@@ -225,7 +225,7 @@ Insert a new line.  Bound to @code{newline}.
 Delete the previous character.  Bound to @code{backward-delete-char}.
 @item @key{INS}
 Toggle @i{Overwrite Mode}.  Bound to @code{overwrite-mode}.
-@item C-@@, C-@key{SPC}, @key{F5}
+@item C-@@, C-@key{SPC}
 Set mark.  Bound to @code{set-mark-command}.
 @item C-\
 Delete spaces and tabs around point.  Bound to @code{delete-horizontal-space}.
@@ -253,7 +253,7 @@ Show the defined bindings.  Bound to @code{list-bindings}.
 Describe a variable.  Bound to @code{describe-variable}.
 @item C-j
 Equivalent to <RET> followed by <TAB>.  Bound to @code{newline-and-indent}.
-@item C-k, @key{F6}
+@item C-k
 Kill line.  Bound to @code{kill-line}.
 @item C-l
 Redraw display.  Bound to @code{recenter}.
@@ -275,7 +275,7 @@ Transpose two characters.  Bound to @code{transpose-chars}.
 Begin a numeric argument for the following command.  Bound to @code{universal-argument}.
 @item C-v, @key{PGDN}
 Scroll up one screen page.  Bound to @code{scroll-up}.
-@item C-w, @key{F7}
+@item C-w
 Kill region.  Bound to @code{kill-region}.
 @item C-x (
 Start recording keyboard macro.  Bound to @code{start-kbd-macro}.
@@ -289,7 +289,7 @@ Delete the other open windows.  Bound to @code{delete-other-windows}.
 Split current window.  Bound to @code{split-window}.
 @item C-x b
 Switch to a buffer.  Bound to @code{switch-to-buffer}.
-@item C-x e, @key{F12}
+@item C-x e
 Execute the last recorded keyboard macro.  Bound to @code{call-last-kbd-macro}.
 @item C-x f
 Set the fill column.  Bound to @code{set-fill-column}.
@@ -303,25 +303,25 @@ Kill current buffer.  Bound to @code{kill-buffer}.
 Select the other window.  Bound to @code{other-window}.
 @item C-x s
 Save modified buffers.  Bound to @code{save-some-buffers}.
-@item C-x u, C-_, @key{F4}
+@item C-x u, C-_
 Undo some previous changes.  Bound to @code{undo}.
 @item C-x C-o
 Delete all but one of many consecutive blank lines.  Bound to @code{delete-blank-lines}.
-@item C-y, @key{F8}
+@item C-y
 Yank killed text.  Bound to @code{yank}.
-@item C-z, C-x C-z
+@item C-z
 Stop Zee and return to superior process.  Bound to @code{suspend-zee}.
 @item C-x C-b
 List buffers.  Bound to @code{list-buffers}.
 @item C-x C-c
 Save modified buffers and quit zee.  Bound to @code{save-buffers-kill-zee}.
-@item C-x C-f, @key{F2}
+@item C-x C-f
 Find a file for editing.  Bound to @code{find-file}.
 @item C-x C-l
 Convert the region to lower case.  Bound to @code{downcase-region}.
 @item C-x C-q
 Toggle @i{Read Only Mode}.  Bound to @code{toggle-read-only}.
-@item C-x C-s, @key{F3}
+@item C-x C-s
 Save the current buffer.  Bound to @code{save-buffer}.
 @item C-x C-t
 Transpose two lines.  Bound to @code{transpose-lines}.
