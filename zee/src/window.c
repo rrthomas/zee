@@ -58,8 +58,9 @@ void free_windows(void)
   }
 }
 
-/* Set the current window and his buffer as the current buffer.  */
-
+/*
+ * Set the current window. Also, make its buffer the current buffer.
+ */
 void set_current_window(Window *wp)
 {
   /* Save buffer's point in a new marker.  */
@@ -99,7 +100,7 @@ Both windows display the same buffer now current.
     newwp = window_new();
     newwp->fwidth = cur_wp->fwidth;
     newwp->ewidth = cur_wp->ewidth;
-    newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
+    newwp->fheight = (cur_wp->fheight + 1) / 2;
     newwp->eheight = newwp->fheight - 1;
     cur_wp->fheight = cur_wp->fheight / 2;
     cur_wp->eheight = cur_wp->fheight - 1;
