@@ -283,7 +283,7 @@ int warn_if_no_mark(void)
     minibuf_error("The mark is not set now");
     return TRUE;
   }
-  else if (!cur_bp->mark_active) {
+  else if (!cur_bp->mark_anchored) {
     minibuf_error("The mark is not active now");
     return TRUE;
   }
@@ -310,12 +310,15 @@ void calculate_region(Region *rp, Point from, Point to)
   rp->num_lines = count_lines(rp->start, rp->end);
 }
 
-static int is_mark_active(void)
+/*
+ * Report whether mark is anchored.
+ */
+int is_mark_anchored(void)
 {
   if (!cur_bp->mark)
     return FALSE;
   else
-    return cur_bp->mark_active ? TRUE : FALSE;
+    return cur_bp->mark_anchored ? TRUE : FALSE;
 }
 
 /*
@@ -324,7 +327,7 @@ static int is_mark_active(void)
  */
 int calculate_the_region(Region *rp)
 {
-  if (!is_mark_active())
+  if (!is_mark_anchored())
     return FALSE;
 
   calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
@@ -380,14 +383,14 @@ size_t calculate_buffer_size(Buffer *bp)
   return size;
 }
 
-void activate_mark(void)
+void anchor_mark(void)
 {
-  cur_bp->mark_active = TRUE;
+  cur_bp->mark_anchored = TRUE;
 }
 
-void deactivate_mark(void)
+void weigh_mark(void)
 {
-  cur_bp->mark_active = FALSE;
+  cur_bp->mark_anchored = FALSE;
 }
 
 /*

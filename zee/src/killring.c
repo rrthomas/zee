@@ -127,7 +127,7 @@ DEFUN_INT("kill-line", kill_line)
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  deactivate_mark();
+  weigh_mark();
   return ret;
 }
 END_DEFUN
@@ -150,7 +150,7 @@ DEFUN_INT("kill-region", kill_region)
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (!cur_bp->mark_active)
+  if (is_mark_anchored())
     return FUNCALL(kill_line);
 
   calculate_the_region(&r);
@@ -185,7 +185,7 @@ DEFUN_INT("kill-region", kill_region)
   }
 
   thisflag |= FLAG_DONE_KILL;
-  deactivate_mark();
+  weigh_mark();
 
   return TRUE;
 }
@@ -212,7 +212,7 @@ DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
   free(p);
 
   thisflag |= FLAG_DONE_KILL;
-  deactivate_mark();
+  weigh_mark();
 
   return TRUE;
 }
@@ -305,7 +305,7 @@ DEFUN_INT("yank", yank)
   insert_nstring(kill_ring_text, kill_ring_size);
   undo_nosave = FALSE;
 
-  deactivate_mark();
+  weigh_mark();
 
   return TRUE;
 }

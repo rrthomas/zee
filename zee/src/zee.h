@@ -171,7 +171,7 @@ struct Buffer {
 
   /* Buffer flags. */
   int flags;
-  size_t mark_active : 1;
+  size_t mark_anchored : 1;
 
   /* Buffer-local variables. */
   le *vars;

@@ -127,14 +127,20 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
 
 static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 {
-  if (wp != cur_wp || !wp->bp->mark || !wp->bp->mark_active)
+  if (wp != cur_wp)
     *highlight = FALSE;
   else {
     *highlight = TRUE;
-    r->start = window_pt(wp);
-    r->end = wp->bp->mark->pt;
-    if (cmp_point(r->end, r->start) < 0)
-      swap_point(&r->end, &r->start);
+    if (!wp->bp->mark || !wp->bp->mark_anchored) {
+      r->start = r->end = wp->bp->pt;
+      r->start.o = 0;
+      r->end.o = astr_len(wp->bp->pt.p);
+    } else {
+      r->start = window_pt(wp);
+      r->end = wp->bp->mark->pt;
+      if (cmp_point(r->end, r->start) < 0)
+        swap_point(&r->end, &r->start);
+    }
   }
 }
 

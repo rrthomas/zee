@@ -50,7 +50,7 @@ END_DEFUN
 
 int cancel(void)
 {
-  deactivate_mark();
+  weigh_mark();
   minibuf_error("Quit");
   return FALSE;
 }
@@ -243,7 +243,7 @@ DEFUN_INT("set-mark-command", set_mark_command)
     +*/
 {
   int ret = set_mark_command();
-  activate_mark();
+  anchor_mark();
   return ret;
 }
 END_DEFUN
@@ -270,7 +270,7 @@ DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
   if (!exchange_point_and_mark())
     return FALSE;
 
-  activate_mark();
+  anchor_mark();
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -1237,7 +1237,7 @@ DEFUN_INT("delete-region", delete_region)
     undo_nosave = FALSE;
   }
 
-  deactivate_mark();
+  weigh_mark();
   return TRUE;
 }
 END_DEFUN

@@ -402,7 +402,7 @@ void insert_nstring(const char *s, size_t size)
 
 int self_insert_command(int c)
 {
-  deactivate_mark();
+  weigh_mark();
 
   if (c <= 255) {
     if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
@@ -450,7 +450,7 @@ void bprintf(const char *fmt, ...)
 
 int delete_char(void)
 {
-  deactivate_mark();
+  weigh_mark();
 
   if (!eolp()) {
     if (warn_if_readonly_buffer())
@@ -530,7 +530,7 @@ END_DEFUN
 
 int backward_delete_char(void)
 {
-  deactivate_mark();
+  weigh_mark();
 
   if (backward_char()) {
     delete_char();
@@ -637,7 +637,7 @@ static int indent_relative(void)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  deactivate_mark();
+  weigh_mark();
   old_point = point_marker();
 
   /* Find previous non-blank line. */

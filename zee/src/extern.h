@@ -27,7 +27,6 @@ char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region(Region *rp, Point from, Point to);
-int calculate_the_region(Region *rp);
 Buffer *create_buffer(const char *name);
 void free_buffer(Buffer *bp);
 void free_buffers(void);
@@ -39,10 +38,12 @@ char *make_buffer_name(const char *filename);
 void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
+int calculate_the_region(Region *rp);
+int is_mark_anchored(void);
 void set_temporary_buffer(Buffer *bp);
 size_t calculate_buffer_size(Buffer *bp);
-void activate_mark(void);
-void deactivate_mark(void);
+void anchor_mark(void);
+void weigh_mark(void);
 size_t tab_width(Buffer *bp);
 
 /* completion.c ----------------------------------------------------------- */
