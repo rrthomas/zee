@@ -685,17 +685,6 @@ static int indent_relative(void)
   while (get_goalc() < target_goalc)
     insert_char_in_insert_mode(' ');
 
-  /* Tabify.  */
-  push_mark();
-  set_mark();
-  activate_mark();
-  while (!bolp() && isspace(preceding_char()))
-    backward_char();
-  exchange_point_and_mark();
-  FUNCALL(tabify);
-  deactivate_mark();
-  pop_mark();
-
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   return TRUE;
