@@ -26,7 +26,7 @@
 #include "zee.h"
 #include "extern.h"
 
-void resync_redisplay(void)
+void resync_display(void)
 {
   int delta = cur_bp->pt.n - cur_wp->lastpointn;
 

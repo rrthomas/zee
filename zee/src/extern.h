@@ -41,10 +41,8 @@ int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 void set_temporary_buffer(Buffer *bp);
 size_t calculate_buffer_size(Buffer *bp);
-int transient_mark_mode(void);
 void activate_mark(void);
 void deactivate_mark(void);
-int is_mark_actived(void);
 size_t tab_width(Buffer *bp);
 
 /* completion.c ----------------------------------------------------------- */
@@ -53,6 +51,11 @@ void free_completion(Completion *cp);
 void completion_scroll_up(void);
 void completion_scroll_down(void);
 int completion_try(Completion *cp, astr search, int popup_when_complete);
+
+/* display.c -------------------------------------------------------------- */
+void resync_display(void);
+void resize_windows(void);
+void recenter(Window *wp);
 
 /* editfns.c -------------------------------------------------------------- */
 void push_mark(void);
@@ -191,11 +194,6 @@ Point point_max(void);
 Point line_beginning_position(int count);
 Point line_end_position(int count);
 
-/* redisplay.c ------------------------------------------------------------ */
-void resync_redisplay(void);
-void resize_windows(void);
-void recenter(Window *wp);
-
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
 
@@ -205,7 +203,7 @@ char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, H
 void free_rotation_buffers(void);
 
 /* term_redisplay.c ------------------------------------------------------- */
-void term_redisplay(void);
+void term_display(void);
 void term_full_redisplay(void);
 void show_splash_screen(const char *splash);
 void term_tidy(void);
@@ -271,13 +269,10 @@ int zasprintf(char **ptr, const char *fmt, ...);
 	X0(zee_name, c_name)
 #define X2(zee_name, c_name, k1, k2)		\
 	X0(zee_name, c_name)
-#define X3(zee_name, c_name, k1, k2, k3)	\
-	X0(zee_name, c_name)
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
 #undef X2
-#undef X3
 
 /*--------------------------------------------------------------------------
  * Missing functions.

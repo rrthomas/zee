@@ -64,25 +64,6 @@ DEFUN_INT("keyboard-quit", keyboard_quit)
 }
 END_DEFUN
 
-DEFUN_INT("transient-mark-mode", transient_mark_mode)
-  /*+
-    Toggle Transient Mark mode.
-    With arg, turn Transient Mark mode on if arg is positive, off otherwise.
-    +*/
-{
-  if (!(lastflag & FLAG_SET_UNIARG)) {
-    if (transient_mark_mode())
-      set_variable("transient-mark-mode", "false");
-    else
-      set_variable("transient-mark-mode", "true");
-  } else
-    set_variable("transient-mark-mode", uniarg > 0 ? "true" : "false");
-
-  activate_mark();
-  return TRUE;
-}
-END_DEFUN
-
 static char *make_buffer_flags(Buffer *bp, int iscurrent)
 {
   static char buf[4];
@@ -289,9 +270,7 @@ DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
   if (!exchange_point_and_mark())
     return FALSE;
 
-  /* In transient-mark-mode we must reactivate the mark.  */
-  if (transient_mark_mode())
-    activate_mark();
+  activate_mark();
 
   thisflag |= FLAG_NEED_RESYNC;
 

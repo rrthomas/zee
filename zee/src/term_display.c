@@ -127,20 +127,15 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
 
 static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 {
-  if ((wp != cur_wp
-       && !lookup_bool_variable("highlight-nonselected-windows"))
-      || (!wp->bp->mark)
-      || (!transient_mark_mode())
-      || (transient_mark_mode() && !(wp->bp->mark_active))) {
+  if (wp != cur_wp || !wp->bp->mark || !wp->bp->mark_active)
     *highlight = FALSE;
-    return;
+  else {
+    *highlight = TRUE;
+    r->start = window_pt(wp);
+    r->end = wp->bp->mark->pt;
+    if (cmp_point(r->end, r->start) < 0)
+      swap_point(&r->end, &r->start);
   }
-
-  *highlight = TRUE;
-  r->start = window_pt(wp);
-  r->end = wp->bp->mark->pt;
-  if (cmp_point(r->end, r->start) < 0)
-    swap_point(&r->end, &r->start);
 }
 
 static void draw_window(size_t topline, Window *wp)
@@ -296,7 +291,7 @@ static void draw_status_line(size_t line, Window *wp)
   term_attrset(1, ZILE_NORMAL);
 }
 
-void term_redisplay(void)
+void term_display(void)
 {
   size_t topline;
   Window *wp;
@@ -330,7 +325,7 @@ void term_redraw_cursor(void)
 void term_full_redisplay(void)
 {
   term_clear();
-  term_redisplay();
+  term_display();
 }
 
 void show_splash_screen(const char *splash)

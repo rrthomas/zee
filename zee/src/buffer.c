@@ -283,7 +283,7 @@ int warn_if_no_mark(void)
     minibuf_error("The mark is not set now");
     return TRUE;
   }
-  else if (transient_mark_mode() && !cur_bp->mark_active) {
+  else if (!cur_bp->mark_active) {
     minibuf_error("The mark is not active now");
     return TRUE;
   }
@@ -310,13 +310,21 @@ void calculate_region(Region *rp, Point from, Point to)
   rp->num_lines = count_lines(rp->start, rp->end);
 }
 
+static int is_mark_active(void)
+{
+  if (!cur_bp->mark)
+    return FALSE;
+  else
+    return cur_bp->mark_active ? TRUE : FALSE;
+}
+
 /*
  * Calculate the region size between point and mark and set the region
-   structure.
+ * structure.
  */
 int calculate_the_region(Region *rp)
 {
-  if (!is_mark_actived())
+  if (!is_mark_active())
     return FALSE;
 
   calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
@@ -372,11 +380,6 @@ size_t calculate_buffer_size(Buffer *bp)
   return size;
 }
 
-int transient_mark_mode(void)
-{
-  return lookup_bool_variable("transient-mark-mode");
-}
-
 void activate_mark(void)
 {
   cur_bp->mark_active = TRUE;
@@ -385,16 +388,6 @@ void activate_mark(void)
 void deactivate_mark(void)
 {
   cur_bp->mark_active = FALSE;
-}
-
-int is_mark_actived(void)
-{
-  if (!cur_bp->mark)
-    return FALSE;
-  else if (transient_mark_mode())
-    return (cur_bp->mark_active) ? TRUE : FALSE;
-  else
-    return TRUE;
 }
 
 /*

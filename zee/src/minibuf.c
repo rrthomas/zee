@@ -59,7 +59,7 @@ static void minibuf_vwrite(const char *fmt, va_list ap)
   free(buf);
 
   /* Redisplay (and leave the cursor in the correct position). */
-  term_redisplay();
+  term_display();
   term_refresh();
 }
 

@@ -381,7 +381,7 @@ static void winch_sig_handler(int signo)
   resize_windows();
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES;
-  resync_redisplay();
+  resync_display();
   term_refresh();
 }
 

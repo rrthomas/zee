@@ -69,7 +69,7 @@ Completion *completion_new(int fileflag)
 void free_completion(Completion *cp)
 {
   list p;
-        
+
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
     free(p->item);
   list_delete(cp->completions);
@@ -93,7 +93,7 @@ void completion_scroll_up(void)
     gotobob();
   set_current_window(old_wp);
 
-  term_redisplay();
+  term_display();
 }
 
 /*
@@ -108,11 +108,11 @@ void completion_scroll_down(void)
   set_current_window(wp);
   if (cur_bp->pt.n == 0 || !FUNCALL(scroll_down)) {
     gotoeob();
-    resync_redisplay();
+    resync_display();
   }
   set_current_window(old_wp);
 
-  term_redisplay();
+  term_display();
 }
 
 /*
@@ -158,7 +158,7 @@ static void write_completion(va_list ap)
 {
   Completion *cp = va_arg(ap, Completion *);
   int allflag = va_arg(ap, int);
-  size_t num = va_arg(ap, size_t); 
+  size_t num = va_arg(ap, size_t);
   if (allflag)
     completion_print(cp->completions, list_length(cp->completions));
   else
@@ -179,7 +179,7 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
   if (!cp->fl_close)
     cp->old_bp = cur_bp;
 
-  term_redisplay();
+  term_display();
 }
 
 static int hcompar(const void *p1, const void *p2)
@@ -320,7 +320,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   for (j = ssize; ; ++j) {
     list p = list_first(cp->matches);
     char *s = p->item;
-                
+
     c = s[j];
     for (i = 1; i < partmatches; ++i) {
       p = list_next(p);

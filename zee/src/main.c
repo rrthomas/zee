@@ -75,8 +75,8 @@ static void loop(void)
     size_t key;
 
     if (lastflag & FLAG_NEED_RESYNC)
-      resync_redisplay();
-    term_redisplay();
+      resync_display();
+    term_display();
     term_refresh();
 
     thisflag = 0;
@@ -136,7 +136,7 @@ then enter the text in that file's own buffer.\n\
 
       undo_nosave = FALSE;
       cur_bp->flags &= ~BFLAG_MODIFIED;
-      resync_redisplay();
+      resync_display();
     }
   }
 }
@@ -311,7 +311,7 @@ int main(int argc, char **argv)
 
     /* Create the `*scratch*' buffer and initialize key bindings. */
     create_first_window();
-    term_redisplay();
+    term_display();
     init_bindings();
 
     if (argc >= 1)

@@ -282,7 +282,7 @@ void open_file(char *path, size_t lineno)
   astr_delete(buf);
   if (lineno > 0)
     ngotodown(lineno);
-  resync_redisplay();
+  resync_display();
 }
 
 /*

@@ -105,7 +105,7 @@ static char *re_find_substr(const char *s1, size_t s1size,
 static void goto_linep(Line *lp)
 {
   cur_bp->pt = point_min();
-  resync_redisplay();
+  resync_display();
   while (cur_bp->pt.p != lp)
     next_line();
 }
@@ -343,7 +343,7 @@ static int isearch(int dir)
       last = TRUE;
 
     if (thisflag & FLAG_NEED_RESYNC)
-      resync_redisplay();
+      resync_display();
   }
 
   /* done */
@@ -431,8 +431,8 @@ DEFUN_INT("replace-regexp", replace_regexp)
   }
 
   if (thisflag & FLAG_NEED_RESYNC)
-    resync_redisplay();
-  term_redisplay();
+    resync_display();
+  term_display();
 
   minibuf_write("Replaced %d occurrences", count);
 
@@ -467,7 +467,7 @@ DEFUN_INT("query-replace-regexp", query_replace_regexp)
     if (!noask) {
       int c;
       if (thisflag & FLAG_NEED_RESYNC)
-        resync_redisplay();
+        resync_display();
       for (;;) {
         minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
         c = getkey();
@@ -517,8 +517,8 @@ DEFUN_INT("query-replace-regexp", query_replace_regexp)
 
  endoffunc:
   if (thisflag & FLAG_NEED_RESYNC)
-    resync_redisplay();
-  term_redisplay();
+    resync_display();
+  term_display();
 
   minibuf_write("Replaced %d occurrences", count);
 

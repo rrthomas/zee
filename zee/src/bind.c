@@ -257,13 +257,10 @@ static struct fentry fentry_table[] = {
 	{zee_name, F_ ## c_name, {key1, NULL, NULL}},
 #define X2(zee_name, c_name, key1, key2) \
 	{zee_name, F_ ## c_name, {key1, key2, NULL}},
-#define X3(zee_name, c_name, key1, key2, key3) \
-	{zee_name, F_ ## c_name, {key1, key2, key3}},
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
 #undef X2
-#undef X3
 };
 
 #define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))

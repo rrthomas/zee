@@ -36,6 +36,7 @@ zee_base_SOURCES =				\
 	bind.c					\
 	buffer.c				\
 	completion.c				\
+	display.c				\
 	editfns.c				\
 	extern.h				\
 	file.c					\
@@ -51,7 +52,6 @@ zee_base_SOURCES =				\
 	marker.c				\
 	minibuf.c				\
 	point.c					\
-	redisplay.c				\
 	search.c				\
 	tbl_funcs.h				\
 	tbl_vars.h				\
@@ -59,7 +59,7 @@ zee_base_SOURCES =				\
 	variables.c				\
 	window.c				\
 	term_minibuf.c				\
-	term_redisplay.c			\
+	term_display.c				\
 	zee.h
 
 if ALLEGRO
