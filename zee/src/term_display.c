@@ -22,10 +22,11 @@
 
 #include "config.h"
 
-#include <ctype.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "zee.h"
 #include "config.h"
@@ -92,12 +93,12 @@ static int in_region(size_t lineno, size_t x, Region *r)
 }
 
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
-                             int highlight, size_t x, size_t i)
+                             size_t x, size_t i)
 {
   if (x >= ZEE_COLS) {
     term_move(line, ZEE_COLS - 1);
     term_addch('$');
-  } else if (highlight) {
+  } else {
     for (; x < wp->ewidth; ++i) {
       if (in_region(lineno, i, r))
         outch(' ', ZEE_REVERSE, &x);
@@ -108,38 +109,28 @@ static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
 }
 
 static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
-		      size_t lineno, Region *r, int highlight)
+		      size_t lineno, Region *r)
 {
   size_t x, i;
 
   term_move(line, 0);
   for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
-    if (highlight && in_region(lineno, i, r))
+    if (in_region(lineno, i, r))
       outch(*astr_char(lp->item, (ptrdiff_t)i), ZEE_REVERSE, &x);
     else
       outch(*astr_char(lp->item, (ptrdiff_t)i), ZEE_NORMAL, &x);
   }
 
-  draw_end_of_line(line, wp, lineno, r, highlight, x, i);
+  draw_end_of_line(line, wp, lineno, r, x, i);
 }
 
-static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
+static void calculate_highlight_region(Window *wp, Region *r)
 {
-  if (wp != cur_wp)
-    *highlight = FALSE;
-  else {
-    *highlight = TRUE;
-    if (!wp->bp->mark || !wp->bp->mark_anchored) {
-      r->start = r->end = wp->bp->pt;
-      r->start.o = 0;
-      r->end.o = astr_len(wp->bp->pt.p);
-    } else {
-      r->start = window_pt(wp);
-      r->end = wp->bp->mark->pt;
-      if (cmp_point(r->end, r->start) < 0)
-        swap_point(&r->end, &r->start);
-    }
-  }
+  assert(wp->bp->mark);
+  r->start = window_pt(wp);
+  r->end = wp->bp->mark->pt;
+  if (cmp_point(r->end, r->start) < 0)
+    swap_point(&r->end, &r->start);
 }
 
 static void draw_window(size_t topline, Window *wp)
@@ -147,15 +138,13 @@ static void draw_window(size_t topline, Window *wp)
   size_t i, startcol, lineno;
   Line *lp;
   Region r;
-  int highlight;
   Point pt = window_pt(wp);
 
-  calculate_highlight_region(wp, &r, &highlight);
+  calculate_highlight_region(wp, &r);
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno)
-    ;
+       i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width(wp->bp);
 
@@ -171,7 +160,7 @@ static void draw_window(size_t topline, Window *wp)
 
     startcol = point_start_column;
 
-    draw_line(i, startcol, wp, lp, lineno, &r, highlight);
+    draw_line(i, startcol, wp, lp, lineno, &r);
 
     if (point_start_column > 0) {
       term_move(i, 0);
