@@ -70,8 +70,7 @@ void   astr_delete(astr as);
 
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
- * than 0, count from the left; if less than zero count from the
- * right.
+ * count from the left; if less than zero count from the right.
  */
 char *astr_char(const astr as, ptrdiff_t pos);
 
