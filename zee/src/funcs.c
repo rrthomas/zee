@@ -713,7 +713,7 @@ END_DEFUN
 
 DEFUN_INT("mark-word", mark_word)
   /*+
-    Set mark argument words away from point.
+    Set mark ARG words away from point.
     +*/
 {
   int ret;
@@ -727,7 +727,7 @@ END_DEFUN
 
 DEFUN_INT("mark-sexp", mark_sexp)
   /*+
-    Set mark argument sexps from point.
+    Set mark ARG sexps from point.
     The place mark goes is the same place C-M-f would
     move to with the same argument.
     +*/

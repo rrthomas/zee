@@ -1,5 +1,7 @@
 /* Useful editing functions
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2004-2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 

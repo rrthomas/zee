@@ -156,10 +156,8 @@ DEFUN_INT("kill-region", kill_region)
   calculate_the_region(&r);
 
   if (cur_bp->flags & BFLAG_READONLY) {
-    /*
-     * The buffer is readonly; save only in the kill buffer
-     * and complain.
-     */
+    /* The buffer is read-only; save text in the kill buffer and
+       complain. */
     char *p;
 
     p = copy_text_block(r.start.n, r.start.o, r.size);
