@@ -862,10 +862,12 @@ static int setcase_word(int rcase)
   int gotword;
   size_t i, size;
 
-  if (!forward_word())
-    return FALSE;
-  if (!backward_word())
-    return FALSE;
+  if (!ISWORDCHAR(following_char())) {
+    if (!forward_word())
+      return FALSE;
+    if (!backward_word())
+      return FALSE;
+  }
 
   i = cur_bp->pt.o;
   while (i < astr_len(cur_bp->pt.p->item)) {
