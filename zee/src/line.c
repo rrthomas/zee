@@ -642,7 +642,6 @@ static int indent_relative(void)
 
   /* Find previous non-blank line. */
   do {
-    int uniused = TRUE;
     if (!FUNCALL_ARG(forward_line, -1)) {
       cur_bp->pt = old_point->pt;
       free_marker(old_point);
