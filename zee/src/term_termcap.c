@@ -346,14 +346,11 @@ void term_init(void)
 
   norm_string = astr_new();
   astr_cat_cstr(norm_string, me_string);
-
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
 }
 
 void term_close(void)
 {
-  printf("%s", ke_string); /* Put keypad back in normal mode. */
-
   /* Free memory and finish with termcap. */
   free(screen.array);
   free(screen.oarray);
@@ -365,9 +362,12 @@ void term_close(void)
   term_suspend();
 }
 
-/* Suspend the term ready to go back to the shell */
+/*
+ * Suspend the term ready to go back to the shell
+ */
 void term_suspend(void)
 {
+  printf("%s", ke_string); /* Put keypad back in normal mode. */
   setattr(TCSADRAIN, &ostate);
 }
 
@@ -384,6 +384,7 @@ static void winch_sig_handler(int signo)
 void term_resume(void)
 {
   setattr(TCSADRAIN, &nstate);
+  printf("%s", ks_string); /* Activate keypad (including cursor keys). */
   winch_sig_handler(SIGWINCH); /* Assume Zee is in a consistent state. */
 }
 
