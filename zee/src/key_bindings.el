@@ -7,7 +7,7 @@
 (global-set-key "\LEFT" 'backward-char)
 (global-set-key "\C-b" 'backward-char)
 (global-set-key "\RIGHT" 'forward-char)
-FIXME: Need a home-keys shortcut for forward-char. Was ^F.
+; FIXME: Need a home-keys shortcut for forward-char. Was ^F.
 (global-set-key "\DOWN" 'next-line)
 (global-set-key "\C-n" 'next-line)
 (global-set-key "\UP" 'previous-line)
