@@ -22,8 +22,8 @@
 # 02111-1307, USA.  */
 
 for i in test1 test2 test3; do
-  ./zee -q --batch --load=$i.el > $i.stdout
-  if ! diff $i.stdout $i.output; then
+  ./zee -q --batch --load=$srcdir/$i.el > $i.stdout
+  if ! diff $i.stdout $srcdir/$i.output; then
     exit 1
   fi
 done

@@ -9,7 +9,7 @@ endif
 TESTS = astr tests
 check_PROGRAMS = astr
 
-astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
+astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 astr_LDADD = zmalloc.o strrstr.o
 
 bin_PROGRAMS = zee
@@ -72,7 +72,10 @@ endif
 
 zee_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c
+EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c test1.el test1.output test2.el test2.output test3.el test3.output
+
+clean-local:
+	rm -f test*.stdout
 
 distclean-local:
 	rm -f paths.h

@@ -385,7 +385,7 @@ int main(void)
   assert_eq(as1, "5 * 3 = 15");
   astr_delete(as1);
 
-  assert(fp = fopen(SRCPATH "/astr.c", "r"));
+  assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);
   printf("The first line of astr.c is: \"%s\"\n", astr_cstr(as1));
   assert(fclose(fp) == 0);
