@@ -279,18 +279,6 @@ void init_bindings(void)
 
   leaf_tree = leaf_new(10);
 
-  if (lookup_bool_variable("alternative-bindings"))
-    for (i = 0; i < fentry_table_size; ++i)
-      for (j = 0; j < 3; ++j)
-        if (fentry_table[i].key[j] != NULL) {
-          if (strcmp(fentry_table[i].key[j], "\\M-h") == 0)
-            fentry_table[i].key[j] = "\\M-h\\M-h";
-          else if (strncmp(fentry_table[i].key[j], "\\C-h", 4) == 0) {
-            fentry_table[i].key[j] = zstrdup(fentry_table[i].key[j]);
-            fentry_table[i].key[j][1] = 'M';
-          }
-        }
-
   /* Sort the array for better searching later. */
   qsort(fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
 

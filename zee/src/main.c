@@ -120,12 +120,6 @@ static char about_minibuf_str[] =
 
 static void about_screen(void)
 {
-  /* I don't like this hack, but I don't know another way... */
-  if (lookup_bool_variable("alternative-bindings")) {
-    replace_string(about_splash_str, "C-h", "M-h");
-    replace_string(about_minibuf_str, "C-h", "M-h");
-  }
-
   minibuf_write(about_minibuf_str);
   if (!lookup_bool_variable("skip-splash-screen")) {
     show_splash_screen(about_splash_str);
