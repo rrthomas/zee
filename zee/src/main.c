@@ -96,37 +96,8 @@ static void loop(void)
   }
 }
 
-static char about_splash_str[] = "\
-" ZILE_VERSION_STRING "\n\
-\n\
-" ZILE_COPYRIGHT_STRING "\n\
-\n\
-Type `C-x C-c' to exit Zee.\n\
-Type `C-h h' for help; `C-x u; to undo changes.\n\
-Type `C-h C-d' for information on getting the latest version.\n\
-Type `C-h t' for a tutorial on using Zee.\n\
-Type `C-h s' for a sample configuration file.\n\
-Type `C-g' at any time to cancel the current operation.\n\
-\n\
-`C-x' means hold the CTRL key while typing the character `x'.\n\
-`M-x' means hold the META or ALT key down while typing `x'.\n\
-If there is no META or ALT key, instead press and release\n\
-the ESC key and then type `x'.\n\
-Combinations like `C-h h' mean first press `C-h', then `h'.\n\
-";
-
 static char about_minibuf_str[] =
-"Welcome to Zee!  For help type `C-h h'";
-
-static void about_screen(void)
-{
-  minibuf_write(about_minibuf_str);
-  if (!lookup_bool_variable("skip-splash-screen")) {
-    show_splash_screen(about_splash_str);
-    term_refresh();
-    waitkey(20 * 10);
-  }
-}
+"Welcome to Zee!  To exit type CTRL-X, then C";
 
 static void setup_main_screen(int argc, astr as)
 {
@@ -351,10 +322,8 @@ int main(int argc, char **argv)
         if (*argv)
           open_file(*argv++, line - 1);
       }
-    else if (eflag == FALSE)
-      /* Show the splash screen only if no files and no Lisp expression
-         or load file is specified on the command line. */
-      about_screen();
+
+    minibuf_write(about_minibuf_str);
 
     setup_main_screen(argc, as);
 

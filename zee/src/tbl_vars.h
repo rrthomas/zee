@@ -28,8 +28,6 @@ Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
-X("skip-splash-screen",			"b", "false", "\
-If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
 X("tab-width",				"", "8", "\

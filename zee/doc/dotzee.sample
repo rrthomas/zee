@@ -1,7 +1,4 @@
-; .zeerc sample configuration
-
-; Do not display the splash screen at startup [default: false]
-(setq skip-splash-screen false)
+; .zee sample configuration
 
 ; The default tabulation width [default: 8]
 (setq tab-width 8)
