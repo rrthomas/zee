@@ -1,5 +1,3 @@
-/*	$Id$	*/
-
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
  */

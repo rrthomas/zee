@@ -1,8 +1,8 @@
 .\" -*- nroff -*-
-.\" $Id$
+.\" Zee Manual $
 .Dd Jan, 2005
 .Os
-.Dt ZILE 1
+.Dt ZEE 1
 .Sh NAME
 .Nm zee
 .Nd Zee Is Lossy Emacs
