@@ -1,4 +1,4 @@
-/* Redisplay engine
+/* Display engine
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
