@@ -201,9 +201,7 @@ void create_first_window(void)
   Window *wp;
   Buffer *bp;
 
-  /*
-   * Create the scratch buffer.
-   */
+  /* Create the scratch buffer. */
   bp = create_buffer("*scratch*");
   bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
   cur_bp = bp;
