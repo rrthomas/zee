@@ -371,7 +371,7 @@ END_DEFUN
 
 DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
 /*+
-Do incremental search forward for regular expression.
+Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
 Type C-r to search again backward, C-s to search again forward.
