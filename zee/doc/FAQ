@@ -9,14 +9,11 @@ INDEX
 1. General questions
    1.1. What does `Zee' mean?
    1.2. What is Zee's license?
-   1.3. Why another clone of Emacs? Why not just use Emacs?
-   1.4. Where can I get the latest version?
-   1.5. Why did you choose such difficult key sequences?
-   1.6. Zee has a bug!
-   1.7. I like the xyz function of (X)Emacs but it's not in Zee!
-   1.8. How small does Zee get?
-   1.9. Does Zee support Unicode/UTF-8?
-   1.10. Zee doesn't compile.
+   1.3. Where can I get the latest version?
+   1.4. Zee has a bug!
+   1.5. Zee is weird!
+   1.6. Does Zee support Unicode/UTF-8?
+   1.7. Zee doesn't compile.
 
 2. Functionality
    2.1. How do I quit Zee?
@@ -27,9 +24,7 @@ INDEX
    2.6. What settings can I change?
    2.7. How do I display non-ASCII characters?
    2.8. Zee doesn't handle filenames with non-ASCII characters.
-   2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-   2.10. How do I enable Auto Fill Mode at startup?
-   2.11. The Zee screen is not resized when I resize my terminal.
+   2.9. How do I enable Auto Fill Mode at startup?
 
 ------------------------------------------------------------------------------
 
@@ -37,68 +32,40 @@ INDEX
 
 1.1. What does `Zee' mean?
 
-    It stands for `Zee Is Lossy Emacs'. It is just another recursive
-    acronym like GNU.
+    Nothing. It sounds like `Zi', which is the name I wanted (to show
+    its descent from Zile). SourceForge doesn't allow two-letter
+    names, so I chose `Zee' instead, which can be pronounced the same.
 
 1.2. What is Zee's license?
 
     Zee is released under the GNU General Public License. For more
     information, see http://www.gnu.org/licenses/gpl.html.
 
-1.3. Why another clone of Emacs? Why not just use Emacs?
-
-    From the features list in the Info documentation:
-
-	``Small but fast and powerful. It is very useful for small
-	footprint installations (e.g. on floppy disk) or quick editing
-	sessions.''
-
-    That's why sometimes Emacs isn't the best editor to use :-)  I
-    use XEmacs myself when I do coding, but I use Zee when I have,
-    let's say, to quick edit the dot files in the home directory; I
-    don't want to wait 5 seconds to load XEmacs for doing a 2-second
-    edit...
-
-1.4. Where can I get the latest version?
+1.3. Where can I get the latest version?
 
     The Zee project is hosted on SourceForge at:
 
 	http://zee.sourceforge.net/
 
-1.5. Why did you choose such difficult key sequences?
-
-    To be the same as Emacs.
-
-1.6. Zee has a bug!
+1.4. Zee has a bug!
 
     Bug reports can be sent to the developers at
     <zee-devel@lists.sourceforge.net>, or entered directly into
     Bugzilla at http://sourceforge.net/projects/zee. Patches are
     appreciated.
 
-1.7. I like the xyz function of (X)Emacs but it's not in Zee!
+1.5. Zee is weird!
 
-    Zee was written to be small but fast and powerful enough.
+    Zee was written to be as small and simple as possible. If you
+    don't like it, it might be because it doesn't work the way you're
+    used to, or I may have been badly designed. If after trying it for
+    a bit you still don't like the way it works, complain!
 
-    In general, if you need something more powerful, use Emacs or
-    XEmacs. You could also try Jed, which emulates Emacs, is not much
-    bigger than Zee, and has syntax highlighting, a macro language
-    and more (http://www.jedsoft.org/jed/).
-
-    If you still think that a certain function should be implemented
-    in Zee, please send a message to the developers (see question
-    1.6).
-
-1.8. How small does Zee get?
-
-    On Debian 3.1 i386, Zee 2.0beta8 built with gcc 3.3.5 -O2 weighs
-    in at 101,496 bytes when stripped. This is a fairly typical build.
-
-1.9. Does Zee support Unicode/UTF-8?
+1.6. Does Zee support Unicode/UTF-8?
 
     No. Support for Unicode is planned in the future.
 
-1.10. Zee doesn't compile.
+1.7. Zee doesn't compile.
 
     We have tested Zee under GNU/Linux only (other than the EPOC
     port), although it should work on any POSIX-compliant OS that
@@ -119,11 +86,11 @@ INDEX
 
 2.2. How do I return to the shell without leaving Zee?
 
-    Type `C-x C-z' or simply `C-z'.
+    Type `C-z'.
 
 2.3. Zee is hung.
 
-    From the tutorial (`C-h t'):
+    From the tutorial:
 
     If Zee gets into an infinite (or simply very long) computation
     which you don't want to finish, you can stop it safely by typing
@@ -136,7 +103,7 @@ INDEX
 
 2.5. What does `C-something' or `M-something' mean?
 
-    From the tutorial (`C-h t'):
+    From the tutorial:
 
     C-<chr> means hold the CONTROL key while typing the character
 	     <chr> Thus, `C-f' would be: hold the CONTROL key and type
@@ -148,8 +115,7 @@ INDEX
 
 2.6. What settings can I change?
 
-    Check out the `zeerc.sample' file (type `C-h s') for a full list
-    of variables.
+    Check out the `zee.sample' file for a full list of variables.
 
 2.7. How do I display non-ASCII characters?
 
@@ -168,23 +134,8 @@ INDEX
 
     See the answer to question 2.7.
 
-2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-
-    Add the following line to your `~/.zeerc' file:
-
-	alternative-bindings = true
-
-    and use the alternative key sequences (`M-h' instead of `C-h').
-
-2.10. How do I enable Auto Fill Mode at startup?
+2.9. How do I enable Auto Fill Mode at startup?
 
     Add the following line to your `~/.zeerc' file:
 
 	auto-fill-mode = true
-
-2.11. The Zee screen is not resized when I resize my terminal.
-
-    Your terminal application does not send the signal `SIGWINCH' to
-    Zee (and other applications). To be sure, you might check if other
-    terminal applications, like `vim' and `joe', also fail to resize
-    their windows.
