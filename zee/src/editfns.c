@@ -43,7 +43,7 @@ void push_mark(void)
     list_append(mark_ring, copy_marker(cur_bp->mark->bp, cur_bp->mark->pt));
   /* Save an invalid mark.  */
   else {
-    Marker *m = point_min_marker();
+    Marker *m = copy_marker(cur_bp, point_min());
     m->pt.p = NULL;
     list_append(mark_ring, m);
   }

@@ -84,21 +84,5 @@ Marker *copy_marker(Buffer *bp, Point pt)
 
 Marker *point_marker(void)
 {
-  Marker *marker = zmalloc(sizeof(Marker));
-  move_marker(marker, cur_bp, cur_bp->pt);
-  return marker;
-}
-
-Marker *point_min_marker(void)
-{
-  Marker *marker = zmalloc(sizeof(Marker));
-  move_marker(marker, cur_bp, point_min());
-  return marker;
-}
-
-Marker *point_max_marker(void)
-{
-  Marker *marker = zmalloc(sizeof(Marker));
-  move_marker(marker, cur_bp, point_max());
-  return marker;
+  return copy_marker(cur_bp, cur_bp->pt);
 }

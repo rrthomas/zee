@@ -166,8 +166,6 @@ void free_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
 Marker *copy_marker(Buffer *bp, Point pt);
 Marker *point_marker(void);
-Marker *point_min_marker(void);
-Marker *point_max_marker(void);
 
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);
