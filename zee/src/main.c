@@ -101,7 +101,7 @@ static void loop(void)
 }
 
 static char about_minibuf_str[] =
-"Welcome to Zee!  To exit type CTRL-X, then C";
+"Welcome to Zee!  To exit type CTRL-ALT-Q";
 
 static void setup_main_screen(int argc, astr as)
 {
