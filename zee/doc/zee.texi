@@ -45,7 +45,6 @@ Zee is a customizable, self-documenting real-time display editor.
 * Initialization file::         The ``.zee'' initialization file.
 * Getting help::                How to get help in Zee.
 * Key names::                   How the keys are named.
-* Key bindings::                The functions associated with keys.
 * Functions::                   The list of functions.
 * Variables::                   The list of variables.
 * Bug reports::                 How to report a bug.
@@ -168,7 +167,7 @@ Show the key or keys to which a command is bound.
 @end table
 
 @c ---------------------------------------------------------------------------
-@node Key names, Key bindings, Getting help, Top
+@node Key names, Functions, Getting help, Top
 @chapter Key names
 
 This table contains the names of the keys that are used in Zee.
@@ -200,22 +199,7 @@ The combination @kbd{C-x} means hold the @key{CTRL} key down while
 typing @kbd{x}.
 
 @c ---------------------------------------------------------------------------
-@node Key bindings, Functions, Key names, Top
-@chapter Key bindings
-
-This table contains the full list of commands associated with key
-sequences.
-
-At run-time, you can list the current defined bindings with the
-@samp{list-bindings} command.
-
-This section includes only a brief documentation for each command.
-For full documentation, see @ref{Functions}.
-
-@include zee_keys.texi
-
-@c ---------------------------------------------------------------------------
-@node Functions, Variables, Key bindings, Top
+@node Functions, Variables, Key names, Top
 @chapter Functions
 
 This table contains the full list of available functions, that can be

@@ -13,10 +13,6 @@ EXTRA_DIST =					\
 	FAQ					\
 	TUTORIAL				\
 	dotzee.sample				\
-	dotzee.texi				\
-	zee_keys.texi				\
-	zee_funcs.texi				\
-	zee_vars.texi				\
 	lisp.txt				\
 	zee.1.in				\
 	mkdoc.c					\
@@ -27,6 +23,8 @@ man_MANS = zee.1
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
+GENERATED_TEXI = dotzee.texi zee_funcs.texi zee_vars.texi
+
 mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ mkdoc.o
 
@@ -35,10 +33,10 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_va
 
 	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
 
-zee_keys.texi zee_funcs.texi zee_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc
-	./mkdoc $(AUTODOCSRCS) >AUTODOC
+zee.texi: $(GENERATED_TEXI)
 
-zee.info: dotzee.texi zee_keys.texi zee_funcs.texi zee_vars.texi
+zee_funcs.texi zee_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc
+	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
 dotzee.texi: dotzee.sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
@@ -56,3 +54,6 @@ all-local: AUTODOC
 clean-local:
 	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC *.o
 	rm -f zee.1
+
+distclean-local:
+	rm -f $(GENERATED_TEXI)

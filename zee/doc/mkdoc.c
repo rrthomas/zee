@@ -19,20 +19,12 @@
 
 struct fentry {
   char	*name;
-  char	*key1;
-  char	*key2;
   astr	doc;
 } fentry_table[] = {
-#define X0(zee_name, c_name) \
-  { zee_name, NULL, NULL, NULL },
-#define X1(zee_name, c_name, key1) \
-  { zee_name, key1, NULL, NULL },
-#define X2(zee_name, c_name, key1, key2) \
-  { zee_name, key1, key2, NULL },
+#define X(zee_name, c_name) \
+  { zee_name, NULL },
 #include "tbl_funcs.h"
-#undef X0
-#undef X1
-#undef X2
+#undef X
 };
 
 #define fentry_table_size (sizeof fentry_table  / sizeof fentry_table[0])
@@ -130,42 +122,6 @@ static void dump_help(void)
             ventry_table[i].doc);
 }
 
-static void dump_key_table(void)
-{
-  unsigned i;
-  FILE *fp = fopen("zee_keys.texi", "w");
-
-  assert(fp);
-  fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
-  fprintf(fp, "@table @kbd\n");
-
-  for (i = 0; i < fentry_table_size; ++i) {
-    astr doc = fentry_table[i].doc;
-    if (!doc || astr_len(doc) == 0) {
-      fprintf(stderr, "mkdoc: no docstring for %s\n", fentry_table[i].name);
-      exit(1);
-    }
-    if (fentry_table[i].key1) {
-      astr key1 = texinfo_subst(astr_cat_cstr(astr_new(), fentry_table[i].key1));
-      doc = texinfo_subst(astr_substr(doc, 0, (size_t)astr_find_cstr(doc, "\n")));
-      fprintf(fp, "@item");
-      fprintf(fp, " %s", astr_cstr(key1));
-      astr_delete(key1);
-      if (fentry_table[i].key2) {
-        astr key2 = texinfo_subst(astr_cat_cstr(astr_new(), fentry_table[i].key2));
-        fprintf(fp, ", %s", astr_cstr(key2));
-        astr_delete(key2);
-      }
-      fprintf(fp, "\n%s  Bound to @code{%s}.\n",
-              astr_cstr(doc), fentry_table[i].name);
-      astr_delete(doc);
-    }
-  }
-
-  fprintf(fp, "@end table");
-  fclose(fp);
-}
-
 static void dump_func_table(void)
 {
   unsigned i;
@@ -241,7 +197,6 @@ int main(int argc, char **argv)
     process_file(argv[i]);
 
   dump_help();
-  dump_key_table();
   dump_func_table();
   dump_var_table();
 
