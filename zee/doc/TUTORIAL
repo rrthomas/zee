@@ -193,8 +193,8 @@ For instance, C-u 8 C-f moves forward eight characters.
 Most commands use the numeric argument as a repeat count.  Certain
 exceptional commands use it differently.
 
-* WHEN ZILE IS HUNG
--------------------
+* WHEN ZEE IS HUNG
+------------------
 
 If Zee stops responding to your commands, you can stop it safely by
 typing C-g.  You can use C-g to stop a command which is taking too
