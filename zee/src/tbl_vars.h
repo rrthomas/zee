@@ -14,12 +14,6 @@
  * The forth column specifies the variable documentation.
  */
 
-X("alternative-bindings",		"b", "false", "\
-Remap the help functions (bound by default to `C-h') to `M-h'.  This may\n\
-be useful when `C-h' is already bound to Backspace or Delete.\n\
-\n\
-Please note that changing this variable at run-time has no effect; you\n\
-need instead to modify your `~/.zeerc' configuration file and restart Zee.")
 X("auto-fill-mode",			"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("beep",				"b", "true", "\

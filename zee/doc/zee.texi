@@ -164,8 +164,6 @@ Describe a function.
 Describe a key sequence.
 @item C-h b
 Show the defined bindings.
-@item C-h t
-Show a tutorial window.
 @item C-h v
 Describe a variable.
 @item C-h w
@@ -211,9 +209,6 @@ typing @kbd{x}.
 This table contains the full list of commands associated with key
 sequences.
 
-If you have set the @samp{alternative-bindings} variable to @samp{true},
-the @kbd{M-h} key should be used instead of @kbd{C-h}.
-
 At run-time, you can list the current defined bindings with the
 @samp{list-bindings} command.
 
@@ -246,26 +241,16 @@ Go to the end of line.  Bound to @code{end-of-line}.
 Move cursor to the next char.  Bound to @code{forward-char}.
 @item C-g
 Cancel current command.  Bound to @code{keyboard-quit}.
-@item C-h F
-Show the FAQ.  Bound to @code{view-zee-FAQ}.
 @item C-h c
 Describe briefly a key sequence.  Bound to @code{describe-key-briefly}.
-@item C-h d, C-h f
+@item C-h f
 Describe a function.  Bound to @code{describe-function}.
-@item C-h h, @key{F1}
-Show a help window.  Bound to @code{help}.
 @item C-h k
 Describe a key sequence.  Bound to @code{describe-key}.
 @item C-h b
 Show the defined bindings.  Bound to @code{list-bindings}.
-@item C-h s
-Show a sample configuration file.  Bound to @code{help-config-sample}.
-@item C-h t
-Show a tutorial window.  Bound to @code{help-with-tutorial}.
 @item C-h v
 Describe a variable.  Bound to @code{describe-variable}.
-@item C-h C-d
-Show informations about getting the latest version.  Bound to @code{describe-function}.
 @item C-j
 Equivalent to <RET> followed by <TAB>.  Bound to @code{newline-and-indent}.
 @item C-k, @key{F6}
@@ -781,14 +766,6 @@ on the compilation options given to @samp{configure}.
 
 @c LINT VAR
 @table @code
-@item alternative-bindings
-Remap the help functions (bound by default to @kbd{C-h}) to @kbd{M-h}.
-This may be useful when @kbd{C-h} is already bound to @key{BS}
-or @key{DEL}.
-Please note that changing this variable at run-time has no effect; you
-need instead to modify your @file{~/.zeerc} configuration file and
-restart Zee.
-Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
