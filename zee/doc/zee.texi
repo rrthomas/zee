@@ -269,8 +269,6 @@ Read next input character and insert it.  Bound to @code{quoted-insert}.
 Incrementally search backward.  Bound to @code{isearch-backward}.
 @item C-s
 Incrementally search forward.  Bound to @code{isearch-forward}.
-@item C-t
-Transpose two characters.  Bound to @code{transpose-chars}.
 @item C-u
 Begin a numeric argument for the following command.  Bound to @code{universal-argument}.
 @item C-v, @key{PGDN}
@@ -323,8 +321,6 @@ Convert the region to lower case.  Bound to @code{downcase-region}.
 Toggle @i{Read Only Mode}.  Bound to @code{toggle-read-only}.
 @item C-x C-s
 Save the current buffer.  Bound to @code{save-buffer}.
-@item C-x C-t
-Transpose two lines.  Bound to @code{transpose-lines}.
 @item C-x C-u
 Convert the region to upper case.  Bound to @code{upcase-region}.
 @item C-x C-w
@@ -361,8 +357,6 @@ Insert a tab character.  Bound to @code{tab-to-tab-stop}.
 Convert following word to lower case.  Bound to @code{downcase-word}.
 @item M-m
 Move point to the first non-whitespace character on this line.  Bound to @code{back-to-indentation}.
-@item M-t
-Transpose two words.  Bound to @code{transpose-words}.
 @item M-u
 Convert following word to upper case.  Bound to @code{upcase-word}.
 @item M-v, @key{PGUP}
@@ -383,8 +377,6 @@ Kill balanced expression forward.  Bound to @code{kill-sexp}.
 Incrementally regexp search backward.  Bound to @code{isearch-backward-regexp}.
 @item C-M-s
 Incrementally regexp search forward.  Bound to @code{isearch-forward-regexp}.
-@item C-M-t
-Transpose two balanced expressions.  Bound to @code{transpose-sexps}.
 @end table
 @c LINT END KEY
 
@@ -714,17 +706,6 @@ Change whether this buffer is visiting its file read-only.
 @item transient-mark-mode
 Toggle Transient Mark mode.
 With arg, turn Transient Mark mode on if arg is positive, off otherwise.
-@item transpose-chars
-Interchange characters around point, moving forward one character.
-If at end of line, the previous two chars are exchanged.
-@item transpose-lines
-Exchange current line and previous line, leaving point after both.
-With argument ARG, takes previous line and moves it past ARG lines.
-With argument 0, interchanges line point is in with line mark is in.
-@item transpose-sexps
-Like @kbd{M-t} but applies to sexps.
-@item transpose-words
-Interchange words around point, leaving point at end of them.
 @item undo
 Undo some previous changes.
 Repeat this command to undo more changes.
