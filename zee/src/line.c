@@ -138,15 +138,12 @@ static void insert_expanded_tab(int (*inschr)(int chr))
     (*inschr)(' ');
 }
 
-int insert_tab(void)
+static int insert_tab(void)
 {
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  if (!lookup_bool_variable("expand-tabs"))
-    insert_char_in_insert_mode('\t');
-  else
-    insert_expanded_tab(insert_char_in_insert_mode);
+  insert_expanded_tab(insert_char_in_insert_mode);
 
   return TRUE;
 }
@@ -154,8 +151,7 @@ int insert_tab(void)
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
   /*+
     Insert a tabulation at the current point position into
-    the current buffer.  Convert the tabulation into spaces
-    if the `expand-tabs' variable is bound and set to true.
+    the current buffer.  Convert the tabulation into spaces.
     +*/
 {
   int uni, ret = TRUE;

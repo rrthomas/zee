@@ -126,7 +126,6 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen, char *newtext, s
 int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);
-int insert_tab(void);
 void fill_break_line(void);
 int insert_newline(void);
 int intercalate_newline(void);
