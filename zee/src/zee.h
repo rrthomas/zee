@@ -366,11 +366,11 @@ typedef size_t Font;
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-        F_ ## c_func(0, evalCastIntToLe(1))
+        F_ ## c_func(1, evalCastIntToLe(1))
 
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func(uniused, evalCastIntToLe(uniarg))
+        F_ ## c_func(2, evalCastIntToLe(uniarg))
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
