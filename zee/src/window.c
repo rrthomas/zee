@@ -33,12 +33,7 @@
 
 static Window *window_new(void)
 {
-  Window *wp;
-
-  wp = (Window *)zmalloc(sizeof(Window));
-  memset(wp, 0, sizeof(Window));
-
-  return wp;
+  return zmalloc(sizeof(Window));
 }
 
 /*

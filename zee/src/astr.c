@@ -42,7 +42,6 @@ astr astr_new(void)
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
   as->text = (char *)zmalloc(as->maxlen + 1);
-  memset(as->text, 0, as->maxlen + 1);
   return as;
 }
 

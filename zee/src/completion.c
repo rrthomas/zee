@@ -50,7 +50,6 @@ Completion *completion_new(int fileflag)
   Completion *cp;
 
   cp = (Completion *)zmalloc(sizeof(Completion));
-  memset(cp, 0, sizeof(Completion));
 
   cp->completions = list_new();
   cp->matches = list_new();
