@@ -388,6 +388,22 @@ void term_resume(void)
   winch_sig_handler(SIGWINCH); /* Assume Zee is in a consistent state. */
 }
 
+static size_t find_fun_key(char *s, size_t nbytes, size_t *len)
+{
+  size_t i, key = KBD_NOKEY;
+
+  for (i = 0; i < KEYS; i++) {
+    if (key_len[i] > 0 && key_len[i] <= nbytes &&
+        strncmp(s, key_cap[i], key_len[i]) == 0) {
+      key = key_code[i];
+      *len = key_len[i];
+      break;
+    }
+  }
+
+  return key;
+}
+
 static size_t translate_key(char *s, size_t nbytes)
 {
   size_t i, key = KBD_NOKEY, used = 0;
@@ -422,14 +438,7 @@ static size_t translate_key(char *s, size_t nbytes)
       return *s;
     }
   } else {
-    for (i = 0; i < KEYS; i++) {
-      if (key_len[i] > 0 && key_len[i] <= nbytes &&
-          strncmp(s, key_cap[i], key_len[i]) == 0) {
-        key = key_code[i];
-        used = key_len[i];
-        break;
-      }
-    }
+    key = find_fun_key(s, nbytes, &used);
     if (used == 0 && nbytes > 1) {
 #ifdef DEBUG
       int i;
@@ -450,11 +459,32 @@ static size_t translate_key(char *s, size_t nbytes)
   return key;
 }
 
+/*
+ * Keep getting characters until either we have the maximum
+ * needed for a keystroke or we don't receive any more.
+ */
+static size_t getchars(char *keys, size_t nbytes)
+{
+  int nread = 1;
+
+  while (nread >= 0 && nbytes < max_key_chars && nread) {
+    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars);
+    if (nread >= 0)
+      nbytes += nread;
+
+    /* Don't wait or require any characters on second and subsequent requests. */
+    nstate.c_cc[VTIME] = 0;
+    nstate.c_cc[VMIN] = 0;
+    setattr(TCSANOW, &nstate);
+  }
+
+  return nbytes;
+}
+
 static size_t _xgetkey(int mode, size_t dsecs)
 {
-  size_t nbytes;
-  size_t len = astr_len(key_buf);
-  char *keys = zmalloc(len + max_key_chars);
+  size_t nbytes = astr_len(key_buf);
+  char *keys = zmalloc(nbytes + max_key_chars);
   size_t key = KBD_NOKEY;
 
   if (mode & GETKEY_DELAYED) {
@@ -465,18 +495,31 @@ static size_t _xgetkey(int mode, size_t dsecs)
     nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
   }
 
-  if (len > 0) {
-    nstate.c_cc[VMIN] = 0; /* We already have characters; don't wait for more. */
-    nstate.c_cc[VTIME] = 0;
-    memcpy(keys, astr_cstr(key_buf), len);
+  /* If we already have characters, move them out of the buffer. */
+  if (nbytes > 0) {
+    memcpy(keys, astr_cstr(key_buf), nbytes);
     astr_truncate(key_buf, 0);
+    nstate.c_cc[VTIME] = 0; /* If we already have some characters, don't wait for the first. */
+    nstate.c_cc[VMIN] = 0;
   }
 
-  setattr(TCSANOW, &nstate); /* Set waiting period and number of characters. */
+  setattr(TCSANOW, &nstate);
+  nbytes = getchars(keys, nbytes);
 
-  nbytes = len;
-  if (len < max_key_chars) /* Get more chars if we might not already have enough for a keystroke. */
-    nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
+  /* If there might be more characters on a slow terminal, try
+     again with a 1ds delay for the first read. */
+  if (nbytes < max_key_chars) {
+    size_t len;
+    char *ptr = strrchr(keys, '\33');
+
+    if (ptr && find_fun_key(ptr, nbytes, &len) == KBD_NOKEY) {
+      nstate.c_cc[VTIME] = 1;
+      nstate.c_cc[VMIN] = 0; /* This is strictly unnecessary. */
+      setattr(TCSANOW, &nstate);
+
+      getchars(keys, nbytes);
+    }
+  }
 
   if (mode & GETKEY_UNFILTERED) {
     int i;
