@@ -68,7 +68,7 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 
   term_addnstr(value + n, min(ZILE_COLS - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
-        
+
   if (strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
     term_move(ZILE_LINES - 1, ZILE_COLS - 1);
     term_addch('$');
@@ -158,7 +158,6 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
         ding();
       break;
     case KBD_CTL | 'k':
-      /* XXX no kill-register save is done yet. */
       if (i < len) {
         len -= len - i;
         (*p)[i] = '\0';

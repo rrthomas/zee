@@ -136,7 +136,6 @@ int self_insert_command(int c);
 void bprintf(const char *fmt, ...);
 int delete_char(void);
 int backward_delete_char(void);
-void free_registers(void);
 void free_kill_ring(void);
 
 /* lisp.c ----------------------------------------------------------------- */

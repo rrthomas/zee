@@ -91,9 +91,8 @@ Zee can open an infinite number of files and can record an infinite
 sequence of undo operations (limited only by the amount of free memory).
 @item Multi window.
 Zee can display multiple windows on the screen.
-@item Killing, yanking and registers.
-The killing, yanking and register features of Emacs are available
-in Zee.
+@item Killing and yanking.
+The killing and yanking features of Emacs are available in Zee.
 @item Minibuffer completion.
 This works for @kbd{M-x} commands and for file names.
 @item Auto fill (word wrap).
@@ -187,8 +186,6 @@ Show this manual.
 Describe a key sequence.
 @item C-h b
 Show the defined bindings.
-@item C-h l r
-Show the defined registers.
 @item C-h s
 Show a sample configuration file.
 @item C-h t
@@ -285,8 +282,6 @@ Show a help window.  Bound to @code{help}.
 Describe a key sequence.  Bound to @code{describe-key}.
 @item C-h b
 Show the defined bindings.  Bound to @code{list-bindings}.
-@item C-h l r
-Show the defined registers.  Bound to @code{list-registers}.
 @item C-h s
 Show a sample configuration file.  Bound to @code{help-config-sample}.
 @item C-h t
@@ -347,10 +342,6 @@ Insert the contents of a file.  Bound to @code{insert-file}.
 Kill current buffer.  Bound to @code{kill-buffer}.
 @item C-x o
 Select the other window.  Bound to @code{other-window}.
-@item C-x r i
-Insert register.  Bound to @code{insert-register}.
-@item C-x r s
-Copy region to register.  Bound to @code{copy-to-register}.
 @item C-x s
 Save modified buffers.  Bound to @code{save-some-buffers}.
 @item C-x u, C-_, @key{F4}
@@ -501,8 +492,6 @@ Make the user specified directory become the current buffer's default
 directory.
 @item copy-region-as-kill
 Save the region as if killed, but don't kill it.
-@item copy-to-register
-Copy region into the user specified register.
 @item delete-blank-lines
 On blank line, delete all surrounding blank lines, leaving just one.
 On isolated blank line, delete that one.
@@ -590,9 +579,6 @@ Puts mark after the inserted text.
 @item insert-file
 Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
-@item insert-register
-Insert contents of the user specified register.
-Puts point before and mark after the inserted text.
 @item isearch-backward
 Do incremental search backward.
 With a prefix argument, do a regular expression search instead.
@@ -657,8 +643,6 @@ Note that buffers with names starting with spaces are omitted.
 @c LINT END IGNORE
 @item list-functions
 List defined functions.
-@item list-registers
-List defined registers.
 @item mark-whole-buffer
 Put point at beginning and mark at end of buffer.
 @item mark-sexp
