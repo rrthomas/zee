@@ -40,7 +40,7 @@ void push_mark(void)
 
   /* Save the mark.  */
   if (cur_bp->mark)
-    list_append(mark_ring, copy_marker(cur_bp->mark));
+    list_append(mark_ring, copy_marker(cur_bp->mark->bp, cur_bp->mark->pt));
   /* Save an invalid mark.  */
   else {
     Marker *m = point_min_marker();
@@ -58,7 +58,7 @@ void pop_mark(void)
   if (m->bp->mark)
     free_marker(m->bp->mark);
 
-  m->bp->mark = (m->pt.p) ? copy_marker(m) : NULL;
+  m->bp->mark = (m->pt.p) ? copy_marker(m->bp, m->pt) : NULL;
 
   list_betail(mark_ring);
   free_marker(m);

@@ -60,25 +60,25 @@ void free_marker(Marker *marker)
 void move_marker(Marker *marker, Buffer *bp, Point pt)
 {
   if (bp != marker->bp) {
-    /* Unchain with the previous pointed buffer.  */
+    /* Unchain with the previous pointed buffer. */
     unchain_marker(marker);
 
-    /* Change the buffer.  */
+    /* Change the buffer. */
     marker->bp = bp;
 
-    /* Chain with the new buffer.  */
+    /* Chain with the new buffer. */
     marker->next = bp->markers;
     bp->markers = marker;
   }
 
-  /* Change the point.  */
+  /* Change the point. */
   marker->pt = pt;
 }
 
-Marker *copy_marker(Marker *m)
+Marker *copy_marker(Buffer *bp, Point pt)
 {
   Marker *marker = zmalloc(sizeof(Marker));
-  move_marker(marker, m->bp, m->pt);
+  move_marker(marker, bp, pt);
   return marker;
 }
 
