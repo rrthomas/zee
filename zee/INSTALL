@@ -1,12 +1,12 @@
-               Zile build and installation instructions
+               Zee build and installation instructions
                ----------------------------------------
 
-Special note for Cygwin users: If you are trying compiling Zile with
+Special note for Cygwin users: If you are trying compiling Zee with
 cygwin, please read question 3.3 of the FAQ (found in the `etc'
 subdirectory).
 
 
-To build zile:
+To build zee:
 
 1) Run configure:
 
@@ -16,32 +16,32 @@ To build zile:
 
 	make
 
-3a) To install zile, run
+3a) To install zee, run
 
 	make install
 
-   By default, zile is installed under /usr/local; this can be changed
+   By default, zee is installed under /usr/local; this can be changed
    by using the --prefix argument to configure.
 
-3b) If you just want to try zile, edit the `src/paths.h' file: replace
+3b) If you just want to try zee, edit the `src/paths.h' file: replace
    the line
 
-	#define PATH_DATA "/usr/local/share/zile"
+	#define PATH_DATA "/usr/local/share/zee"
 
    by
 
-	#define PATH_DATA "/zile_src_dir/etc/zile"
+	#define PATH_DATA "/zee_src_dir/etc/zee"
 
-   where `zile_src_dir' is the absolute directory where you unpacked the
-   Zile sources.
+   where `zee_src_dir' is the absolute directory where you unpacked the
+   Zee sources.
 
 4b) Recompile the sources:
 
 	make
 
-5b) To try zile, run it: 
+5b) To try zee, run it: 
 
-	src/zile
+	src/zee
 
 
 Options
@@ -59,6 +59,6 @@ For other configure options, run
 Changing key bindings
 ---------------------
 
-If you would like to change some key bindings of Zile, you need to
+If you would like to change some key bindings of Zee, you need to
 edit the `src/tbl_funcs.h' file. Maybe in the future a feature for
 rebinding a function at run-time will be available.

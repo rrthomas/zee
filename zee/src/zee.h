@@ -3,20 +3,20 @@
    Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -62,7 +62,7 @@ typedef struct History History;
 typedef struct Terminal Terminal;
 
 /*
- * The type of a Zile exported function.  `uniarg' is the number of
+ * The type of a Zee exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
 typedef int (*Function)(int argc, le *branch);
@@ -268,7 +268,7 @@ extern Terminal *termp; /* The global Terminal. */
 /* Type of font attributes */
 typedef size_t Font;
 
-/* Zile font codes
+/* Zee font codes
  * Designed to fit in an int, leaving room for a char underneath. */
 #define ZILE_NORMAL		0x000
 #define ZILE_REVERSE		0x100
@@ -350,12 +350,12 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 /* N.B. The function type is actually eval_cb. */
-#define DEFUN(zile_func, c_func) \
+#define DEFUN(zee_func, c_func) \
         int F_ ## c_func(int argc, le *branch) \
         { \
           int uniused = argc > 1;
-#define DEFUN_INT(zile_func, c_func) \
-	DEFUN(zile_func, c_func) \
+#define DEFUN_INT(zee_func, c_func) \
+	DEFUN(zee_func, c_func) \
           int uniarg = 1; \
           if (uniused) { \
             le *value_le = evaluateNode(branch); \

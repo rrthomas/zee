@@ -13,9 +13,9 @@ check_PROGRAMS = astr
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
 
-bin_PROGRAMS = zile
+bin_PROGRAMS = zee
 
-zile_base_SOURCES =				\
+zee_base_SOURCES =				\
 	list.c					\
 	list.h					\
 	astr.c					\
@@ -61,20 +61,20 @@ zile_base_SOURCES =				\
 	window.c				\
 	term_minibuf.c				\
 	term_redisplay.c			\
-	zile.h
+	zee.h
 
 if ALLEGRO
-zile_SOURCES = $(zile_base_SOURCES) term_allegro.c
-zile_LDFLAGS = `allegro-config --libs`
+zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
+zee_LDFLAGS = `allegro-config --libs`
 else
 if EPOCEMX
-zile_SOURCES = $(zile_base_SOURCES) term_epocemx.c
+zee_SOURCES = $(zee_base_SOURCES) term_epocemx.c
 else
-zile_SOURCES = $(zile_base_SOURCES) term_termcap.c
+zee_SOURCES = $(zee_base_SOURCES) term_termcap.c
 endif
 endif
 
-zile_LDADD = $(regex) @LIBOBJS@
+zee_LDADD = $(regex) @LIBOBJS@
 
 EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c
 

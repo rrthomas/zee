@@ -3,20 +3,20 @@
    Copyright (c) 2004-2005 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -47,12 +47,12 @@
 #endif
 #endif
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
 
-#define ZILE_VERSION_STRING	"Zile " VERSION
+#define ZILE_VERSION_STRING	"Zee " VERSION
 
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
@@ -101,10 +101,10 @@ static char about_splash_str[] = "\
 \n\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
-Type `C-x C-c' to exit Zile.\n\
+Type `C-x C-c' to exit Zee.\n\
 Type `C-h h' for help; `C-x u; to undo changes.\n\
 Type `C-h C-d' for information on getting the latest version.\n\
-Type `C-h t' for a tutorial on using Zile.\n\
+Type `C-h t' for a tutorial on using Zee.\n\
 Type `C-h s' for a sample configuration file.\n\
 Type `C-g' at any time to cancel the current operation.\n\
 \n\
@@ -116,7 +116,7 @@ Combinations like `C-h h' mean first press `C-h', then `h'.\n\
 ";
 
 static char about_minibuf_str[] =
-"Welcome to Zile!  For help type `C-h h'";
+"Welcome to Zee!  For help type `C-h h'";
 
 static void about_screen(void)
 {
@@ -179,15 +179,15 @@ then enter the text in that file's own buffer.\n\
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-  zile_exit(2);
+  fprintf(stderr, "Zee crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  zee_exit(2);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
-  zile_exit(2);
+  fprintf(stderr, "Zee terminated with signal %d.\r\n", signo);
+  zee_exit(2);
 }
 
 #ifdef HAVE_SIGACTION
@@ -239,7 +239,7 @@ static void signal_init(void)
 
 #ifdef HAVE_SIGACTION
   /* If we don't do this, it seems other stuff interrupts the
-     suspend handler! Without it, suspending zile under e.g.
+     suspend handler! Without it, suspending zee under e.g.
      pine or mutt freezes the process. */
   sigfillset(&act.sa_mask);
 
@@ -297,23 +297,23 @@ int main(int argc, char **argv)
       fprintf(stderr,
               ZILE_VERSION_STRING "\n"
               ZILE_COPYRIGHT_STRING "\n"
-              "Zile comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of Zile\n"
+              "Zee comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of Zee\n"
               "under the terms of the GNU General Public License.\n"
               "For more information about these matters, see the file named COPYING.\n"
               );
       return 0;
     case 'h':
       fprintf(stderr,
-              "Usage: zile [OPTION-OR-FILENAME]...\n"
+              "Usage: zee [OPTION-OR-FILENAME]...\n"
               "\n"
-              "Run Zile, the lightweight Emacs clone.\n"
+              "Run Zee, the lightweight Emacs clone.\n"
               "\n"
               "Initialization options:\n"
               "\n"
               "--batch                do not do interactive display; implies -q\n"
               "--help                 display this help message and exit\n"
-              "--no-init-file, -q     do not load ~/.zile\n"
+              "--no-init-file, -q     do not load ~/.zee\n"
               "--version              display version information and exit\n"
               "\n"
               "Action options:\n"
@@ -337,7 +337,7 @@ int main(int argc, char **argv)
   else {
     if (!qflag) {
       astr as = get_home_dir();
-      astr_cat_cstr(as, "/.zile");
+      astr_cat_cstr(as, "/.zee");
       astr_delete(lisp_dump(lisp_read_file(astr_cstr(as))));
       astr_delete(as);
     }
@@ -364,7 +364,7 @@ int main(int argc, char **argv)
 
     setup_main_screen(argc, as);
 
-    /* Run the main Zile loop. */
+    /* Run the main Zee loop. */
     loop();
 
     /* Tidy and close the terminal. */

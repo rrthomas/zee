@@ -5,7 +5,7 @@
  * X0 means no key binding, X1 means one key binding, etc.
  *
  * Please remember to keep in sync with the Texinfo documentation
- * `../doc/zile.texi'.
+ * `../doc/zee.texi'.
  */
 
 X0("auto-fill-mode", auto_fill_mode)
@@ -89,7 +89,7 @@ X1("quoted-insert", quoted_insert,			"\\C-q")
 X1("recenter", recenter,				"\\C-l")
 X0("replace-regexp", replace_regexp)
 X2("save-buffer", save_buffer,				"\\C-x\\C-s", "\\F3")
-X1("save-buffers-kill-zile", save_buffers_kill_zile,	"\\C-x\\C-c")
+X1("save-buffers-kill-zee", save_buffers_kill_zee,	"\\C-x\\C-c")
 X1("save-some-buffers", save_some_buffers,		"\\C-xs")
 X2("scroll-down", scroll_down,				"\\M-v", "\\PGUP")
 X2("scroll-up", scroll_up,				"\\C-v", "\\PGDN")
@@ -104,7 +104,7 @@ X1("shell-command-on-region", shell_command_on_region,	"\\M-|")
 X0("shrink-window", shrink_window)
 X1("split-window", split_window,			"\\C-x2")
 X1("start-kbd-macro", start_kbd_macro,			"\\C-x(")
-X2("suspend-zile", suspend_zile,			"\\C-x\\C-z", "\\C-z")
+X2("suspend-zee", suspend_zee,			"\\C-x\\C-z", "\\C-z")
 X1("switch-to-buffer", switch_to_buffer,		"\\C-xb")
 X0("tabify", tabify)
 X1("tab-to-tab-stop", tab_to_tab_stop,			"\\M-i")
@@ -119,8 +119,8 @@ X1("universal-argument", universal_argument,		"\\C-u")
 X0("untabify", untabify)
 X1("upcase-region", upcase_region,			"\\C-x\\C-u")
 X1("upcase-word", upcase_word,				"\\M-u")
-X1("view-zile-FAQ", view_zile_FAQ,			"\\C-hF")
+X1("view-zee-FAQ", view_zee_FAQ,			"\\C-hF")
 X1("where-is", where_is,				"\\C-hw")
 X1("write-file", write_file,				"\\C-x\\C-w")
 X2("yank", yank,					"\\C-y", "\\F8")
-X0("zile-version", zile_version)
+X0("zee-version", zee_version)

@@ -27,14 +27,14 @@ struct fentry {
   char	*key4;
   astr	doc;
 } fentry_table[] = {
-#define X0(zile_name, c_name) \
-  { zile_name, NULL, NULL, NULL, NULL, NULL },
-#define X1(zile_name, c_name, key1) \
-  { zile_name, key1, NULL, NULL, NULL, NULL },
-#define X2(zile_name, c_name, key1, key2) \
-  { zile_name, key1, key2, NULL, NULL, NULL },
-#define X3(zile_name, c_name, key1, key2, key3) \
-  { zile_name, key1, key2, key3, NULL, NULL },
+#define X0(zee_name, c_name) \
+  { zee_name, NULL, NULL, NULL, NULL, NULL },
+#define X1(zee_name, c_name, key1) \
+  { zee_name, key1, NULL, NULL, NULL, NULL },
+#define X2(zee_name, c_name, key1, key2) \
+  { zee_name, key1, key2, NULL, NULL, NULL },
+#define X3(zee_name, c_name, key1, key2, key3) \
+  { zee_name, key1, key2, key3, NULL, NULL },
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
@@ -144,7 +144,7 @@ static void process_file(char *filename)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zile_exit(int exitcode)
+void zee_exit(int exitcode)
 {
   exit(exitcode);
 }

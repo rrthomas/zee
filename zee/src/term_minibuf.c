@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 /* Write minibuf prompt, assuming cursor starts at column 0. */
@@ -121,7 +121,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
     case KBD_NOKEY:
       break;
     case KBD_CTL | 'z':
-      FUNCALL(suspend_zile);
+      FUNCALL(suspend_zee);
       break;
     case KBD_RET:
       term_move(ZILE_LINES - 1, 0);

@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -34,7 +34,7 @@
 #include <termcap.h>
 #include <emx.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 static Terminal thisterm = {
@@ -49,7 +49,7 @@ typedef struct {
   int curx, cury;  /* cursor x and y. */
   Font font;       /* current font. */
   int *array, *oarray; /* contents of screen (8 low bits is
-                          character, rest is Zile font code).
+                          character, rest is Zee font code).
                           array is current, oarray is last
                           displayed contents. */
 } Screen;
@@ -220,10 +220,10 @@ static char *get_tcap(void)
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    zile_exit(1);
+    zee_exit(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    zile_exit(1);
+    zee_exit(1);
   }
 
   return tcap;

@@ -1,4 +1,4 @@
-		    Zile FAQ - Frequently Asked Questions
+		    Zee FAQ - Frequently Asked Questions
 
 		   Last updated: $Date$
 
@@ -7,42 +7,42 @@
 INDEX
 
 1. General questions
-   1.1. What does `Zile' mean?
-   1.2. What is Zile's license?
+   1.1. What does `Zee' mean?
+   1.2. What is Zee's license?
    1.3. Why another clone of Emacs? Why not just use Emacs?
    1.4. Where can I get the latest version?
    1.5. Why did you choose such difficult key sequences?
-   1.6. Zile has a bug!
-   1.7. I like the xyz function of (X)Emacs but it's not in Zile!
-   1.8. How small does Zile get?
-   1.9. Does Zile support Unicode/UTF-8?
-   1.10. Zile doesn't compile.
+   1.6. Zee has a bug!
+   1.7. I like the xyz function of (X)Emacs but it's not in Zee!
+   1.8. How small does Zee get?
+   1.9. Does Zee support Unicode/UTF-8?
+   1.10. Zee doesn't compile.
 
 2. Functionality
-   2.1. How do I quit Zile?
-   2.2. How do I return to the shell without leaving Zile?
-   2.3. Zile is hung.
+   2.1. How do I quit Zee?
+   2.2. How do I return to the shell without leaving Zee?
+   2.3. Zee is hung.
    2.4. How do I undo the previous command?
    2.5. What does `C-something' or `M-something' mean?
    2.6. What settings can I change?
    2.7. How do I display non-ASCII characters?
-   2.8. Zile doesn't handle filenames with non-ASCII characters.
+   2.8. Zee doesn't handle filenames with non-ASCII characters.
    2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
    2.10. How do I enable Auto Fill Mode at startup?
-   2.11. The Zile screen is not resized when I resize my terminal.
+   2.11. The Zee screen is not resized when I resize my terminal.
 
 ------------------------------------------------------------------------------
 
 1. General questions
 
-1.1. What does `Zile' mean?
+1.1. What does `Zee' mean?
 
-    It stands for `Zile Is Lossy Emacs'. It is just another recursive
+    It stands for `Zee Is Lossy Emacs'. It is just another recursive
     acronym like GNU.
 
-1.2. What is Zile's license?
+1.2. What is Zee's license?
 
-    Zile is released under the GNU General Public License. For more
+    Zee is released under the GNU General Public License. For more
     information, see http://www.gnu.org/licenses/gpl.html.
 
 1.3. Why another clone of Emacs? Why not just use Emacs?
@@ -54,78 +54,78 @@ INDEX
 	sessions.''
 
     That's why sometimes Emacs isn't the best editor to use :-)  I
-    use XEmacs myself when I do coding, but I use Zile when I have,
+    use XEmacs myself when I do coding, but I use Zee when I have,
     let's say, to quick edit the dot files in the home directory; I
     don't want to wait 5 seconds to load XEmacs for doing a 2-second
     edit...
 
 1.4. Where can I get the latest version?
 
-    The Zile project is hosted on SourceForge at:
+    The Zee project is hosted on SourceForge at:
 
-	http://zile.sourceforge.net/
+	http://zee.sourceforge.net/
 
 1.5. Why did you choose such difficult key sequences?
 
     To be the same as Emacs.
 
-1.6. Zile has a bug!
+1.6. Zee has a bug!
 
     Bug reports can be sent to the developers at
-    <zile-devel@lists.sourceforge.net>, or entered directly into
-    Bugzilla at http://sourceforge.net/projects/zile. Patches are
+    <zee-devel@lists.sourceforge.net>, or entered directly into
+    Bugzilla at http://sourceforge.net/projects/zee. Patches are
     appreciated.
 
-1.7. I like the xyz function of (X)Emacs but it's not in Zile!
+1.7. I like the xyz function of (X)Emacs but it's not in Zee!
 
-    Zile was written to be small but fast and powerful enough.
+    Zee was written to be small but fast and powerful enough.
 
     In general, if you need something more powerful, use Emacs or
     XEmacs. You could also try Jed, which emulates Emacs, is not much
-    bigger than Zile, and has syntax highlighting, a macro language
+    bigger than Zee, and has syntax highlighting, a macro language
     and more (http://www.jedsoft.org/jed/).
 
     If you still think that a certain function should be implemented
-    in Zile, please send a message to the developers (see question
+    in Zee, please send a message to the developers (see question
     1.6).
 
-1.8. How small does Zile get?
+1.8. How small does Zee get?
 
-    On Debian 3.1 i386, Zile 2.0beta8 built with gcc 3.3.5 -O2 weighs
+    On Debian 3.1 i386, Zee 2.0beta8 built with gcc 3.3.5 -O2 weighs
     in at 101,496 bytes when stripped. This is a fairly typical build.
 
-1.9. Does Zile support Unicode/UTF-8?
+1.9. Does Zee support Unicode/UTF-8?
 
     No. Support for Unicode is planned in the future.
 
-1.10. Zile doesn't compile.
+1.10. Zee doesn't compile.
 
-    We have tested Zile under GNU/Linux only (other than the EPOC
+    We have tested Zee under GNU/Linux only (other than the EPOC
     port), although it should work on any POSIX-compliant OS that
-    supports termcap or Allegro. If you get Zile running under an OS
-    not listed here, please send a message to the Zile developers
+    supports termcap or Allegro. If you get Zee running under an OS
+    not listed here, please send a message to the Zee developers
     telling them that (you might also send any patches you have made
-    to the Zile sources if you want them included in the next
+    to the Zee sources if you want them included in the next
     release).
 
 ------------------------------------------------------------------------------
 
 2. Functionality
 
-2.1. How do I quit Zile?
+2.1. How do I quit Zee?
 
     Type `C-x C-c' (that means holding CONTROL while typing X,
     releasing them, then holding CONTROL while typing C)
 
-2.2. How do I return to the shell without leaving Zile?
+2.2. How do I return to the shell without leaving Zee?
 
     Type `C-x C-z' or simply `C-z'.
 
-2.3. Zile is hung.
+2.3. Zee is hung.
 
     From the tutorial (`C-h t'):
 
-    If Zile gets into an infinite (or simply very long) computation
+    If Zee gets into an infinite (or simply very long) computation
     which you don't want to finish, you can stop it safely by typing
     `C-g'. You can also use `C-g' to discard a numeric argument or the
     beginning of a command that you don't want to finish.
@@ -148,29 +148,29 @@ INDEX
 
 2.6. What settings can I change?
 
-    Check out the `zilerc.sample' file (type `C-h s') for a full list
+    Check out the `zeerc.sample' file (type `C-h s') for a full list
     of variables.
 
 2.7. How do I display non-ASCII characters?
 
-    Zile uses the operating system's locale support, so you need to
-    set an appropriate locale. However, Zile only works with 8-bit
+    Zee uses the operating system's locale support, so you need to
+    set an appropriate locale. However, Zee only works with 8-bit
     locales at present; support for Unicode is planned.
 
     Try to set the LANG environment variable according to your locale,
-    before running Zile. For example, for a French environment, try:
+    before running Zee. For example, for a French environment, try:
 
 	export LANG=fr_FR	(with a Bourne-like shell)
 
 	setenv LANG fr_FR	(with a C-like shell).
 
-2.8. Zile doesn't handle filenames with non-ASCII characters.
+2.8. Zee doesn't handle filenames with non-ASCII characters.
 
     See the answer to question 2.7.
 
 2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
-    Add the following line to your `~/.zilerc' file:
+    Add the following line to your `~/.zeerc' file:
 
 	alternative-bindings = true
 
@@ -178,13 +178,13 @@ INDEX
 
 2.10. How do I enable Auto Fill Mode at startup?
 
-    Add the following line to your `~/.zilerc' file:
+    Add the following line to your `~/.zeerc' file:
 
 	auto-fill-mode = true
 
-2.11. The Zile screen is not resized when I resize my terminal.
+2.11. The Zee screen is not resized when I resize my terminal.
 
     Your terminal application does not send the signal `SIGWINCH' to
-    Zile (and other applications). To be sure, you might check if other
+    Zee (and other applications). To be sure, you might check if other
     terminal applications, like `vim' and `joe', also fail to resize
     their windows.

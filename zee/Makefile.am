@@ -10,12 +10,12 @@ EXTRA_DIST =					\
 	NEWS					\
 	README					\
 	THANKS					\
-	zile.pkg
+	zee.pkg
 
 CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
 
 dist-epoc:
-	emxsis zile.pkg
+	emxsis zee.pkg
 	cp README Readme.txt
-	zip zile.zip zile.sis Readme.txt
+	zip zee.zip zee.sis Readme.txt
 	rm Readme.txt

@@ -83,7 +83,7 @@ int find_file(const char *filename);
 Completion *make_buffer_completion(void);
 int check_modified_buffer(Buffer *bp);
 void kill_buffer(Buffer *kill_bp);
-void zile_exit(int exitcode);
+void zee_exit(int exitcode);
 
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
@@ -266,16 +266,16 @@ int zasprintf(char **ptr, const char *fmt, ...);
 
 
 /*
- * Declare external Zile functions.
+ * Declare external Zee functions.
  */
-#define X0(zile_name, c_name)			\
+#define X0(zee_name, c_name)			\
 	extern int F_ ## c_name(int argc, le *branch);
-#define X1(zile_name, c_name, k1)		\
-	X0(zile_name, c_name)
-#define X2(zile_name, c_name, k1, k2)		\
-	X0(zile_name, c_name)
-#define X3(zile_name, c_name, k1, k2, k3)	\
-	X0(zile_name, c_name)
+#define X1(zee_name, c_name, k1)		\
+	X0(zee_name, c_name)
+#define X2(zee_name, c_name, k1, k2)		\
+	X0(zee_name, c_name)
+#define X3(zee_name, c_name, k1, k2, k3)	\
+	X0(zee_name, c_name)
 #include "tbl_funcs.h"
 #undef X0
 #undef X1

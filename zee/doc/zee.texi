@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
-@setfilename zile.info
-@settitle The Zile Manual
+@setfilename zee.info
+@settitle The Zee Manual
 
 @c If "finalout" is commented out, the printed output will show
 @c black boxes that mark lines that are too long.  Thus, it is
@@ -14,14 +14,14 @@
 @setchapternewpage odd
 
 @titlepage
-@title The Zile Manual
-@subtitle for Zile version 2.1
+@title The Zee Manual
+@subtitle for Zee version 2.1
 @subtitle January 2005
 @author Sandro Sigala and Reuben Thomas
 
 @dircategory Text editors
 @direntry
-* Zile: (zile).                 Zile emacs clone text editor.
+* Zee: (zee).                 Zee emacs clone text editor.
 @end direntry
 
 @page
@@ -34,19 +34,19 @@ Copyright @copyright{} 2004 David A. Capello
 @c ---------------------------------------------------------------------------
 @node Top, Overview, (dir), (dir)
 
-This is the @emph{Zile} manual.
+This is the @emph{Zee} manual.
 
-Zile is another Emacs-clone.
-Zile is a customizable, self-documenting real-time display editor.
-Zile was written to be as similar as possible to Emacs; every Emacs
-user should feel at home with Zile.
+Zee is another Emacs-clone.
+Zee is a customizable, self-documenting real-time display editor.
+Zee was written to be as similar as possible to Emacs; every Emacs
+user should feel at home with Zee.
 
 @menu
-* Overview::                    An overview of the Zile editor.
-* Features::                    The characteristics of Zile.
-* Invoking Zile::               Command line options that you can give to Zile.
-* Initialization file::         The ``.zile'' initialization file.
-* Getting help::                How to get help in Zile.
+* Overview::                    An overview of the Zee editor.
+* Features::                    The characteristics of Zee.
+* Invoking Zee::               Command line options that you can give to Zee.
+* Initialization file::         The ``.zee'' initialization file.
+* Getting help::                How to get help in Zee.
 * Key names::                   How the keys are named.
 * Key bindings::                The functions associated with keys.
 * Functions::                   The list of functions.
@@ -58,10 +58,10 @@ user should feel at home with Zile.
 @node Overview, Features, Top, Top
 @chapter Overview
 
-The @emph{Zile} editor is written entirely in @emph{@w{ANSI C}}.
+The @emph{Zee} editor is written entirely in @emph{@w{ANSI C}}.
 It should run on any POSIX system. It has also been ported to @emph{EPOC}.
 
-Zile should really appear like
+Zee should really appear like
 Emacs, but a lot of good ideas were also taken from from other editors:
 @itemize -
 @item Emacs:
@@ -75,7 +75,7 @@ Internal structure and function names.
 @end itemize
 
 @c ---------------------------------------------------------------------------
-@node Features, Invoking Zile, Overview, Top
+@node Features, Invoking Zee, Overview, Top
 @chapter Features
 
 @itemize -
@@ -83,21 +83,21 @@ Internal structure and function names.
 It is very useful for small footprint installations (e.g. on floppy disk)
 or quick editing sessions.
 @item 8-bit clean.
-Zile can operate with binary files.
+Zee can operate with binary files.
 @item Looks like @emph{Emacs}.
-Most Zile key sequences and function names are identical to Emacs ones.
+Most Zee key sequences and function names are identical to Emacs ones.
 @item Multi buffer editing with multi level undo.
-Zile can open an infinite number of files and can record an infinite
+Zee can open an infinite number of files and can record an infinite
 sequence of undo operations (limited only by the amount of free memory).
 @item Multi window.
-Zile can display multiple windows on the screen.
+Zee can display multiple windows on the screen.
 @item Killing, yanking and registers.
 The killing, yanking and register features of Emacs are available
-in Zile.
+in Zee.
 @item Minibuffer completion.
 This works for @kbd{M-x} commands and for file names.
 @item Auto fill (word wrap).
-Zile automatically breaks the lines when they become too wide (if the
+Zee automatically breaks the lines when they become too wide (if the
 @i{Auto Fill Mode} is enabled).
 @item Auto line ending detection.
 When a file is loaded, its line ending is detected automatically
@@ -107,8 +107,8 @@ displayed.
 @end itemize
 
 @c ---------------------------------------------------------------------------
-@node Invoking Zile, Initialization file, Features, Top
-@chapter Invoking Zile
+@node Invoking Zee, Initialization file, Features, Top
+@chapter Invoking Zee
 
 The options are as follows:
 
@@ -127,19 +127,19 @@ Print the command line syntax and exit.
 @item --load FILE
 Load Lisp file @file{FILE}.
 @item -q, --no-init-file
-Do not load ~/.zile.
+Do not load ~/.zee.
 @item --version
 Print version information and exit.
 @end table
 
 @c ---------------------------------------------------------------------------
-@node Initialization file, Getting help, Invoking Zile, Top
+@node Initialization file, Getting help, Invoking Zee, Top
 @chapter Initialization file
 
-When Zile is started, it normally loads the @file{.zile} file in your
+When Zee is started, it normally loads the @file{.zee} file in your
 home directory. We call this file your ``initialization file'' because
-it specifies how to initialize Zile for you. You can use the command
-line switch @samp{-q} to tell Zile not to load the initialization file.
+it specifies how to initialize Zee for you. You can use the command
+line switch @samp{-q} to tell Zee not to load the initialization file.
 
 @menu
 * File syntax::                 The initialization file syntax.
@@ -158,9 +158,9 @@ variables; see the next subsection for an example.
 @node Sample file,  , File syntax, Initialization file
 @section A sample file
 
-This is the initialization file that comes with the Zile sources.
+This is the initialization file that comes with the Zee sources.
 
-@include dotzile.texi
+@include dotzee.texi
 
 @c ---------------------------------------------------------------------------
 @node Getting help, Key names, Initialization file, Top
@@ -176,7 +176,7 @@ the @kbd{M-h} key should be used instead of @kbd{C-h}.
 @item C-h C-d
 Show informations about getting the latest version.
 @item C-h F
-Show the Frequently Asked Questions about Zile.
+Show the Frequently Asked Questions about Zee.
 @item C-h c
 Describe briefly a key sequence.
 @item C-h d, C-h f
@@ -203,7 +203,7 @@ Show the key or keys to which a command is bound.
 @node Key names, Key bindings, Getting help, Top
 @chapter Key names
 
-This table contains the names of the keys that are used in Zile.
+This table contains the names of the keys that are used in Zee.
 
 @table @key
 @item SPC
@@ -274,7 +274,7 @@ Move cursor to the next char.  Bound to @code{forward-char}.
 @item C-g
 Cancel current command.  Bound to @code{keyboard-quit}.
 @item C-h F
-Show the FAQ.  Bound to @code{view-zile-FAQ}.
+Show the FAQ.  Bound to @code{view-zee-FAQ}.
 @item C-h c
 Describe briefly a key sequence.  Bound to @code{describe-key-briefly}.
 @item C-h d, C-h f
@@ -360,11 +360,11 @@ Delete all but one of many consecutive blank lines.  Bound to @code{delete-blank
 @item C-y, @key{F8}
 Yank killed text.  Bound to @code{yank}.
 @item C-z, C-x C-z
-Stop Zile and return to superior process.  Bound to @code{suspend-zile}.
+Stop Zee and return to superior process.  Bound to @code{suspend-zee}.
 @item C-x C-b
 List buffers.  Bound to @code{list-buffers}.
 @item C-x C-c
-Save modified buffers and quit zile.  Bound to @code{save-buffers-kill-zile}.
+Save modified buffers and quit zee.  Bound to @code{save-buffers-kill-zee}.
 @item C-x C-f, @key{F2}
 Find a file for editing.  Bound to @code{find-file}.
 @item C-x C-l
@@ -576,8 +576,8 @@ Line 1 is the beginning of the buffer.
 Show a help window.
 @item help-config-sample
 Show a configuration file sample.
-@item view-zile-FAQ
-Show the Zile @i{Frequently Asked Questions} list (FAQ).
+@item view-zee-FAQ
+Show the Zee @i{Frequently Asked Questions} list (FAQ).
 @item help-latest-version
 Show informations about getting the latest version.
 @item help-tutorial
@@ -628,7 +628,7 @@ Kill between point and mark.
 The text is deleted but saved in the kill ring.
 The command @kbd{C-y} (yank) can retrieve it from there.
 
-If the buffer is read-only, Zile will beep and refrain from deleting
+If the buffer is read-only, Zee will beep and refrain from deleting
 the text, but put the text in the kill ring anyway.  This means that
 you can use the killing commands to copy text from a read-only buffer.
 
@@ -711,8 +711,8 @@ Replace occurrences of a string with other text.
 @item save-buffer
 Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
-@item save-buffers-kill-zile
-Offer to save each buffer, then kill this Zile process.
+@item save-buffers-kill-zee
+Offer to save each buffer, then kill this Zee process.
 @item save-some-buffers
 Save some modified file-visiting buffers.  Asks user about each one.
 @item scroll-down
@@ -742,7 +742,7 @@ Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command.
 
 Standard input from the command comes from the null device.  If the
-shell command produces any output, the output goes to a Zile buffer
+shell command produces any output, the output goes to a Zee buffer
 named @samp{*Shell Command Output*}, which is displayed in another window
 but not selected.
 
@@ -754,7 +754,7 @@ Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
 
-If the shell command produces any output, the output goes to a Zile buffer
+If the shell command produces any output, the output goes to a Zee buffer
 named @samp{*Shell Command Output*}, which is displayed in another window
 but not selected.
 
@@ -772,8 +772,8 @@ Both windows display the same buffer now current.
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
 Use @kbd{C-x )} to finish recording and make the macro available.
-@item suspend-zile
-Stop Zile and return to superior process.
+@item suspend-zee
+Stop Zee and return to superior process.
 @item switch-to-buffer
 Select to the user specified buffer in the current window.
 @item tabify
@@ -827,8 +827,8 @@ Makes buffer visit that file, and marks it not modified.
 Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
 killed @i{or} yanked.  Put point at end, and set mark at beginning.
-@item zile-version
-Show the zile version.
+@item zee-version
+Show the zee version.
 @end table
 @c LINT END FUNC
 
@@ -838,7 +838,7 @@ Show the zile version.
 
 This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
-in the @file{.zilerc} initialization file.
+in the @file{.zeerc} initialization file.
 
 Please note that some variables may be not available depending
 on the compilation options given to @samp{configure}.
@@ -850,8 +850,8 @@ Remap the help functions (bound by default to @kbd{C-h}) to @kbd{M-h}.
 This may be useful when @kbd{C-h} is already bound to @key{BS}
 or @key{DEL}.
 Please note that changing this variable at run-time has no effect; you
-need instead to modify your @file{~/.zilerc} configuration file and
-restart Zile.
+need instead to modify your @file{~/.zeerc} configuration file and
+restart Zee.
 Default value is @samp{false}.
 @item backup-directory
 Specify target backup directory.  Directory must exist.
@@ -863,16 +863,16 @@ Possible values are: @samp{none} and @samp{simple}.
 @c LINT IGNORE
 @table @samp
 @item none
-If @samp{none} is specified, Zile will not create backup files.
+If @samp{none} is specified, Zee will not create backup files.
 @item simple
-If @samp{simple} is specified, Zile will create a backup file with a
+If @samp{simple} is specified, Zee will create a backup file with a
 tilde @samp{~} appended to the name (e.g.: on saving @file{foo.c} it will
 create the backup @file{foo.c~}).
 @end table
 @c LINT END IGNORE
 Default value is @samp{simple}.
 @item backup-with-directory
-If enabled Zile will backup files to a user specified directory;
+If enabled Zee will backup files to a user specified directory;
 the directory must exist and must be specified in the
 variable @samp{backup-directory}.
 Default value is @samp{false}.
@@ -880,7 +880,7 @@ Default value is @samp{false}.
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
 @item expand-tabs
-If disabled, Zile will insert hard tabs (the character @samp{\t}),
+If disabled, Zee will insert hard tabs (the character @samp{\t}),
 otherwise it will insert spaces.
 Default value is @samp{false}.
 @item fill-column
@@ -918,13 +918,13 @@ highlight all windows or just the selected window.  Default value is
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
-developers at @email{zile-devel@@lists.sourceforge.net}, or even better,
-filed in the relevant tracker at @uref{http://sourceforge.net/projects/zile/}.
+developers at @email{zee-devel@@lists.sourceforge.net}, or even better,
+filed in the relevant tracker at @uref{http://sourceforge.net/projects/zee/}.
 
 @contents
 
 @bye
 
 Local Variables:
-compile-command: "texi2dvi zile.texi"
+compile-command: "texi2dvi zee.texi"
 End:

@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -34,7 +34,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 static Terminal thisterm = {
@@ -49,7 +49,7 @@ typedef struct {
   size_t curx, cury;          /* cursor x and y. */
   Font font;                    /* current font. */
   size_t *array, *oarray;     /* contents of screen (8 low bits is
-                                   character, rest is Zile font code).
+                                   character, rest is Zee font code).
                                    array is current, oarray is last
                                    displayed contents. */
 } Screen;
@@ -241,16 +241,16 @@ static char *get_tcap(void)
 
   if (!term) {
     fprintf(stderr, "No terminal type in TERM.\n");
-    zile_exit(1);
+    zee_exit(1);
   }
 
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    zile_exit(1);
+    zee_exit(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    zile_exit(1);
+    zee_exit(1);
   }
 
   return tcap;
@@ -292,7 +292,7 @@ static void setattr(int flags, struct termios *state)
 {
   if (tcsetattr(0, flags, state) < 0) {
     fprintf(stderr, "Can't change terminal settings\n");
-    zile_exit(1);
+    zee_exit(1);
   }
 }
 
@@ -313,7 +313,7 @@ void term_init(void)
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
     fprintf(stderr, "Can't read terminal capabilites\n");
-    zile_exit(1);
+    zee_exit(1);
   }
 
   /* Set up terminal. */
@@ -387,7 +387,7 @@ static void winch_sig_handler(int signo)
 void term_resume(void)
 {
   setattr(TCSADRAIN, &nstate);
-  winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
+  winch_sig_handler(SIGWINCH); /* Assume Zee is in a consistent state. */
 }
 
 static size_t translate_key(char *s, size_t nbytes)
@@ -494,7 +494,7 @@ size_t term_xgetkey(int mode, size_t timeout)
 
   /* The SIGWINCH handler is only active in this routine, so that we
      know the data structures are in a consistent state. Here is where
-     Zile typically spends most of its time. */
+     Zee typically spends most of its time. */
   winch_sig.sa_handler = winch_sig_handler;
   sigemptyset(&winch_sig.sa_mask);
   winch_sig.sa_flags = SA_RESTART;

@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -47,7 +47,7 @@
 #include <utime.h>
 #include <ctype.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 int exist_file(const char *filename)
@@ -269,8 +269,8 @@ void open_file(char *path, size_t lineno)
   buf = get_current_dir(FALSE);
 
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-    fprintf(stderr, "zile: %s: invalid filename or path\n", path);
-    zile_exit(1);
+    fprintf(stderr, "zee: %s: invalid filename or path\n", path);
+    zee_exit(1);
   }
 
   astr_cpy_cstr(buf, astr_cstr(dir));
@@ -754,8 +754,8 @@ static astr create_backup_filename(const char *filename,
     dir = astr_new();
     fname = astr_new();
     if (!expand_path(astr_cstr(buf), "", dir, fname)) {
-      fprintf(stderr, "zile: %s: invalid backup directory\n", astr_cstr(dir));
-      zile_exit(1);
+      fprintf(stderr, "zee: %s: invalid backup directory\n", astr_cstr(dir));
+      zee_exit(1);
     }
     astr_cpy_cstr(buf, astr_cstr(dir));
     astr_cat_cstr(buf, astr_cstr(fname));
@@ -1076,9 +1076,9 @@ DEFUN_INT("save-some-buffers", save_some_buffers)
 }
 END_DEFUN
 
-DEFUN_INT("save-buffers-kill-zile", save_buffers_kill_zile)
+DEFUN_INT("save-buffers-kill-zee", save_buffers_kill_zee)
   /*+
-    Offer to save each buffer, then kill this Zile process.
+    Offer to save each buffer, then kill this Zee process.
     +*/
 {
   Buffer *bp;
@@ -1107,10 +1107,10 @@ DEFUN_INT("save-buffers-kill-zile", save_buffers_kill_zile)
 END_DEFUN
 
 /*
- * Function called on unexpected error or Zile crash (SIGSEGV).
+ * Function called on unexpected error or Zee crash (SIGSEGV).
  * Attempts to save modified buffers.
  */
-void zile_exit(int exitcode)
+void zee_exit(int exitcode)
 {
   Buffer *bp;
 

@@ -1,4 +1,4 @@
-; .zilerc sample configuration
+; .zeerc sample configuration
 
 ; Do not display the splash screen at startup [default: false]
 (setq skip-splash-screen false)
@@ -21,7 +21,7 @@
 (setq kill-whole-line false)
 
 ; Expand tabs [default: false]
-; If disabled, Zile will insert hard tabs (the character \t),
+; If disabled, Zee will insert hard tabs (the character \t),
 ; otherwise it will insert spaces.
 (setq expand-tabs false)
 
@@ -47,14 +47,14 @@
 ;
 ; Possible values are: none and simple.
 ;
-; * If `none' is specified, Zile will not create backup files.
-; * If `simple' is specified, Zile will create a backup file with a
+; * If `none' is specified, Zee will not create backup files.
+; * If `simple' is specified, Zee will create a backup file with a
 ;   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
 ;   create the backup `foo.c~').
 (setq backup-method simple)
 
 ; Enable backup directory for backup files [default: false]
-; If enabled Zile will backup files to a user specified directory;
+; If enabled Zee will backup files to a user specified directory;
 ; the directory must exist and must be specified in the
 ; variable `backup-directory' (see below).
 (setq backup-with-directory false)

@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -29,7 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 static char *kill_ring_text;
@@ -144,7 +144,7 @@ DEFUN_INT("kill-region", kill_region)
     Kill between point and mark.
     The text is deleted but saved in the kill ring.
     The command C-y (yank) can retrieve it from there.
-    If the buffer is read-only, Zile will beep and refrain from deleting
+    If the buffer is read-only, Zee will beep and refrain from deleting
     the text, but put the text in the kill ring anyway.  This means that
     you can use the killing commands to copy text from a read-only buffer.
     If the previous command was also a kill command,

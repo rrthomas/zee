@@ -1,15 +1,15 @@
-; EPOC PKG file for zile
+; EPOC PKG file for zee
 ; (c) Reuben Thomas 2004
 
 &EN
-#{"Zile"},(0x101F9331),2,0,0
+#{"Zee"},(0x101F9331),2,0,0
 
 "doc/BANNER.EPOC"-"",FT,TA
-"src/zile"-"!:\zile.exe"
-"zile.lnk"-"!:\emx\bin\zile.exe"
-"doc/AUTODOC"-"!:\emx\share\zile\AUTODOC"
-"doc/FAQ"-"!:\emx\share\zile\FAQ"
-"doc/HELP"-"!:\emx\share\zile\HELP"
-"doc/TUTORIAL"-"!:\emx\share\zile\TUTORIAL"
-"doc/zilerc.sample"-"!:\emx\share\zile\zilerc.sample"
+"src/zee"-"!:\zee.exe"
+"zee.lnk"-"!:\emx\bin\zee.exe"
+"doc/AUTODOC"-"!:\emx\share\zee\AUTODOC"
+"doc/FAQ"-"!:\emx\share\zee\FAQ"
+"doc/HELP"-"!:\emx\share\zee\HELP"
+"doc/TUTORIAL"-"!:\emx\share\zee\TUTORIAL"
+"doc/zeerc.sample"-"!:\emx\share\zee\zeerc.sample"
 @"emxuser.sis",(0x101f3e36)

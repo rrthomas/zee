@@ -1,4 +1,4 @@
-                              Zile Lisp
+                              Zee Lisp
                               ---------
 
                           Supported Commands

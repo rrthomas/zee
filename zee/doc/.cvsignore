@@ -4,6 +4,6 @@ Makefile.in
 mkdoc
 AUTODOC
 HELP
-zile.info
-dotzile.texi
-zile.1
+zee.info
+dotzee.texi
+zee.1

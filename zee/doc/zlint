@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Check the consistency of the keys and functions definitions between
-# the Zile sources, the Texinfo documentation, and the `zile.1.in' man page.
+# the Zee sources, the Texinfo documentation, and the `zee.1.in' man page.
 #
 # This script is a big hack, like all shell scripts.
 #
@@ -37,7 +37,7 @@ EOF
 cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPVARS
 
-cat ../doc/zile.texi | awk '
+cat ../doc/zee.texi | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT FUNC/ { v=1 }
 /^@c LINT END FUNC/ { v=0 }
@@ -46,7 +46,7 @@ BEGIN { v=0;i=0 }
 { if (v && !i) print }
 ' | grep "@item" | sed "s/@item //" | sort >$TMPFUNCST
 
-cat ../doc/zile.texi | awk '
+cat ../doc/zee.texi | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT VAR/ { v=1 }
 /^@c LINT END VAR/ { v=0 }

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(zile, 2.1.0, zile-devel@lists.sourceforge.net)
+AC_INIT(zee, 0.0CVS, zee-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
@@ -71,7 +71,7 @@ dnl ==================================================================
 dnl Allegro
 dnl ==================================================================
 
-AC_DEFUN([zile_CHECK_ALLEGRO],
+AC_DEFUN([zee_CHECK_ALLEGRO],
 [
         AC_CHECK_HEADER(allegro.h,
 			AC_DEFINE(HAVE_ALLEGRO_H, 1, [We have the allegro.h header.]),
@@ -86,7 +86,7 @@ AC_HELP_STRING([--enable-allegro], [use allegro interface]),
 if test $enableval = yes; then
         allegro=true
         AC_MSG_RESULT(yes)
-	zile_CHECK_ALLEGRO
+	zee_CHECK_ALLEGRO
 else
         allegro=false
         AC_MSG_RESULT(no)

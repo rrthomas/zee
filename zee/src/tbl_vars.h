@@ -4,7 +4,7 @@
  * Add an entry to this list for declaring a new global variable.
  *
  * If you do any modification, please remember to keep in sync with the
- * documentation in the `../doc/zile.texi' file.
+ * documentation in the `../doc/zee.texi' file.
  *
  * The first column specifies the variable name.
  * The second column specifies the variable type.
@@ -19,7 +19,7 @@ Remap the help functions (bound by default to `C-h') to `M-h'.  This may\n\
 be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
-need instead to modify your `~/.zilerc' configuration file and restart Zile.")
+need instead to modify your `~/.zeerc' configuration file and restart Zee.")
 X("auto-fill-mode",			"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("backup-directory",			"", "~/.backup", "\
@@ -30,12 +30,12 @@ Specify the file backup method.\n\
 \n\
 Possible values are: none and simple.\n\
 \n\
- - If `none' is specified, Zile will not create backup files.\n\
- - If `simple' is specified, Zile will create a backup file with a\n\
+ - If `none' is specified, Zee will not create backup files.\n\
+ - If `simple' is specified, Zee will create a backup file with a\n\
    tilde `~' appended to the name (e.g.: on saving `foo.c' it will\n\
    create the backup `foo.c~').")
 X("backup-with-directory",		"b", "false", "\
-If enabled Zile will backup files to a user specified directory;\n\
+If enabled Zee will backup files to a user specified directory;\n\
 the directory must exist and must be specified in the\n\
 variable `backup-directory'.")
 X("beep",				"b", "true", "\
@@ -43,7 +43,7 @@ If enabled, a sound will be emitted on any error.")
 X("case-replace",			"b", "true", "\
 Non-nil means `query-replace' should preserve case in replacements.")
 X("expand-tabs",			"b", "false", "\
-If disabled, Zile will insert hard tabs (the character `\\t'),\n\
+If disabled, Zee will insert hard tabs (the character `\\t'),\n\
 otherwise it will insert spaces.")
 X("fill-column",			"", "72", "\
 Column beyond which automatic line-wrapping should happen.\n\

@@ -1,30 +1,30 @@
 ## Process this file with automake to produce Makefile.in
 ## $Id$
 
-info_TEXINFOS = zile.texi
+info_TEXINFOS = zee.texi
 
-ziledir = $(datadir)/zile
-zile_DATA =					\
+zeedir = $(datadir)/zee
+zee_DATA =					\
 	AUTODOC					\
 	FAQ					\
 	HELP					\
 	TUTORIAL				\
-	dotzile.sample
+	dotzee.sample
 
 EXTRA_DIST =					\
 	FAQ					\
 	TUTORIAL				\
-	dotzile.sample				\
-	dotzile.texi				\
+	dotzee.sample				\
+	dotzee.texi				\
 	lisp.txt				\
 	zlint					\
-	zile.1.in				\
+	zee.1.in				\
 	mkdoc.c					\
 	config.h
 
-man_MANS = zile.1
+man_MANS = zee.1
 
-HELP: $(top_srcdir)/doc/zile.texi
+HELP: $(top_srcdir)/doc/zee.texi
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
@@ -41,16 +41,16 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_va
 AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
-zile.info: dotzile.texi
+zee.info: dotzee.texi
 
-dotzile.texi: dotzile.sample
+dotzee.texi: dotzee.sample
 	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
-	@echo "@setfilename dotzile.info" >>$@
+	@echo "@setfilename dotzee.info" >>$@
 	@echo "@example" >>$@
 	expand $< >>$@
 	@echo "@end example" >>$@
 
-zile.1: zile.1.in
+zee.1: zee.1.in
 	rm -f $@
 	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
 
@@ -58,4 +58,4 @@ all-local: HELP AUTODOC
 
 clean-local:
 	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
-	rm -f zile.1
+	rm -f zee.1

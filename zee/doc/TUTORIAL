@@ -1,10 +1,10 @@
 Copyright (c) 1985, 1996 Free Software Foundation, Inc. See end for conditions.
 
-Modified for Zile by Sandro Sigala <sandro@sigala.it>.
+Modified for Zee by Sandro Sigala <sandro@sigala.it>.
 
-You are looking at the Zile tutorial.
+You are looking at the Zee tutorial.
 
-Zile commands generally involve the CONTROL key (sometimes labelled
+Zee commands generally involve the CONTROL key (sometimes labelled
 CTRL or CTL) or the META key.  On some keyboards, the META key is
 labelled ALT or EDIT or something else (for example, on Sun keyboards,
 the diamond key to the left of the spacebar is META).  If you have no
@@ -18,7 +18,7 @@ following abbreviations:
 	  is no META key, type <ESC>, release it, then type the
 	  character <chr>.
 
-Important note: to end the Zile session, type C-x C-c.  (Two characters.)
+Important note: to end the Zee session, type C-x C-c.  (Two characters.)
 The characters ">>" at the left margin indicate directions for you to
 try using a command.  For instance:
 
@@ -92,7 +92,7 @@ time, so it would be of great benefit if you learn them now.
 
 Each of text line ends with a Newline character, which serves to
 separate it from the following line.  The last line in your file ought
-to have a Newline at the end (but Zile does not require it to have
+to have a Newline at the end (but Zee does not require it to have
 one).
 
 >> Try to C-b at the beginning of a line.  It should move to
@@ -107,7 +107,7 @@ C-f can move across a Newline just like C-b.
 
 When you move past the top or bottom of the screen, the text beyond
 the edge shifts onto the screen.  This is called "scrolling".  It
-enables Zile to move the cursor to the specified place in the text
+enables Zee to move the cursor to the specified place in the text
 without moving it off the screen.
 
 >> Try to move the cursor off the bottom of the screen with C-n, and
@@ -171,13 +171,13 @@ to type M-< also; without the shift key, you would be typing M-comma.
 You can also move the cursor with the arrow keys, if your terminal has
 arrow keys.  We recommend learning C-b, C-f, C-n and C-p for three
 reasons.  First, they work on all kinds of terminals.  Second, once
-you gain practice at using Zile, you will find that typing these CTRL
+you gain practice at using Zee, you will find that typing these CTRL
 characters is faster than typing the arrow keys (because you do not
 have to move your hands away from touch-typing position).  Third, once
 you form the habit of using these CTRL character commands, you can
 easily learn to use other advanced cursor motion commands as well.
 
-Most Zile commands accept a numeric argument; for most commands, this
+Most Zee commands accept a numeric argument; for most commands, this
 serves as a repeat-count.  The way you give a command a repeat count
 is by typing C-u and then the digits before you type the command.  If
 you have a META (or EDIT or ALT) key, there is another alternative way
@@ -196,7 +196,7 @@ exceptional commands use it differently.
 * WHEN ZILE IS HUNG
 -------------------
 
-If Zile stops responding to your commands, you can stop it safely by
+If Zee stops responding to your commands, you can stop it safely by
 typing C-g.  You can use C-g to stop a command which is taking too
 long to execute.
 
@@ -214,7 +214,7 @@ with a C-g.
 * WINDOWS
 ---------
 
-Zile can have several windows, each displaying its own text.
+Zee can have several windows, each displaying its own text.
 
 At this stage it is better not to go into the techniques of
 using multiple windows.  But you do need to know how to get
@@ -242,7 +242,7 @@ other windows.
 ------------------------
 
 If you want to insert text, just type the text.  Characters which you
-can see, such as A, 7, *, etc. are taken by Zile as text and inserted
+can see, such as A, 7, *, etc. are taken by Zee as text and inserted
 immediately.  Type <Return> (the carriage-return key) to insert a
 Newline character.
 
@@ -274,14 +274,14 @@ screen width, it will be displayed with a continuation line.
 
 >> Type <Return> to reinsert the Newline you deleted.
 
-Remember that most Zile commands can be given a repeat count;
+Remember that most Zee commands can be given a repeat count;
 this includes text characters.  Repeating a text character inserts
 it several times.
 
 >>  Try that now -- type C-u 8 * to insert ********.
 
 You've now learned the most basic way of typing something in
-Zile and correcting errors.  You can delete by words or lines
+Zee and correcting errors.  You can delete by words or lines
 as well.  Here is a summary of the delete operations:
 
 	<Delete>     delete the character just before the cursor
@@ -296,7 +296,7 @@ Notice that <Delete> and C-d vs M-<Delete> and M-d extend the parallel
 started by C-f and M-f (well, <Delete> is not really a control
 character, but let's not worry about that).
 
-When you delete more than one character at a time, Zile saves the
+When you delete more than one character at a time, Zee saves the
 deleted text so that you can bring it back.  Bringing back killed text
 is called "yanking".  You can yank the killed text either at the same
 place where it was killed, or at some other place in the text.  You
@@ -363,23 +363,23 @@ A numeric argument to C-_ or C-x u acts as a repeat count.
 -------
 
 In order to make the text you edit permanent, you must put it in a
-file.  Otherwise, it will go away when your invocation of Zile goes
+file.  Otherwise, it will go away when your invocation of Zee goes
 away.  You put your editing in a file by "finding" the file.  (This is
 also called "visiting" the file.)
 
 Finding a file means that you see the contents of the file within
-Zile.  In many ways, it is as if you were editing the file itself.
-However, the changes you make using Zile do not become permanent
+Zee.  In many ways, it is as if you were editing the file itself.
+However, the changes you make using Zee do not become permanent
 until you "save" the file.  This is so you can avoid leaving a
 half-changed file on the system when you do not want to.  Even when
-you save, Zile leaves the original file under a changed name in case
+you save, Zee leaves the original file under a changed name in case
 you later decide that your changes were a mistake.
 
 If you look near the bottom of the screen you will see a line that
-begins and ends with dashes, and contains the string "Zile:
+begins and ends with dashes, and contains the string "Zee:
 TUTORIAL".  This part of the screen always shows the name of the file
 that you are visiting.  Right now, you are visiting a file called
-"TUTORIAL" which is your personal scratch copy of the Zile tutorial.
+"TUTORIAL" which is your personal scratch copy of the Zee tutorial.
 Whatever file you find, that file's name will appear in that precise
 spot.
 
@@ -397,10 +397,10 @@ file).  After you type the command
 
 	C-x C-f   Find a file
 
-Zile asks you to type the file name.  The file name you type appears
+Zee asks you to type the file name.  The file name you type appears
 on the bottom line of the screen.  The bottom line is called the
 minibuffer when it is used for this sort of input.  You can use
-ordinary Zile editing commands to edit the file name.
+ordinary Zee editing commands to edit the file name.
 
 While you are entering the file name (or any minibuffer input),
 you can cancel the command with C-g.
@@ -420,12 +420,12 @@ type the command
 
 	C-x C-s   Save the file
 
-This copies the text within Zile into the file.  The first time you
-do this, Zile renames the original file to a new name so that it is
+This copies the text within Zee into the file.  The first time you
+do this, Zee renames the original file to a new name so that it is
 not lost.  The new name is made by adding "~" to the end of the
 original file's name.
 
-When saving is finished, Zile prints the name of the file written.
+When saving is finished, Zee prints the name of the file written.
 You should save fairly often, so that you will not lose very much
 work if the system should crash.
 
@@ -433,16 +433,16 @@ work if the system should crash.
    This should print "Wrote ...TUTORIAL" at the bottom of the screen.
 
 NOTE: On some systems, typing C-x C-s will freeze the screen and you
-will see no further output from Zile.  This indicates that an
+will see no further output from Zee.  This indicates that an
 operating system "feature" called "flow control" is intercepting the
-C-s and not letting it get through to Zile.  To unfreeze the screen,
+C-s and not letting it get through to Zee.  To unfreeze the screen,
 type C-q.
 
 You can find an existing file, to view it or edit it.  You can also
 find a file which does not already exist.  This is the way to create a
-file with Zile: find the file, which will start out empty, and then
+file with Zee: find the file, which will start out empty, and then
 begin inserting the text for the file.  When you ask to "save" the
-file, Zile will really create the file with the text that you have
+file, Zee will really create the file with the text that you have
 inserted.  From then on, you can consider yourself to be editing an
 already existing file.
 
@@ -451,17 +451,17 @@ already existing file.
 ---------
 
 If you find a second file with C-x C-f, the first file remains
-inside Zile.  You can switch back to it by finding it again with
-C-x C-f.  This way you can get quite a number of files inside Zile.
+inside Zee.  You can switch back to it by finding it again with
+C-x C-f.  This way you can get quite a number of files inside Zee.
 
 >> Create a file named "foo" by typing  C-x C-f foo <Return>.
    Then insert some text, edit it, and save "foo" by typing  C-x C-s.
    Finally, type C-x C-f TUTORIAL <Return>
    to come back to the tutorial.
 
-Zile stores each file's text inside an object called a "buffer."
-Finding a file makes a new buffer inside Zile.  To see a list of the
-buffers that current exist in your Zile job, type
+Zee stores each file's text inside an object called a "buffer."
+Finding a file makes a new buffer inside Zee.  To see a list of the
+buffers that current exist in your Zee job, type
 
 	C-x C-b   List buffers
 
@@ -471,13 +471,13 @@ See how each buffer has a name, and it may also have a file name
 for the file whose contents it holds.  Some buffers do not correspond
 to files.  For example, the buffer named "*Buffer List*" does
 not have any file.  It is the buffer which contains the buffer
-list that was made by C-x C-b.  ANY text you see in an Zile window
+list that was made by C-x C-b.  ANY text you see in an Zee window
 is always part of some buffer.
 
 >> Type C-x 1 to get rid of the buffer list.
 
 If you make changes to the text of one file, then find another file,
-this does not save the first file.  Its changes remain inside Zile,
+this does not save the first file.  Its changes remain inside Zee,
 in that file's buffer.  The creation or editing of the second file's
 buffer has no effect on the first file's buffer.  This is very useful,
 but it also means that you need a convenient way to save the first
@@ -497,8 +497,8 @@ buffer.
 * EXTENDING THE COMMAND SET
 ---------------------------
 
-There are many, many more Zile commands than could possibly be put
-on all the control and meta characters.  Zile gets around this with
+There are many, many more Zee commands than could possibly be put
+on all the control and meta characters.  Zee gets around this with
 the X (eXtend) command.  This comes in two flavors:
 
 	C-x	Character eXtend.  Followed by one character.
@@ -507,45 +507,45 @@ the X (eXtend) command.  This comes in two flavors:
 These are commands that are generally useful but used less than the
 commands you have already learned about.  You have already seen two of
 them: the file commands C-x C-f to Find and C-x C-s to Save.  Another
-example is the command to end the Zile session--this is the command
+example is the command to end the Zee session--this is the command
 C-x C-c.  (Do not worry about losing changes you have made; C-x C-c
-offers to save each changed file before it kills the Zile.)
+offers to save each changed file before it kills the Zee.)
 
-C-z is the command to exit Zile *temporarily*--so that you can go
-back to the same Zile session afterward.
+C-z is the command to exit Zee *temporarily*--so that you can go
+back to the same Zee session afterward.
 
-On systems which allow it, C-z "suspends" Zile; that is, it returns
-to the shell but does not destroy the Zile.  In the most common
-shells, you can resume Zile with the `fg' command or with `%zile'.
+On systems which allow it, C-z "suspends" Zee; that is, it returns
+to the shell but does not destroy the Zee.  In the most common
+shells, you can resume Zee with the `fg' command or with `%zee'.
 
 On systems which do not implement suspending, C-z creates a subshell
-running under Zile to give you the chance to run other programs and
-return to Zile afterward; it does not truly "exit" from Zile.  In
+running under Zee to give you the chance to run other programs and
+return to Zee afterward; it does not truly "exit" from Zee.  In
 this case, the shell command `exit' is the usual way to get back to
-Zile from the subshell.
+Zee from the subshell.
 
 The time to use C-x C-c is when you are about to log out.  It's also
-the right thing to use to exit an Zile invoked under mail handling
+the right thing to use to exit an Zee invoked under mail handling
 programs and other miscellaneous utilities, since they may not know
-how to cope with suspension of Zile.  In ordinary circumstances,
-though, if you are not about to log out, it is better to suspend Zile
-with C-z instead of exiting Zile.
+how to cope with suspension of Zee.  In ordinary circumstances,
+though, if you are not about to log out, it is better to suspend Zee
+with C-z instead of exiting Zee.
 
 There are many C-x commands.  Here is a list of the ones you have learned:
 
 	C-x C-f		Find file.
 	C-x C-s		Save file.
 	C-x C-b		List buffers.
-	C-x C-c		Quit Zile.
+	C-x C-c		Quit Zee.
 	C-x u		Undo.
 
 Named eXtended commands are commands which are used even less
 frequently, or commands which are used only in certain modes.  An
 example is the command replace-string, which globally replaces one
-string with another.  When you type M-x, Zile prompts you at the
+string with another.  When you type M-x, Zee prompts you at the
 bottom of the screen with M-x and you should type the name of the
 command; in this case, "replace-string".  Just type "repl s<TAB>" and
-Zile will complete the name.  End the command name with <Return>.
+Zee will complete the name.  End the command name with <Return>.
 
 The replace-string command requires two arguments--the string to be
 replaced, and the string to replace it with.  You must end each
@@ -562,7 +562,7 @@ argument with <Return>.
 * ECHO AREA
 -----------
 
-If Zile sees that you are typing commands slowly it shows them to you
+If Zee sees that you are typing commands slowly it shows them to you
 at the bottom of the screen in an area called the "echo area."  The echo
 area contains the bottom line of the screen.
 
@@ -573,9 +573,9 @@ area contains the bottom line of the screen.
 The line immediately above the echo area it is called the "modeline".
 The mode line says something like this:
 
---**-Zile: TUTORIAL          (Text)--L670/820,C1--78%----------------
+--**-Zee: TUTORIAL          (Text)--L670/820,C1--78%----------------
 
-This line gives useful information about the status of Zile and
+This line gives useful information about the status of Zee and
 the text you are editing.
 
 You already know what the filename means--it is the file you have
@@ -595,7 +595,7 @@ editing modes you are in.  Each mode can be turned on or off by
 itself, independent of all other modes.
 
 One mode which is very useful, especially for editing plain text,
-is Auto Fill mode.  When this mode is on, Zile breaks the line
+is Auto Fill mode.  When this mode is on, Zee breaks the line
 in between words automatically whenever you insert text and make a
 line that is too wide.
 
@@ -614,7 +614,7 @@ with the C-x f command.  You should give the margin setting you want
 as a numeric argument.
 
 >> Type C-x f with an argument of 20.  (C-u 2 0 C-x f).
-   Then type in some text and see Zile fill lines of 20
+   Then type in some text and see Zee fill lines of 20
    characters with it.  Then set the margin back to 72 using
    C-x f again.
 
@@ -629,12 +629,12 @@ that paragraph.
 * SEARCHING
 -----------
 
-Zile can do searches for strings (these are groups of contiguous
+Zee can do searches for strings (these are groups of contiguous
 characters or words) either forward through the text or backward
 through it.  Searching for a string is a cursor motion command;
 it moves the cursor to the next place where that string appears.
 
-The Zile search command is different from the search commands
+The Zee search command is different from the search commands
 of most editors, in that it is "incremental".  This means that the
 search happens while you type in the string to search for.
 
@@ -642,7 +642,7 @@ The command to initiate a search is C-s for forward search, and C-r
 for reverse search.  BUT WAIT!  Don't try them yet!
 
 When you type C-s you'll notice that the string "I-search" appears as
-a prompt in the echo area.  This tells you that Zile is in what is
+a prompt in the echo area.  This tells you that Zee is in what is
 called an incremental search waiting for you to type the thing that
 you want to search for.  <Return> terminates a search.
 
@@ -654,17 +654,17 @@ you want to search for.  <Return> terminates a search.
 >> Now type <Delete> four times and see how the cursor moves.
 >> Type <RET> to terminate the search.
 
-Did you see what happened?  Zile, in an incremental search, tries to
+Did you see what happened?  Zee, in an incremental search, tries to
 go to the occurrence of the string that you've typed out so far,
 highlighting it for your convenience.  To go to the next occurrence of
-'cursor' just type C-s again.  If no such occurrence exists Zile
+'cursor' just type C-s again.  If no such occurrence exists Zee
 beeps and tells you the search is currently "failing", C-g would also
 terminate the search.
 
 NOTE: On some systems, typing C-s will freeze the screen and you will
-see no further output from Zile.  This indicates that an operating
+see no further output from Zee.  This indicates that an operating
 system "feature" called "flow control" is intercepting the C-s and not
-letting it get through to Zile.  To unfreeze the screen, type C-q.
+letting it get through to Zee.  To unfreeze the screen, type C-q.
 
 If you are in the middle of an incremental search and type <Delete>,
 you'll notice that the last character in the search string is erased
@@ -689,7 +689,7 @@ the search is reversed.
 * MULTIPLE WINDOWS
 ------------------
 
-One of the nice features of Zile is that you can display more than one
+One of the nice features of Zee is that you can display more than one
 window on the screen at the same time.
 
 >> Move the cursor to this line and type C-l.
@@ -723,7 +723,7 @@ change.  You can find a file in each window independently.
 * CONCLUSION
 ------------
 
-Remember, to exit Zile permanently use C-x C-c.  To exit to a shell
+Remember, to exit Zee permanently use C-x C-c.  To exit to a shell
 temporarily, so that you can come back in, use C-z.
 
 This tutorial is meant to be understandable to all new users, so if
@@ -738,7 +738,7 @@ starting with the one written by Stuart Cracraft for the original Emacs.
 Ben Wing updated the tutorial for X Windows.  Martin Buchholz and
 Hrvoje Niksic added more corrections for XEmacs.
 
-This version has been modified for Zile.  You may find the original text
+This version has been modified for Zee.  You may find the original text
 in the XEmacs sources at ftp://ftp.xemacs.org/pub/xemacs.
 
 This version of the tutorial, like GNU Emacs, is copyrighted, and

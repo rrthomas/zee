@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 
 static History functions_history;
@@ -251,14 +251,14 @@ struct fentry {
 typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
-#define X0(zile_name, c_name) \
-	{zile_name, F_ ## c_name, {NULL, NULL, NULL}},
-#define X1(zile_name, c_name, key1) \
-	{zile_name, F_ ## c_name, {key1, NULL, NULL}},
-#define X2(zile_name, c_name, key1, key2) \
-	{zile_name, F_ ## c_name, {key1, key2, NULL}},
-#define X3(zile_name, c_name, key1, key2, key3) \
-	{zile_name, F_ ## c_name, {key1, key2, key3}},
+#define X0(zee_name, c_name) \
+	{zee_name, F_ ## c_name, {NULL, NULL, NULL}},
+#define X1(zee_name, c_name, key1) \
+	{zee_name, F_ ## c_name, {key1, NULL, NULL}},
+#define X2(zee_name, c_name, key1, key2) \
+	{zee_name, F_ ## c_name, {key1, key2, NULL}},
+#define X3(zee_name, c_name, key1, key2, key3) \
+	{zee_name, F_ ## c_name, {key1, key2, key3}},
 #include "tbl_funcs.h"
 #undef X0
 #undef X1

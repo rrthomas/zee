@@ -4,21 +4,21 @@
 .Os
 .Dt ZILE 1
 .Sh NAME
-.Nm zile
-.Nd Zile Is Lossy Emacs
+.Nm zee
+.Nd Zee Is Lossy Emacs
 .Sh SYNOPSIS
-.Nm zile
+.Nm zee
 .Op Fl hqV
 .Op Fl u Ar rcfile
 .Op Ar +number
 .Op Ar
 .Sh DESCRIPTION
-.Nm Zile
+.Nm Zee
 is another Emacs clone.
-Zile is a customizable, self-documenting real-time
+Zee is a customizable, self-documenting real-time
 display editor.
 .Pp
-This document contains only a brief description of the Zile editor.  For a
+This document contains only a brief description of the Zee editor.  For a
 more complete documentation, please read the Info file or the
 Texinfo manual.
 .Pp
@@ -37,18 +37,18 @@ Print version information on standard output then exit.
 .El
 .Sh FILES
 .Bl -tag -width Fl
-.It Pa ~/.zilerc
-user customized Zile initialization file
+.It Pa ~/.zeerc
+user customized Zee initialization file
 .It Pa @pkgdatadir@/AUTODOC
 self-documentation
 .It Pa @pkgdatadir@/FAQ
-Zile FAQ
+Zee FAQ
 .It Pa @pkgdatadir@/HELP
-Zile manual
+Zee manual
 .It Pa @pkgdatadir@/TUTORIAL
-Zile tutorial
-.It Pa @pkgdatadir@/zilerc.sample
-sample Zile initialization file
+Zee tutorial
+.It Pa @pkgdatadir@/zeerc.sample
+sample Zee initialization file
 .El
 .Sh SEE ALSO
 .Xr emacs 1 ,

@@ -3,20 +3,20 @@
    Copyright (c) 2003-2004 Reuben Thomas.  All rights reserved.
    Copyright (c) 2004 David A. Capello.  All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
@@ -33,14 +33,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "zile.h"
+#include "zee.h"
 #include "extern.h"
 #include "vars.h"
 
 
-DEFUN_INT("suspend-zile", suspend_zile)
+DEFUN_INT("suspend-zee", suspend_zee)
   /*+
-    Stop Zile and return to superior process.
+    Stop Zee and return to superior process.
     +*/
 {
   raise(SIGTSTP);
@@ -1414,7 +1414,7 @@ DEFUN_INT("shell-command", shell_command)
     Reads a line of text using the minibuffer and creates an inferior shell
     to execute the line as a command.
     Standard input from the command comes from the null device.  If the
-    shell command produces any output, the output goes to a Zile buffer
+    shell command produces any output, the output goes to a Zee buffer
     named `*Shell Command Output*', which is displayed in another window
     but not selected.
     If the output is one line, it is displayed in the echo area.
@@ -1474,7 +1474,7 @@ DEFUN_INT("shell-command-on-region", shell_command_on_region)
     Reads a line of text using the minibuffer and creates an inferior shell
     to execute the line as a command; passes the contents of the region as
     input to the shell command.
-    If the shell command produces any output, the output goes to a Zile buffer
+    If the shell command produces any output, the output goes to a Zee buffer
     named `*Shell Command Output*', which is displayed in another window
     but not selected.
     If the output is one line, it is displayed in the echo area.
@@ -1488,7 +1488,7 @@ DEFUN_INT("shell-command-on-region", shell_command_on_region)
   astr out, s;
   int lines = 0;
   astr cmd;
-  char tempfile[] = P_tmpdir "/zileXXXXXX";
+  char tempfile[] = P_tmpdir "/zeeXXXXXX";
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();
