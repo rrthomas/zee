@@ -105,9 +105,6 @@ size_t getkey(void);
 void waitkey(size_t delay);
 char *copy_text_block(size_t startn, size_t starto, size_t size);
 astr shorten_string(char *s, int maxlen);
-char *replace_string(char *s, char *match, char *subst);
-void tabify_string(char *dest, char *src, size_t scol, size_t tw);
-void untabify_string(char *dest, char *src, size_t scol, size_t tw);
 void goto_point(Point pt);
 char *getln(FILE *fp);
 

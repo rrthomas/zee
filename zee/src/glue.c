@@ -18,8 +18,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id$	*/
-
 #include "config.h"
 
 #include <assert.h>
@@ -136,83 +134,6 @@ astr shorten_string(char *s, int maxlen)
 }
 
 /*
- * Replace the matches of `match' into `s' with the string `subst'.  The
- * two strings `match' and `subst' must have the same length.
- */
-char *replace_string(char *s, char *match, char *subst)
-{
-  char *sp = s, *p;
-  size_t slen = strlen(subst);
-
-  if (strlen(match) != slen)
-    return NULL;
-  while ((p = strstr(sp, match)) != NULL) {
-    strncpy(p, subst, slen);
-    sp = p + slen;
-  }
-
-  return s;
-}
-
-/*
- * Compact the spaces into tabulations according to the `tw' tab width.
- */
-void tabify_string(char *dest, char *src, size_t scol, size_t tw)
-{
-  char *sp, *dp;
-  size_t dcol = scol, ocol = scol;
-
-  for (sp = src, dp = dest;; ++sp)
-    switch (*sp) {
-    case ' ':
-      ++dcol;
-      break;
-    case '\t':
-      dcol += tw;
-      dcol -= dcol % tw;
-      break;
-    default:
-      while (((ocol + tw) - (ocol + tw) % tw) <= dcol) {
-        if (ocol + 1 == dcol)
-          break;
-        *dp++ = '\t';
-        ocol += tw;
-        ocol -= ocol % tw;
-      }
-      while (ocol < dcol) {
-        *dp++ = ' ';
-        ocol++;
-      }
-      *dp++ = *sp;
-      if (*sp == '\0')
-        return;
-      ++ocol;
-      ++dcol;
-    }
-}
-
-/*
- * Expand the tabulations into spaces according to the `tw' tab width.
- * The output buffer should be big enough to contain the expanded string.
- * To be sure, sizeof(dest) should be >= strlen(src)*tw + 1.
- */
-void untabify_string(char *dest, char *src, size_t scol, size_t tw)
-{
-  char *sp, *dp;
-  int col = scol;
-
-  for (sp = src, dp = dest; *sp != '\0'; ++sp)
-    if (*sp == '\t') {
-      do
-        *dp++ = ' ', ++col;
-      while ((col%tw) > 0);
-    }
-    else
-      *dp++ = *sp, ++col;
-  *dp = '\0';
-}
-
-/*
  * Jump to the specified line number and offset.
  */
 void goto_point(Point pt)
@@ -239,8 +160,7 @@ void goto_point(Point pt)
 /*
  * Read an arbitrary length string.
  */
-char *
-getln(FILE *fp)
+char *getln(FILE *fp)
 {
   size_t len = 256;
   int c;
