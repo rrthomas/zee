@@ -17,11 +17,6 @@
 ; Enable the Auto Fill Mode [default: false]
 (setq auto-fill-mode false)
 
-; Expand tabs [default: false]
-; If disabled, Zee will insert hard tabs (the character \t),
-; otherwise it will insert spaces.
-(setq expand-tabs false)
-
 ; Enable beep [default: true]
 ; If enabled, a sound will be emitted on any error.
 (setq beep true)

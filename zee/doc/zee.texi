@@ -737,8 +737,7 @@ Stop Zee and return to superior process.
 Select to the user specified buffer in the current window.
 @item tab-to-tab-stop
 Insert a tabulation at the current point position into
-the current buffer.  Convert the tabulation into spaces
-if the @samp{expand-tabs} variable is bound and set to true.
+the current buffer.  Convert the tabulation into spaces.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
 @item transient-mark-mode
@@ -807,10 +806,6 @@ Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
-@item expand-tabs
-If disabled, Zee will insert hard tabs (the character @samp{\t}),
-otherwise it will insert spaces.
-Default value is @samp{false}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
