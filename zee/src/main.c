@@ -69,7 +69,9 @@ int last_uniarg = 1;
 
 static void loop(void)
 {
-  for (;;) {
+  for (;
+       !(thisflag & FLAG_QUIT_ZEE);
+       lastflag = thisflag) {
     size_t key;
 
     if (lastflag & FLAG_NEED_RESYNC)
@@ -85,12 +87,16 @@ static void loop(void)
     minibuf_clear();
     process_key(key);
 
-    if (thisflag & FLAG_QUIT_ZEE)
-      break;
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;
 
-    lastflag = thisflag;
+    if (!cur_bp->mark_anchored) {
+      Point pt;
+      pt.p = cur_bp->pt.p;
+      pt.n = cur_bp->pt.n;
+      pt.o = astr_len(cur_bp->pt.p->item);
+      move_marker(cur_bp->mark, cur_bp, pt);
+    }
   }
 }
 
