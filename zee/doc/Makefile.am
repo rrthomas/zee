@@ -7,7 +7,6 @@ zeedir = $(datadir)/zee
 zee_DATA =					\
 	AUTODOC					\
 	FAQ					\
-	HELP					\
 	TUTORIAL				\
 	dotzee.sample
 
@@ -23,9 +22,6 @@ EXTRA_DIST =					\
 	config.h
 
 man_MANS = zee.1
-
-HELP: $(top_srcdir)/doc/zee.texi
-	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src

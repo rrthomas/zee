@@ -1,6 +1,6 @@
 /* Self documentation facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -60,33 +60,6 @@ static int show_file(char *filename)
 
   return TRUE;
 }
-
-DEFUN_INT("help", help)
-  /*+
-    Show a help window.
-    +*/
-{
-  return show_file(PATH_DATA "/HELP");
-}
-END_DEFUN
-
-DEFUN_INT("help-config-sample", help_config_sample)
-  /*+
-    Show a configuration file sample.
-    +*/
-{
-  return show_file(PATH_DATA "/zeerc.sample");
-}
-END_DEFUN
-
-DEFUN_INT("view-zee-FAQ", view_zee_FAQ)
-  /*+
-    Show the Zee Frequently Asked Questions (FAQ).
-    +*/
-{
-  return show_file(PATH_DATA "/FAQ");
-}
-END_DEFUN
 
 DEFUN_INT("help-with-tutorial", help_with_tutorial)
   /*+
