@@ -1,8 +1,8 @@
 ; EPOC PKG file for zee
-; (c) Reuben Thomas 2004
+; (c) Reuben Thomas 2004-2005
 
 &EN
-#{"Zee"},(0x101F9331),2,0,0
+#{"Zee"},(0x101F9331),0,0,0
 
 "doc/BANNER.EPOC"-"",FT,TA
 "src/zee"-"!:\zee.exe"
