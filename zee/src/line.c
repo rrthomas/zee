@@ -540,14 +540,13 @@ DEFUN_INT("indent-relative", indent_relative)
 Indent line or insert a tab.
 +*/
 {
-  size_t target_goalc, cur_goalc = get_goalc();
-  Marker *old_point;
-
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
+    size_t cur_goalc = get_goalc(), target_goalc = 0;
+    Marker *old_point = point_marker();
+
     weigh_mark();
-    old_point = point_marker();
 
     /* Find previous non-blank line. */
     while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
@@ -558,30 +557,30 @@ Indent line or insert a tab.
 
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
-      while (!eolp() && (!isspace(following_char())))
+      while (!eolp() && !isspace(following_char()))
         forward_char();
 
     /* Find next non-blank char. */
-    while (!eolp() && (isspace(following_char())))
+    while (!eolp() && isspace(following_char()))
       forward_char();
 
-    /* Target column. */
-    if (!eolp()) {
+    /* Record target column. */
+    if (!eolp())
       target_goalc = get_goalc();
-      cur_bp->pt = old_point->pt;
-      free_marker(old_point);
+    cur_bp->pt = old_point->pt;
+    free_marker(old_point);
 
-      /* Insert spaces. */
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    /* Indent. */
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    if (target_goalc > 0)
+      /* If not at EOL on target line, insert spaces up to
+         target_goalc. */
       while (get_goalc() < target_goalc)
+        /* If already at EOL on target line, insert a tab. */
         insert_char(' ');
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-    } else {
-      cur_bp->pt = old_point->pt;
-      free_marker(old_point);
-
+    else
       ok = insert_tab();
-    }
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   }
 }
 END_DEFUN
