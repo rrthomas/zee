@@ -15,11 +15,11 @@ int scroll_down(void);
 int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
+void bind_key_string(char *keystr, Function func);
 size_t do_completion(astr as);
 char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);
 void process_key(size_t key);
-void init_bindings(void);
 Function last_command(void);
 void free_bindings(void);
 Function get_function(char *name);
@@ -140,7 +140,6 @@ void lisp_finalise(void);
 le *lisp_read(getcCallback getcp, ungetcCallback ungetcp);
 le *lisp_read_string(const char *string);
 le *lisp_read_file(const char *file);
-astr lisp_dump(le *list);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
@@ -254,16 +253,10 @@ int zasprintf(char **ptr, const char *fmt, ...);
 /*
  * Declare external Zee functions.
  */
-#define X0(zee_name, c_name)			\
-	extern int F_ ## c_name(int argc, le *branch);
-#define X1(zee_name, c_name, k1)		\
-	X0(zee_name, c_name)
-#define X2(zee_name, c_name, k1, k2)		\
-	X0(zee_name, c_name)
+#define X(zee_name, c_name) \
+  extern int F_ ## c_name(int argc, le *branch);
 #include "tbl_funcs.h"
-#undef X0
-#undef X1
-#undef X2
+#undef X
 
 /*--------------------------------------------------------------------------
  * Missing functions.

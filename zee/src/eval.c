@@ -37,18 +37,13 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
   return ret ? leT : leNIL;
 }
 
-#define X0(zee_name, c_name) \
+#define X(zee_name, c_name) \
   static le *eval_cb_ ## c_name(int argc, le *branch) \
   { \
     return eval_cb_command_helper(F_ ## c_name, argc, branch); \
   }
-#define X1(zee_name, c_name, key1)              X0(zee_name, c_name)
-#define X2(zee_name, c_name, key1, key2)        X0(zee_name, c_name)
 #include "tbl_funcs.h"
 #undef X
-#undef X0
-#undef X1
-#undef X2
 
 static evalLookupNode evalTable[] = {
   { "+"		, eval_cb_add		},
@@ -93,19 +88,10 @@ static evalLookupNode evalTable[] = {
 
   { "defun"	, eval_cb_defun		},
 
-#define X0(zee_name, c_name) \
-	{ zee_name, eval_cb_ ## c_name },
-#define X1(zee_name, c_name, key1) \
-	{ zee_name, eval_cb_ ## c_name },
-#define X2(zee_name, c_name, key1, key2) \
-	{ zee_name, eval_cb_ ## c_name },
-#define X3(zee_name, c_name, key1, key2, key3) \
+#define X(zee_name, c_name) \
 	{ zee_name, eval_cb_ ## c_name },
 #include "tbl_funcs.h"
-#undef X0
-#undef X1
-#undef X2
-#undef X3
+#undef X
 
   { NULL	, NULL			}
 };

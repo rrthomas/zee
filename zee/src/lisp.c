@@ -47,9 +47,7 @@ le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
   int lineno = 0;
   struct le *list = NULL;
 
-  list = parseInFile(getcp, ungetcp, list, &lineno);
-
-  return list;
+  return parseInFile(getcp, ungetcp, list, &lineno);
 }
 
 
@@ -107,17 +105,30 @@ le *lisp_read_file(const char *file)
   return list;
 }
 
-
-astr lisp_dump(le *list)
+DEFUN("load-file", load_file)
+/*+
+Load the Lisp file named FILE.
++*/
 {
-  astr as = astr_new();
+  char *name = NULL;
 
-  astr_cat_cstr(as, "Eval results:\n");
-  astr_cat_delete(as, leDumpEval(list, 0));
-  astr_cat_cstr(as, "\n\nVariables:\n");
-  astr_cat_delete(as, variableDump(mainVarList));
-  astr_cat_cstr(as, "\nDefuns:\n");
-  astr_cat_delete(as, variableDump(defunList));
+  ok = FALSE;
 
-  return as;
+  if (uniused) {
+    if (argc == 2)
+      name = evaluateNode(branch->list_next)->data;
+  } else {
+    astr buf = get_current_dir(TRUE);
+    if ((name = minibuf_read_dir("Load file: ", astr_cstr(buf))) == NULL)
+      ok = cancel();
+    astr_delete(buf);
+  }
+
+  if (name) {
+    le *list = lisp_read_file(name);
+    astr_delete(leDumpEval(list, 0));
+    leWipe(list);
+    ok = TRUE;
+  }
 }
+END_DEFUN

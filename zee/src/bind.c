@@ -47,8 +47,8 @@ struct binding {
 };
 
 /* Binding vector, number of items, max number of items. */
-bindingp *binding;
-static size_t nbindings, max_bindings;
+bindingp *binding = NULL;
+static size_t nbindings, max_bindings = 0;
 
 static bindingp get_binding(size_t key)
 {
@@ -96,7 +96,7 @@ static void bind_key(size_t key, Function func)
     s->func = func;
 }
 
-static void bind_key_string(char *keystr, Function func)
+void bind_key_string(char *keystr, Function func)
 {
   size_t key;
 
@@ -169,16 +169,10 @@ struct fentry {
 typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
-#define X0(zee_name, c_name) \
+#define X(zee_name, c_name) \
 	{zee_name, F_ ## c_name, {NULL, NULL, NULL}},
-#define X1(zee_name, c_name, key1) \
-	{zee_name, F_ ## c_name, {key1, NULL, NULL}},
-#define X2(zee_name, c_name, key1, key2) \
-	{zee_name, F_ ## c_name, {key1, key2, NULL}},
 #include "tbl_funcs.h"
-#undef X0
-#undef X1
-#undef X2
+#undef X
 };
 
 #define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))
@@ -186,23 +180,6 @@ static struct fentry fentry_table[] = {
 static int bind_compar(const void *p1, const void *p2)
 {
   return strcmp(((fentryp)p1)->name, ((fentryp)p2)->name);
-}
-
-void init_bindings(void)
-{
-  size_t i, j;
-
-  max_bindings = 10;
-  binding = zmalloc(sizeof(*binding) * max_bindings);
-
-  /* Sort the array for better searching later. */
-  qsort(fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
-
-  /* Bind all the default functions. */
-  for (i = 0; i < fentry_table_size; i++)
-    for (j = 0; j < 3; ++j)
-      if (fentry_table[i].key[j] != NULL)
-        bind_key_string(fentry_table[i].key[j], fentry_table[i].func);
 }
 
 static void recursive_free_bindings(void)
@@ -319,7 +296,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
         add_history_element(&functions_history, ms);
         minibuf_clear();        /* Remove any error message. */
         ms = zstrdup(ms);       /* Might be about to be freed. */
-        break;                  /* We're finished. */
+        break;
       } else {
         minibuf_error("Undefined function name `%s'", ms);
         waitkey(WAITKEY_DEFAULT);
@@ -463,30 +440,3 @@ char *get_function_by_key_sequence(void)
   } else
     return get_function_name(p->func);
 }
-
-static void write_bindings_list(va_list ap)
-{
-  size_t i;
-
-  (void)ap;
-
-  bprintf("%-15s %s\n", "Binding", "Function");
-  bprintf("%-15s %s\n", "-------", "--------");
-
-  for (i = 0; i < nbindings; ++i) {
-    bindingp p = binding[i];
-    astr key = chordtostr(p->key);
-    assert(p->func != NULL);
-    bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
-    astr_delete(key);
-  }
-}
-
-DEFUN_INT("list-bindings", list_bindings)
-/*+
-List defined bindings.
-+*/
-{
-  write_temp_buffer("*Bindings List*", write_bindings_list);
-}
-END_DEFUN

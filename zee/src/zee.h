@@ -357,7 +357,6 @@ typedef size_t Font;
             leWipe(value_le); \
           }
 #define END_DEFUN \
-          leWipe(branch); \
           return ok; \
         }
 

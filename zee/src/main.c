@@ -93,7 +93,7 @@ static void loop(void)
 }
 
 static char about_minibuf_str[] =
-"Welcome to Zee!  To exit type CTRL-ALT-Q";
+"Welcome to Zee!  To exit type ALT-X save-buffers-kill-zee RETURN";
 
 static void setup_main_screen(int argc, astr as)
 {
@@ -126,8 +126,6 @@ static void setup_main_screen(int argc, astr as)
       else
         insert_string("\
 This buffer is for notes you don't want to save.\n\
-If you want to create a file, visit that file with C-x C-f,\n\
-then enter the text in that file's own buffer.\n\
 \n");
 
       undo_nosave = FALSE;
@@ -241,13 +239,13 @@ int main(int argc, char **argv)
       break;
     case 'e':
       list = lisp_read_string(optarg);
-      astr_cat_delete(as, lisp_dump(list));
+      astr_cat_delete(as, leDumpEval(list, 0));
       leWipe(list);
       eflag = TRUE;
       break;
     case 'l':
       list = lisp_read_file(optarg);
-      astr_cat_delete(as, lisp_dump(list));
+      astr_cat_delete(as, leDumpEval(list, 0));
       leWipe(list);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
@@ -299,7 +297,7 @@ int main(int argc, char **argv)
     if (!qflag) {
       astr as = get_home_dir();
       astr_cat_cstr(as, "/.zee");
-      astr_delete(lisp_dump(lisp_read_file(astr_cstr(as))));
+      astr_delete(leDumpEval(lisp_read_file(astr_cstr(as)), 0));
       astr_delete(as);
     }
 
@@ -308,7 +306,10 @@ int main(int argc, char **argv)
     /* Create the `*scratch*' buffer and initialize key bindings. */
     create_first_window();
     term_display();
-    init_bindings();
+
+    /* Create a single default binding so M-x commands can still be
+       issued if the default bindings file can't be loaded. */
+    bind_key_string("\\M-x", F_execute_extended_command);
 
     if (argc >= 1)
       while (*argv) {
