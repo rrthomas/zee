@@ -156,66 +156,6 @@ DEFUN_INT("delete-window", delete_window)
 }
 END_DEFUN
 
-DEFUN_INT("enlarge-window", enlarge_window)
-  /*+
-    Make current window one line bigger.
-    +*/
-{
-  Window *wp;
-
-  if (cur_wp == head_wp && cur_wp->next == NULL)
-    return FALSE;
-
-  if ((wp = cur_wp->next) == NULL || wp->fheight < 3)
-    for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->next == cur_wp) {
-        if (wp->fheight < 3)
-          return FALSE;
-        break;
-      }
-
-  if (cur_wp == head_wp && cur_wp->next->fheight < 3)
-    return FALSE;
-
-  --wp->fheight;
-  --wp->eheight;
-  if (wp->topdelta >= wp->eheight)
-    recenter(wp);
-  ++cur_wp->fheight;
-  ++cur_wp->eheight;
-
-  return TRUE;
-}
-END_DEFUN
-
-DEFUN_INT("shrink-window", shrink_window)
-  /*+
-    Make current window one line smaller.
-    +*/
-{
-  Window *wp;
-
-  if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
-    return FALSE;
-
-  if ((wp = cur_wp->next) == NULL) {
-    for (wp = head_wp; wp != NULL; wp = wp->next) {
-      if (wp->next == cur_wp)
-        break;
-    }
-  }
-
-  ++wp->fheight;
-  ++wp->eheight;
-  --cur_wp->fheight;
-  --cur_wp->eheight;
-  if (cur_wp->topdelta >= cur_wp->eheight)
-    recenter(cur_wp);
-
-  return TRUE;
-}
-END_DEFUN
-
 Window *popup_window(void)
 {
   if (head_wp->next == NULL) {
