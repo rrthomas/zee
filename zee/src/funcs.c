@@ -492,9 +492,9 @@ static int backward_word(void)
 
 DEFUN_INT("backward-word", backward_word)
 /*+
-Move backward until encountering the end of a word (forward if the
-argument is negative).
+Move backward until encountering the beginning of a word.
 With argument, do this that many times.
+If the argument is negative, move forward.
 +*/
 {
   int uni;
@@ -975,7 +975,7 @@ static void write_shell_output(va_list ap)
 
 DEFUN_INT("shell-command", shell_command)
 /*+
-Reads a line of text using the minibuffer and creates an inferior shell
+Reads a line of text using the minibuffer and creates an inferior shell.
 to execute the line as a command.
 Standard input from the command comes from the null device.  If the
 shell command produces any output, the output goes to a Zee buffer
@@ -1035,7 +1035,7 @@ END_DEFUN
 
 DEFUN_INT("shell-command-on-region", shell_command_on_region)
 /*+
-Reads a line of text using the minibuffer and creates an inferior shell
+Reads a line of text using the minibuffer and creates an inferior shell.
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
 If the shell command produces any output, the output goes to a Zee buffer

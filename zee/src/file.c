@@ -386,7 +386,8 @@ Completion *make_buffer_completion(void)
 
 DEFUN_INT("find-file", find_file)
 /*+
-Edit a file specified by the user.  Switch to a buffer visiting the file,
+Edit file FILENAME.
+Switch to a buffer visiting file FILENAME,
 creating one if none already exists.
 +*/
 {

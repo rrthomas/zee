@@ -945,7 +945,6 @@ static le *eval_expression(char *expr)
 }
 
 DEFUN_INT("eval-expression", eval_expression)
-{
 /*+
 Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
 Value is also consed on to front of the variable `values'.
@@ -953,6 +952,7 @@ Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
 insert the result into the current buffer instead of printing it in
 the minibuffer.
 +*/
+{
   char *expr;
 
   if ((expr = minibuf_read("Eval: ", "")) == NULL)

@@ -103,8 +103,8 @@ static int insert_tab(void)
 
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
 /*+
-Insert a tabulation at the current point position into
-the current buffer.  Convert the tabulation into spaces.
+Insert spaces or tabs to next defined tab-stop column.
+Convert the tabulation into spaces.
 +*/
 {
   int i;
@@ -286,8 +286,7 @@ void fill_break_line(void)
 
 DEFUN_INT("newline", newline)
 /*+
-Insert a newline at the current point position into
-the current buffer.
+Insert a newline, and move to left margin of the new line if it's blank.
 +*/
 {
   int i;

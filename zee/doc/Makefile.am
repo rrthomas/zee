@@ -14,8 +14,10 @@ EXTRA_DIST =					\
 	TUTORIAL				\
 	dotzee.sample				\
 	dotzee.texi				\
+	zee_keys.texi				\
+	zee_funcs.texi				\
+	zee_vars.texi				\
 	lisp.txt				\
-	zlint					\
 	zee.1.in				\
 	mkdoc.c					\
 	config.h
@@ -33,13 +35,13 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_va
 
 	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
 
-AUTODOC: $(AUTODOCSRCS) mkdoc
+zee_keys.texi zee_funcs.texi zee_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
-zee.info: dotzee.texi
+zee.info: dotzee.texi zee_keys.texi zee_funcs.texi zee_vars.texi
 
 dotzee.texi: dotzee.sample
-	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
+	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
 	@echo "@setfilename dotzee.info" >>$@
 	@echo "@example" >>$@
 	expand $< >>$@
