@@ -276,7 +276,7 @@ typedef size_t Font;
  *--------------------------------------------------------------------------*/
 
 #define GETKEY_DELAYED                  0001
-#define GETKEY_UNFILTERED              0002
+#define GETKEY_UNFILTERED               0002
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY                       UINT_MAX
