@@ -413,37 +413,6 @@ DEFUN_INT("find-file", find_file)
 }
 END_DEFUN
 
-DEFUN_INT("find-alternate-file", find_alternate_file)
-  /*+
-    Find the file specified by the user, select its buffer, kill previous buffer.
-    If the current buffer now contains an empty file that you just visited
-    (presumably by mistake), use this command to visit the file you really want.
-    +*/
-{
-  char *ms;
-  astr buf;
-
-  buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
-      == NULL) {
-    astr_delete(buf);
-    return cancel();
-  }
-  astr_delete(buf);
-
-  if (ms[0] != '\0' && check_modified_buffer(cur_bp)) {
-    int ret_value;
-    kill_buffer(cur_bp);
-    ret_value = find_file(ms);
-    free(ms);
-    return ret_value;
-  }
-
-  free(ms);
-  return FALSE;
-}
-END_DEFUN
-
 DEFUN_INT("switch-to-buffer", switch_to_buffer)
   /*+
     Select to the user specified buffer in the current window.
