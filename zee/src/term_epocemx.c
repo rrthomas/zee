@@ -1,6 +1,6 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.

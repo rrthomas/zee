@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
    Copyright (c) Kent Irwin (kent.irwin@nist.gov).
-   Copyright (c) 2004 Reuben Thomas.
+   Copyright (c) 2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
