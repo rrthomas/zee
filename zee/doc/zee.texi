@@ -21,13 +21,13 @@
 
 @dircategory Text editors
 @direntry
-* Zee: (zee).                 Zee emacs clone text editor.
+* Zee: (zee).                 Zee text editor.
 @end direntry
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1997-2004 Sandro Sigala
 Copyright @copyright{} 2003-2005 Reuben Thomas
+Copyright @copyright{} 1997-2004 Sandro Sigala
 Copyright @copyright{} 2004 David A. Capello
 @end titlepage
 
@@ -36,10 +36,7 @@ Copyright @copyright{} 2004 David A. Capello
 
 This is the @emph{Zee} manual.
 
-Zee is another Emacs-clone.
 Zee is a customizable, self-documenting real-time display editor.
-Zee was written to be as similar as possible to Emacs; every Emacs
-user should feel at home with Zee.
 
 @menu
 * Overview::                    An overview of the Zee editor.
@@ -60,19 +57,6 @@ user should feel at home with Zee.
 
 The @emph{Zee} editor is written entirely in @emph{@w{ANSI C}}.
 It should run on any POSIX system. It has also been ported to @emph{EPOC}.
-
-Zee should really appear like
-Emacs, but a lot of good ideas were also taken from from other editors:
-@itemize -
-@item Emacs:
-General look and feel, function names, function behaviors, key bindings.
-@item XEmacs:
-Some minor hints for look and feel.
-@item Jed:
-mode line.
-@item ce:
-Internal structure and function names.
-@end itemize
 
 @c ---------------------------------------------------------------------------
 @node Features, Invoking Zee, Overview, Top
@@ -326,8 +310,6 @@ Delete the current window.  Bound to @code{delete-window}.
 Delete the other open windows.  Bound to @code{delete-other-windows}.
 @item C-x 2
 Split current window.  Bound to @code{split-window}.
-@item C-x ^
-Enlarge current window.  Bound to @code{enlarge-window}.
 @item C-x b
 Switch to a buffer.  Bound to @code{switch-to-buffer}.
 @item C-x e, @key{F12}
@@ -404,8 +386,6 @@ Insert a tab character.  Bound to @code{tab-to-tab-stop}.
 Convert following word to lower case.  Bound to @code{downcase-word}.
 @item M-m
 Move point to the first non-whitespace character on this line.  Bound to @code{back-to-indentation}.
-@item M-s
-Shrink current window.  Bound to @code{shrink-window}.
 @item M-t
 Transpose two words.  Bound to @code{transpose-words}.
 @item M-u
@@ -529,8 +509,6 @@ The macro is now available for use via @kbd{C-x e}.
 Move point to the end of the buffer; leave mark at previous position.
 @item end-of-line
 Move point to end of current line.
-@item enlarge-window
-Make current window one line bigger.
 @item exchange-point-and-mark
 Put the mark where point is now, and point where the mark is now.
 @item execute-extended-command
@@ -746,8 +724,6 @@ A numeric argument, as in @kbd{M-1 M-|} or @kbd{C-u M-|}, directs output
 to the current buffer,
 then the old region is deleted first and the output replaces it as the
 contents of the region.
-@item shrink-window
-Make current window one line smaller.
 @item split-window
 Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
@@ -759,11 +735,6 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 Stop Zee and return to superior process.
 @item switch-to-buffer
 Select to the user specified buffer in the current window.
-@item tabify
-Convert multiple spaces in region to tabs when possible.
-A group of spaces is partially replaced by tabs
-when this can be done without changing the column they end at.
-The variable @samp{tab-width} controls the spacing of tab stops.
 @item tab-to-tab-stop
 Insert a tabulation at the current point position into
 the current buffer.  Convert the tabulation into spaces
@@ -794,9 +765,6 @@ Digits or minus sign following @kbd{C-u} make up the numeric argument.
 @kbd{C-u} without digits or minus sign provides 4 as argument.
 Repeating @kbd{C-u} without digits or minus sign multiplies the argument
 by 4 each time.
-@item untabify
-Convert all tabs in region to multiple spaces, preserving columns.
-The variable @samp{tab-width} controls the spacing of tab stops.
 @item upcase-region
 Convert the region to upper case.
 @item upcase-word
@@ -852,9 +820,6 @@ Default value is @samp{false}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.
-@item skip-splash-screen
-If enabled, the splash screen at startup will be avoided.
-Default value is @samp{false}.
 @item standard-indent
 Default number of columns for margin-changing functions to
 indent. Default values is @samp{4}.
