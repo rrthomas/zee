@@ -79,7 +79,7 @@ void astr_delete(astr as)
   free(as);
 }
 
-static astr astr_cpy_x(astr as, const char *s, size_t csize)
+astr astr_ncpy(astr as, const char *s, size_t csize)
 {
   astr_resize(as, csize);
   memcpy(as->text, s, csize);
@@ -91,16 +91,16 @@ static astr astr_cpy_x(astr as, const char *s, size_t csize)
 astr astr_cpy(astr as, const astr src)
 {
   assert(src != NULL);
-  return astr_cpy_x(as, src->text, src->len);
+  return astr_ncpy(as, src->text, src->len);
 }
 
 astr astr_cpy_cstr(astr as, const char *s)
 {
   assert(s != NULL);
-  return astr_cpy_x(as, s, strlen(s));
+  return astr_ncpy(as, s, strlen(s));
 }
 
-static astr astr_cat_x(astr as, const char *s, size_t csize)
+astr astr_ncat(astr as, const char *s, size_t csize)
 {
   astr_resize(as, as->len + csize);
   memcpy(as->text + as->len, s, csize);
@@ -112,17 +112,12 @@ static astr astr_cat_x(astr as, const char *s, size_t csize)
 astr astr_cat(astr as, const astr src)
 {
   assert(src != NULL);
-  return astr_cat_x(as, src->text, src->len);
-}
-
-astr astr_ncat_cstr(astr as, const char *s, size_t len)
-{
-  return astr_cat_x(as, s, len);
+  return astr_ncat(as, src->text, src->len);
 }
 
 astr astr_cat_cstr(astr as, const char *s)
 {
-  return astr_ncat_cstr(as, s, strlen(s));
+  return astr_ncat(as, s, strlen(s));
 }
 
 astr astr_cat_char(astr as, int c)
@@ -137,7 +132,7 @@ astr astr_cat_char(astr as, int c)
 astr astr_cat_delete(astr as, const astr src)
 {
   assert(src != NULL);
-  astr_cat_x(as, src->text, src->len);
+  astr_ncat(as, src->text, src->len);
   astr_delete(src);
   return as;
 }
@@ -147,7 +142,7 @@ astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
   assert(as != NULL);
   pos = astr_pos(as, pos);
   assert(pos + size <= as->len);
-  return astr_ncat_cstr(astr_new(), astr_char(as, pos), size);
+  return astr_ncat(astr_new(), astr_char(as, pos), size);
 }
 
 int astr_find(const astr as, const astr src)
@@ -176,7 +171,7 @@ int astr_rfind_cstr(const astr as, const char *s)
   return (sp == NULL) ? -1 : sp - as->text;
 }
 
-static astr astr_replace_x(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
+astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
 
@@ -187,7 +182,7 @@ static astr astr_replace_x(astr as, ptrdiff_t pos, size_t size, const char *s, s
     size = as->len - pos;
   tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
   astr_truncate(as, pos);
-  astr_ncat_cstr(as, s, csize);
+  astr_ncat(as, s, csize);
   astr_cat(as, tail);
   astr_delete(tail);
 
@@ -197,41 +192,41 @@ static astr astr_replace_x(astr as, ptrdiff_t pos, size_t size, const char *s, s
 astr astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src)
 {
   assert(src != NULL);
-  return astr_replace_x(as, pos, size, src->text, src->len);
+  return astr_nreplace(as, pos, size, src->text, src->len);
 }
 
 astr astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s)
 {
   assert(s != NULL);
-  return astr_replace_x(as, pos, size, s, strlen(s));
+  return astr_nreplace(as, pos, size, s, strlen(s));
 }
 
 astr astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c)
 {
-  return astr_replace_x(as, pos, size, (const char *)&c, 1);
+  return astr_nreplace(as, pos, size, (const char *)&c, 1);
 }
 
 astr astr_insert(astr as, ptrdiff_t pos, const astr src)
 {
   assert(src != NULL);
-  return astr_replace_x(as, pos, 0, src->text, src->len);
+  return astr_nreplace(as, pos, 0, src->text, src->len);
 }
 
 astr astr_insert_cstr(astr as, ptrdiff_t pos, const char *s)
 {
   assert(s != NULL);
-  return astr_replace_x(as, pos, 0, s, strlen(s));
+  return astr_nreplace(as, pos, 0, s, strlen(s));
 }
 
 astr astr_insert_char(astr as, ptrdiff_t pos, int c)
 {
   char ch = (char)c;
-  return astr_replace_x(as, pos, 0, &ch, 1);
+  return astr_nreplace(as, pos, 0, &ch, 1);
 }
 
 astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 {
-  return astr_replace_x(as, pos, size, "", 0);
+  return astr_nreplace(as, pos, size, "", 0);
 }
 
 /* Don't define in terms of astr_remove, to avoid endless recursion */
