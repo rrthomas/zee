@@ -128,9 +128,12 @@ static void calculate_highlight_region(Window *wp, Region *r)
 {
   assert(wp->bp->mark);
   r->start = window_pt(wp);
-  r->end = wp->bp->mark->pt;
-  if (cmp_point(r->end, r->start) < 0)
-    swap_point(&r->end, &r->start);
+  if (wp->bp->mark_anchored) {
+    r->end = wp->bp->mark->pt;
+    if (cmp_point(r->end, r->start) < 0)
+      swap_point(&r->end, &r->start);
+  } else
+    r->end = window_pt(wp);
 }
 
 static void draw_window(size_t topline, Window *wp)

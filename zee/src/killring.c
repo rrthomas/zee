@@ -76,6 +76,9 @@ static int kill_line(void)
     undo_nosave = FALSE;
 
     thisflag |= FLAG_DONE_KILL;
+
+    if (!bolp())
+      return TRUE;
   }
 
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
