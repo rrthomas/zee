@@ -119,17 +119,13 @@ DEFUN_INT("kill-line", kill_line)
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (uniarg == 1)
-    kill_line();
-  else {
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!kill_line()) {
-        ret = FALSE;
-        break;
-      }
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  }
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!kill_line()) {
+      ret = FALSE;
+      break;
+    }
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   deactivate_mark();
   return ret;
@@ -154,8 +150,8 @@ DEFUN_INT("kill-region", kill_region)
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (warn_if_no_mark())
-    return FALSE;
+  if (!cur_bp->mark)
+    return FUNCALL(kill_line);
 
   calculate_the_region(&r);
 
