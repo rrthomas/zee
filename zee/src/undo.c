@@ -112,7 +112,7 @@ static Undo *revert_action(Undo *up)
     if (up->delta.c == '\n')
       insert_newline();
     else
-      insert_char_in_insert_mode(up->delta.c);
+      insert_char(up->delta.c);
     break;
   case UNDO_INTERCALATE_CHAR:
     if (up->delta.c == '\n')

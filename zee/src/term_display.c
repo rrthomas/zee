@@ -268,10 +268,6 @@ static void draw_status_line(size_t line, Window *wp)
     term_printw("Fill");
     someflag = 1;
   }
-  if (wp->bp->flags & BFLAG_OVERWRITE) {
-    term_printw("%sOvwrt", someflag ? " " : "");
-    someflag = 1;
-  }
   if (thisflag & FLAG_DEFINING_MACRO) {
     term_printw("%sDef", someflag ? " " : "");
     someflag = 1;

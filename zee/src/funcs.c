@@ -177,20 +177,6 @@ The R column contains a % for buffers that are read-only.
 }
 END_DEFUN
 
-DEFUN_INT("overwrite-mode", overwrite_mode)
-/*+
-In overwrite mode, printing characters typed in replace existing
-text on a one-for-one basis, rather than pushing it to the right.
-At the end of a line, such characters extend the line.
-C-q still inserts characters in overwrite mode; this is supposed
-to make it easier to insert characters when necessary.
-+*/
-{
-  cur_bp->flags ^= BFLAG_OVERWRITE;
-  return TRUE;
-}
-END_DEFUN
-
 DEFUN_INT("toggle-read-only", toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.
@@ -293,8 +279,8 @@ static int quoted_insert_octal(int c1)
   c2 = getkey();
 
   if (!isdigit(c2) || c2 - '0' >= 8) {
-    insert_char_in_insert_mode(c1 - '0');
-    insert_char_in_insert_mode(c2);
+    insert_char(c1 - '0');
+    insert_char(c2);
     return TRUE;
   }
 
@@ -302,12 +288,12 @@ static int quoted_insert_octal(int c1)
   c3 = getkey();
 
   if (!isdigit(c3) || c3 - '0' >= 8) {
-    insert_char_in_insert_mode((c1 - '0') * 8 + (c2 - '0'));
-    insert_char_in_insert_mode(c3);
+    insert_char((c1 - '0') * 8 + (c2 - '0'));
+    insert_char(c3);
     return TRUE;
   }
 
-  insert_char_in_insert_mode((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
+  insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
 
   return TRUE;
 }
@@ -327,7 +313,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
   if (isdigit(c) && c - '0' < 8)
     quoted_insert_octal(c);
   else
-    insert_char_in_insert_mode(c);
+    insert_char(c);
 
   minibuf_clear();
 
@@ -849,7 +835,7 @@ Fill paragraph at or after point.
     FUNCALL(end_of_line);
     delete_char();
     FUNCALL(delete_horizontal_space);
-    insert_char_in_insert_mode(' ');
+    insert_char(' ');
   }
 
   FUNCALL(end_of_line);
@@ -977,63 +963,6 @@ lower case.
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   return ret;
-}
-END_DEFUN
-
-/*
- * Set the region case.
- */
-static int setcase_region(int rcase)
-{
-  Region r;
-  Line *lp;
-  size_t size, i;
-
-  if (warn_if_readonly_buffer() || warn_if_no_mark())
-    return FALSE;
-
-  calculate_the_region(&r);
-  size = r.size;
-
-  undo_save(UNDO_REPLACE_BLOCK, r.start, size, size);
-
-  lp = r.start.p;
-  i = r.start.o;
-  while (size--) {
-    if (i < astr_len(lp->item)) {
-      if (rcase == UPPERCASE)
-        *astr_char(lp->item, (ptrdiff_t)i) =
-          toupper(*astr_char(lp->item, (ptrdiff_t)i));
-      else
-        *astr_char(lp->item, (ptrdiff_t)i) =
-          tolower(*astr_char(lp->item, (ptrdiff_t)i));
-      ++i;
-    } else {
-      lp = list_next(lp);
-      i = 0;
-    }
-  }
-
-  cur_bp->flags |= BFLAG_MODIFIED;
-
-  return TRUE;
-}
-
-DEFUN_INT("upcase-region", upcase_region)
-/*+
-Convert the region to upper case.
-+*/
-{
-  return setcase_region(UPPERCASE);
-}
-END_DEFUN
-
-DEFUN_INT("downcase-region", downcase_region)
-/*+
-Convert the region to lower case.
-+*/
-{
-  return setcase_region(LOWERCASE);
 }
 END_DEFUN
 
@@ -1202,38 +1131,6 @@ it as the contents of the region.
   }
   astr_delete(out);
 
-  return TRUE;
-}
-END_DEFUN
-
-DEFUN_INT("delete-region", delete_region)
-/*+
-Delete the text between point and mark.
-+*/
-{
-  Region r;
-
-  if (warn_if_no_mark())
-    return FALSE;
-
-  calculate_the_region(&r);
-
-  if (cur_bp->flags & BFLAG_READONLY) {
-    warn_if_readonly_buffer();
-  } else {
-    size_t size = r.size;
-
-    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-      FUNCALL(exchange_point_and_mark);
-
-    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-    undo_nosave = TRUE;
-    while (size--)
-      FUNCALL(delete_char);
-    undo_nosave = FALSE;
-  }
-
-  weigh_mark();
   return TRUE;
 }
 END_DEFUN

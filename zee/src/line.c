@@ -51,8 +51,8 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
   free_marker(pt);
 }
 
-/* Insert the character at the current position and move the text at its right
- * whatever the insert/overwrite mode is.
+/*
+ * Insert the character at the current position.
  * This function doesn't change the current position of the pointer.
  */
 int intercalate_char(int c)
@@ -73,58 +73,13 @@ int intercalate_char(int c)
  */
 int insert_char(int c)
 {
-  size_t t = tab_width(cur_bp);
-
   if (warn_if_readonly_buffer())
     return FALSE;
-
-  if (cur_bp->flags & BFLAG_OVERWRITE) {
-    /* Current character isn't the end of line
-       && isn't a \t
-       || tab width isn't correct
-       || current char is a \t && we are in the tab limit.  */
-    if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->item))
-        && ((*astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o) != '\t')
-            || ((*astr_char(cur_bp->pt.p->item,
-                            (ptrdiff_t)cur_bp->pt.o) == '\t')
-                && ((get_goalc() % t) == t)))) {
-      /* Replace the character.  */
-      undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
-                (size_t)(*astr_char(cur_bp->pt.p->item,
-                                      (ptrdiff_t)cur_bp->pt.o)), 0);
-      *astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o) = c;
-      ++cur_bp->pt.o;
-
-      cur_bp->flags |= BFLAG_MODIFIED;
-
-      return TRUE;
-    }
-    /*
-     * Fall through the "insertion" mode of a character
-     * at the end of the line, since it is totally
-     * equivalent to "overwrite" mode.
-     */
-  }
 
   (void)intercalate_char(c);
   adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
 
   return TRUE;
-}
-
-/*
- * Insert a character at the current position in insert mode
- * whetever the current insert mode is.
- */
-int insert_char_in_insert_mode(int c)
-{
-  int old_mode = cur_bp->flags, ret;
-
-  cur_bp->flags &= ~BFLAG_OVERWRITE;
-  ret = insert_char(c);
-  cur_bp->flags = old_mode;
-
-  return ret;
 }
 
 static void insert_expanded_tab(int (*inschr)(int chr))
@@ -141,7 +96,7 @@ static int insert_tab(void)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  insert_expanded_tab(insert_char_in_insert_mode);
+  insert_expanded_tab(insert_char);
 
   return TRUE;
 }
@@ -388,7 +343,7 @@ void insert_nstring(const char *s, size_t size)
     if (*s == '\n')
       insert_newline();
     else
-      insert_char_in_insert_mode(*s);
+      insert_char(*s);
   undo_nosave = FALSE;
 }
 
@@ -527,31 +482,6 @@ int backward_delete_char(void)
   }
 }
 
-static int backward_delete_char_overwrite(void)
-{
-  if (!bolp() && !eolp()) {
-    if (warn_if_readonly_buffer())
-      return FALSE;
-
-    backward_char();
-    if (following_char() == '\t') {
-      /* In overwrite-mode. */
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-      insert_expanded_tab(insert_char);
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-    }
-    else {
-      insert_char(' '); /* In overwrite-mode. */
-    }
-    backward_char();
-
-    cur_bp->flags |= BFLAG_MODIFIED;
-
-    return TRUE;
-  } else
-    return backward_delete_char();
-}
-
 DEFUN_INT("backward-delete-char", backward_delete_char)
 /*+
 Delete the previous character.
@@ -559,17 +489,13 @@ Join lines if the character is a newline.
 +*/
 {
   int i;
-  /* In overwrite-mode and isn't called by delete_char().  */
-  int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
-                    (last_uniarg > 0)) ?
-    backward_delete_char_overwrite : backward_delete_char;
 
   if (uniarg < 0)
     return FUNCALL_ARG(delete_char, -uniarg);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (i = 0; i < uniarg; ++i)
-    if (!(*f)()) {
+    if (!backward_delete_char()) {
       ok = FALSE;
       break;
     }
@@ -601,7 +527,7 @@ Delete all spaces and tabs around point, leaving one space.
 {
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   FUNCALL(delete_horizontal_space);
-  insert_char_in_insert_mode(' ');
+  insert_char(' ');
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 }
 END_DEFUN
@@ -659,7 +585,7 @@ static int indent_relative(void)
   /* Insert spaces.  */
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   while (get_goalc() < target_goalc)
-    insert_char_in_insert_mode(' ');
+    insert_char(' ');
 
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 

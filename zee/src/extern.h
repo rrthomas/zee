@@ -122,7 +122,6 @@ astr simplify_key(char *key);
 /* line.c ----------------------------------------------------------------- */
 void line_replace_text(Line **lp, size_t offset, size_t oldlen, char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
-int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);
 void fill_break_line(void);
 int insert_newline(void);

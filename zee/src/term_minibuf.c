@@ -80,7 +80,6 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 static char *rot_vminibuf_read(const char *prompt, const char *value,
 			       Completion *cp, History *hp, char **p, size_t *max)
 {
-  static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
   size_t i, len, prompt_len;
   char *s, *saved = NULL;
@@ -175,9 +174,6 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
         strcpy(*p + i, *p + i + 1);
       } else
         ding();
-      break;
-    case KBD_INS:
-      overwrite_mode = overwrite_mode ? 0 : 1;
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
@@ -290,7 +286,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
         ding();
         break;
       }
-      if (!overwrite_mode || i == len) {
+      if (i == len) {
         char *s;
         if (len >= *max - 1) {
           *max *= 2;

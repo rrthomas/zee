@@ -141,10 +141,9 @@ struct Region {
 #define BFLAG_NEEDNAME  (0000004) /* On save, ask for a file name. */
 #define BFLAG_TEMPORARY (0000010) /* The buffer is a temporary buffer. */
 #define BFLAG_READONLY  (0000020) /* The buffer cannot be modified. */
-#define BFLAG_OVERWRITE (0000040) /* The buffer is in overwrite mode. */
-#define BFLAG_NOUNDO    (0000100) /* Do not record undo informations. */
-#define BFLAG_AUTOFILL  (0000200) /* The buffer is in Auto Fill mode. */
-#define BFLAG_ISEARCH   (0000400) /* The buffer is in Isearch loop. */
+#define BFLAG_NOUNDO    (0000040) /* Do not record undo informations. */
+#define BFLAG_AUTOFILL  (0000100) /* The buffer is in Auto Fill mode. */
+#define BFLAG_ISEARCH   (0000200) /* The buffer is in Isearch loop. */
 
 struct Buffer {
   /* The next buffer in buffer list. */
