@@ -238,7 +238,7 @@ static int isearch(int dir)
   Marker *old_mark;
 
   assert(cur_wp->bp->mark);
-  marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt);
+  old_mark = marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt);
 
   start = cur_bp->pt;
   cur = cur_bp->pt;
