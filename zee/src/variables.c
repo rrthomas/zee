@@ -156,30 +156,30 @@ DEFUN_INT("set-variable", set_variable)
     Set a variable value to the user-specified value.
     +*/
 {
-  char *var, *val, *fmt;
+  char *var, *val = NULL, *fmt;
 
-  var = minibuf_read_variable_name("Set variable: ");
-  if (var == NULL)
-    return FALSE;
+  if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
+    ok = FALSE;
+  else {
+    fmt = get_variable_format(var);
+    if (!strcmp(fmt, "b")) {
+      int i;
+      if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
+        ok = cancel();
+      else
+        val = (i == TRUE) ? "true" : "false";
+    } else /* Non-boolean variable. */
+      if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
+        ok = cancel();
 
-  fmt = get_variable_format(var);
-  if (!strcmp(fmt, "b")) {
-    int i;
-    if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
-      return cancel();
-    val = (i == TRUE) ? "true" : "false";
-  } else { /* Non-boolean variable. */
-    if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
-      return cancel();
+    if (ok) {
+      /* `tab-width' and `fill-column' automatically become
+         buffer-local when set in any fashion. */
+      if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
+        variableSetString(&cur_bp->vars, var, val);
+      else
+        set_variable(var, val);
+    }
   }
-
-  /* `tab-width' and `fill-column' automatically become
-     buffer-local when set in any fashion. */
-  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
-    variableSetString(&cur_bp->vars, var, val);
-  else
-    set_variable(var, val);
-
-  return TRUE;
 }
 END_DEFUN

@@ -83,17 +83,16 @@ DEFUN_INT("start-kbd-macro", start_kbd_macro)
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
     minibuf_error("Already defining a keyboard macro");
-    return FALSE;
+    ok = FALSE;
+  } else {
+    if (cur_mp)
+      cancel_kbd_macro();
+
+    minibuf_write("Defining keyboard macro...");
+
+    thisflag |= FLAG_DEFINING_MACRO;
+    cur_mp = zmalloc(sizeof(Macro));
   }
-
-  if (cur_mp)
-    cancel_kbd_macro();
-
-  minibuf_write("Defining keyboard macro...");
-
-  thisflag |= FLAG_DEFINING_MACRO;
-  cur_mp = zmalloc(sizeof(Macro));
-  return TRUE;
 }
 END_DEFUN
 
@@ -106,11 +105,9 @@ DEFUN_INT("end-kbd-macro", end_kbd_macro)
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
     minibuf_error("Not defining a keyboard macro");
-    return FALSE;
-  }
-
-  thisflag &= ~FLAG_DEFINING_MACRO;
-  return TRUE;
+    ok = FALSE;
+  } else
+    thisflag &= ~FLAG_DEFINING_MACRO;
 }
 END_DEFUN
 
@@ -128,32 +125,28 @@ DEFUN_INT("name-last-kbd-macro", name_last_kbd_macro)
 
   if ((ms = minibuf_read("Name for last kbd macro: ", "")) == NULL) {
     minibuf_error("No command name given");
-    return FALSE;
-  }
-
-  if (cur_mp == NULL) {
+    ok = FALSE;
+  } else if (cur_mp == NULL) {
     minibuf_error("No keyboard macro defined");
-    return FALSE;
-  }
-
-  if ((mp = get_macro(ms))) {
-    /* If a macro with this name already exists, update its key list */
-    free(mp->keys);
+    ok = FALSE;
   } else {
-    /* Add a new macro to the list */
-    mp = zmalloc(sizeof(*mp));
-    mp->next = head_mp;
-    mp->name = zstrdup(ms);
-    head_mp = mp;
+    if ((mp = get_macro(ms))) {
+      /* If a macro with this name already exists, update its key list */
+      free(mp->keys);
+    } else {
+      /* Add a new macro to the list */
+      mp = zmalloc(sizeof(*mp));
+      mp->next = head_mp;
+      mp->name = zstrdup(ms);
+      head_mp = mp;
+    }
+
+    /* Copy the keystrokes from cur_mp. */
+    mp->nkeys = cur_mp->nkeys;
+    size = sizeof(*(mp->keys)) * mp->nkeys;
+    mp->keys = zmalloc(size);
+    memcpy(mp->keys, cur_mp->keys, size);
   }
-
-  /* Copy the keystrokes from cur_mp. */
-  mp->nkeys = cur_mp->nkeys;
-  size = sizeof(*(mp->keys)) * mp->nkeys;
-  mp->keys = zmalloc(size);
-  memcpy(mp->keys, cur_mp->keys, size);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -185,26 +178,24 @@ DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
     defining others, use M-x name-last-kbd-macro.
     +*/
 {
-  int uni, ret = TRUE;
-
   if (cur_mp == NULL) {
     minibuf_error("No kbd macro has been defined");
-    return FALSE;
-  }
+    ok = FALSE;
+  } else {
+    int i;
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  if (uniarg == 0)
-    while (call_macro(cur_mp));
-  else {
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!call_macro(cur_mp)) {
-        ret = FALSE;
-        break;
-      }
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    if (uniarg == 0)
+      while (call_macro(cur_mp));
+    else {
+      for (i = 0; i < uniarg; ++i)
+        if (!call_macro(cur_mp)) {
+          ok = FALSE;
+          break;
+        }
+    }
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 

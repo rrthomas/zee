@@ -101,24 +101,22 @@ DEFUN_INT("split-window", split_window)
   /* Windows smaller than 4 lines cannot be split. */
   if (cur_wp->fheight < 4) {
     minibuf_error("Window height %d too small for splitting", cur_wp->fheight);
-    return FALSE;
+    ok = FALSE;
+  } else {
+    newwp = window_new();
+    newwp->fwidth = cur_wp->fwidth;
+    newwp->ewidth = cur_wp->ewidth;
+    newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
+    newwp->eheight = newwp->fheight - 1;
+    cur_wp->fheight = cur_wp->fheight / 2;
+    cur_wp->eheight = cur_wp->fheight - 1;
+    if (cur_wp->topdelta >= cur_wp->eheight)
+      recenter(cur_wp);
+    newwp->bp = cur_wp->bp;
+    newwp->saved_pt = point_marker();
+    newwp->next = cur_wp->next;
+    cur_wp->next = newwp;
   }
-
-  newwp = window_new();
-  newwp->fwidth = cur_wp->fwidth;
-  newwp->ewidth = cur_wp->ewidth;
-  newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
-  newwp->eheight = newwp->fheight - 1;
-  cur_wp->fheight = cur_wp->fheight / 2;
-  cur_wp->eheight = cur_wp->fheight - 1;
-  if (cur_wp->topdelta >= cur_wp->eheight)
-    recenter(cur_wp);
-  newwp->bp = cur_wp->bp;
-  newwp->saved_pt = point_marker();
-  newwp->next = cur_wp->next;
-  cur_wp->next = newwp;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -131,28 +129,23 @@ DEFUN_INT("delete-window", delete_window)
 
   if (cur_wp == head_wp && cur_wp->next == NULL) {
     minibuf_error("Attempt to delete sole ordinary window");
-    return FALSE;
+    ok = FALSE;
+  } else {
+    if (cur_wp == head_wp)
+      wp = head_wp = head_wp->next;
+    else
+      for (wp = head_wp; wp != NULL; wp = wp->next)
+        if (wp->next == cur_wp) {
+          wp->next = wp->next->next;
+          break;
+        }
+
+    wp->fheight += cur_wp->fheight;
+    wp->eheight += cur_wp->eheight + 1;
+
+    set_current_window(wp);
+    free_window(del_wp);
   }
-
-  if (cur_wp == head_wp)
-    wp = head_wp = head_wp->next;
-  else
-    for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->next == cur_wp) {
-        wp->next = wp->next->next;
-        break;
-      }
-
-  wp->fheight += cur_wp->fheight;
-  wp->eheight += cur_wp->eheight + 1;
-
-  /* Set current window. */
-  set_current_window(wp);
-
-  /* Destroy the window.  */
-  free_window(del_wp);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -192,8 +185,6 @@ DEFUN_INT("delete-other-windows", delete_other_windows)
   cur_wp->eheight = cur_wp->fheight - 1;
   cur_wp->next = NULL;
   head_wp = cur_wp;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -205,7 +196,6 @@ DEFUN_INT("other-window", other_window)
     +*/
 {
   set_current_window((cur_wp->next != NULL) ? cur_wp->next : head_wp);
-  return TRUE;
 }
 END_DEFUN
 

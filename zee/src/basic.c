@@ -48,8 +48,6 @@ DEFUN_INT("beginning-of-line", beginning_of_line)
      `prev/next-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -64,8 +62,6 @@ DEFUN_INT("end-of-line", end_of_line)
      `prev/next-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -150,20 +146,16 @@ DEFUN_INT("previous-line", previous_line)
   int i;
 
   if (uniarg < 0)
-    return FUNCALL_ARG(next_line, -uniarg);
-
-  if (!bobp()) {
+    ok = FUNCALL_ARG(next_line, -uniarg);
+  else if (!bobp()) {
     for (i = 0; i < uniarg; i++)
       if (!previous_line()) {
         thisflag |= FLAG_DONE_CPCN;
         FUNCALL(beginning_of_line);
         break;
       }
-  }
-  else if (lastflag & FLAG_DONE_CPCN)
+  } else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -194,12 +186,10 @@ DEFUN_INT("next-line", next_line)
     column, or at the end of the line if it is not long enough.
     +*/
 {
-  int i;
-
   if (uniarg < 0)
-    return FUNCALL_ARG(previous_line, -uniarg);
-
-  if (!eobp()) {
+    ok = FUNCALL_ARG(previous_line, -uniarg);
+  else if (!eobp()) {
+    int i;
     for (i = 0; i < uniarg; i++)
       if (!next_line()) {
         int old = cur_goalc;
@@ -208,11 +198,8 @@ DEFUN_INT("next-line", next_line)
         cur_goalc = old;
         break;
       }
-  }
-  else if (lastflag & FLAG_DONE_CPCN)
+  } else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -235,21 +222,24 @@ DEFUN_INT("goto-char", goto_char)
     +*/
 {
   char *ms;
-  int to_char, count;
+  size_t to_char = 0;
 
   do {
-    if ((ms = minibuf_read("Goto char: ", "")) == NULL)
-      return cancel();
-    if ((to_char = atoi(ms)) < 0)
-      ding();
-  } while (to_char < 0);
-
-  gotobob();
-  for (count = 1; count < to_char; ++count)
-    if (!forward_char())
+    if ((ms = minibuf_read("Goto char: ", "")) == NULL) {
+      ok = cancel();
       break;
+    }
+    if ((to_char = strtoul(ms, NULL, 10)) == ULONG_MAX)
+      ding();
+  } while (to_char == ULONG_MAX);
 
-  return TRUE;
+  if (ok) {
+    size_t count;
+    gotobob();
+    for (count = 1; count < to_char; ++count)
+      if (!forward_char())
+        break;
+  }
 }
 END_DEFUN
 
@@ -260,19 +250,21 @@ DEFUN_INT("goto-line", goto_line)
     +*/
 {
   char *ms;
-  size_t to_line;
+  size_t to_line = 0;
 
   do {
-    if ((ms = minibuf_read("Goto line: ", "")) == NULL)
-      return cancel();
+    if ((ms = minibuf_read("Goto line: ", "")) == NULL) {
+      ok = cancel();
+      break;
+    }
     if ((to_line = strtoul(ms, NULL, 10)) == ULONG_MAX)
       ding();
   } while (to_line == ULONG_MAX);
 
-  goto_line(to_line - 1);
-  cur_bp->pt.o = 0;
-
-  return TRUE;
+  if (ok) {
+    goto_line(to_line - 1);
+    cur_bp->pt.o = 0;
+  }
 }
 END_DEFUN
 
@@ -292,7 +284,6 @@ DEFUN_INT("beginning-of-buffer", beginning_of_buffer)
 {
   set_mark_command();
   gotobob();
-  return TRUE;
 }
 END_DEFUN
 
@@ -312,7 +303,6 @@ DEFUN_INT("end-of-buffer", end_of_buffer)
 {
   set_mark_command();
   gotoeob();
-  return TRUE;
 }
 END_DEFUN
 
@@ -341,15 +331,14 @@ DEFUN_INT("backward-char", backward_char)
   int i;
 
   if (uniarg < 0)
-    return FUNCALL_ARG(forward_char, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!backward_char()) {
-      minibuf_error("Beginning of buffer");
-      return FALSE;
-    }
-
-  return TRUE;
+    ok = FUNCALL_ARG(forward_char, -uniarg);
+  else
+    for (i = 0; i < uniarg; i++)
+      if (!backward_char()) {
+        minibuf_error("Beginning of buffer");
+        ok = FALSE;
+        break;
+      }
 }
 END_DEFUN
 
@@ -378,15 +367,14 @@ DEFUN_INT("forward-char", forward_char)
   int i;
 
   if (uniarg < 0)
-    return FUNCALL_ARG(backward_char, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!forward_char()) {
-      minibuf_error("End of buffer");
-      return FALSE;
-    }
-
-  return TRUE;
+    ok = FUNCALL_ARG(backward_char, -uniarg);
+  else
+    for (i = 0; i < uniarg; i++)
+      if (!forward_char()) {
+        minibuf_error("End of buffer");
+        ok = FALSE;
+        break;
+      }
 }
 END_DEFUN
 
@@ -430,13 +418,13 @@ DEFUN_INT("scroll-down", scroll_down)
   int i;
 
   if (uniarg < 0)
-    return FUNCALL_ARG(scroll_up, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!scroll_down())
-      return FALSE;
-
-  return TRUE;
+    ok = FUNCALL_ARG(scroll_up, -uniarg);
+  else
+    for (i = 0; i < uniarg; i++)
+      if (!scroll_down()) {
+        ok = FALSE;
+        break;
+      }
 }
 END_DEFUN
 
@@ -458,12 +446,12 @@ DEFUN_INT("scroll-up", scroll_up)
   int i;
 
   if (uniarg < 0)
-    return FUNCALL_ARG(scroll_down, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!scroll_up())
-      return FALSE;
-
-  return TRUE;
+    ok = FUNCALL_ARG(scroll_down, -uniarg);
+  else
+    for (i = 0; i < uniarg; i++)
+      if (!scroll_up()) {
+        ok = FALSE;
+        break;
+      }
 }
 END_DEFUN

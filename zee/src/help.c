@@ -42,8 +42,6 @@ DEFUN_INT("zee-version", zee_version)
     +*/
 {
   minibuf_write("Zee " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -114,24 +112,20 @@ DEFUN_INT("describe-function", describe_function)
     +*/
 {
   char *name;
-  astr bufname, doc;
+  astr doc;
 
-  name = minibuf_read_function_name("Describe function: ");
-  if (name == NULL)
-    return FALSE;
+  if ((name = minibuf_read_function_name("Describe function: ")) &&
+      ((doc = get_funcvar_doc(name, NULL, TRUE)))) {
+    astr bufname = astr_new();
+    astr_afmt(bufname, "*Help: function `%s'*", name);
+    write_temp_buffer(astr_cstr(bufname), write_function_description,
+                      name, doc);
+    astr_delete(bufname);
+    astr_delete(doc);
+  } else
+    ok = FALSE;
 
-  if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
-    return FALSE;
-
-  bufname = astr_new();
-  astr_afmt(bufname, "*Help: function `%s'*", name);
-  write_temp_buffer(astr_cstr(bufname), write_function_description,
-                    name, doc);
   free(name);
-  astr_delete(bufname);
-  astr_delete(doc);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -154,27 +148,23 @@ DEFUN_INT("describe-variable", describe_variable)
     +*/
 {
   char *name;
-  astr bufname, defval, doc;
 
-  name = minibuf_read_variable_name("Describe variable: ");
-  if (name == NULL)
-    return FALSE;
+  if ((name = minibuf_read_variable_name("Describe variable: "))) {
+    astr defval = astr_new(), doc;
 
-  defval = astr_new();
-  if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL) {
+    if ((doc = get_funcvar_doc(name, defval, FALSE))) {
+      astr bufname = astr_new();
+      astr_afmt(bufname, "*Help: variable `%s'*", name);
+      write_temp_buffer(astr_cstr(bufname), write_variable_description,
+                        name, defval, get_variable(name), doc);
+      astr_delete(bufname);
+      astr_delete(doc);
+    } else
+      ok = FALSE;
+
     astr_delete(defval);
-    return FALSE;
-  }
-
-  bufname = astr_new();
-  astr_afmt(bufname, "*Help: variable `%s'*", name);
-  write_temp_buffer(astr_cstr(bufname), write_variable_description,
-                    name, defval, get_variable(name), doc);
-  astr_delete(bufname);
-  astr_delete(doc);
-  astr_delete(defval);
-
-  return TRUE;
+  } else
+    ok = FALSE;
 }
 END_DEFUN
 
@@ -184,27 +174,27 @@ DEFUN_INT("describe-key", describe_key)
     +*/
 {
   char *name;
-  astr bufname, doc;
 
   minibuf_write("Describe key:");
 
   if ((name = get_function_by_key_sequence()) == NULL) {
     minibuf_error("Key sequence is undefined");
-    return FALSE;
+    ok = FALSE;
+  } else {
+    astr doc;
+
+    minibuf_write("Key sequence runs the command `%s'", name);
+
+    if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
+      ok = FALSE;
+    else {
+      astr bufname = astr_new();
+      astr_afmt(bufname, "*Help: function `%s'*", name);
+      write_temp_buffer(astr_cstr(bufname), write_function_description,
+                        name, doc);
+      astr_delete(bufname);
+    }
+    astr_delete(doc);
   }
-
-  minibuf_write("Key sequence runs the command `%s'", name);
-
-  if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
-    return FALSE;
-
-  bufname = astr_new();
-  astr_afmt(bufname, "*Help: function `%s'*", name);
-  write_temp_buffer(astr_cstr(bufname), write_function_description,
-                    name, doc);
-  astr_delete(bufname);
-  astr_delete(doc);
-
-  return TRUE;
 }
 END_DEFUN

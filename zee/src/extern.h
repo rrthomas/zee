@@ -135,7 +135,7 @@ int insert_newline(void);
 int intercalate_newline(void);
 void insert_string(const char *s);
 void insert_nstring(const char *s, size_t size);
-int self_insert_command(int c);
+int self_insert_command(size_t key);
 void bprintf(const char *fmt, ...);
 int delete_char(void);
 int backward_delete_char(void);

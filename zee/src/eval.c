@@ -956,16 +956,15 @@ DEFUN_INT("eval-expression", eval_expression)
     the minibuffer.
     +*/
   char *expr;
-  le *list;
 
   if ((expr = minibuf_read("Eval: ", "")) == NULL)
-    return FALSE;
-
-  list = eval_expression(expr);
-  /* XXX cons value on to front of values */
-  leWipe(list);
-
-  return list == NULL;
+    ok = FALSE;
+  else {
+    le *list = eval_expression(expr);
+    /* XXX cons value on to front of values */
+    leWipe(list);
+    ok = list == NULL;
+  }
 }
 END_DEFUN
 
@@ -989,6 +988,6 @@ DEFUN_INT("eval-last-sexp", eval_last_sexp)
   free(expr);
   leWipe(list);
 
-  return list == NULL;
+  ok = list == NULL;
 }
 END_DEFUN

@@ -100,6 +100,5 @@ DEFUN_INT("recenter", recenter)
 {
   recenter(cur_wp);
   term_full_redisplay();
-  return TRUE;
 }
 END_DEFUN

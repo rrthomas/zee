@@ -102,21 +102,20 @@ DEFUN_INT("kill-line", kill_line)
     With prefix argument, kill that many lines from point.
     +*/
 {
-  int uni, ret = TRUE;
+  int i;
 
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; ++i)
     if (!kill_line()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   weigh_mark();
-  return ret;
 }
 END_DEFUN
 
@@ -139,41 +138,40 @@ DEFUN_INT("kill-region", kill_region)
     flush_kill_ring();
 
   if (!is_mark_anchored())
-    return FUNCALL(kill_line);
+    ok = FUNCALL(kill_line);
+  else {
+    calculate_the_region(&r);
 
-  calculate_the_region(&r);
+    if (cur_bp->flags & BFLAG_READONLY) {
+      /* The buffer is read-only; save text in the kill buffer and
+         complain. */
+      char *p;
 
-  if (cur_bp->flags & BFLAG_READONLY) {
-    /* The buffer is read-only; save text in the kill buffer and
-       complain. */
-    char *p;
+      p = copy_text_block(r.start.n, r.start.o, r.size);
+      kill_ring_push_nstring(p, r.size);
+      free(p);
 
-    p = copy_text_block(r.start.n, r.start.o, r.size);
-    kill_ring_push_nstring(p, r.size);
-    free(p);
+      warn_if_readonly_buffer();
+    } else {
+      size_t size = r.size;
 
-    warn_if_readonly_buffer();
-  } else {
-    size_t size = r.size;
-
-    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-      FUNCALL(exchange_point_and_mark);
-    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-    undo_nosave = TRUE;
-    while (size--) {
-      if (!eolp())
-        kill_ring_push_char(following_char());
-      else
-        kill_ring_push_char('\n');
-      FUNCALL(delete_char);
+      if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+        FUNCALL(exchange_point_and_mark);
+      undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
+      undo_nosave = TRUE;
+      while (size--) {
+        if (!eolp())
+          kill_ring_push_char(following_char());
+        else
+          kill_ring_push_char('\n');
+        FUNCALL(delete_char);
+      }
+      undo_nosave = FALSE;
     }
-    undo_nosave = FALSE;
+
+    thisflag |= FLAG_DONE_KILL;
+    weigh_mark();
   }
-
-  thisflag |= FLAG_DONE_KILL;
-  weigh_mark();
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -189,18 +187,17 @@ DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
     flush_kill_ring();
 
   if (warn_if_no_mark())
-    return FALSE;
+    ok = FALSE;
+  else {
+    calculate_the_region(&r);
 
-  calculate_the_region(&r);
+    p = copy_text_block(r.start.n, r.start.o, r.size);
+    kill_ring_push_nstring(p, r.size);
+    free(p);
 
-  p = copy_text_block(r.start.n, r.start.o, r.size);
-  kill_ring_push_nstring(p, r.size);
-  free(p);
-
-  thisflag |= FLAG_DONE_KILL;
-  weigh_mark();
-
-  return TRUE;
+    thisflag |= FLAG_DONE_KILL;
+    weigh_mark();
+  }
 }
 END_DEFUN
 
@@ -214,20 +211,19 @@ DEFUN_INT("kill-word", kill_word)
     flush_kill_ring();
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    ok = FALSE;
+  else {
+    push_mark();
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    FUNCALL_ARG(mark_word, uniarg);
+    FUNCALL(kill_region);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    pop_mark();
 
-  push_mark();
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  FUNCALL_ARG(mark_word, uniarg);
-  FUNCALL(kill_region);
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  pop_mark();
+    thisflag |= FLAG_DONE_KILL;
 
-  thisflag |= FLAG_DONE_KILL;
-
-  minibuf_write("");	/* Don't write "Set mark" message.  */
-
-  return TRUE;
+    minibuf_write("");	/* Don't write "Set mark" message.  */
+  }
 }
 END_DEFUN
 
@@ -237,7 +233,7 @@ DEFUN_INT("backward-kill-word", backward_kill_word)
     With argument, do this that many times.
     +*/
 {
-  return FUNCALL_ARG(kill_word, (uniused == 0) ? -1 : -uniarg);
+  ok = FUNCALL_ARG(kill_word, (uniused == 0) ? -1 : -uniarg);
 }
 END_DEFUN
 
@@ -252,20 +248,19 @@ DEFUN_INT("kill-sexp", kill_sexp)
     flush_kill_ring();
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    ok = FALSE;
+  else {
+    push_mark();
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    FUNCALL_ARG(mark_sexp, uniarg);
+    FUNCALL(kill_region);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    pop_mark();
 
-  push_mark();
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  FUNCALL_ARG(mark_sexp, uniarg);
-  FUNCALL(kill_region);
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  pop_mark();
+    thisflag |= FLAG_DONE_KILL;
 
-  thisflag |= FLAG_DONE_KILL;
-
-  minibuf_write("");	/* Don't write "Set mark" message.  */
-
-  return TRUE;
+    minibuf_write("");	/* Don't write "Set mark" message.  */
+  }
 }
 END_DEFUN
 
@@ -276,24 +271,22 @@ DEFUN_INT("yank", yank)
     killed OR yanked.  Put point at end, and set mark at beginning.
     +*/
 {
-  if (kill_ring_size == 0) {
+  ok = FALSE;
+
+  if (kill_ring_size == 0)
     minibuf_error("Kill ring is empty");
-    return FALSE;
+  else if (!warn_if_readonly_buffer()) {
+    set_mark_command();
+
+    undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
+    undo_nosave = TRUE;
+    insert_nstring(kill_ring_text, kill_ring_size);
+    undo_nosave = FALSE;
+
+    weigh_mark();
+
+    ok = TRUE;
   }
-
-  if (warn_if_readonly_buffer())
-    return FALSE;
-
-  set_mark_command();
-
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
-  undo_nosave = TRUE;
-  insert_nstring(kill_ring_text, kill_ring_size);
-  undo_nosave = FALSE;
-
-  weigh_mark();
-
-  return TRUE;
 }
 END_DEFUN
 

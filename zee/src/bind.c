@@ -211,7 +211,7 @@ void process_key(size_t key)
       /* There are no bindings for the pressed key. */
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       for (uni = 0;
-           uni < last_uniarg && self_insert_command((ptrdiff_t)key);
+           uni < last_uniarg && self_insert_command(key);
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     } else {
@@ -460,46 +460,45 @@ DEFUN("global-set-key", global_set_key)
     sequence.
     +*/
 {
-  int ok = FALSE;
-  size_t key, *keys = NULL, numkeys;
-  leafp p;
-  Function func;
-  char *name, *keystr = NULL;
-  astr as;
+  size_t *keys = NULL, numkeys;
+  char *name = NULL, *keystr = NULL;
+
+  ok = FALSE;
 
   if (uniused) {
-    if (argc != 3)
-      return FALSE;
-    keystr = evaluateNode(branch->list_next)->data;
-    name = evaluateNode(branch->list_next->list_next)->data;
+    if (argc == 3) {
+      keystr = evaluateNode(branch->list_next)->data;
+      name = evaluateNode(branch->list_next->list_next)->data;
+    }
   } else {
+    astr as;
+    leafp p;
+
     minibuf_write("Set key globally: ");
-    key = getkey();
-    p = completion_scan(key, &keys, &numkeys);
+    p = completion_scan(getkey(), &keys, &numkeys);
 
     as = keyvectostr(keys, numkeys);
     name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
     astr_delete(as);
   }
 
-  if (name == NULL)
-    return FALSE;
+  if (name) {
+    Function func;
 
-  func = get_function(name);
-  if (func) {
-    ok = TRUE;
-    if (uniused)
-      bind_key_string(keystr, func);
-    else
-      bind_key_vec(leaf_tree, keys, numkeys, func);
-  } else
-    minibuf_error("No such function `%d'", name);
+    if ((func = get_function(name))) {
+      ok = TRUE;
+      if (uniused)
+        bind_key_string(keystr, func);
+      else
+        bind_key_vec(leaf_tree, keys, numkeys, func);
+    } else
+      minibuf_error("No such function `%d'", name);
 
-  free(name);
+    free(name);
+  }
+
   if (uniused == 0)
     free(keys);
-
-  return ok;
 }
 END_DEFUN
 

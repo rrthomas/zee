@@ -396,20 +396,19 @@ DEFUN_INT("find-file", find_file)
   astr buf;
 
   buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
-    astr_delete(buf);
-    return cancel();
-  }
+  if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL)
+    ok = cancel();
   astr_delete(buf);
 
-  if (ms[0] != '\0') {
-    int ret_value = find_file(ms);
-    free(ms);
-    return ret_value;
+  if (ok) {
+    if (ms[0] != '\0') {
+      ok = find_file(ms);
+      free(ms);
+    } else {
+      free(ms);
+      ok = FALSE;
+    }
   }
-
-  free(ms);
-  return FALSE;
 }
 END_DEFUN
 
@@ -429,18 +428,19 @@ DEFUN_INT("switch-to-buffer", switch_to_buffer)
                                "", cp, NULL, swbuf->name);
   free_completion(cp);
   if (ms == NULL)
-    return cancel();
-
-  if (ms[0] != '\0') {
-    if ((swbuf = find_buffer(ms, FALSE)) == NULL) {
-      swbuf = find_buffer(ms, TRUE);
-      swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+    ok = cancel();
+  else {
+    if (ms[0] != '\0') {
+      if ((swbuf = find_buffer(ms, FALSE)) == NULL) {
+        swbuf = find_buffer(ms, TRUE);
+        swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+      }
     }
+
+    switch_to_buffer(swbuf);
+
+    ok = TRUE;
   }
-
-  switch_to_buffer(swbuf);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -545,77 +545,23 @@ DEFUN_INT("kill-buffer", kill_buffer)
   cp = make_buffer_completion();
   if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
                                     "", cp, NULL, cur_bp->name)) == NULL)
-    return cancel();
+    ok = cancel();
   free_completion(cp);
-  if (ms[0] != '\0') {
-    if ((bp = find_buffer(ms, FALSE)) == NULL) {
-      minibuf_error("Buffer `%s' not found", ms);
-      return FALSE;
-    }
-  } else
-    bp = cur_bp;
 
-  if (check_modified_buffer(bp)) {
-    kill_buffer(bp);
-    return TRUE;
+  if (ok) {
+    if (ms[0] != '\0') {
+      if ((bp = find_buffer(ms, FALSE)) == NULL) {
+        minibuf_error("Buffer `%s' not found", ms);
+        ok = FALSE;
+      }
+    } else
+      bp = cur_bp;
+
+    if (ok && check_modified_buffer(bp))
+      kill_buffer(bp);
+    else
+      ok = FALSE;
   }
-
-  return FALSE;
-}
-END_DEFUN
-
-static void insert_buffer(Buffer *bp)
-{
-  Line *lp;
-  size_t size = calculate_buffer_size(bp), i;
-
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-  undo_nosave = TRUE;
-  for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
-    for (i = 0; i < astr_len(lp->item); i++)
-      insert_char(*astr_char(lp->item, (ptrdiff_t)i));
-    if (list_next(lp) != bp->lines)
-      insert_newline();
-  }
-  undo_nosave = FALSE;
-}
-
-DEFUN_INT("insert-buffer", insert_buffer)
-  /*+
-    Insert after point the contents of the user specified buffer.
-    Puts mark after the inserted text.
-    +*/
-{
-  Buffer *bp, *swbuf;
-  char *ms;
-  Completion *cp;
-
-  if (warn_if_readonly_buffer())
-    return FALSE;
-
-  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-  cp = make_buffer_completion();
-  if ((ms = minibuf_read_completion("Insert buffer (default %s): ",
-                                    "", cp, NULL, swbuf->name)) == NULL)
-    return cancel();
-  free_completion(cp);
-  if (ms[0] != '\0') {
-    if ((bp = find_buffer(ms, FALSE)) == NULL) {
-      minibuf_error("Buffer `%s' not found", ms);
-      return FALSE;
-    }
-  } else
-    bp = swbuf;
-
-  if (bp == cur_bp) {
-    minibuf_error("Cannot insert the current buffer");
-    return FALSE;
-  }
-
-  insert_buffer(bp);
-  set_mark_command();
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -665,31 +611,21 @@ DEFUN_INT("insert-file", insert_file)
   char *ms;
   astr buf;
 
-  if (warn_if_readonly_buffer())
-    return FALSE;
-
-  buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
-      == NULL) {
+  if ((ok = !warn_if_readonly_buffer())) {
+    buf = get_current_dir(TRUE);
+    if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf))) == NULL)
+      ok = cancel();
     astr_delete(buf);
-    return cancel();
+
+    if (ok) {
+      if (ms[0] == '\0' || !insert_file(ms))
+        ok =  FALSE;
+      else
+        set_mark_command();
+
+      free(ms);
+    }
   }
-  astr_delete(buf);
-
-  if (ms[0] == '\0') {
-    free(ms);
-    return FALSE;
-  }
-
-  if (!insert_file(ms)) {
-    free(ms);
-    return FALSE;
-  }
-
-  set_mark_command();
-
-  free(ms);
-  return TRUE;
 }
 END_DEFUN
 
@@ -780,7 +716,7 @@ DEFUN_INT("save-buffer", save_buffer)
     Save current buffer in visited file if modified.
     +*/
 {
-  return save_buffer(cur_bp);
+  ok = save_buffer(cur_bp);
 }
 END_DEFUN
 
@@ -794,23 +730,22 @@ DEFUN_INT("write-file", write_file)
   char *ms;
 
   if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
-    return cancel();
-  if (ms[0] == '\0') {
-    free(ms);
-    return FALSE;
-  }
+    ok = cancel();
+  else if (ms[0] == '\0')
+    ok = FALSE;
 
-  set_buffer_filename(cur_bp, ms);
+  if (ok) {
+    set_buffer_filename(cur_bp, ms);
 
-  cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+    cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
 
-  if (write_to_disk(cur_bp, ms)) {
-    minibuf_write("Wrote %s", ms);
-    cur_bp->flags &= ~BFLAG_MODIFIED;
+    if (write_to_disk(cur_bp, ms)) {
+      minibuf_write("Wrote %s", ms);
+      cur_bp->flags &= ~BFLAG_MODIFIED;
+    }
   }
 
   free(ms);
-  return TRUE;
 }
 END_DEFUN
 
@@ -890,7 +825,7 @@ DEFUN_INT("save-some-buffers", save_some_buffers)
     Save some modified file-visiting buffers.  Asks user about each one.
     +*/
 {
-  return save_some_buffers();
+  ok = save_some_buffers();
 }
 END_DEFUN
 
@@ -903,24 +838,21 @@ DEFUN_INT("save-buffers-kill-zee", save_buffers_kill_zee)
   int ans, i = 0;
 
   if (!save_some_buffers())
-    return FALSE;
+    ok = FALSE;
+  else {
+    for (bp = head_bp; bp != NULL; bp = bp->next)
+      if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
+        ++i;
 
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
-      ++i;
-
-  if (i > 0)
-    for (;;) {
+    if (i > 0) {
       if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
-        return cancel();
+        ok = cancel();
       else if (!ans)
-        return FALSE;
-      break;
+        ok = FALSE;
     }
 
-  thisflag |= FLAG_QUIT_ZILE;
-
-  return TRUE;
+    thisflag |= FLAG_QUIT_ZILE;
+  }
 }
 END_DEFUN
 
@@ -959,32 +891,26 @@ DEFUN_INT("cd", cd)
 {
   char *ms;
   astr buf;
-  struct stat st;
 
   buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Change default directory: ",
-                             astr_cstr(buf))) == NULL) {
-    astr_delete(buf);
-    return cancel();
-  }
+                             astr_cstr(buf))) == NULL)
+    ok = cancel();
   astr_delete(buf);
 
-  if (ms[0] != '\0') {
-    if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
-      minibuf_error("`%s' is not a directory", ms);
-      free(ms);
-      return FALSE;
+  if (ok)
+    if (ms[0] != '\0') {
+      struct stat st;
+      if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
+        minibuf_error("`%s' is not a directory", ms);
+        ok = FALSE;
+      } else if (chdir(ms) == -1) {
+        minibuf_write("%s: %s", ms, strerror(errno));
+        ok = FALSE;
+      } else
+        ok = TRUE;
     }
-    if (chdir(ms) == -1) {
-      minibuf_write("%s: %s", ms, strerror(errno));
-      free(ms);
-      return FALSE;
-    }
-    free(ms);
-    return TRUE;
-  }
 
   free(ms);
-  return FALSE;
 }
 END_DEFUN

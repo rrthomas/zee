@@ -184,20 +184,19 @@ DEFUN_INT("search-forward-regexp", search_forward_regexp)
   char *ms;
 
   if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
-    return cancel();
-  if (ms[0] == '\0')
-    return FALSE;
+    ok = cancel();
+  else if (ms[0] == '\0')
+    ok = FALSE;
+  else {
+    if (last_search != NULL)
+      free(last_search);
+    last_search = zstrdup(ms);
 
-  if (last_search != NULL)
-    free(last_search);
-  last_search = zstrdup(ms);
-
-  if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
-    minibuf_error("Failing regexp search: `%s'", ms);
-    return FALSE;
+    if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
+      minibuf_error("Failing regexp search: `%s'", ms);
+      ok = FALSE;
+    }
   }
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -209,20 +208,19 @@ DEFUN_INT("search-backward-regexp", search_backward_regexp)
   char *ms;
 
   if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
-    return cancel();
+    ok = cancel();
   if (ms[0] == '\0')
-    return FALSE;
+    ok = FALSE;
+  else {
+    if (last_search != NULL)
+      free(last_search);
+    last_search = zstrdup(ms);
 
-  if (last_search != NULL)
-    free(last_search);
-  last_search = zstrdup(ms);
-
-  if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
-    minibuf_error("Failing regexp search backward: `%s'", ms);
-    return FALSE;
+    if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
+      minibuf_error("Failing regexp search backward: `%s'", ms);
+      ok = FALSE;
+    }
   }
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -367,7 +365,7 @@ DEFUN_INT("isearch-forward-regexp", isearch_forward_regexp)
     C-g when search is successful aborts and moves point to starting point.
     +*/
 {
-  return isearch(ISEARCH_FORWARD);
+  ok = isearch(ISEARCH_FORWARD);
 }
 END_DEFUN
 
@@ -380,7 +378,7 @@ DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
     C-g when search is successful aborts and moves point to starting point.
     +*/
 {
-  return isearch(ISEARCH_BACKWARD);
+  ok = isearch(ISEARCH_BACKWARD);
 }
 END_DEFUN
 
@@ -410,33 +408,35 @@ DEFUN_INT("replace-regexp", replace_regexp)
   size_t find_len, repl_len;
 
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
-    return cancel();
-  if (find[0] == '\0')
-    return FALSE;
-  find_len = strlen(find);
-  find_no_upper = no_upper(find, find_len);
+    ok = cancel();
+  else if (find[0] == '\0')
+    ok = FALSE;
+  else {
+    find_len = strlen(find);
+    find_no_upper = no_upper(find, find_len);
 
-  if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
-    return cancel();
-  repl_len = strlen(repl);
+    if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
+      ok = cancel();
+    else {
+      repl_len = strlen(repl);
 
-  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
-    ++count;
-    undo_save(UNDO_REPLACE_BLOCK,
-              make_point(cur_bp->pt.n,
-                         cur_bp->pt.o - find_len),
-              strlen(find), strlen(repl));
-    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                      find_len, repl, repl_len, find_no_upper);
+      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
+        ++count;
+        undo_save(UNDO_REPLACE_BLOCK,
+                  make_point(cur_bp->pt.n,
+                             cur_bp->pt.o - find_len),
+                  strlen(find), strlen(repl));
+        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
+                          find_len, repl, repl_len, find_no_upper);
+      }
+
+      if (thisflag & FLAG_NEED_RESYNC)
+        resync_display();
+      term_display();
+
+      minibuf_write("Replaced %d occurrences", count);
+    }
   }
-
-  if (thisflag & FLAG_NEED_RESYNC)
-    resync_display();
-  term_display();
-
-  minibuf_write("Replaced %d occurrences", count);
-
-  return TRUE;
 }
 END_DEFUN
 
@@ -452,76 +452,79 @@ DEFUN_INT("query-replace-regexp", query_replace_regexp)
   size_t find_len, repl_len;
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
-    return cancel();
-  if (*find == '\0')
-    return FALSE;
-  find_len = strlen(find);
-  find_no_upper = no_upper(find, find_len);
+    ok = cancel();
+  else if (*find == '\0')
+    ok = FALSE;
+  else {
+    find_len = strlen(find);
+    find_no_upper = no_upper(find, find_len);
 
-  if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
-    return cancel();
-  repl_len = strlen(repl);
+    if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
+      ok = cancel();
+    if (ok) {
+      repl_len = strlen(repl);
 
-  /* Spaghetti code follows... :-( */
-  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
-    if (!noask) {
-      int c;
+      /* Spaghetti code follows... :-( */
+      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
+        if (!noask) {
+          int c;
+          if (thisflag & FLAG_NEED_RESYNC)
+            resync_display();
+          for (;;) {
+            minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
+            c = getkey();
+            if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
+                c == 'q' || c == '.' || c == '!')
+              goto exitloop;
+            minibuf_error("Please answer y, n, !, . or q.");
+            waitkey(WAITKEY_DEFAULT);
+          }
+        exitloop:
+          minibuf_clear();
+
+          switch (c) {
+          case KBD_CANCEL: /* C-g */
+            ok = cancel();
+            /* Fall through. */
+          case 'q': /* Quit immediately. */
+            goto endoffunc;
+          case '.': /* Replace and quit. */
+            exitloop = TRUE;
+            goto replblock;
+          case '!': /* Replace all without asking. */
+            noask = TRUE;
+            goto replblock;
+          case ' ': /* Replace. */
+          case 'y':
+            goto replblock;
+            break;
+          case 'n': /* Do not replace. */
+          case KBD_RET:
+          case KBD_DEL:
+            goto nextmatch;
+          }
+        }
+
+      replblock:
+        ++count;
+        undo_save(UNDO_REPLACE_BLOCK,
+                  make_point(cur_bp->pt.n,
+                             cur_bp->pt.o - find_len),
+                  find_len, repl_len);
+        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
+                          find_len, repl, repl_len, find_no_upper);
+      nextmatch:
+        if (exitloop)
+          break;
+      }
+
+    endoffunc:
       if (thisflag & FLAG_NEED_RESYNC)
         resync_display();
-      for (;;) {
-        minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
-        c = getkey();
-        if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
-            c == 'q' || c == '.' || c == '!')
-          goto exitloop;
-        minibuf_error("Please answer y, n, !, . or q.");
-        waitkey(WAITKEY_DEFAULT);
-      }
-    exitloop:
-      minibuf_clear();
+      term_display();
 
-      switch (c) {
-      case KBD_CANCEL: /* C-g */
-        return cancel();
-      case 'q': /* Quit immediately. */
-        goto endoffunc;
-      case '.': /* Replace and quit. */
-        exitloop = TRUE;
-        goto replblock;
-      case '!': /* Replace all without asking. */
-        noask = TRUE;
-        goto replblock;
-      case ' ': /* Replace. */
-      case 'y':
-        goto replblock;
-        break;
-      case 'n': /* Do not replace. */
-      case KBD_RET:
-      case KBD_DEL:
-        goto nextmatch;
-      }
+      minibuf_write("Replaced %d occurrences", count);
     }
-
-  replblock:
-    ++count;
-    undo_save(UNDO_REPLACE_BLOCK,
-              make_point(cur_bp->pt.n,
-                         cur_bp->pt.o - find_len),
-              find_len, repl_len);
-    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                      find_len, repl, repl_len, find_no_upper);
-  nextmatch:
-    if (exitloop)
-      break;
   }
-
- endoffunc:
-  if (thisflag & FLAG_NEED_RESYNC)
-    resync_display();
-  term_display();
-
-  minibuf_write("Replaced %d occurrences", count);
-
-  return TRUE;
 }
 END_DEFUN

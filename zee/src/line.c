@@ -154,17 +154,15 @@ DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
     the current buffer.  Convert the tabulation into spaces.
     +*/
 {
-  int uni, ret = TRUE;
+  int i;
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; ++i)
     if (!insert_tab()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -339,21 +337,19 @@ DEFUN_INT("newline", newline)
     the current buffer.
     +*/
 {
-  int uni, ret = TRUE;
+  int i;
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni) {
+  for (i = 0; i < uniarg; ++i) {
     if (cur_bp->flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
     if (!insert_newline()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -362,17 +358,15 @@ DEFUN_INT("open-line", open_line)
     Insert a newline and leave point before it.
     +*/
 {
-  int uni, ret = TRUE;
+  int i;
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; ++i)
     if (!intercalate_newline()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -400,15 +394,15 @@ void insert_nstring(const char *s, size_t size)
   undo_nosave = FALSE;
 }
 
-int self_insert_command(int c)
+int self_insert_command(size_t key)
 {
   weigh_mark();
 
-  if (c <= 255) {
-    if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
+  if (key <= 255) {
+    if (isspace(key) && cur_bp->flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
-    insert_char(c);
+    insert_char((int)key);
     return TRUE;
   } else {
     ding();
@@ -421,19 +415,16 @@ DEFUN_INT("self-insert-command", self_insert_command)
     Insert the character you type.
     +*/
 {
-  int uni, c, ret = TRUE;
-
-  c = getkey();
+  int i;
+  size_t key = getkey();
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!self_insert_command(c)) {
-      ret = FALSE;
+  for (i = 0; i < uniarg; ++i)
+    if (!self_insert_command(key)) {
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -511,20 +502,18 @@ DEFUN_INT("delete-char", delete_char)
     Join lines if the character is a newline.
     +*/
 {
-  int uni, ret = TRUE;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(backward_delete_char, -uniarg);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; ++i)
     if (!delete_char()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -573,24 +562,22 @@ DEFUN_INT("backward-delete-char", backward_delete_char)
     Join lines if the character is a newline.
     +*/
 {
+  int i;
   /* In overwrite-mode and isn't called by delete_char().  */
   int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
                     (last_uniarg > 0)) ?
     backward_delete_char_overwrite : backward_delete_char;
-  int uni, ret = TRUE;
 
   if (uniarg < 0)
     return FUNCALL_ARG(delete_char, -uniarg);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; ++i)
     if (!(*f)()) {
-      ret = FALSE;
+      ok = FALSE;
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 
@@ -608,7 +595,6 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
     backward_delete_char();
 
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return TRUE;
 }
 END_DEFUN
 
@@ -621,7 +607,6 @@ DEFUN_INT("just-one-space", just_one_space)
   FUNCALL(delete_horizontal_space);
   insert_char_in_insert_mode(' ');
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return TRUE;
 }
 END_DEFUN
 
@@ -690,7 +675,7 @@ DEFUN_INT("indent-command", indent_command)
     Indent line or insert a tab.
     +*/
 {
-  return indent_relative();
+  ok = indent_relative();
 }
 END_DEFUN
 
@@ -700,16 +685,14 @@ DEFUN_INT("newline-and-indent", newline_and_indent)
     Indentation is done using the `indent-command' function.
     +*/
 {
-  int ret;
-
   if (warn_if_readonly_buffer())
-    return FALSE;
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  ret = insert_newline();
-  if (ret)
-    FUNCALL(indent_command);
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return ret;
+    ok = FALSE;
+  else {
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    ok = insert_newline();
+    if (ok)
+      FUNCALL(indent_command);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  }
 }
 END_DEFUN

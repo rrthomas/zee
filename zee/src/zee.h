@@ -351,7 +351,7 @@ typedef size_t Font;
 #define DEFUN(zee_func, c_func) \
         int F_ ## c_func(int argc, le *branch) \
         { \
-          int uniused = argc > 1;
+          int uniused = argc > 1, ok = TRUE;
 #define DEFUN_INT(zee_func, c_func) \
 	DEFUN(zee_func, c_func) \
           int uniarg = 1; \
@@ -362,6 +362,7 @@ typedef size_t Font;
           }
 #define END_DEFUN \
           leWipe(branch); \
+          return ok; \
         }
 
 /* Call an interactive function. */
