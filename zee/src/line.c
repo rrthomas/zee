@@ -535,84 +535,71 @@ END_DEFUN
 			 Indentation command
 ***********************************************************************/
 
-static int indent_relative(void)
+DEFUN_INT("indent-relative", indent_relative)
+/*+
+Indent line or insert a tab.
++*/
 {
   size_t target_goalc, cur_goalc = get_goalc();
   Marker *old_point;
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    ok = FALSE;
+  else {
+    weigh_mark();
+    old_point = point_marker();
 
-  weigh_mark();
-  old_point = point_marker();
+    /* Find previous non-blank line. */
+    while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
 
-  /* Find previous non-blank line. */
-  do {
-    if (!FUNCALL_ARG(forward_line, -1)) {
-      cur_bp->pt = old_point->pt;
-      free_marker(old_point);
-      return insert_tab();
-    }
-  } while (is_blank_line());
-
-  /* Go to `cur_goalc' in that non-blank line. */
-  while (!eolp() && get_goalc() < cur_goalc)
-    forward_char();
-
-  /* Now find the next blank char. */
-  if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
-    while (!eolp() && (!isspace(following_char())))
+    /* Go to `cur_goalc' in that non-blank line. */
+    while (!eolp() && get_goalc() < cur_goalc)
       forward_char();
 
-  /* Find next non-blank char. */
-  while (!eolp() && (isspace(following_char())))
-    forward_char();
+    /* Now find the next blank char. */
+    if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
+      while (!eolp() && (!isspace(following_char())))
+        forward_char();
 
-  /* Target column. */
-  if (!eolp())
-    target_goalc = get_goalc();
-  else {
-    cur_bp->pt = old_point->pt;
-    free_marker(old_point);
+    /* Find next non-blank char. */
+    while (!eolp() && (isspace(following_char())))
+      forward_char();
 
-    return insert_tab();
+    /* Target column. */
+    if (!eolp()) {
+      target_goalc = get_goalc();
+      cur_bp->pt = old_point->pt;
+      free_marker(old_point);
+
+      /* Insert spaces. */
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+      while (get_goalc() < target_goalc)
+        insert_char(' ');
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    } else {
+      cur_bp->pt = old_point->pt;
+      free_marker(old_point);
+
+      ok = insert_tab();
+    }
   }
-
-  cur_bp->pt = old_point->pt;
-  free_marker(old_point);
-
-  /* Insert spaces.  */
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  while (get_goalc() < target_goalc)
-    insert_char(' ');
-
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return TRUE;
-}
-
-DEFUN_INT("indent-command", indent_command)
-/*+
-Indent line or insert a tab.
-+*/
-{
-  ok = indent_relative();
 }
 END_DEFUN
 
 DEFUN_INT("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
-Indentation is done using the `indent-command' function.
+Indentation is done using the `indent-relative' function,
+except that if there is a character in the first column of the line
+above, no indenting is performed.
 +*/
 {
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    ok = insert_newline();
-    if (ok)
-      FUNCALL(indent_command);
+    if ((ok = insert_newline()))
+      FUNCALL(indent_relative);
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   }
 }
