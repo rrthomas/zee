@@ -98,10 +98,10 @@ static int kill_line(void)
 }
 
 DEFUN_INT("kill-line", kill_line)
-  /*+
-    Kill the rest of the current line; if no nonblanks there, kill thru newline.
-    With prefix argument, kill that many lines from point.
-    +*/
+/*+
+Kill the rest of the current line; if no nonblanks there, kill thru newline.
+With prefix argument, kill that many lines from point.
++*/
 {
   int i;
 
@@ -121,17 +121,17 @@ DEFUN_INT("kill-line", kill_line)
 END_DEFUN
 
 DEFUN_INT("kill-region", kill_region)
-  /*+
-    Kill between point and mark.
-    The text is deleted but saved in the kill ring.
-    The command C-y (yank) can retrieve it from there.
-    If the buffer is read-only, Zee will beep and refrain from deleting
-    the text, but put the text in the kill ring anyway.  This means that
-    you can use the killing commands to copy text from a read-only buffer.
-    If the previous command was also a kill command,
-    the text killed this time appends to the text killed last time
-    to make one entry in the kill ring.
-    +*/
+/*+
+Kill between point and mark.
+The text is deleted but saved in the kill ring.
+The command C-y (yank) can retrieve it from there.
+If the buffer is read-only, Zee will beep and refrain from deleting
+the text, but put the text in the kill ring anyway.  This means that
+you can use the killing commands to copy text from a read-only buffer.
+If the previous command was also a kill command,
+the text killed this time appends to the text killed last time
+to make one entry in the kill ring.
++*/
 {
   Region r;
 
@@ -177,9 +177,9 @@ DEFUN_INT("kill-region", kill_region)
 END_DEFUN
 
 DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
-  /*+
-    Save the region as if killed, but don't kill it.
-    +*/
+/*+
+Save the region as if killed, but don't kill it.
++*/
 {
   Region r;
   char *p;
@@ -203,10 +203,10 @@ DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
 END_DEFUN
 
 DEFUN_INT("kill-word", kill_word)
-  /*+
-    Kill characters forward until encountering the end of a word.
-    With argument, do this that many times.
-    +*/
+/*+
+Kill characters forward until encountering the end of a word.
+With argument, do this that many times.
++*/
 {
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
@@ -229,21 +229,21 @@ DEFUN_INT("kill-word", kill_word)
 END_DEFUN
 
 DEFUN_INT("backward-kill-word", backward_kill_word)
-  /*+
-    Kill characters backward until encountering the end of a word.
-    With argument, do this that many times.
-    +*/
+/*+
+Kill characters backward until encountering the end of a word.
+With argument, do this that many times.
++*/
 {
   ok = FUNCALL_ARG(kill_word, (uniused == 0) ? -1 : -uniarg);
 }
 END_DEFUN
 
 DEFUN_INT("kill-sexp", kill_sexp)
-  /*+
-    Kill the sexp (balanced expression) following the cursor.
-    With ARG, kill that many sexps after the cursor.
-    Negative arg -N means kill N sexps before the cursor.
-    +*/
+/*+
+Kill the sexp (balanced expression) following the cursor.
+With ARG, kill that many sexps after the cursor.
+Negative arg -N means kill N sexps before the cursor.
++*/
 {
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
@@ -266,11 +266,11 @@ DEFUN_INT("kill-sexp", kill_sexp)
 END_DEFUN
 
 DEFUN_INT("yank", yank)
-  /*+
-    Reinsert the last stretch of killed text.
-    More precisely, reinsert the stretch of killed text most recently
-    killed OR yanked.  Put point at end, and set mark at beginning.
-    +*/
+/*+
+Reinsert the last stretch of killed text.
+More precisely, reinsert the stretch of killed text most recently
+killed OR yanked.  Put point at end, and set mark at beginning.
++*/
 {
   ok = FALSE;
 

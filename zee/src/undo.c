@@ -173,10 +173,10 @@ static Undo *revert_action(Undo *up)
 }
 
 DEFUN_INT("undo", undo)
-  /*+
-    Undo some previous changes.
-    Repeat this command to undo more changes.
-    +*/
+/*+
+Undo some previous changes.
+Repeat this command to undo more changes.
++*/
 {
   ok = FALSE;
 

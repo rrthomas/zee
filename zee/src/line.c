@@ -147,10 +147,10 @@ static int insert_tab(void)
 }
 
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
-  /*+
-    Insert a tabulation at the current point position into
-    the current buffer.  Convert the tabulation into spaces.
-    +*/
+/*+
+Insert a tabulation at the current point position into
+the current buffer.  Convert the tabulation into spaces.
++*/
 {
   int i;
 
@@ -330,10 +330,10 @@ void fill_break_line(void)
 }
 
 DEFUN_INT("newline", newline)
-  /*+
-    Insert a newline at the current point position into
-    the current buffer.
-    +*/
+/*+
+Insert a newline at the current point position into
+the current buffer.
++*/
 {
   int i;
 
@@ -352,9 +352,9 @@ DEFUN_INT("newline", newline)
 END_DEFUN
 
 DEFUN_INT("open-line", open_line)
-  /*+
-    Insert a newline and leave point before it.
-    +*/
+/*+
+Insert a newline and leave point before it.
++*/
 {
   int i;
 
@@ -409,9 +409,10 @@ int self_insert_command(size_t key)
 }
 
 DEFUN_INT("self-insert-command", self_insert_command)
-  /*+
-    Insert the character you type.
-    +*/
+/*+
+Insert the character you type.
+Whichever character you type to run this command is inserted.
++*/
 {
   int i;
   size_t key = getkey();
@@ -449,11 +450,8 @@ int delete_char(void)
               (size_t)(*astr_char(cur_bp->pt.p->item,
                                     (ptrdiff_t)cur_bp->pt.o)), 0);
 
-    /*
-     * Move the text one position backward after the point,
-     * if required.
-     * This code assumes that memmove(d, s, 0) does nothing.
-     */
+    /* Move the text one position backward after the point,
+       if required. */
     astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
 
     adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
@@ -495,10 +493,10 @@ int delete_char(void)
 }
 
 DEFUN_INT("delete-char", delete_char)
-  /*+
-    Delete the following character.
-    Join lines if the character is a newline.
-    +*/
+/*+
+Delete the following character.
+Join lines if the character is a newline.
++*/
 {
   int i;
 
@@ -537,13 +535,13 @@ static int backward_delete_char_overwrite(void)
 
     backward_char();
     if (following_char() == '\t') {
-      /* In overwrite-mode.  */
+      /* In overwrite-mode. */
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       insert_expanded_tab(insert_char);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     }
     else {
-      insert_char(' '); /* In overwrite-mode.  */
+      insert_char(' '); /* In overwrite-mode. */
     }
     backward_char();
 
@@ -555,10 +553,10 @@ static int backward_delete_char_overwrite(void)
 }
 
 DEFUN_INT("backward-delete-char", backward_delete_char)
-  /*+
-    Delete the previous character.
-    Join lines if the character is a newline.
-    +*/
+/*+
+Delete the previous character.
+Join lines if the character is a newline.
++*/
 {
   int i;
   /* In overwrite-mode and isn't called by delete_char().  */
@@ -580,9 +578,9 @@ DEFUN_INT("backward-delete-char", backward_delete_char)
 END_DEFUN
 
 DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
-  /*+
-    Delete all spaces and tabs around point.
-    +*/
+/*+
+Delete all spaces and tabs around point.
++*/
 {
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
@@ -597,9 +595,9 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
 END_DEFUN
 
 DEFUN_INT("just-one-space", just_one_space)
-  /*+
-    Delete all spaces and tabs around point, leaving one space.
-    +*/
+/*+
+Delete all spaces and tabs around point, leaving one space.
++*/
 {
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   FUNCALL(delete_horizontal_space);
@@ -669,19 +667,19 @@ static int indent_relative(void)
 }
 
 DEFUN_INT("indent-command", indent_command)
-  /*+
-    Indent line or insert a tab.
-    +*/
+/*+
+Indent line or insert a tab.
++*/
 {
   ok = indent_relative();
 }
 END_DEFUN
 
 DEFUN_INT("newline-and-indent", newline_and_indent)
-  /*+
-    Insert a newline, then indent.
-    Indentation is done using the `indent-command' function.
-    +*/
+/*+
+Insert a newline, then indent.
+Indentation is done using the `indent-command' function.
++*/
 {
   if (warn_if_readonly_buffer())
     ok = FALSE;

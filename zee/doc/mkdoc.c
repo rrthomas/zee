@@ -57,7 +57,6 @@ struct ventry {
 #define ventry_table_size (sizeof ventry_table / sizeof ventry_table[0])
 
 FILE *input_file;
-FILE *output_file;
 
 static void fdecl(const char *name)
 {
@@ -89,7 +88,8 @@ static void parse(void)
   astr buf;
 
   while ((buf = astr_fgets(input_file)) != NULL) {
-    if (!strncmp(astr_cstr(buf), "DEFUN(", 6)) {
+    if (!strncmp(astr_cstr(buf), "DEFUN(", 6) ||
+        !strncmp(astr_cstr(buf), "DEFUN_INT(", 10)) {
       int i, j;
       astr sub;
       i = astr_find_cstr(buf, "\"");
@@ -113,30 +113,27 @@ static void dump_help(void)
   for (i = 0; i < fentry_table_size; ++i) {
     astr doc = fentry_table[i].doc;
     if (doc != NULL)
-      fprintf(output_file, "\fF_%s\n%s",
+      fprintf(stdout, "\fF_%s\n%s",
               fentry_table[i].name, astr_cstr(doc));
   }
   for (i = 0; i < ventry_table_size; ++i)
-    fprintf(output_file, "\fV_%s\n%s\n%s\n",
+    fprintf(stdout, "\fV_%s\n%s\n%s\n",
             ventry_table[i].name, ventry_table[i].defvalue,
             ventry_table[i].doc);
 }
 
 static void process_file(char *filename)
 {
-  if (filename != NULL && strcmp(filename, "-") != 0) {
-    if ((input_file = fopen(filename, "r")) == NULL) {
-      fprintf(stderr, "mkdoc:%s: %s\n",
-              filename, strerror(errno));
-      exit(1);
-    }
-  } else
-    input_file = stdin;
+  if (filename != NULL && strcmp(filename, "-") != 0 &&
+      (input_file = fopen(filename, "r")) == NULL) {
+    fprintf(stderr, "mkdoc:%s: %s\n",
+            filename, strerror(errno));
+    exit(1);
+  }
 
   parse();
 
-  if (input_file != stdin)
-    fclose(input_file);
+  fclose(input_file);
 }
 
 /*
@@ -149,14 +146,9 @@ void zee_exit(int exitcode)
 
 int main(int argc, char **argv)
 {
-  input_file = stdin;
-  output_file = stdout;
-
-  if (argc < 1)
-    process_file(NULL);
-  else
-    while (*argv)
-      process_file(*argv++);
+  int i;
+  for (i = 1; i < argc; i++)
+    process_file(argv[i]);
 
   dump_help();
 

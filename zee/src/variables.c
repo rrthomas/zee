@@ -150,9 +150,9 @@ static char *get_variable_format(char *var)
 }
 
 DEFUN_INT("set-variable", set_variable)
-  /*+
-    Set a variable value to the user-specified value.
-    +*/
+/*+
+Set a variable value to the user-specified value.
++*/
 {
   char *var, *val = NULL, *fmt;
 

@@ -84,10 +84,10 @@ void set_current_window(Window *wp)
 }
 
 DEFUN_INT("split-window", split_window)
-  /*+
-    Split current window into two windows, one above the other.
-    Both windows display the same buffer now current.
-    +*/
+/*+
+Split current window into two windows, one above the other.
+Both windows display the same buffer now current.
++*/
 {
   Window *newwp;
 
@@ -114,9 +114,9 @@ DEFUN_INT("split-window", split_window)
 END_DEFUN
 
 DEFUN_INT("delete-window", delete_window)
-  /*+
-    Remove the current window from the screen.
-    +*/
+/*+
+Remove the current window from the screen.
++*/
 {
   Window *wp, *del_wp = cur_wp;
 
@@ -159,9 +159,9 @@ Window *popup_window(void)
 }
 
 DEFUN_INT("delete-other-windows", delete_other_windows)
-  /*+
-    Make the selected window fill the screen.
-    +*/
+/*+
+Make the selected window fill the screen.
++*/
 {
   Window *wp, *nextwp;
 
@@ -182,11 +182,11 @@ DEFUN_INT("delete-other-windows", delete_other_windows)
 END_DEFUN
 
 DEFUN_INT("other-window", other_window)
-  /*+
-    Select the first different window on the screen.
-    All windows are arranged in a cyclic order.
-    This command selects the window one step away in that order.
-    +*/
+/*+
+Select the first different window on the screen.
+All windows are arranged in a cyclic order.
+This command selects the window one step away in that order.
++*/
 {
   set_current_window((cur_wp->next != NULL) ? cur_wp->next : head_wp);
 }

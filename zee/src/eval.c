@@ -946,13 +946,13 @@ static le *eval_expression(char *expr)
 
 DEFUN_INT("eval-expression", eval_expression)
 {
-  /*+
-    Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
-    Value is also consed on to front of the variable `values'.
-    Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
-    insert the result into the current buffer instead of printing it in
-    the minibuffer.
-    +*/
+/*+
+Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
+Value is also consed on to front of the variable `values'.
+Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
+insert the result into the current buffer instead of printing it in
+the minibuffer.
++*/
   char *expr;
 
   if ((expr = minibuf_read("Eval: ", "")) == NULL)
@@ -967,10 +967,10 @@ DEFUN_INT("eval-expression", eval_expression)
 END_DEFUN
 
 DEFUN_INT("eval-last-sexp", eval_last_sexp)
-  /*+
-    Evaluate sexp before point; print value in minibuffer.
-    Interactively, with prefix argument, print output into current buffer.
-    +*/
+/*+
+Evaluate sexp before point; print value in minibuffer.
+Interactively, with prefix argument, print output into current buffer.
++*/
 {
   char *expr;
   le *list;

@@ -91,10 +91,10 @@ void recenter(Window *wp)
 }
 
 DEFUN_INT("recenter", recenter)
-  /*+
-    Center point in window and redisplay screen.
-    The desired position of point is always relative to the current window.
-    +*/
+/*+
+Center point in window and redisplay screen.
+The desired position of point is always relative to the current window.
++*/
 {
   recenter(cur_wp);
   term_full_redisplay();

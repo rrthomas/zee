@@ -72,12 +72,12 @@ void cancel_kbd_macro(void)
 }
 
 DEFUN_INT("start-kbd-macro", start_kbd_macro)
-  /*+
-    Record subsequent keyboard input, defining a keyboard macro.
-    The commands are recorded even as they are executed.
-    Use C-x ) to finish recording and make the macro available.
-    Use M-x name-last-kbd-macro to give it a permanent name.
-    +*/
+/*+
+Record subsequent keyboard input, defining a keyboard macro.
+The commands are recorded even as they are executed.
+Use C-x ) to finish recording and make the macro available.
+Use M-x name-last-kbd-macro to give it a permanent name.
++*/
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
     minibuf_error("Already defining a keyboard macro");
@@ -95,11 +95,11 @@ DEFUN_INT("start-kbd-macro", start_kbd_macro)
 END_DEFUN
 
 DEFUN_INT("end-kbd-macro", end_kbd_macro)
-  /*+
-    Finish defining a keyboard macro.
-    The definition was started by C-x (.
-    The macro is now available for use via C-x e.
-    +*/
+/*+
+Finish defining a keyboard macro.
+The definition was started by C-x (.
+The macro is now available for use via C-x e.
++*/
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
     minibuf_error("Not defining a keyboard macro");
@@ -110,12 +110,12 @@ DEFUN_INT("end-kbd-macro", end_kbd_macro)
 END_DEFUN
 
 DEFUN_INT("name-last-kbd-macro", name_last_kbd_macro)
-  /*+
-    Assign a name to the last keyboard macro defined.
-    Argument SYMBOL is the name to define.
-    The symbol's function definition becomes the keyboard macro string.
-    Such a "function" cannot be called from Lisp, but it is a valid editor command.
-    +*/
+/*+
+Assign a name to the last keyboard macro defined.
+Argument SYMBOL is the name to define.
+The symbol's function definition becomes the keyboard macro string.
+Such a "function" cannot be called from Lisp, but it is a valid editor command.
++*/
 {
   char *ms;
   Macro *mp;
@@ -168,13 +168,13 @@ int call_macro(Macro *mp)
 }
 
 DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
-  /*+
-    Call the last keyboard macro that you defined with C-x (.
-    A prefix argument serves as a repeat count.  Zero means repeat until error.
+/*+
+Call the last keyboard macro that you defined with C-x (.
+A prefix argument serves as a repeat count.  Zero means repeat until error.
 
-    To make a macro permanent so you can call it even after
-    defining others, use M-x name-last-kbd-macro.
-    +*/
+To make a macro permanent so you can call it even after
+defining others, use M-x name-last-kbd-macro.
++*/
 {
   if (cur_mp == NULL) {
     minibuf_error("No kbd macro has been defined");

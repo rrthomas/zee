@@ -35,9 +35,9 @@
 #include "paths.h"
 
 DEFUN_INT("zee-version", zee_version)
-  /*+
-    Show the zee version.
-    +*/
+/*+
+Show the version of Zee in the minibuffer.
++*/
 {
   minibuf_write("Zee " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 }
@@ -105,9 +105,9 @@ static void write_function_description(va_list ap)
 }
 
 DEFUN_INT("describe-function", describe_function)
-  /*+
-    Display the full documentation of a function.
-    +*/
+/*+
+Display the full documentation of FUNCTION (a symbol).
++*/
 {
   char *name;
   astr doc;
@@ -141,9 +141,9 @@ static void write_variable_description(va_list ap)
 }
 
 DEFUN_INT("describe-variable", describe_variable)
-  /*+
-    Display the full documentation of a variable.
-    +*/
+/*+
+Display the full documentation of VARIABLE (a symbol).
++*/
 {
   char *name;
 
@@ -167,9 +167,9 @@ DEFUN_INT("describe-variable", describe_variable)
 END_DEFUN
 
 DEFUN_INT("describe-key", describe_key)
-  /*+
-    Display documentation of the command invoked by a key sequence.
-    +*/
+/*+
+Display documentation of the command invoked by a key sequence.
++*/
 {
   char *name;
 

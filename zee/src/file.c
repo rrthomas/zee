@@ -385,10 +385,10 @@ Completion *make_buffer_completion(void)
 }
 
 DEFUN_INT("find-file", find_file)
-  /*+
-    Edit a file specified by the user.  Switch to a buffer visiting the file,
-    creating one if none already exists.
-    +*/
+/*+
+Edit a file specified by the user.  Switch to a buffer visiting the file,
+creating one if none already exists.
++*/
 {
   char *ms;
   astr buf;
@@ -411,9 +411,9 @@ DEFUN_INT("find-file", find_file)
 END_DEFUN
 
 DEFUN_INT("switch-to-buffer", switch_to_buffer)
-  /*+
-    Select to the user specified buffer in the current window.
-    +*/
+/*+
+Select to the user specified buffer in the current window.
++*/
 {
   char *ms;
   Buffer *swbuf;
@@ -532,9 +532,9 @@ void kill_buffer(Buffer *kill_bp)
 }
 
 DEFUN_INT("kill-buffer", kill_buffer)
-  /*+
-    Kill the current buffer or the user specified one.
-    +*/
+/*+
+Kill the current buffer or the user specified one.
++*/
 {
   Buffer *bp;
   char *ms;
@@ -601,10 +601,10 @@ static int insert_file(char *filename)
 }
 
 DEFUN_INT("insert-file", insert_file)
-  /*+
-    Insert contents of the user specified file into buffer after point.
-    Set mark after the inserted text.
-    +*/
+/*+
+Insert contents of the user specified file into buffer after point.
+Set mark after the inserted text.
++*/
 {
   char *ms;
   astr buf;
@@ -710,19 +710,19 @@ static int save_buffer(Buffer *bp)
 }
 
 DEFUN_INT("save-buffer", save_buffer)
-  /*+
-    Save current buffer in visited file if modified.
-    +*/
+/*+
+Save current buffer in visited file if modified.
++*/
 {
   ok = save_buffer(cur_bp);
 }
 END_DEFUN
 
 DEFUN_INT("write-file", write_file)
-  /*+
-    Write current buffer into the user specified file.
-    Makes buffer visit that file, and marks it not modified.
-    +*/
+/*+
+Write current buffer into the user specified file.
+Makes buffer visit that file, and marks it not modified.
++*/
 {
   char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
   char *ms;
@@ -819,18 +819,18 @@ static int save_some_buffers(void)
 
 
 DEFUN_INT("save-some-buffers", save_some_buffers)
-  /*+
-    Save some modified file-visiting buffers.  Asks user about each one.
-    +*/
+/*+
+Save some modified file-visiting buffers.  Asks user about each one.
++*/
 {
   ok = save_some_buffers();
 }
 END_DEFUN
 
 DEFUN_INT("save-buffers-kill-zee", save_buffers_kill_zee)
-  /*+
-    Offer to save each buffer, then kill this Zee process.
-    +*/
+/*+
+Offer to save each buffer, then kill this Zee process.
++*/
 {
   Buffer *bp;
   int ans, i = 0;
@@ -882,10 +882,9 @@ void zee_exit(int exitcode)
 }
 
 DEFUN_INT("cd", cd)
-  /*+
-    Make the user specified directory become the current buffer's default
-    directory.
-    +*/
+/*+
+Make DIR become the current default directory.
++*/
 {
   char *ms;
   astr buf;

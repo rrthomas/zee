@@ -152,9 +152,6 @@ This is the initialization file that comes with the Zee sources.
 This table contains the commands that can be used during an editing
 session to get help.
 
-If you have set the @samp{alternative-bindings} variable to @samp{true},
-the @kbd{M-h} key should be used instead of @kbd{C-h}.
-
 @table @kbd
 @item C-h c
 Describe briefly a key sequence.
@@ -273,8 +270,6 @@ Incrementally search forward.  Bound to @code{isearch-forward}.
 Begin a numeric argument for the following command.  Bound to @code{universal-argument}.
 @item C-v, @key{PGDN}
 Scroll up one screen page.  Bound to @code{scroll-up}.
-@item C-w
-Kill region.  Bound to @code{kill-region}.
 @item C-x (
 Start recording keyboard macro.  Bound to @code{start-kbd-macro}.
 @item C-x )
