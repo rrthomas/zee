@@ -535,6 +535,21 @@ END_DEFUN
 			 Indentation command
 ***********************************************************************/
 
+/*
+ * Go to cur_goalc() in the previous non-blank line.
+ */
+static void previous_nonblank_goalc(void)
+{
+  size_t cur_goalc = get_goalc();
+
+  /* Find previous non-blank line. */
+  while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
+
+  /* Go to `cur_goalc' in that non-blank line. */
+  while (!eolp() && get_goalc() < cur_goalc)
+    forward_char();
+}
+
 DEFUN_INT("indent-relative", indent_relative)
 /*+
 Indent line or insert a tab.
@@ -547,13 +562,7 @@ Indent line or insert a tab.
     Marker *old_point = point_marker();
 
     weigh_mark();
-
-    /* Find previous non-blank line. */
-    while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
-
-    /* Go to `cur_goalc' in that non-blank line. */
-    while (!eolp() && get_goalc() < cur_goalc)
-      forward_char();
+    previous_nonblank_goalc();
 
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
@@ -567,6 +576,7 @@ Indent line or insert a tab.
     /* Record target column. */
     if (!eolp())
       target_goalc = get_goalc();
+
     cur_bp->pt = old_point->pt;
     free_marker(old_point);
 
@@ -596,10 +606,28 @@ above, no indenting is performed.
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
+    int indent;
+
+    weigh_mark();
+
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    if ((ok = insert_newline()))
-      FUNCALL(indent_relative);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    if ((ok = insert_newline())) {
+      size_t pos;
+      Marker *old_point = point_marker();
+
+      /* Check where last non-blank goalc is. */
+      previous_nonblank_goalc();
+      pos = get_goalc();
+      indent = pos > 0 || isspace(following_char());
+      cur_bp->pt = old_point->pt;
+      free_marker(old_point);
+      /* Only indent if we're in column > 0 or we're in column 0 and
+         there is a space character there in the last non-blank line. */
+      if (indent)
+        FUNCALL(indent_relative);
+
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    }
   }
 }
 END_DEFUN
