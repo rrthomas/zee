@@ -52,7 +52,6 @@ zee_base_SOURCES =				\
 	minibuf.c				\
 	point.c					\
 	redisplay.c				\
-	registers.c				\
 	search.c				\
 	tbl_funcs.h				\
 	tbl_vars.h				\

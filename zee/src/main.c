@@ -382,7 +382,6 @@ int main(int argc, char **argv)
   /* Free all the memory allocated. */
   astr_delete(as);
   free_kill_ring();
-  free_registers();
   free_search_history();
   free_macros();
   free_windows();
