@@ -41,106 +41,69 @@ static Function _last_command;
  * Key binding.
  *--------------------------------------------------------------------------*/
 
-typedef struct leaf *leafp;
+typedef struct binding *bindingp;
 
-struct leaf {
-  /* The key and the function associated with the leaf. */
+struct binding {
   size_t key;
   Function func;
-
-  /* Leaf vector, number of items, max number of items. */
-  leafp *vec;
-  size_t vecnum, vecmax;
 };
 
-static leafp leaf_tree;
+/* Binding vector, number of items, max number of items. */
+bindingp *binding;
+static size_t nbindings, max_bindings;
 
-static leafp leaf_new(int vecmax)
-{
-  leafp p;
-
-  p = (leafp)zmalloc(sizeof(*p));
-  memset(p, 0, sizeof(*p));
-
-  p->vecmax = vecmax;
-  p->vec = (leafp *)zmalloc(sizeof(*p) * vecmax);
-
-  return p;
-}
-
-static leafp search_leaf(leafp tree, size_t key)
+static bindingp get_binding(size_t key)
 {
   size_t i;
 
-  for (i = 0; i < tree->vecnum; ++i)
-    if (tree->vec[i]->key == key)
-      return tree->vec[i];
+  for (i = 0; i < nbindings; ++i)
+    if (binding[i]->key == key)
+      return binding[i];
 
   return NULL;
 }
 
-static void add_leaf(leafp tree, leafp p)
+static void add_binding(bindingp p)
 {
   size_t i;
 
   /* Reallocate vector if there is not enough space. */
-  if (tree->vecnum + 1 >= tree->vecmax) {
-    tree->vecmax += 5;
-    tree->vec = (leafp *)zrealloc(tree->vec, sizeof(*p) * tree->vecmax);
+  if (nbindings + 1 >= max_bindings) {
+    max_bindings += 5;
+    binding = zrealloc(binding, sizeof(p) * max_bindings);
   }
 
-  /* Insert the leaf at the sorted position. */
-  for (i = 0; i < tree->vecnum; i++)
-    if (tree->vec[i]->key > p->key) {
-      memmove(&tree->vec[i+1], &tree->vec[i], sizeof(p) * tree->vecnum - i);
-      tree->vec[i] = p;
+  /* Insert the binding at the sorted position. */
+  for (i = 0; i < nbindings; i++)
+    if (binding[i]->key > p->key) {
+      memmove(&binding[i + 1], &binding[i], sizeof(p) * (nbindings - i));
+      binding[i] = p;
       break;
     }
-  if (i == tree->vecnum)
-    tree->vec[tree->vecnum] = p;
-  ++tree->vecnum;
+  if (i == nbindings)
+    binding[nbindings] = p;
+  ++nbindings;
 }
 
-static void bind_key_vec(leafp tree, size_t *keys, size_t n, Function func)
+static void bind_key(size_t key, Function func)
 {
-  leafp p, s;
+  bindingp p, s;
 
-  if ((s = search_leaf(tree, keys[0])) == NULL) {
-    p = leaf_new(n == 1 ? 1 : 5);
-    p->key = keys[0];
-    add_leaf(tree, p);
-    if (n == 1)
-      p->func = func;
-    else
-      bind_key_vec(p, &keys[1], n - 1, func);
-  } else if (n > 1)
-    bind_key_vec(s, &keys[1], n - 1, func);
-  else
+  if ((s = get_binding(key)) == NULL) {
+    p = zmalloc(sizeof(*p));
+    p->key = key;
+    add_binding(p);
+    p->func = func;
+  } else
     s->func = func;
 }
 
-static void bind_key_string(char *key, Function func)
+static void bind_key_string(char *keystr, Function func)
 {
-  size_t numkeys, *keys;
+  size_t key;
 
-  if ((numkeys = keystrtovec(key, &keys)) > 0) {
-    bind_key_vec(leaf_tree, keys, numkeys, func);
-    free(keys);
-  }
-}
-
-static leafp search_key(leafp tree, size_t *keys, size_t n)
-{
-  leafp p;
-
-  if ((p = search_leaf(tree, keys[0])) != NULL) {
-    if (n == 1)
-      return p;
-    else
-      return search_key(p, &keys[1], n - 1);
-  }
-
-  return NULL;
+  if ((key = strtochord(keystr)) != KBD_NOKEY)
+    bind_key(key, func);
 }
 
 size_t do_completion(astr as)
@@ -154,51 +117,10 @@ size_t do_completion(astr as)
   return key;
 }
 
-static astr make_completion(size_t *keys, size_t numkeys)
-{
-  astr as = astr_new(), key;
-  size_t i, len = 0;
-
-  for (i = 0; i < numkeys; i++) {
-    if (i > 0) {
-      astr_cat_cstr(as, " ");
-      len++;
-    }
-    key = chordtostr(keys[i]);
-    astr_cat(as, key);
-    astr_delete(key);
-  }
-
-  return astr_cat_cstr(as, "-");
-}
-
-static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
-{
-  leafp p;
-  vector *v = vec_new(sizeof(key));
-
-  vec_item(v, 0, size_t) = key;
-  *numkeys = 1;
-
-  do {
-    if ((p = search_key(leaf_tree, vec_array(v), *numkeys)) == NULL)
-      break;
-    if (p->func == NULL) {
-      astr as = make_completion(vec_array(v), *numkeys);
-      vec_item(v, (*numkeys)++, size_t) = do_completion(as);
-      astr_delete(as);
-    }
-  } while (p->func == NULL);
-
-  *keys = vec_toarray(v);
-  return p;
-}
-
 void process_key(size_t key)
 {
   int uni;
-  size_t *keys = NULL, numkeys;
-  leafp p;
+  bindingp p;
 
   if (key == KBD_NOKEY)
     return;
@@ -207,7 +129,7 @@ void process_key(size_t key)
     /* Got an ESC x sequence where `x' is a digit. */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
-    if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
+    if ((p = get_binding(key)) == NULL) {
       /* There are no bindings for the pressed key. */
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       for (uni = 0;
@@ -218,8 +140,6 @@ void process_key(size_t key)
       p->func((lastflag & FLAG_SET_UNIARG) != 0, evalCastIntToLe(last_uniarg));
       _last_command = p->func;
     }
-
-    free(keys);
   }
 
   /* Only add keystrokes if we're already in macro defining mode
@@ -274,7 +194,8 @@ void init_bindings(void)
 {
   size_t i, j;
 
-  leaf_tree = leaf_new(10);
+  max_bindings = 10;
+  binding = zmalloc(sizeof(*binding) * max_bindings);
 
   /* Sort the array for better searching later. */
   qsort(fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
@@ -286,18 +207,17 @@ void init_bindings(void)
         bind_key_string(fentry_table[i].key[j], fentry_table[i].func);
 }
 
-static void recursive_free_bindings(leafp p)
+static void recursive_free_bindings(void)
 {
   size_t i;
-  for (i = 0; i < p->vecnum; ++i)
-    recursive_free_bindings(p->vec[i]);
-  free(p->vec);
-  free(p);
+  for (i = 0; i < nbindings; ++i)
+    free(binding[i]);
+  free(binding);
 }
 
 void free_bindings(void)
 {
-  recursive_free_bindings(leaf_tree);
+  recursive_free_bindings();
   free_history_elements(&functions_history);
 }
 
@@ -432,7 +352,6 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
     Read function name, then read its arguments and call it.
     +*/
 {
-  int res;
   char *name;
   astr msg = astr_new();
 
@@ -446,10 +365,8 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
   if (name == NULL)
     return FALSE;
 
-  res = execute_function(name, uniarg);
+  ok = execute_function(name, uniarg);
   free(name);
-
-  return res;
 }
 END_DEFUN
 
@@ -460,7 +377,7 @@ DEFUN("global-set-key", global_set_key)
     sequence.
     +*/
 {
-  size_t *keys = NULL, numkeys;
+  size_t key = KBD_NOKEY;
   char *name = NULL, *keystr = NULL;
 
   ok = FALSE;
@@ -472,12 +389,11 @@ DEFUN("global-set-key", global_set_key)
     }
   } else {
     astr as;
-    leafp p;
 
     minibuf_write("Set key globally: ");
-    p = completion_scan(getkey(), &keys, &numkeys);
+    key = getkey();
 
-    as = keyvectostr(keys, numkeys);
+    as = chordtostr(key);
     name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
     astr_delete(as);
   }
@@ -490,15 +406,12 @@ DEFUN("global-set-key", global_set_key)
       if (uniused)
         bind_key_string(keystr, func);
       else
-        bind_key_vec(leaf_tree, keys, numkeys, func);
+        bind_key(key, func);
     } else
       minibuf_error("No such function `%d'", name);
 
     free(name);
   }
-
-  if (uniused == 0)
-    free(keys);
 }
 END_DEFUN
 
@@ -515,40 +428,37 @@ DEFUN_INT("where-is", where_is)
   name = minibuf_read_function_name("Where is command: ");
 
   if (name == NULL || (f = get_fentry(name)) == NULL)
-    return FALSE;
+    ok = FALSE;
+  else {
+    if (f->key[0]) {
+      astr bindings = bindings_string(f);
+      astr as = astr_new();
 
-  if (f->key[0]) {
-    astr bindings = bindings_string(f);
-    astr as = astr_new();
+      astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
+      if (uniused)
+        bprintf("%s", astr_cstr(as));
+      else
+        minibuf_write("%s", astr_cstr(as));
 
-    astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
-    if (uniused)
-      bprintf("%s", astr_cstr(as));
-    else
-      minibuf_write("%s", astr_cstr(as));
-
-    astr_delete(as);
-    astr_delete(bindings);
-  } else
-    minibuf_write("%s is not on any key", name);
-
-  return TRUE;
+      astr_delete(as);
+      astr_delete(bindings);
+    } else
+      minibuf_write("%s is not on any key", name);
+  }
 }
 END_DEFUN
 
 char *get_function_by_key_sequence(void)
 {
-  leafp p;
-  size_t c = getkey();
-  size_t *keys, numkeys;
+  bindingp p;
+  size_t key = getkey();
 
-  if (c & KBD_META && isdigit(c & 255))
+  if (key & KBD_META && isdigit(key & 255))
     return "universal-argument";
 
-  p = completion_scan(c, &keys, &numkeys);
-  free(keys);
+  p = get_binding(key);
   if (p == NULL) {
-    if (c == KBD_RET || c == KBD_TAB || c <= 255)
+    if (key == KBD_RET || key == KBD_TAB || key <= 255)
       return "self-insert-command";
     else
       return NULL;
@@ -556,47 +466,22 @@ char *get_function_by_key_sequence(void)
     return get_function_name(p->func);
 }
 
-static void write_bindings_tree(leafp tree, list keys)
-{
-  size_t i;
-  list l;
-  astr as = chordtostr(tree->key);
-
-  list_append(keys, as);
-
-  for (i = 0; i < tree->vecnum; ++i) {
-    leafp p = tree->vec[i];
-    if (p->func != NULL) {
-      astr key = astr_new();
-      astr as = chordtostr(p->key);
-      for (l = list_next(list_first(keys));
-           l != keys;
-           l = list_next(l)) {
-        astr_cat(key, l->item);
-        astr_cat_char(key, ' ');
-      }
-      astr_cat(key, as);
-      astr_delete(as);
-      bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
-      astr_delete(key);
-    } else
-      write_bindings_tree(p, keys);
-  }
-
-  astr_delete(list_betail(keys));
-}
-
 static void write_bindings_list(va_list ap)
 {
-  list l = list_new();
+  size_t i;
 
   (void)ap;
 
   bprintf("%-15s %s\n", "Binding", "Function");
   bprintf("%-15s %s\n", "-------", "--------");
 
-  write_bindings_tree(leaf_tree, l);
-  list_delete(l);
+  for (i = 0; i < nbindings; ++i) {
+    bindingp p = binding[i];
+    astr key = chordtostr(p->key);
+    assert(p->func != NULL);
+    bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
+    astr_delete(key);
+  }
 }
 
 DEFUN_INT("list-bindings", list_bindings)
@@ -605,6 +490,5 @@ DEFUN_INT("list-bindings", list_bindings)
     +*/
 {
   write_temp_buffer("*Bindings List*", write_bindings_list);
-  return TRUE;
 }
 END_DEFUN

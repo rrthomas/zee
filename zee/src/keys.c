@@ -1,5 +1,7 @@
 /* Key sequences functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004-2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -237,70 +239,18 @@ static size_t strtokey(char *buf, size_t *len)
 /*
  * Convert a key chord string to its key code.
  */
-size_t strtochord(char *buf, size_t *len)
+size_t strtochord(char *buf)
 {
-  size_t key, l;
+  size_t key = 0, len = 0, k;
 
-  key = strtokey(buf, &l);
-  if (key == KBD_NOKEY) {
-    *len = 0;
-    return KBD_NOKEY;
-  }
-
-  *len = l;
-
-  if (key == KBD_CTL || key == KBD_META) {
-    size_t k = strtochord(buf + l, &l);
-    if (k == KBD_NOKEY) {
-      *len = 0;
-      return KBD_NOKEY;
-    }
-    *len += l;
+  do {
+    size_t l;
+    k = strtokey(buf + len, &l);
     key |= k;
-  }
+    len += l;
+  } while (k == KBD_CTL || k == KBD_META);
 
   return key;
-}
-
-/*
- * Convert a key sequence string into a key code sequence.
- */
-int keystrtovec(char *key, size_t **keys)
-{
-  vector *v = vec_new(sizeof(size_t));
-  size_t size;
-
-  for (size = 0; *key != '\0'; size++) {
-    size_t len, code = strtochord(key, &len);
-    vec_item(v, size, size_t) = code;
-    if ((vec_item(v, size, size_t) = code) == KBD_NOKEY) {
-      vec_delete(v);
-      return -1;
-    }
-    key += len;
-  }
-
-  *keys = vec_toarray(v);
-  return size;
-}
-
-/*
- * Convert a key code sequence into a key code sequence string.
- */
-astr keyvectostr(size_t *keys, size_t numkeys)
-{
-  size_t i;
-  astr as = astr_new();
-
-  for (i = 0; i < numkeys; i++) {
-    astr key = chordtostr(keys[i]);
-    astr_cat(as, key);
-    astr_delete(key);
-    if (i > 0)
-      astr_cat_char(as, ' ');
-  }
-
-  return as;
 }
 
 /*
@@ -308,22 +258,11 @@ astr keyvectostr(size_t *keys, size_t numkeys)
  */
 astr simplify_key(char *key)
 {
-  size_t i, j, *keys;
-  astr dest = astr_new();
+  size_t code;
 
   if (key == NULL)
-    return dest;
-  i = keystrtovec(key, &keys);
-  for (j = 0; j < i; j++) {
-    astr as;
-    if (j > 0)
-      astr_cat_cstr(dest, " ");
-    as = chordtostr(keys[j]);
-    astr_cat(dest, as);
-    astr_delete(as);
-  }
-  if (i > 0)
-    free(keys);
+    return astr_new();
 
-  return dest;
+  code = strtochord(key);
+  return chordtostr(code);
 }

@@ -120,9 +120,7 @@ const char *next_history_element(History *hp);
 
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(size_t key);
-size_t strtochord(char *buf, size_t *len);
-int keystrtovec(char *key, size_t **keyvec);
-astr keyvectostr(size_t *keys, size_t numkeys);
+size_t strtochord(char *buf);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
