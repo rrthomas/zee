@@ -43,11 +43,11 @@ void resync_display(void)
 void resize_windows(void)
 {
   Window *wp;
-  int hdelta = ZILE_LINES - termp->height;
+  int hdelta = ZEE_LINES - termp->height;
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = ZILE_COLS;
+    wp->fwidth = wp->ewidth = ZEE_COLS;
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
@@ -74,8 +74,8 @@ void resize_windows(void)
 
   /* Sometimes we cannot reduce the windows height to a certain value
      (too small); take care of this case. */
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES - hdelta;
+  termp->width = ZEE_COLS;
+  termp->height = ZEE_LINES - hdelta;
 
   FUNCALL(recenter);
 }

@@ -36,7 +36,7 @@ static void xminibuf_write(const char *s)
 {
   size_t x;
 
-  for (x = 0; *s != '\0' && x < ZILE_COLS; s++) {
+  for (x = 0; *s != '\0' && x < ZEE_COLS; s++) {
     term_addch(*(unsigned char *)s);
     ++x;
   }
@@ -44,7 +44,7 @@ static void xminibuf_write(const char *s)
 
 void term_minibuf_write(const char *s)
 {
-  term_move(ZILE_LINES - 1, 0);
+  term_move(ZEE_LINES - 1, 0);
   xminibuf_write(s);
   term_clrtoeol();
 }
@@ -54,25 +54,25 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 {
   int margin = 1, n = 0;
 
-  term_move(ZILE_LINES - 1, 0);
+  term_move(ZEE_LINES - 1, 0);
   term_clrtoeol();
   xminibuf_write(prompt);
 
-  if (prompt_len + pointo + 1 >= ZILE_COLS) {
+  if (prompt_len + pointo + 1 >= ZEE_COLS) {
     margin++;
     term_addch('$');
-    n = pointo - pointo % (ZILE_COLS - prompt_len - 2);
+    n = pointo - pointo % (ZEE_COLS - prompt_len - 2);
   }
 
-  term_addnstr(value + n, min(ZILE_COLS - prompt_len - margin, strlen(value) - n));
+  term_addnstr(value + n, min(ZEE_COLS - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
 
-  if (strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
-    term_move(ZILE_LINES - 1, ZILE_COLS - 1);
+  if (strlen(value + n) >= ZEE_COLS - prompt_len - margin) {
+    term_move(ZEE_LINES - 1, ZEE_COLS - 1);
     term_addch('$');
   }
 
-  term_move(ZILE_LINES - 1, prompt_len + margin - 1 + pointo % (ZILE_COLS - prompt_len - margin));
+  term_move(ZEE_LINES - 1, prompt_len + margin - 1 + pointo % (ZEE_COLS - prompt_len - margin));
 
   term_refresh();
 }
@@ -122,13 +122,13 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
       FUNCALL(suspend_zee);
       break;
     case KBD_RET:
-      term_move(ZILE_LINES - 1, 0);
+      term_move(ZEE_LINES - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);
       return *p;
     case KBD_CANCEL:
-      term_move(ZILE_LINES - 1, 0);
+      term_move(ZEE_LINES - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);

@@ -849,7 +849,7 @@ DEFUN_INT("save-buffers-kill-zee", save_buffers_kill_zee)
         ok = FALSE;
     }
 
-    thisflag |= FLAG_QUIT_ZILE;
+    thisflag |= FLAG_QUIT_ZEE;
   }
 }
 END_DEFUN
@@ -872,7 +872,7 @@ void zee_exit(int exitcode)
         astr_cpy_cstr(buf, bp->filename);
       else
         astr_cpy_cstr(buf, bp->name);
-      astr_cat_cstr(buf, ".ZILESAVE");
+      astr_cat_cstr(buf, ".ZEESAVE");
       fprintf(stderr, "Saving %s...\r\n",
               astr_cstr(buf));
       raw_write_to_disk(bp, astr_cstr(buf), 0600);

@@ -20,8 +20,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#ifndef ZILE_H
-#define ZILE_H
+#ifndef ZEE_H
+#define ZEE_H
 
 #include <limits.h>
 
@@ -256,7 +256,7 @@ struct Terminal {
 
 /* The actual number of lines and columns on the screen, which may
    differ from the Terminal's settings after a SIGWINCH. */
-extern size_t ZILE_LINES, ZILE_COLS;
+extern size_t ZEE_LINES, ZEE_COLS;
 
 extern Terminal *termp; /* The global Terminal. */
 
@@ -265,8 +265,8 @@ typedef size_t Font;
 
 /* Zee font codes
  * Designed to fit in an int, leaving room for a char underneath. */
-#define ZILE_NORMAL		0x000
-#define ZILE_REVERSE		0x100
+#define ZEE_NORMAL		0x000
+#define ZEE_REVERSE		0x100
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
@@ -321,7 +321,7 @@ typedef size_t Font;
 /* Hint for the redisplay engine: a resync is required. */
 #define FLAG_NEED_RESYNC                0000004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT_ZILE                  0000010
+#define FLAG_QUIT_ZEE                  0000010
 /* The last command modified the universal argument variable `uniarg'. */
 #define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */
@@ -373,4 +373,4 @@ typedef size_t Font;
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
 
-#endif /* !ZILE_H */
+#endif /* !ZEE_H */

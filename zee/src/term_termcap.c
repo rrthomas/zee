@@ -59,8 +59,8 @@ Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-size_t ZILE_COLS;   /* Current number of columns on screen. */
-size_t ZILE_LINES;  /* Current number of rows on screen. */
+size_t ZEE_COLS;   /* Current number of columns on screen. */
+size_t ZEE_LINES;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
@@ -104,9 +104,9 @@ void term_clrtoeol(void)
 }
 
 static const char *getattr(Font f) {
-  if (f == ZILE_NORMAL)
+  if (f == ZEE_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZILE_REVERSE)
+  else if (f & ZEE_REVERSE)
     return mr_string;
   assert(0);
   return "";
@@ -126,12 +126,12 @@ void term_refresh(void)
 {
   int skipped, eol;
   size_t i, j;
-  Font of = ZILE_NORMAL;
+  Font of = ZEE_NORMAL;
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
   astr_cat_cstr(as, tgoto(cm_string, 0, 0));
-  astr_cat_cstr(as, getattr(ZILE_NORMAL));
+  astr_cat_cstr(as, getattr(ZEE_NORMAL));
 
   /* Add the rest of the screen. */
   for (i = 0; i < termp->height; i++) {
@@ -217,9 +217,9 @@ void term_attrset(size_t attrs, ...)
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
     Font f = va_arg(valist, Font);
-    if (f == ZILE_NORMAL)
-      screen.font = ZILE_NORMAL;
-    else if (f == ZILE_REVERSE)
+    if (f == ZEE_NORMAL)
+      screen.font = ZEE_NORMAL;
+    else if (f == ZEE_REVERSE)
       screen.font |= f;
   }
   va_end(valist);
@@ -257,8 +257,8 @@ static char *get_tcap(void)
 static void read_screen_size(void)
 {
   char *tcap = get_tcap();
-  ZILE_COLS = tgetnum("co");
-  ZILE_LINES = tgetnum("li");
+  ZEE_COLS = tgetnum("co");
+  ZEE_LINES = tgetnum("li");
   free(tcap);
 }
 
@@ -267,8 +267,8 @@ static void init_screen(void)
   int size;
 
   read_screen_size();
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
+  termp->width = ZEE_COLS;
+  termp->height = ZEE_LINES;
 
   size = termp->width * termp->height;
   screen.array = zrealloc(screen.array, size * sizeof(int));

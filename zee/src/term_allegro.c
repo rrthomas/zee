@@ -47,7 +47,7 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-size_t ZILE_LINES, ZILE_COLS;
+size_t ZEE_LINES, ZEE_COLS;
 
 /* current position and color */
 static size_t cur_x = 0;
@@ -64,7 +64,7 @@ static void _get_color(int c, int *_fg, int *_bg)
   fg = makecol(170, 170, 170);
   bg = makecol(0, 0, 0);
 
-  if (c & ZILE_REVERSE) {
+  if (c & ZEE_REVERSE) {
     int aux = fg;
     fg = bg;
     bg = aux;
@@ -95,13 +95,13 @@ END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
 {
-  if (cursor_state && cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
+  if (cursor_state && cur_x < ZEE_COLS && cur_y < ZEE_LINES) {
     if (state)
       rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
-      int fg, bg, c = new_scr[cur_y*ZILE_COLS+cur_x];
+      int fg, bg, c = new_scr[cur_y*ZEE_COLS+cur_x];
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
@@ -120,10 +120,10 @@ void term_move(size_t y, size_t x)
 
 void term_clrtoeol(void)
 {
-  if (cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
+  if (cur_x < ZEE_COLS && cur_y < ZEE_LINES) {
     size_t x;
-    for (x = cur_x; x < ZILE_COLS; x++)
-      new_scr[cur_y * ZILE_COLS + x] = 0;
+    for (x = cur_x; x < ZEE_COLS; x++)
+      new_scr[cur_y * ZEE_COLS + x] = 0;
   }
 }
 
@@ -132,8 +132,8 @@ void term_refresh(void)
   int c, i, bg, fg;
   size_t x, y;
   i = 0;
-  for (y = 0; y<ZILE_LINES; y++)
-    for (x = 0; x < ZILE_COLS; x++) {
+  for (y = 0; y<ZEE_LINES; y++)
+    for (x = 0; x < ZEE_COLS; x++) {
       if (new_scr[i] != cur_scr[i]) {
         c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
@@ -149,12 +149,12 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(short) * ZILE_COLS * ZILE_LINES);
+  memset(new_scr, 0, sizeof(short) * ZEE_COLS * ZEE_LINES);
 }
 
 void term_addch(int c)
 {
-  if (cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
+  if (cur_x < ZEE_COLS && cur_y < ZEE_LINES) {
     int color = 0;
 
     if (c & 0x0f00)
@@ -162,14 +162,14 @@ void term_addch(int c)
     else if (cur_color & 0x0f00)
       color |= cur_color & 0x0f00;
     else
-      color |= ZILE_NORMAL;
+      color |= ZEE_NORMAL;
 
     if (c & 0xf000)
       color |= c & 0xf000;
     else
       color |= cur_color & 0xf000;
 
-    new_scr[cur_y*ZILE_COLS+cur_x] = (c & 0x00ff) | color;
+    new_scr[cur_y*ZEE_COLS+cur_x] = (c & 0x00ff) | color;
   }
   cur_x++;
 }
@@ -209,15 +209,15 @@ void term_init(void)
   LOCK_FUNCTION(inc_cur_time);
   install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-  ZILE_COLS = SCREEN_W/FW;
-  ZILE_LINES = SCREEN_H/FH;
+  ZEE_COLS = SCREEN_W/FW;
+  ZEE_LINES = SCREEN_H/FH;
 
   termp->screen = screen;
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
+  termp->width = ZEE_COLS;
+  termp->height = ZEE_LINES;
 
-  cur_scr = zmalloc(sizeof(short) * ZILE_COLS * ZILE_LINES);
-  new_scr = zmalloc(sizeof(short) * ZILE_COLS * ZILE_LINES);
+  cur_scr = zmalloc(sizeof(short) * ZEE_COLS * ZEE_LINES);
+  new_scr = zmalloc(sizeof(short) * ZEE_COLS * ZEE_LINES);
 }
 
 void term_close(void)

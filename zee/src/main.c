@@ -50,9 +50,9 @@
 #include "eval.h"
 #include "vars.h"
 
-#define ZILE_VERSION_STRING	"Zee " VERSION
+#define ZEE_VERSION_STRING	"Zee " VERSION
 
-#define ZILE_COPYRIGHT_STRING \
+#define ZEE_COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"\
   "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
@@ -85,7 +85,7 @@ static void loop(void)
     minibuf_clear();
     process_key(key);
 
-    if (thisflag & FLAG_QUIT_ZILE)
+    if (thisflag & FLAG_QUIT_ZEE)
       break;
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;
@@ -258,8 +258,8 @@ int main(int argc, char **argv)
       break;
     case 'v':
       fprintf(stderr,
-              ZILE_VERSION_STRING "\n"
-              ZILE_COPYRIGHT_STRING "\n"
+              ZEE_VERSION_STRING "\n"
+              ZEE_COPYRIGHT_STRING "\n"
               "Zee comes with ABSOLUTELY NO WARRANTY.\n"
               "You may redistribute copies of Zee\n"
               "under the terms of the GNU General Public License.\n"
