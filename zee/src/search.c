@@ -102,7 +102,7 @@ static char *re_find_substr(const char *s1, size_t s1size,
 
 static void goto_linep(Line *lp)
 {
-  cur_bp->pt = point_min();
+  cur_bp->pt = point_min(cur_bp);
   resync_display();
   while (cur_bp->pt.p != lp)
     next_line();
@@ -235,8 +235,10 @@ static int isearch(int dir)
   astr buf = astr_new();
   astr pattern = astr_new();
   Point start, cur;
-  Marker *old_mark = cur_wp->bp->mark ?
-    marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt) : NULL;
+  Marker *old_mark;
+
+  assert(cur_wp->bp->mark);
+  marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt);
 
   start = cur_bp->pt;
   cur = cur_bp->pt;
@@ -276,8 +278,8 @@ static int isearch(int dir)
       cancel();
 
       /* Restore old mark position. */
-      if (cur_bp->mark)
-        free_marker(cur_bp->mark);
+      assert(cur_bp->mark);
+      free_marker(cur_bp->mark);
 
       if (old_mark)
         cur_bp->mark = marker_new(old_mark->bp, old_mark->pt);

@@ -39,9 +39,7 @@
  */
 static Buffer *buffer_new(void)
 {
-  Buffer *bp;
-
-  bp = (Buffer *)zmalloc(sizeof(Buffer));
+  Buffer *bp = (Buffer *)zmalloc(sizeof(Buffer));
 
   /* Allocate a line. */
   bp->pt.p = list_new();
@@ -49,9 +47,11 @@ static Buffer *buffer_new(void)
 
   /* Allocate the limit marker. */
   bp->lines = list_new();
-
   list_prev(bp->lines) = list_next(bp->lines) = bp->pt.p;
   list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
+
+  /* Set the initial mark (needs limit marker to be set up). */
+  bp->mark = marker_new(bp, point_min(bp));
 
   /* Set default EOL string. */
   bp->eol[0] = '\n';
@@ -277,15 +277,11 @@ int warn_if_readonly_buffer(void)
 
 int warn_if_no_mark(void)
 {
-  if (!cur_bp->mark) {
-    minibuf_error("The mark is not set now");
-    return TRUE;
-  }
-  else if (!cur_bp->mark_anchored) {
+  assert(cur_bp->mark);
+  if (!cur_bp->mark_anchored) {
     minibuf_error("The mark is not active now");
     return TRUE;
-  }
-  else
+  } else
     return FALSE;
 }
 
@@ -313,10 +309,8 @@ void calculate_region(Region *rp, Point from, Point to)
  */
 int is_mark_anchored(void)
 {
-  if (!cur_bp->mark)
-    return FALSE;
-  else
-    return cur_bp->mark_anchored ? TRUE : FALSE;
+  assert(cur_bp->mark);
+  return cur_bp->mark_anchored ? TRUE : FALSE;
 }
 
 /*

@@ -271,7 +271,7 @@ END_DEFUN
  */
 void gotobob(void)
 {
-  cur_bp->pt = point_min();
+  cur_bp->pt = point_min(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -290,7 +290,7 @@ END_DEFUN
  */
 void gotoeob(void)
 {
-  cur_bp->pt = point_max();
+  cur_bp->pt = point_max(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 

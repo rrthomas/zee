@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 
@@ -37,14 +38,8 @@ void push_mark(void)
     mark_ring = list_new();
 
   /* Save the mark.  */
-  if (cur_bp->mark)
-    list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
-  /* Save an invalid mark.  */
-  else {
-    Marker *m = marker_new(cur_bp, point_min());
-    m->pt.p = NULL;
-    list_append(mark_ring, m);
-  }
+  assert(cur_bp->mark);
+  list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
 }
 
 /* Pop a mark from the mark-ring a put it as current mark. */
@@ -53,8 +48,8 @@ void pop_mark(void)
   Marker *m = list_last(mark_ring)->item;
 
   /* Replace the mark. */
-  if (m->bp->mark)
-    free_marker(m->bp->mark);
+  assert(m->bp->mark);
+  free_marker(m->bp->mark);
 
   m->bp->mark = (m->pt.p) ? marker_new(m->bp, m->pt) : NULL;
 
@@ -65,10 +60,8 @@ void pop_mark(void)
 /* Set the mark to the point position. */
 void set_mark(void)
 {
-  if (!cur_bp->mark)
-    cur_bp->mark = point_marker();
-  else
-    move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
+  assert(cur_bp->mark);
+  move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
 }
 
 int is_empty_line(void)

@@ -87,21 +87,21 @@ void swap_point(Point *pt1, Point *pt2)
   *pt2 = pt0;
 }
 
-Point point_min(void)
+Point point_min(Buffer *bp)
 {
   Point pt;
-  pt.p = list_next(cur_bp->lines);
+  pt.p = list_next(bp->lines);
   pt.n = 0;
   pt.o = 0;
   return pt;
 }
 
-Point point_max(void)
+Point point_max(Buffer *bp)
 {
   Point pt;
-  pt.p = list_prev(cur_bp->lines);
+  pt.p = list_prev(bp->lines);
   pt.n = cur_bp->num_lines;
-  pt.o = astr_len(list_prev(cur_bp->lines)->item);
+  pt.o = astr_len(list_prev(bp->lines)->item);
   return pt;
 }
 

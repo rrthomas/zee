@@ -250,10 +250,7 @@ END_DEFUN
 int exchange_point_and_mark(void)
 {
   /* No mark? */
-  if (!cur_bp->mark) {
-    minibuf_error("No mark set in this buffer");
-    return FALSE;
-  }
+  assert(cur_bp->mark);
 
   /* Swap the point with the mark.  */
   swap_point(&cur_bp->pt, &cur_bp->mark->pt);
