@@ -740,7 +740,7 @@ Show the zee version.
 
 This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
-in the @file{.zeerc} initialization file.
+in the @file{.zee} initialization file.
 
 Please note that some variables may be not available depending
 on the compilation options given to @samp{configure}.

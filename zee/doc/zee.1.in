@@ -37,7 +37,7 @@ Print version information on standard output then exit.
 .El
 .Sh FILES
 .Bl -tag -width Fl
-.It Pa ~/.zeerc
+.It Pa ~/.zee
 user customized Zee initialization file
 .It Pa @pkgdatadir@/AUTODOC
 self-documentation
@@ -47,7 +47,7 @@ Zee FAQ
 Zee manual
 .It Pa @pkgdatadir@/TUTORIAL
 Zee tutorial
-.It Pa @pkgdatadir@/zeerc.sample
+.It Pa @pkgdatadir@/dotzee.sample
 sample Zee initialization file
 .El
 .Sh SEE ALSO

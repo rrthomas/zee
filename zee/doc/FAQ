@@ -136,6 +136,6 @@ INDEX
 
 2.9. How do I enable Auto Fill Mode at startup?
 
-    Add the following line to your `~/.zeerc' file:
+    Add the following line to your `~/.zee' file:
 
-	auto-fill-mode = true
+	(setq auto-fill-mode true)
