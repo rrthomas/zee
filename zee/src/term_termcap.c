@@ -267,15 +267,10 @@ static void init_screen(void)
   int size;
 
   read_screen_size();
-  termp->width = ZEE_COLS;
-  termp->height = ZEE_LINES;
-
-  size = termp->width * termp->height;
+  size = ZEE_COLS * ZEE_LINES;
   screen.array = zrealloc(screen.array, size * sizeof(int));
   screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
   screen.curx = screen.cury = 0;
-
-  term_clear(); /* Ensure the first call to term_refresh will update the screen. */
 }
 
 static char *tgetstr_safe(const char *cap, char **tcap)
@@ -307,7 +302,10 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   init_screen();
+  termp->width = ZEE_COLS;
+  termp->height = ZEE_LINES;
   termp->screen = &screen;
+  term_clear();
 
   key_buf = astr_new();
 
