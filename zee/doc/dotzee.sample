@@ -42,23 +42,3 @@
 ; If enabled, highlight region even in nonselected windows.
 ; [default: false]
 (setq highlight-nonselected-windows false)
-
-; Specify the file backup method [default: simple]
-;
-; Possible values are: none and simple.
-;
-; * If `none' is specified, Zee will not create backup files.
-; * If `simple' is specified, Zee will create a backup file with a
-;   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
-;   create the backup `foo.c~').
-(setq backup-method simple)
-
-; Enable backup directory for backup files [default: false]
-; If enabled Zee will backup files to a user specified directory;
-; the directory must exist and must be specified in the
-; variable `backup-directory' (see below).
-(setq backup-with-directory false)
-
-; Specify target backup directory [default: "~/.backup"]
-; Directory must exist.
-(setq backup-directory "~/.backup")

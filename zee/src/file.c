@@ -724,136 +724,6 @@ DEFUN_INT("insert-file", insert_file)
 }
 END_DEFUN
 
-/*
- * Create a backup filename according to user specified variables.
- */
-static astr create_backup_filename(const char *filename,
-                                   int withdirectory)
-{
-  astr res;
-
-  /* Add the backup directory path to the filename */
-  if (withdirectory) {
-    astr dir, fname, buf;
-    char *backupdir;
-
-    backupdir = get_variable("backup-directory");
-    buf = astr_new();
-
-    astr_cat_cstr(buf, backupdir);
-    if (*astr_char(buf, -1) != '/')
-      astr_cat_cstr(buf, "/");
-    while (*filename != '\0') {
-      if (*filename == '/')
-        astr_cat_char(buf, '!');
-      else
-        astr_cat_char(buf, *filename);
-      ++filename;
-    }
-
-    dir = astr_new();
-    fname = astr_new();
-    if (!expand_path(astr_cstr(buf), "", dir, fname)) {
-      fprintf(stderr, "zee: %s: invalid backup directory\n", astr_cstr(dir));
-      zee_exit(1);
-    }
-    astr_cpy_cstr(buf, astr_cstr(dir));
-    astr_cat_cstr(buf, astr_cstr(fname));
-    astr_delete(dir);
-    astr_delete(fname);
-    filename = astr_cstr(buf);
-    astr_delete(buf);
-  }
-
-  res = astr_new();
-  astr_cat_cstr(res, filename);
-  astr_cat_char(res, '~');
-
-  return res;
-}
-
-/*
- * Copy a file.
- */
-static int copy_file(const char *source, const char *dest)
-{
-  char buf[BUFSIZ];
-  int ifd, ofd, stat_valid, serrno;
-  size_t len;
-  struct stat st;
-  char *tname;
-
-  ifd = open(source, O_RDONLY, 0);
-  if (ifd < 0) {
-    minibuf_error("%s: unable to backup", source);
-    return FALSE;
-  }
-
-  if (zasprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
-    minibuf_error("Cannot allocate temporary file name `%s'",
-                  strerror(errno));
-    return FALSE;
-  }
-
-  ofd = mkstemp(tname);
-  if (ofd == -1) {
-    serrno = errno;
-    close(ifd);
-    minibuf_error("%s: unable to create backup", dest);
-    free(tname);
-    errno = serrno;
-    return FALSE;
-  }
-
-  while ((len = read(ifd, buf, sizeof buf)) > 0)
-    if (write(ofd, buf, len) < 0) {
-      minibuf_error("Unable to write to backup file `%s'", dest);
-      close(ifd);
-      close(ofd);
-      return FALSE;
-    }
-
-  serrno = errno;
-  stat_valid = fstat(ifd, &st) != -1;
-
-#if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
-  /* Recover file permissions and ownership. */
-  if (stat_valid) {
-#ifdef HAVE_FCHMOD
-    fchmod(ofd, st.st_mode);
-#endif
-#ifdef HAVE_FCHOWN
-    fchown(ofd, st.st_uid, st.st_gid);
-#endif
-  }
-#endif
-
-  close(ifd);
-  close(ofd);
-
-  if (stat_valid) {
-    if (rename(tname, dest) == -1) {
-      minibuf_error("Cannot rename temporary file `%s'", strerror(errno));
-      (void)unlink(tname);
-      stat_valid = FALSE;
-    }
-  } else if (unlink(tname) == -1)
-    minibuf_error("Cannot remove temporary file `%s'", strerror(errno));
-
-  free(tname);
-  errno = serrno;
-
-  /* Recover file modification time. */
-  if (stat_valid) {
-    struct utimbuf t;
-    t.actime = st.st_atime;
-    t.modtime = st.st_mtime;
-    utime(dest, &t);
-  }
-
-  return stat_valid;
-}
-
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
   int fd;
@@ -877,30 +747,10 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 }
 
 /*
- * Write the buffer contents to a file.  Create a backup file if specified
- * by the user variables.
+ * Write the buffer contents to a file.
  */
 static int write_to_disk(Buffer *bp, char *filename)
 {
-  int fd, backupsimple, backupwithdir;
-
-  backupsimple = is_variable_equal("backup-method", "simple");
-  backupwithdir = lookup_bool_variable("backup-with-directory");
-
-  /*
-   * Make backup of original file.
-   */
-  if (!(bp->flags & BFLAG_BACKUP) && backupsimple
-      && (fd = open(filename, O_RDWR, 0)) != -1) {
-    astr bfilename;
-    close(fd);
-    bfilename = create_backup_filename(filename, backupwithdir);
-    if (!copy_file(filename, astr_cstr(bfilename)))
-      waitkey(WAITKEY_DEFAULT);
-    astr_delete(bfilename);
-    bp->flags |= BFLAG_BACKUP;
-  }
-
   if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
     minibuf_error("%s: %s", filename, strerror(errno));
     return FALSE;
@@ -958,8 +808,7 @@ static int save_buffer(Buffer *bp)
 
 DEFUN_INT("save-buffer", save_buffer)
   /*+
-    Save current buffer in visited file if modified. By default, makes the
-    previous version into a backup file if this is the first save.
+    Save current buffer in visited file if modified.
     +*/
 {
   return save_buffer(cur_bp);

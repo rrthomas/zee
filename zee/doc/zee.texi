@@ -15,9 +15,9 @@
 
 @titlepage
 @title The Zee Manual
-@subtitle for Zee version 2.1
+@subtitle for Zee version 0.0
 @subtitle January 2005
-@author Sandro Sigala and Reuben Thomas
+@author Reuben Thomas
 
 @dircategory Text editors
 @direntry
@@ -693,8 +693,7 @@ The desired position of point is always relative to the current window.
 @item replace-string
 Replace occurrences of a string with other text.
 @item save-buffer
-Save current buffer in visited file if modified. By default, makes the
-previous version into a backup file if this is the first save.
+Save current buffer in visited file if modified.
 @item save-buffers-kill-zee
 Offer to save each buffer, then kill this Zee process.
 @item save-some-buffers
@@ -836,29 +835,6 @@ or @key{DEL}.
 Please note that changing this variable at run-time has no effect; you
 need instead to modify your @file{~/.zeerc} configuration file and
 restart Zee.
-Default value is @samp{false}.
-@item backup-directory
-Specify target backup directory.  Directory must exist.
-This value is used only when the @samp{backup-with-directory} value is true.
-Default value is @samp{~/.backup}.
-@item backup-method
-Specify the file backup method.
-Possible values are: @samp{none} and @samp{simple}.
-@c LINT IGNORE
-@table @samp
-@item none
-If @samp{none} is specified, Zee will not create backup files.
-@item simple
-If @samp{simple} is specified, Zee will create a backup file with a
-tilde @samp{~} appended to the name (e.g.: on saving @file{foo.c} it will
-create the backup @file{foo.c~}).
-@end table
-@c LINT END IGNORE
-Default value is @samp{simple}.
-@item backup-with-directory
-If enabled Zee will backup files to a user specified directory;
-the directory must exist and must be specified in the
-variable @samp{backup-directory}.
 Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
