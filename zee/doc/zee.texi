@@ -769,7 +769,7 @@ If enabled, case is preserved by @samp{query-replace-regexp}.
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
-developers at @email{zee-devel@@lists.sourceforge.net}, or even better,
+developers at @email{rrt@@sc3d.org}, or even better,
 filed in the relevant tracker at @uref{http://sourceforge.net/projects/zee/}.
 
 @contents

@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(zee, 0.0CVS, zee-devel@lists.sourceforge.net)
+AC_INIT(zee, 0.1, rrt@sc3d.org)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
