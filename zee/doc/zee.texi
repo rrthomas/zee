@@ -814,9 +814,6 @@ Default value is @samp{false}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
-@item kill-whole-line
-If enabled, `kill-line' with no arg at the beginning of a line kills the whole line.
-Default value is @samp{false}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.

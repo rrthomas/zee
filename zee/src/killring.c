@@ -74,7 +74,7 @@ static void kill_ring_push_nstring(char *s, size_t size)
   kill_ring_size += size;
 }
 
-static int kill_line(int literally)
+static int kill_line(void)
 {
   if (!eolp()) {
     if (warn_if_readonly_buffer())
@@ -90,9 +90,6 @@ static int kill_line(int literally)
     undo_nosave = FALSE;
 
     thisflag |= FLAG_DONE_KILL;
-
-    if (!literally)
-      return TRUE;
   }
 
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
@@ -123,11 +120,11 @@ DEFUN_INT("kill-line", kill_line)
     flush_kill_ring();
 
   if (uniarg == 1)
-    kill_line(lookup_bool_variable("kill-whole-line"));
+    kill_line();
   else {
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     for (uni = 0; uni < uniarg; ++uni)
-      if (!kill_line(TRUE)) {
+      if (!kill_line()) {
         ret = FALSE;
         break;
       }
