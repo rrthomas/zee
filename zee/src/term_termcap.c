@@ -409,6 +409,11 @@ static size_t translate_key(char *s, size_t nbytes)
       return KBD_RET;
     case '\33':		/* META */
       return KBD_META;
+    case '\34':
+      /* The Linux console sends single \34 bytes preceding cursor key
+         codes (not on all systems, apparently, but this should be
+         harmless). */
+      return KBD_NOKEY;
     case '\37':
       return KBD_CTL | '_';
     case 0177:		/* BS */
