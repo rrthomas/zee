@@ -20,8 +20,6 @@ zee_base_SOURCES =				\
 	list.h					\
 	astr.c					\
 	astr.h					\
-	vector.c				\
-	vector.h				\
 	zmalloc.c				\
 	eval.c					\
 	eval.h					\

@@ -28,12 +28,9 @@
 
 #include "zee.h"
 #include "extern.h"
-#include "vector.h"
 #include "lists.h"
 #include "eval.h"
 
-
-vector *leRoot;
 
 le *leNew(const char *text)
 {

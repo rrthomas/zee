@@ -140,12 +140,12 @@ void *list_at(list l, size_t n)
 {
   size_t i;
   list p;
-        
+
   assert(l != NULL);
 
   for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++)
     ;
-  
+
   return p->item;
 }
 
