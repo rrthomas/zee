@@ -2,7 +2,7 @@
                                  ----
 
 Zee an experimental editor and programming environment based on the
-Emacs clone Zee (zee.sourceforge.net).
+Emacs clone Zile (zile.sourceforge.net).
 
 Zee is written in ISO C using POSIX APIs; its only external
 dependency is a terminal library, either termcap, Allegro or epocemx.
