@@ -56,7 +56,7 @@ static void kill_ring_push_nstring(char *s, size_t size)
   kill_ring_size += size;
 }
 
-static void kill_ring_push(int c)
+static void kill_ring_push_char(int c)
 {
   char ch = (char)c;
   kill_ring_push_nstring(&ch, 1);
@@ -72,7 +72,7 @@ static int kill_line(void)
               astr_len(cur_bp->pt.p->item) - cur_bp->pt.o, 0);
     undo_nosave = TRUE;
     while (!eolp()) {
-      kill_ring_push(following_char());
+      kill_ring_push_char(following_char());
       FUNCALL(delete_char);
     }
     undo_nosave = FALSE;
@@ -84,7 +84,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    kill_ring_push('\n');
+    kill_ring_push_char('\n');
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -162,9 +162,9 @@ DEFUN_INT("kill-region", kill_region)
     undo_nosave = TRUE;
     while (size--) {
       if (!eolp())
-        kill_ring_push(following_char());
+        kill_ring_push_char(following_char());
       else
-        kill_ring_push('\n');
+        kill_ring_push_char('\n');
       FUNCALL(delete_char);
     }
     undo_nosave = FALSE;
