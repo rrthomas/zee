@@ -237,7 +237,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
-int is_variable_equal(char *var, char *val);
 int lookup_bool_variable(char *var);
 char *minibuf_read_variable_name(char *msg);
 void set_variable(char *var, char *val);
