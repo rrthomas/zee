@@ -1,0 +1,16 @@
+configure
+autom4te.cache
+aclocal.m4
+config.log
+config.status
+Makefile
+Makefile.in
+config.h
+config.h.in
+stamp-h
+stamp-h.in
+stamp-h1
+zile*.tar.gz
+zile.zip
+zile.sis
+emxuser.sis

@@ -1,0 +1,9 @@
+.deps
+Makefile
+Makefile.in
+mkdoc
+AUTODOC
+HELP
+zile.info
+dotzile.texi
+zile.1
