@@ -1,6 +1,7 @@
 /* Table of Zee commands
  *
  * Add an entry to this list to declare a new command.
+ * The list must be kept in alphabetical order.
  */
 
 X("auto-fill-mode", auto_fill_mode)
@@ -20,7 +21,6 @@ X("copy-region-as-kill", copy_region_as_kill)
 X("delete-char", delete_char)
 X("delete-horizontal-space", delete_horizontal_space)
 X("delete-other-windows", delete_other_windows)
-X("just-one-space", just_one_space)
 X("delete-window", delete_window)
 X("describe-function", describe_function)
 X("describe-key", describe_key)
@@ -47,6 +47,7 @@ X("indent-relative", indent_relative)
 X("insert-file", insert_file)
 X("isearch-backward-regexp", isearch_backward_regexp)
 X("isearch-forward-regexp", isearch_forward_regexp)
+X("just-one-space", just_one_space)
 X("keyboard-quit", keyboard_quit)
 X("kill-buffer", kill_buffer)
 X("kill-line", kill_line)
