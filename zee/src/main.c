@@ -74,6 +74,14 @@ static void loop(void)
        lastflag = thisflag) {
     size_t key;
 
+    if (!cur_bp->mark_anchored) {
+      Point pt;
+      pt.p = cur_bp->pt.p;
+      pt.n = cur_bp->pt.n;
+      pt.o = astr_len(cur_bp->pt.p->item);
+      move_marker(cur_bp->mark, cur_bp, pt);
+    }
+
     if (lastflag & FLAG_NEED_RESYNC)
       resync_display();
     term_display();
@@ -89,14 +97,6 @@ static void loop(void)
 
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;
-
-    if (!cur_bp->mark_anchored) {
-      Point pt;
-      pt.p = cur_bp->pt.p;
-      pt.n = cur_bp->pt.n;
-      pt.o = astr_len(cur_bp->pt.p->item);
-      move_marker(cur_bp->mark, cur_bp, pt);
-    }
   }
 }
 
