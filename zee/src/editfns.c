@@ -81,7 +81,7 @@ int is_blank_line(void)
 int char_after(Point *pt)
 {
   if (eobp())
-    return 0;
+    return '\0';
   else if (eolp())
     return '\n';
   else
@@ -91,7 +91,7 @@ int char_after(Point *pt)
 int char_before(Point *pt)
 {
   if (bobp())
-    return 0;
+    return '\0';
   else if (bolp())
     return '\n';
   else
