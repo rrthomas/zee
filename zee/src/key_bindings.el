@@ -60,7 +60,7 @@
 ; Open recent
 (global-set-key "\C-\M-x" 'switch-to-buffer)
 
-; Undo, Cut, copy, paste, delete etc.
+; Undo, cut, copy, paste, delete etc.
 
 ; Undo
 (global-set-key "\C--" 'undo)
@@ -87,7 +87,7 @@
 (global-set-key "\C-\M-o" 'other-window)
 (global-set-key "\M-0" 'delete-window)
 
-; Insert special characters
+; Insert special characters.
 
 (global-set-key "\C-\RET" 'newline)
 (global-set-key "\RET" 'newline-and-indent)
