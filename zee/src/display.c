@@ -1,4 +1,4 @@
-/* Terminal independent redisplay routines
+/* Terminal-independent display routines
    Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
 
    This file is part of Zee.
@@ -74,10 +74,8 @@ void resize_windows(void)
     }
   }
 
-  /*
-   * Sometimes Zee cannot reduce the windows height to a certain
-   * value (too small); take care of this case.
-   */
+  /* Sometimes we cannot reduce the windows height to a certain value
+     (too small); take care of this case. */
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES - hdelta;
 
