@@ -39,39 +39,27 @@ static size_t kill_ring_maxsize;
 static void flush_kill_ring(void)
 {
   kill_ring_size = 0;
-  if (kill_ring_maxsize > 1024) {
-    /*
-     * Deallocate memory area, since is big enough.
-     */
-    kill_ring_maxsize = 0;
-    free(kill_ring_text);
-    kill_ring_text = NULL;
-  }
-}
-
-static void kill_ring_push(int c)
-{
-  if (kill_ring_text == NULL) {
-    kill_ring_maxsize = 16;
-    kill_ring_text = (char *)zmalloc(kill_ring_maxsize);
-  } else if (kill_ring_size + 1 >= kill_ring_maxsize) {
-    kill_ring_maxsize += 16;
-    kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
-  }
-  kill_ring_text[kill_ring_size++] = (char)c;
+  kill_ring_maxsize = 0;
+  free(kill_ring_text);
+  kill_ring_text = NULL;
 }
 
 static void kill_ring_push_nstring(char *s, size_t size)
 {
-  if (kill_ring_text == NULL) {
-    kill_ring_maxsize = size;
-    kill_ring_text = (char *)zmalloc(size);
-  } else if (kill_ring_size + (int)size >= kill_ring_maxsize) {
-    kill_ring_maxsize += size;
+  if (kill_ring_size + (int)size >= kill_ring_maxsize) {
+    /* Increase size by at least 16 bytes to avoid too much
+       reallocing. */
+    kill_ring_maxsize += max(size, 16);
     kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
   }
   memcpy(kill_ring_text + kill_ring_size, s, size);
   kill_ring_size += size;
+}
+
+static void kill_ring_push(int c)
+{
+  char ch = (char)c;
+  kill_ring_push_nstring(&ch, 1);
 }
 
 static int kill_line(void)
