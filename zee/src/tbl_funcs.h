@@ -1,4 +1,4 @@
-/*	$Id$	*/
+/*  Table of Zee commands */
 
 /*
  * Add an entry to this list for declaring a new function.

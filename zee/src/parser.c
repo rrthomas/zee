@@ -20,8 +20,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id$	*/
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,7 +73,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
   while (1) {
     astr_cat_char(tok, (char)c);
 
-    if (!doublequotes) { 
+    if (!doublequotes) {
       if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
         ungetachar(c);
         astr_truncate(tok, -1);
@@ -99,7 +97,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
         astr_truncate(tok, -1);
         *tokenid = T_WORD;
         return tok;
-    
+
       }
     }
 
@@ -141,7 +139,7 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
       list = leAddDataElement(list, astr_cstr(tok), isquoted);
       isquoted = 0;
       break;
-	    
+
     case T_CLOSEPAREN:
     case T_EOF:
       isquoted = 0;

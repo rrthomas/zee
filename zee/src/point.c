@@ -18,8 +18,6 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id$	*/
-
 #include "config.h"
 
 #include "zee.h"
@@ -131,4 +129,3 @@ Point line_end_position(int count)
   pt.o = astr_len(pt.p->item);
   return pt;
 }
-

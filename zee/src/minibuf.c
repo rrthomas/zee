@@ -1,5 +1,7 @@
 /* Minibuffer facility functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004-2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -17,8 +19,6 @@
    along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
-
-/*      $Id$     */
 
 #include "config.h"
 

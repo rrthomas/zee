@@ -1,4 +1,4 @@
-/*	$Id$	*/
+/* Table of Zee variables */
 
 /*
  * Add an entry to this list for declaring a new global variable.
