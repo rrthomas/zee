@@ -47,40 +47,6 @@ DEFUN_INT("zee-version", zee_version)
 }
 END_DEFUN
 
-static int show_file(char *filename)
-{
-  if (!exist_file(filename)) {
-    minibuf_error("Unable to read file `%s'", filename);
-    return FALSE;
-  }
-
-  open_file(filename, 0);
-  cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
-    | BFLAG_NOUNDO;
-
-  return TRUE;
-}
-
-DEFUN_INT("help-with-tutorial", help_with_tutorial)
-  /*+
-    Show a tutorial window.
-    +*/
-{
-  if (show_file(PATH_DATA "/TUTORIAL")) {
-    astr buf;
-    cur_bp->flags = 0;
-    buf = get_home_dir();
-    astr_cat_cstr(buf, "/TUTORIAL");
-    set_buffer_filename(cur_bp, astr_cstr(buf));
-
-    astr_delete(buf);
-    return TRUE;
-  }
-
-  return FALSE;
-}
-END_DEFUN
-
 /*
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.

@@ -50,8 +50,8 @@ zee.1: zee.1.in
 	rm -f $@
 	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
 
-all-local: HELP AUTODOC
+all-local: AUTODOC
 
 clean-local:
-	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
+	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC *.o
 	rm -f zee.1
