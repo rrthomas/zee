@@ -29,14 +29,6 @@
 #include "zee.h"
 #include "extern.h"
 
-Marker *make_marker(void)
-{
-  Marker *marker;
-  marker = (Marker *)zmalloc(sizeof(Marker));
-  memset(marker, 0, sizeof(Marker));
-  return marker;
-}
-
 static void unchain_marker(Marker *marker)
 {
   Marker *m, *next, *prev = NULL;
@@ -85,28 +77,28 @@ void move_marker(Marker *marker, Buffer *bp, Point pt)
 
 Marker *copy_marker(Marker *m)
 {
-  Marker *marker = make_marker();
+  Marker *marker = zmalloc(sizeof(Marker));
   move_marker(marker, m->bp, m->pt);
   return marker;
 }
 
 Marker *point_marker(void)
 {
-  Marker *marker = make_marker();
+  Marker *marker = zmalloc(sizeof(Marker));
   move_marker(marker, cur_bp, cur_bp->pt);
   return marker;
 }
 
 Marker *point_min_marker(void)
 {
-  Marker *marker = make_marker();
+  Marker *marker = zmalloc(sizeof(Marker));
   move_marker(marker, cur_bp, point_min());
   return marker;
 }
 
 Marker *point_max_marker(void)
 {
-  Marker *marker = make_marker();
+  Marker *marker = zmalloc(sizeof(Marker));
   move_marker(marker, cur_bp, point_max());
   return marker;
 }
