@@ -50,10 +50,10 @@ type:  d i o u x X f e g E G c s p n
 
 
 The function needs to allocate memory to store the full text before to
-actually writting it.  i.e if you want to fnprintf() 1000 characters, the
+actually writing it.  i.e if you want to fnprintf() 1000 characters, the
 functions will allocate 1000 bytes.
 This behaviour can be modified: you have to customise the code to flush the
-internal buffer (writing to screen or file) when it reach a given size. Then
+internal buffer (writing to screen or file) when it reaches a given size. Then
 the buffer can have a shorter length. But what? If you really need to write
 HUGE string, don't use printf!
 During the process, some other memory is allocated (1024 bytes minimum)
@@ -63,7 +63,7 @@ free in memory, you *may* not be able to nprintf() a 8000 bytes-long text.
 note: if a buffer overflow occurs, exit() is called. This situation should
 never appear ... but if you want to be *really* sure, you have to modify the
 code to handle those situations (only one place to modify).
-A buffer overflow can only occur if your sprintf() do strange things or when
+A buffer overflow can only occur if your sprintf() does strange things or when
 you use strange formats.
 
 */
@@ -221,7 +221,7 @@ static int type_s(xprintf_struct *s, int width, int prec,
  *  Return value: the value read (between 0 and 32767).
  *  Note: no checks are made against overflow. If the string contain a big
  *  number, then the return value won't be what we want (but, in this case,
- *  the programmer don't know whatr he wants, then no problem).
+ *  the programmer doesn't know what he wants, so no problem).
  */
 static int getint(const char **string)
 {

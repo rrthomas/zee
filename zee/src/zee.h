@@ -320,7 +320,7 @@ typedef size_t Font;
 /* Hint for the redisplay engine: a resync is required. */
 #define FLAG_NEED_RESYNC                0000004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT_ZEE                  0000010
+#define FLAG_QUIT_ZEE                   0000010
 /* The last command modified the universal argument variable `uniarg'. */
 #define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */
