@@ -350,8 +350,6 @@ Save the current buffer.  Bound to @code{save-buffer}.
 Transpose two lines.  Bound to @code{transpose-lines}.
 @item C-x C-u
 Convert the region to upper case.  Bound to @code{upcase-region}.
-@item C-x C-v
-Kill the current buffer and find a file for editing.  Bound to @code{find-alternate-file}.
 @item C-x C-w
 Write buffer to a file.  Bound to @code{write-file}.
 @item C-x C-x
@@ -513,10 +511,6 @@ Move point to end of current line.
 Put the mark where point is now, and point where the mark is now.
 @item execute-extended-command
 Read function name, then read its arguments and call it.
-@item find-alternate-file
-Find the file specified by the user, select its buffer, kill previous buffer.
-If the current buffer now contains an empty file that you just visited
-(presumably by mistake), use this command to visit the file you really want.
 @item find-file
 Edit a file specified by the user.  Switch to a buffer visiting the file,
 creating one if none already exists.
