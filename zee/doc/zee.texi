@@ -220,8 +220,6 @@ Insert indentation.  Bound to @code{indent-command}.
 Insert a new line.  Bound to @code{newline}.
 @item @key{BS}
 Delete the previous character.  Bound to @code{backward-delete-char}.
-@item @key{INS}
-Toggle @i{Overwrite Mode}.  Bound to @code{overwrite-mode}.
 @item C-@@, C-@key{SPC}
 Set mark.  Bound to @code{set-mark-command}.
 @item C-\
@@ -310,14 +308,10 @@ List buffers.  Bound to @code{list-buffers}.
 Save modified buffers and quit zee.  Bound to @code{save-buffers-kill-zee}.
 @item C-x C-f
 Find a file for editing.  Bound to @code{find-file}.
-@item C-x C-l
-Convert the region to lower case.  Bound to @code{downcase-region}.
 @item C-x C-q
 Toggle @i{Read Only Mode}.  Bound to @code{toggle-read-only}.
 @item C-x C-s
 Save the current buffer.  Bound to @code{save-buffer}.
-@item C-x C-u
-Convert the region to upper case.  Bound to @code{upcase-region}.
 @item C-x C-w
 Write buffer to a file.  Bound to @code{write-file}.
 @item C-x C-x
@@ -447,8 +441,6 @@ Delete all spaces and tabs around point.
 Make the selected window fill the screen.
 @item just-one-space
 Delete all spaces and tabs around point, leaving one space.
-@item delete-region
-Delete the text between point and mark.
 @item delete-window
 Remove the current window from the screen.
 @item describe-function
@@ -604,12 +596,6 @@ Insert a newline and leave point before it.
 Select the first different window on the screen.
 All windows are arranged in a cyclic order.
 This command selects the window one step away in that order.
-@item overwrite-mode
-In @i{Overwrite Mode}, printing characters typed in replace existing text
-on a one-for-one basis, rather than pushing it to the right.  At the
-end of a line, such characters extend the line.
-@kbd{C-q} still inserts characters in @i{Overwrite Mode}; this
-is supposed to make it easier to insert characters when necessary.
 @item previous-line
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
