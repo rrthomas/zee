@@ -237,7 +237,7 @@ DEFUN_INT("backward-kill-word", backward_kill_word)
     With argument, do this that many times.
     +*/
 {
-  return FUNCALL_ARG(kill_word, !uniarg ? -1 : -uniarg);
+  return FUNCALL_ARG(kill_word, (uniused == 0) ? -1 : -uniarg);
 }
 END_DEFUN
 
