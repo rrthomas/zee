@@ -135,7 +135,7 @@ DEFUN_INT("kill-region", kill_region)
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (!is_mark_anchored())
+  if (!cur_bp->mark_anchored)
     ok = FUNCALL(kill_line);
   else {
     calculate_the_region(&r);

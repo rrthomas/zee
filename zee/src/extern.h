@@ -39,7 +39,6 @@ void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 int calculate_the_region(Region *rp);
-int is_mark_anchored(void);
 void set_temporary_buffer(Buffer *bp);
 size_t calculate_buffer_size(Buffer *bp);
 void anchor_mark(void);

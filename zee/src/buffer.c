@@ -305,21 +305,12 @@ void calculate_region(Region *rp, Point from, Point to)
 }
 
 /*
- * Report whether mark is anchored.
- */
-int is_mark_anchored(void)
-{
-  assert(cur_bp->mark);
-  return cur_bp->mark_anchored ? TRUE : FALSE;
-}
-
-/*
  * Calculate the region size between point and mark and set the region
  * structure.
  */
 int calculate_the_region(Region *rp)
 {
-  if (!is_mark_anchored())
+  if (!cur_bp->mark_anchored)
     return FALSE;
 
   calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
