@@ -75,7 +75,7 @@ void move_marker(Marker *marker, Buffer *bp, Point pt)
   marker->pt = pt;
 }
 
-Marker *copy_marker(Buffer *bp, Point pt)
+Marker *marker_new(Buffer *bp, Point pt)
 {
   Marker *marker = zmalloc(sizeof(Marker));
   move_marker(marker, bp, pt);
@@ -84,5 +84,5 @@ Marker *copy_marker(Buffer *bp, Point pt)
 
 Marker *point_marker(void)
 {
-  return copy_marker(cur_bp, cur_bp->pt);
+  return marker_new(cur_bp, cur_bp->pt);
 }

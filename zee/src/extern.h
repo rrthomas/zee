@@ -164,7 +164,7 @@ extern int thisflag, lastflag, last_uniarg;
 /* marker.c --------------------------------------------------------------- */
 void free_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
-Marker *copy_marker(Buffer *bp, Point pt);
+Marker *marker_new(Buffer *bp, Point pt);
 Marker *point_marker(void);
 
 /* minibuf.c -------------------------------------------------------------- */

@@ -238,7 +238,7 @@ static int isearch(int dir)
   astr pattern = astr_new();
   Point start, cur;
   Marker *old_mark = cur_wp->bp->mark ?
-    copy_marker(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt) : NULL;
+    marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt) : NULL;
 
   start = cur_bp->pt;
   cur = cur_bp->pt;
@@ -282,7 +282,7 @@ static int isearch(int dir)
         free_marker(cur_bp->mark);
 
       if (old_mark)
-        cur_bp->mark = copy_marker(old_mark->bp, old_mark->pt);
+        cur_bp->mark = marker_new(old_mark->bp, old_mark->pt);
       else
         cur_bp->mark = old_mark;
       break;
