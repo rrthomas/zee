@@ -32,16 +32,14 @@
 #include "extern.h"
 
 /*
- * Emit an error sound only when the appropriate variable
- * is set.
+ * Emit an error sound.
  */
 void ding(void)
 {
   if (thisflag & FLAG_DEFINING_MACRO)
     cancel_kbd_macro();
 
-  if (lookup_bool_variable("beep"))
-    term_beep();
+  term_beep();
 
   thisflag |= FLAG_GOT_ERROR;
 }

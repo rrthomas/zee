@@ -747,15 +747,9 @@ on the compilation options given to @samp{configure}.
 
 @c LINT VAR
 @table @code
-@item beep
-If enabled, a sound will be emitted on any error.
-Default value is @samp{true}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
-@item highlight-nonselected-windows
-If enabled, highlight region even in nonselected windows.  Default
-value is @samp{false}.
 @item standard-indent
 Default number of columns for margin-changing functions to
 indent. Default values is @samp{4}.
@@ -765,12 +759,8 @@ Default value is @samp{8}.
 @item auto-fill-mode
 If enabled, the @i{Auto Fill Mode} is automatically enabled.  Default
 value is @samp{false}.
-@item transient-mark-mode
-If enabled, deactivates the mark when the buffer contents change.
-Also enables highlighting of the region whenever the mark is active.
-The variable `highlight-nonselected-windows' controls whether to
-highlight all windows or just the selected window.  Default value is
-@samp{true}.
+@item case-replace
+If enabled, case is preserved by @samp{query-replace-regexp}.
 @end table
 @c LINT END VAR
 
