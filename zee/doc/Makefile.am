@@ -48,7 +48,6 @@ all-local: AUTODOC
 
 clean-local:
 	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC *.o
-	rm -f zee.1
 
 distclean-local:
 	rm -f $(GENERATED_TEXI)
