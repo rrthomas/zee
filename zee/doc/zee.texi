@@ -15,7 +15,7 @@
 
 @titlepage
 @title The Zee Manual
-@subtitle for Zee version 0.0
+@subtitle for Zee version 0.2
 @subtitle January 2005
 @author Reuben Thomas
 
@@ -202,15 +202,9 @@ typing @kbd{x}.
 @node Functions, Variables, Key names, Top
 @chapter Functions
 
-This table contains the full list of available functions, that can be
+This table contains the full list of available functions that can be
 called with the @kbd{M-x} key (please note that most functions have a
-key binding, anyway).
-
-At run-time, you can list the current defined functions with the
-@samp{list-functions} command.
-
-Please note that some functions may be not available depending
-on the compilation options given to @samp{configure}.
+key binding anyway).
 
 @include zee_funcs.texi
 
