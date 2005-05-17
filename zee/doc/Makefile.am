@@ -14,7 +14,6 @@ EXTRA_DIST =					\
 	TUTORIAL				\
 	dotzee.sample				\
 	lisp.txt				\
-	zee.1.in				\
 	mkdoc.c					\
 	config.h
 
@@ -44,10 +43,6 @@ dotzee.texi: dotzee.sample
 	@echo "@example" >>$@
 	expand $< >>$@
 	@echo "@end example" >>$@
-
-zee.1: zee.1.in
-	rm -f $@
-	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
 
 all-local: AUTODOC
 
