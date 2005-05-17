@@ -17,8 +17,6 @@ EXTRA_DIST =					\
 	mkdoc.c					\
 	config.h
 
-man_MANS = zee.1
-
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
