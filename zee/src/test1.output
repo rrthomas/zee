@@ -1,16 +1,2 @@
-Eval results:
 (!)
 (Hello , world !)
-
-Variables:
-exclamation 	(!)
-comma 	(,)
-hi 	(Hello)
-world 	(world)
-tab-width 	(8)
-standard-indent 	(4)
-fill-column 	(72)
-case-replace 	(true)
-auto-fill-mode 	(false)
-
-Defuns:
