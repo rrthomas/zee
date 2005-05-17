@@ -1,4 +1,4 @@
-/* Table of Zee commands
+/* Table of commands
  *
  * Add an entry to this list to declare a new command.
  * The list must be kept in alphabetical order.
@@ -72,7 +72,7 @@ X("quoted-insert", quoted_insert)
 X("recenter", recenter)
 X("replace-regexp", replace_regexp)
 X("save-buffer", save_buffer)
-X("save-buffers-kill-zee", save_buffers_kill_zee)
+X("save-buffers-quit", save_buffers_quit)
 X("save-some-buffers", save_some_buffers)
 X("scroll-down", scroll_down)
 X("scroll-up", scroll_up)
@@ -86,7 +86,7 @@ X("shell-command", shell_command)
 X("shell-command-on-region", shell_command_on_region)
 X("split-window", split_window)
 X("start-kbd-macro", start_kbd_macro)
-X("suspend-zee", suspend_zee)
+X("suspend", suspend)
 X("switch-to-buffer", switch_to_buffer)
 X("tab-to-tab-stop", tab_to_tab_stop)
 X("toggle-read-only", toggle_read_only)
@@ -96,4 +96,4 @@ X("upcase-word", upcase_word)
 X("where-is", where_is)
 X("write-file", write_file)
 X("yank", yank)
-X("zee-version", zee_version)
+X("version", version)

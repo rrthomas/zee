@@ -1,10 +1,7 @@
-/* Table of Zee variables */
+/* Table of variables */
 
 /*
  * Add an entry to this list for declaring a new global variable.
- *
- * If you do any modification, please remember to keep in sync with the
- * documentation in the `../doc/zee.texi' file.
  *
  * The first column specifies the variable name.
  * The second column specifies the variable type.

@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
@@ -37,7 +37,7 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
   return ret ? leT : leNIL;
 }
 
-#define X(zee_name, c_name) \
+#define X(cmd_name, c_name) \
   static le *eval_cb_ ## c_name(int argc, le *branch) \
   { \
     return eval_cb_command_helper(F_ ## c_name, argc, branch); \
@@ -88,8 +88,8 @@ static evalLookupNode evalTable[] = {
 
   { "defun"	, eval_cb_defun		},
 
-#define X(zee_name, c_name) \
-	{ zee_name, eval_cb_ ## c_name },
+#define X(cmd_name, c_name) \
+	{ cmd_name, eval_cb_ ## c_name },
 #include "tbl_funcs.h"
 #undef X
 

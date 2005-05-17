@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /* This variable is set to TRUE when the `undo_save()' function should not

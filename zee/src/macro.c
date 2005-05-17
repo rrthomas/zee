@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 
@@ -198,7 +198,7 @@ defining others, use M-x name-last-kbd-macro.
 END_DEFUN
 
 /*
- * Free all the macros (used at Zee exit).
+ * Free all the macros (used at exit).
  */
 void free_macros(void)
 {

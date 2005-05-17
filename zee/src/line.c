@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 

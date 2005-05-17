@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokenname *tokenid)

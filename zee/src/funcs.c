@@ -32,14 +32,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #include "vars.h"
 
 
-DEFUN_INT("suspend-zee", suspend_zee)
+DEFUN_INT("suspend", suspend)
 /*+
-Stop Zee and return to superior process.
+Stop and return to superior process.
 +*/
 {
   raise(SIGTSTP);
@@ -980,7 +980,7 @@ DEFUN_INT("shell-command", shell_command)
 Reads a line of text using the minibuffer and creates an inferior shell.
 to execute the line as a command.
 Standard input from the command comes from the null device.  If the
-shell command produces any output, the output goes to a Zee buffer
+shell command produces any output, the output goes to a buffer
 named `*Shell Command Output*', which is displayed in another window
 but not selected.
 If the output is one line, it is displayed in the echo area.
@@ -1040,7 +1040,7 @@ DEFUN_INT("shell-command-on-region", shell_command_on_region)
 Reads a line of text using the minibuffer and creates an inferior shell.
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
-If the shell command produces any output, the output goes to a Zee buffer
+If the shell command produces any output, the output goes to a buffer
 named `*Shell Command Output*', which is displayed in another window
 but not selected.
 If the output is one line, it is displayed in the echo area.
@@ -1054,7 +1054,7 @@ it as the contents of the region.
   astr out, s;
   int lines = 0;
   astr cmd;
-  char tempfile[] = P_tmpdir "/zeeXXXXXX";
+  char tempfile[] = P_tmpdir "/" BIN_NAME "XXXXXX";
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();

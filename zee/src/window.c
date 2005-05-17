@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static Window *window_new(void)
@@ -46,7 +46,7 @@ void free_window(Window *wp)
 }
 
 /*
- * Free all the allocated windows (used at Zee exit).
+ * Free all the allocated windows (used at exit).
  */
 void free_windows(void)
 {

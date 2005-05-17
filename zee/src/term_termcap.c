@@ -32,7 +32,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static Terminal thisterm = {
@@ -47,7 +47,7 @@ typedef struct {
   size_t curx, cury;          /* cursor x and y. */
   Font font;                    /* current font. */
   size_t *array, *oarray;     /* contents of screen (8 low bits is
-                                   character, rest is Zee font code).
+                                   character, rest is font code).
                                    array is current, oarray is last
                                    displayed contents. */
 } Screen;
@@ -59,8 +59,8 @@ Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-size_t ZEE_COLS;   /* Current number of columns on screen. */
-size_t ZEE_LINES;  /* Current number of rows on screen. */
+size_t SCREEN_COLS;   /* Current number of columns on screen. */
+size_t SCREEN_ROWS;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
@@ -104,9 +104,9 @@ void term_clrtoeol(void)
 }
 
 static const char *getattr(Font f) {
-  if (f == ZEE_NORMAL)
+  if (f == FONT_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZEE_REVERSE)
+  else if (f & FONT_REVERSE)
     return mr_string;
   assert(0);
   return "";
@@ -126,12 +126,12 @@ void term_refresh(void)
 {
   int skipped, eol;
   size_t i, j;
-  Font of = ZEE_NORMAL;
+  Font of = FONT_NORMAL;
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
   astr_cat_cstr(as, tgoto(cm_string, 0, 0));
-  astr_cat_cstr(as, getattr(ZEE_NORMAL));
+  astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
   for (i = 0; i < termp->height; i++) {
@@ -217,9 +217,9 @@ void term_attrset(size_t attrs, ...)
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
     Font f = va_arg(valist, Font);
-    if (f == ZEE_NORMAL)
-      screen.font = ZEE_NORMAL;
-    else if (f == ZEE_REVERSE)
+    if (f == FONT_NORMAL)
+      screen.font = FONT_NORMAL;
+    else if (f == FONT_REVERSE)
       screen.font |= f;
   }
   va_end(valist);
@@ -239,16 +239,16 @@ static char *get_tcap(void)
 
   if (!term) {
     fprintf(stderr, "No terminal type in TERM.\n");
-    zee_exit(1);
+    die(1);
   }
 
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    zee_exit(1);
+    die(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    zee_exit(1);
+    die(1);
   }
 
   return tcap;
@@ -257,8 +257,8 @@ static char *get_tcap(void)
 static void read_screen_size(void)
 {
   char *tcap = get_tcap();
-  ZEE_COLS = tgetnum("co");
-  ZEE_LINES = tgetnum("li");
+  SCREEN_COLS = tgetnum("co");
+  SCREEN_ROWS = tgetnum("li");
   free(tcap);
 }
 
@@ -267,7 +267,7 @@ static void init_screen(void)
   int size;
 
   read_screen_size();
-  size = ZEE_COLS * ZEE_LINES;
+  size = SCREEN_COLS * SCREEN_ROWS;
   screen.array = zrealloc(screen.array, size * sizeof(int));
   screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
   screen.curx = screen.cury = 0;
@@ -290,7 +290,7 @@ static void setattr(int flags, struct termios *state)
 {
   if (tcsetattr(0, flags, state) < 0) {
     fprintf(stderr, "Can't change terminal settings\n");
-    zee_exit(1);
+    die(1);
   }
 }
 
@@ -302,8 +302,8 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   init_screen();
-  termp->width = ZEE_COLS;
-  termp->height = ZEE_LINES;
+  termp->width = SCREEN_COLS;
+  termp->height = SCREEN_ROWS;
   termp->screen = &screen;
   term_clear();
 
@@ -312,7 +312,7 @@ void term_init(void)
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
     fprintf(stderr, "Can't read terminal capabilites\n");
-    zee_exit(1);
+    die(1);
   }
 
   /* Set up terminal. */
@@ -385,7 +385,7 @@ void term_resume(void)
 {
   setattr(TCSADRAIN, &nstate);
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
-  winch_sig_handler(SIGWINCH); /* Assume Zee is in a consistent state. */
+  winch_sig_handler(SIGWINCH); /* Assume global state is consistent. */
 }
 
 static size_t find_fun_key(char *s, size_t nbytes, size_t *len)
@@ -543,7 +543,7 @@ size_t term_xgetkey(int mode, size_t timeout)
 
   /* The SIGWINCH handler is only active in this routine, so that we
      know the data structures are in a consistent state. Here is where
-     Zee typically spends most of its time. */
+     we typically spend most of our time. */
   winch_sig.sa_handler = winch_sig_handler;
   sigemptyset(&winch_sig.sa_mask);
   winch_sig.sa_flags = SA_RESTART;

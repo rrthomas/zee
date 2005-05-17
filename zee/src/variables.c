@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
@@ -41,7 +41,7 @@ static struct var_entry {
   char *fmt;	/* Variable format (boolean, etc.). */
   char *val;	/* Default value. */
 } def_vars[] = {
-#define X(zee_var, fmt, val, doc) { zee_var, fmt, val },
+#define X(var, fmt, val, doc) { var, fmt, val },
 #include "tbl_vars.h"
 #undef X
 };

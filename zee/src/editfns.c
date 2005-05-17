@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static list mark_ring = NULL;	/* Mark ring. */

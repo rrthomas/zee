@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /*
@@ -95,7 +95,7 @@ void free_buffer(Buffer *bp)
 }
 
 /*
- * Free all the allocated buffers (used at Zee exit).
+ * Free all the allocated buffers (used at exit).
  */
 void free_buffers(void)
 {

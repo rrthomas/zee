@@ -20,8 +20,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-#ifndef ZEE_H
-#define ZEE_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <limits.h>
 
@@ -29,6 +29,9 @@
 #include "astr.h"
 #include "parser.h"
 #include "eval.h"
+
+#define NAME "Zee" /* XXX Generate from package name */
+#define BIN_NAME PACKAGE
 
 #undef TRUE
 #define TRUE                            1
@@ -255,7 +258,7 @@ struct Terminal {
 
 /* The actual number of lines and columns on the screen, which may
    differ from the Terminal's settings after a SIGWINCH. */
-extern size_t ZEE_LINES, ZEE_COLS;
+extern size_t SCREEN_ROWS, SCREEN_COLS;
 
 extern Terminal *termp; /* The global Terminal. */
 
@@ -264,8 +267,8 @@ typedef size_t Font;
 
 /* Zee font codes
  * Designed to fit in an int, leaving room for a char underneath. */
-#define ZEE_NORMAL		0x000
-#define ZEE_REVERSE		0x100
+#define FONT_NORMAL		0x000
+#define FONT_REVERSE		0x100
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
@@ -320,7 +323,7 @@ typedef size_t Font;
 /* Hint for the redisplay engine: a resync is required. */
 #define FLAG_NEED_RESYNC                0000004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT_ZEE                   0000010
+#define FLAG_QUIT                   0000010
 /* The last command modified the universal argument variable `uniarg'. */
 #define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */
@@ -344,12 +347,12 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 /* N.B. The function type is actually eval_cb. */
-#define DEFUN(zee_func, c_func) \
+#define DEFUN(lisp_name, c_func) \
         int F_ ## c_func(int argc, le *branch) \
         { \
           int uniused = argc > 1, ok = TRUE;
-#define DEFUN_INT(zee_func, c_func) \
-	DEFUN(zee_func, c_func) \
+#define DEFUN_INT(lisp_name, c_func) \
+	DEFUN(lisp_name, c_func) \
           int uniarg = 1; \
           if (uniused) { \
             le *value_le = evaluateNode(branch); \
@@ -371,4 +374,4 @@ typedef size_t Font;
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
 
-#endif /* !ZEE_H */
+#endif /* !MAIN_H */

@@ -24,7 +24,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static void unchain_marker(Marker *marker)

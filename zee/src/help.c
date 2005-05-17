@@ -30,16 +30,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #include "paths.h"
 
-DEFUN_INT("zee-version", zee_version)
+DEFUN_INT("version", version)
 /*+
-Show the version of Zee in the minibuffer.
+Show the version in the minibuffer.
 +*/
 {
-  minibuf_write("Zee " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+  minibuf_write(NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 }
 END_DEFUN
 

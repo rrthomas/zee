@@ -45,15 +45,15 @@
 #endif
 #endif
 
-#include "zee.h"
+#include "main.h"
 #include "paths.h"
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
 
-#define ZEE_VERSION_STRING	"Zee " VERSION
+#define VERSION_STRING	NAME " " VERSION
 
-#define ZEE_COPYRIGHT_STRING \
+#define COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"\
   "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
@@ -71,7 +71,7 @@ int last_uniarg = 1;
 static void loop(void)
 {
   for (;
-       !(thisflag & FLAG_QUIT_ZEE);
+       !(thisflag & FLAG_QUIT);
        lastflag = thisflag) {
     size_t key;
 
@@ -94,7 +94,7 @@ static void loop(void)
 }
 
 static char about_minibuf_str[] =
-"Welcome to Zee!  To exit type ALT-X save-buffers-kill-zee RETURN";
+"Welcome to " NAME "!  To exit type ALT-X save-buffers-quit RETURN";
 
 static void setup_main_screen(int argc, astr as)
 {
@@ -139,15 +139,15 @@ This buffer is for notes you don't want to save.\n\
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zee crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-  zee_exit(2);
+  fprintf(stderr, NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  die(2);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zee terminated with signal %d.\r\n", signo);
-  zee_exit(2);
+  fprintf(stderr, NAME " terminated with signal %d.\r\n", signo);
+  die(2);
 }
 
 #ifdef HAVE_SIGACTION
@@ -199,7 +199,7 @@ static void signal_init(void)
 
 #ifdef HAVE_SIGACTION
   /* If we don't do this, it seems other stuff interrupts the
-     suspend handler! Without it, suspending zee under e.g.
+     suspend handler! Without it, suspending under e.g.
      pine or mutt freezes the process. */
   sigfillset(&act.sa_mask);
 
@@ -258,25 +258,25 @@ int main(int argc, char **argv)
       break;
     case 'v':
       fprintf(stderr,
-              ZEE_VERSION_STRING "\n"
-              ZEE_COPYRIGHT_STRING "\n"
-              "Zee comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of Zee\n"
+              VERSION_STRING "\n"
+              COPYRIGHT_STRING "\n"
+              NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of " NAME "\n"
               "under the terms of the GNU General Public License.\n"
               "For more information about these matters, see the file named COPYING.\n"
               );
       return 0;
     case 'h':
       fprintf(stderr,
-              "Usage: zee [OPTION-OR-FILENAME]...\n"
+              "Usage: " BIN_NAME " [OPTION-OR-FILENAME]...\n"
               "\n"
-              "Run Zee, the lightweight Emacs clone.\n"
+              "Run " NAME ", the lightweight editor.\n"
               "\n"
               "Initialization options:\n"
               "\n"
               "--batch                do not do interactive display; implies -q\n"
               "--help                 display this help message and exit\n"
-              "--no-init-file, -q     do not load ~/.zee\n"
+              "--no-init-file, -q     do not load ~/." BIN_NAME "\n"
               "--version              display version information and exit\n"
               "\n"
               "Action options:\n"
@@ -300,7 +300,7 @@ int main(int argc, char **argv)
   else {
     if (!qflag) {
       astr as = get_home_dir();
-      astr_cat_cstr(as, "/.zee");
+      astr_cat_cstr(as, "/." BIN_NAME);
       astr_delete(leDumpEval(lisp_read_file(astr_cstr(as)), 0));
       astr_delete(as);
     }
@@ -328,7 +328,7 @@ int main(int argc, char **argv)
 
     setup_main_screen(argc, as);
 
-    /* Run the main Zee loop. */
+    /* Run the main loop. */
     loop();
 
     /* Tidy and close the terminal. */

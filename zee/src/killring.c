@@ -27,7 +27,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static char *kill_ring_text;
@@ -125,8 +125,8 @@ DEFUN_INT("kill-region", kill_region)
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
 The command C-y (yank) can retrieve it from there.
-If the buffer is read-only, Zee will beep and refrain from deleting
-the text, but put the text in the kill ring anyway.  This means that
+If the buffer is read-only, the text will not be deleted, but it will
+be added to the kill ring anyway.  This means that
 you can use the killing commands to copy text from a read-only buffer.
 If the previous command was also a kill command,
 the text killed this time appends to the text killed last time

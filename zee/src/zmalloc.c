@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /*
@@ -39,8 +39,8 @@ void *zmalloc(size_t size)
   assert(size > 0);
 
   if ((ptr = calloc(size, 1)) == NULL) {
-    fprintf(stderr, "zee: cannot allocate memory\n");
-    zee_exit(1);
+    fprintf(stderr, BIN_NAME ": cannot allocate memory\n");
+    die(1);
   }
 
   return ptr;
@@ -56,8 +56,8 @@ void *zrealloc(void *ptr, size_t size)
   assert(size > 0);
 
   if ((newptr = realloc(ptr, size)) == NULL) {
-    fprintf(stderr, "zee: cannot reallocate memory\n");
-    zee_exit(1);
+    fprintf(stderr, BIN_NAME ": cannot reallocate memory\n");
+    die(1);
   }
 
   return newptr;
@@ -79,8 +79,8 @@ int zvasprintf(char **ptr, const char *fmt, va_list vargs)
   int retval = vasprintf(ptr, fmt, vargs);
 
   if (retval == -1) {
-    fprintf(stderr, "zee: cannot allocate memory for asprintf\n");
-    zee_exit(1);
+    fprintf(stderr, BIN_NAME ": cannot allocate memory for asprintf\n");
+    die(1);
   }
 
   return retval;

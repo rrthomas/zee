@@ -28,7 +28,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "zee.h"
+#include "main.h"
 #include "config.h"
 #include "extern.h"
 
@@ -52,24 +52,24 @@ static void outch(int c, Font font, size_t *x)
   int j, w;
   char *buf;
 
-  if (*x >= ZEE_COLS)
+  if (*x >= SCREEN_COLS)
     return;
 
   term_attrset(1, font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZEE_COLS; w--)
+    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < SCREEN_COLS; w--)
       term_addch(' '), ++(*x);
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
     j = make_char_printable(&buf, (size_t)c);
-    for (w = 0; w < j && *x < ZEE_COLS; ++w)
+    for (w = 0; w < j && *x < SCREEN_COLS; ++w)
       term_addch(buf[w]), ++(*x);
     free(buf);
   }
 
-  term_attrset(1, ZEE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
 }
 
 static int in_region(size_t lineno, size_t x, Region *r)
@@ -95,13 +95,13 @@ static int in_region(size_t lineno, size_t x, Region *r)
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
                              size_t x, size_t i)
 {
-  if (x >= ZEE_COLS) {
-    term_move(line, ZEE_COLS - 1);
+  if (x >= SCREEN_COLS) {
+    term_move(line, SCREEN_COLS - 1);
     term_addch('$');
   } else {
     for (; x < wp->ewidth; ++i) {
       if (in_region(lineno, i, r))
-        outch(' ', ZEE_REVERSE, &x);
+        outch(' ', FONT_REVERSE, &x);
       else
         x++;
     }
@@ -116,9 +116,9 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
   term_move(line, 0);
   for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
     if (in_region(lineno, i, r))
-      outch(*astr_char(lp->item, (ptrdiff_t)i), ZEE_REVERSE, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
     else
-      outch(*astr_char(lp->item, (ptrdiff_t)i), ZEE_NORMAL, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
   }
 
   draw_end_of_line(line, wp, lineno, r, x, i);
@@ -255,7 +255,7 @@ static void draw_status_line(size_t line, Window *wp)
   char *buf;
   Point pt = window_pt(wp);
 
-  term_attrset(1, ZEE_REVERSE);
+  term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
   for (i = 0; i < wp->ewidth; ++i)
@@ -280,7 +280,7 @@ static void draw_status_line(size_t line, Window *wp)
               make_screen_pos(wp, &buf));
   free(buf);
 
-  term_attrset(1, ZEE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
 }
 
 void term_display(void)
@@ -325,7 +325,7 @@ void show_splash_screen(const char *splash)
   size_t i;
   const char *p;
 
-  for (i = 0; i < ZEE_LINES - 2; ++i) {
+  for (i = 0; i < SCREEN_ROWS - 2; ++i) {
     term_move(i, 0);
     term_clrtoeol();
   }
@@ -339,13 +339,13 @@ void show_splash_screen(const char *splash)
 }
 
 /*
- * Tidy up the term ready to leave Zee (temporarily or permanently!).
+ * Tidy up the term ready to suspend or quit.
  */
 void term_tidy(void)
 {
-  term_move(ZEE_LINES - 1, 0);
+  term_move(SCREEN_ROWS - 1, 0);
   term_clrtoeol();
-  term_attrset(1, ZEE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
   term_refresh();
 }
 

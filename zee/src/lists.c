@@ -24,7 +24,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #include "lists.h"
 #include "eval.h"

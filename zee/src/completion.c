@@ -33,7 +33,7 @@
 #include <unistd.h>
 #endif
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /*----------------------------------------------------------------------

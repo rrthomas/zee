@@ -23,7 +23,7 @@
 #include <assert.h>
 
 #include "list.h"
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /* Create an empty list, returning a pointer to the list */

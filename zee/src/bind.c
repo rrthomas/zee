@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static History functions_history;
@@ -169,8 +169,8 @@ struct fentry {
 typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
-#define X(zee_name, c_name) \
-	{zee_name, F_ ## c_name, {NULL, NULL, NULL}},
+#define X(cmd_name, c_name) \
+	{cmd_name, F_ ## c_name, {NULL, NULL, NULL}},
 #include "tbl_funcs.h"
 #undef X
 };

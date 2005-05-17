@@ -86,7 +86,7 @@ int find_file(const char *filename);
 Completion *make_buffer_completion(void);
 int check_modified_buffer(Buffer *bp);
 void kill_buffer(Buffer *kill_bp);
-void zee_exit(int exitcode);
+void die(int exitcode);
 
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
@@ -253,7 +253,7 @@ int zasprintf(char **ptr, const char *fmt, ...);
 /*
  * Declare external Zee functions.
  */
-#define X(zee_name, c_name) \
+#define X(cmd_name, c_name) \
   extern int F_ ## c_name(int argc, le *branch);
 #include "tbl_funcs.h"
 #undef X

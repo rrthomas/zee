@@ -185,7 +185,7 @@ static void process_file(char *filename)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zee_exit(int exitcode)
+void die(int exitcode)
 {
   exit(exitcode);
 }

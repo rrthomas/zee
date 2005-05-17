@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 /*
@@ -44,7 +44,7 @@ void ding(void)
 
 /*
  * Get a keystroke, waiting for up to timeout 10ths of a second if
- * mode contains GETKEY_DELAYED, and translating it into a Zee
+ * mode contains GETKEY_DELAYED, and translating it into a
  * keycode unless mode contains GETKEY_UNFILTERED.
  */
 size_t xgetkey(int mode, size_t timeout)
@@ -56,7 +56,7 @@ size_t xgetkey(int mode, size_t timeout)
 }
 
 /*
- * Wait for a keystroke and return the Zee key code.
+ * Wait for a keystroke and return the keycode.
  */
 size_t getkey(void)
 {

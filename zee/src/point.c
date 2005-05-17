@@ -20,7 +20,7 @@
 
 #include "config.h"
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 Point make_point(size_t lineno, size_t offset)

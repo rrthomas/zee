@@ -45,7 +45,7 @@
 #include <utime.h>
 #include <ctype.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 int exist_file(const char *filename)
@@ -267,8 +267,8 @@ void open_file(char *path, size_t lineno)
   buf = get_current_dir(FALSE);
 
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-    fprintf(stderr, "zee: %s: invalid filename or path\n", path);
-    zee_exit(1);
+    fprintf(stderr, BIN_NAME ": %s: invalid filename or path\n", path);
+    die(1);
   }
 
   astr_cpy_cstr(buf, astr_cstr(dir));
@@ -828,9 +828,9 @@ Save some modified file-visiting buffers.  Asks user about each one.
 }
 END_DEFUN
 
-DEFUN_INT("save-buffers-kill-zee", save_buffers_kill_zee)
+DEFUN_INT("save-buffers-quit", save_buffers_quit)
 /*+
-Offer to save each buffer, then kill this Zee process.
+Offer to save each buffer, then kill this process.
 +*/
 {
   Buffer *bp;
@@ -850,16 +850,16 @@ Offer to save each buffer, then kill this Zee process.
         ok = FALSE;
     }
 
-    thisflag |= FLAG_QUIT_ZEE;
+    thisflag |= FLAG_QUIT;
   }
 }
 END_DEFUN
 
 /*
- * Function called on unexpected error or Zee crash (SIGSEGV).
+ * Function called on unexpected error or crash (SIGSEGV).
  * Attempts to save modified buffers.
  */
-void zee_exit(int exitcode)
+void die(int exitcode)
 {
   Buffer *bp;
 
@@ -873,7 +873,7 @@ void zee_exit(int exitcode)
         astr_cpy_cstr(buf, bp->filename);
       else
         astr_cpy_cstr(buf, bp->name);
-      astr_cat_cstr(buf, ".ZEESAVE");
+      astr_cat_cstr(buf, "." NAME "SAVE");
       fprintf(stderr, "Saving %s...\r\n",
               astr_cstr(buf));
       raw_write_to_disk(bp, astr_cstr(buf), 0600);

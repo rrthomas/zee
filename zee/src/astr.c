@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include "astr.h"
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
@@ -282,7 +282,7 @@ static void assert_eq(astr as, const char *s)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zee_exit(int exitcode)
+void die(int exitcode)
 {
   exit(exitcode);
 }

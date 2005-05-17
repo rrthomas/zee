@@ -21,7 +21,7 @@
 #include <stdarg.h>
 
 #include "config.h"
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 void resync_display(void)
@@ -43,11 +43,11 @@ void resync_display(void)
 void resize_windows(void)
 {
   Window *wp;
-  int hdelta = ZEE_LINES - termp->height;
+  int hdelta = SCREEN_ROWS - termp->height;
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = ZEE_COLS;
+    wp->fwidth = wp->ewidth = SCREEN_COLS;
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
@@ -74,8 +74,8 @@ void resize_windows(void)
 
   /* Sometimes we cannot reduce the windows height to a certain value
      (too small); take care of this case. */
-  termp->width = ZEE_COLS;
-  termp->height = ZEE_LINES - hdelta;
+  termp->width = SCREEN_COLS;
+  termp->height = SCREEN_ROWS - hdelta;
 
   FUNCALL(recenter);
 }

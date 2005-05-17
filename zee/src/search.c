@@ -32,7 +32,7 @@
 #include <sys/types.h>
 #endif
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 #ifdef HAVE_REGEX_H
 #include <regex.h>

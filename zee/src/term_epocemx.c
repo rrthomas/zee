@@ -32,7 +32,7 @@
 #include <termcap.h>
 #include <emx.h>
 
-#include "zee.h"
+#include "main.h"
 #include "extern.h"
 
 static Terminal thisterm = {
@@ -47,7 +47,7 @@ typedef struct {
   int curx, cury;  /* cursor x and y. */
   Font font;       /* current font. */
   int *array, *oarray; /* contents of screen (8 low bits is
-                          character, rest is Zee font code).
+                          character, rest is font code).
                           array is current, oarray is last
                           displayed contents. */
 } Screen;
@@ -58,8 +58,8 @@ static Screen screen;
 
 Terminal *termp = &thisterm;
 
-size_t ZEE_COLS;   /* Current number of columns on screen. */
-size_t ZEE_LINES;  /* Current number of rows on screen. */
+size_t SCREEN_COLS;   /* Current number of columns on screen. */
+size_t SCREEN_ROWS;  /* Current number of rows on screen. */
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -81,9 +81,9 @@ void term_clrtoeol(void)
 }
 
 static const char *getattr(Font f) {
-  if (f == ZEE_NORMAL)
+  if (f == FONT_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZEE_REVERSE)
+  else if (f & FONT_REVERSE)
     return mr_string;
   assert(0);
   return "";
@@ -102,12 +102,12 @@ static const char *getattr(Font f) {
 void term_refresh(void)
 {
   int i, j, skipped, eol;
-  Font of = ZEE_NORMAL;
+  Font of = FONT_NORMAL;
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
   astr_cat_cstr(as, tgoto(cm_string, 0, 0));
-  astr_cat_cstr(as, getattr(ZEE_NORMAL));
+  astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
   for (i = 0; i < termp->height; i++) {
@@ -191,11 +191,11 @@ void term_attrset(int attrs, ...)
   for (i = 0; i < attrs; i++) {
     Font f = va_arg(valist, Font);
     switch (f) {
-    case ZEE_NORMAL:
-      screen.font = ZEE_NORMAL;
+    case FONT_NORMAL:
+      screen.font = FONT_NORMAL;
       break;
-    case ZEE_REVERSE:
-    case ZEE_BOLD:
+    case FONT_REVERSE:
+    case FONT_BOLD:
       screen.font |= f;
       break;
     }
@@ -218,10 +218,10 @@ static char *get_tcap(void)
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    zee_exit(1);
+    die(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    zee_exit(1);
+    die(1);
   }
 
   return tcap;
@@ -230,8 +230,8 @@ static char *get_tcap(void)
 static void read_screen_size(void)
 {
   char *tcap = get_tcap();
-  ZEE_COLS = tgetnum("co");
-  ZEE_LINES = tgetnum("li");
+  SCREEN_COLS = tgetnum("co");
+  SCREEN_ROWS = tgetnum("li");
   free(tcap);
 }
 
@@ -259,8 +259,8 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   read_screen_size();
-  termp->width = ZEE_COLS;
-  termp->height = ZEE_LINES;
+  termp->width = SCREEN_COLS;
+  termp->height = SCREEN_ROWS;
 
   term_init_screen();
   termp->screen = &screen;
