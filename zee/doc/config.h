@@ -6,3 +6,5 @@
 
 extern int asprintf(char **strp, const char *fmt, ...);
 extern int vasprintf(char **strp, const char *fmt, va_list ap);
+
+#define PACKAGE "zee"
