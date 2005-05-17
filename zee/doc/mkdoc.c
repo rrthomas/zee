@@ -159,7 +159,6 @@ static void dump_var_table(void)
       fprintf(stderr, "mkdoc: no docstring for %s\n", ventry_table[i].name);
       exit(1);
     }
-    fprintf(stderr, "%s\n%s\n", ventry_table[i].name, astr_cstr(doc));
     fprintf(fp, "@item %s\n%s\n", ventry_table[i].name, astr_cstr(doc));
     astr_delete(doc);
   }
