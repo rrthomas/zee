@@ -14,6 +14,10 @@ astr_LDADD = zmalloc.o strrstr.o
 
 bin_PROGRAMS = zee
 
+zeedir = $(datadir)/zee
+zee_DATA =					\
+	key_bindings.el
+
 zee_base_SOURCES =				\
 	list.c					\
 	list.h					\

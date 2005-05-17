@@ -46,6 +46,7 @@
 #endif
 
 #include "zee.h"
+#include "paths.h"
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
@@ -230,6 +231,9 @@ int main(int argc, char **argv)
      expressions specified on the command-line. */
   lisp_init();
   init_variables();
+  list = lisp_read_file(PATH_DATA "/key_bindings.el");
+  astr_delete(leDumpEval(list, 0));
+  leWipe(list);
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {

@@ -610,10 +610,11 @@ above, no indenting is performed.
 
     weigh_mark();
 
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     if ((ok = insert_newline())) {
       size_t pos;
       Marker *old_point = point_marker();
+
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
