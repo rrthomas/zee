@@ -1,4 +1,4 @@
-; Default Zee key bindings
+; Default key bindings
 
 ; Navigation. Mostly arrows and things but everything has a home-keys
 ; alternative.
