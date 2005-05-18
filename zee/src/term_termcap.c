@@ -468,7 +468,7 @@ static size_t getchars(char *keys, size_t nbytes)
   int nread = 1;
 
   while (nread >= 0 && nbytes < max_key_chars && nread) {
-    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars);
+    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars - nbytes);
     if (nread >= 0)
       nbytes += nread;
 
