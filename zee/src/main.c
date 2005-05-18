@@ -231,9 +231,6 @@ int main(int argc, char **argv)
      expressions specified on the command-line. */
   lisp_init();
   init_variables();
-  list = lisp_read_file(PATH_DATA "/key_bindings.el");
-  astr_delete(leDumpEval(list, 0));
-  leWipe(list);
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
@@ -307,13 +304,18 @@ int main(int argc, char **argv)
 
     term_init();
 
-    /* Create the `*scratch*' buffer and initialize key bindings. */
+    /* Create the `*scratch*' buffer. */
     create_first_window();
     term_display();
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
     bind_key_string("\\M-x", F_execute_extended_command);
+
+    /* Load default bindings file. */
+    list = lisp_read_file(PATH_DATA "/key_bindings.el");
+    astr_delete(leDumpEval(list, 0));
+    leWipe(list);
 
     if (argc >= 1)
       while (*argv) {
