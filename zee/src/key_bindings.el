@@ -54,9 +54,9 @@
 ; Close
 (global-set-key "\C-w" 'kill-buffer)
 ; Quit
-(global-set-key "\M-\C-q" 'save-buffers-kill-zee)
-(global-set-key "\M-q" 'save-buffers-kill-zee)
-(global-set-key "\C-q" 'save-buffers-kill-zee)
+(global-set-key "\M-\C-q" 'save-buffers-quit)
+(global-set-key "\M-q" 'save-buffers-quit)
+(global-set-key "\C-q" 'save-buffers-quit)
 ; Open recent
 (global-set-key "\C-\M-x" 'switch-to-buffer)
 
