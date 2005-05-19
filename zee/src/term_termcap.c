@@ -41,6 +41,9 @@ static Terminal thisterm = {
 
   /* Uninitialized width and height. */
   0, 0,
+
+  /* Uninitialised */
+  FALSE,
 };
 
 typedef struct {
@@ -238,16 +241,16 @@ static char *get_tcap(void)
   int res;
 
   if (!term) {
-    fprintf(stderr, "No terminal type in TERM.\n");
+    fprintf(stderr, NAME ": no terminal type in TERM\n");
     die(1);
   }
 
   res = tgetent(tcap, term);
   if (res < 0) {
-    fprintf(stderr, "Could not access the termcap data base.\n");
+    perror(NAME ": can't access the termcap data base");
     die(1);
   } else if (res == 0) {
-    fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
+    fprintf(stderr, NAME ": terminal type `%s' is not defined", term);
     die(1);
   }
 
@@ -289,7 +292,7 @@ static char *tgetstr_note_len(const char *cap, char **tcap)
 static void setattr(int flags, struct termios *state)
 {
   if (tcsetattr(0, flags, state) < 0) {
-    fprintf(stderr, "Can't change terminal settings\n");
+    perror(NAME ": can't change terminal settings");
     die(1);
   }
 }
@@ -311,7 +314,7 @@ void term_init(void)
 
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
-    fprintf(stderr, "Can't read terminal capabilites\n");
+    perror(NAME ": can't read terminal capabilites");
     die(1);
   }
 
@@ -347,6 +350,8 @@ void term_init(void)
   norm_string = astr_new();
   astr_cat_cstr(norm_string, me_string);
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
+
+  termp->initted = TRUE;
 }
 
 void term_close(void)

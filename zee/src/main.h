@@ -254,6 +254,7 @@ struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end. */
   size_t width, height;
+  int initted; /* Set to TRUE when the terminal has been initialised. */
 };
 
 /* The actual number of lines and columns on the screen, which may
