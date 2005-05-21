@@ -106,13 +106,24 @@ void term_clrtoeol(void)
   screen.curx = x;
 }
 
-static const char *getattr(Font f) {
+static const char *getattr(Font f)
+{
   if (f == FONT_NORMAL)
     return astr_cstr(norm_string);
   else if (f & FONT_REVERSE)
     return mr_string;
   assert(0);
   return "";
+}
+
+static char *zgoto(const char *s, int col, int row)
+{
+  char *ret = tgoto(s, col, row);
+  if (ret == NULL) {
+    fprintf(stderr, "zile: can't position cursor\n");
+    die(1);
+  }
+  return ret;
 }
 
 /*
@@ -133,7 +144,7 @@ void term_refresh(void)
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
-  astr_cat_cstr(as, tgoto(cm_string, 0, 0));
+  astr_cat_cstr(as, zgoto(cm_string, 0, 0));
   astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
@@ -145,7 +156,7 @@ void term_refresh(void)
      * rest of the line to be updated in the array (it should be
      * all zeros).
      */
-    astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
+    astr_cat_cstr(as, zgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
@@ -156,7 +167,7 @@ void term_refresh(void)
 
       if (screen.oarray[offset] != n) {
         if (skipped)
-          astr_cat_cstr(as, tgoto(cm_string, (int)j, (int)i));
+          astr_cat_cstr(as, zgoto(cm_string, (int)j, (int)i));
         skipped = FALSE;
 
         screen.oarray[offset] = n;
@@ -180,7 +191,7 @@ void term_refresh(void)
   }
 
   /* Put the cursor back where it should be. */
-  astr_cat_cstr(as, tgoto(cm_string, (int)screen.curx, (int)screen.cury));
+  astr_cat_cstr(as, zgoto(cm_string, (int)screen.curx, (int)screen.cury));
 
   /* Display the output. */
   write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
