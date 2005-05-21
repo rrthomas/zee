@@ -61,7 +61,7 @@ zee_base_SOURCES =				\
 	window.c				\
 	term_minibuf.c				\
 	term_display.c				\
-	zee.h
+	main.h
 
 if ALLEGRO
 zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
@@ -76,7 +76,7 @@ endif
 
 zee_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c test1.el test1.output test2.el test2.output test3.el test3.output
+EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c key_bindings.el test1.el test1.output test2.el test2.output test3.el test3.output
 
 clean-local:
 	rm -f test*.stdout
