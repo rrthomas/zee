@@ -43,6 +43,9 @@ static Terminal thisterm = {
 
   /* Uninitialized width and height. */
   0, 0,
+
+  /* Uninitialised. */
+  FALSE,
 };
 
 Terminal *termp = &thisterm;
@@ -342,11 +345,6 @@ static size_t _getkey(size_t timeout)
   }
 
   return key;
-}
-
-size_t getkey(void)
-{
-  return _getkey(0);
 }
 
 static int _xgetkey(int mode, size_t timeout)
