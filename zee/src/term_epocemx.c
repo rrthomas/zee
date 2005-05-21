@@ -40,16 +40,19 @@ static Terminal thisterm = {
   NULL,
 
   /* Uninitialized width and height. */
-  -1, -1,
+  0, 0,
+
+  /* Uninitialised. */
+  FALSE,
 };
 
 typedef struct {
-  int curx, cury;  /* cursor x and y. */
+  size_t curx, cury;  /* cursor x and y. */
   Font font;       /* current font. */
-  int *array, *oarray; /* contents of screen (8 low bits is
-                          character, rest is font code).
-                          array is current, oarray is last
-                          displayed contents. */
+  size_t *array, *oarray; /* contents of screen (8 low bits is
+                             character, rest is font code).
+                             array is current, oarray is last
+                             displayed contents. */
 } Screen;
 
 static char *tcap_ptr;
@@ -66,7 +69,7 @@ static char *so_string, *se_string, *mr_string, *me_string;
 
 astr norm_string;
 
-void term_move(int y, int x)
+void term_move(size_t y, size_t x)
 {
   screen.curx = x;
   screen.cury = y;
@@ -74,7 +77,7 @@ void term_move(int y, int x)
 
 void term_clrtoeol(void)
 {
-  int i, x = screen.curx;
+  size_t i, x = screen.curx;
   for (i = screen.curx; i < termp->width; i++)
     term_addch(0);
   screen.curx = x;
@@ -101,7 +104,8 @@ static const char *getattr(Font f) {
  */
 void term_refresh(void)
 {
-  int i, j, skipped, eol;
+  int skipped, eol;
+  size_t i, j;
   Font of = FONT_NORMAL;
   astr as = astr_new();
 
@@ -118,18 +122,18 @@ void term_refresh(void)
      * rest of the line to be updated in the array (it should be
      * all zeros).
      */
-    astr_cat_cstr(as, tgoto(cm_string, 0, i));
+    astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
-      int offset = i * termp->width + j;
-      int n = screen.array[offset];
+      size_t offset = i * termp->width + j;
+      size_t n = screen.array[offset];
       char c = n & 0xff;
-      Font f = n & ~0xff;
+      Font f = n & ~0xffU;
 
       if (screen.oarray[offset] != n) {
         if (skipped)
-          astr_cat_cstr(as, tgoto(cm_string, j, i));
+          astr_cat_cstr(as, tgoto(cm_string, (int)j, (int)i));
         skipped = FALSE;
 
         screen.oarray[offset] = n;
@@ -153,7 +157,7 @@ void term_refresh(void)
   }
 
   /* Put the cursor back where it should be. */
-  astr_cat_cstr(as, tgoto(cm_string, screen.curx, screen.cury));
+  astr_cat_cstr(as, tgoto(cm_string, (int)screen.curx, (int)screen.cury));
 
   /* Display the output. */
   write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
@@ -162,11 +166,11 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  int i;
+  size_t i;
   term_move(0, 0);
   for (i = 0; i < termp->width * termp->height; i++) {
     screen.array[i] = 0;
-    screen.oarray[i] = -1;
+    screen.oarray[i] = 1;
   }
 }
 
@@ -183,9 +187,9 @@ void term_addch(int c)
   }
 }
 
-void term_attrset(int attrs, ...)
+void term_attrset(size_t attrs, ...)
 {
-  int i;
+  size_t i;
   va_list valist;
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
@@ -195,7 +199,6 @@ void term_attrset(int attrs, ...)
       screen.font = FONT_NORMAL;
       break;
     case FONT_REVERSE:
-    case FONT_BOLD:
       screen.font |= f;
       break;
     }
@@ -363,9 +366,10 @@ static int translate_key(int code)
 static int key_buf[MAX_KEY_BUF];
 static int *keyp = key_buf;
 
-static int xgetkey(int mode)
+size_t term_xgetkey(int mode, size_t timeout)
 {
   int code;
+  (void)timeout;
 
   if (keyp > key_buf)
     return *--keyp;
@@ -382,17 +386,7 @@ static int xgetkey(int mode)
   }
 }
 
-int term_xgetkey(int mode, size_t timeout)
-{
-  return xgetkey(mode);
-}
-
-int getkey(void)
-{
-  return term_xgetkey(0, 0);
-}
-
-void term_ungetkey(int key)
+void term_ungetkey(size_t key)
 {
   if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
     *keyp++ = key;
