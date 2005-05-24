@@ -47,6 +47,13 @@ static int make_char_printable(char **buf, size_t c)
     return zasprintf(buf, "\\%o", c & 0xff);
 }
 
+/* Prints a printable representation of the character 'c' on the screen in the
+ * specified font, and updates the cursor position 'x'. On exit, the font is set
+ * to FONT_NORMAL.
+ * Printing is suppressed if 'x' reaches SCREEN_COLS; in this case 'x' is set to
+ * SCREEN_COLS.
+ * This function is implemented in terms of 'term_addch()'.
+ */
 static void outch(int c, Font font, size_t *x)
 {
   int j, w;
@@ -72,6 +79,10 @@ static void outch(int c, Font font, size_t *x)
   term_attrset(1, FONT_NORMAL);
 }
 
+/** Tests whether the specified line and offset is within the specified Region.
+ * The offset is measured in characters, not in character positions.
+ * (Question: this code is horrible. Why not just use cmp_point()?)
+ */
 static int in_region(size_t lineno, size_t x, Region *r)
 {
   if (lineno >= r->start.n && lineno <= r->end.n) {
@@ -92,6 +103,12 @@ static int in_region(size_t lineno, size_t x, Region *r)
   return FALSE;
 }
 
+/* (Question: what is this for? It seems to have several purposes. Used only in
+ * 'draw_line()' so why not just inline it? Probably easier then documenting
+ * it.)
+ * (Question: why does this method use SCREEN_COLS instead of 'wp_ewidth'?)
+ * Guess: 'r' is the current selection?
+ */
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
                              size_t x, size_t i)
 {
@@ -108,6 +125,18 @@ static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
   }
 }
 
+/* Prints a line on the terminal.
+ *  - Guess: 'line' is the line number measured on the terminal.
+ *    (Question: why not within window?)
+ *  - 'start_col' is the horizontal scroll offset: the character position (not
+ *    cursor position) within 'lp' of the first character that should be
+ *    displayed.
+ *  - 'wp' is the window in which to display. Only used to find the display
+ *    width.
+ *  - 'lp' is the line to display.
+ *  - 'lineno' is the line number of 'lp' within the buffer.
+ *  - 'r' is a region to highlight: the current selection.
+ */
 static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
 		      size_t lineno, Region *r)
 {
@@ -124,6 +153,10 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
   draw_end_of_line(line, wp, lineno, r, x, i);
 }
 
+/* Sets 'r->start' to the lesser of the point and mark of the specified window,
+ * and sets 'r->end' to the greater. If the mark is not anchored, it is treated
+ * as if it were at the point.
+ */
 static void calculate_highlight_region(Window *wp, Region *r)
 {
   assert(wp->bp->mark);
@@ -193,7 +226,7 @@ static char *make_mode_line_flags(Window *wp)
 /*
  * This function calculates the best start column to draw if the line
  * needs to get truncated.
- * Called only for the line where is the point.
+ * Called only for the line where the point is.
  */
 static void calculate_start_column(Window *wp)
 {
@@ -283,6 +316,9 @@ static void draw_status_line(size_t line, Window *wp)
   term_attrset(1, FONT_NORMAL);
 }
 
+/* Draws all the windows in turn, and draws the status line if any space
+ * remains. Finally, moves the cursor to the correct position.
+ */
 void term_display(void)
 {
   size_t topline;

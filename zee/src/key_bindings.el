@@ -83,9 +83,13 @@
 (global-set-key "\C-v" 'yank)
 
 ; Window management.
+
 (global-set-key "\M-2" 'split-window)
 (global-set-key "\C-\M-o" 'other-window)
 (global-set-key "\M-0" 'delete-window)
+
+(global-set-key "\ESC" 'keyboard-quit)
+(global-set-key "\C-g" 'keyboard-quit)
 
 ; Insert special characters.
 

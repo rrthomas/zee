@@ -148,6 +148,16 @@ struct Region {
 #define BFLAG_AUTOFILL  (0000100) /* The buffer is in Auto Fill mode. */
 #define BFLAG_ISEARCH   (0000200) /* The buffer is in Isearch loop. */
 
+/* Represents a buffer: an open file.
+ * To support multiple simultaneous buffers, they can be organised into a linked
+ * list using the 'next' field.
+ * Every buffer has its own:
+ *  - Point and mark (i.e. cursor and selection)
+ *  - List of markers.
+ *  - Undo history.
+ *  - Flags, including the line terminator.
+ *  - Filename.
+ */
 struct Buffer {
   /* The next buffer in buffer list. */
   Buffer *next;
@@ -186,6 +196,10 @@ struct Buffer {
   char eol[3];
 };
 
+/* Represents a window on the screen: a rectangular area used to display a
+ * buffer. To allow more than one window at a time, windows can be organised
+ * into a linked list using the 'next' field.
+ */
 struct Window {
   /* The next window in window list. */
   Window *next;
@@ -193,15 +207,21 @@ struct Window {
   /* The buffer displayed in window. */
   Buffer *bp;
 
-  /* The top line delta and last point line number. */
+  /* The top line delta and last point line number.
+   * (Question: definitions?)
+   */
   size_t topdelta;
   int lastpointn;
 
   /* The point line pointer, line number and offset (used to
-     hold the point in non-current windows). */
+   * hold the point in non-current windows).
+   * (Question: surely this should be a property of 'bp'?)
+   */
   Marker *saved_pt;
 
-  /* The formal and effective width and height of window. */
+  /* The formal and effective width and height of window.
+   * (Question: definitions?)
+   */
   size_t fwidth, fheight;
   size_t ewidth, eheight;
 };
@@ -252,7 +272,8 @@ typedef struct Macro {
 
 struct Terminal {
   void *screen; /* The real type of this pointer depends on the
-                   terminal back-end. */
+                   terminal back-end.
+                   (Question: which is determined by...?) */
   size_t width, height;
   int initted; /* Set to TRUE when the terminal has been initialised. */
 };
@@ -324,7 +345,7 @@ typedef size_t Font;
 /* Hint for the redisplay engine: a resync is required. */
 #define FLAG_NEED_RESYNC                0000004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT                   0000010
+#define FLAG_QUIT                       0000010
 /* The last command modified the universal argument variable `uniarg'. */
 #define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */

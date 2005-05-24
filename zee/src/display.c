@@ -73,7 +73,9 @@ void resize_windows(void)
   }
 
   /* Sometimes we cannot reduce the windows height to a certain value
-     (too small); take care of this case. */
+     (too small); take care of this case.
+     FIXME: *Really* take care of this case. Currently Zee just crashes.
+   */
   termp->width = SCREEN_COLS;
   termp->height = SCREEN_ROWS - hdelta;
 
