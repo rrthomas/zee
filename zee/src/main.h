@@ -215,7 +215,8 @@ struct Window {
 
   /* The point line pointer, line number and offset (used to
    * hold the point in non-current windows).
-   * (Question: surely this should be a property of 'bp'?)
+   * (This can't be a property of 'bp' because we want separate cursors for each
+   * window even if they show the same buffer.)
    */
   Marker *saved_pt;
 
@@ -273,7 +274,7 @@ typedef struct Macro {
 struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end.
-                   (Question: which is determined by...?) */
+                   (Currently determined by compile-time config) */
   size_t width, height;
   int initted; /* Set to TRUE when the terminal has been initialised. */
 };

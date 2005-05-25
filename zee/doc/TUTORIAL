@@ -18,7 +18,7 @@ following abbreviations:
 	  is no META key, type <ESC>, release it, then type the
 	  character <chr>.
 
-Important note: to end the Zee session, type C-x C-c.  (Two characters.)
+Important note: to end the Zee session, type C-q.
 The characters ">>" at the left margin indicate directions for you to
 try using a command.  For instance:
 

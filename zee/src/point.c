@@ -36,6 +36,7 @@ Point make_point(size_t lineno, size_t offset)
   return pt;
 }
 
+/* Returns '-1', '0' or '1'. */
 int cmp_point(Point pt1, Point pt2)
 {
   if (pt1.n < pt2.n)

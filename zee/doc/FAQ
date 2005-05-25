@@ -80,12 +80,11 @@ INDEX
 
 2.1. How do I quit Zee?
 
-    Type `C-x C-c' (that means holding CONTROL while typing X,
-    releasing them, then holding CONTROL while typing C)
+    Type `C-q'.
 
 2.2. How do I return to the shell without leaving Zee?
 
-    Type `C-z'.
+    Type `M-x suspend-zee'.
 
 2.3. Zee is hung.
 
@@ -98,7 +97,7 @@ INDEX
 
 2.4. How do I undo the previous command?
 
-    Type `C-x u'.
+    Type `C-z'.
 
 2.5. What does `C-something' or `M-something' mean?
 
