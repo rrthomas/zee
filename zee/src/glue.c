@@ -31,6 +31,7 @@
 
 /*
  * Emit an error sound.
+ * Also, calls cancel_mbd_macro() and sets FLAG_GOT_ERROR.
  */
 void ding(void)
 {
@@ -46,6 +47,7 @@ void ding(void)
  * Get a keystroke, waiting for up to timeout 10ths of a second if
  * mode contains GETKEY_DELAYED, and translating it into a
  * keycode unless mode contains GETKEY_UNFILTERED.
+ * (Question: when should this function be called and when 'getkey()'.)
  */
 size_t xgetkey(int mode, size_t timeout)
 {
@@ -57,6 +59,7 @@ size_t xgetkey(int mode, size_t timeout)
 
 /*
  * Wait for a keystroke and return the keycode.
+ * (Question: when should this function be called and when 'xgetkey()'.)
  */
 size_t getkey(void)
 {
@@ -64,7 +67,7 @@ size_t getkey(void)
 }
 
 /*
- * Wait for two seconds or until a key is pressed.
+ * Wait for 'delay' 10ths if a second or until a key is pressed.
  * The key is then available with getkey().
  */
 void waitkey(size_t delay)
@@ -73,7 +76,14 @@ void waitkey(size_t delay)
 }
 
 /*
- * Copy a region of text into an allocated buffer.
+ * Copy a region of text from the current buffer into an allocated buffer.
+ *  startn - the line number of the beginning of the region.
+ *  starto - the character offset of the beginning of the region within the
+ *           line.
+ *  (Question: why not pass a point? Would be clearer.)
+ *  size - number of characters to copy.
+ * If the region includes any line endings, they are turned into '\n'
+ * irrespective of 'cur_bp->eol', and count as one character.
  */
 char *copy_text_block(size_t startn, size_t starto, size_t size)
 {
@@ -84,6 +94,10 @@ char *copy_text_block(size_t startn, size_t starto, size_t size)
   max_size = 10;
   dp = buf = (char *)zmalloc(max_size);
 
+  /* Have to do a linear search through the buffer to find the start of the
+   * region. Doesn't matter where we start. Starting at 'cur_bp->pt' is a good
+   * heuristic.
+   */
   lp = cur_bp->pt.p;
   n = cur_bp->pt.n;
   if (n > startn)
@@ -95,10 +109,11 @@ char *copy_text_block(size_t startn, size_t starto, size_t size)
       lp = list_next(lp);
     while (++n < startn);
 
+  /* Copy one character at a time. */
   for (i = starto; dp - buf < (int)size;) {
     if (dp >= buf + max_size) {
       int save_off = dp - buf;
-      max_size += 10;
+      max_size += 10 + (max_size>>2);
       buf = (char *)zrealloc(buf, max_size);
       dp = buf + save_off;
     }
@@ -111,7 +126,7 @@ char *copy_text_block(size_t startn, size_t starto, size_t size)
     }
   }
 
-  return buf;
+  return zrealloc(buf, size);
 }
 
 /*
@@ -159,6 +174,8 @@ void goto_point(Point pt)
 
 /*
  * Read an arbitrary length string.
+ * (Question: How did this function get so broken? Is it actually called
+ * anywhere?)
  */
 char *getln(FILE *fp)
 {
@@ -168,10 +185,10 @@ char *getln(FILE *fp)
 
   for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
     if (s == l + len)
-      zrealloc(l, len *= 2);
+      zrealloc(l, len *= 2); /* FIXME: What if it moves? */
     *s++ = c;
   }
-  *s = '\0';
+  *s++ = '\0'; /* FIXME: Buffer overflow. */
 
-  return l;
+  return l; /* FIXME: trim to length. */
 }
