@@ -270,7 +270,7 @@ static char *get_tcap(void)
 
 static void read_screen_size(void)
 {
-  char *tcap = get_tcap();
+  char *tcap = get_tcap(); /* (Question: why do this here and nowhere else?) */
   SCREEN_COLS = tgetnum("co");
   SCREEN_ROWS = tgetnum("li");
   free(tcap);

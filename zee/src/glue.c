@@ -174,8 +174,7 @@ void goto_point(Point pt)
 
 /*
  * Read an arbitrary length string.
- * (Question: How did this function get so broken? Is it actually called
- * anywhere?)
+ * (Question: How did this function get so broken? It is not called anywhere.)
  */
 char *getln(FILE *fp)
 {
