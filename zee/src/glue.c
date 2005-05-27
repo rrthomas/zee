@@ -47,7 +47,6 @@ void ding(void)
  * Get a keystroke, waiting for up to timeout 10ths of a second if
  * mode contains GETKEY_DELAYED, and translating it into a
  * keycode unless mode contains GETKEY_UNFILTERED.
- * (Question: when should this function be called and when 'getkey()'.)
  */
 size_t xgetkey(int mode, size_t timeout)
 {
@@ -58,8 +57,8 @@ size_t xgetkey(int mode, size_t timeout)
 }
 
 /*
- * Wait for a keystroke and return the keycode.
- * (Question: when should this function be called and when 'xgetkey()'.)
+ * Wait for a keystroke, waiting indefinitely, and return the
+ * corresponding keycode.
  */
 size_t getkey(void)
 {
