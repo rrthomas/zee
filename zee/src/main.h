@@ -196,9 +196,10 @@ struct Buffer {
   char eol[3];
 };
 
-/* Represents a window on the screen: a rectangular area used to display a
- * buffer. To allow more than one window at a time, windows can be organised
- * into a linked list using the 'next' field.
+/*
+ * Represents a window on the screen: a rectangular area used to
+ * display a buffer. To allow more than one window at a time, windows
+ * can be organised into a linked list using the 'next' field.
  */
 struct Window {
   /* The next window in window list. */
@@ -215,8 +216,8 @@ struct Window {
 
   /* The point line pointer, line number and offset (used to
    * hold the point in non-current windows).
-   * (This can't be a property of 'bp' because we want separate cursors for each
-   * window even if they show the same buffer.)
+   * (This can't be a property of 'bp' because we want separate
+   * cursors for each window even if they show the same buffer.)
    */
   Marker *saved_pt;
 
