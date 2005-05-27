@@ -421,6 +421,18 @@ static size_t translate_key(char *s, size_t nbytes)
 {
   size_t i, key = KBD_NOKEY, used = 0;
 
+#if 1
+  char *s2 = s;
+  fprintf(stderr, "translate_key(&{");
+  if (*s2) {
+    fprintf(stderr, "%d", (int)(*s2++));
+    while (*s2) {
+      fprintf(stderr, ", %d", (int)(*s2++));
+    }
+  }
+  fprintf(stderr, "}, %d)\n\r", nbytes);
+#endif
+
   if (nbytes == 1) {
     switch (*s) {
     case '\0':		/* C-@ */
@@ -453,7 +465,7 @@ static size_t translate_key(char *s, size_t nbytes)
   } else {
     key = find_fun_key(s, nbytes, &used);
     if (used == 0 && nbytes > 1) {
-#ifdef DEBUG
+#if 0
       int i;
       fprintf(stderr, "key code ");
       for (i = 0; i < nbytes; i++)
