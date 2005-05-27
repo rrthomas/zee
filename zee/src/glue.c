@@ -171,23 +171,3 @@ void goto_point(Point pt)
       FUNCALL(forward_char);
     while (cur_bp->pt.o < pt.o);
 }
-
-/*
- * Read an arbitrary length string.
- * (Question: How did this function get so broken? It is not called anywhere.)
- */
-char *getln(FILE *fp)
-{
-  size_t len = 256;
-  int c;
-  char *l = zmalloc(len), *s = l;
-
-  for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
-    if (s == l + len)
-      zrealloc(l, len *= 2); /* FIXME: What if it moves? */
-    *s++ = c;
-  }
-  *s++ = '\0'; /* FIXME: Buffer overflow. */
-
-  return l; /* FIXME: trim to length. */
-}
