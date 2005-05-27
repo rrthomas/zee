@@ -230,14 +230,6 @@ static char *get_tcap(void)
   return tcap;
 }
 
-static void read_screen_size(void)
-{
-  char *tcap = get_tcap();
-  SCREEN_COLS = tgetnum("co");
-  SCREEN_ROWS = tgetnum("li");
-  free(tcap);
-}
-
 static void term_init_screen(void)
 {
   int size = termp->width * termp->height;
@@ -261,9 +253,8 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  read_screen_size();
-  termp->width = SCREEN_COLS;
-  termp->height = SCREEN_ROWS;
+  termp->width = SCREEN_COLS = tgetnum("co");
+  termp->height = SCREEN_ROWS = tgetnum("li");
 
   term_init_screen();
   termp->screen = &screen;

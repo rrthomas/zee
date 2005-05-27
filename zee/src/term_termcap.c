@@ -268,19 +268,16 @@ static char *get_tcap(void)
   return tcap;
 }
 
-static void read_screen_size(void)
-{
-  char *tcap = get_tcap(); /* (Question: why do this here and nowhere else?) */
-  SCREEN_COLS = tgetnum("co");
-  SCREEN_ROWS = tgetnum("li");
-  free(tcap);
-}
-
 static void init_screen(void)
 {
   int size;
+  char *tcap = get_tcap();
+  /* We need a local tcap as we might be called by the SIGWINCH
+     handler before the global tcap is initialised. */
 
-  read_screen_size();
+  SCREEN_COLS = tgetnum("co");
+  SCREEN_ROWS = tgetnum("li");
+  free(tcap);
   size = SCREEN_COLS * SCREEN_ROWS;
   screen.array = zrealloc(screen.array, size * sizeof(int));
   screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
