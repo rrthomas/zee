@@ -61,8 +61,8 @@ static Screen screen;
 
 Terminal *termp = &thisterm;
 
-size_t SCREEN_COLS;   /* Current number of columns on screen. */
-size_t SCREEN_ROWS;  /* Current number of rows on screen. */
+size_t screen_cols;   /* Current number of columns on screen. */
+size_t screen_rows;  /* Current number of rows on screen. */
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -253,8 +253,8 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  termp->width = SCREEN_COLS = tgetnum("co");
-  termp->height = SCREEN_ROWS = tgetnum("li");
+  termp->width = screen_cols = tgetnum("co");
+  termp->height = screen_rows = tgetnum("li");
 
   term_init_screen();
   termp->screen = &screen;

@@ -36,7 +36,7 @@ static void xminibuf_write(const char *s)
 {
   size_t x;
 
-  for (x = 0; *s != '\0' && x < SCREEN_COLS; s++) {
+  for (x = 0; *s != '\0' && x < screen_cols; s++) {
     term_addch(*(unsigned char *)s);
     ++x;
   }
@@ -44,7 +44,7 @@ static void xminibuf_write(const char *s)
 
 void term_minibuf_write(const char *s)
 {
-  term_move(SCREEN_ROWS - 1, 0);
+  term_move(screen_rows - 1, 0);
   xminibuf_write(s);
   term_clrtoeol();
 }
@@ -54,25 +54,25 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 {
   int margin = 1, n = 0;
 
-  term_move(SCREEN_ROWS - 1, 0);
+  term_move(screen_rows - 1, 0);
   term_clrtoeol();
   xminibuf_write(prompt);
 
-  if (prompt_len + pointo + 1 >= SCREEN_COLS) {
+  if (prompt_len + pointo + 1 >= screen_cols) {
     margin++;
     term_addch('$');
-    n = pointo - pointo % (SCREEN_COLS - prompt_len - 2);
+    n = pointo - pointo % (screen_cols - prompt_len - 2);
   }
 
-  term_addnstr(value + n, min(SCREEN_COLS - prompt_len - margin, strlen(value) - n));
+  term_addnstr(value + n, min(screen_cols - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
 
-  if (strlen(value + n) >= SCREEN_COLS - prompt_len - margin) {
-    term_move(SCREEN_ROWS - 1, SCREEN_COLS - 1);
+  if (strlen(value + n) >= screen_cols - prompt_len - margin) {
+    term_move(screen_rows - 1, screen_cols - 1);
     term_addch('$');
   }
 
-  term_move(SCREEN_ROWS - 1, prompt_len + margin - 1 + pointo % (SCREEN_COLS - prompt_len - margin));
+  term_move(screen_rows - 1, prompt_len + margin - 1 + pointo % (screen_cols - prompt_len - margin));
 
   term_refresh();
 }
@@ -121,13 +121,13 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
       FUNCALL(suspend);
       break;
     case KBD_RET:
-      term_move(SCREEN_ROWS - 1, 0);
+      term_move(screen_rows - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);
       return *p;
     case KBD_CANCEL:
-      term_move(SCREEN_ROWS - 1, 0);
+      term_move(screen_rows - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);

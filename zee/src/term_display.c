@@ -59,19 +59,19 @@ static void outch(int c, Font font, size_t *x)
   int j, w;
   char *buf;
 
-  if (*x >= SCREEN_COLS)
+  if (*x >= screen_cols)
     return;
 
   term_attrset(1, font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < SCREEN_COLS; w--)
+    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < screen_cols; w--)
       term_addch(' '), ++(*x);
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
     j = make_char_printable(&buf, (size_t)c);
-    for (w = 0; w < j && *x < SCREEN_COLS; ++w)
+    for (w = 0; w < j && *x < screen_cols; ++w)
       term_addch(buf[w]), ++(*x);
     free(buf);
   }
@@ -112,8 +112,8 @@ static int in_region(size_t lineno, size_t x, Region *r)
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
                              size_t x, size_t i)
 {
-  if (x >= SCREEN_COLS) {
-    term_move(line, SCREEN_COLS - 1);
+  if (x >= screen_cols) {
+    term_move(line, screen_cols - 1);
     term_addch('$');
   } else {
     for (; x < wp->ewidth; ++i) {
@@ -361,7 +361,7 @@ void show_splash_screen(const char *splash)
   size_t i;
   const char *p;
 
-  for (i = 0; i < SCREEN_ROWS - 2; ++i) {
+  for (i = 0; i < screen_rows - 2; ++i) {
     term_move(i, 0);
     term_clrtoeol();
   }
@@ -379,7 +379,7 @@ void show_splash_screen(const char *splash)
  */
 void term_tidy(void)
 {
-  term_move(SCREEN_ROWS - 1, 0);
+  term_move(screen_rows - 1, 0);
   term_clrtoeol();
   term_attrset(1, FONT_NORMAL);
   term_refresh();

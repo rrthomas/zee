@@ -286,7 +286,7 @@ struct Terminal {
    (Question: would it not be much simpler just to pass these values to
    resize_windows()? Then there'd be no duplication and no question which
    version was the right one to use.) */
-extern size_t SCREEN_ROWS, SCREEN_COLS;
+extern size_t screen_rows, screen_cols;
 
 extern Terminal *termp; /* The global Terminal. */
 
@@ -302,10 +302,8 @@ typedef size_t Font;
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
-/* (Question: Please can we change these to hex?) */
-
-#define GETKEY_DELAYED                  0001
-#define GETKEY_UNFILTERED               0002
+#define GETKEY_DELAYED                  0x1
+#define GETKEY_UNFILTERED               0x2
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY                       UINT_MAX
@@ -347,19 +345,19 @@ typedef size_t Font;
  *--------------------------------------------------------------------------*/
 
 /* The last command was a C-p or a C-n. */
-#define FLAG_DONE_CPCN                  0000001
+#define FLAG_DONE_CPCN                  0x0001
 /* The last command was a kill. */
-#define FLAG_DONE_KILL                  0000002
+#define FLAG_DONE_KILL                  0x0002
 /* Hint for the redisplay engine: a resync is required. */
-#define FLAG_NEED_RESYNC                0000004
+#define FLAG_NEED_RESYNC                0x0004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT                       0000010
+#define FLAG_QUIT                       0x0008
 /* The last command modified the universal argument variable `uniarg'. */
-#define FLAG_SET_UNIARG                 0000020
+#define FLAG_SET_UNIARG                 0x0010
 /* We are defining a macro. */
-#define FLAG_DEFINING_MACRO             0000040
+#define FLAG_DEFINING_MACRO             0x0020
 /* Encountered an error. */
-#define FLAG_GOT_ERROR                  0000100
+#define FLAG_GOT_ERROR                  0x0040
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

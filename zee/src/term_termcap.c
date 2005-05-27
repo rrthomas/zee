@@ -57,23 +57,12 @@ typedef struct {
 static char *tcap_ptr;
 static astr key_buf;
 static Screen screen;
-Terminal *termp = &thisterm; /* (Question: why does this file use the global
-                                variable 'termp' but term_epocmx and
-                                term_allegro have a private (static) variable
-                                called 'termp' which shadows this? I'm guessing
-                                it is something to do with resizing the window,
-                                which I guess is impossible for epocmx and
-                                allegro. Still, wouldn't it be better to have a
-                                term_setsize() function and remove all mention
-                                of Terminal from main.c?) */
+Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-/* (Question: Why are these spelt in capital letters? Makes them look like
-   constants which they are not. (e.g. modified by display.c/resize_windows().)
- */
-size_t SCREEN_COLS;   /* Current number of columns on screen. */
-size_t SCREEN_ROWS;  /* Current number of rows on screen. */
+size_t screen_cols;   /* Current number of columns on screen. */
+size_t screen_rows;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
@@ -285,10 +274,10 @@ static void init_screen(void)
   /* We need a local tcap as we might be called by the SIGWINCH
      handler before the global tcap is initialised. */
 
-  SCREEN_COLS = tgetnum("co");
-  SCREEN_ROWS = tgetnum("li");
+  screen_cols = tgetnum("co");
+  screen_rows = tgetnum("li");
   free(tcap);
-  size = SCREEN_COLS * SCREEN_ROWS;
+  size = screen_cols * screen_rows;
   screen.array = zrealloc(screen.array, size * sizeof(int));
   screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
   screen.curx = screen.cury = 0;
@@ -323,8 +312,8 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   init_screen();
-  termp->width = SCREEN_COLS;
-  termp->height = SCREEN_ROWS;
+  termp->width = screen_cols;
+  termp->height = screen_rows;
   termp->screen = &screen;
   term_clear();
 

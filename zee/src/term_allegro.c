@@ -50,7 +50,7 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-size_t SCREEN_ROWS, SCREEN_COLS;
+size_t screen_rows, screen_cols;
 
 /* current position and color */
 static size_t cur_x = 0;
@@ -98,13 +98,13 @@ END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
 {
-  if (cursor_state && cur_x < SCREEN_COLS && cur_y < SCREEN_ROWS) {
+  if (cursor_state && cur_x < screen_cols && cur_y < screen_rows) {
     if (state)
       rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
-      int fg, bg, c = new_scr[cur_y*SCREEN_COLS+cur_x];
+      int fg, bg, c = new_scr[cur_y*screen_cols+cur_x];
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
@@ -123,10 +123,10 @@ void term_move(size_t y, size_t x)
 
 void term_clrtoeol(void)
 {
-  if (cur_x < SCREEN_COLS && cur_y < SCREEN_ROWS) {
+  if (cur_x < screen_cols && cur_y < screen_rows) {
     size_t x;
-    for (x = cur_x; x < SCREEN_COLS; x++)
-      new_scr[cur_y * SCREEN_COLS + x] = 0;
+    for (x = cur_x; x < screen_cols; x++)
+      new_scr[cur_y * screen_cols + x] = 0;
   }
 }
 
@@ -135,8 +135,8 @@ void term_refresh(void)
   int c, i, bg, fg;
   size_t x, y;
   i = 0;
-  for (y = 0; y<SCREEN_ROWS; y++)
-    for (x = 0; x < SCREEN_COLS; x++) {
+  for (y = 0; y<screen_rows; y++)
+    for (x = 0; x < screen_cols; x++) {
       if (new_scr[i] != cur_scr[i]) {
         c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
@@ -152,12 +152,12 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(short) * SCREEN_COLS * SCREEN_ROWS);
+  memset(new_scr, 0, sizeof(short) * screen_cols * screen_rows);
 }
 
 void term_addch(int c)
 {
-  if (cur_x < SCREEN_COLS && cur_y < SCREEN_ROWS) {
+  if (cur_x < screen_cols && cur_y < screen_rows) {
     int color = 0;
 
     if (c & 0x0f00)
@@ -172,7 +172,7 @@ void term_addch(int c)
     else
       color |= cur_color & 0xf000;
 
-    new_scr[cur_y*SCREEN_COLS+cur_x] = (c & 0x00ff) | color;
+    new_scr[cur_y*screen_cols+cur_x] = (c & 0x00ff) | color;
   }
   cur_x++;
 }
@@ -212,15 +212,15 @@ void term_init(void)
   LOCK_FUNCTION(inc_cur_time);
   install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-  SCREEN_COLS = SCREEN_W/FW;
-  SCREEN_ROWS = SCREEN_H/FH;
+  screen_cols = SCREEN_W/FW;
+  screen_rows = SCREEN_H/FH;
 
   termp->screen = screen;
-  termp->width = SCREEN_COLS;
-  termp->height = SCREEN_ROWS;
+  termp->width = screen_cols;
+  termp->height = screen_rows;
 
-  cur_scr = zmalloc(sizeof(short) * SCREEN_COLS * SCREEN_ROWS);
-  new_scr = zmalloc(sizeof(short) * SCREEN_COLS * SCREEN_ROWS);
+  cur_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
+  new_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
 }
 
 void term_close(void)
