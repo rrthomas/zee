@@ -965,7 +965,7 @@ Interactively, with prefix argument, print output into current buffer.
 
   backward_sexp();
   calculate_region(&r, cur_bp->pt, m->pt);
-  expr = copy_text_block(r.start.n, r.start.o, r.size);
+  expr = copy_text_block(r.start, r.size);
   cur_bp->pt = m->pt;
 
   list = eval_expression(expr);

@@ -1078,7 +1078,7 @@ it as the contents of the region.
     }
 
     calculate_the_region(&r);
-    p = copy_text_block(r.start.n, r.start.o, r.size);
+    p = copy_text_block(r.start, r.size);
     write(fd, p, r.size);
     free(p);
 

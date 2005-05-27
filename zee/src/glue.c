@@ -76,15 +76,12 @@ void waitkey(size_t delay)
 
 /*
  * Copy a region of text from the current buffer into an allocated buffer.
- *  startn - the line number of the beginning of the region.
- *  starto - the character offset of the beginning of the region within the
- *           line.
- *  (Question: why not pass a point? Would be clearer.)
+ *  start - the starting point.
  *  size - number of characters to copy.
  * If the region includes any line endings, they are turned into '\n'
  * irrespective of 'cur_bp->eol', and count as one character.
  */
-char *copy_text_block(size_t startn, size_t starto, size_t size)
+char *copy_text_block(Point start, size_t size)
 {
   char *buf, *dp;
   size_t max_size, n, i;
@@ -99,17 +96,17 @@ char *copy_text_block(size_t startn, size_t starto, size_t size)
    */
   lp = cur_bp->pt.p;
   n = cur_bp->pt.n;
-  if (n > startn)
+  if (n > start.n)
     do
       lp = list_prev(lp);
-    while (--n > startn);
-  else if (n < startn)
+    while (--n > start.n);
+  else if (n < start.n)
     do
       lp = list_next(lp);
-    while (++n < startn);
+    while (++n < start.n);
 
   /* Copy one character at a time. */
-  for (i = starto; dp - buf < (int)size;) {
+  for (i = start.o; dp - buf < (int)size;) {
     if (dp >= buf + max_size) {
       int save_off = dp - buf;
       max_size += 10 + (max_size>>2);

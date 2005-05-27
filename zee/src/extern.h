@@ -102,7 +102,7 @@ void ding(void);
 size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t delay);
-char *copy_text_block(size_t startn, size_t starto, size_t size);
+char *copy_text_block(Point start, size_t size);
 astr shorten_string(char *s, int maxlen);
 void goto_point(Point pt);
 char *getln(FILE *fp);

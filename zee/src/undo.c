@@ -63,12 +63,12 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     break;
   case UNDO_INSERT_BLOCK:
     up->delta.block.size = arg1;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
+    up->delta.block.text = copy_text_block(pt, arg1);
     break;
   case UNDO_REPLACE_BLOCK:
     up->delta.block.osize = arg1;
     up->delta.block.size = arg2;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
+    up->delta.block.text = copy_text_block(pt, arg1);
     break;
   case UNDO_REMOVE_BLOCK:
     up->delta.block.size = arg1;

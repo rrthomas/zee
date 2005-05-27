@@ -148,7 +148,7 @@ to make one entry in the kill ring.
          complain. */
       char *p;
 
-      p = copy_text_block(r.start.n, r.start.o, r.size);
+      p = copy_text_block(r.start, r.size);
       kill_ring_push_nstring(p, r.size);
       free(p);
 
@@ -192,7 +192,7 @@ Save the region as if killed, but don't kill it.
   else {
     calculate_the_region(&r);
 
-    p = copy_text_block(r.start.n, r.start.o, r.size);
+    p = copy_text_block(r.start, r.size);
     kill_ring_push_nstring(p, r.size);
     free(p);
 
