@@ -271,6 +271,8 @@ typedef struct Macro {
   struct Macro *next;           /* Next macro in the list. */
 } Macro;
 
+/* (Question: why is this a struct? At any moment there is a unique global
+   instance and it is never passed to anything.) */
 struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end.
@@ -280,7 +282,10 @@ struct Terminal {
 };
 
 /* The actual number of lines and columns on the screen, which may
-   differ from the Terminal's settings after a SIGWINCH. */
+   differ from the Terminal's settings after a SIGWINCH.
+   (Question: would it not be much simpler just to pass these values to
+   resize_windows()? Then there'd be no duplication and no question which
+   version was the right one to use.) */
 extern size_t SCREEN_ROWS, SCREEN_COLS;
 
 extern Terminal *termp; /* The global Terminal. */
@@ -296,6 +301,8 @@ typedef size_t Font;
 /*--------------------------------------------------------------------------
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
+
+/* (Question: Please can we change these to hex?) */
 
 #define GETKEY_DELAYED                  0001
 #define GETKEY_UNFILTERED               0002

@@ -48,20 +48,30 @@ static Terminal thisterm = {
 
 typedef struct {
   size_t curx, cury;          /* cursor x and y. */
-  Font font;                    /* current font. */
-  size_t *array, *oarray;     /* contents of screen (8 low bits is
-                                   character, rest is font code).
-                                   array is current, oarray is last
-                                   displayed contents. */
+  Font font;                  /* current font. */
+  size_t *array, *oarray;     /* contents of screen (8 low bits is character,
+                                 rest is font code). array is current, oarray is
+                                 last displayed contents. */
 } Screen;
 
 static char *tcap_ptr;
 static astr key_buf;
 static Screen screen;
-Terminal *termp = &thisterm;
+Terminal *termp = &thisterm; /* (Question: why does this file use the global
+                                variable 'termp' but term_epocmx and
+                                term_allegro have a private (static) variable
+                                called 'termp' which shadows this? I'm guessing
+                                it is something to do with resizing the window,
+                                which I guess is impossible for epocmx and
+                                allegro. Still, wouldn't it be better to have a
+                                term_setsize() function and remove all mention
+                                of Terminal from main.c?) */
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
+/* (Question: Why are these spelt in capital letters? Makes them look like
+   constants which they are not. (e.g. modified by display.c/resize_windows().)
+ */
 size_t SCREEN_COLS;   /* Current number of columns on screen. */
 size_t SCREEN_ROWS;  /* Current number of rows on screen. */
 
