@@ -109,7 +109,7 @@ char *copy_text_block(Point start, size_t size)
   for (i = start.o; dp - buf < (int)size;) {
     if (dp >= buf + max_size) {
       int save_off = dp - buf;
-      max_size += 10 + (max_size>>2);
+      max_size += 10 + (max_size >> 2);
       buf = (char *)zrealloc(buf, max_size);
       dp = buf + save_off;
     }
