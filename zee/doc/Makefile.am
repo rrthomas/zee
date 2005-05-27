@@ -39,7 +39,7 @@ dotzee.texi: dotzee.sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
 	@echo "@setfilename dotzee.info" >>$@
 	@echo "@example" >>$@
-	expand $< >>$@
+	expand $? >>$@
 	@echo "@end example" >>$@
 
 all-local: AUTODOC
