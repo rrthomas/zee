@@ -36,9 +36,6 @@
 #include "extern.h"
 
 static Terminal thisterm = {
-  /* Uninitialized screen pointer. */
-  NULL,
-
   /* Uninitialised */
   FALSE,
 };
@@ -311,7 +308,6 @@ void term_init(void)
   init_screen();
   term_set_width(screen_cols);
   term_set_height(screen_rows);
-  termp->screen = &screen;
   term_clear();
 
   key_buf = astr_new();
@@ -363,7 +359,6 @@ void term_close(void)
   /* Free memory and finish with termcap. */
   free(screen.array);
   free(screen.oarray);
-  termp->screen = NULL;
   free(tcap_ptr);
   astr_delete(norm_string);
   tcdrain(0);

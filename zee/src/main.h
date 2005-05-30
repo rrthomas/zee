@@ -275,9 +275,6 @@ typedef struct Macro {
 /* (Question: why is this a struct? At any moment there is a unique global
    instance and it is never passed to anything.) */
 struct Terminal {
-  void *screen; /* The real type of this pointer depends on the
-                   terminal back-end.
-                   (Currently determined by compile-time config) */
   int initted; /* Set to TRUE when the terminal has been initialised. */
 };
 

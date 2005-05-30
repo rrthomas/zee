@@ -257,7 +257,6 @@ void term_init(void)
   term_set_height(screen_rows = tgetnum("li"));
 
   term_init_screen();
-  termp->screen = &screen;
 
   /* Unbuffered I/O so screen is always up-to-date. */
   setvbuf(stdout, NULL, _IONBF, 0);
@@ -280,7 +279,6 @@ void term_close(void)
   /* Free memory and finish with termcap. */
   free(screen.array);
   free(screen.oarray);
-  termp->screen = NULL;
   free(tcap_ptr);
   astr_delete(norm_string);
   fflush(stdout);

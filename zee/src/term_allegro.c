@@ -215,7 +215,6 @@ void term_init(void)
   screen_cols = SCREEN_W/FW;
   screen_rows = SCREEN_H/FH;
 
-  termp->screen = screen;
   term_set_width(screen_cols);
   term_set_height(screen_rows);
 
@@ -226,7 +225,6 @@ void term_init(void)
 void term_close(void)
 {
   /* Free memory and finish with allegro. */
-  termp->screen = NULL;
   free(cur_scr);
   free(new_scr);
 
