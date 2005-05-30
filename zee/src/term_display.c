@@ -163,14 +163,13 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
     /* (Question: why do we use screen_cols instead of wp->ewidth?) */
     term_move(line, screen_cols - 1);
     term_addch('$');
-  } else {
+  } else
     for (; x < wp->ewidth; ++i) {
       if (in_region(lineno, i, r))
         outch(' ', FONT_REVERSE, &x);
       else
         x++;
     }
-  }
 }
 
 /* Sets 'r->start' to the lesser of the point and mark of the specified window,
