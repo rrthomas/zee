@@ -134,28 +134,6 @@ static int in_region(size_t lineno, size_t x, Region *r)
   return FALSE;
 }
 
-/* (Question: what is this for? It seems to have several purposes. Used only in
- * draw_line(), so why not just inline it? Probably easier then documenting
- * it.)
- * (Question: why does this method use screen_cols instead of wp->ewidth?)
- * Guess: 'r' is the current selection?
- */
-static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
-                             size_t x, size_t i)
-{
-  if (x >= screen_cols) {
-    term_move(line, screen_cols - 1);
-    term_addch('$');
-  } else {
-    for (; x < wp->ewidth; ++i) {
-      if (in_region(lineno, i, r))
-        outch(' ', FONT_REVERSE, &x);
-      else
-        x++;
-    }
-  }
-}
-
 /* Prints a line on the terminal.
  *  - Guess: 'line' is the line number measured on the terminal.
  *    (Question: why not within window?)
@@ -181,7 +159,18 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
       outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
   }
 
-  draw_end_of_line(line, wp, lineno, r, x, i);
+  if (x >= screen_cols) {
+    /* (Question: why do we use screen_cols instead of wp->ewidth?) */
+    term_move(line, screen_cols - 1);
+    term_addch('$');
+  } else {
+    for (; x < wp->ewidth; ++i) {
+      if (in_region(lineno, i, r))
+        outch(' ', FONT_REVERSE, &x);
+      else
+        x++;
+    }
+  }
 }
 
 /* Sets 'r->start' to the lesser of the point and mark of the specified window,
