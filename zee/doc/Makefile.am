@@ -2,17 +2,17 @@
 
 info_TEXINFOS = zee.texi
 
-zeedir = $(datadir)/zee
+zeedir = $(datadir)/$(PACKAGE_NAME)
 zee_DATA =					\
 	AUTODOC					\
 	FAQ					\
 	TUTORIAL				\
-	dotzee.sample
+	dot$(PACKAGE_NAME).sample
 
 EXTRA_DIST =					\
 	FAQ					\
 	TUTORIAL				\
-	dotzee.sample				\
+	dot$(PACKAGE_NAME).sample		\
 	lisp.txt				\
 	mkdoc.c					\
 	BANNER.EPOC				\
@@ -21,7 +21,7 @@ EXTRA_DIST =					\
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
-GENERATED_TEXI = dotzee.texi zee_funcs.texi zee_vars.texi
+GENERATED_TEXI = dot$(PACKAGE_NAME).texi $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi
 
 mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ mkdoc.o
@@ -31,14 +31,14 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_va
 
 	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
 
-zee.info: $(GENERATED_TEXI)
+$(PACKAGE_NAME).info: $(GENERATED_TEXI)
 
-zee_funcs.texi zee_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc
+$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
-dotzee.texi: dotzee.sample
+dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
-	@echo "@setfilename dotzee.info" >>$@
+	@echo "@setfilename dot$(PACKAGE_NAME).info" >>$@
 	@echo "@example" >>$@
 	expand $? >>$@
 	@echo "@end example" >>$@
