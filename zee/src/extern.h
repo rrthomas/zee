@@ -191,7 +191,7 @@ void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void free_rotation_buffers(void);
 
-/* term_redisplay.c ------------------------------------------------------- */
+/* term_display.c --------------------------------------------------------- */
 int term_initted(void);
 void term_set_initted(void);
 size_t term_width(void);
