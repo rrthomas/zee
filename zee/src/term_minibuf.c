@@ -36,7 +36,7 @@ static void xminibuf_write(const char *s)
 {
   size_t x;
 
-  for (x = 0; *s != '\0' && x < screen_cols; s++) {
+  for (x = 0; *s != '\0' && x < term_width(); s++) {
     term_addch(*(unsigned char *)s);
     ++x;
   }
@@ -44,7 +44,7 @@ static void xminibuf_write(const char *s)
 
 void term_minibuf_write(const char *s)
 {
-  term_move(screen_rows - 1, 0);
+  term_move(term_height() - 1, 0);
   xminibuf_write(s);
   term_clrtoeol();
 }
@@ -52,27 +52,29 @@ void term_minibuf_write(const char *s)
 static void draw_minibuf_read(const char *prompt, const char *value,
                               size_t prompt_len, char *match, size_t pointo)
 {
-  int margin = 1, n = 0;
+  size_t margin = 1, n = 0;
+  size_t width = term_width();
 
-  term_move(screen_rows - 1, 0);
+  term_move(term_height() - 1, 0);
   term_clrtoeol();
   xminibuf_write(prompt);
 
-  if (prompt_len + pointo + 1 >= screen_cols) {
+  if (prompt_len + pointo + 1 >= width) {
     margin++;
     term_addch('$');
-    n = pointo - pointo % (screen_cols - prompt_len - 2);
+    n = pointo - pointo % (width - prompt_len - 2);
   }
 
-  term_addnstr(value + n, min(screen_cols - prompt_len - margin, strlen(value) - n));
+  term_addnstr(value + n, min(width - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
 
-  if (strlen(value + n) >= screen_cols - prompt_len - margin) {
-    term_move(screen_rows - 1, screen_cols - 1);
+  if (strlen(value + n) >= width - prompt_len - margin) {
+    term_move(term_height() - 1, width - 1);
     term_addch('$');
   }
 
-  term_move(screen_rows - 1, prompt_len + margin - 1 + pointo % (screen_cols - prompt_len - margin));
+  term_move(term_height() - 1, prompt_len + margin - 1 +
+            pointo % (width - prompt_len - margin));
 
   term_refresh();
 }
@@ -121,13 +123,13 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
       FUNCALL(suspend);
       break;
     case KBD_RET:
-      term_move(screen_rows - 1, 0);
+      term_move(term_height() - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);
       return *p;
     case KBD_CANCEL:
-      term_move(screen_rows - 1, 0);
+      term_move(term_height() - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);

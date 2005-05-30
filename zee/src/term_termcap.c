@@ -49,9 +49,6 @@ static Screen screen;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-size_t screen_cols;   /* Current number of columns on screen. */
-size_t screen_rows;  /* Current number of rows on screen. */
-
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
 
@@ -262,10 +259,10 @@ static void init_screen(void)
   /* We need a local tcap as we might be called by the SIGWINCH
      handler before the global tcap is initialised. */
 
-  screen_cols = tgetnum("co");
-  screen_rows = tgetnum("li");
+  term_set_width(tgetnum("co"));
+  term_set_height(tgetnum("li"));
   free(tcap);
-  size = screen_cols * screen_rows;
+  size = term_width() * term_height();
   screen.array = zrealloc(screen.array, size * sizeof(int));
   screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
   screen.curx = screen.cury = 0;
@@ -300,8 +297,6 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   init_screen();
-  term_set_width(screen_cols);
-  term_set_height(screen_rows);
   term_clear();
 
   key_buf = astr_new();
@@ -371,9 +366,12 @@ void term_suspend(void)
 
 static void winch_sig_handler(int signo)
 {
+  size_t old_width = term_width();
+  size_t old_height = term_height();
+
   assert(signo == SIGWINCH);
   init_screen();
-  resize_windows();
+  resize_windows(old_width, old_height);
   resync_display();
   term_refresh();
 }

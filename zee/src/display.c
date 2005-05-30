@@ -40,14 +40,16 @@ void resync_display(void)
   cur_wp->lastpointn = cur_bp->pt.n;
 }
 
-void resize_windows(void)
+void resize_windows(size_t old_width, size_t old_height)
 {
   Window *wp;
-  int hdelta = screen_rows - term_height();
+  int hdelta = term_height() - old_height;
+
+  (void)old_width;
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = screen_cols;
+    wp->fwidth = wp->ewidth = term_width();
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
@@ -76,8 +78,7 @@ void resize_windows(void)
      (too small); take care of this case.
      FIXME: *Really* take care of this case. Currently Zee just crashes.
    */
-  term_set_width(screen_cols);
-  term_set_height(screen_rows - hdelta);
+  term_set_height(term_height() - hdelta);
 
   FUNCALL(recenter);
 }

@@ -79,31 +79,33 @@ static int make_char_printable(char **buf, size_t c)
     return zasprintf(buf, "\\%o", c & 0xff);
 }
 
-/* Prints a printable representation of the character 'c' on the screen in the
- * specified font, and updates the cursor position 'x'. On exit, the font is set
+/* Prints a printable representation of the character c on the screen in the
+ * specified font, and updates the cursor position x. On exit, the font is set
  * to FONT_NORMAL.
- * Printing is suppressed if 'x' reaches SCREEN_COLS; in this case 'x' is set to
- * SCREEN_COLS.
- * This function is implemented in terms of 'term_addch()'.
+ *
+ * Printing is suppressed if x reaches term_width(); in this case x is set to
+ * term_width.
+ *
+ * This function is implemented in terms of term_addch().
  */
 static void outch(int c, Font font, size_t *x)
 {
-  int j, w;
+  size_t j, w, width = term_width();
   char *buf;
 
-  if (*x >= screen_cols)
+  if (*x >= width)
     return;
 
   term_attrset(1, font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < screen_cols; w--)
+    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < width; w--)
       term_addch(' '), ++(*x);
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
     j = make_char_printable(&buf, (size_t)c);
-    for (w = 0; w < j && *x < screen_cols; ++w)
+    for (w = 0; w < j && *x < width; ++w)
       term_addch(buf[w]), ++(*x);
     free(buf);
   }
@@ -159,7 +161,7 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
       outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
   }
 
-  if (x >= screen_cols) {
+  if (x >= term_width()) {
     term_move(line, wp->ewidth - 1);
     term_addch('$');
   } else
@@ -379,7 +381,7 @@ void show_splash_screen(const char *splash)
   size_t i;
   const char *p;
 
-  for (i = 0; i < screen_rows - 2; ++i) {
+  for (i = 0; i < term_height() - 2; ++i) {
     term_move(i, 0);
     term_clrtoeol();
   }
@@ -397,7 +399,7 @@ void show_splash_screen(const char *splash)
  */
 void term_tidy(void)
 {
-  term_move(screen_rows - 1, 0);
+  term_move(term_height() - 1, 0);
   term_clrtoeol();
   term_attrset(1, FONT_NORMAL);
   term_refresh();
