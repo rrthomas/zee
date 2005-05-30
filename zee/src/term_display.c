@@ -32,25 +32,36 @@
 #include "config.h"
 #include "extern.h"
 
-static size_t width, height;
+static int initted = FALSE;
+static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
 static size_t point_start_column;
 static size_t point_screen_column;
+
+int term_initted(void)
+{
+  return initted;
+}
+
+void term_set_initted(void)
+{
+  initted = TRUE;
+}
 
 size_t term_width(void)
 {
   return width;
 }
 
-size_t term_height(void)
-{
-  return height;
-}
-
 void term_set_width(size_t n)
 {
   width = n;
+}
+
+size_t term_height(void)
+{
+  return height;
 }
 
 void term_set_height(size_t n)

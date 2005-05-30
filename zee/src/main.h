@@ -59,7 +59,6 @@ typedef struct Buffer Buffer;
 typedef struct Window Window;
 typedef struct Completion Completion;
 typedef struct History History;
-typedef struct Terminal Terminal;
 
 /*
  * The type of a Zee exported function.  `uniarg' is the number of
@@ -272,20 +271,12 @@ typedef struct Macro {
   struct Macro *next;           /* Next macro in the list. */
 } Macro;
 
-/* (Question: why is this a struct? At any moment there is a unique global
-   instance and it is never passed to anything.) */
-struct Terminal {
-  int initted; /* Set to TRUE when the terminal has been initialised. */
-};
-
 /* The actual number of lines and columns on the screen, which may
-   differ from the Terminal's settings after a SIGWINCH.
+   differ from the screen's settings after a SIGWINCH.
    (Question: would it not be much simpler just to pass these values to
    resize_windows()? Then there'd be no duplication and no question which
    version was the right one to use.) */
 extern size_t screen_rows, screen_cols;
-
-extern Terminal *termp; /* The global Terminal. */
 
 /* Type of font attributes */
 typedef size_t Font;

@@ -35,11 +35,6 @@
 #include "main.h"
 #include "extern.h"
 
-static Terminal thisterm = {
-  /* Uninitialised */
-  FALSE,
-};
-
 typedef struct {
   size_t curx, cury;          /* cursor x and y. */
   Font font;                  /* current font. */
@@ -51,7 +46,6 @@ typedef struct {
 static char *tcap_ptr;
 static astr key_buf;
 static Screen screen;
-Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
@@ -351,7 +345,7 @@ void term_init(void)
   astr_cat_cstr(norm_string, me_string);
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
 
-  termp->initted = TRUE;
+  term_set_initted();
 }
 
 void term_close(void)

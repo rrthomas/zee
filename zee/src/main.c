@@ -167,7 +167,7 @@ static void suspend_sig_handler(int signal)
 {
   assert(signal == SIGTSTP);
 
-  if (termp->initted) {
+  if (term_initted()) {
     term_tidy();
     term_suspend();
   }
@@ -192,7 +192,7 @@ static void cont_sig_handler(int signal)
 {
   assert(signal == SIGCONT);
 
-  if (termp->initted) {
+  if (term_initted()) {
     term_resume();
     term_full_redisplay();
   }

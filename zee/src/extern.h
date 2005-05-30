@@ -152,7 +152,6 @@ Macro *get_macro(char *name);
 /* main.c ----------------------------------------------------------------- */
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
-extern Terminal *cur_tp;
 extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */
@@ -193,9 +192,11 @@ char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, H
 void free_rotation_buffers(void);
 
 /* term_redisplay.c ------------------------------------------------------- */
+int term_initted(void);
+void term_set_initted(void);
 size_t term_width(void);
-size_t term_height(void);
 void term_set_width(size_t n);
+size_t term_height(void);
 void term_set_height(size_t n);
 void term_display(void);
 void term_full_redisplay(void);
