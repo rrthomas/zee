@@ -160,8 +160,7 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
   }
 
   if (x >= screen_cols) {
-    /* (Question: why do we use screen_cols instead of wp->ewidth?) */
-    term_move(line, screen_cols - 1);
+    term_move(line, wp->ewidth - 1);
     term_addch('$');
   } else
     for (; x < wp->ewidth; ++i) {
