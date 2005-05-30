@@ -98,12 +98,13 @@ static char about_minibuf_str[] =
 
 /* Chooses a sensible state for the editor to start in:
  *  - If 'argc' is zero, just displays the scratch buffer.
- *    (Question: why test 'argc' here rather than the number of buffers?)
+ *    FIXME: Remove 'argc' and instead test the number of buffers.
  *  - If the number of (non-scratch) buffers is 2, splits the window and
  *    displays both.
  *  - If the number of (non-scratch) buffers is more than 2, lists them.
  *  - Otherwise does nothing.
- *    (Question: why not ensure the non-scratch buffer is displayed?)
+ *    FIXME: If the number of (non-scratch) buffers is exactly 1, display it.
+ * (Question: maybe export this as a UI function?)
  */
 static void setup_main_screen(int argc, astr as)
 {
