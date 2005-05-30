@@ -9,12 +9,12 @@ EXTRA_DIST =					\
 	NEWS					\
 	README					\
 	THANKS					\
-	zee.pkg
+	$(PACKAGE_NAME).pkg
 
 CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
 
 dist-epoc:
-	emxsis zee.pkg
+	emxsis $(PACKAGE_NAME).pkg
 	cp README Readme.txt
-	zip zee.zip zee.sis Readme.txt
+	zip $(PACKAGE_NAME).zip $(PACKAGE_NAME).sis Readme.txt
 	rm Readme.txt
