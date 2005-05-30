@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Every other copy of the package version number gets its value from here
+dnl FIXME: Make BANNER.EPOC and zee.pkg get version number from here
 AC_INIT(zee, 0.2, zee-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
