@@ -31,7 +31,6 @@
 #include "eval.h"
 
 #define NAME "Zee" /* XXX Generate from package name */
-#define BIN_NAME PACKAGE
 
 #undef TRUE
 #define TRUE                            1

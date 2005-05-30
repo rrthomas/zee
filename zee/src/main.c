@@ -280,7 +280,7 @@ int main(int argc, char **argv)
       return 0;
     case 'h':
       fprintf(stderr,
-              "Usage: " BIN_NAME " [OPTION-OR-FILENAME]...\n"
+              "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
               "\n"
               "Run " NAME ", the lightweight editor.\n"
               "\n"
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
               "\n"
               "--batch                do not do interactive display; implies -q\n"
               "--help                 display this help message and exit\n"
-              "--no-init-file, -q     do not load ~/." BIN_NAME "\n"
+              "--no-init-file, -q     do not load ~/." PACKAGE_NAME "\n"
               "--version              display version information and exit\n"
               "\n"
               "Action options:\n"
@@ -312,7 +312,7 @@ int main(int argc, char **argv)
   else {
     if (!qflag) {
       astr as = get_home_dir();
-      astr_cat_cstr(as, "/." BIN_NAME);
+      astr_cat_cstr(as, "/." PACKAGE_NAME);
       astr_delete(leDumpEval(lisp_read_file(astr_cstr(as)), 0));
       astr_delete(as);
     }

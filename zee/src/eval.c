@@ -809,7 +809,7 @@ le *eval_cb_princ(int argc, le *branch)
       if (retblock)
         leWipe(retblock);
       retblock = evaluateNode(thisnode);
-      leDumpReformat(retblock); /* XXX */
+      leDumpReformat(retblock);
     }
   }
 
@@ -870,7 +870,7 @@ le *eval_cb_progn(int argc, le *branch)
 
 le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 {
-  le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
+  le *newkey = NULL, *newvalue = leNIL, *current;
 
   if (branch != NULL && argc >= 3) {
     for (current = branch->list_next; current; current = current->list_next->list_next) {
@@ -945,7 +945,7 @@ the minibuffer.
     ok = FALSE;
   else {
     le *list = eval_expression(expr);
-    /* XXX cons value on to front of values */
+    /* FIXME: cons value on to front of values */
     leWipe(list);
     ok = list == NULL;
   }

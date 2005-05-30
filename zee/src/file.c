@@ -267,7 +267,7 @@ void open_file(char *path, size_t lineno)
   buf = get_current_dir(FALSE);
 
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-    fprintf(stderr, BIN_NAME ": %s: invalid filename or path\n", path);
+    fprintf(stderr, PACKAGE_NAME ": %s: invalid filename or path\n", path);
     die(1);
   }
 

@@ -1054,7 +1054,7 @@ it as the contents of the region.
   astr out, s;
   int lines = 0;
   astr cmd;
-  char tempfile[] = P_tmpdir "/" BIN_NAME "XXXXXX";
+  char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();
