@@ -78,7 +78,7 @@ void term_move(size_t y, size_t x)
 void term_clrtoeol(void)
 {
   size_t i, x = screen.curx;
-  for (i = screen.curx; i < termp->width; i++)
+  for (i = screen.curx; i < term_width(); i++)
     term_addch(0);
   screen.curx = x;
 }
@@ -114,7 +114,7 @@ void term_refresh(void)
   astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
-  for (i = 0; i < termp->height; i++) {
+  for (i = 0; i < term_height(); i++) {
     eol = FALSE;
     /*
      * The eol flag may seem unnecessary; it is used (rather than
@@ -125,8 +125,8 @@ void term_refresh(void)
     astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
-    for (j = 0; j < termp->width; j++) {
-      size_t offset = i * termp->width + j;
+    for (j = 0; j < term_width(); j++) {
+      size_t offset = i * term_width() + j;
       size_t n = screen.array[offset];
       char c = n & 0xff;
       Font f = n & ~0xffU;
@@ -168,7 +168,7 @@ void term_clear(void)
 {
   size_t i;
   term_move(0, 0);
-  for (i = 0; i < termp->width * termp->height; i++) {
+  for (i = 0; i < term_width() * term_height(); i++) {
     screen.array[i] = 0;
     screen.oarray[i] = 1;
   }
@@ -176,10 +176,10 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  screen.array[screen.cury * termp->width + screen.curx] = c | screen.font;
+  screen.array[screen.cury * term_width() + screen.curx] = c | screen.font;
   screen.curx++;
-  if (screen.curx == termp->width) {
-    if (screen.cury < termp->height - 1) {
+  if (screen.curx == term_width()) {
+    if (screen.cury < term_height() - 1) {
       screen.curx = 0;
       screen.cury++;
     } else
@@ -232,7 +232,7 @@ static char *get_tcap(void)
 
 static void term_init_screen(void)
 {
-  int size = termp->width * termp->height;
+  int size = term_width() * term_height();
 
   screen.array = zmalloc(size * sizeof(int));
   screen.oarray = zmalloc(size * sizeof(int));
@@ -253,8 +253,8 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  termp->width = screen_cols = tgetnum("co");
-  termp->height = screen_rows = tgetnum("li");
+  term_set_width(screen_cols = tgetnum("co"));
+  term_set_height(screen_rows = tgetnum("li"));
 
   term_init_screen();
   termp->screen = &screen;

@@ -216,8 +216,8 @@ void term_init(void)
   screen_rows = SCREEN_H/FH;
 
   termp->screen = screen;
-  termp->width = screen_cols;
-  termp->height = screen_rows;
+  term_set_width(screen_cols);
+  term_set_height(screen_rows);
 
   cur_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
   new_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
