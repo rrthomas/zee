@@ -127,18 +127,17 @@ static int in_region(size_t lineno, size_t x, Region *r)
     } else if (lineno == r->end.n) {
       if (x < r->end.o)
         return TRUE;
-    } else {
+    } else
       return TRUE;
-    }
   }
 
   return FALSE;
 }
 
 /* (Question: what is this for? It seems to have several purposes. Used only in
- * 'draw_line()' so why not just inline it? Probably easier then documenting
+ * draw_line(), so why not just inline it? Probably easier then documenting
  * it.)
- * (Question: why does this method use SCREEN_COLS instead of 'wp_ewidth'?)
+ * (Question: why does this method use screen_cols instead of wp->ewidth?)
  * Guess: 'r' is the current selection?
  */
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
