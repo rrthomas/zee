@@ -7,6 +7,8 @@ AM_INIT_AUTOMAKE
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
 
+TEXT_NAME="Zee"
+AC_SUBST(TEXT_NAME)
 AC_SUBST(VERSION)
 
 dnl Allow GNU functions to be used if present (e.g. vasprintf)
@@ -139,6 +141,8 @@ AH_BOTTOM([
 #ifndef HAVE_STRRSTR
 extern char *strrstr(const char *, const char *);
 #endif
+
+#define TEXT_NAME "Zee"
 ])
 
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],

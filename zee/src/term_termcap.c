@@ -239,16 +239,16 @@ static char *get_tcap(void)
   int res;
 
   if (!term) {
-    fprintf(stderr, TEXT_NAME ": no terminal type in TERM\n");
+    fprintf(stderr, PACKAGE_NAME ": no terminal type in TERM\n");
     die(1);
   }
 
   res = tgetent(tcap, term);
   if (res < 0) {
-    perror(NAME ": can't access the termcap data base");
+    perror(PACKAGE_NAME ": can't access the termcap data base");
     die(1);
   } else if (res == 0) {
-    fprintf(stderr, TEXT_NAME ": terminal type `%s' is not defined", term);
+    fprintf(stderr, PACKAGE_NAME ": terminal type `%s' is not defined", term);
     die(1);
   }
 
@@ -287,7 +287,7 @@ static char *tgetstr_note_len(const char *cap, char **tcap)
 static void setattr(int flags, struct termios *state)
 {
   if (tcsetattr(0, flags, state) < 0) {
-    perror(NAME ": can't change terminal settings");
+    perror(PACKAGE_NAME ": can't change terminal settings");
     die(1);
   }
 }
@@ -308,7 +308,7 @@ void term_init(void)
 
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
-    perror(NAME ": can't read terminal capabilites");
+    perror(PACKAGE_NAME ": can't read terminal capabilites");
     die(1);
   }
 

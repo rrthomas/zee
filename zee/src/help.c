@@ -39,7 +39,7 @@ DEFUN_INT("version", version)
 Show the version in the minibuffer.
 +*/
 {
-  minibuf_write(NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+  minibuf_write(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 }
 END_DEFUN
 

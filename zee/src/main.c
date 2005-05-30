@@ -51,7 +51,7 @@
 #include "eval.h"
 #include "vars.h"
 
-#define VERSION_STRING	NAME " " VERSION
+#define VERSION_STRING TEXT_NAME " " VERSION
 
 #define COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
@@ -148,14 +148,14 @@ This buffer is for notes you don't want to save.\n\
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, TEXT_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  fprintf(stderr, TEXT_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
   die(2);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, TEXT_NAME " terminated with signal %d.\r\n", signo);
+  fprintf(stderr, TEXT_NAME " terminated with signal %d\r\n", signo);
   die(2);
 }
 
