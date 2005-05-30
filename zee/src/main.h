@@ -278,7 +278,6 @@ struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end.
                    (Currently determined by compile-time config) */
-  size_t width, height;
   int initted; /* Set to TRUE when the terminal has been initialised. */
 };
 

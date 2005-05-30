@@ -193,6 +193,10 @@ char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, H
 void free_rotation_buffers(void);
 
 /* term_redisplay.c ------------------------------------------------------- */
+size_t term_width(void);
+size_t term_height(void);
+void term_set_width(size_t n);
+void term_set_height(size_t n);
 void term_display(void);
 void term_full_redisplay(void);
 void show_splash_screen(const char *splash);

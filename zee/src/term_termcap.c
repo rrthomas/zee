@@ -39,9 +39,6 @@ static Terminal thisterm = {
   /* Uninitialized screen pointer. */
   NULL,
 
-  /* Uninitialized width and height. */
-  0, 0,
-
   /* Uninitialised */
   FALSE,
 };
@@ -100,7 +97,7 @@ void term_move(size_t y, size_t x)
 void term_clrtoeol(void)
 {
   size_t i, x = screen.curx;
-  for (i = screen.curx; i < termp->width; i++)
+  for (i = screen.curx; i < term_width(); i++)
     term_addch(0);
   screen.curx = x;
 }
@@ -147,7 +144,7 @@ void term_refresh(void)
   astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
-  for (i = 0; i < termp->height; i++) {
+  for (i = 0; i < term_height(); i++) {
     eol = FALSE;
     /*
      * The eol flag may seem unnecessary; it is used (rather than
@@ -158,8 +155,8 @@ void term_refresh(void)
     astr_cat_cstr(as, zgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
-    for (j = 0; j < termp->width; j++) {
-      size_t offset = i * termp->width + j;
+    for (j = 0; j < term_width(); j++) {
+      size_t offset = i * term_width() + j;
       size_t n = screen.array[offset];
       char c = n & 0xff;
       Font f = n & ~0xffU;
@@ -201,7 +198,7 @@ void term_clear(void)
 {
   size_t i;
   term_move(0, 0);
-  for (i = 0; i < termp->width * termp->height; i++) {
+  for (i = 0; i < term_width() * term_height(); i++) {
     screen.array[i] = 0;
     screen.oarray[i] = 1;
   }
@@ -209,13 +206,13 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  if (screen.curx >= termp->width || screen.cury >= termp->height)
+  if (screen.curx >= term_width() || screen.cury >= term_height())
     return;
 
-  screen.array[screen.cury * termp->width + screen.curx] = (c & 0xff) | screen.font;
+  screen.array[screen.cury * term_width() + screen.curx] = (c & 0xff) | screen.font;
   screen.curx++;
-  if (screen.curx == termp->width) {
-    if (screen.cury < termp->height - 1) {
+  if (screen.curx == term_width()) {
+    if (screen.cury < term_height() - 1) {
       screen.curx = 0;
       screen.cury++;
     } else
@@ -312,8 +309,8 @@ void term_init(void)
   tcap_ptr = tcap = get_tcap();
 
   init_screen();
-  termp->width = screen_cols;
-  termp->height = screen_rows;
+  term_set_width(screen_cols);
+  term_set_height(screen_rows);
   termp->screen = &screen;
   term_clear();
 
@@ -420,7 +417,7 @@ static size_t translate_key(char *s, size_t nbytes)
 {
   size_t i, key = KBD_NOKEY, used = 0;
 
-#if 1
+#if DEBUG
   char *s2 = s;
   fprintf(stderr, "translate_key(&{");
   if (*s2) {

@@ -32,10 +32,31 @@
 #include "config.h"
 #include "extern.h"
 
+static size_t width, height;
 static size_t cur_tab_width;
 static size_t cur_topline;
 static size_t point_start_column;
 static size_t point_screen_column;
+
+size_t term_width(void)
+{
+  return width;
+}
+
+size_t term_height(void)
+{
+  return height;
+}
+
+void term_set_width(size_t n)
+{
+  width = n;
+}
+
+void term_set_height(size_t n)
+{
+  height = n;
+}
 
 static int make_char_printable(char **buf, size_t c)
 {
@@ -347,7 +368,7 @@ void term_display(void)
 
 void term_redraw_cursor(void)
 {
-        term_move(cur_topline + cur_wp->topdelta, point_screen_column);
+  term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
 void term_full_redisplay(void)
@@ -367,7 +388,7 @@ void show_splash_screen(const char *splash)
   }
 
   term_move(0, 0);
-  for (i = 0, p = splash; *p != '\0' && i < termp->height - 2; ++p)
+  for (i = 0, p = splash; *p != '\0' && i < term_height() - 2; ++p)
     if (*p == '\n')
       term_move(++i, 0);
     else
