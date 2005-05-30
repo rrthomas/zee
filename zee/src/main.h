@@ -30,8 +30,6 @@
 #include "parser.h"
 #include "eval.h"
 
-#define NAME "Zee" /* XXX Generate from package name */
-
 #undef TRUE
 #define TRUE                            1
 #undef FALSE

@@ -94,7 +94,7 @@ static void loop(void)
 }
 
 static char about_minibuf_str[] =
-"Welcome to " NAME "!  To exit type ALT-X save-buffers-quit RETURN";
+"Welcome to " TEXT_NAME "!  To exit type ALT-X save-buffers-quit RETURN";
 
 /* Chooses a sensible state for the editor to start in:
  *  - If 'argc' is zero, just displays the scratch buffer.
@@ -148,14 +148,14 @@ This buffer is for notes you don't want to save.\n\
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  fprintf(stderr, TEXT_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
   die(2);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, NAME " terminated with signal %d.\r\n", signo);
+  fprintf(stderr, TEXT_NAME " terminated with signal %d.\r\n", signo);
   die(2);
 }
 
@@ -272,8 +272,8 @@ int main(int argc, char **argv)
       fprintf(stderr,
               VERSION_STRING "\n"
               COPYRIGHT_STRING "\n"
-              NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of " NAME "\n"
+              TEXT_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of " TEXT_NAME "\n"
               "under the terms of the GNU General Public License.\n"
               "For more information about these matters, see the file named COPYING.\n"
               );
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
       fprintf(stderr,
               "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
               "\n"
-              "Run " NAME ", the lightweight editor.\n"
+              "Run " TEXT_NAME ", the lightweight editor.\n"
               "\n"
               "Initialization options:\n"
               "\n"

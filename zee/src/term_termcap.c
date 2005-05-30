@@ -239,7 +239,7 @@ static char *get_tcap(void)
   int res;
 
   if (!term) {
-    fprintf(stderr, NAME ": no terminal type in TERM\n");
+    fprintf(stderr, TEXT_NAME ": no terminal type in TERM\n");
     die(1);
   }
 
@@ -248,7 +248,7 @@ static char *get_tcap(void)
     perror(NAME ": can't access the termcap data base");
     die(1);
   } else if (res == 0) {
-    fprintf(stderr, NAME ": terminal type `%s' is not defined", term);
+    fprintf(stderr, TEXT_NAME ": terminal type `%s' is not defined", term);
     die(1);
   }
 
