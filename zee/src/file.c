@@ -864,31 +864,27 @@ void die(int exitcode)
   static int already_dying;
   Buffer *bp;
 
-  if (already_dying) {
-    fprintf(
-      stderr,
-      "Ouch! die() called recursively. Sorry about your files. :-(\r\n"
-    );
-  } else {
-    already_dying = 1;
+  if (already_dying)
+    fprintf(stderr, "die() called recursively; aborting.\r\n");
+  else {
+    already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
     for (bp = head_bp; bp != NULL; bp = bp->next)
       if (bp->flags & BFLAG_MODIFIED &&
           !(bp->flags & BFLAG_NOSAVE)) {
-        astr buf;
-        buf = astr_new();
+        astr buf = astr_new();
         if (bp->filename != NULL)
           astr_cpy_cstr(buf, bp->filename);
         else
           astr_cpy_cstr(buf, bp->name);
         astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
-        fprintf(stderr, "Saving %s...\r\n",
-                astr_cstr(buf));
+        fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
         raw_write_to_disk(bp, astr_cstr(buf), 0600);
         astr_delete(buf);
       }
+    term_suspend();  /* Rather than term_close(), do the bare minimum
+                        to restore the terminal. */
   }
-  term_suspend(); /* Like term_close() but less likely to crash. */
   exit(exitcode);
 }
 
