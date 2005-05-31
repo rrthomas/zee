@@ -96,56 +96,6 @@ static void loop(void)
 static char about_minibuf_str[] =
 "Welcome to " TEXT_NAME "!  To exit type ALT-X save-buffers-quit RETURN";
 
-/* Chooses a sensible state for the editor to start in:
- *  - If 'argc' is zero, just displays the scratch buffer.
- *    FIXME: Remove 'argc' and instead test the number of buffers.
- *  - If the number of (non-scratch) buffers is 2, splits the window and
- *    displays both.
- *  - If the number of (non-scratch) buffers is more than 2, lists them.
- *  - Otherwise does nothing.
- *    FIXME: If the number of (non-scratch) buffers is exactly 1, display it.
- * (Question: maybe export this as a UI function?)
- */
-static void setup_main_screen(int argc, astr as)
-{
-  Buffer *bp, *last_bp = NULL;
-  int c = 0;
-
-  for (bp = head_bp; bp; bp = bp->next) {
-    /* Last buffer that isn't *scratch*. */
-    if (bp->next && !bp->next->next)
-      last_bp = bp;
-    c++;
-  }
-
-  /* *scratch* and two files.  */
-  if (c == 3) {
-    FUNCALL(split_window);
-    switch_to_buffer(last_bp);
-    FUNCALL(other_window);
-  }
-  /* More than two files.  */
-  else if (c > 3) {
-    FUNCALL(list_buffers);
-  }
-  else {
-    if (argc < 1) {
-      undo_nosave = TRUE;
-
-      if (astr_len(as) > 0)
-        insert_string(astr_cstr(as));
-      else
-        insert_string("\
-This buffer is for notes you don't want to save.\n\
-\n");
-
-      undo_nosave = FALSE;
-      cur_bp->flags &= ~BFLAG_MODIFIED;
-      resync_display();
-    }
-  }
-}
-
 static void segv_sig_handler(int signo)
 {
   (void)signo;
@@ -319,10 +269,7 @@ int main(int argc, char **argv)
     }
 
     term_init();
-
-    /* Create the `*scratch*' buffer. */
     create_first_window();
-    term_display();
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
@@ -341,10 +288,19 @@ int main(int argc, char **argv)
         if (*argv)
           open_file(*argv++, line - 1);
       }
+    else {
+      /* Create the scratch buffer. */
+      Buffer *bp = create_buffer("*scratch*");
+      bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
+      cur_wp->bp = cur_bp = bp;
+      insert_string("This buffer is for notes you don't want to save.\n\n");
+    }
 
+    term_display();
     minibuf_write(about_minibuf_str);
 
-    setup_main_screen(argc, as);
+    /* FIXME: at this point, display string 'as' in scratch buffer if
+       non-empty. */
 
     /* Run the main loop. */
     loop();

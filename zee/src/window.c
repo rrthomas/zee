@@ -199,22 +199,13 @@ END_DEFUN
  */
 void create_first_window(void)
 {
-  Window *wp;
-  Buffer *bp;
-
-  /* Create the scratch buffer. */
-  bp = create_buffer("*scratch*");
-  bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
-  cur_bp = bp;
-
-  wp = window_new();
-  cur_wp = head_wp = wp;
-  wp->fwidth = wp->ewidth = term_width();
+  cur_wp = head_wp = window_new();
+  cur_wp->fwidth = cur_wp->ewidth = term_width();
   /* Save space for minibuffer. */
-  wp->fheight = term_height() - 1;
+  cur_wp->fheight = term_height() - 1;
   /* Save space for status line. */
-  wp->eheight = wp->fheight - 1;
-  wp->bp = bp;
+  cur_wp->eheight = cur_wp->fheight - 1;
+/*   wp->bp = bp; */
 }
 
 Window *find_window(const char *name)
