@@ -54,19 +54,15 @@ size_t term_width(void)
   return width;
 }
 
-void term_set_width(size_t n)
-{
-  width = n;
-}
-
 size_t term_height(void)
 {
   return height;
 }
 
-void term_set_height(size_t n)
+void term_set_size(size_t cols, size_t rows)
 {
-  height = n;
+  width = cols;
+  height = rows;
 }
 
 static int make_char_printable(char **buf, size_t c)
@@ -429,4 +425,47 @@ int term_printw(const char *fmt, ...)
   term_addnstr(buf, strlen(buf));
   free(buf);
   return res;
+}
+
+void resize_windows(size_t old_width, size_t old_height)
+{
+  Window *wp;
+  int hdelta = term_height() - old_height;
+
+  (void)old_width;
+
+  /* Resize windows horizontally. */
+  for (wp = head_wp; wp != NULL; wp = wp->next)
+    wp->fwidth = wp->ewidth = term_width();
+
+  /* Resize windows vertically. */
+  if (hdelta > 0) { /* Increase windows height. */
+    for (wp = head_wp; hdelta > 0; wp = wp->next) {
+      if (wp == NULL)
+        wp = head_wp;
+      ++wp->fheight;
+      ++wp->eheight;
+      --hdelta;
+    }
+  } else { /* Decrease windows height. */
+    int decreased = TRUE;
+    while (decreased) {
+      decreased = FALSE;
+      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+        if (wp->fheight > 2) {
+          --wp->fheight;
+          --wp->eheight;
+          ++hdelta;
+          decreased = TRUE;
+        }
+    }
+  }
+
+  /* Sometimes we cannot reduce the windows height to a certain value
+     (too small); take care of this case.
+     FIXME: *Really* take care of this case. Currently Zee just crashes.
+   */
+  height -= hdelta;
+
+  FUNCALL(recenter);
 }

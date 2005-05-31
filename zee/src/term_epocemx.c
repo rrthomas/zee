@@ -35,17 +35,6 @@
 #include "main.h"
 #include "extern.h"
 
-static Terminal thisterm = {
-  /* Unitialised screen pointer. */
-  NULL,
-
-  /* Uninitialized width and height. */
-  0, 0,
-
-  /* Uninitialised. */
-  FALSE,
-};
-
 typedef struct {
   size_t curx, cury;  /* cursor x and y. */
   Font font;       /* current font. */
@@ -58,8 +47,6 @@ typedef struct {
 static char *tcap_ptr;
 
 static Screen screen;
-
-Terminal *termp = &thisterm;
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -250,8 +237,7 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  term_set_width(tgetnum("co"));
-  term_set_height(tgetnum("li"));
+  term_set_size((size_t)tgetnum("co"), (size_t)tgetnum("li"));
 
   term_init_screen();
 

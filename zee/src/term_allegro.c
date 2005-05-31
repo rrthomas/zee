@@ -37,21 +37,6 @@
 #define FW		(8)	/* font_length (font, ...) */
 #define FH		(8)	/* font_height (font) */
 
-static Terminal thisterm = {
-  /* Unitialised screen pointer */
-  NULL,
-
-  /* Uninitialized width and height. */
-  0, 0,
-
-  /* Uninitialised. */
-  FALSE,
-};
-
-Terminal *termp = &thisterm;
-
-size_t screen_rows, screen_cols;
-
 /* current position and color */
 static size_t cur_x = 0;
 static size_t cur_y = 0;
@@ -98,13 +83,13 @@ END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
 {
-  if (cursor_state && cur_x < screen_cols && cur_y < screen_rows) {
+  if (cursor_state && cur_x < term_width() && cur_y < term_height()) {
     if (state)
       rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
-      int fg, bg, c = new_scr[cur_y*screen_cols+cur_x];
+      int fg, bg, c = new_scr[cur_y*term_width()+cur_x];
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
@@ -123,10 +108,10 @@ void term_move(size_t y, size_t x)
 
 void term_clrtoeol(void)
 {
-  if (cur_x < screen_cols && cur_y < screen_rows) {
+  if (cur_x < term_width() && cur_y < term_height()) {
     size_t x;
-    for (x = cur_x; x < screen_cols; x++)
-      new_scr[cur_y * screen_cols + x] = 0;
+    for (x = cur_x; x < term_width(); x++)
+      new_scr[cur_y * term_width() + x] = 0;
   }
 }
 
@@ -135,8 +120,8 @@ void term_refresh(void)
   int c, i, bg, fg;
   size_t x, y;
   i = 0;
-  for (y = 0; y<screen_rows; y++)
-    for (x = 0; x < screen_cols; x++) {
+  for (y = 0; y < term_height(); y++)
+    for (x = 0; x < term_width(); x++) {
       if (new_scr[i] != cur_scr[i]) {
         c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
@@ -152,12 +137,12 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(short) * screen_cols * screen_rows);
+  memset(new_scr, 0, sizeof(short) * term_width() * term_height());
 }
 
 void term_addch(int c)
 {
-  if (cur_x < screen_cols && cur_y < screen_rows) {
+  if (cur_x < term_width() && cur_y < term_height()) {
     int color = 0;
 
     if (c & 0x0f00)
@@ -172,7 +157,7 @@ void term_addch(int c)
     else
       color |= cur_color & 0xf000;
 
-    new_scr[cur_y*screen_cols+cur_x] = (c & 0x00ff) | color;
+    new_scr[cur_y*term_width()+cur_x] = (c & 0x00ff) | color;
   }
   cur_x++;
 }
@@ -212,14 +197,10 @@ void term_init(void)
   LOCK_FUNCTION(inc_cur_time);
   install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-  screen_cols = SCREEN_W/FW;
-  screen_rows = SCREEN_H/FH;
+  term_set_size(SCREEN_W / FW, SCREEN_H / FH);
 
-  term_set_width(screen_cols);
-  term_set_height(screen_rows);
-
-  cur_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
-  new_scr = zmalloc(sizeof(short) * screen_cols * screen_rows);
+  cur_scr = zmalloc(sizeof(short) * term_width() * term_height());
+  new_scr = zmalloc(sizeof(short) * term_width() * term_height());
 }
 
 void term_close(void)

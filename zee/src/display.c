@@ -40,49 +40,6 @@ void resync_display(void)
   cur_wp->lastpointn = cur_bp->pt.n;
 }
 
-void resize_windows(size_t old_width, size_t old_height)
-{
-  Window *wp;
-  int hdelta = term_height() - old_height;
-
-  (void)old_width;
-
-  /* Resize windows horizontally. */
-  for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = term_width();
-
-  /* Resize windows vertically. */
-  if (hdelta > 0) { /* Increase windows height. */
-    for (wp = head_wp; hdelta > 0; wp = wp->next) {
-      if (wp == NULL)
-        wp = head_wp;
-      ++wp->fheight;
-      ++wp->eheight;
-      --hdelta;
-    }
-  } else { /* Decrease windows height. */
-    int decreased = TRUE;
-    while (decreased) {
-      decreased = FALSE;
-      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
-        if (wp->fheight > 2) {
-          --wp->fheight;
-          --wp->eheight;
-          ++hdelta;
-          decreased = TRUE;
-        }
-    }
-  }
-
-  /* Sometimes we cannot reduce the windows height to a certain value
-     (too small); take care of this case.
-     FIXME: *Really* take care of this case. Currently Zee just crashes.
-   */
-  term_set_height(term_height() - hdelta);
-
-  FUNCALL(recenter);
-}
-
 void recenter(Window *wp)
 {
   Point pt = window_pt(wp);

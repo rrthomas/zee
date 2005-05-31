@@ -1,3 +1,25 @@
+/* Global functions
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2005 Reuben Thomas.
+   All rights reserved.
+
+   This file is part of Zee.
+
+   Zee is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2, or (at your option) any later
+   version.
+
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Zee; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
+
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp(Buffer *bp, Point pt);
 size_t get_goalc_wp(Window *wp);
@@ -195,9 +217,8 @@ void free_rotation_buffers(void);
 int term_initted(void);
 void term_set_initted(void);
 size_t term_width(void);
-void term_set_width(size_t n);
 size_t term_height(void);
-void term_set_height(size_t n);
+void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_full_redisplay(void);
 void show_splash_screen(const char *splash);
