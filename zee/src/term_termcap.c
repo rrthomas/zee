@@ -259,8 +259,8 @@ static void init_screen(void)
   /* We need a local tcap as we might be called by the SIGWINCH
      handler before the global tcap is initialised. */
 
-  term_set_width(tgetnum("co"));
-  term_set_height(tgetnum("li"));
+  term_set_width((size_t)tgetnum("co"));
+  term_set_height((size_t)tgetnum("li"));
   free(tcap);
   size = term_width() * term_height();
   screen.array = zrealloc(screen.array, size * sizeof(int));
