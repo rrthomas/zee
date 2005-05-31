@@ -151,7 +151,6 @@ static void write_buffers_list(va_list ap)
   bprintf(" MR Buffer           Size    Mode         File\n");
   bprintf(" -- ------           ----    ----         ----\n");
 
-  /* Print buffers. */
   bp = old_wp->bp;
   do {
     /* Print all buffer less this one (the *Buffer List*). */
