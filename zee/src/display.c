@@ -28,9 +28,9 @@
 void resync_display(void)
 {
   int delta;
-  
+
   assert(cur_bp); /* FIXME: Remove this assumption. */
-  
+
   delta = cur_bp->pt.n - cur_wp->lastpointn;
 
   if (delta) {
