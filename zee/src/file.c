@@ -218,7 +218,8 @@ astr compact_path(const char *path)
 }
 
 /*
- * Return the current directory.
+ * Return the current directory. The current directory is defined to be the one
+ * containing the current file, if any, otherwise it is the cwd.
  */
 astr get_current_dir(int interactive)
 {
