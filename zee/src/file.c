@@ -224,6 +224,7 @@ astr get_current_dir(int interactive)
 {
   astr buf;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
@@ -293,6 +294,8 @@ void read_from_disk(const char *filename)
   FILE *fp;
   int i, size, eol = FALSE;
   char buf[BUFSIZ + 1];
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
 
@@ -420,6 +423,8 @@ Select to the user specified buffer in the current window.
   Buffer *swbuf;
   Completion *cp;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
   cp = make_buffer_completion();
@@ -472,6 +477,8 @@ int check_modified_buffer(Buffer *bp)
 void kill_buffer(Buffer *kill_bp)
 {
   Buffer *next_bp;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (kill_bp->next != NULL)
     next_bp = kill_bp->next;
@@ -541,6 +548,8 @@ Kill the current buffer or the user specified one.
   char *ms;
   Completion *cp;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   cp = make_buffer_completion();
   if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
                                     "", cp, NULL, cur_bp->name)) == NULL)
@@ -569,6 +578,8 @@ static int insert_file(char *filename)
   int fd;
   size_t i, size;
   char buf[BUFSIZ];
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (!exist_file(filename)) {
     minibuf_error("Unable to read file `%s'", filename);
@@ -715,6 +726,7 @@ DEFUN_INT("save-buffer", save_buffer)
 Save current buffer in visited file if modified.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   ok = save_buffer(cur_bp);
 }
 END_DEFUN
@@ -725,8 +737,12 @@ Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
 +*/
 {
-  char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
+  char *fname;
   char *ms;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
+  fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
 
   if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
     ok = cancel();

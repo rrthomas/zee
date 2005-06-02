@@ -38,6 +38,7 @@ void push_mark(void)
     mark_ring = list_new();
 
   /* Save the mark.  */
+  assert(cur_bp); /* FIXME: Check this assumption. */
   assert(cur_bp->mark);
   list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
 }
@@ -60,18 +61,21 @@ void pop_mark(void)
 /* Set the mark to the point position. */
 void set_mark(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   assert(cur_bp->mark);
   move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
 }
 
 int is_empty_line(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return astr_len(cur_bp->pt.p->item) == 0;
 }
 
 int is_blank_line(void)
 {
   size_t c;
+  assert(cur_bp); /* FIXME: Check this assumption. */
   for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
     if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
       return FALSE;
@@ -102,6 +106,7 @@ int char_before(Point *pt)
    buffer. */
 int following_char(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return char_after(&cur_bp->pt);
 }
 
@@ -109,6 +114,7 @@ int following_char(void)
    buffer. */
 int preceding_char(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return char_before(&cur_bp->pt);
 }
 
@@ -116,6 +122,7 @@ int preceding_char(void)
    buffer. */
 int bobp(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return (list_prev(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == 0);
 }
@@ -124,6 +131,7 @@ int bobp(void)
    buffer. */
 int eobp(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return (list_next(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
 }
@@ -131,11 +139,13 @@ int eobp(void)
 /* Returns TRUE if point is at the beginning of a line. */
 int bolp(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return cur_bp->pt.o == 0;
 }
 
 /* Returns TRUE if point is at the end of a line. */
 int eolp(void)
 {
+  assert(cur_bp); /* FIXME: Check this assumption. */
   return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
 }

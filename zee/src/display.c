@@ -19,6 +19,7 @@
    02111-1307, USA.  */
 
 #include <stdarg.h>
+#include <assert.h>
 
 #include "config.h"
 #include "main.h"
@@ -26,7 +27,11 @@
 
 void resync_display(void)
 {
-  int delta = cur_bp->pt.n - cur_wp->lastpointn;
+  int delta;
+  
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+  
+  delta = cur_bp->pt.n - cur_wp->lastpointn;
 
   if (delta) {
     if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||

@@ -964,6 +964,7 @@ Interactively, with prefix argument, print output into current buffer.
   Region r;
 
   backward_sexp();
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   calculate_region(&r, cur_bp->pt, m->pt);
   expr = copy_text_block(r.start, r.size);
   cur_bp->pt = m->pt;

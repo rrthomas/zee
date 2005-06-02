@@ -86,6 +86,9 @@ void completion_scroll_up(void)
   wp = find_window("*Completions*");
   assert(wp != NULL);
   set_current_window(wp);
+  assert(cur_bp); /* FIXME: Think about this carefully in case breaking the
+                     "always at least one buffer" invariant has broken it.
+                     This might be okay. */
   if (cur_bp->pt.n == cur_bp->num_lines || !FUNCALL(scroll_up))
     gotobob();
   set_current_window(old_wp);
@@ -103,6 +106,9 @@ void completion_scroll_down(void)
   wp = find_window("*Completions*");
   assert(wp != NULL);
   set_current_window(wp);
+  assert(cur_bp); /* FIXME: Think about this carefully in case breaking the
+                     "always at least one buffer" invariant has broken it.
+                     This might be okay. */
   if (cur_bp->pt.n == 0 || !FUNCALL(scroll_down)) {
     gotoeob();
     resync_display();

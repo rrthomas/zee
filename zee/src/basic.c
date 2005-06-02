@@ -40,6 +40,7 @@ DEFUN_INT("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   cur_bp->pt = line_beginning_position(uniarg);
 
   /* Change the `goalc' to the beginning of line for next
@@ -54,6 +55,7 @@ DEFUN_INT("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   cur_bp->pt = line_end_position(uniarg);
 
   /* Change the `goalc' to the end of line for next
@@ -87,6 +89,7 @@ size_t get_goalc_wp(Window *wp)
 
 size_t get_goalc(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   return get_goalc_bp(cur_bp, cur_bp->pt);
 }
 
@@ -96,10 +99,15 @@ size_t get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-  int col = 0, t = tab_width(cur_bp), w;
+  int col = 0, t, w;
   size_t i;
-  const char *sp = astr_cstr(cur_bp->pt.p->item);
+  const char *sp;
 
+  assert(cur_bp); /* FIXME: remove this assumption. */
+
+  t = tab_width(cur_bp);
+  sp = astr_cstr(cur_bp->pt.p->item);
+  
   for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {
     if (col == goalc)
       break;
@@ -116,6 +124,7 @@ static void goto_goalc(int goalc)
 
 int previous_line(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
@@ -159,6 +168,7 @@ END_DEFUN
 
 int next_line(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
@@ -207,6 +217,7 @@ END_DEFUN
  */
 void goto_line(size_t to_line)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (cur_bp->pt.n > to_line)
     ngotoup(cur_bp->pt.n - to_line);
   else if (cur_bp->pt.n < to_line)
@@ -250,6 +261,8 @@ Line 1 is the beginning of the buffer.
   char *ms;
   size_t to_line = 0;
 
+  assert(cur_bp); /* FIXME: remove this assumption. */
+
   do {
     if ((ms = minibuf_read("Goto line: ", "")) == NULL) {
       ok = cancel();
@@ -271,6 +284,7 @@ END_DEFUN
  */
 void gotobob(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   cur_bp->pt = point_min(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
@@ -290,6 +304,7 @@ END_DEFUN
  */
 void gotoeob(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   cur_bp->pt = point_max(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
@@ -306,6 +321,7 @@ END_DEFUN
 
 int backward_char(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (!bolp()) {
     cur_bp->pt.o--;
     return TRUE;
@@ -342,6 +358,7 @@ END_DEFUN
 
 int forward_char(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (!eolp()) {
     cur_bp->pt.o++;
     return TRUE;
@@ -378,6 +395,7 @@ END_DEFUN
 
 int ngotoup(size_t n)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   for (; n > 0; n--)
     if (list_prev(cur_bp->pt.p) != cur_bp->lines)
       FUNCALL(previous_line);
@@ -389,6 +407,7 @@ int ngotoup(size_t n)
 
 int ngotodown(size_t n)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   for (; n > 0; n--)
     if (list_next(cur_bp->pt.p) != cur_bp->lines)
       FUNCALL(next_line);
@@ -400,6 +419,7 @@ int ngotodown(size_t n)
 
 int scroll_down(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (cur_bp->pt.n > 0)
     return ngotoup(cur_wp->eheight) ? TRUE : FALSE;
   else {
@@ -428,6 +448,7 @@ END_DEFUN
 
 int scroll_up(void)
 {
+  assert(cur_bp); /* FIXME: remove this assumption. */
   if (cur_bp->pt.n < cur_bp->num_lines)
     return ngotodown(cur_wp->eheight) ? TRUE : FALSE;
   else {

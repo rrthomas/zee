@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "main.h"
 #include "extern.h"
@@ -62,6 +63,8 @@ static void kill_ring_push_char(int c)
 
 static int kill_line(void)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if (!eolp()) {
     if (warn_if_readonly_buffer())
       return FALSE;
@@ -105,6 +108,8 @@ With prefix argument, kill that many lines from point.
 {
   int i;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -134,6 +139,8 @@ to make one entry in the kill ring.
 +*/
 {
   Region r;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
@@ -208,6 +215,8 @@ Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -245,6 +254,8 @@ With ARG, kill that many sexps after the cursor.
 Negative arg -N means kill N sexps before the cursor.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -272,6 +283,8 @@ More precisely, reinsert the stretch of killed text most recently
 killed OR yanked.  Put point at end, and set mark at beginning.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   ok = FALSE;
 
   if (kill_ring_size == 0)

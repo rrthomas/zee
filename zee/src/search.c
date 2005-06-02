@@ -102,6 +102,7 @@ static char *re_find_substr(const char *s1, size_t s1size,
 
 static void goto_linep(Line *lp)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   cur_bp->pt = point_min(cur_bp);
   resync_display();
   while (cur_bp->pt.p != lp)
@@ -113,6 +114,8 @@ static int search_forward(Line *startp, size_t starto, const char *s)
   Line *lp;
   const char *sp, *sp2;
   size_t s1size, s2size = strlen(s);
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (s2size < 1)
     return FALSE;
@@ -146,6 +149,8 @@ static int search_backward(Line *startp, size_t starto, const char *s)
   Line *lp;
   const char *sp, *sp2;
   size_t s1size, ssize = strlen(s);
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (ssize < 1)
     return FALSE;
@@ -181,6 +186,8 @@ Search forward from point for regular expression REGEXP.
 {
   char *ms;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
     ok = cancel();
   else if (ms[0] == '\0')
@@ -204,6 +211,8 @@ Search backward from point for match for regular expression REGEXP.
 +*/
 {
   char *ms;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
     ok = cancel();
@@ -236,6 +245,8 @@ static int isearch(int dir)
   astr pattern = astr_new();
   Point start, cur;
   Marker *old_mark;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   assert(cur_wp->bp->mark);
   old_mark = marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt);
@@ -407,6 +418,8 @@ Replace occurrences of a regexp with other text.
   int count = 0, find_no_upper;
   size_t find_len, repl_len;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
     ok = cancel();
   else if (find[0] == '\0')
@@ -450,6 +463,8 @@ what to do with it.
   char *find, *repl;
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
   size_t find_len, repl_len;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
     ok = cancel();

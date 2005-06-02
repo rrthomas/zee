@@ -221,6 +221,8 @@ Window *find_window(const char *name)
 
 Point window_pt(Window *wp)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   /* The current window uses the current buffer point; all other
      windows have a saved point.  */
   assert(wp != NULL);

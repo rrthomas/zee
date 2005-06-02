@@ -182,6 +182,8 @@ defining others, use M-x name-last-kbd-macro.
   } else {
     int i;
 
+    assert(cur_bp); /* FIXME: Remove this assumption. */
+
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     if (uniarg == 0)
       while (call_macro(cur_mp));

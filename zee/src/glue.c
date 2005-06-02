@@ -87,6 +87,8 @@ char *copy_text_block(Point start, size_t size)
   size_t max_size, n, i;
   Line *lp;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   max_size = 10;
   dp = buf = (char *)zmalloc(max_size);
 
@@ -149,6 +151,8 @@ astr shorten_string(char *s, int maxlen)
  */
 void goto_point(Point pt)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   if (cur_bp->pt.n > pt.n)
     do
       FUNCALL(previous_line);

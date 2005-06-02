@@ -128,6 +128,7 @@ void process_key(size_t key)
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
     if ((p = get_binding(key)) == NULL) {
+      assert(cur_bp); /* FIXME: Remove this assumption. */
       /* There are no bindings for the pressed key. */
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       for (uni = 0;

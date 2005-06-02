@@ -90,6 +90,7 @@ int get_variable_number_bp(Buffer *bp, char *var)
 
 int get_variable_number(char *var)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   return get_variable_number_bp(cur_bp, var);
 }
 
@@ -155,6 +156,8 @@ Set a variable value to the user-specified value.
 +*/
 {
   char *var, *val = NULL, *fmt;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
     ok = FALSE;

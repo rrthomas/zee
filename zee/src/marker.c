@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 #include "main.h"
 #include "extern.h"
@@ -82,5 +83,6 @@ Marker *marker_new(Buffer *bp, Point pt)
 
 Marker *point_marker(void)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   return marker_new(cur_bp, cur_bp->pt);
 }

@@ -66,6 +66,8 @@ END_DEFUN
 static char *make_buffer_flags(Buffer *bp, int iscurrent)
 {
   static char buf[4];
+  
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   buf[0] = iscurrent ? '.' : ' ';
   buf[1] = (bp->flags & BFLAG_MODIFIED) ? '*' : ' ';
@@ -114,6 +116,8 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   Buffer *new_bp;
   va_list ap;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   /* Popup a window with the buffer "name". */
   if ((wp = find_window(name)))
     set_current_window(wp);
@@ -148,6 +152,8 @@ static void write_buffers_list(va_list ap)
   Window *old_wp = va_arg(ap, Window *);
   Buffer *bp;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   bprintf(" MR Buffer           Size    Mode         File\n");
   bprintf(" -- ------           ----    ----         ----\n");
 
@@ -181,6 +187,7 @@ DEFUN_INT("toggle-read-only", toggle_read_only)
 Change whether this buffer is visiting its file read-only.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   cur_bp->flags ^= BFLAG_READONLY;
   return TRUE;
 }
@@ -193,6 +200,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   cur_bp->flags ^= BFLAG_AUTOFILL;
   return TRUE;
 }
@@ -205,6 +213,7 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   if (lastflag & FLAG_SET_UNIARG)
     variableSetNumber(&cur_bp->vars, "fill-column", uniarg);
   else
@@ -234,6 +243,8 @@ END_DEFUN
 
 int exchange_point_and_mark(void)
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   /* No mark? */
   assert(cur_bp->mark);
 
@@ -406,6 +417,7 @@ DEFUN_INT("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   cur_bp->pt = line_beginning_position(0);
   while (!eolp()) {
     if (!isspace(following_char()))
@@ -426,6 +438,9 @@ END_DEFUN
 static int forward_word(void)
 {
   int gotword = FALSE;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   for (;;) {
     while (!eolp()) {
       int c = following_char();
@@ -468,6 +483,9 @@ END_DEFUN
 static int backward_word(void)
 {
   int gotword = FALSE;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   for (;;) {
     if (bolp()) {
       if (!previous_line())
@@ -560,6 +578,7 @@ int forward_sexp(void)
   int double_quote = 0;
   int single_quote = 0;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   for (;;) {
     while (!eolp()) {
       int c = following_char();
@@ -630,6 +649,7 @@ int backward_sexp(void)
   int double_quote = 1;
   int single_quote = 1;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   for (;;) {
     if (bolp()) {
       if (!previous_line()) {
@@ -816,6 +836,7 @@ Fill paragraph at or after point.
   int i, start, end;
   Marker *m = point_marker();
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
   FUNCALL(forward_paragraph);
@@ -860,6 +881,8 @@ static int setcase_word(int rcase)
 {
   int gotword;
   size_t i, size;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if (!ISWORDCHAR(following_char())) {
     if (!forward_word())
@@ -915,6 +938,8 @@ Convert following word (or argument N words) to lower case, moving over.
 {
   int uni, ret = TRUE;
 
+  assert(cur_bp); /* FIXME: Remove this assumption. */
+
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word(LOWERCASE)) {
@@ -933,6 +958,8 @@ Convert following word (or argument N words) to upper case, moving over.
 +*/
 {
   int uni, ret = TRUE;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -954,6 +981,8 @@ lower case.
 +*/
 {
   int uni, ret = TRUE;
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -1054,6 +1083,8 @@ it as the contents of the region.
   int lines = 0;
   astr cmd;
   char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
+
+  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();
