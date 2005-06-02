@@ -278,21 +278,9 @@ int zasprintf(char **ptr, const char *fmt, ...);
 
 
 /*
- * Declare external Zee functions.
+ * Declare external C functions for interactive commands.
  */
 #define X(cmd_name, c_name) \
   extern int F_ ## c_name(int argc, le *branch);
 #include "tbl_funcs.h"
 #undef X
-
-/*--------------------------------------------------------------------------
- * Missing functions.
- *
- * The functions here are used in tools, where config.h is not available.
- *--------------------------------------------------------------------------*/
-
-#ifndef HAVE_VASPRINTF
-#include <stdarg.h>
-
-int vasprintf(char **ptr, const char *fmt, va_list vargs);
-#endif
