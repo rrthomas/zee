@@ -225,8 +225,7 @@ astr get_current_dir(int interactive)
 {
   astr buf;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-  if (interactive && cur_bp->filename != NULL) {
+  if (interactive && cur_bp && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
     int p;
@@ -472,8 +471,7 @@ int check_modified_buffer(Buffer *bp)
 
 /*
  * Remove the specified buffer from the buffer list and deallocate
- * its space.  Avoid killing the sole buffers and creates the scratch
- * buffer when required.
+ * its space.
  */
 void kill_buffer(Buffer *kill_bp)
 {
@@ -486,33 +484,7 @@ void kill_buffer(Buffer *kill_bp)
   else
     next_bp = head_bp;
 
-  if (next_bp == kill_bp) {
-    Window *wp;
-    Buffer *new_bp = create_buffer(cur_bp->name);
-    /* If this is the sole buffer available, then remove the contents
-       and set the name to `*scratch*' if it is not already set. */
-    assert(cur_bp == kill_bp);
-
-    free_buffer(cur_bp);
-
-    /* Scan all the windows that display this buffer. */
-    for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->bp == cur_bp) {
-        wp->bp = new_bp;
-        wp->topdelta = 0;
-        wp->saved_pt = NULL;    /* It was freed. */
-      }
-
-    cur_bp = new_bp;
-    cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
-    if (strcmp(cur_bp->name, "*scratch*") != 0) {
-      set_buffer_name(cur_bp, "*scratch*");
-      if (cur_bp->filename != NULL) {
-        free(cur_bp->filename);
-        cur_bp->filename = NULL;
-      }
-    }
-  } else {
+  {
     Buffer *bp;
     Window *wp;
 

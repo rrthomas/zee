@@ -269,7 +269,14 @@ int main(int argc, char **argv)
     }
 
     term_init();
-    create_first_window();
+
+    /* Create first window */
+    cur_wp = head_wp = window_new();
+    cur_wp->fwidth = cur_wp->ewidth = term_width();
+    /* Save space for minibuffer. */
+    cur_wp->fheight = term_height() - 1;
+    /* Save space for status line. */
+    cur_wp->eheight = cur_wp->fheight - 1;
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
@@ -288,18 +295,11 @@ int main(int argc, char **argv)
         if (*argv)
           open_file(*argv++, line - 1);
       }
-    else {
-      /* Create the scratch buffer. */
-      Buffer *bp = create_buffer("*scratch*");
-      bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
-      cur_wp->bp = cur_bp = bp;
-      insert_string("This buffer is for notes you don't want to save.\n\n");
-    }
 
     term_display();
     minibuf_write(about_minibuf_str);
 
-    /* FIXME: at this point, display string 'as' in scratch buffer if
+    /* FIXME: at this point, display string 'as' in a new buffer if
        non-empty. */
 
     /* Run the main loop. */

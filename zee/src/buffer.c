@@ -247,9 +247,6 @@ static void move_buffer_to_head(Buffer *bp)
  */
 void switch_to_buffer(Buffer *bp)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-  assert(cur_wp->bp == cur_bp);
-
   /* The buffer is the current buffer; return safely.  */
   if (cur_bp == bp)
     return;

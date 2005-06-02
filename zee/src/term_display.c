@@ -342,7 +342,8 @@ void term_display(void)
 
   cur_topline = topline = 0;
 
-  calculate_start_column(cur_wp);
+  if (cur_wp)
+    calculate_start_column(cur_wp);
 
   for (wp = head_wp; wp != NULL; wp = wp->next) {
     if (wp == cur_wp)
@@ -358,11 +359,7 @@ void term_display(void)
     topline += wp->fheight;
   }
 
-  term_redraw_cursor();
-}
-
-void term_redraw_cursor(void)
-{
+  /* Redraw cursor. */
   term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 

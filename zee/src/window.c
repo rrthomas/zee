@@ -29,7 +29,7 @@
 #include "main.h"
 #include "extern.h"
 
-static Window *window_new(void)
+Window *window_new(void)
 {
   return zmalloc(sizeof(Window));
 }
@@ -118,17 +118,17 @@ void delete_window(Window *del_wp)
 {
   Window *wp;
 
-  if (cur_wp == head_wp)
+  if (del_wp == head_wp)
     wp = head_wp = head_wp->next;
   else
     for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->next == cur_wp) {
+      if (wp->next == del_wp) {
         wp->next = wp->next->next;
         break;
       }
 
-  wp->fheight += cur_wp->fheight;
-  wp->eheight += cur_wp->eheight + 1;
+  wp->fheight += del_wp->fheight;
+  wp->eheight += del_wp->eheight + 1;
 
   set_current_window(wp);
   free_window(del_wp);
@@ -196,21 +196,6 @@ This command selects the window one step away in that order.
   set_current_window((cur_wp->next != NULL) ? cur_wp->next : head_wp);
 }
 END_DEFUN
-
-/*
- * This function is called once in main(), for creating
- * the scratch buffer.
- */
-void create_first_window(void)
-{
-  cur_wp = head_wp = window_new();
-  cur_wp->fwidth = cur_wp->ewidth = term_width();
-  /* Save space for minibuffer. */
-  cur_wp->fheight = term_height() - 1;
-  /* Save space for status line. */
-  cur_wp->eheight = cur_wp->fheight - 1;
-/*   wp->bp = bp; */
-}
 
 Window *find_window(const char *name)
 {
