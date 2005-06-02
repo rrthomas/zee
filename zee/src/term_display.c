@@ -467,12 +467,5 @@ void resize_windows(size_t old_width, size_t old_height)
     }
   }
 
-  /* Sometimes we cannot reduce the windows height to a certain value
-     (too small); take care of this case.
-     FIXME: *Really* take care of this case. Currently Zee just crashes.
-   */
-  if (hdelta > 0)
-    height -= hdelta;
-
   FUNCALL(recenter);
 }
