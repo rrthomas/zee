@@ -365,12 +365,9 @@ void term_suspend(void)
 
 static void winch_sig_handler(int signo)
 {
-  size_t old_width = term_width();
-  size_t old_height = term_height();
-
   assert(signo == SIGWINCH);
   init_screen();
-  resize_windows(old_width, old_height);
+  resize_windows();
   resync_display();
   term_refresh();
 }

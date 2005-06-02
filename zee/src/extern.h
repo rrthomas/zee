@@ -76,7 +76,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
-void resize_windows(size_t new_width, size_t new_height);
+void resize_windows(void);
 void recenter(Window *wp);
 
 /* editfns.c -------------------------------------------------------------- */

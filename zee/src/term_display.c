@@ -427,16 +427,20 @@ int term_printw(const char *fmt, ...)
   return res;
 }
 
-void resize_windows(size_t old_width, size_t old_height)
+void resize_windows(void)
 {
   Window *wp;
-  int hdelta = term_height() - old_height;
-
-  (void)old_width;
+  int hdelta;
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
     wp->fwidth = wp->ewidth = term_width();
+
+  /* Work out difference in window height; windows may be taller than
+     terminal if the terminal was very short. */
+  for (hdelta = term_height(), wp = head_wp;
+       wp != NULL;
+       hdelta -= wp->fheight, wp = wp->next);
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
