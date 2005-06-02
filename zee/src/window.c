@@ -114,32 +114,36 @@ Both windows display the same buffer now current.
 }
 END_DEFUN
 
+void delete_window(Window *del_wp)
+{
+  Window *wp;
+
+  if (cur_wp == head_wp)
+    wp = head_wp = head_wp->next;
+  else
+    for (wp = head_wp; wp != NULL; wp = wp->next)
+      if (wp->next == cur_wp) {
+        wp->next = wp->next->next;
+        break;
+      }
+
+  wp->fheight += cur_wp->fheight;
+  wp->eheight += cur_wp->eheight + 1;
+
+  set_current_window(wp);
+  free_window(del_wp);
+}
+
 DEFUN_INT("delete-window", delete_window)
 /*+
 Remove the current window from the screen.
 +*/
 {
-  Window *wp, *del_wp = cur_wp;
-
   if (cur_wp == head_wp && cur_wp->next == NULL) {
     minibuf_error("Attempt to delete sole ordinary window");
     ok = FALSE;
-  } else {
-    if (cur_wp == head_wp)
-      wp = head_wp = head_wp->next;
-    else
-      for (wp = head_wp; wp != NULL; wp = wp->next)
-        if (wp->next == cur_wp) {
-          wp->next = wp->next->next;
-          break;
-        }
-
-    wp->fheight += cur_wp->fheight;
-    wp->eheight += cur_wp->eheight + 1;
-
-    set_current_window(wp);
-    free_window(del_wp);
-  }
+  } else
+    delete_window(cur_wp);
 }
 END_DEFUN
 

@@ -451,13 +451,19 @@ void resize_windows(size_t old_width, size_t old_height)
     int decreased = TRUE;
     while (decreased) {
       decreased = FALSE;
-      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next) {
         if (wp->fheight > 2) {
           --wp->fheight;
           --wp->eheight;
           ++hdelta;
           decreased = TRUE;
+        } else if (cur_wp != head_wp || cur_wp->next != NULL) {
+          Window *new_wp = wp->next;
+          delete_window(wp);
+          wp = new_wp;
+          decreased = TRUE;
         }
+      }
     }
   }
 
