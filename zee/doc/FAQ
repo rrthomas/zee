@@ -12,8 +12,7 @@ INDEX
    1.3. Where can I get the latest version?
    1.4. Zee has a bug!
    1.5. Zee is weird!
-   1.6. Does Zee support Unicode/UTF-8?
-   1.7. Zee doesn't compile.
+   1.6. Zee doesn't compile.
 
 2. Functionality
    2.1. How do I quit Zee?
@@ -49,9 +48,9 @@ INDEX
 
 1.4. Zee has a bug!
 
-    Bug reports can be sent to the author at rrt@sc3d.org
-    or entered directly into Bugzilla at
-    http://sourceforge.net/projects/zee. Patches are appreciated.
+    Bug reports can be sent to the authors at
+    zee-devel@lists.sourceforge.net or entered directly into Bugzilla
+    at http://sourceforge.net/projects/zee. Patches are appreciated.
 
 1.5. Zee is weird!
 
@@ -60,19 +59,14 @@ INDEX
     used to, or I may have been badly designed. If after trying it for
     a bit you still don't like the way it works, complain!
 
-1.6. Does Zee support Unicode/UTF-8?
-
-    No. Support for Unicode is planned in the future.
-
-1.7. Zee doesn't compile.
+1.6. Zee doesn't compile.
 
     We have tested Zee under GNU/Linux only (other than the EPOC
     port), although it should work on any POSIX-compliant OS that
     supports termcap or Allegro. If you get Zee running under an OS
-    not listed here, please send a message to the Zee developers
-    telling them that (you might also send any patches you have made
-    to the Zee sources if you want them included in the next
-    release).
+    not listed here, please send a message to the developers telling
+    them that (you might also send any patches you have made to the
+    sources if you want them included in the next release).
 
 ------------------------------------------------------------------------------
 
@@ -84,7 +78,7 @@ INDEX
 
 2.2. How do I return to the shell without leaving Zee?
 
-    Type `M-x suspend-zee'.
+    Type `M-x suspend'.
 
 2.3. Zee is hung.
 
@@ -113,26 +107,20 @@ INDEX
 
 2.6. What settings can I change?
 
-    Check out the `zee.sample' file for a full list of variables.
+    Check out the `dotzee.sample' file for a full list of variables.
 
 2.7. How do I display non-ASCII characters?
 
-    Zee uses the operating system's locale support, so you need to
-    set an appropriate locale. However, Zee only works with 8-bit
-    locales at present; support for Unicode is planned.
-
-    Try to set the LANG environment variable according to your locale,
-    before running Zee. For example, for a French environment, try:
-
-	export LANG=fr_FR	(with a Bourne-like shell)
-
-	setenv LANG fr_FR	(with a C-like shell).
+    Zee uses the operating system's locale support, so you need to set
+    an appropriate locale. How you do this depends on your OS.
+    However, Zee only works with 8-bit locales at present; support for
+    Unicode/UTF-8 is planned.
 
 2.8. Zee doesn't handle filenames with non-ASCII characters.
 
     See the answer to question 2.7.
 
-2.9. How do I enable Auto Fill Mode at startup?
+2.9. How do I enable auto-fill mode at startup?
 
     Add the following line to your `~/.zee' file:
 
