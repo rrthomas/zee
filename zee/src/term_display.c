@@ -465,7 +465,8 @@ void resize_windows(size_t old_width, size_t old_height)
      (too small); take care of this case.
      FIXME: *Really* take care of this case. Currently Zee just crashes.
    */
-  height -= hdelta;
+  if (hdelta > 0)
+    height -= hdelta;
 
   FUNCALL(recenter);
 }
