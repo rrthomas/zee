@@ -259,6 +259,7 @@ int get_variable_number_bp(Buffer *bp, char *var);
 int get_variable_number(char *var);
 
 /* window.c --------------------------------------------------------------- */
+Window *window_new(void);
 void free_window(Window *wp);
 Window *find_window(const char *name);
 void free_windows(void);
