@@ -500,11 +500,15 @@ void kill_buffer(Buffer *kill_bp)
     cur_bp = next_bp;
     if (head_bp == kill_bp)
       head_bp = head_bp->next;
-    for (bp = head_bp; bp->next != NULL; bp = bp->next)
-      if (bp->next == kill_bp) {
-        bp->next = bp->next->next;
-        break;
-      }
+    if (head_bp) {
+      for (bp = head_bp; bp->next != NULL; bp = bp->next)
+        if (bp->next == kill_bp) {
+          bp->next = bp->next->next;
+          break;
+        }
+    } else
+      /* If we just deleted the last buffer, quit. */
+      thisflag |= FLAG_QUIT;
 
     free_buffer(kill_bp);
 
@@ -520,8 +524,6 @@ Kill the current buffer or the user specified one.
   Buffer *bp;
   char *ms;
   Completion *cp;
-
-  assert(cur_bp); /* FIXME: Remove this assumption. */
 
   cp = make_buffer_completion();
   if ((ms = minibuf_read_completion("Kill buffer (default %s): ",

@@ -189,7 +189,7 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int c, bflag = FALSE, qflag = FALSE, eflag = FALSE;
+  int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
   astr as = astr_new();
   le *list;
 
@@ -230,29 +230,34 @@ int main(int argc, char **argv)
               );
       return 0;
     case 'h':
-      fprintf(stderr,
-              "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
-              "\n"
-              "Run " TEXT_NAME ", the lightweight editor.\n"
-              "\n"
-              "Initialization options:\n"
-              "\n"
-              "--batch                do not do interactive display; implies -q\n"
-              "--help                 display this help message and exit\n"
-              "--no-init-file, -q     do not load ~/." PACKAGE_NAME "\n"
-              "--version              display version information and exit\n"
-              "\n"
-              "Action options:\n"
-              "\n"
-              "FILE                   visit FILE using find-file\n"
-              "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
-              "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
-              "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
-              );
-      return 0;
+      hflag = TRUE;
+      break;
     }
   argc -= optind;
   argv += optind;
+
+  if (hflag || argc == 0) {
+    fprintf(stderr,
+            "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
+            "\n"
+            "Run " TEXT_NAME ", the lightweight editor.\n"
+            "\n"
+            "Initialization options:\n"
+            "\n"
+            "--batch                do not do interactive display; implies -q\n"
+            "--help                 display this help message and exit\n"
+            "--no-init-file, -q     do not load ~/." PACKAGE_NAME "\n"
+            "--version              display version information and exit\n"
+            "\n"
+            "Action options:\n"
+            "\n"
+            "FILE                   visit FILE using find-file\n"
+            "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+            "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
+            "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
+            );
+    return 0;
+  }
 
   signal_init();
 
@@ -287,14 +292,13 @@ int main(int argc, char **argv)
     astr_delete(leDumpEval(list, 0));
     leWipe(list);
 
-    if (argc >= 1)
-      while (*argv) {
-        size_t line = 1;
-        if (**argv == '+')
-          line = strtoul(*argv++ + 1, NULL, 10);
-        if (*argv)
-          open_file(*argv++, line - 1);
-      }
+    while (*argv) {
+      size_t line = 1;
+      if (**argv == '+')
+        line = strtoul(*argv++ + 1, NULL, 10);
+      if (*argv)
+        open_file(*argv++, line - 1);
+    }
 
     term_display();
     minibuf_write(about_minibuf_str);

@@ -1,5 +1,7 @@
 /* Windows-handling functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
