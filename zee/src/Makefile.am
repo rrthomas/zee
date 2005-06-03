@@ -70,7 +70,11 @@ else
 if EPOCEMX
 zee_SOURCES = $(zee_base_SOURCES) term_epocemx.c
 else
+if CURSES
+zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
+else
 zee_SOURCES = $(zee_base_SOURCES) term_termcap.c
+endif
 endif
 endif
 
