@@ -93,8 +93,7 @@ static void loop(void)
   }
 }
 
-static char about_minibuf_str[] =
-"Welcome to " TEXT_NAME "!  To exit type ALT-X file-quit RETURN (or press C-q)";
+static char about_minibuf_str[] = "Welcome to " TEXT_NAME "!  To exit press Ctrl-q";
 
 static void segv_sig_handler(int signo)
 {
@@ -293,11 +292,16 @@ int main(int argc, char **argv)
        issued if the default bindings file can't be loaded. */
     bind_key_string("\\M-x", F_execute_extended_command);
 
+    /* Write help message, but allow it to be overwritten by errors
+       from loading key_bindings.el. */
+    minibuf_write(about_minibuf_str);
+
     /* Load default bindings file. */
     list = lisp_read_file(PATH_DATA "/key_bindings.el");
     astr_delete(leDumpEval(list, 0));
     leWipe(list);
 
+    /* Open files listed on command line. */
     while (*argv) {
       size_t line = 1;
       if (**argv == '+')
@@ -305,9 +309,7 @@ int main(int argc, char **argv)
       if (*argv)
         open_file(*argv++, line - 1);
     }
-
     term_display();
-    minibuf_write(about_minibuf_str);
 
     /* FIXME: at this point, display string 'as' in a new buffer if
        non-empty. */
