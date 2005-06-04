@@ -110,7 +110,6 @@ void term_close(void)
   term_refresh();
 
   /* Free memory and finish with ncurses.  */
-  free_rotation_buffers();
   endwin();
   delscreen(screen);
   screen = NULL;
