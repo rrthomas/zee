@@ -197,7 +197,7 @@ void term_init(void)
   LOCK_FUNCTION(inc_cur_time);
   install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-  term_set_size(SCREEN_W / FW, SCREEN_H / FH);
+  term_set_size((size_t)(SCREEN_W / FW), (size_t)(SCREEN_H / FH));
 
   cur_scr = zmalloc(sizeof(short) * term_width() * term_height());
   new_scr = zmalloc(sizeof(short) * term_width() * term_height());
