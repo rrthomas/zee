@@ -126,7 +126,7 @@ dnl ==================================================================
 dnl Curses
 dnl ==================================================================
 
-AC_DEFUN([zile_CHECK_CURSES],
+AC_DEFUN([CHECK_CURSES],
 [
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
@@ -145,7 +145,7 @@ AC_HELP_STRING([--disable-curses], [don't use curses interface]),
 [
 if test $enableval = yes; then
         curses=true
-        zile_CHECK_CURSES
+        CHECK_CURSES
 else
         curses=false
         AC_MSG_RESULT(no)
@@ -155,7 +155,7 @@ AC_MSG_FAILURE([cannot find libtermcap]))
 fi
 ],[
         curses=true
-        zile_CHECK_CURSES
+        CHECK_CURSES
 ])
 
 AM_CONDITIONAL(CURSES, test x$curses = xtrue)
