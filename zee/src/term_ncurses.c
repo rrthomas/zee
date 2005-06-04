@@ -30,12 +30,11 @@
 #include <curses.h>
 #endif
 
-typedef SCREEN Screen;
-
-Screen *screen;
-
 #include "main.h"
 #include "extern.h"
+
+typedef SCREEN Screen;
+Screen *screen;
 
 void term_move(size_t y, size_t x)
 {
