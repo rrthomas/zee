@@ -325,7 +325,7 @@ static void draw_status_line(size_t line, Window *wp)
     term_printw("%sIsearch", someflag ? " " : "");
 
   term_printw(")--L%d--C%d--%s",
-              pt.n+1, get_goalc_wp(wp),
+              pt.n + 1, get_goalc_wp(wp),
               make_screen_pos(wp, &buf));
   free(buf);
 
@@ -342,19 +342,21 @@ void term_display(void)
 
   cur_topline = topline = 0;
 
-  if (cur_wp)
+  if (cur_wp && cur_wp->bp)
     calculate_start_column(cur_wp);
 
   for (wp = head_wp; wp != NULL; wp = wp->next) {
     if (wp == cur_wp)
       cur_topline = topline;
 
-    draw_window(topline, wp);
+    if (wp->bp) {
+      draw_window(topline, wp);
 
-    /* Draw the status line only if there is available space after the
-       buffer text space. */
-    if (wp->fheight - wp->eheight > 0)
-      draw_status_line(topline + wp->eheight, wp);
+      /* Draw the status line only if there is available space after the
+         buffer text space. */
+      if (wp->fheight - wp->eheight > 0)
+        draw_status_line(topline + wp->eheight, wp);
+    }
 
     topline += wp->fheight;
   }
