@@ -139,21 +139,10 @@ AC_DEFUN([CHECK_CURSES],
 AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 ])
 
-AC_MSG_CHECKING([use curses])
-AC_ARG_ENABLE(curses,
-AC_HELP_STRING([--enable-curses], [use curses interface]),
-[
-if test $enableval = yes; then
+if test x$allegro = xfalse && test x$epocemx = xfalse; then
         curses=true
         CHECK_CURSES
-else
-        curses=false
-        AC_MSG_RESULT(no)
 fi
-],[
-        curses=true
-        CHECK_CURSES
-])
 
 AM_CONDITIONAL(CURSES, test x$curses = xtrue)
 
