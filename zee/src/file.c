@@ -877,9 +877,7 @@ void die(int exitcode)
         raw_write_to_disk(bp, astr_cstr(buf), 0600);
         astr_delete(buf);
       }
-/* FIXME: implement term_suspend in ncurses backend
-/*   term_suspend();  /\* Rather than term_close(), do the bare minimum */
-/*                         to restore the terminal. *\/ */
+    term_close();
   }
   exit(exitcode);
 }

@@ -267,16 +267,6 @@ void term_close(void)
   fflush(stdout);
 }
 
-/* Suspend the term ready to go back to the shell */
-void term_suspend(void)
-{
-}
-
-/* Set up the term again */
-void term_resume(void)
-{
-}
-
 /* cursor keys */
 #define KUP         4105
 #define KDOWN       4106

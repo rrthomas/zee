@@ -209,18 +209,8 @@ void term_close(void)
   free(cur_scr);
   free(new_scr);
 
-  set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
-  allegro_exit ();
-}
-
-/* Suspend the term ready to go back to the shell */
-void term_suspend(void)
-{
-}
-
-/* Set up the term again */
-void term_resume(void)
-{
+  set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+  allegro_exit();
 }
 
 static int translate_key(int c)
