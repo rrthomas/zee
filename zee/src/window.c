@@ -86,7 +86,7 @@ void set_current_window(Window *wp)
   }
 }
 
-DEFUN_INT("split-window", split_window)
+DEFUN_INT("window-split", window_split)
 /*+
 Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
@@ -136,13 +136,13 @@ void delete_window(Window *del_wp)
   free_window(del_wp);
 }
 
-DEFUN_INT("delete-window", delete_window)
+DEFUN_INT("window-close", window_close)
 /*+
 Remove the current window from the screen.
 +*/
 {
   if (cur_wp == head_wp && cur_wp->next == NULL) {
-    minibuf_error("Attempt to delete sole ordinary window");
+    minibuf_error("Attempt to close sole ordinary window");
     ok = FALSE;
   } else
     delete_window(cur_wp);
@@ -153,7 +153,7 @@ Window *popup_window(void)
 {
   if (head_wp->next == NULL) {
     /* There is only one window on the screen, so split it. */
-    FUNCALL(split_window);
+    FUNCALL(window_split);
     return cur_wp->next;
   }
 
@@ -165,9 +165,9 @@ Window *popup_window(void)
   return head_wp;
 }
 
-DEFUN_INT("delete-other-windows", delete_other_windows)
+DEFUN_INT("window-close-others", window_close_others)
 /*+
-Make the selected window fill the screen.
+Make the current window fill the screen.
 +*/
 {
   Window *wp, *nextwp;
@@ -188,7 +188,7 @@ Make the selected window fill the screen.
 }
 END_DEFUN
 
-DEFUN_INT("other-window", other_window)
+DEFUN_INT("window-next", window_next)
 /*+
 Select the first different window on the screen.
 All windows are arranged in a cyclic order.

@@ -1,7 +1,9 @@
+
 ; Default key bindings
 
-; Navigation. Mostly arrows and things but everything has a home-keys
-; alternative.
+; Navigation. Mostly arrows and things.
+; Ideally everything should have a home-keys alternative, but this is
+; currently not true.
 
 ; Character/line
 (global-set-key "\LEFT" 'backward-char)
@@ -49,6 +51,8 @@
 
 ; Open
 (global-set-key "\C-o" 'file-open)
+(global-set-key "\C-p" 'file-switch)
+(global-set-key "\C-\M-x" 'file-switch)
 ; Save
 (global-set-key "\C-s" 'file-save)
 ; Close
@@ -57,8 +61,6 @@
 (global-set-key "\M-\C-q" 'file-quit)
 (global-set-key "\M-q" 'file-quit)
 (global-set-key "\C-q" 'file-quit)
-; Open recent
-(global-set-key "\C-\M-x" 'file-recent)
 
 ; Undo, cut, copy, paste, delete etc.
 
@@ -82,11 +84,20 @@
 (global-set-key "\C-y" 'yank)
 (global-set-key "\C-v" 'yank)
 
+; Search
+
+; Once the search is underway, "find next" is hard-wired to Ctrl+I.
+; Having it hard-wired is obviously broken, but something neutral like Ret
+; would be better.
+; The proposed meaning of Esc obviates the current behaviour of Ret.
+(global-set-key "\C-f" 'isearch-forward-regexp)
+
 ; Window management.
 
-(global-set-key "\M-2" 'split-window)
-(global-set-key "\C-\M-o" 'other-window)
-(global-set-key "\M-0" 'delete-window)
+(global-set-key "\M-n" 'window-next)
+(global-set-key "\M-o" 'window-split)
+(global-set-key "\M-p" 'window-close-others)
+(global-set-key "\M-w" 'window-close)
 
 (global-set-key "\ESC" 'keyboard-quit)
 (global-set-key "\C-g" 'keyboard-quit)
@@ -106,7 +117,7 @@
 (global-set-key "\M-e" 'call-last-kbd-macro)
 (global-set-key "\M-c" 'capitalize-word)
 (global-set-key "\M-\\" 'delete-horizontal-space)
-(global-set-key "\M-1" 'delete-other-windows)
+(global-set-key "\M-1" 'window-close-others)
 (global-set-key "\M- " 'just-one-space)
 (global-set-key "\M-l" 'downcase-word)
 (global-set-key "\'M-)" 'end-kbd-macro)
@@ -116,8 +127,6 @@
 (global-set-key "\M-q" 'fill-paragraph)
 (global-set-key "\C-\M-f" 'forward-sexp)
 (global-set-key "\C-r" 'isearch-backward-regexp)
-(global-set-key "\C-f" 'isearch-forward-regexp)
-(global-set-key "\C-g" 'keyboard-quit)
 (global-set-key "\C-\M-k" 'kill-sexp)
 (global-set-key "\M-h" 'mark-paragraph)
 (global-set-key "\C-\M-@" 'mark-sexp)

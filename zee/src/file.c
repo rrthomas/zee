@@ -418,7 +418,7 @@ creating one if none already exists.
 }
 END_DEFUN
 
-DEFUN_INT("file-recent", file_recent)
+DEFUN_INT("file-switch", file_switch)
 /*+
 Select to the user specified buffer in the current window.
 +*/

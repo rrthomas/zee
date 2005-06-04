@@ -339,7 +339,7 @@ char *term_minibuf_read(const char *prompt, const char *value,
   if (cp != NULL && cp->fl_poppedup && (wp = find_window("*Completions*")) != NULL) {
     set_current_window(wp);
     if (cp->fl_close)
-      FUNCALL(delete_window);
+      FUNCALL(window_close);
     else if (cp->old_bp)
       switch_to_buffer(cp->old_bp);
     set_current_window(old_wp);
