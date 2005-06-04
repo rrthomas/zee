@@ -104,7 +104,7 @@ static char *zgoto(const char *s, int col, int row)
 {
   char *ret = tgoto(s, col, row);
   if (ret == NULL) {
-    fprintf(stderr, "zile: can't position cursor\n");
+    fprintf(stderr, PACKAGE_NAME ": can't position cursor\n");
     die(1);
   }
   return ret;
