@@ -109,50 +109,6 @@ static void other_sig_handler(int signo)
   die(2);
 }
 
-/* #ifdef HAVE_SIGACTION */
-/* FIXME: get this working again */
-/* static struct sigaction act; /\* For use by signal handlers *\/ */
-
-/* /\* What do we do when we catch the suspend signal *\/ */
-/* static void suspend_sig_handler(int signal) */
-/* { */
-/*   assert(signal == SIGTSTP); */
-
-/*   if (term_initted()) { */
-/*     term_tidy(); */
-/*     term_suspend(); */
-/*   } */
-
-/*   /\* Trap SIGHUP and SIGTERM so we can properly deal with them while */
-/*      suspended *\/ */
-/*   act.sa_handler = other_sig_handler; */
-/*   act.sa_flags = SA_RESTART; */
-/*   sigaction(SIGHUP, &act, NULL); */
-/*   sigaction(SIGTERM, &act, NULL); */
-
-/*   /\* We used to re-enable the default SIG_DFL and raise SIGTSTP, but */
-/*      then we could be (and were) interrupted in the middle of the call. */
-/*      So we do it the mutt way instead *\/ */
-/*   kill(0, SIGSTOP); */
-/* } */
-
-/* static void signal_init(void); */
-
-/* /\* Restore the suspend handler when we come back into the prog *\/ */
-/* static void cont_sig_handler(int signal) */
-/* { */
-/*   assert(signal == SIGCONT); */
-
-/*   if (term_initted()) { */
-/*     term_resume(); */
-/*     term_full_redisplay(); */
-/*   } */
-
-/*   /\* Simplest just to reinitialise everything. *\/ */
-/*   signal_init(); */
-/* } */
-/* #endif */
-
 static void signal_init(void)
 {
   /* Set up signal handling */
@@ -161,20 +117,6 @@ static void signal_init(void)
   signal(SIGINT, other_sig_handler);
   signal(SIGQUIT, other_sig_handler);
   signal(SIGTERM, other_sig_handler);
-
-/* #ifdef HAVE_SIGACTION */
-/* FIXME: Get this working again */
-/*   /\* If we don't do this, it seems other stuff interrupts the */
-/*      suspend handler! Without it, suspending under e.g. */
-/*      pine or mutt freezes the process. *\/ */
-/*   sigfillset(&act.sa_mask); */
-
-/*   act.sa_flags = SA_RESTART; */
-/*   act.sa_handler = suspend_sig_handler; */
-/*   sigaction(SIGTSTP, &act, NULL); */
-/*   act.sa_handler = cont_sig_handler; */
-/*   sigaction(SIGCONT, &act, NULL); */
-/* #endif */
 }
 
 /* Options table */

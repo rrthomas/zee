@@ -28,7 +28,7 @@ dnl Checks for functions.
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
-AC_CHECK_FUNCS(getcwd fchmod fchown sigaction)
+AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
 dnl Checks for header files.
@@ -141,7 +141,7 @@ AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 
 AC_MSG_CHECKING([use curses])
 AC_ARG_ENABLE(curses,
-AC_HELP_STRING([--disable-curses], [don't use curses interface]),
+AC_HELP_STRING([--enable-curses], [use curses interface]),
 [
 if test $enableval = yes; then
         curses=true
@@ -149,9 +149,6 @@ if test $enableval = yes; then
 else
         curses=false
         AC_MSG_RESULT(no)
-        AC_CHECK_HEADERS([termcap.h] [termios.h])
-        AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
-AC_MSG_FAILURE([cannot find libtermcap]))
 fi
 ],[
         curses=true
@@ -159,17 +156,6 @@ fi
 ])
 
 AM_CONDITIONAL(CURSES, test x$curses = xtrue)
-
-dnl ==================================================================
-dnl Termcap
-dnl ==================================================================
-
-if test x$curses = xfalse && test x$allegro = xfalse && test x$epocemx = xfalse; then
-        AC_CHECK_HEADERS([termcap.h] [termios.h])
-        AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
-		AC_CHECK_LIB(ncurses, tgetstr, [LIBS="$LIBS -lncurses"],
-                        AC_MSG_FAILURE([cannot find termcap])))
-fi
 
 dnl ==================================================================
 dnl Extra definitions for config.h
