@@ -269,10 +269,14 @@ int main(int argc, char **argv)
     printf(astr_cstr(as));
   else {
     if (!qflag) {
+      le *list;
+
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
-      astr_delete(leDumpEval(lisp_read_file(astr_cstr(as)), 0));
+      list = lisp_read_file(astr_cstr(as));
+      astr_delete(leDumpEval(list, 0));
       astr_delete(as);
+      leWipe(list);
     }
 
     term_init();
