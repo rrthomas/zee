@@ -384,7 +384,7 @@ sequence.
       else
         bind_key(key, func);
     } else
-      minibuf_error("No such function `%d'", name);
+      minibuf_error("No such function `%s'", name);
 
     free(name);
   }
