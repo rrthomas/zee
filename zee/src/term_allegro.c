@@ -326,7 +326,7 @@ static int _xgetkey(int mode, size_t timeout)
   case GETKEY_DELAYED:
     c = _getkey(timeout);
     break;
-  case GETKEY_UNFILTERED|GETKEY_DELAYED:
+  case GETKEY_UNFILTERED | GETKEY_DELAYED:
     c = hooked_readkey(timeout) & 0xff;
     break;
   default:

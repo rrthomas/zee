@@ -338,9 +338,9 @@ size_t term_xgetkey(int mode, size_t timeout)
 
   code= _read_key(0);
 
-  if (mode & GETKEY_UNFILTERED) {
+  if (mode & GETKEY_UNFILTERED)
     return code & 0xff;
-  } else {
+  else {
     int key = translate_key(code);
     while (key == KBD_META)
       key = getkey() | KBD_META;

@@ -139,13 +139,13 @@ static size_t translate_key(int c)
 #endif
   case '\33':		/* META */
     return KBD_META;
-  case KEY_PPAGE:		/* PGUP */
+  case KEY_PPAGE:	/* PGUP */
     return KBD_PGUP;
-  case KEY_NPAGE:		/* PGDN */
+  case KEY_NPAGE:	/* PGDN */
     return KBD_PGDN;
-  case KEY_HOME:		/* HOME */
+  case KEY_HOME:
     return KBD_HOME;
-  case KEY_END:		/* END */
+  case KEY_END:
     return KBD_END;
   case KEY_DC:		/* DEL */
     return KBD_DEL;
@@ -154,13 +154,13 @@ static size_t translate_key(int c)
     return KBD_BS;
   case KEY_IC:		/* INSERT */
     return KBD_INS;
-  case KEY_LEFT:		/* LEFT */
+  case KEY_LEFT:
     return KBD_LEFT;
-  case KEY_RIGHT:		/* RIGHT */
+  case KEY_RIGHT:
     return KBD_RIGHT;
-  case KEY_UP:		/* UP */
+  case KEY_UP:
     return KBD_UP;
-  case KEY_DOWN:		/* DOWN */
+  case KEY_DOWN:
     return KBD_DOWN;
   case KEY_F(1):
     return KBD_F1;
