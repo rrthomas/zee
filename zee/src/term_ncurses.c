@@ -104,12 +104,12 @@ void term_init(void)
 
 void term_close(void)
 {
-  /* Clear last line.  */
+  /* Clear last line. */
   term_move((size_t)(LINES - 1), 0);
   term_clrtoeol();
   term_refresh();
 
-  /* Free memory and finish with ncurses.  */
+  /* Free memory and finish with ncurses. */
   endwin();
   delscreen(screen);
   screen = NULL;
