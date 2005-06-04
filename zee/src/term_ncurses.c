@@ -193,73 +193,33 @@ static size_t translate_key(int c)
   }
 }
 
-static size_t _getkey(void)
+size_t term_xgetkey(int mode, size_t arg)
 {
-  int c;
   size_t key;
 
-#ifdef KEY_RESIZE
   for (;;) {
+    int c;
+
+    if (mode & GETKEY_DELAYED)
+      wtimeout(stdscr, (int)arg);
     c = getch();
-    if (c != KEY_RESIZE)
-      break;
-    resize_windows();
-  }
-#else
-  c = getch();
-#endif
+    if (mode & GETKEY_DELAYED)
+      wtimeout(stdscr, -1);
 
-  if (c == ERR)
-    return KBD_NOKEY;
+    if (c == KEY_RESIZE) {
+      resize_windows();
+      continue;
+    }
 
-  key = translate_key(c);
-
-  while (key == KBD_META) {
-    c = getch();
-    key = translate_key(c);
-    key |= KBD_META;
+    if (mode & GETKEY_UNFILTERED)
+      key = (size_t)c;
+    else {
+      key = translate_key(c);
+      while (key == KBD_META)
+        key = translate_key(getch()) | KBD_META;
+    }
+    break;
   }
 
   return key;
-}
-
-static size_t _xgetkey(int mode, size_t arg)
-{
-  size_t c = KBD_NOKEY;
-  switch (mode) {
-  case GETKEY_UNFILTERED:
-    c = (size_t)getch();
-    break;
-  case GETKEY_DELAYED:
-    wtimeout(stdscr, (int)arg);
-    c = _getkey();
-    wtimeout(stdscr, -1);
-    break;
-  case GETKEY_UNFILTERED | GETKEY_DELAYED:
-    wtimeout(stdscr, (int)arg);
-    c = (size_t)getch();
-    wtimeout(stdscr, -1);
-    break;
-  default:
-    c = _getkey();
-  }
-  return c;
-}
-
-size_t term_xgetkey(int mode, size_t arg)
-{
-  int c;
-
-#ifdef KEY_RESIZE
-  for (;;) {
-    c = _xgetkey(mode, arg);
-    if (c != KEY_RESIZE)
-      break;
-    resize_windows();
-  }
-#else
-  c = _xgetkey(mode, arg);
-#endif
-
-  return c;
 }

@@ -67,7 +67,7 @@ size_t xgetkey(int mode, size_t timeout)
 }
 
 /*
- * Wait for a keystroke, waiting indefinitely, and return the
+ * Wait for a keystroke indefinitely, and return the
  * corresponding keycode.
  */
 size_t getkey(void)
@@ -77,7 +77,7 @@ size_t getkey(void)
 
 /*
  * Wait for timeout 10ths if a second or until a key is pressed.
- * The key is then available with getkey().
+ * The key is then available with [x]getkey().
  */
 void waitkey(size_t timeout)
 {

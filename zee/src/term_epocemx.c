@@ -325,11 +325,9 @@ static int translate_key(int code)
 
 size_t term_xgetkey(int mode, size_t timeout)
 {
-  int code;
+  int code = _read_key(0);
+
   (void)timeout;
-
-  code= _read_key(0);
-
   if (mode & GETKEY_UNFILTERED)
     return code & 0xff;
   else {

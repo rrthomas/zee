@@ -294,35 +294,17 @@ static int hooked_readkey(size_t timeout)
   return readkey();
 }
 
-static size_t _getkey(size_t timeout)
-{
-  size_t key;
-
-  key = translate_key(hooked_readkey(timeout));
-
-  while (key == KBD_META) {
-    key = translate_key(hooked_readkey(0));
-    key |= KBD_META;
-  }
-
-  return key;
-}
-
+/* FIXME: make timeout of 0 with GETKEY_DELAYED work; see also hooked_readkey */
 size_t term_xgetkey(int mode, size_t timeout)
 {
-  int c = 0;
-  switch (mode) {
-  case GETKEY_UNFILTERED:
-    c = hooked_readkey(0) & 0xff;
-    break;
-  case GETKEY_DELAYED:
-    c = _getkey(timeout);
-    break;
-  case GETKEY_UNFILTERED | GETKEY_DELAYED:
-    c = hooked_readkey(timeout) & 0xff;
-    break;
-  default:
-    c = _getkey(0);
+  if (mode & GETKEY_UNFILTERED)
+    return hooked_readkey(timeout) & 0xff;
+  else {
+    size_t key = translate_key(hooked_readkey(timeout));
+    while (key == KBD_META) {
+      key = translate_key(hooked_readkey(0));
+      key |= KBD_META;
+    }
+    return key;
   }
-  return (size_t)c;
 }
