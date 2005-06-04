@@ -34,7 +34,7 @@
 #include "extern.h"
 #include "paths.h"
 
-DEFUN_INT("version", version)
+DEFUN_INT("help-about", help_about)
 /*+
 Show the version in the minibuffer.
 +*/
@@ -104,7 +104,7 @@ static void write_function_description(va_list ap)
           name, astr_cstr(doc));
 }
 
-DEFUN_INT("describe-function", describe_function)
+DEFUN_INT("help-command", help_command)
 /*+
 Display the full documentation of FUNCTION (a symbol).
 +*/
@@ -115,7 +115,7 @@ Display the full documentation of FUNCTION (a symbol).
   if ((name = minibuf_read_function_name("Describe function: ")) &&
       ((doc = get_funcvar_doc(name, NULL, TRUE)))) {
     astr bufname = astr_new();
-    astr_afmt(bufname, "*Help: function `%s'*", name);
+    astr_afmt(bufname, "*Help: command `%s'*", name);
     write_temp_buffer(astr_cstr(bufname), write_function_description,
                       name, doc);
     astr_delete(bufname);
@@ -140,7 +140,7 @@ static void write_variable_description(va_list ap)
           name, astr_cstr(defval), curval, astr_cstr(doc));
 }
 
-DEFUN_INT("describe-variable", describe_variable)
+DEFUN_INT("help-variable", help_variable)
 /*+
 Display the full documentation of VARIABLE (a symbol).
 +*/
@@ -166,7 +166,7 @@ Display the full documentation of VARIABLE (a symbol).
 }
 END_DEFUN
 
-DEFUN_INT("describe-key", describe_key)
+DEFUN_INT("help-key", help_key)
 /*+
 Display documentation of the command invoked by a key sequence.
 +*/

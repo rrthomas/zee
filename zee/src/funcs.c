@@ -182,7 +182,7 @@ The R column contains a % for buffers that are read-only.
 }
 END_DEFUN
 
-DEFUN_INT("toggle-read-only", toggle_read_only)
+DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.
 +*/
