@@ -156,7 +156,7 @@ int call_macro(Macro *mp)
   size_t i;
 
   for (i = mp->nkeys - 1; i < mp->nkeys ; i--)
-    term_ungetkey(mp->keys[i]);
+    ungetkey(mp->keys[i]);
 
   if (lastflag & FLAG_GOT_ERROR)
     ret = FALSE;

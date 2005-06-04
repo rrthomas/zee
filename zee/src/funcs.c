@@ -318,7 +318,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
   int c;
 
   minibuf_write("C-q-");
-  c = term_xgetkey(GETKEY_UNFILTERED, 0);
+  c = xgetkey(GETKEY_UNFILTERED, 0);
 
   if (isdigit(c) && c - '0' < 8)
     quoted_insert_octal(c);
@@ -339,7 +339,7 @@ int universal_argument(int keytype, int xarg)
 
   if (keytype == KBD_META) {
     astr_cpy_cstr(as, "ESC");
-    term_ungetkey((size_t)(xarg + '0'));
+    ungetkey((size_t)(xarg + '0'));
   } else
     astr_cpy_cstr(as, "C-u");
 
@@ -381,11 +381,11 @@ int universal_argument(int keytype, int xarg)
         /* If i == 0 do nothing (the Emacs behavior is a little
            strange in this case, it waits for one more key that is
            eaten, and then goes back to the normal state). */
-        term_ungetkey(key);
+        ungetkey(key);
         break;
       }
     } else {
-      term_ungetkey(key);
+      ungetkey(key);
       break;
     }
   }

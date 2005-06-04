@@ -43,6 +43,11 @@ void ding(void)
   thisflag |= FLAG_GOT_ERROR;
 }
 
+#define MAX_KEY_BUF	16
+
+static int key_buf[MAX_KEY_BUF];
+static int *keyp = key_buf;
+
 /*
  * Get a keystroke, waiting for up to timeout 10ths of a second if
  * mode contains GETKEY_DELAYED, and translating it into a
@@ -50,7 +55,12 @@ void ding(void)
  */
 size_t xgetkey(int mode, size_t timeout)
 {
-  size_t key = term_xgetkey(mode, timeout);
+  size_t key;
+
+  if (keyp > key_buf)
+    return *--keyp;
+
+  key = term_xgetkey(mode, timeout);
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd(key);
   return key;
@@ -62,18 +72,24 @@ size_t xgetkey(int mode, size_t timeout)
  */
 size_t getkey(void)
 {
-  return term_xgetkey(0, 0);
+  return xgetkey(0, 0);
 }
 
 /*
- * Wait for 'delay' 10ths if a second or until a key is pressed.
+ * Wait for timeout 10ths if a second or until a key is pressed.
  * The key is then available with getkey().
  */
-void waitkey(size_t delay)
+void waitkey(size_t timeout)
 {
-  term_ungetkey(term_xgetkey(GETKEY_DELAYED, delay));
+  ungetkey(xgetkey(GETKEY_DELAYED, timeout));
 }
 
+
+void ungetkey(size_t key)
+{
+  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
+    *keyp++ = key;
+}
 /*
  * Copy a region of text from the current buffer into an allocated buffer.
  *  start - the starting point.

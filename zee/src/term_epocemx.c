@@ -323,18 +323,10 @@ static int translate_key(int code)
   }
 }
 
-#define MAX_KEY_BUF	16
-
-static int key_buf[MAX_KEY_BUF];
-static int *keyp = key_buf;
-
 size_t term_xgetkey(int mode, size_t timeout)
 {
   int code;
   (void)timeout;
-
-  if (keyp > key_buf)
-    return *--keyp;
 
   code= _read_key(0);
 
@@ -346,10 +338,4 @@ size_t term_xgetkey(int mode, size_t timeout)
       key = getkey() | KBD_META;
     return key;
   }
-}
-
-void term_ungetkey(size_t key)
-{
-  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
-    *keyp++ = key;
 }

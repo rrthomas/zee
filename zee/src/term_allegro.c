@@ -279,11 +279,6 @@ static int translate_key(int c)
   return KBD_NOKEY;
 }
 
-#define MAX_UNGETKEY_BUF	16
-
-static int ungetkey_buf[MAX_UNGETKEY_BUF];
-static int *ungetkey_p = ungetkey_buf;
-
 static int hooked_readkey(size_t timeout)
 {
   size_t beg_time = cur_time;
@@ -303,9 +298,6 @@ static size_t _getkey(size_t timeout)
 {
   size_t key;
 
-  if (ungetkey_p > ungetkey_buf)
-    return *--ungetkey_p;
-
   key = translate_key(hooked_readkey(timeout));
 
   while (key == KBD_META) {
@@ -316,7 +308,7 @@ static size_t _getkey(size_t timeout)
   return key;
 }
 
-static int _xgetkey(int mode, size_t timeout)
+size_t term_xgetkey(int mode, size_t timeout)
 {
   int c = 0;
   switch (mode) {
@@ -332,24 +324,5 @@ static int _xgetkey(int mode, size_t timeout)
   default:
     c = _getkey(0);
   }
-  return c;
-}
-
-size_t term_xgetkey(int mode, size_t timeout)
-{
-  size_t key;
-
-  if (ungetkey_p > ungetkey_buf)
-    return *--ungetkey_p;
-
-  key = _xgetkey(mode, timeout);
-
-  return key;
-}
-
-void term_ungetkey(size_t key)
-{
-  if (ungetkey_p - ungetkey_buf < MAX_UNGETKEY_BUF &&
-      key != KBD_NOKEY)
-    *ungetkey_p++ = key;
+  return (size_t)c;
 }

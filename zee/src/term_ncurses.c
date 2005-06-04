@@ -193,18 +193,10 @@ static size_t translate_key(int c)
   }
 }
 
-#define MAX_UNGETKEY_BUF	16
-
-static int ungetkey_buf[MAX_UNGETKEY_BUF];
-static int *ungetkey_p = ungetkey_buf;
-
 static size_t _getkey(void)
 {
   int c;
   size_t key;
-
-  if (ungetkey_p > ungetkey_buf)
-    return *--ungetkey_p;
 
 #ifdef KEY_RESIZE
   for (;;) {
@@ -258,9 +250,6 @@ size_t term_xgetkey(int mode, size_t arg)
 {
   int c;
 
-  if (ungetkey_p > ungetkey_buf)
-    return *--ungetkey_p;
-
 #ifdef KEY_RESIZE
   for (;;) {
     c = _xgetkey(mode, arg);
@@ -273,12 +262,4 @@ size_t term_xgetkey(int mode, size_t arg)
 #endif
 
   return c;
-}
-
-void term_ungetkey(size_t key)
-{
-  if (ungetkey_p - ungetkey_buf >= MAX_UNGETKEY_BUF)
-    return;
-
-  *ungetkey_p++ = key;
 }
