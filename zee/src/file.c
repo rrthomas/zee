@@ -402,7 +402,7 @@ creating one if none already exists.
   astr buf;
 
   buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL)
+  if ((ms = minibuf_read_dir("Open file: ", astr_cstr(buf))) == NULL)
     ok = cancel();
   astr_delete(buf);
 
