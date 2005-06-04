@@ -104,10 +104,10 @@ astr compact_path(const char *path);
 astr get_current_dir(int interactive);
 void open_file(char *path, size_t lineno);
 void read_from_disk(const char *filename);
-int find_file(const char *filename);
+int file_open(const char *filename);
 Completion *make_buffer_completion(void);
 int check_modified_buffer(Buffer *bp);
-void kill_buffer(Buffer *kill_bp);
+void file_close(Buffer *kill_bp);
 void die(int exitcode);
 
 /* funcs.c ---------------------------------------------------------------- */

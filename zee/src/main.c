@@ -94,7 +94,7 @@ static void loop(void)
 }
 
 static char about_minibuf_str[] =
-"Welcome to " TEXT_NAME "!  To exit type ALT-X save-buffers-quit RETURN";
+"Welcome to " TEXT_NAME "!  To exit type ALT-X file-quit RETURN (or press C-q)";
 
 static void segv_sig_handler(int signo)
 {
@@ -253,8 +253,8 @@ int main(int argc, char **argv)
             "\n"
             "Action options:\n"
             "\n"
-            "FILE                   visit FILE using find-file\n"
-            "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+            "FILE                   visit FILE using file-open\n"
+            "+LINE FILE             visit FILE using file-open, then go to line LINE\n"
             "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
             "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
             );

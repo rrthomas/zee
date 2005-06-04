@@ -48,17 +48,17 @@
 ; Open, save, close, quit etc.
 
 ; Open
-(global-set-key "\C-o" 'find-file)
+(global-set-key "\C-o" 'file-open)
 ; Save
-(global-set-key "\C-s" 'save-buffer)
+(global-set-key "\C-s" 'file-save)
 ; Close
-(global-set-key "\C-w" 'kill-buffer)
+(global-set-key "\C-w" 'file-close)
 ; Quit
-(global-set-key "\M-\C-q" 'save-buffers-quit)
-(global-set-key "\M-q" 'save-buffers-quit)
-(global-set-key "\C-q" 'save-buffers-quit)
+(global-set-key "\M-\C-q" 'file-quit)
+(global-set-key "\M-q" 'file-quit)
+(global-set-key "\C-q" 'file-quit)
 ; Open recent
-(global-set-key "\C-\M-x" 'switch-to-buffer)
+(global-set-key "\C-\M-x" 'file-recent)
 
 ; Undo, cut, copy, paste, delete etc.
 

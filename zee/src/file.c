@@ -259,6 +259,9 @@ astr get_home_dir(void)
   return as;
 }
 
+/* FIXME: Comment the difference between this and file_open. Since renaming
+ * things it is a bit confusing. I think the difference is that this function
+ * also does a "go to line" command. */
 void open_file(char *path, size_t lineno)
 {
   astr buf, dir, fname;
@@ -277,7 +280,7 @@ void open_file(char *path, size_t lineno)
   astr_delete(dir);
   astr_delete(fname);
 
-  find_file(astr_cstr(buf));
+  file_open(astr_cstr(buf));
   astr_delete(buf);
   if (lineno > 0)
     ngotodown(lineno);
@@ -340,7 +343,8 @@ void read_from_disk(const char *filename)
   fclose(fp);
 }
 
-int find_file(const char *filename)
+/* FIXME: Comment the difference between this and open_file. */
+int file_open(const char *filename)
 {
   Buffer *bp;
   char *s;
@@ -387,7 +391,7 @@ Completion *make_buffer_completion(void)
   return cp;
 }
 
-DEFUN_INT("find-file", find_file)
+DEFUN_INT("file-open", file_open)
 /*+
 Edit file FILENAME.
 Switch to a buffer visiting file FILENAME,
@@ -404,7 +408,7 @@ creating one if none already exists.
 
   if (ok) {
     if (ms[0] != '\0') {
-      ok = find_file(ms);
+      ok = file_open(ms);
       free(ms);
     } else {
       free(ms);
@@ -414,7 +418,7 @@ creating one if none already exists.
 }
 END_DEFUN
 
-DEFUN_INT("switch-to-buffer", switch_to_buffer)
+DEFUN_INT("file-recent", file_recent)
 /*+
 Select to the user specified buffer in the current window.
 +*/
@@ -473,7 +477,7 @@ int check_modified_buffer(Buffer *bp)
  * Remove the specified buffer from the buffer list and deallocate
  * its space.
  */
-void kill_buffer(Buffer *kill_bp)
+void file_close(Buffer *kill_bp)
 {
   Buffer *next_bp;
 
@@ -516,7 +520,7 @@ void kill_buffer(Buffer *kill_bp)
   }
 }
 
-DEFUN_INT("kill-buffer", kill_buffer)
+DEFUN_INT("file-close", file_close)
 /*+
 Kill the current buffer or the user specified one.
 +*/
@@ -526,7 +530,7 @@ Kill the current buffer or the user specified one.
   Completion *cp;
 
   cp = make_buffer_completion();
-  if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
+  if ((ms = minibuf_read_completion("Close file (default %s): ",
                                     "", cp, NULL, cur_bp->name)) == NULL)
     ok = cancel();
   free_completion(cp);
@@ -541,14 +545,14 @@ Kill the current buffer or the user specified one.
       bp = cur_bp;
 
     if (ok && check_modified_buffer(bp))
-      kill_buffer(bp);
+      file_close(bp);
     else
       ok = FALSE;
   }
 }
 END_DEFUN
 
-static int insert_file(char *filename)
+static int file_insert(char *filename)
 {
   int fd;
   size_t i, size;
@@ -587,7 +591,7 @@ static int insert_file(char *filename)
   return TRUE;
 }
 
-DEFUN_INT("insert-file", insert_file)
+DEFUN_INT("file-insert", file_insert)
 /*+
 Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
@@ -603,7 +607,7 @@ Set mark after the inserted text.
     astr_delete(buf);
 
     if (ok) {
-      if (ms[0] == '\0' || !insert_file(ms))
+      if (ms[0] == '\0' || !file_insert(ms))
         ok =  FALSE;
       else
         set_mark_command();
@@ -649,7 +653,7 @@ static int write_to_disk(Buffer *bp, char *filename)
   return TRUE;
 }
 
-static int save_buffer(Buffer *bp)
+static int file_save(Buffer *bp)
 {
   char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
   int ms_is_from_minibuffer = 0;
@@ -696,17 +700,17 @@ static int save_buffer(Buffer *bp)
   return TRUE;
 }
 
-DEFUN_INT("save-buffer", save_buffer)
+DEFUN_INT("file-save", file_save)
 /*+
 Save current buffer in visited file if modified.
 +*/
 {
   assert(cur_bp); /* FIXME: Remove this assumption. */
-  ok = save_buffer(cur_bp);
+  ok = file_save(cur_bp);
 }
 END_DEFUN
 
-DEFUN_INT("write-file", write_file)
+DEFUN_INT("file-save-as", file_save_as)
 /*+
 Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
@@ -739,7 +743,7 @@ Makes buffer visit that file, and marks it not modified.
 }
 END_DEFUN
 
-static int save_some_buffers(void)
+static int file_save_some(void)
 {
   Buffer *bp;
   int i = 0, noask = FALSE, c;
@@ -752,7 +756,7 @@ static int save_some_buffers(void)
       ++i;
 
       if (noask)
-        save_buffer(bp);
+        file_save(bp);
       else {
         for (;;) {
           minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
@@ -783,7 +787,7 @@ static int save_some_buffers(void)
         case 'q':
           goto endoffunc;
         case '.':
-          save_buffer(bp);
+          file_save(bp);
           ++i;
           return TRUE;
         case '!':
@@ -791,7 +795,7 @@ static int save_some_buffers(void)
           /* FALLTHROUGH */
         case ' ':
         case 'y':
-          save_buffer(bp);
+          file_save(bp);
           ++i;
           break;
         case 'n':
@@ -810,16 +814,16 @@ static int save_some_buffers(void)
 }
 
 
-DEFUN_INT("save-some-buffers", save_some_buffers)
+DEFUN_INT("file-save-some", file_save_some)
 /*+
 Save some modified file-visiting buffers.  Asks user about each one.
 +*/
 {
-  ok = save_some_buffers();
+  ok = file_save_some();
 }
 END_DEFUN
 
-DEFUN_INT("save-buffers-quit", save_buffers_quit)
+DEFUN_INT("file-quit", file_quit)
 /*+
 Offer to save each buffer, then kill this process.
 +*/
@@ -827,7 +831,7 @@ Offer to save each buffer, then kill this process.
   Buffer *bp;
   int ans, i = 0;
 
-  if (!save_some_buffers())
+  if (!file_save_some())
     ok = FALSE;
   else {
     for (bp = head_bp; bp != NULL; bp = bp->next)
@@ -880,7 +884,7 @@ void die(int exitcode)
   exit(exitcode);
 }
 
-DEFUN_INT("cd", cd)
+DEFUN_INT("file-change-directory", file_change_directory)
 /*+
 Make DIR become the current default directory.
 +*/

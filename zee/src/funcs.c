@@ -128,7 +128,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 
   /* Remove all the content of that buffer. */
   new_bp = create_buffer(cur_bp->name);
-  kill_buffer(cur_bp);
+  file_close(cur_bp);
   cur_bp = cur_wp->bp = new_bp;
 
   /* Make the buffer like a temporary one. */
