@@ -66,7 +66,7 @@ END_DEFUN
 static char *make_buffer_flags(Buffer *bp, int iscurrent)
 {
   static char buf[4];
-  
+
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   buf[0] = iscurrent ? '.' : ' ';
