@@ -92,31 +92,32 @@ void minibuf_error(const char *fmt, ...)
 /*
  * Read a string from the minibuffer.
  */
-char *minibuf_read(const char *fmt, const char *value, ...)
+astr minibuf_read(const char *fmt, const char *value, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
+  astr as;
 
   va_start(ap, value);
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  p = term_minibuf_read(buf, value ? value : "", NULL, NULL);
+  as = term_minibuf_read(buf, value ? value : "", NULL, NULL);
   free(buf);
 
-  return p;
+  return as;
 }
 
 /*
  * Read a directory from the minibuffer.
  * The returned buffer must be freed by the caller.
  */
-char *minibuf_read_dir(const char *fmt, const char *value, ...)
+astr minibuf_read_dir(const char *fmt, const char *value, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
   Completion *cp;
-  astr dir, fname, rbuf;
+  astr dir, fname, rbuf, as;
 
   va_start(ap, value);
   buf = minibuf_format(fmt, ap);
@@ -133,61 +134,63 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   astr_delete(fname);
 
   cp = completion_new(TRUE);
-  p = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
+  as = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
   free_completion(cp);
   astr_delete(rbuf);
   free(buf);
 
-  if (p != NULL) {
+  if (as != NULL) {
     /* Add history element. */
-    add_history_element(&files_history, p);
+    add_history_element(&files_history, astr_cstr(as));
 
     rbuf = agetcwd();
     dir = astr_new();
     fname = astr_new();
 
-    expand_path(p, astr_cstr(rbuf), dir, fname);
+    expand_path(astr_cstr(as), astr_cstr(rbuf), dir, fname);
     astr_cpy(rbuf, dir);
     astr_cat(rbuf, fname);
 
     astr_delete(dir);
     astr_delete(fname);
-    p = zstrdup(astr_cstr(rbuf));
-    astr_delete(rbuf);
+    astr_delete(as);
+    as = rbuf;
   }
 
-  return p;
+  return as;
 }
 
 static int minibuf_read_forced(const char *fmt, const char *errmsg,
                                Completion *cp, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
+  astr as;
 
   va_start(ap, cp);
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
   for (;;) {
-    p = term_minibuf_read(buf, "", cp, NULL);
-    if (p == NULL) { /* Cancelled. */
+    as = term_minibuf_read(buf, "", cp, NULL);
+    if (as == NULL) { /* Cancelled. */
       free(buf);
       return -1;
     } else {
       list s;
       int i;
-      astr as = astr_new();
+      astr bs = astr_new();
 
       /* Complete partial words if possible. */
-      astr_cpy_cstr(as, p);
-      if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
-        p = cp->match;
-      astr_delete(as);
+      astr_cpy(bs, as);
+      if (completion_try(cp, bs, FALSE) == COMPLETION_MATCHED)
+        astr_cpy_cstr(as, cp->match);
+      astr_delete(bs);
 
       for (s = list_first(cp->completions), i = 0; s != cp->completions;
            s = list_next(s), i++)
-        if (!strcmp(p, s->item)) {
+        if (!astr_cmp_cstr(as, s->item)) {
+          astr_delete(as);
           free(buf);
           return i;
         }
@@ -196,9 +199,6 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
       waitkey(WAITKEY_DEFAULT);
     }
   }
-
-  assert(0);
-  return FALSE;
 }
 
 int minibuf_read_yesno(const char *fmt, ...)
@@ -264,19 +264,20 @@ int minibuf_read_boolean(const char *fmt, ...)
 /*
  * Read a string from the minibuffer using a completion.
  */
-char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...)
+astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
+  astr as;
 
   va_start(ap, hp);
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  p = term_minibuf_read(buf, value, cp, hp);
+  as = term_minibuf_read(buf, value, cp, hp);
   free(buf);
 
-  return p;
+  return as;
 }
 
 /*

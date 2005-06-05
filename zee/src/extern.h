@@ -40,12 +40,12 @@ int scroll_up(void);
 void bind_key_string(char *keystr, Function func);
 size_t do_completion(astr as);
 char *minibuf_read_function_name(const char *fmt, ...);
-char *get_function_by_key_sequence(void);
+const char *get_function_by_key_sequence(void);
 void process_key(size_t key);
 Function last_command(void);
 void free_bindings(void);
 Function get_function(char *name);
-char *get_function_name(Function p);
+const char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region(Region *rp, Point from, Point to);
@@ -143,7 +143,7 @@ size_t strtochord(char *buf);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
-void line_replace_text(Line **lp, size_t offset, size_t oldlen, char *newtext, size_t newlen, int replace_case);
+void line_replace_text(Line **lp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
 int intercalate_char(int c);
 void fill_break_line(void);
@@ -170,7 +170,7 @@ void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
 int call_macro(Macro *mp);
 void free_macros(void);
-Macro *get_macro(char *name);
+Macro *get_macro(const char *name);
 
 /* main.c ----------------------------------------------------------------- */
 extern Window *cur_wp, *head_wp;
@@ -188,11 +188,11 @@ char *minibuf_format(const char *fmt, va_list ap);
 void free_minibuf(void);
 void minibuf_error(const char *fmt, ...);
 void minibuf_write(const char *fmt, ...);
-char *minibuf_read(const char *fmt, const char *value, ...);
+astr minibuf_read(const char *fmt, const char *value, ...);
 int minibuf_read_yesno(const char *fmt, ...);
 int minibuf_read_boolean(const char *fmt, ...);
-char *minibuf_read_dir(const char *fmt, const char *value, ...);
-char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
+astr minibuf_read_dir(const char *fmt, const char *value, ...);
+astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
 void minibuf_clear(void);
 
 /* point.c ---------------------------------------------------------------- */
@@ -211,8 +211,7 @@ void free_search_history(void);
 
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write(const char *fmt);
-char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-void free_rotation_buffers(void);
+astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 
 /* term_display.c --------------------------------------------------------- */
 int term_initted(void);
@@ -250,9 +249,9 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void init_variables(void);
 int lookup_bool_variable(char *var);
 char *minibuf_read_variable_name(char *msg);
-void set_variable(char *var, char *val);
-char *get_variable_bp(Buffer *bp, char *var);
-char *get_variable(char *var);
+void set_variable(char *var, const char *val);
+char *get_variable_bp(Buffer *bp, const char *var);
+char *get_variable(const char *var);
 int get_variable_number_bp(Buffer *bp, char *var);
 int get_variable_number(char *var);
 

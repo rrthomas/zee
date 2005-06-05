@@ -184,24 +184,25 @@ DEFUN_INT("search-forward-regexp", search_forward_regexp)
 Search forward from point for regular expression REGEXP.
 +*/
 {
-  char *ms;
+  astr ms;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
     ok = cancel();
-  else if (ms[0] == '\0')
+  else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
     if (last_search != NULL)
       free(last_search);
-    last_search = zstrdup(ms);
+    last_search = zstrdup(astr_cstr(ms));
 
-    if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
-      minibuf_error("Failing regexp search: `%s'", ms);
+    if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
+      minibuf_error("Failing regexp search: `%s'", astr_cstr(ms));
       ok = FALSE;
     }
   }
+  astr_delete(ms);
 }
 END_DEFUN
 
@@ -210,24 +211,25 @@ DEFUN_INT("search-backward-regexp", search_backward_regexp)
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
-  char *ms;
+  astr ms;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
     ok = cancel();
-  if (ms[0] == '\0')
+  if (astr_len(ms) == 0)
     ok = FALSE;
   else {
     if (last_search != NULL)
       free(last_search);
-    last_search = zstrdup(ms);
+    last_search = zstrdup(astr_cstr(ms));
 
-    if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
+    if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
       minibuf_error("Failing regexp search backward: `%s'", ms);
       ok = FALSE;
     }
   }
+  astr_delete(ms);
 }
 END_DEFUN
 
@@ -414,33 +416,30 @@ DEFUN_INT("replace-regexp", replace_regexp)
 Replace occurrences of a regexp with other text.
 +*/
 {
-  char *find, *repl;
   int count = 0, find_no_upper;
-  size_t find_len, repl_len;
+  astr find, repl;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
     ok = cancel();
-  else if (find[0] == '\0')
+  else if (astr_len(find) == 0)
     ok = FALSE;
   else {
-    find_len = strlen(find);
-    find_no_upper = no_upper(find, find_len);
+    find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
+    if ((repl = minibuf_read("Replace `%s' with: ", "", astr_cstr(find))) == NULL)
       ok = cancel();
     else {
-      repl_len = strlen(repl);
-
-      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
+      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(find))) {
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
                   make_point(cur_bp->pt.n,
-                             cur_bp->pt.o - find_len),
-                  strlen(find), strlen(repl));
-        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                          find_len, repl, repl_len, find_no_upper);
+                             cur_bp->pt.o - astr_len(find)),
+                  astr_len(find), astr_len(repl));
+        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+                          astr_len(find), astr_cstr(repl), astr_len(repl),
+                          find_no_upper);
       }
 
       if (thisflag & FLAG_NEED_RESYNC)
@@ -460,33 +459,29 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  char *find, *repl;
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
-  size_t find_len, repl_len;
+  astr find, repl;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
     ok = cancel();
-  else if (*find == '\0')
+  else if (astr_len(find) == 0)
     ok = FALSE;
   else {
-    find_len = strlen(find);
-    find_no_upper = no_upper(find, find_len);
+    find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
+    if ((repl = minibuf_read("Query replace `%s' with: ", "", astr_cstr(find))) == NULL)
       ok = cancel();
     if (ok) {
-      repl_len = strlen(repl);
-
       /* Spaghetti code follows... :-( */
-      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
+      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(find))) {
         if (!noask) {
           int c;
           if (thisflag & FLAG_NEED_RESYNC)
             resync_display();
           for (;;) {
-            minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
+            minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
                 c == 'q' || c == '.' || c == '!')
@@ -523,11 +518,11 @@ what to do with it.
       replblock:
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(cur_bp->pt.n,
-                             cur_bp->pt.o - find_len),
-                  find_len, repl_len);
-        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                          find_len, repl, repl_len, find_no_upper);
+                  make_point(cur_bp->pt.n, cur_bp->pt.o - astr_len(find)),
+                  astr_len(find), astr_len(repl));
+        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+                          astr_len(find), astr_cstr(repl), astr_len(repl),
+                          find_no_upper);
       nextmatch:
         if (exitloop)
           break;

@@ -398,8 +398,7 @@ Switch to a buffer visiting file FILENAME,
 creating one if none already exists.
 +*/
 {
-  char *ms;
-  astr buf;
+  astr ms, buf;
 
   buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Open file: ", astr_cstr(buf))) == NULL)
@@ -407,13 +406,11 @@ creating one if none already exists.
   astr_delete(buf);
 
   if (ok) {
-    if (ms[0] != '\0') {
-      ok = file_open(ms);
-      free(ms);
-    } else {
-      free(ms);
+    if (astr_len(ms) > 0)
+      ok = file_open(astr_cstr(ms));
+    else
       ok = FALSE;
-    }
+    astr_delete(ms);
   }
 }
 END_DEFUN
@@ -423,7 +420,7 @@ DEFUN_INT("file-switch", file_switch)
 Select to the user specified buffer in the current window.
 +*/
 {
-  char *ms;
+  astr ms;
   Buffer *swbuf;
   Completion *cp;
 
@@ -438,14 +435,15 @@ Select to the user specified buffer in the current window.
   if (ms == NULL)
     ok = cancel();
   else {
-    if (ms[0] != '\0') {
-      if ((swbuf = find_buffer(ms, FALSE)) == NULL) {
-        swbuf = find_buffer(ms, TRUE);
+    if (astr_len(ms) > 0) {
+      if ((swbuf = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
+        swbuf = find_buffer(astr_cstr(ms), TRUE);
         swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
       }
     }
 
     switch_to_buffer(swbuf);
+    astr_delete(ms);
 
     ok = TRUE;
   }
@@ -526,7 +524,7 @@ Kill the current buffer or the user specified one.
 +*/
 {
   Buffer *bp;
-  char *ms;
+  astr ms;
   Completion *cp;
 
   cp = make_buffer_completion();
@@ -536,9 +534,9 @@ Kill the current buffer or the user specified one.
   free_completion(cp);
 
   if (ok) {
-    if (ms[0] != '\0') {
-      if ((bp = find_buffer(ms, FALSE)) == NULL) {
-        minibuf_error("Buffer `%s' not found", ms);
+    if (astr_len(ms) > 0) {
+      if ((bp = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
+        minibuf_error("Buffer `%s' not found", astr_cstr(ms));
         ok = FALSE;
       }
     } else
@@ -548,11 +546,13 @@ Kill the current buffer or the user specified one.
       file_close(bp);
     else
       ok = FALSE;
+
+    astr_delete(ms);
   }
 }
 END_DEFUN
 
-static int file_insert(char *filename)
+static int file_insert(const char *filename)
 {
   int fd;
   size_t i, size;
@@ -597,8 +597,7 @@ Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
 +*/
 {
-  char *ms;
-  astr buf;
+  astr ms, buf;
 
   if ((ok = !warn_if_readonly_buffer())) {
     buf = get_current_dir(TRUE);
@@ -607,12 +606,12 @@ Set mark after the inserted text.
     astr_delete(buf);
 
     if (ok) {
-      if (ms[0] == '\0' || !file_insert(ms))
+      if (astr_len(ms) == 0 || !file_insert(astr_cstr(ms)))
         ok =  FALSE;
       else
         set_mark_command();
 
-      free(ms);
+      astr_delete(ms);
     }
   }
 }
@@ -643,7 +642,7 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 /*
  * Write the buffer contents to a file.
  */
-static int write_to_disk(Buffer *bp, char *filename)
+static int write_to_disk(Buffer *bp, const char *filename)
 {
   if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
     minibuf_error("%s: %s", filename, strerror(errno));
@@ -655,8 +654,8 @@ static int write_to_disk(Buffer *bp, char *filename)
 
 static int file_save(Buffer *bp)
 {
-  char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
-  int ms_is_from_minibuffer = 0;
+  char *fname = bp->filename != NULL ? bp->filename : bp->name;
+  astr ms;
 
   if (!(bp->flags & BFLAG_MODIFIED))
     minibuf_write("(No changes need to be saved)");
@@ -664,22 +663,23 @@ static int file_save(Buffer *bp)
     if (bp->flags & BFLAG_NEEDNAME) {
       if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
         return cancel();
-      ms_is_from_minibuffer = 1;
-      if (ms[0] == '\0') {
-        free(ms);
+      if (astr_len(ms) == 0) {
+        astr_delete(ms);
         return FALSE;
       }
 
-      set_buffer_filename(bp, ms);
+      set_buffer_filename(bp, astr_cstr(ms));
 
       bp->flags &= ~BFLAG_NEEDNAME;
-    } else
-      ms = bp->filename;
+    } else {
+      ms = astr_new();
+      astr_cpy_cstr(ms, bp->filename);
+    }
 
-    if (write_to_disk(bp, ms)) {
+    if (write_to_disk(bp, astr_cstr(ms))) {
       Undo *up;
 
-      minibuf_write("Wrote %s", ms);
+      minibuf_write("Wrote %s", astr_cstr(ms));
       bp->flags &= ~BFLAG_MODIFIED;
 
       /* Set unchanged flags to FALSE except for the
@@ -693,8 +693,7 @@ static int file_save(Buffer *bp)
 
     bp->flags &= ~BFLAG_TEMPORARY;
 
-    if (ms_is_from_minibuffer)
-      free(ms);
+    astr_delete(ms);
   }
 
   return TRUE;
@@ -717,7 +716,7 @@ Makes buffer visit that file, and marks it not modified.
 +*/
 {
   char *fname;
-  char *ms;
+  astr ms;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
@@ -725,21 +724,22 @@ Makes buffer visit that file, and marks it not modified.
 
   if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
     ok = cancel();
-  else if (ms[0] == '\0')
+  else if (astr_len(ms) == 0)
     ok = FALSE;
 
   if (ok) {
-    set_buffer_filename(cur_bp, ms);
+    set_buffer_filename(cur_bp, astr_cstr(ms));
 
     cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
 
-    if (write_to_disk(cur_bp, ms)) {
-      minibuf_write("Wrote %s", ms);
+    if (write_to_disk(cur_bp, astr_cstr(ms))) {
+      minibuf_write("Wrote %s", astr_cstr(ms));
       cur_bp->flags &= ~BFLAG_MODIFIED;
     }
   }
 
-  free(ms);
+  if (ms)
+    astr_delete(ms);
 }
 END_DEFUN
 
@@ -887,8 +887,7 @@ DEFUN_INT("file-change-directory", file_change_directory)
 Make DIR become the current default directory.
 +*/
 {
-  char *ms;
-  astr buf;
+  astr ms, buf;
 
   buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Change default directory: ",
@@ -897,18 +896,17 @@ Make DIR become the current default directory.
   astr_delete(buf);
 
   if (ok)
-    if (ms[0] != '\0') {
+    if (astr_len(ms) > 0) {
       struct stat st;
-      if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
-        minibuf_error("`%s' is not a directory", ms);
+      if (stat(astr_cstr(ms), &st) != 0 || !S_ISDIR(st.st_mode)) {
+        minibuf_error("`%s' is not a directory", astr_cstr(ms));
         ok = FALSE;
-      } else if (chdir(ms) == -1) {
-        minibuf_write("%s: %s", ms, strerror(errno));
+      } else if (chdir(astr_cstr(ms)) == -1) {
+        minibuf_write("%s: %s", astr_cstr(ms), strerror(errno));
         ok = FALSE;
-      } else
-        ok = TRUE;
-    }
+      }
 
-  free(ms);
+      astr_delete(ms);
+    }
 }
 END_DEFUN

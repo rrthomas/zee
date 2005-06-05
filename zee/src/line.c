@@ -92,7 +92,7 @@ static void insert_expanded_tab(int (*inschr)(int chr))
 {
   int c = get_goalc();
   int t;
-  
+
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   t = tab_width(cur_bp);
@@ -218,31 +218,30 @@ static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
  * TRUE then the new characters will be the same case as the old.
  */
 void line_replace_text(Line **lp, size_t offset, size_t oldlen,
-                       char *newtext, size_t newlen, int replace_case)
+                       const char *newtext, size_t newlen, int replace_case)
 {
+  char *newcopy = zstrdup(newtext);
+
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
-  if (oldlen == 0)
-    return;
+  if (oldlen > 0) {
+    if (replace_case && lookup_bool_variable("case-replace")) {
+      recase(newcopy, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
+             oldlen);
+    }
 
-  if (replace_case && lookup_bool_variable("case-replace")) {
-    newtext = zstrdup(newtext);
-    recase(newtext, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
-           oldlen);
+    if (newlen != oldlen) {
+      cur_bp->flags |= BFLAG_MODIFIED;
+      astr_replace_cstr((*lp)->item, (ptrdiff_t)offset, oldlen, newcopy);
+      adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
+    } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
+                      newcopy, newlen) != 0) {
+      memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newcopy, newlen);
+      cur_bp->flags |= BFLAG_MODIFIED;
+    }
   }
 
-  if (newlen != oldlen) {
-    cur_bp->flags |= BFLAG_MODIFIED;
-    astr_replace_cstr((*lp)->item, (ptrdiff_t)offset, oldlen, newtext);
-    adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
-  } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
-                    newtext, newlen) != 0) {
-    memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newtext, newlen);
-    cur_bp->flags |= BFLAG_MODIFIED;
-  }
-
-  if (replace_case)
-    free((char *)newtext);
+  free(newcopy);
 }
 
 /*

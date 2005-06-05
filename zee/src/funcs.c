@@ -1016,15 +1016,14 @@ A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
 command to insert any output into the current buffer.
 +*/
 {
-  char *ms;
   FILE *pipe;
-  astr out, s;
+  astr out, s, ms;
   int lines = 0;
   astr cmd;
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();
-  if (ms[0] == '\0')
+  if (astr_len(ms) == 0)
     return FALSE;
 
   cmd = astr_new();
@@ -1065,7 +1064,7 @@ END_DEFUN
 
 DEFUN_INT("shell-command-on-region", shell_command_on_region)
 /*+
-Reads a line of text using the minibuffer and creates an inferior shell.
+Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
 If the shell command produces any output, the output goes to a buffer
@@ -1077,18 +1076,16 @@ current buffer, then the old region is deleted first and the output replaces
 it as the contents of the region.
 +*/
 {
-  char *ms;
   FILE *pipe;
-  astr out, s;
   int lines = 0;
-  astr cmd;
+  astr out, s, ms, cmd;
   char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     return cancel();
-  if (ms[0] == '\0')
+  if (astr_len(ms) == 0)
     return FALSE;
 
   if (warn_if_no_mark())
@@ -1114,7 +1111,7 @@ it as the contents of the region.
 
     close(fd);
 
-    astr_afmt(cmd, "%s 2>&1 <%s", ms, tempfile);
+    astr_afmt(cmd, "%s 2>&1 <%s", astr_cstr(ms), tempfile);
   }
 
   if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {

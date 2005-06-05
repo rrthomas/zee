@@ -54,12 +54,12 @@ void init_variables(void)
     set_variable(p->var, p->val);
 }
 
-void set_variable(char *var, char *val)
+void set_variable(char *var, const char *val)
 {
   variableSetString(&mainVarList, var, val);
 }
 
-char *get_variable_bp(Buffer *bp, char *var)
+char *get_variable_bp(Buffer *bp, const char *var)
 {
   char *s = NULL;
 
@@ -72,7 +72,7 @@ char *get_variable_bp(Buffer *bp, char *var)
   return s;
 }
 
-char *get_variable(char *var)
+char *get_variable(const char *var)
 {
   return get_variable_bp(cur_bp, var);
 }
@@ -106,7 +106,7 @@ int lookup_bool_variable(char *var)
 
 char *minibuf_read_variable_name(char *msg)
 {
-  char *ms;
+  astr ms;
   Completion *cp = completion_new(FALSE);
   le *lp;
 
@@ -122,12 +122,12 @@ char *minibuf_read_variable_name(char *msg)
       return NULL;
     }
 
-    if (ms[0] == '\0') {
+    if (astr_len(ms) == 0) {
       free_completion(cp);
       minibuf_error("No variable name given");
       return NULL;
-    } else if (get_variable(ms) == NULL) {
-      minibuf_error("Undefined variable name `%s'", ms);
+    } else if (get_variable(astr_cstr(ms)) == NULL) {
+      minibuf_error("Undefined variable name `%s'", astr_cstr(ms));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -137,7 +137,8 @@ char *minibuf_read_variable_name(char *msg)
 
   free_completion(cp);
 
-  return ms;
+  /* FIXME: Return astr */
+  return (char *)astr_cstr(ms);
 }
 
 static char *get_variable_format(char *var)
@@ -155,7 +156,8 @@ DEFUN_INT("set-variable", set_variable)
 Set a variable value to the user-specified value.
 +*/
 {
-  char *var, *val = NULL, *fmt;
+  char *var, *fmt;
+  astr val = NULL;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
@@ -168,7 +170,7 @@ Set a variable value to the user-specified value.
       if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
         ok = cancel();
       else
-        val = (i == TRUE) ? "true" : "false";
+        astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
     } else /* Non-boolean variable. */
       if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
         ok = cancel();
@@ -177,9 +179,9 @@ Set a variable value to the user-specified value.
       /* `tab-width' and `fill-column' automatically become
          buffer-local when set in any fashion. */
       if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
-        variableSetString(&cur_bp->vars, var, val);
+        variableSetString(&cur_bp->vars, var, astr_cstr(val));
       else
-        set_variable(var, val);
+        set_variable(var, astr_cstr(val));
     }
   }
 }

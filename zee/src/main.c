@@ -279,7 +279,6 @@ int main(int argc, char **argv)
   free_windows();
   free_buffers();
   free_minibuf();
-  free_rotation_buffers();
 
   return 0;
 }

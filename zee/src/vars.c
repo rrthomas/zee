@@ -33,7 +33,7 @@ le *mainVarList = NULL;
 le *defunList = NULL;
 
 
-le *variableFind(le *varlist, char *key)
+le *variableFind(le *varlist, const char *key)
 {
   if (varlist != NULL && key != NULL)
     for (; varlist; varlist = varlist->list_next)
@@ -59,7 +59,7 @@ void variableSet(le **varlist, char *key, le *value)
   }
 }
 
-void variableSetString(le **varlist, char *key, char *value)
+void variableSetString(le **varlist, char *key, const char *value)
 {
   if (key && value) {
     le *temp = leNew(value);
@@ -83,7 +83,7 @@ le *variableGet(le *varlist, char *key)
   return temp ? temp->branch : NULL;
 }
 
-char *variableGetString(le *varlist, char *key)
+char *variableGetString(le *varlist, const char *key)
 {
   le *temp = variableFind(varlist, key);
   if (temp && temp->branch && temp->branch->data

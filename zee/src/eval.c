@@ -916,7 +916,7 @@ le *eval_cb_defun(int argc, le *branch)
 }
 
 
-static le *eval_expression(char *expr)
+static le *eval_expression(const char *expr)
 {
   le *list = lisp_read_string(expr);
   astr as = leDumpEval(list, 0);
@@ -939,14 +939,15 @@ insert the result into the current buffer instead of printing it in
 the minibuffer.
 +*/
 {
-  char *expr;
+  astr expr;
 
   if ((expr = minibuf_read("Eval: ", "")) == NULL)
     ok = FALSE;
   else {
-    le *list = eval_expression(expr);
+    le *list = eval_expression(astr_cstr(expr));
     /* FIXME: cons value on to front of values */
     leWipe(list);
+    astr_delete(expr);
     ok = list == NULL;
   }
 }

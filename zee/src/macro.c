@@ -117,7 +117,7 @@ The symbol's function definition becomes the keyboard macro string.
 Such a "function" cannot be called from Lisp, but it is a valid editor command.
 +*/
 {
-  char *ms;
+  astr ms;
   Macro *mp;
   size_t size;
 
@@ -128,14 +128,14 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
     minibuf_error("No keyboard macro defined");
     ok = FALSE;
   } else {
-    if ((mp = get_macro(ms))) {
+    if ((mp = get_macro(astr_cstr(ms)))) {
       /* If a macro with this name already exists, update its key list */
       free(mp->keys);
     } else {
       /* Add a new macro to the list */
       mp = zmalloc(sizeof(*mp));
       mp->next = head_mp;
-      mp->name = zstrdup(ms);
+      mp->name = zstrdup(astr_cstr(ms));
       head_mp = mp;
     }
 
@@ -217,7 +217,7 @@ void free_macros(void)
 /*
  * Find a macro given its name.
  */
-Macro *get_macro(char *name)
+Macro *get_macro(const char *name)
 {
   Macro *mp;
   assert(name);

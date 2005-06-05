@@ -107,7 +107,7 @@ static void goto_goalc(int goalc)
 
   t = tab_width(cur_bp);
   sp = astr_cstr(cur_bp->pt.p->item);
-  
+
   for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {
     if (col == goalc)
       break;
@@ -230,16 +230,17 @@ Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
 +*/
 {
-  char *ms;
   size_t to_char = 0;
+  astr ms;
 
   do {
     if ((ms = minibuf_read("Goto char: ", "")) == NULL) {
       ok = cancel();
       break;
     }
-    if ((to_char = strtoul(ms, NULL, 10)) == ULONG_MAX)
+    if ((to_char = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
       ding();
+    astr_delete(ms);
   } while (to_char == ULONG_MAX);
 
   if (ok) {
@@ -258,8 +259,8 @@ Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
 +*/
 {
-  char *ms;
   size_t to_line = 0;
+  astr ms;
 
   assert(cur_bp); /* FIXME: remove this assumption. */
 
@@ -268,8 +269,9 @@ Line 1 is the beginning of the buffer.
       ok = cancel();
       break;
     }
-    if ((to_line = strtoul(ms, NULL, 10)) == ULONG_MAX)
+    if ((to_line = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
       ding();
+    astr_delete(ms);
   } while (to_line == ULONG_MAX);
 
   if (ok) {

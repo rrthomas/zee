@@ -158,7 +158,7 @@ Function last_command(void)
 
 struct fentry {
   /* The function name. */
-  char *name;
+  const char *name;
 
   /* The function pointer. */
   Function func;
@@ -197,7 +197,7 @@ void free_bindings(void)
   free_history_elements(&functions_history);
 }
 
-static char *bsearch_function(char *name)
+static const char *bsearch_function(const char *name)
 {
   struct fentry key, *entryp;
   key.name = name;
@@ -221,7 +221,7 @@ Function get_function(char *name)
   return f ? f->func : NULL;
 }
 
-char *get_function_name(Function p)
+const char *get_function_name(Function p)
 {
   size_t i;
   for (i = 0; i < fentry_table_size; ++i)
@@ -255,7 +255,8 @@ char *minibuf_read_function_name(const char *fmt, ...)
 {
   va_list ap;
   size_t i;
-  char *buf, *ms;
+  char *buf;
+  astr ms;
   list p;
   Completion *cp;
 
@@ -276,30 +277,29 @@ char *minibuf_read_function_name(const char *fmt, ...)
       return NULL;
     }
 
-    if (ms[0] == '\0') {
+    if (astr_len(ms) == 0) {
       free_completion(cp);
       minibuf_error("No function name given");
       return NULL;
     } else {
       astr as = astr_new();
-      astr_cpy_cstr(as, ms);
+      astr_cpy(as, ms);
       /* Complete partial words if possible. */
       if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
-        ms = cp->match;
+        astr_cpy_cstr(ms, cp->match);
       astr_delete(as);
       for (p = list_first(cp->completions); p != cp->completions;
            p = list_next(p))
-        if (!strcmp(ms, p->item)) {
-          ms = p->item;
+        if (!astr_cmp_cstr(ms, p->item)) {
+          astr_cpy_cstr(ms, p->item);
           break;
         }
-      if (bsearch_function(ms) || get_macro(ms)) {
-        add_history_element(&functions_history, ms);
+      if (bsearch_function(astr_cstr(ms)) || get_macro(astr_cstr(ms))) {
+        add_history_element(&functions_history, astr_cstr(ms));
         minibuf_clear();        /* Remove any error message. */
-        ms = zstrdup(ms);       /* Might be about to be freed. */
         break;
       } else {
-        minibuf_error("Undefined function name `%s'", ms);
+        minibuf_error("Undefined function name `%s'", astr_cstr(ms));
         waitkey(WAITKEY_DEFAULT);
       }
     }
@@ -307,7 +307,8 @@ char *minibuf_read_function_name(const char *fmt, ...)
 
   free_completion(cp);
 
-  return ms;
+  /* FIXME: Return astr */
+  return (char *)astr_cstr(ms);
 }
 
 static int execute_function(char *name, int uniarg)
@@ -424,7 +425,7 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
 }
 END_DEFUN
 
-char *get_function_by_key_sequence(void)
+const char *get_function_by_key_sequence(void)
 {
   bindingp p;
   size_t key = getkey();

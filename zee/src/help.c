@@ -47,7 +47,7 @@ END_DEFUN
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
  */
-static astr get_funcvar_doc(char *name, astr defval, int isfunc)
+static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
 {
   FILE *f;
   astr buf, match, doc;
@@ -171,7 +171,7 @@ DEFUN_INT("help-key", help_key)
 Display documentation of the command invoked by a key sequence.
 +*/
 {
-  char *name;
+  const char *name;
 
   minibuf_write("Describe key:");
 
