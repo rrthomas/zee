@@ -62,53 +62,6 @@ Cancel current command.
 }
 END_DEFUN
 
-static char *make_buffer_flags(Buffer *bp, int iscurrent)
-{
-  static char buf[4];
-
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
-  buf[0] = iscurrent ? '.' : ' ';
-  buf[1] = (bp->flags & BFLAG_MODIFIED) ? '*' : ' ';
-  /* Display the readonly flag if it is set or the buffer is
-     the current buffer, i.e. the `*Buffer List*' buffer. */
-  buf[2] = (bp->flags & BFLAG_READONLY || bp == cur_bp) ? '%' : ' ';
-  buf[3] = '\0';
-
-  return buf;
-}
-
-static astr make_buffer_modeline(Buffer *bp)
-{
-  astr as = astr_new();
-
-  if (bp->flags & BFLAG_AUTOFILL)
-    astr_cat_cstr(as, " Fill");
-
-  return as;
-}
-
-static void print_buf(Buffer *old_bp, Buffer *bp)
-{
-  astr mode = make_buffer_modeline(bp);
-
-  if (bp->name[0] == ' ')
-    return;
-
-  bprintf("%3s %-16s %6u  %-13s",
-          make_buffer_flags(bp, old_bp == bp),
-          bp->name,
-          calculate_buffer_size(bp),
-          astr_cstr(mode));
-  astr_delete(mode);
-  if (bp->filename != NULL) {
-    astr shortname = shorten_string(bp->filename, 40);
-    insert_string(astr_cstr(shortname));
-    astr_delete(shortname);
-  }
-  insert_newline();
-}
-
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 {
   Window *wp, *old_wp = cur_wp;
@@ -145,40 +98,6 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   /* Restore old current window. */
   set_current_window(old_wp);
 }
-
-static void write_buffers_list(va_list ap)
-{
-  Window *old_wp = va_arg(ap, Window *);
-  Buffer *bp;
-
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
-  bprintf(" MR Buffer           Size    Mode         File\n");
-  bprintf(" -- ------           ----    ----         ----\n");
-
-  bp = old_wp->bp;
-  do {
-    /* Print all buffer less this one (the *Buffer List*). */
-    if (cur_bp != bp)
-      print_buf(old_wp->bp, bp);
-    if ((bp = bp->next) == NULL)
-      bp = head_bp;
-  } while (bp != old_wp->bp);
-}
-
-DEFUN_INT("list-buffers", list_buffers)
-/*+
-Display a list of names of existing buffers.
-The list is displayed in a buffer named `*Buffer List*'.
-Note that buffers with names starting with spaces are omitted.
-
-The M column contains a * for buffers that are modified.
-The R column contains a % for buffers that are read-only.
-+*/
-{
-  write_temp_buffer("*Buffer List*", write_buffers_list, cur_wp);
-}
-END_DEFUN
 
 DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 /*+
