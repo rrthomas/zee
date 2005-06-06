@@ -327,8 +327,6 @@ void set_temporary_buffer(Buffer *bp)
 {
   Buffer *bp0;
 
-  bp->flags |= BFLAG_TEMPORARY;
-
   if (bp == head_bp) {
     if (head_bp->next == NULL)
       return;

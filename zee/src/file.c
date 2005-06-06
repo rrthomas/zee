@@ -687,8 +687,6 @@ static int file_save(Buffer *bp)
         up->unchanged = FALSE;
     }
 
-    bp->flags &= ~BFLAG_TEMPORARY;
-
     astr_delete(ms);
   }
 
@@ -726,7 +724,7 @@ Makes buffer visit that file, and marks it not modified.
   if (ok) {
     set_buffer_filename(cur_bp, astr_cstr(ms));
 
-    cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+    cur_bp->flags &= ~BFLAG_NEEDNAME;
 
     if (write_to_disk(cur_bp, astr_cstr(ms))) {
       minibuf_write("Wrote %s", astr_cstr(ms));
