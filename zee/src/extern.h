@@ -113,7 +113,7 @@ void die(int exitcode);
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
 int set_mark_command(void);
-int exchange_point_and_mark(void);
+void exchange_point_and_mark(void);
 int universal_argument(int keytype, int xarg);
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
 int forward_sexp(void);
