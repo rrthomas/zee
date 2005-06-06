@@ -175,7 +175,7 @@ int intercalate_newline()
 
 int insert_newline(void)
 {
-  return intercalate_newline() && forward_char();
+  return intercalate_newline() && edit_navigate_forward_char();
 }
 
 /*
@@ -504,7 +504,7 @@ int backward_delete_char(void)
 {
   weigh_mark();
 
-  if (backward_char()) {
+  if (edit_navigate_backward_char()) {
     delete_char();
     return TRUE;
   }
@@ -585,7 +585,7 @@ static void previous_nonblank_goalc(void)
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
-    forward_char();
+    edit_navigate_forward_char();
 }
 
 DEFUN_INT("indent-relative", indent_relative)
@@ -607,11 +607,11 @@ Indent line or insert a tab.
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
-        forward_char();
+        edit_navigate_forward_char();
 
     /* Find next non-blank char. */
     while (!eolp() && isspace(following_char()))
-      forward_char();
+      edit_navigate_forward_char();
 
     /* Record target column. */
     if (!eolp())

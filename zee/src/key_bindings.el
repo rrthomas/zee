@@ -6,14 +6,14 @@
 ; currently not true.
 
 ; Character/line
-(global-set-key "\LEFT" 'backward-char)
-(global-set-key "\C-b" 'backward-char)
-(global-set-key "\RIGHT" 'forward-char)
-; FIXME: Need a home-keys shortcut for forward-char. Was ^F.
-(global-set-key "\DOWN" 'next-line)
-(global-set-key "\C-n" 'next-line)
-(global-set-key "\UP" 'previous-line)
-(global-set-key "\C-p" 'previous-line)
+(global-set-key "\LEFT" 'edit-navigate-backward-char)
+(global-set-key "\C-b" 'edit-navigate-backward-char)
+(global-set-key "\RIGHT" 'edit-navigate-forward-char)
+; FIXME: Need a home-keys shortcut for edit-navigate-forward-char. Was ^F.
+(global-set-key "\DOWN" 'edit-navigate-down-line)
+(global-set-key "\C-n" 'edit-navigate-down-line)
+(global-set-key "\UP" 'edit-navigate-up-line)
+(global-set-key "\C-p" 'edit-navigate-up-line)
 ; Word/paragraph
 (global-set-key "\C-\LEFT" 'backward-word)
 (global-set-key "\M-b" 'backward-word)

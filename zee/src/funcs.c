@@ -403,7 +403,7 @@ Move point to the first non-whitespace character on this line.
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
-    forward_char();
+    edit_navigate_forward_char();
   }
 }
 END_DEFUN
@@ -434,7 +434,7 @@ static int forward_word(void)
     if (gotword)
       return TRUE;
     cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
-    if (!next_line())
+    if (!edit_navigate_down_line())
       break;
     cur_bp->pt.o = 0;
   }
@@ -468,7 +468,7 @@ static int backward_word(void)
 
   for (;;) {
     if (bolp()) {
-      if (!previous_line())
+      if (!edit_navigate_up_line())
         break;
       cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
     }
@@ -592,7 +592,7 @@ int forward_sexp(void)
     if (gotsexp && level == 0)
       return TRUE;
     cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
-    if (!next_line()) {
+    if (!edit_navigate_down_line()) {
       if (level != 0)
         minibuf_error("Scan error: \"Unbalanced parentheses\"");
       break;
@@ -632,7 +632,7 @@ int backward_sexp(void)
   assert(cur_bp); /* FIXME: Remove this assumption. */
   for (;;) {
     if (bolp()) {
-      if (!previous_line()) {
+      if (!edit_navigate_up_line()) {
         if (level != 0)
           minibuf_error("Scan error: \"Unbalanced parentheses\"");
         break;
@@ -726,7 +726,7 @@ Precisely, if point is on line I, move to the start of line I + N.
 
   if (uniarg < 0) {
     while (uniarg++)
-      if (!previous_line()) {
+      if (!edit_navigate_up_line()) {
         ok = FALSE;
         break;
       }
@@ -735,7 +735,7 @@ Precisely, if point is on line I, move to the start of line I + N.
       uniarg = 1;
 
     while (uniarg--)
-      if (!next_line()) {
+      if (!edit_navigate_down_line()) {
         ok = FALSE;
         break;
       }
@@ -752,8 +752,8 @@ Move backward to start of paragraph.  With argument N, do it N times.
     ok = FUNCALL_ARG(forward_paragraph, -uniarg);
   else {
     do {
-      while (previous_line() && is_empty_line());
-      while (previous_line() && !is_empty_line());
+      while (edit_navigate_up_line() && is_empty_line());
+      while (edit_navigate_up_line() && !is_empty_line());
     } while (--uniarg > 0);
 
     FUNCALL(beginning_of_line);
@@ -770,8 +770,8 @@ Move forward to end of paragraph.  With argument N, do it N times.
     ok = FUNCALL_ARG(backward_paragraph, -uniarg);
   else {
     do {
-      while (next_line() && is_empty_line());
-      while (next_line() && !is_empty_line());
+      while (edit_navigate_down_line() && is_empty_line());
+      while (edit_navigate_down_line() && !is_empty_line());
     } while (--uniarg > 0);
 
     if (is_empty_line())
@@ -819,7 +819,7 @@ Fill paragraph at or after point.
   FUNCALL(backward_paragraph);
   start = cur_bp->pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
-    next_line();
+    edit_navigate_down_line();
     start++;
   }
 

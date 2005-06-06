@@ -32,7 +32,7 @@
 #include "main.h"
 #include "extern.h"
 
-/* Goal-column to arrive when `prev/next-line' functions are used.  */
+/* Goal-column to arrive when `prev/edit-navigate-down-line' functions are used.  */
 static int cur_goalc;
 
 DEFUN_INT("beginning-of-line", beginning_of_line)
@@ -44,7 +44,7 @@ Move point to beginning of current line.
   cur_bp->pt = line_beginning_position(uniarg);
 
   /* Change the `goalc' to the beginning of line for next
-     `prev/next-line' calls.  */
+     `prev/edit-navigate-down-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
@@ -59,7 +59,7 @@ Move point to end of current line.
   cur_bp->pt = line_end_position(uniarg);
 
   /* Change the `goalc' to the end of line for next
-     `prev/next-line' calls.  */
+     `prev/edit-navigate-down-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 }
@@ -122,7 +122,7 @@ static void goto_goalc(int goalc)
   cur_bp->pt.o = i;
 }
 
-int previous_line(void)
+int edit_navigate_up_line(void)
 {
   assert(cur_bp); /* FIXME: remove this assumption. */
   if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
@@ -142,7 +142,7 @@ int previous_line(void)
   return FALSE;
 }
 
-DEFUN_INT("previous-line", previous_line)
+DEFUN_INT("edit-navigate-up-line", edit_navigate_up_line)
 /*+
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -153,10 +153,10 @@ column, or at the end of the line if it is not long enough.
   int i;
 
   if (uniarg < 0)
-    ok = FUNCALL_ARG(next_line, -uniarg);
+    ok = FUNCALL_ARG(edit_navigate_down_line, -uniarg);
   else if (!bobp()) {
     for (i = 0; i < uniarg; i++)
-      if (!previous_line()) {
+      if (!edit_navigate_up_line()) {
         thisflag |= FLAG_DONE_CPCN;
         FUNCALL(beginning_of_line);
         break;
@@ -166,7 +166,7 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-int next_line(void)
+int edit_navigate_down_line(void)
 {
   assert(cur_bp); /* FIXME: remove this assumption. */
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
@@ -186,7 +186,7 @@ int next_line(void)
   return FALSE;
 }
 
-DEFUN_INT("next-line", next_line)
+DEFUN_INT("edit-navigate-down-line", edit_navigate_down_line)
 /*+
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -195,11 +195,11 @@ column, or at the end of the line if it is not long enough.
 +*/
 {
   if (uniarg < 0)
-    ok = FUNCALL_ARG(previous_line, -uniarg);
+    ok = FUNCALL_ARG(edit_navigate_up_line, -uniarg);
   else if (!eobp()) {
     int i;
     for (i = 0; i < uniarg; i++)
-      if (!next_line()) {
+      if (!edit_navigate_down_line()) {
         int old = cur_goalc;
         thisflag |= FLAG_DONE_CPCN;
         FUNCALL(end_of_line);
@@ -247,7 +247,7 @@ Position 1 is the beginning of the buffer.
     size_t count;
     gotobob();
     for (count = 1; count < to_char; ++count)
-      if (!forward_char())
+      if (!edit_navigate_forward_char())
         break;
   }
 }
@@ -321,7 +321,7 @@ Move point to the end of the buffer; leave mark at previous position.
 }
 END_DEFUN
 
-int backward_char(void)
+int edit_navigate_backward_char(void)
 {
   assert(cur_bp); /* FIXME: remove this assumption. */
   if (!bolp()) {
@@ -338,7 +338,7 @@ int backward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("backward-char", backward_char)
+DEFUN_INT("edit-navigate-backward-char", edit_navigate_backward_char)
 /*+
 Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
@@ -347,10 +347,10 @@ On attempt to pass beginning or end of buffer, stop and signal error.
   int i;
 
   if (uniarg < 0)
-    ok = FUNCALL_ARG(forward_char, -uniarg);
+    ok = FUNCALL_ARG(edit_navigate_forward_char, -uniarg);
   else
     for (i = 0; i < uniarg; i++)
-      if (!backward_char()) {
+      if (!edit_navigate_backward_char()) {
         minibuf_error("Beginning of buffer");
         ok = FALSE;
         break;
@@ -358,7 +358,7 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 }
 END_DEFUN
 
-int forward_char(void)
+int edit_navigate_forward_char(void)
 {
   assert(cur_bp); /* FIXME: remove this assumption. */
   if (!eolp()) {
@@ -375,7 +375,7 @@ int forward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("forward-char", forward_char)
+DEFUN_INT("edit-navigate-forward-char", edit_navigate_forward_char)
 /*+
 Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
@@ -384,10 +384,10 @@ On reaching end of buffer, stop and signal error.
   int i;
 
   if (uniarg < 0)
-    ok = FUNCALL_ARG(backward_char, -uniarg);
+    ok = FUNCALL_ARG(edit_navigate_backward_char, -uniarg);
   else
     for (i = 0; i < uniarg; i++)
-      if (!forward_char()) {
+      if (!edit_navigate_forward_char()) {
         minibuf_error("End of buffer");
         ok = FALSE;
         break;
@@ -400,7 +400,7 @@ int ngotoup(size_t n)
   assert(cur_bp); /* FIXME: remove this assumption. */
   for (; n > 0; n--)
     if (list_prev(cur_bp->pt.p) != cur_bp->lines)
-      FUNCALL(previous_line);
+      FUNCALL(edit_navigate_up_line);
     else
       return FALSE;
 
@@ -412,7 +412,7 @@ int ngotodown(size_t n)
   assert(cur_bp); /* FIXME: remove this assumption. */
   for (; n > 0; n--)
     if (list_next(cur_bp->pt.p) != cur_bp->lines)
-      FUNCALL(next_line);
+      FUNCALL(edit_navigate_down_line);
     else
       return FALSE;
 

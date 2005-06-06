@@ -171,19 +171,19 @@ void goto_point(Point pt)
 
   if (cur_bp->pt.n > pt.n)
     do
-      FUNCALL(previous_line);
+      FUNCALL(edit_navigate_up_line);
     while (cur_bp->pt.n > pt.n);
   else if (cur_bp->pt.n < pt.n)
     do
-      FUNCALL(next_line);
+      FUNCALL(edit_navigate_down_line);
     while (cur_bp->pt.n < pt.n);
 
   if (cur_bp->pt.o > pt.o)
     do
-      FUNCALL(backward_char);
+      FUNCALL(edit_navigate_backward_char);
     while (cur_bp->pt.o > pt.o);
   else if (cur_bp->pt.o < pt.o)
     do
-      FUNCALL(forward_char);
+      FUNCALL(edit_navigate_forward_char);
     while (cur_bp->pt.o < pt.o);
 }

@@ -106,7 +106,7 @@ static void goto_linep(Line *lp)
   cur_bp->pt = point_min(cur_bp);
   resync_display();
   while (cur_bp->pt.p != lp)
-    next_line();
+    edit_navigate_down_line();
 }
 
 static int search_forward(Line *startp, size_t starto, const char *s)

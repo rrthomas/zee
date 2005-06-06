@@ -24,15 +24,15 @@
 size_t get_goalc_bp(Buffer *bp, Point pt);
 size_t get_goalc_wp(Window *wp);
 size_t get_goalc(void);
-int backward_char(void);
-int forward_char(void);
+int edit_navigate_backward_char(void);
+int edit_navigate_forward_char(void);
 void goto_line(size_t to_line);
 void gotobob(void);
 void gotoeob(void);
-int next_line(void);
+int edit_navigate_down_line(void);
 int ngotodown(size_t n);
 int ngotoup(size_t n);
-int previous_line(void);
+int edit_navigate_up_line(void);
 int scroll_down(void);
 int scroll_up(void);
 
