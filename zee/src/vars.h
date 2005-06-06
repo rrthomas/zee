@@ -31,7 +31,7 @@ le *variableFind(le *varlist, const char *key);
 #define variableFree(L) \
   leWipe(L)
 
-void variableSet(le **varlist, char *key, le *value);
+void variableSet(le **varlist, const char *key, le *value);
 void variableSetString(le **varlist, const char *key, const char *value);
 void variableSetNumber(le **varlist, char *key, int value);
 le *variableGet(le *varlist, char *key);

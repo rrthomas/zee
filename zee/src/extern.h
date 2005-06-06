@@ -37,7 +37,7 @@ int scroll_down(void);
 int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
-void bind_key_string(char *keystr, Function func);
+void bind_key_string(const char *keystr, Function func);
 size_t do_completion(astr as);
 astr minibuf_read_function_name(const char *fmt, ...);
 const char *get_function_by_key_sequence(void);
@@ -139,7 +139,7 @@ const char *next_history_element(History *hp);
 
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(size_t key);
-size_t strtochord(char *buf);
+size_t strtochord(const char *buf);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */

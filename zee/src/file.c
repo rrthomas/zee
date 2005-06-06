@@ -477,7 +477,8 @@ int check_modified_buffer(Buffer *bp)
  */
 void file_close(Buffer *kill_bp)
 {
-  Buffer *next_bp;
+  Buffer *bp, *next_bp;
+  Window *wp;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
@@ -486,36 +487,31 @@ void file_close(Buffer *kill_bp)
   else
     next_bp = head_bp;
 
-  {
-    Buffer *bp;
-    Window *wp;
+  /* Search for windows displaying the buffer to kill. */
+  for (wp = head_wp; wp != NULL; wp = wp->next)
+    if (wp->bp == kill_bp) {
+      wp->bp = next_bp;
+      wp->topdelta = 0;
+      wp->saved_pt = NULL;    /* The marker will be freed. */
+    }
 
-    /* Search for windows displaying the buffer to kill. */
-    for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->bp == kill_bp) {
-        wp->bp = next_bp;
-        wp->topdelta = 0;
-        wp->saved_pt = NULL;    /* The marker will be freed. */
+  /* Remove the buffer from the buffer list. */
+  cur_bp = next_bp;
+  if (head_bp == kill_bp)
+    head_bp = head_bp->next;
+  if (head_bp) {
+    for (bp = head_bp; bp->next != NULL; bp = bp->next)
+      if (bp->next == kill_bp) {
+        bp->next = bp->next->next;
+        break;
       }
+  } else
+    /* If we just deleted the last buffer, quit. */
+    thisflag |= FLAG_QUIT;
 
-    /* Remove the buffer from the buffer list. */
-    cur_bp = next_bp;
-    if (head_bp == kill_bp)
-      head_bp = head_bp->next;
-    if (head_bp) {
-      for (bp = head_bp; bp->next != NULL; bp = bp->next)
-        if (bp->next == kill_bp) {
-          bp->next = bp->next->next;
-          break;
-        }
-    } else
-      /* If we just deleted the last buffer, quit. */
-      thisflag |= FLAG_QUIT;
+  free_buffer(kill_bp);
 
-    free_buffer(kill_bp);
-
-    thisflag |= FLAG_NEED_RESYNC;
-  }
+  thisflag |= FLAG_NEED_RESYNC;
 }
 
 DEFUN_INT("file-close", file_close)

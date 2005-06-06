@@ -96,7 +96,7 @@ static void bind_key(size_t key, Function func)
     s->func = func;
 }
 
-void bind_key_string(char *keystr, Function func)
+void bind_key_string(const char *keystr, Function func)
 {
   size_t key;
 
@@ -136,7 +136,9 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     } else {
-      p->func((lastflag & FLAG_SET_UNIARG) != 0, evalCastIntToLe(last_uniarg));
+      le *list = evalCastIntToLe(last_uniarg);
+      p->func((lastflag & FLAG_SET_UNIARG) != 0, list);
+      leWipe(list);
       _last_command = p->func;
     }
   }
@@ -272,15 +274,13 @@ astr minibuf_read_function_name(const char *fmt, ...)
     ms = minibuf_read_completion(buf, "", cp, &functions_history);
 
     if (ms == NULL) {
-      free_completion(cp);
       cancel();
-      return NULL;
-    }
-
-    if (astr_len(ms) == 0) {
-      free_completion(cp);
+      break;
+    } else if (astr_len(ms) == 0) {
       minibuf_error("No function name given");
-      return NULL;
+      astr_delete(ms);
+      ms = NULL;
+      break;
     } else {
       astr as = astr_new();
       astr_cpy(as, ms);
@@ -305,6 +305,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
     }
   }
 
+  free(buf);
   free_completion(cp);
 
   return ms;
@@ -353,16 +354,18 @@ sequence.
 +*/
 {
   size_t key = KBD_NOKEY;
-  char *keystr = NULL;
-  astr name = NULL;
+  astr keystr = NULL, name = NULL;
 
   ok = FALSE;
 
   if (uniused) {
     if (argc == 3) {
-      keystr = evaluateNode(branch->list_next)->data;
-      name = astr_new();
-      astr_cpy_cstr(name, evaluateNode(branch->list_next->list_next)->data);
+      le *list = evaluateNode(branch->list_next);
+      keystr = astr_cpy_cstr(astr_new(), list->data);
+      leWipe(list);
+      list = evaluateNode(branch->list_next->list_next);
+      name = astr_cpy_cstr(astr_new(), list->data);
+      leWipe(list);
     }
   } else {
     astr as;
@@ -380,9 +383,11 @@ sequence.
 
     if ((func = get_function(astr_cstr(name)))) {
       ok = TRUE;
-      if (uniused)
-        bind_key_string(keystr, func);
-      else
+      if (uniused) {
+        bind_key_string(astr_cstr(keystr), func);
+        if (keystr)
+          astr_delete(keystr);
+      } else
         bind_key(key, func);
     } else
       minibuf_error("No such function `%s'", astr_cstr(name));

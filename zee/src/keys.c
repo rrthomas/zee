@@ -214,7 +214,7 @@ static int bstrcmp_prefix(const void *s, const void *t)
 /*
  * Convert a key string to its key code.
  */
-static size_t strtokey(char *buf, size_t *len)
+static size_t strtokey(const char *buf, size_t *len)
 {
   if (*buf == '\\') {
     char **p = bsearch(&buf, keyname,
@@ -237,7 +237,7 @@ static size_t strtokey(char *buf, size_t *len)
 /*
  * Convert a key chord string to its key code.
  */
-size_t strtochord(char *buf)
+size_t strtochord(const char *buf)
 {
   size_t key = 0, len = 0, k;
 

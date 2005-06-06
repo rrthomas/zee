@@ -43,7 +43,7 @@ le *variableFind(le *varlist, const char *key)
   return NULL;
 }
 
-void variableSet(le **varlist, char *key, le *value)
+void variableSet(le **varlist, const char *key, le *value)
 {
   if (key && value) {
     le *temp = variableFind(*varlist, key);
