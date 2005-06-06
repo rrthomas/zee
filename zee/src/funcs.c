@@ -131,7 +131,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   cur_bp = cur_wp->bp = new_bp;
 
   /* Make the buffer like a temporary one. */
-  cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+  cur_bp->flags = BFLAG_NEEDNAME;
   set_temporary_buffer(cur_bp);
 
   /* Use the "callback" routine. */

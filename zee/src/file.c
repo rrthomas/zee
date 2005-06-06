@@ -459,7 +459,7 @@ int check_modified_buffer(Buffer *bp)
 {
   int ans;
 
-  if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
+  if (bp->flags & BFLAG_MODIFIED)
     for (;;) {
       if ((ans = minibuf_read_yesno("Buffer %s modified; kill anyway? (yes or no) ", bp->name)) == -1)
         return cancel();
@@ -745,8 +745,7 @@ static int file_save_some(void)
   int i = 0, noask = FALSE, c;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED
-        && !(bp->flags & BFLAG_NOSAVE)) {
+    if (bp->flags & BFLAG_MODIFIED) {
       char *fname = bp->filename != NULL ? bp->filename : bp->name;
 
       ++i;
@@ -862,8 +861,7 @@ void die(int exitcode)
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
     for (bp = head_bp; bp != NULL; bp = bp->next)
-      if (bp->flags & BFLAG_MODIFIED &&
-          !(bp->flags & BFLAG_NOSAVE)) {
+      if (bp->flags & BFLAG_MODIFIED) {
         astr buf = astr_new();
         if (bp->filename != NULL)
           astr_cpy_cstr(buf, bp->filename);
