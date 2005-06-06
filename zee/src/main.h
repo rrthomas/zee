@@ -379,10 +379,12 @@ typedef size_t Font;
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
         F_ ## c_func(1, evalCastIntToLe(1))
+/* FIXME: the evalCastIntToLe above causes a space leak. */
 
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func(2, evalCastIntToLe(uniarg))
+/* FIXME: the evalCastIntToLe above causes a space leak. */
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
