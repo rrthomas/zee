@@ -137,7 +137,6 @@
 (global-set-key "\C-l" 'recenter)
 (global-set-key "\C-@" 'set-mark-command)
 (global-set-key "\M-!" 'shell-command)
-(global-set-key "\M-|" 'shell-command-on-region)
 (global-set-key "\M-(" 'start-kbd-macro)
 (global-set-key "\M-i" 'tab-to-tab-stop)
 (global-set-key "\C-u" 'universal-argument)
