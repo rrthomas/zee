@@ -661,7 +661,7 @@ above, no indenting is performed.
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
       pos = get_goalc();
-      indent = pos > 0 || isspace(following_char());
+      indent = pos > 0 || (!eolp() && isspace(following_char()));
       cur_bp->pt = old_point->pt;
       free_marker(old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and

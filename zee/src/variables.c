@@ -54,7 +54,7 @@ void init_variables(void)
     set_variable(p->var, p->val);
 }
 
-void set_variable(char *var, const char *val)
+void set_variable(const char *var, const char *val)
 {
   variableSetString(&mainVarList, var, val);
 }
@@ -104,7 +104,7 @@ int lookup_bool_variable(char *var)
   return FALSE;
 }
 
-char *minibuf_read_variable_name(char *msg)
+astr minibuf_read_variable_name(char *msg)
 {
   astr ms;
   Completion *cp = completion_new(FALSE);
@@ -137,11 +137,10 @@ char *minibuf_read_variable_name(char *msg)
 
   free_completion(cp);
 
-  /* FIXME: Return astr */
-  return (char *)astr_cstr(ms);
+  return ms;
 }
 
-static char *get_variable_format(char *var)
+static char *get_variable_format(const char *var)
 {
   struct var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
@@ -156,32 +155,32 @@ DEFUN_INT("set-variable", set_variable)
 Set a variable value to the user-specified value.
 +*/
 {
-  char *var, *fmt;
-  astr val = NULL;
+  char *fmt;
+  astr var, val = NULL;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
   if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
     ok = FALSE;
   else {
-    fmt = get_variable_format(var);
+    fmt = get_variable_format(astr_cstr(var));
     if (!strcmp(fmt, "b")) {
       int i;
-      if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
+      if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)
         ok = cancel();
       else
         astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
     } else /* Non-boolean variable. */
-      if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
+      if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
         ok = cancel();
 
     if (ok) {
       /* `tab-width' and `fill-column' automatically become
          buffer-local when set in any fashion. */
-      if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
-        variableSetString(&cur_bp->vars, var, astr_cstr(val));
+      if (!astr_cmp_cstr(var, "tab-width") || !astr_cmp_cstr(var, "fill-column"))
+        variableSetString(&cur_bp->vars, astr_cstr(var), astr_cstr(val));
       else
-        set_variable(var, astr_cstr(val));
+        set_variable(astr_cstr(var), astr_cstr(val));
     }
   }
 }

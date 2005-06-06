@@ -59,7 +59,7 @@ void variableSet(le **varlist, char *key, le *value)
   }
 }
 
-void variableSetString(le **varlist, char *key, const char *value)
+void variableSetString(le **varlist, const char *key, const char *value)
 {
   if (key && value) {
     le *temp = leNew(value);

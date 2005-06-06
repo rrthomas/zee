@@ -109,21 +109,20 @@ DEFUN_INT("help-command", help_command)
 Display the full documentation of FUNCTION (a symbol).
 +*/
 {
-  char *name;
-  astr doc;
+  astr name, doc;
 
   if ((name = minibuf_read_function_name("Describe function: ")) &&
-      ((doc = get_funcvar_doc(name, NULL, TRUE)))) {
+      ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE)))) {
     astr bufname = astr_new();
-    astr_afmt(bufname, "*Help: command `%s'*", name);
+    astr_afmt(bufname, "*Help: command `%s'*", astr_cstr(name));
     write_temp_buffer(astr_cstr(bufname), write_function_description,
-                      name, doc);
+                      astr_cstr(name), doc);
     astr_delete(bufname);
     astr_delete(doc);
   } else
     ok = FALSE;
 
-  free(name);
+  astr_delete(name);
 }
 END_DEFUN
 
@@ -145,22 +144,23 @@ DEFUN_INT("help-variable", help_variable)
 Display the full documentation of VARIABLE (a symbol).
 +*/
 {
-  char *name;
+  astr name;
 
   if ((name = minibuf_read_variable_name("Describe variable: "))) {
     astr defval = astr_new(), doc;
 
-    if ((doc = get_funcvar_doc(name, defval, FALSE))) {
+    if ((doc = get_funcvar_doc(astr_cstr(name), defval, FALSE))) {
       astr bufname = astr_new();
-      astr_afmt(bufname, "*Help: variable `%s'*", name);
+      astr_afmt(bufname, "*Help: variable `%s'*", astr_cstr(name));
       write_temp_buffer(astr_cstr(bufname), write_variable_description,
-                        name, defval, get_variable(name), doc);
+                        astr_cstr(name), defval, get_variable(astr_cstr(name)), doc);
       astr_delete(bufname);
       astr_delete(doc);
     } else
       ok = FALSE;
 
     astr_delete(defval);
+    astr_delete(name);
   } else
     ok = FALSE;
 }

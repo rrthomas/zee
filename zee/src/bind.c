@@ -205,7 +205,7 @@ static const char *bsearch_function(const char *name)
   return entryp ? entryp->name : NULL;
 }
 
-static fentryp get_fentry(char *name)
+static fentryp get_fentry(const char *name)
 {
   size_t i;
   assert(name);
@@ -215,7 +215,7 @@ static fentryp get_fentry(char *name)
   return NULL;
 }
 
-Function get_function(char *name)
+Function get_function(const char *name)
 {
   fentryp f = get_fentry(name);
   return f ? f->func : NULL;
@@ -251,7 +251,7 @@ static astr bindings_string(fentryp f)
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
  */
-char *minibuf_read_function_name(const char *fmt, ...)
+astr minibuf_read_function_name(const char *fmt, ...)
 {
   va_list ap;
   size_t i;
@@ -307,11 +307,10 @@ char *minibuf_read_function_name(const char *fmt, ...)
 
   free_completion(cp);
 
-  /* FIXME: Return astr */
-  return (char *)astr_cstr(ms);
+  return ms;
 }
 
-static int execute_function(char *name, int uniarg)
+static int execute_function(const char *name, int uniarg)
 {
   Function func;
   Macro *mp;
@@ -329,8 +328,7 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-  char *name;
-  astr msg = astr_new();
+  astr name, msg = astr_new();
 
   if (uniused && uniarg != 0)
     astr_afmt(msg, "%d M-x ", uniarg);
@@ -342,8 +340,8 @@ Read function name, then read its arguments and call it.
   if (name == NULL)
     return FALSE;
 
-  ok = execute_function(name, uniarg);
-  free(name);
+  ok = execute_function(astr_cstr(name), uniarg);
+  astr_delete(name);
 }
 END_DEFUN
 
@@ -355,14 +353,16 @@ sequence.
 +*/
 {
   size_t key = KBD_NOKEY;
-  char *name = NULL, *keystr = NULL;
+  char *keystr = NULL;
+  astr name = NULL;
 
   ok = FALSE;
 
   if (uniused) {
     if (argc == 3) {
       keystr = evaluateNode(branch->list_next)->data;
-      name = evaluateNode(branch->list_next->list_next)->data;
+      name = astr_new();
+      astr_cpy_cstr(name, evaluateNode(branch->list_next->list_next)->data);
     }
   } else {
     astr as;
@@ -378,16 +378,16 @@ sequence.
   if (name) {
     Function func;
 
-    if ((func = get_function(name))) {
+    if ((func = get_function(astr_cstr(name)))) {
       ok = TRUE;
       if (uniused)
         bind_key_string(keystr, func);
       else
         bind_key(key, func);
     } else
-      minibuf_error("No such function `%s'", name);
+      minibuf_error("No such function `%s'", astr_cstr(name));
 
-    free(name);
+    astr_delete(name);
   }
 }
 END_DEFUN
@@ -399,19 +399,19 @@ Argument is a command definition, usually a symbol with a function definition.
 If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
 +*/
 {
-  char *name;
+  astr name;
   fentryp f;
 
   name = minibuf_read_function_name("Where is command: ");
 
-  if (name == NULL || (f = get_fentry(name)) == NULL)
+  if (name == NULL || (f = get_fentry(astr_cstr(name))) == NULL)
     ok = FALSE;
   else {
     if (f->key[0]) {
       astr bindings = bindings_string(f);
       astr as = astr_new();
 
-      astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
+      astr_afmt(as, "%s is on %s", astr_cstr(name), astr_cstr(bindings));
       if (uniused)
         bprintf("%s", astr_cstr(as));
       else
@@ -420,7 +420,7 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
       astr_delete(as);
       astr_delete(bindings);
     } else
-      minibuf_write("%s is not on any key", name);
+      minibuf_write("%s is not on any key", astr_cstr(name));
   }
 }
 END_DEFUN

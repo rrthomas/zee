@@ -39,12 +39,12 @@ int scroll_up(void);
 /* bind.c ----------------------------------------------------------------- */
 void bind_key_string(char *keystr, Function func);
 size_t do_completion(astr as);
-char *minibuf_read_function_name(const char *fmt, ...);
+astr minibuf_read_function_name(const char *fmt, ...);
 const char *get_function_by_key_sequence(void);
 void process_key(size_t key);
 Function last_command(void);
 void free_bindings(void);
-Function get_function(char *name);
+Function get_function(const char *name);
 const char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
@@ -248,8 +248,8 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
 int lookup_bool_variable(char *var);
-char *minibuf_read_variable_name(char *msg);
-void set_variable(char *var, const char *val);
+astr minibuf_read_variable_name(char *msg);
+void set_variable(const char *var, const char *val);
 char *get_variable_bp(Buffer *bp, const char *var);
 char *get_variable(const char *var);
 int get_variable_number_bp(Buffer *bp, char *var);
