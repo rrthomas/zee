@@ -996,84 +996,13 @@ lower case.
 }
 END_DEFUN
 
-static void write_shell_output(va_list ap)
-{
-  astr out = va_arg(ap, astr);
-
-  insert_string((char *)astr_cstr(out));
-}
-
 DEFUN_INT("shell-command", shell_command)
-/*+
-Reads a line of text using the minibuffer and creates an inferior shell.
-to execute the line as a command.
-Standard input from the command comes from the null device.  If the
-shell command produces any output, the output goes to a buffer
-named `*Shell Command Output*', which is displayed in another window
-but not selected.
-If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
-command to insert any output into the current buffer.
-+*/
-{
-  FILE *pipe;
-  astr out, s, ms;
-  int lines = 0;
-  astr cmd;
-
-  if ((ms = minibuf_read("Shell command: ", "")) == NULL)
-    return cancel();
-  if (astr_len(ms) == 0)
-    return FALSE;
-
-  cmd = astr_new();
-  astr_afmt(cmd, "%s 2>&1 </dev/null", ms);
-  if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
-    minibuf_error("Cannot open pipe to process");
-    return FALSE;
-  }
-  astr_delete(cmd);
-
-  out = astr_new();
-  while ((s = astr_fgets(pipe)) != NULL) {
-    ++lines;
-    astr_cat(out, s);
-    astr_cat_cstr(out, "\n");
-    astr_delete(s);
-  }
-  pclose(pipe);
-
-  if (lines == 0)
-    minibuf_write("(Shell command succeeded with no output)");
-  else { /* lines >= 1 */
-    if (lastflag & FLAG_SET_UNIARG)
-      insert_string((char *)astr_cstr(out));
-    else {
-      if (lines > 1)
-        write_temp_buffer("*Shell Command Output*",
-                          write_shell_output, out);
-      else /* lines == 1 */
-        minibuf_write("%s", astr_cstr(out));
-    }
-  }
-  astr_delete(out);
-
-  return TRUE;
-}
-END_DEFUN
-
-DEFUN_INT("shell-command-on-region", shell_command_on_region)
 /*+
 Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
-If the shell command produces any output, the output goes to a buffer
-named `*Shell Command Output*', which is displayed in another window
-but not selected.
-If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
-current buffer, then the old region is deleted first and the output replaces
-it as the contents of the region.
+If the shell command produces any output, it is inserted into the
+current buffer.
 +*/
 {
   FILE *pipe;
@@ -1131,33 +1060,22 @@ it as the contents of the region.
   pclose(pipe);
   remove(tempfile);
 
-  if (lines == 0)
-    minibuf_write("(Shell command succeeded with no output)");
-  else { /* lines >= 1 */
-    if (lastflag & FLAG_SET_UNIARG) {
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-      {
-        Region r;
-        calculate_the_region(&r);
-        if (cur_bp->pt.p != r.start.p
-            || r.start.o != cur_bp->pt.o)
-          FUNCALL(exchange_point_and_mark);
-        undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
-        undo_nosave = TRUE;
-        while (r.size--)
-          FUNCALL(delete_char);
-        undo_nosave = FALSE;
-      }
-      insert_string((char *)astr_cstr(out));
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-    } else {
-      if (lines > 1)
-        write_temp_buffer("*Shell Command Output*",
-                          write_shell_output, out);
-      else /* lines == 1 */
-        minibuf_write("%s", astr_cstr(out));
-    }
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  {
+    Region r;
+    calculate_the_region(&r);
+    if (cur_bp->pt.p != r.start.p
+        || r.start.o != cur_bp->pt.o)
+      FUNCALL(exchange_point_and_mark);
+    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
+    undo_nosave = TRUE;
+    while (r.size--)
+      FUNCALL(delete_char);
+    undo_nosave = FALSE;
   }
+  insert_string((char *)astr_cstr(out));
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
   astr_delete(out);
 
   return TRUE;
