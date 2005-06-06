@@ -45,7 +45,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
-  if (cur_bp->flags & BFLAG_NOUNDO || undo_nosave)
+  if (undo_nosave)
     return;
 
   up = (Undo *)zmalloc(sizeof(Undo));
@@ -186,9 +186,7 @@ Repeat this command to undo more changes.
 
   ok = FALSE;
 
-  if (cur_bp->flags & BFLAG_NOUNDO)
-    minibuf_error("Undo disabled in this buffer");
-  else if (warn_if_readonly_buffer());
+  if (warn_if_readonly_buffer());
   else if (cur_bp->next_undop == NULL) {
     minibuf_error("No further undo information");
     cur_bp->next_undop = cur_bp->last_undop;
