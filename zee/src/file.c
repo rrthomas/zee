@@ -841,7 +841,8 @@ Offer to save each buffer, then kill this process.
         ok = FALSE;
     }
 
-    thisflag |= FLAG_QUIT;
+    if (ok)
+      thisflag |= FLAG_QUIT;
   }
 }
 END_DEFUN
