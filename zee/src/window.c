@@ -217,8 +217,7 @@ Point window_pt(Window *wp)
   /* The current window uses the current buffer point; all other
      windows have a saved point.  */
   assert(wp != NULL);
-  if (wp == cur_wp) {
-    assert(wp->bp == cur_bp);
+  if (wp->bp == cur_wp->bp) {
     assert(wp->saved_pt == NULL);
     return cur_bp->pt;
   } else {
