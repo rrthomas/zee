@@ -421,28 +421,28 @@ Select to the user specified buffer in the current window.
 +*/
 {
   astr ms;
-  Buffer *swbuf;
   Completion *cp;
+  Buffer *bp;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
 
-  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+  bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
   cp = make_buffer_completion();
   ms = minibuf_read_completion("Switch to buffer (default %s): ",
-                               "", cp, NULL, swbuf->name);
+                               "", cp, NULL, bp->name);
   free_completion(cp);
   if (ms == NULL)
     ok = cancel();
   else {
     if (astr_len(ms) > 0) {
-      if ((swbuf = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
-        swbuf = find_buffer(astr_cstr(ms), TRUE);
-        swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+      if ((bp = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
+        minibuf_error("Buffer `%s' not found", astr_cstr(ms));
+        ok = FALSE;
       }
     }
 
-    switch_to_buffer(swbuf);
+    switch_to_buffer(bp);
     astr_delete(ms);
 
     ok = TRUE;
