@@ -99,6 +99,7 @@ void term_init(void)
   raw();
   intrflush(stdscr, FALSE);
   keypad(stdscr, TRUE);
+  meta(stdscr, FALSE);
 }
 
 void term_close(void)
