@@ -17,11 +17,10 @@ INDEX
 2. Functionality
    2.1. How do I quit Zee?
    2.2. How do I return to the shell without leaving Zee?
-   2.3. Zee is hung.
-   2.4. How do I undo the previous command?
-   2.5. What does `C-something' or `M-something' mean?
-   2.6. What settings can I change?
-   2.7. How do I handle non-ASCII characters?
+   2.3. How do I undo the previous command?
+   2.4. What does `C-something' or `M-something' mean?
+   2.5. What settings can I change?
+   2.6. How do I handle non-ASCII characters?
 
 ------------------------------------------------------------------------------
 
@@ -78,20 +77,11 @@ INDEX
 
     Type `M-x suspend'.
 
-2.3. Zee is hung.
-
-    From the tutorial:
-
-    If Zee gets into an infinite (or simply very long) computation
-    which you don't want to finish, you can stop it safely by typing
-    `C-g'. You can also use `C-g' to discard a numeric argument or the
-    beginning of a command that you don't want to finish.
-
-2.4. How do I undo the previous command?
+2.3. How do I undo the previous command?
 
     Type `C-z'.
 
-2.5. What does `C-something' or `M-something' mean?
+2.4. What does `C-something' or `M-something' mean?
 
     From the tutorial:
 
@@ -103,11 +93,11 @@ INDEX
 	     press and release the ESC key and then type <chr>. We
 	     write <ESC> for the ESC key.
 
-2.6. What settings can I change?
+2.5. What settings can I change?
 
     Check out the `dotzee.sample' file for a full list of variables.
 
-2.7. How do I handle non-ASCII characters?
+2.6. How do I handle non-ASCII characters?
 
     Zee uses the operating system's locale support, so you need to set
     an appropriate locale. How you do this depends on your OS.
