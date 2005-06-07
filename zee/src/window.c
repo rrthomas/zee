@@ -38,7 +38,7 @@
  * Please add more checks here if you become aware of any other invariants that
  * are not checked.
  */
-extern void check_windows(void)
+void check_windows(void)
 {
   Window *wp;
   
