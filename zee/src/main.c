@@ -20,6 +20,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+#define DEBUG 1
+
 #include "config.h"
 
 #include <assert.h>
@@ -88,6 +90,10 @@ static void loop(void)
     popup_clear();
     minibuf_clear();
     process_key(key);
+
+#ifdef DEBUG
+    check_windows();
+#endif
 
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;

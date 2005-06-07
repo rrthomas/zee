@@ -32,7 +32,8 @@
 #include "main.h"
 #include "extern.h"
 
-/* Goal-column to arrive when `prev/edit-navigate-down-line' functions are used.  */
+/* Goal column to arrive at when `edit-navigate-down/up-line' functions are
+   used.  */
 static int cur_goalc;
 
 DEFUN_INT("beginning-of-line", beginning_of_line)
@@ -44,7 +45,7 @@ Move point to beginning of current line.
   cur_bp->pt = line_beginning_position(uniarg);
 
   /* Change the `goalc' to the beginning of line for next
-     `prev/edit-navigate-down-line' calls.  */
+     `edit-navigate-down/up-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
@@ -59,7 +60,7 @@ Move point to end of current line.
   cur_bp->pt = line_end_position(uniarg);
 
   /* Change the `goalc' to the end of line for next
-     `prev/edit-navigate-down-line' calls.  */
+     `edit-navigate-down/up-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 }

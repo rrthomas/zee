@@ -31,6 +31,41 @@
 #include "main.h"
 #include "extern.h"
 
+/*
+ * Does nothing provided the window data structures satisfy all the required
+ * invariants, otherwise crashes informatively. It's just a lot of assertions.
+ *
+ * Please add more checks here if you become aware of any other invariants that
+ * are not checked.
+ */
+extern void check_windows(void)
+{
+  Window *wp;
+  
+  /* There must be a current window. */
+  assert(cur_wp);
+  /* The current buffer must be the one displayed in the current window. */
+  assert(cur_wp->bp == cur_bp);
+  
+  /* For all windows... */
+  for (wp = head_wp; wp != NULL; wp = wp->next) {
+    /* There must be a buffer displayed in the window. */
+    assert(wp->bp);
+    
+    if (wp == cur_wp) { /* FIXME: Should be (wp->bp == cur_bp), but currently
+                           that wouldn't work. */
+      /* There must not be a saved_pt. */
+      assert(cur_wp->saved_pt == NULL);
+    } else {
+      /* There must be a saved_pt. */
+      assert(wp->saved_pt);
+
+      /* The saved point must be in the right buffer. */
+      assert(wp->saved_pt->bp == wp->bp);
+    }
+  }
+}
+
 Window *window_new(void)
 {
   return zmalloc(sizeof(Window));
