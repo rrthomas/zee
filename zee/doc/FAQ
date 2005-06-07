@@ -21,9 +21,7 @@ INDEX
    2.4. How do I undo the previous command?
    2.5. What does `C-something' or `M-something' mean?
    2.6. What settings can I change?
-   2.7. How do I display non-ASCII characters?
-   2.8. Zee doesn't handle filenames with non-ASCII characters.
-   2.9. How do I enable Auto Fill Mode at startup?
+   2.7. How do I handle non-ASCII characters?
 
 ------------------------------------------------------------------------------
 
@@ -109,19 +107,9 @@ INDEX
 
     Check out the `dotzee.sample' file for a full list of variables.
 
-2.7. How do I display non-ASCII characters?
+2.7. How do I handle non-ASCII characters?
 
     Zee uses the operating system's locale support, so you need to set
     an appropriate locale. How you do this depends on your OS.
     However, Zee only works with 8-bit locales at present; support for
     Unicode/UTF-8 is planned.
-
-2.8. Zee doesn't handle filenames with non-ASCII characters.
-
-    See the answer to question 2.7.
-
-2.9. How do I enable auto-fill mode at startup?
-
-    Add the following line to your `~/.zee' file:
-
-	(setq auto-fill-mode true)
