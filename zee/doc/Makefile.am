@@ -6,12 +6,10 @@ zeedir = $(datadir)/$(PACKAGE_NAME)
 zee_DATA =					\
 	AUTODOC					\
 	FAQ					\
-	TUTORIAL				\
 	dot$(PACKAGE_NAME).sample
 
 EXTRA_DIST =					\
 	FAQ					\
-	TUTORIAL				\
 	dot$(PACKAGE_NAME).sample		\
 	lisp.txt				\
 	mkdoc.c					\
