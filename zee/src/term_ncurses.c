@@ -24,6 +24,8 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -35,6 +37,7 @@
 
 typedef SCREEN Screen;
 Screen *screen;
+int xterm;
 
 void term_move(size_t y, size_t x)
 {
@@ -89,6 +92,12 @@ void term_beep(void)
 
 void term_init(void)
 {
+  char *term = getenv("TERM");
+
+  if (term && strcmp(term, "xterm") == 0) {
+    xterm = TRUE;
+    printf("\033[?1036;h");       /* Make Meta send ESC */
+  }
   screen = newterm(NULL, stdout, stdin);
   set_term(screen);
 
@@ -111,6 +120,8 @@ void term_close(void)
   /* Free memory and finish with ncurses. */
   endwin();
   delscreen(screen);
+  if (xterm)
+    printf("\033[?1036;l");       /* Reset Meta key */
   screen = NULL;
 }
 
