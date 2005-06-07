@@ -1,4 +1,3 @@
-
 ; Default key bindings
 
 ; Navigation. Mostly arrows and things.
