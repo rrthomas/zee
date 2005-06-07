@@ -85,6 +85,7 @@ static void loop(void)
       thisflag |= FLAG_DEFINING_MACRO;
 
     key = getkey();
+    popup_clear();
     minibuf_clear();
     process_key(key);
 

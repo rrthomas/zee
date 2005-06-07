@@ -152,7 +152,6 @@ int intercalate_newline(void);
 void insert_string(const char *s);
 void insert_nstring(const char *s, size_t size);
 int self_insert_command(size_t key);
-void bprintf(const char *fmt, ...);
 int delete_char(void);
 int backward_delete_char(void);
 void free_kill_ring(void);
@@ -221,10 +220,8 @@ size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_full_redisplay(void);
-void show_splash_screen(const char *splash);
 void term_tidy(void);
-void term_addnstr(const char *s, size_t len);
-int term_printw(const char *fmt, ...);
+int term_printf(const char *fmt, ...);
 
 /* term_{allegro,epocemx,ncurses}.c --------------------------------------- */
 void term_init(void);
@@ -234,6 +231,7 @@ void term_clrtoeol(void);
 void term_refresh(void);
 void term_clear(void);
 void term_addch(int c);
+void term_nl(void);
 void term_attrset(size_t attrs, ...);
 void term_beep(void);
 size_t term_xgetkey(int mode, size_t timeout);
@@ -264,6 +262,9 @@ Window *popup_window(void);
 void set_current_window (Window *wp);
 void delete_window(Window *del_wp);
 Point window_pt(Window *wp);
+astr popup_get(void);
+void popup_set(astr as);
+void popup_clear(void);
 
 /* zmalloc.c -------------------------------------------------------------- */
 void *zmalloc(size_t size);

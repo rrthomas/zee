@@ -62,43 +62,6 @@ Cancel current command.
 }
 END_DEFUN
 
-void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
-{
-  Window *wp, *old_wp = cur_wp;
-  Buffer *new_bp;
-  va_list ap;
-
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
-  /* Popup a window with the buffer "name". */
-  if ((wp = find_window(name)))
-    set_current_window(wp);
-  else {
-    set_current_window(popup_window());
-    switch_to_buffer(find_buffer(name, TRUE));
-  }
-
-  /* Remove all the content of that buffer. */
-  new_bp = create_buffer(cur_bp->name);
-  file_close(cur_bp);
-  cur_bp = cur_wp->bp = new_bp;
-
-  /* Make the buffer like a temporary one. */
-  cur_bp->flags = BFLAG_NEEDNAME;
-  set_temporary_buffer(cur_bp);
-
-  /* Use the "callback" routine. */
-  va_start(ap, func);
-  func(ap);
-  va_end(ap);
-
-  gotobob();
-  cur_bp->flags |= BFLAG_READONLY;
-
-  /* Restore old current window. */
-  set_current_window(old_wp);
-}
-
 DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.

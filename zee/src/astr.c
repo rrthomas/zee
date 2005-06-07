@@ -168,6 +168,20 @@ int astr_rfind_cstr(const astr as, const char *s)
   return (sp == NULL) ? -1 : sp - as->text;
 }
 
+size_t astr_count_char(astr as, int c)
+{
+  size_t n = 0;
+  const char *s = astr_cstr(as);
+
+  assert(as != NULL);
+  while (s - astr_cstr(as) < (ptrdiff_t)astr_len(as) && (s = strchr(s, c))) {
+    s++;
+    n++;
+  }
+
+  return n;
+}
+
 astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
@@ -268,6 +282,7 @@ astr astr_afmt(astr as, const char *fmt, ...)
   va_end(ap);
   return as;
 }
+
 
 #ifdef TEST
 

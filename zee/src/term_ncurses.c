@@ -64,6 +64,11 @@ void term_addch(int c)
   addch((chtype)c);
 }
 
+void term_nl(void)
+{
+  addch((chtype)'\n');
+}
+
 void term_attrset(size_t attrs, ...)
 {
   size_t i;

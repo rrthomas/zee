@@ -94,16 +94,6 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
   return doc;
 }
 
-static void write_function_description(va_list ap)
-{
-  const char *name = va_arg(ap, const char *);
-  astr doc = va_arg(ap, astr);
-
-  bprintf("Function: %s\n\n"
-          "Documentation:\n%s",
-          name, astr_cstr(doc));
-}
-
 DEFUN_INT("help-command", help_command)
 /*+
 Display the full documentation of FUNCTION (a symbol).
@@ -111,33 +101,20 @@ Display the full documentation of FUNCTION (a symbol).
 {
   astr name, doc;
 
-  if ((name = minibuf_read_function_name("Describe function: ")) &&
-      ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE)))) {
-    astr bufname = astr_new();
-    astr_afmt(bufname, "*Help: command `%s'*", astr_cstr(name));
-    write_temp_buffer(astr_cstr(bufname), write_function_description,
-                      astr_cstr(name), doc);
-    astr_delete(bufname);
-    astr_delete(doc);
+  if ((name = minibuf_read_function_name("Describe function: "))) {
+    if ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE))) {
+      astr popup = astr_new();
+      astr_afmt(popup, "Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc));
+      popup_set(popup);
+      astr_delete(doc);
+    } else
+      ok = FALSE;
+
+    astr_delete(name);
   } else
     ok = FALSE;
-
-  astr_delete(name);
 }
 END_DEFUN
-
-static void write_variable_description(va_list ap)
-{
-  char *name = va_arg(ap, char *);
-  astr defval = va_arg(ap, astr);
-  char *curval = va_arg(ap, char *);
-  astr doc = va_arg(ap, astr);
-  bprintf("Variable: %s\n\n"
-          "Default value: %s\n"
-          "Current value: %s\n\n"
-          "Documentation:\n%s",
-          name, astr_cstr(defval), curval, astr_cstr(doc));
-}
 
 DEFUN_INT("help-variable", help_variable)
 /*+
@@ -147,14 +124,16 @@ Display the full documentation of VARIABLE (a symbol).
   astr name;
 
   if ((name = minibuf_read_variable_name("Describe variable: "))) {
-    astr defval = astr_new(), doc;
+    astr defval = astr_new(), doc, popup = astr_new();
 
     if ((doc = get_funcvar_doc(astr_cstr(name), defval, FALSE))) {
-      astr bufname = astr_new();
-      astr_afmt(bufname, "*Help: variable `%s'*", astr_cstr(name));
-      write_temp_buffer(astr_cstr(bufname), write_variable_description,
-                        astr_cstr(name), defval, get_variable(astr_cstr(name)), doc);
-      astr_delete(bufname);
+      astr_afmt(popup, "Help for variable `%s':\n\n"
+                "Default value: %s\n"
+                "Current value: %s\n\n"
+                "Documentation:\n%s",
+                astr_cstr(name), astr_cstr(defval),
+                get_variable(astr_cstr(name)), astr_cstr(doc));
+      popup_set(popup);
       astr_delete(doc);
     } else
       ok = FALSE;
@@ -168,7 +147,7 @@ END_DEFUN
 
 DEFUN_INT("help-key", help_key)
 /*+
-Display documentation of the command invoked by a key sequence.
+Display the command invoked by a key sequence.
 +*/
 {
   const char *name;
@@ -178,21 +157,7 @@ Display documentation of the command invoked by a key sequence.
   if ((name = get_function_by_key_sequence()) == NULL) {
     minibuf_error("Key sequence is undefined");
     ok = FALSE;
-  } else {
-    astr doc;
-
+  } else
     minibuf_write("Key sequence runs the command `%s'", name);
-
-    if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
-      ok = FALSE;
-    else {
-      astr bufname = astr_new();
-      astr_afmt(bufname, "*Help: function `%s'*", name);
-      write_temp_buffer(astr_cstr(bufname), write_function_description,
-                        name, doc);
-      astr_delete(bufname);
-    }
-    astr_delete(doc);
-  }
 }
 END_DEFUN

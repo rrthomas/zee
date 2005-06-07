@@ -297,39 +297,62 @@ static char *make_screen_pos(Window *wp, char **buf)
   return *buf;
 }
 
-static void draw_status_line(size_t line, Window *wp)
+static void draw_border(Window *wp)
 {
   size_t i;
+  term_attrset(1, FONT_REVERSE);
+  for (i = 0; i < wp->ewidth; ++i)
+    term_addch('-');
+  term_attrset(1, FONT_NORMAL);
+}
+
+static void draw_status_line(size_t line, Window *wp)
+{
   int someflag = 0;
   char *buf;
   Point pt = window_pt(wp);
 
+  term_move(line, 0);
+  draw_border(wp);
+
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  for (i = 0; i < wp->ewidth; ++i)
-    term_addch('-');
-
-  term_move(line, 0);
-  term_printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
+  term_printf("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
 
   if (wp->bp->flags & BFLAG_AUTOFILL) {
-    term_printw("Fill");
+    term_printf("Fill");
     someflag = 1;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
-    term_printw("%sDef", someflag ? " " : "");
+    term_printf("%sDef", someflag ? " " : "");
     someflag = 1;
   }
   if (wp->bp->flags & BFLAG_ISEARCH)
-    term_printw("%sIsearch", someflag ? " " : "");
+    term_printf("%sIsearch", someflag ? " " : "");
 
-  term_printw(")--L%d--C%d--%s",
+  term_printf(")--L%d--C%d--%s",
               pt.n + 1, get_goalc_wp(wp),
               make_screen_pos(wp, &buf));
   free(buf);
 
   term_attrset(1, FONT_NORMAL);
+}
+
+/*
+ * Draw the popup window.
+ */
+static void draw_popup(astr as)
+{
+  /* Move to top of popup window. Add one to number of newlines
+     because popup string has no trailing newline; subtract a further
+     3 for the border above, and minibuffer and status line below. */
+  /* FIXME: could go off bottom of available area. But in that case
+     need not only to adjust display but provide scrolling. */
+  term_move(max(term_height() - (astr_count_char(as, '\n') + 1) - 3, 0), 0);
+  draw_border(cur_wp);
+  term_printf("%.c", term_width(), '-');
+  term_printf("%s", astr_cstr(as));
 }
 
 /* Draws all the windows in turn, and draws the status line if any space
@@ -338,6 +361,7 @@ static void draw_status_line(size_t line, Window *wp)
 void term_display(void)
 {
   size_t topline;
+  astr popup;
   Window *wp;
 
   cur_topline = topline = 0;
@@ -361,6 +385,10 @@ void term_display(void)
     topline += wp->fheight;
   }
 
+  /* Draw the popup window. */
+  if ((popup = popup_get()))
+    draw_popup(popup);
+
   /* Redraw cursor. */
   term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
@@ -369,24 +397,6 @@ void term_full_redisplay(void)
 {
   term_clear();
   term_display();
-}
-
-void show_splash_screen(const char *splash)
-{
-  size_t i;
-  const char *p;
-
-  for (i = 0; i < term_height() - 2; ++i) {
-    term_move(i, 0);
-    term_clrtoeol();
-  }
-
-  term_move(0, 0);
-  for (i = 0, p = splash; *p != '\0' && i < term_height() - 2; ++p)
-    if (*p == '\n')
-      term_move(++i, 0);
-    else
-      term_addch(*p);
 }
 
 /*
@@ -401,19 +411,24 @@ void term_tidy(void)
 }
 
 /*
- * Add a string to the terminal
+ * Print a string on the terminal.
  */
-void term_addnstr(const char *s, size_t len)
+static void term_print(const char *s)
 {
   size_t i;
-  for (i = 0; i < len; i++)
-    term_addch(*s++);
+
+  for (i = 0; *s != '\0'; s++)
+    if (*s == '\n') {
+      term_clrtoeol();
+      term_nl();
+    } else
+      term_addch(*s);
 }
 
 /*
  * printf on the terminal
  */
-int term_printw(const char *fmt, ...)
+int term_printf(const char *fmt, ...)
 {
   char *buf;
   int res = 0;
@@ -421,7 +436,7 @@ int term_printw(const char *fmt, ...)
   va_start(ap, fmt);
   res = zvasprintf(&buf, fmt, ap);
   va_end(ap);
-  term_addnstr(buf, strlen(buf));
+  term_print(buf);
   free(buf);
   return res;
 }

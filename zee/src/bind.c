@@ -401,7 +401,6 @@ DEFUN_INT("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command definition, usually a symbol with a function definition.
-If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
 +*/
 {
   astr name;
@@ -417,10 +416,7 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
       astr as = astr_new();
 
       astr_afmt(as, "%s is on %s", astr_cstr(name), astr_cstr(bindings));
-      if (uniused)
-        bprintf("%s", astr_cstr(as));
-      else
-        minibuf_write("%s", astr_cstr(as));
+      minibuf_write("%s", astr_cstr(as));
 
       astr_delete(as);
       astr_delete(bindings);

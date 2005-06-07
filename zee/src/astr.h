@@ -147,6 +147,11 @@ int astr_rfind(const astr as, const astr src);
 int astr_rfind_cstr(const astr as, const char *s);
 
 /*
+ * Count the number of occurrences of a char in an astr.
+ */
+size_t astr_count_char(astr as, int c);
+
+/*
  * Read a string from the stream f and return it. The trailing newline
  * is removed from the string. If the stream is at eof when astr_fgets
  * is called, it returns NULL.

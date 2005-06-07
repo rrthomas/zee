@@ -410,17 +410,6 @@ Whichever character you type to run this command is inserted.
 }
 END_DEFUN
 
-void bprintf(const char *fmt, ...)
-{
-  va_list ap;
-  char *buf;
-  va_start(ap, fmt);
-  zvasprintf(&buf, fmt, ap);
-  va_end(ap);
-  insert_string(buf);
-  free(buf);
-}
-
 int delete_char(void)
 {
   assert(cur_bp); /* FIXME: Remove this assumption. */

@@ -149,22 +149,6 @@ Remove the current window from the screen.
 }
 END_DEFUN
 
-Window *popup_window(void)
-{
-  if (head_wp->next == NULL) {
-    /* There is only one window on the screen, so split it. */
-    FUNCALL(window_split);
-    return cur_wp->next;
-  }
-
-  /* Use the window after the current one. */
-  if (cur_wp->next != NULL)
-    return cur_wp->next;
-
-  /* Use the first window. */
-  return head_wp;
-}
-
 DEFUN_INT("window-close-others", window_close_others)
 /*+
 Make the current window fill the screen.
@@ -224,4 +208,49 @@ Point window_pt(Window *wp)
     assert(wp->saved_pt != NULL);
     return wp->saved_pt->pt;
   }
+}
+
+Window *popup_window(void)
+{
+  if (head_wp->next == NULL) {
+    /* There is only one window on the screen, so split it. */
+    FUNCALL(window_split);
+    return cur_wp->next;
+  }
+
+  /* Use the window after the current one. */
+  if (cur_wp->next != NULL)
+    return cur_wp->next;
+
+  /* Use the first window. */
+  return head_wp;
+}
+
+/* Contents of popup window. */
+static astr popup = NULL;
+
+/*
+ * Return the contents of the popup window.
+ */
+astr popup_get(void)
+{
+  return popup;
+}
+
+/*
+ * Set the popup string to as, which should not have a trailing newline.
+ */
+void popup_set(astr as)
+{
+  if (popup)
+    astr_delete(popup);
+  popup = as;
+}
+
+/*
+ * Clear the popup string.
+ */
+void popup_clear(void)
+{
+  popup_set(NULL);
 }
