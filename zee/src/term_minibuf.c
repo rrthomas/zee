@@ -69,6 +69,214 @@ static void draw_minibuf_read(const char *prompt, const char *value,
   term_refresh();
 }
 
+
+/*
+ * Minibuffer key action routines
+ */
+
+static void mb_suspend(void)
+{
+  FUNCALL(suspend);
+}
+
+static void mb_return(char *saved)
+{
+  term_move(term_height() - 1, 0);
+  term_clrtoeol();
+  if (saved)
+    free(saved);
+}
+
+static void mb_cancel(char *saved)
+{
+  term_move(term_height() - 1, 0);
+  term_clrtoeol();
+  if (saved)
+    free(saved);
+}
+
+static ptrdiff_t mb_bol(void)
+{
+  ptrdiff_t i;
+  i = 0;
+  return(i);
+}
+
+static ptrdiff_t mb_eol(astr as)
+{
+  ptrdiff_t i;
+  i = astr_len(as);
+  return(i);
+}
+
+static ptrdiff_t mb_backward_char(ptrdiff_t i)
+{
+  if (i > 0)
+    --i;
+  else
+    ding();
+  return(i);
+}
+
+static ptrdiff_t mb_forward_char(ptrdiff_t i, astr as)
+{
+  if ((size_t)i < astr_len(as))
+    ++i;
+  else
+    ding();
+  return(i);
+}
+
+static void mb_kill_line(ptrdiff_t i, astr as)
+{
+  if ((size_t)i < astr_len(as))
+    astr_truncate(as, i);
+  else
+    ding();
+}
+
+static ptrdiff_t mb_backward_delete_char(ptrdiff_t i, astr as)
+{
+  if (i > 0)
+    astr_remove(as, --i, 1);
+  else
+    ding();
+  return(i);
+}
+
+static void mb_delete_char(ptrdiff_t i, astr as)
+{
+  if ((size_t)i < astr_len(as))
+    astr_remove(as, i, 1);
+  else
+    ding();
+}
+
+static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
+{
+  if (cp == NULL)
+    ding();
+  else if (cp->fl_poppedup) {
+    completion_scroll_down();
+    thistab = lasttab;
+  }
+  return(thistab);
+}
+
+static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
+{
+  if (cp == NULL)
+    ding();
+  else if (cp->fl_poppedup) {
+    completion_scroll_up();
+    thistab = lasttab;
+  }
+  return(thistab);
+}
+
+static void mb_prev_history(History *hp, astr as, ptrdiff_t *_i, char **_saved)
+{
+  ptrdiff_t i = *_i;
+  char *saved = *_saved;
+  if (hp) {
+    const char *elem = previous_history_element(hp);
+    if (elem) {
+      if (!saved)
+        saved = zstrdup(astr_cstr(as));
+
+      i = strlen(elem);
+      astr_cpy_cstr(as, elem);
+    }
+  }
+  *_i = i;
+  *_saved = saved;
+}
+
+static void mb_next_history(History *hp, astr as, ptrdiff_t *_i, char **_saved)
+{
+  ptrdiff_t i = *_i;
+  char *saved = *_saved;
+  if (hp) {
+    const char *elem = next_history_element(hp);
+    if (elem) {
+      i = strlen(elem);
+      astr_cpy_cstr(as, elem);
+    }
+    else if (saved) {
+      i = strlen(saved);
+      astr_cpy_cstr(as, saved);
+
+      free(saved);
+      saved = NULL;
+    }
+  }
+  *_i = i;
+  *_saved = saved;
+}
+
+static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptrdiff_t *_i)
+{
+  int thistab = *_thistab;
+  ptrdiff_t i = *_i;
+  if (cp == NULL) {
+    ding();
+  } else {
+    if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
+        && cp->fl_poppedup) {
+      completion_scroll_up();
+      thistab = lasttab;
+    } else {
+      astr bs = astr_new();
+      astr_cpy(bs, as);
+      thistab = completion_try(cp, bs, TRUE);
+      astr_delete(bs);
+      switch (thistab) {
+      case COMPLETION_NONUNIQUE:
+      case COMPLETION_MATCHED:
+      case COMPLETION_MATCHEDNONUNIQUE:
+        i = cp->matchsize;
+        if (cp->fl_dir)
+          i += astr_len(cp->path);
+        bs = astr_new();
+        if (cp->fl_dir)
+          astr_cat(bs, cp->path);
+        astr_ncat(bs, cp->match, cp->matchsize);
+        if (astr_cmp(as, bs) != 0)
+          thistab = -1;
+        astr_cpy(as, bs);
+        astr_delete(bs);
+        break;
+      case COMPLETION_NOTMATCHED:
+        ding();
+      }
+    }
+  }
+  *_thistab = thistab;
+  *_i = i;
+}
+
+static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr as)
+{
+  if (c > 255 || !isprint(c))
+    ding();
+  else
+    astr_insert_char(as, i++, c);
+  return(i);
+}
+
+static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, int *_thistab, ptrdiff_t *_i)
+{
+  int thistab = *_thistab;
+  ptrdiff_t i = *_i;
+  if (cp != NULL && !cp->fl_space)
+    mb_complete(cp, lasttab, as, &thistab, &i);
+  else
+    astr_insert_char(as, i++, c);
+  *_thistab = thistab;
+  *_i = i;
+}
+
+
 static astr vminibuf_read(const char *prompt, const char *value,
                            Completion *cp, History *hp)
 {
@@ -103,161 +311,63 @@ static astr vminibuf_read(const char *prompt, const char *value,
     case KBD_NOKEY:
       break;
     case KBD_CTL | 'z':
-      FUNCALL(suspend);
+      mb_suspend();
       break;
     case KBD_RET:
-      term_move(term_height() - 1, 0);
-      term_clrtoeol();
-      if (saved)
-        free(saved);
+      mb_return(saved);
       return as;
     case KBD_CANCEL:
-      term_move(term_height() - 1, 0);
-      term_clrtoeol();
-      if (saved)
-        free(saved);
+      mb_cancel(saved);
       return NULL;
     case KBD_CTL | 'a':
     case KBD_HOME:
-      i = 0;
+      i = mb_bol();
       break;
     case KBD_CTL | 'e':
     case KBD_END:
-      i = astr_len(as);
+      i = mb_eol(as);
       break;
     case KBD_CTL | 'b':
     case KBD_LEFT:
-      if (i > 0)
-        --i;
-      else
-        ding();
+      i = mb_backward_char(i);
       break;
     case KBD_CTL | 'f':
     case KBD_RIGHT:
-      if ((size_t)i < astr_len(as))
-        ++i;
-      else
-        ding();
+      i = mb_forward_char(i, as);
       break;
     case KBD_CTL | 'k':
-      if ((size_t)i < astr_len(as))
-        astr_truncate(as, i);
-      else
-        ding();
+      mb_kill_line(i, as);
       break;
     case KBD_BS:
-      if (i > 0)
-        astr_remove(as, --i, 1);
-      else
-        ding();
+      i = mb_backward_delete_char(i, as);
       break;
     case KBD_DEL:
-      if ((size_t)i < astr_len(as))
-        astr_remove(as, i, 1);
-      else
-        ding();
+      mb_delete_char(i, as);
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
-      if (cp == NULL) {
-        ding();
-        break;
-      }
-
-      if (cp->fl_poppedup) {
-        completion_scroll_down();
-        thistab = lasttab;
-      }
+      thistab = mb_scroll_down(cp, thistab, lasttab);
       break;
     case KBD_CTL | 'v':
     case KBD_PGDN:
-      if (cp == NULL) {
-        ding();
-        break;
-      }
-
-      if (cp->fl_poppedup) {
-        completion_scroll_up();
-        thistab = lasttab;
-      }
+      thistab = mb_scroll_up(cp, thistab, lasttab);
       break;
     case KBD_UP:
     case KBD_META | 'p':
-      if (hp) {
-        const char *elem = previous_history_element(hp);
-        if (elem) {
-          if (!saved)
-            saved = zstrdup(astr_cstr(as));
-
-          i = strlen(elem);
-          astr_cpy_cstr(as, elem);
-        }
-      }
+      mb_prev_history(hp, as, &i, &saved);
       break;
     case KBD_DOWN:
     case KBD_META | 'n':
-      if (hp) {
-        const char *elem = next_history_element(hp);
-        if (elem) {
-          i = strlen(elem);
-          astr_cpy_cstr(as, elem);
-        }
-        else if (saved) {
-          i = strlen(saved);
-          astr_cpy_cstr(as, saved);
-
-          free(saved);
-          saved = NULL;
-        }
-      }
+      mb_next_history(hp, as, &i, &saved);
       break;
     case KBD_TAB:
-    got_tab:
-      if (cp == NULL) {
-        ding();
-        break;
-      }
-
-      if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
-          && cp->fl_poppedup) {
-        completion_scroll_up();
-        thistab = lasttab;
-      } else {
-        astr bs = astr_new();
-        astr_cpy(bs, as);
-        thistab = completion_try(cp, bs, TRUE);
-        astr_delete(bs);
-        switch (thistab) {
-        case COMPLETION_NONUNIQUE:
-        case COMPLETION_MATCHED:
-        case COMPLETION_MATCHEDNONUNIQUE:
-          i = cp->matchsize;
-          if (cp->fl_dir)
-            i += astr_len(cp->path);
-          bs = astr_new();
-          if (cp->fl_dir)
-            astr_cat(bs, cp->path);
-          astr_ncat(bs, cp->match, cp->matchsize);
-          if (astr_cmp(as, bs) != 0)
-            thistab = -1;
-          astr_cpy(as, bs);
-          astr_delete(bs);
-          break;
-        case COMPLETION_NOTMATCHED:
-          ding();
-        }
-      }
+      mb_complete(cp, lasttab, as, &thistab, &i);
       break;
     case ' ':
-      if (cp != NULL && !cp->fl_space)
-        goto got_tab;
-      /* FALLTHROUGH */
+      mb_space_or_complete(cp, c, lasttab, as, &thistab, &i);
+      break;
     default:
-      if (c > 255 || !isprint(c)) {
-        ding();
-        break;
-      }
-      astr_insert_char(as, i++, c);
+      i = mb_self_insert(c, i, as);
     }
 
     lasttab = thistab;
