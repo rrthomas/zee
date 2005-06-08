@@ -72,7 +72,7 @@
 (global-set-key "\M-d" 'kill-word)
 (global-set-key "\M-\DEL" 'kill-word)
 ; Copy selection to clipboard.
-(global-set-key "\C-C" 'copy-region-as-kill)
+(global-set-key "\C-c" 'copy-region-as-kill)
 (global-set-key "\M-w" 'copy-region-as-kill)
 ; Delete without modifying clipboard.
 (global-set-key "\BS" 'backward-delete-char)
