@@ -26,9 +26,7 @@
 (global-set-key "\C-e" 'end-of-line)
 (global-set-key "\END" 'end-of-line)
 (global-set-key "\PGUP" 'scroll-down)
-(global-set-key "\M-n" 'scroll-down)
 (global-set-key "\PGDN" 'scroll-up)
-(global-set-key "\M-p" 'scroll-up)
 ; Whole buffer
 (global-set-key "\M-<" 'beginning-of-buffer)
 (global-set-key "\C-\HOME" 'beginning-of-buffer)
@@ -93,9 +91,9 @@
 
 ; Window management.
 
-;(global-set-key "\M-n" 'window-next)
+(global-set-key "\M-n" 'window-next)
 (global-set-key "\M-o" 'window-split)
-;(global-set-key "\M-p" 'window-close-others)
+(global-set-key "\M-p" 'window-close-others)
 (global-set-key "\M-w" 'window-close)
 
 (global-set-key "\ESC" 'keyboard-quit)
