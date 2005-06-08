@@ -887,7 +887,6 @@ current buffer.
       } else {
         astr out = astr_new(), s;
 
-        out = astr_new();
         while (astr_len(s = astr_fgets(pipe)) > 0) {
           astr_cat(out, s);
           astr_cat_cstr(out, "\n");
@@ -896,6 +895,10 @@ current buffer.
         astr_delete(s);
         pclose(pipe);
         remove(tempfile);
+
+#ifdef CURSES
+        raise(SIGWINCH);
+#endif
 
         undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
         calculate_the_region(&r);
