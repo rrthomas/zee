@@ -93,9 +93,9 @@
 
 ; Window management.
 
-(global-set-key "\M-n" 'window-next)
+;(global-set-key "\M-n" 'window-next)
 (global-set-key "\M-o" 'window-split)
-(global-set-key "\M-p" 'window-close-others)
+;(global-set-key "\M-p" 'window-close-others)
 (global-set-key "\M-w" 'window-close)
 
 (global-set-key "\ESC" 'keyboard-quit)
