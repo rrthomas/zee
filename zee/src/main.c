@@ -124,6 +124,7 @@ static void signal_init(void)
   signal(SIGINT, other_sig_handler);
   signal(SIGQUIT, other_sig_handler);
   signal(SIGTERM, other_sig_handler);
+  signal(SIGPIPE, SIG_IGN);
 }
 
 /* Options table */
