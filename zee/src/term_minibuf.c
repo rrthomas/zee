@@ -276,14 +276,16 @@ static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, in
 }
 
 
-static astr vminibuf_read(const char *prompt, const char *value,
-                           Completion *cp, History *hp)
+astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp)
 {
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING;
   ptrdiff_t i;
   char *s[] = {"", " [No match]", " [Sole completion]", " [Complete, but not unique]", ""};
   char *saved = NULL;
   astr as = astr_new();
+
+  if (hp)
+    prepare_history(hp);
 
   i = strlen(value);
   astr_cpy_cstr(as, value);
@@ -358,12 +360,4 @@ static astr vminibuf_read(const char *prompt, const char *value,
 
     lasttab = thistab;
   }
-}
-
-astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp)
-{
-  if (hp)
-    prepare_history(hp);
-
-  return vminibuf_read(prompt, value, cp, hp);
 }
