@@ -41,17 +41,17 @@
 void check_windows(void)
 {
   Window *wp;
-  
+
   /* There must be a current window. */
   assert(cur_wp);
   /* The current buffer must be the one displayed in the current window. */
   assert(cur_wp->bp == cur_bp);
-  
+
   /* For all windows... */
   for (wp = head_wp; wp != NULL; wp = wp->next) {
     /* There must be a buffer displayed in the window. */
     assert(wp->bp);
-    
+
     if (wp == cur_wp) { /* FIXME: Should be (wp->bp == cur_bp), but currently
                            that wouldn't work. */
       /* There must not be a saved_pt. */
@@ -236,56 +236,11 @@ Point window_pt(Window *wp)
   /* The current window uses the current buffer point; all other
      windows have a saved point.  */
   assert(wp != NULL);
-  if (wp->bp == cur_wp->bp) {
+  if (wp == cur_wp) {
     assert(wp->saved_pt == NULL);
     return cur_bp->pt;
   } else {
     assert(wp->saved_pt != NULL);
     return wp->saved_pt->pt;
   }
-}
-
-Window *popup_window(void)
-{
-  if (head_wp->next == NULL) {
-    /* There is only one window on the screen, so split it. */
-    FUNCALL(window_split);
-    return cur_wp->next;
-  }
-
-  /* Use the window after the current one. */
-  if (cur_wp->next != NULL)
-    return cur_wp->next;
-
-  /* Use the first window. */
-  return head_wp;
-}
-
-/* Contents of popup window. */
-static astr popup = NULL;
-
-/*
- * Return the contents of the popup window.
- */
-astr popup_get(void)
-{
-  return popup;
-}
-
-/*
- * Set the popup string to as, which should not have a trailing newline.
- */
-void popup_set(astr as)
-{
-  if (popup)
-    astr_delete(popup);
-  popup = as;
-}
-
-/*
- * Clear the popup string.
- */
-void popup_clear(void)
-{
-  popup_set(NULL);
 }

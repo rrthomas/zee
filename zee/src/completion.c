@@ -20,17 +20,21 @@
 
 #include "config.h"
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #include <assert.h>
-#include <dirent.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
+
+#include <dirent.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 
 #include "main.h"
@@ -61,7 +65,7 @@ Completion *completion_new(int fileflag)
 }
 
 /*
- * Dispose an completion structure.
+ * Free a completion structure.
  */
 void free_completion(Completion *cp)
 {
@@ -74,48 +78,6 @@ void free_completion(Completion *cp)
   if (cp->fl_dir)
     astr_delete(cp->path);
   free(cp);
-}
-
-/*
- * Scroll completions up.
- */
-void completion_scroll_up(void)
-{
-  Window *wp, *old_wp = cur_wp;
-
-  wp = find_window("*Completions*");
-  assert(wp != NULL);
-  set_current_window(wp);
-  assert(cur_bp); /* FIXME: Think about this carefully in case breaking the
-                     "always at least one buffer" invariant has broken it.
-                     This might be okay. */
-  if (cur_bp->pt.n == cur_bp->num_lines || !FUNCALL(scroll_up))
-    gotobob();
-  set_current_window(old_wp);
-
-  term_display();
-}
-
-/*
- * Scroll completions down.
- */
-void completion_scroll_down(void)
-{
-  Window *wp, *old_wp = cur_wp;
-
-  wp = find_window("*Completions*");
-  assert(wp != NULL);
-  set_current_window(wp);
-  assert(cur_bp); /* FIXME: Think about this carefully in case breaking the
-                     "always at least one buffer" invariant has broken it.
-                     This might be okay. */
-  if (cur_bp->pt.n == 0 || !FUNCALL(scroll_down)) {
-    gotoeob();
-    resync_display();
-  }
-  set_current_window(old_wp);
-
-  term_display();
 }
 
 /*
@@ -145,7 +107,7 @@ static astr completion_write(list l, size_t size)
   max = calculate_max_length(l, size) + 5;
   numcols = (cur_wp->ewidth - 1) / max;
 
-  astr_cat_cstr(as, "Possible completions are:\n");
+  astr_cpy_cstr(as, "Possible completions are:\n");
   for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
@@ -165,21 +127,23 @@ static astr completion_write(list l, size_t size)
  */
 static void popup_completion(Completion *cp, int allflag, size_t num)
 {
-  astr popup = astr_new();
+  astr popup = astr_new(), as;
 
   cp->fl_poppedup = 1;
   if (head_wp->next == NULL)
     cp->fl_close = 1;
 
-  astr_afmt(popup, "Completions\n\n");
+  astr_cpy_cstr(popup, "Completions\n\n");
 
   if (allflag)
-    astr_cat(popup, completion_write(cp->completions,
-                                     list_length(cp->completions)));
+    as = completion_write(cp->completions, list_length(cp->completions));
   else
-    astr_cat(popup, completion_write(cp->matches, num));
+    as = completion_write(cp->matches, num);
+  astr_cat(popup, as);
+  astr_delete(as);
 
   popup_set(popup);
+  astr_delete(popup);
 
   if (!cp->fl_close)
     cp->old_bp = cur_bp;

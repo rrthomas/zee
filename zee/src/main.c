@@ -32,19 +32,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if HAVE_GETOPT_LONG_ONLY
+#include <signal.h>
+
+#ifdef HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
 #else
 #include "getopt.h"
 #endif
-#include <signal.h>
-#if ALLEGRO
-#if HAVE_ALLEGRO_H
+#ifdef ALLEGRO
 #include <allegro.h>
-#endif
 #endif
 
 #include "main.h"
@@ -137,6 +133,29 @@ struct option longopts[] = {
     { "version",      0, NULL, 'v' },
     { 0, 0, 0, 0 }
 };
+
+static void open_file_at(char *path, size_t lineno)
+{
+  astr cwd = get_current_dir(FALSE), dir = astr_new(), fname = astr_new();
+
+  /* Check path */
+  if (!expand_path(path, astr_cstr(cwd), dir, fname)) {
+    fprintf(stderr, PACKAGE_NAME ": %s: invalid filename or path\n", path);
+    die(1);
+  }
+  astr_delete(cwd);
+
+  /* Open file */
+  astr_cat(dir, fname);
+  astr_delete(fname);
+  file_open(astr_cstr(dir));
+  astr_delete(dir);
+
+  /* Update display */
+  if (lineno > 0)
+    ngotodown(lineno);
+  resync_display();
+}
 
 int main(int argc, char **argv)
 {
@@ -257,7 +276,7 @@ int main(int argc, char **argv)
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
       if (*argv)
-        open_file(*argv++, line - 1);
+        open_file_at(*argv++, line - 1);
     }
     term_display();
 

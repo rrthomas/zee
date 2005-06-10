@@ -36,7 +36,7 @@ static History functions_history;
 static Function _last_command;
 
 /*--------------------------------------------------------------------------
- * Key binding.
+ * Key binding
  *--------------------------------------------------------------------------*/
 
 typedef struct binding *bindingp;

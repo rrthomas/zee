@@ -35,20 +35,15 @@
  * Allocate a new buffer structure and set the default local
  * variable values.
  * The allocation of the first empty line is done here to simplify
- * a lot the code.
+ * the code.
  */
 static Buffer *buffer_new(void)
 {
   Buffer *bp = (Buffer *)zmalloc(sizeof(Buffer));
 
-  /* Allocate a line. */
-  bp->pt.p = list_new();
-  bp->pt.p->item = astr_new();
-
-  /* Allocate the limit marker. */
-  bp->lines = list_new();
-  list_prev(bp->lines) = list_next(bp->lines) = bp->pt.p;
-  list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
+  /* Allocate the lines. */
+  bp->lines = line_new();
+  bp->pt.p = list_first(bp->lines);
 
   /* Set the initial mark (needs limit marker to be set up). */
   bp->mark = marker_new(bp, point_min(bp));
@@ -64,13 +59,9 @@ static Buffer *buffer_new(void)
  */
 void free_buffer(Buffer *bp)
 {
-  Line *lp;
   Undo *up, *next_up;
 
-  /* Free all the lines. */
-  for (lp = list_first(bp->lines); lp != bp->lines; lp = list_next(lp))
-    astr_delete(lp->item);
-  list_delete(bp->lines);
+  line_delete(bp->lines);
 
   /* Free all the undo operations. */
   up = bp->last_undop;
@@ -88,8 +79,7 @@ void free_buffer(Buffer *bp)
 
   /* Free the name and the filename. */
   free(bp->name);
-  if (bp->filename != NULL)
-    free(bp->filename);
+  free(bp->filename);
 
   free(bp);
 }
@@ -131,8 +121,7 @@ Buffer *create_buffer(const char *name)
  */
 void set_buffer_name(Buffer *bp, const char *name)
 {
-  if (bp->name != NULL)
-    free(bp->name);
+  free(bp->name);
   bp->name = zstrdup(name);
 }
 
@@ -141,14 +130,14 @@ void set_buffer_name(Buffer *bp, const char *name)
  */
 void set_buffer_filename(Buffer *bp, const char *filename)
 {
-  if (bp->filename != NULL)
-    free(bp->filename);
+  astr name = make_buffer_name(filename);
+
+  free(bp->filename);
   bp->filename = zstrdup(filename);
 
-  if (bp->name != NULL)
-    free(bp->name);
-  bp->name = "";
-  bp->name = make_buffer_name(filename);
+  free(bp->name);
+  bp->name = zstrdup(astr_cstr(name));
+  astr_delete(name);
 }
 
 /*
@@ -190,37 +179,24 @@ Buffer *get_next_buffer(void)
 /*
  * Create a buffer name using the file name.
  */
-char *make_buffer_name(const char *filename)
+astr make_buffer_name(const char *filename)
 {
   const char *p;
-  char *name;
-  int i;
+  astr name = astr_new();
+  size_t i;
 
   if ((p = strrchr(filename, '/')) == NULL)
     p = filename;
   else
     ++p;
+  astr_cpy_cstr(name, p);
 
-  if (find_buffer(p, FALSE) == NULL)
-    return zstrdup(p);
+  /* This loop will terminate at the latest after checking all the
+     buffers. */
+  for (i = 2; find_buffer(astr_cstr(name), FALSE) != NULL; i++)
+    astr_afmt(name, "%s<%d>", p, i);
 
-  /*
-   * The limit of 999 buffers with the same name should
-   * be enough; if it is too much restrictive for you,
-   * just change 999 to your preferred value :-)
-   */
-  name = (char *)zmalloc(strlen(p) + 6);	/* name + "<nnn>\0" */
-  for (i = 2; i <= 999; i++) {
-    sprintf(name, "%s<%d>", p, i);
-    if (find_buffer(name, FALSE) == NULL)
-      return name;
-  }
-
-  /*
-   * This should never happen.
-   */
-  assert(0);
-  return NULL;
+  return name;
 }
 
 /* Move the selected buffer to head.  */

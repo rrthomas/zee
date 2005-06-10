@@ -22,28 +22,29 @@
 
 #include "config.h"
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #include <assert.h>
 #include <errno.h>
-#if HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #include <limits.h>
-#include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
+#include <ctype.h>
+
+#include <pwd.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #include <utime.h>
-#include <ctype.h>
 
 #include "main.h"
 #include "extern.h"
@@ -228,19 +229,17 @@ astr get_current_dir(int interactive)
   if (interactive && cur_bp && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    int p;
+    char *sep;
 
     buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
-    p = astr_rfind_cstr(buf, "/");
-    if (p != -1)
-      astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
-    if (*astr_char(buf, -1) != '/')
-      astr_cat_cstr(buf, "/");
-  } else {
+    if ((sep = strrchr(astr_cstr(buf), '/')) != NULL)
+      astr_truncate(buf, sep - astr_cstr(buf));
+  } else
     /* Get the current directory name from the system. */
     buf = agetcwd();
+
+  if (*astr_char(buf, -1) != '/')
     astr_cat_cstr(buf, "/");
-  }
 
   return buf;
 }
@@ -259,95 +258,49 @@ astr get_home_dir(void)
   return as;
 }
 
-/* FIXME: Comment the difference between this and file_open. Since renaming
- * things it is a bit confusing. I think the difference is that this function
- * also does a "go to line" command. */
-void open_file(char *path, size_t lineno)
-{
-  astr buf, dir, fname;
-
-  dir = astr_new();
-  fname = astr_new();
-  buf = get_current_dir(FALSE);
-
-  if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-    fprintf(stderr, PACKAGE_NAME ": %s: invalid filename or path\n", path);
-    die(1);
-  }
-
-  astr_cpy_cstr(buf, astr_cstr(dir));
-  astr_cat_cstr(buf, astr_cstr(fname));
-  astr_delete(dir);
-  astr_delete(fname);
-
-  file_open(astr_cstr(buf));
-  astr_delete(buf);
-  if (lineno > 0)
-    ngotodown(lineno);
-  resync_display();
-}
-
 /*
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist.
  */
-void read_from_disk(const char *filename)
+void read_file(const char *filename)
 {
-  Line *lp;
   FILE *fp;
-  int i, size, eol = FALSE;
-  char buf[BUFSIZ + 1];
+  char eolstr[3] = "\n";
+  astr as = NULL;
+  int ok = TRUE;
+  Buffer *bp = cur_bp;          /* FIXME: Pass bp as a parameter. */
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(bp);
 
-  buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
-
-  if ((fp = fopen(filename, "r")) == NULL) {
-    if (errno != ENOENT) {
-      minibuf_write("%s: %s foo", filename, strerror(errno));
-      cur_bp->flags |= BFLAG_READONLY;
-    }
-    return;
+  if ((fp = fopen(filename, "r")) == NULL)
+    ok = FALSE;
+  else {
+    as = astr_fread(fp);
+    ok = fclose(fp) == 0;
   }
 
-  lp = cur_bp->pt.p;
+  if (ok == FALSE) {
+    if (errno != ENOENT) {
+      minibuf_write("%s: %s", filename, strerror(errno));
+      bp->flags |= BFLAG_READONLY;
+    }
+  } else {
+    /* FIXME: scan buffer to determine correct eolstr. */
+    strcpy(bp->eol, eolstr);
 
-  while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
-    for (i = 0; i < size; i++)
-      if (buf[i] != '\n' && buf[i] != '\r')
-        astr_cat_char(lp->item, buf[i]);
-      else {
-        lp = list_prepend(lp, astr_new());
-        ++cur_bp->num_lines;
+    line_delete(bp->lines);
+    bp->lines = string_to_lines(as, eolstr, &bp->num_lines);
+    bp->pt.p = list_first(bp->lines);
+  }
 
-        if (i < size - 1 &&
-            buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
-                                     buf[i + 1] == '\r')) {
-          if (!eol) {
-            cur_bp->eol[0] = buf[i];
-            cur_bp->eol[1] = buf[i + 1];
-            eol = TRUE;
-          }
-          i++;
-        } else if (!eol) {
-          cur_bp->eol[0] = buf[i];
-          cur_bp->eol[1] = '\0';
-          eol = TRUE;
-        }
-      }
-
-  list_next(lp) = cur_bp->lines;
-  list_prev(cur_bp->lines) = lp;
-  cur_bp->pt.p = list_next(cur_bp->lines);
-
-  fclose(fp);
+  if (as)
+    astr_delete(as);
 }
 
-/* FIXME: Comment the difference between this and open_file. */
 int file_open(const char *filename)
 {
   Buffer *bp;
-  char *s;
+  astr as;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->filename != NULL && !strcmp(bp->filename, filename)) {
@@ -355,9 +308,9 @@ int file_open(const char *filename)
       return TRUE;
     }
 
-  s = make_buffer_name(filename);
-  if (strlen(s) < 1) {
-    free(s);
+  as = make_buffer_name(filename);
+  if (astr_len(as) == 0) {
+    astr_delete(as);
     return FALSE;
   }
 
@@ -367,12 +320,12 @@ int file_open(const char *filename)
     return FALSE;
   }
 
-  bp = create_buffer(s);
-  free(s);
+  bp = create_buffer(astr_cstr(as));
+  astr_delete(as);
   bp->filename = zstrdup(filename);
 
   switch_to_buffer(bp);
-  read_from_disk(filename);
+  read_file(filename);
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -548,10 +501,11 @@ Kill the current buffer or the user specified one.
 }
 END_DEFUN
 
+/* FIXME: Use stdio, flen &c., and common up with file_open */
 static int file_insert(const char *filename)
 {
   int fd;
-  size_t i, size;
+  off_t i, size;
   char buf[BUFSIZ];
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
@@ -571,9 +525,9 @@ static int file_insert(const char *filename)
     close(fd);
     return TRUE;
   }
-
   lseek(fd, 0, SEEK_SET);
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (size_t)size, 0);
   undo_nosave = TRUE;
   while ((size = read(fd, buf, BUFSIZ)) > 0)
     for (i = 0; i < size; i++)

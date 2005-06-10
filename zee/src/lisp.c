@@ -104,32 +104,3 @@ le *lisp_read_file(const char *file)
 
   return list;
 }
-
-DEFUN("load-file", load_file)
-/*+
-Load the Lisp file named FILE.
-+*/
-{
-  astr name = NULL;
-
-  ok = FALSE;
-
-  if (uniused) {
-    if (argc == 2)
-      astr_cpy_cstr(name, evaluateNode(branch->list_next)->data);
-  } else {
-    astr buf = get_current_dir(TRUE);
-    if ((name = minibuf_read_dir("Load file: ", astr_cstr(buf))) == NULL)
-      ok = cancel();
-    astr_delete(buf);
-  }
-
-  if (name) {
-    le *list = lisp_read_file(astr_cstr(name));
-    astr_delete(leDumpEval(list, 0));
-    leWipe(list);
-    astr_delete(name);
-    ok = TRUE;
-  }
-}
-END_DEFUN

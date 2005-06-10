@@ -142,46 +142,6 @@ astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
   return astr_ncat(astr_new(), astr_char(as, pos), size);
 }
 
-int astr_find(const astr as, const astr src)
-{
-  return astr_find_cstr(as, src->text);
-}
-
-int astr_find_cstr(const astr as, const char *s)
-{
-  char *sp;
-  assert(as != NULL && s != NULL);
-  sp = strstr(as->text, s);
-  return (sp == NULL) ? -1 : sp - as->text;
-}
-
-int astr_rfind(const astr as, const astr src)
-{
-  return astr_rfind_cstr(as, src->text);
-}
-
-int astr_rfind_cstr(const astr as, const char *s)
-{
-  char *sp;
-  assert(as != NULL && s != NULL);
-  sp = strrstr(as->text, s);
-  return (sp == NULL) ? -1 : sp - as->text;
-}
-
-size_t astr_count_char(astr as, int c)
-{
-  size_t n = 0;
-  const char *s = astr_cstr(as);
-
-  assert(as != NULL);
-  while (s - astr_cstr(as) < (ptrdiff_t)astr_len(as) && (s = strchr(s, c))) {
-    s++;
-    n++;
-  }
-
-  return n;
-}
-
 astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
@@ -252,15 +212,25 @@ astr astr_truncate(astr as, ptrdiff_t pos)
   return as;
 }
 
-astr astr_fgets(FILE *f)
+astr astr_fread(FILE *fp)
+{
+  int c;
+  astr as = astr_new();
+
+  while ((c = getc(fp)) != EOF)
+    astr_cat_char(as, c);
+  return as;
+}
+
+astr astr_fgets(FILE *fp)
 {
   int c;
   astr as;
 
-  if (feof(f))
+  if (feof(fp))
     return NULL;
   as = astr_new();
-  while ((c = fgetc(f)) != EOF && c != '\n')
+  while ((c = getc(fp)) != EOF && c != '\n')
     astr_cat_char(as, c);
   return as;
 }
@@ -357,17 +327,6 @@ int main(void)
   astr_remove(as1, 4, 10);
   assert_eq(as1, "1234");
 
-  astr_cpy_cstr(as1, "abc def de ab cd ab de fg");
-  while ((i = astr_find_cstr(as1, "de")) >= 0)
-    astr_replace_cstr(as1, i, 2, "xxx");
-  assert_eq(as1, "abc xxxf xxx ab cd ab xxx fg");
-  while ((i = astr_find_cstr(as1, "ab")) >= 0)
-    astr_remove(as1, i, 2);
-  assert_eq(as1, "c xxxf xxx  cd  xxx fg");
-  while ((i = astr_find_cstr(as1, "  ")) >= 0)
-    astr_replace_char(as1, i, 2, ' ');
-  assert_eq(as1, "c xxxf xxx cd xxx fg");
-
   astr_cpy_cstr(as1, "12345");
   as2 = astr_substr(as1, -2, 2);
   assert_eq(as2, "45");
@@ -388,11 +347,6 @@ int main(void)
   astr_cpy_cstr(as1, "1234567");
   astr_replace_cstr(as1, -1, 5, "foo");
   assert_eq(as1, "123456foo");
-
-  astr_cpy_cstr(as1, "abc def de ab cd ab de fg");
-  while ((i = astr_find_cstr(as1, "de")) >= 0)
-    astr_replace_cstr(as1, i, 2, "xxx");
-  assert_eq(as1, "abc xxxf xxx ab cd ab xxx fg");
 
   astr_cpy_cstr(as1, "");
   astr_afmt(as1, "%s * %d = ", "5", 3);

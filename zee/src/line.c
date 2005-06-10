@@ -34,12 +34,74 @@
 #include "extern.h"
 
 
+/*--------------------------------------------------------------------------
+ * Markers
+ *--------------------------------------------------------------------------*/
+
+static void unchain_marker(Marker *marker)
+{
+  Marker *m, *next, *prev = NULL;
+
+  if (!marker->bp)
+    return;
+
+  for (m=marker->bp->markers; m; m=next) {
+    next = m->next;
+    if (m == marker) {
+      if (prev)
+        prev->next = next;
+      else
+        m->bp->markers = next;
+
+      m->bp = NULL;
+      break;
+    }
+    prev = m;
+  }
+}
+
+void free_marker(Marker *marker)
+{
+  unchain_marker(marker);
+  free(marker);
+}
+
+void move_marker(Marker *marker, Buffer *bp, Point pt)
+{
+  if (bp != marker->bp) {
+    /* Unchain with the previous pointed buffer. */
+    unchain_marker(marker);
+
+    /* Change the buffer. */
+    marker->bp = bp;
+
+    /* Chain with the new buffer. */
+    marker->next = bp->markers;
+    bp->markers = marker;
+  }
+
+  /* Change the point. */
+  marker->pt = pt;
+}
+
+Marker *marker_new(Buffer *bp, Point pt)
+{
+  Marker *marker = zmalloc(sizeof(Marker));
+  move_marker(marker, bp, pt);
+  return marker;
+}
+
+Marker *point_marker(void)
+{
+  assert(cur_bp);
+  return marker_new(cur_bp, cur_bp->pt);
+}
+
 static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int offset)
 {
   Marker *pt = point_marker(), *marker;
 
   assert(cur_bp); /* FIXME: Remove this assumption. */
-
   for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
     if (marker->pt.p == oldlp &&
         (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
@@ -51,6 +113,51 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 
   cur_bp->pt = pt->pt;
   free_marker(pt);
+}
+
+
+/*
+ * Create a Line list.
+ */
+Line *line_new(void)
+{
+  Line *lp = list_new();
+  list_append(lp, astr_new());
+  return lp;
+}
+
+/*
+ * Free a Line list.
+ */
+void line_delete(Line *lp)
+{
+  Line *lq;
+
+  /* Free all the lines. */
+  for (lq = list_first(lp); lq != lp; lq = list_next(lq))
+    astr_delete(lq->item);
+  list_delete(lp);
+}
+
+/*
+ * Read an astr into a Line list.
+ */
+Line *string_to_lines(astr as, const char *eol, size_t *lines)
+{
+  size_t i, eol_len = strlen(eol);
+  Line *lp = line_new();
+
+  /* FIXME: Rewrite using strstr */
+  for (i = 0, *lines = 1; i < astr_len(as); i++)
+    if (strncmp(astr_char(as, (ptrdiff_t)i), eol, eol_len) != 0)
+      astr_cat_char(list_last(lp)->item, *astr_char(as, (ptrdiff_t)i));
+    else {
+      list_append(lp, astr_new());
+      ++*lines;
+      i += eol_len - 1;
+    }
+
+  return lp;
 }
 
 /*

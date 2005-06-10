@@ -52,8 +52,7 @@ void leReallyWipe(le *list)
     leWipe(list->list_next);
 
     /* free ourself */
-    if (list->data)
-      free(list->data);
+    free(list->data);
     free(list);
   }
 }
@@ -160,10 +159,8 @@ void leTagReplace(le *list, int tagval, le *newinfo)
   while (list) {
     if (list->tag == tagval) {
       /* free any existing stuff */
-      if (list->data) {
-        free(list->data);
-        list->data = NULL;
-      }
+      free(list->data);
+      list->data = NULL;
 
       /* NOTE: This next comparison might be flawed */
       if (newinfo->list_next || newinfo->branch) {

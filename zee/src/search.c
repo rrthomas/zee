@@ -28,9 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 
 #include "main.h"
 #include "extern.h"
@@ -193,8 +190,7 @@ Search forward from point for regular expression REGEXP.
   else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    if (last_search != NULL)
-      free(last_search);
+    free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
@@ -220,8 +216,7 @@ Search backward from point for match for regular expression REGEXP.
   if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    if (last_search != NULL)
-      free(last_search);
+    free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
@@ -316,8 +311,7 @@ static int isearch(int dir)
         /* Find next match. */
         cur = cur_bp->pt;
         /* Save search string. */
-        if (last_search != NULL)
-          free(last_search);
+        free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
       }
       else if (last_search != NULL)
@@ -334,8 +328,7 @@ static int isearch(int dir)
         cur_bp->mark->pt = start;
 
         /* Save search string. */
-        if (last_search != NULL)
-          free(last_search);
+        free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
 
         minibuf_write("Mark saved when search started");

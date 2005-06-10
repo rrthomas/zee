@@ -83,16 +83,14 @@ static void mb_return(char *saved)
 {
   term_move(term_height() - 1, 0);
   term_clrtoeol();
-  if (saved)
-    free(saved);
+  free(saved);
 }
 
 static void mb_cancel(char *saved)
 {
   term_move(term_height() - 1, 0);
   term_clrtoeol();
-  if (saved)
-    free(saved);
+  free(saved);
 }
 
 static ptrdiff_t mb_bol(void)
@@ -157,7 +155,7 @@ static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
   if (cp == NULL)
     ding();
   else if (cp->fl_poppedup) {
-    completion_scroll_down();
+    popup_scroll_down();
     thistab = lasttab;
   }
   return(thistab);
@@ -168,7 +166,7 @@ static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
   if (cp == NULL)
     ding();
   else if (cp->fl_poppedup) {
-    completion_scroll_up();
+    popup_scroll_up();
     thistab = lasttab;
   }
   return(thistab);
@@ -218,17 +216,18 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
 {
   int thistab = *_thistab;
   ptrdiff_t i = *_i;
-  if (cp == NULL) {
+  if (cp == NULL)
     ding();
-  } else {
-    if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
-        && cp->fl_poppedup) {
-      completion_scroll_up();
+  else {
+    if (lasttab != COMPLETION_NOTCOMPLETING &&
+        lasttab != COMPLETION_NOTMATCHED && cp->fl_poppedup) {
+      popup_scroll_up();
       thistab = lasttab;
     } else {
       astr bs = astr_new();
       astr_cpy(bs, as);
       thistab = completion_try(cp, bs, TRUE);
+      assert(thistab != COMPLETION_NOTCOMPLETING);
       astr_delete(bs);
       switch (thistab) {
       case COMPLETION_NONUNIQUE:
@@ -242,7 +241,7 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
           astr_cat(bs, cp->path);
         astr_ncat(bs, cp->match, cp->matchsize);
         if (astr_cmp(as, bs) != 0)
-          thistab = -1;
+          thistab = COMPLETION_NOTCOMPLETING;
         astr_cpy(as, bs);
         astr_delete(bs);
         break;
@@ -280,32 +279,19 @@ static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, in
 static astr vminibuf_read(const char *prompt, const char *value,
                            Completion *cp, History *hp)
 {
-  int c, thistab, lasttab = -1;
-  size_t prompt_len = strlen(prompt);
+  int c, thistab, lasttab = COMPLETION_NOTCOMPLETING;
   ptrdiff_t i;
-  char *s, *saved = NULL;
+  char *s[] = {"", " [No match]", " [Sole completion]", " [Complete, but not unique]", ""};
+  char *saved = NULL;
   astr as = astr_new();
 
   i = strlen(value);
   astr_cpy_cstr(as, value);
 
   for (;;) {
-    switch (lasttab) {
-    case COMPLETION_MATCHEDNONUNIQUE:
-      s = " [Complete, but not unique]";
-      break;
-    case COMPLETION_NOTMATCHED:
-      s = " [No match]";
-      break;
-    case COMPLETION_MATCHED:
-      s = " [Sole completion]";
-      break;
-    default:
-      s = "";
-    }
-    draw_minibuf_read(prompt, astr_cstr(as), prompt_len, s, (size_t)i);
+    draw_minibuf_read(prompt, astr_cstr(as), strlen(prompt), s[lasttab], (size_t)i);
 
-    thistab = -1;
+    thistab = COMPLETION_NOTCOMPLETING;
 
     switch (c = getkey()) {
     case KBD_NOKEY:
@@ -374,25 +360,10 @@ static astr vminibuf_read(const char *prompt, const char *value,
   }
 }
 
-astr term_minibuf_read(const char *prompt, const char *value,
-                        Completion *cp, History *hp)
+astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp)
 {
-  Window *wp, *old_wp = cur_wp;
-  astr as;
-
   if (hp)
     prepare_history(hp);
 
-  as = vminibuf_read(prompt, value, cp, hp);
-
-  if (cp != NULL && cp->fl_poppedup && (wp = find_window("*Completions*")) != NULL) {
-    set_current_window(wp);
-    if (cp->fl_close)
-      FUNCALL(window_close);
-    else if (cp->old_bp)
-      switch_to_buffer(cp->old_bp);
-    set_current_window(old_wp);
-  }
-
-  return as;
+  return vminibuf_read(prompt, value, cp, hp);
 }

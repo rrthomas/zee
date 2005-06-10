@@ -555,12 +555,8 @@ static int core(xprintf_struct *s)
     return EOF; /* should rarely happen because we shrink the buffer */
   return s->pseudo_len;
 
-  free(s->buffer_base);
-  return s->pseudo_len;
-
  free_EOF:
-  if (s->buffer_base != NULL)
-    free(s->buffer_base);
+  free(s->buffer_base);
   return EOF;
 }
 

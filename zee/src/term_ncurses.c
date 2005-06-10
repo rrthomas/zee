@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_NCURSES_H
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>

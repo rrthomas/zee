@@ -65,3 +65,87 @@ The desired position of point is always relative to the current window.
   term_full_redisplay();
 }
 END_DEFUN
+
+
+/* Contents of popup window. */
+static Line *popup = NULL;
+static size_t popup_num_lines = 0;
+static size_t popup_pos_line = 0;
+
+/*
+ * Return the contents of the popup window.
+ */
+Line *popup_get(void)
+{
+  return popup;
+}
+
+/*
+ * Return number of lines in popup.
+ */
+size_t popup_lines(void)
+{
+  return popup_num_lines;
+}
+
+/*
+ * Set the popup string to as, which should not have a trailing newline.
+ * Passing NULL for as clears the popup string.
+ */
+void popup_set(astr as)
+{
+  if (popup)
+    line_delete(popup);
+
+  if (as)
+    popup = string_to_lines(as, "\n", &popup_num_lines);
+  else {
+    popup = NULL;
+    popup_num_lines = 0;
+  }
+  popup_pos_line = 0;
+}
+
+/*
+ * Clear the popup string.
+ */
+void popup_clear(void)
+{
+  popup_set(NULL);
+}
+
+/*
+ * Return the popup position.
+ */
+size_t popup_pos(void)
+{
+  return popup_pos_line;
+}
+
+/*
+ * Scroll the popup text up.
+ */
+void popup_scroll_up(void)
+{
+  if (popup_pos_line + term_height() - 3 < popup_num_lines)
+    popup_pos_line += term_height() - 3;
+  else
+    popup_pos_line = 0;
+
+  term_display();
+}
+
+/*
+ * Scroll the popup text down.
+ */
+void popup_scroll_down(void)
+{
+  if (popup_pos_line >= (term_height() - 3))
+    popup_pos_line -= term_height() - 3;
+  else if (popup_pos_line > 0)
+    popup_pos_line = 0;
+  else
+    popup_pos_line = popup_num_lines - (term_height() - 3);
+
+  term_display();
+}

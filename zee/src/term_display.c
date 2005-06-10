@@ -342,17 +342,34 @@ static void draw_status_line(size_t line, Window *wp)
 /*
  * Draw the popup window.
  */
-static void draw_popup(astr as)
+static void draw_popup(void)
 {
-  /* Move to top of popup window. Add one to number of newlines
-     because popup string has no trailing newline; subtract a further
-     3 for the border above, and minibuffer and status line below. */
-  /* FIXME: could go off bottom of available area. But in that case
-     need not only to adjust display but provide scrolling. */
-  term_move(max(term_height() - (astr_count_char(as, '\n') + 1) - 3, 0), 0);
-  draw_border(cur_wp);
-  term_printf("%.c", term_width(), '-');
-  term_printf("%s", astr_cstr(as));
+  Line *popup = popup_get();
+
+  if (popup) {
+    Line *lp;
+    size_t i, y = 0;
+
+    /* Add 3 to popup_lines for the border above, and minibuffer and
+       status line below. */
+    if (term_height() - 3 > popup_lines())
+      y = term_height() - 3 - popup_lines();
+    term_move(y++, 0);
+    draw_border(cur_wp);
+
+    /* Skip down to first line to display. */
+    for (i = 0, lp = list_first(popup); i < popup_pos(); i++, lp = list_next(lp))
+      ;
+
+    /* Draw lines. */
+    for (; i < popup_lines() && y < term_height() - 2;
+         i++, y++, lp = list_next(lp))
+      term_printf("%.*s\n", term_width(), astr_cstr(lp->item));
+
+    /* Draw blank lines to bottom of window. */
+    for (; y < term_height() - 2; y++)
+      term_printf("\n");
+  }
 }
 
 /* Draws all the windows in turn, and draws the status line if any space
@@ -361,7 +378,6 @@ static void draw_popup(astr as)
 void term_display(void)
 {
   size_t topline;
-  astr popup;
   Window *wp;
 
   cur_topline = topline = 0;
@@ -386,8 +402,7 @@ void term_display(void)
   }
 
   /* Draw the popup window. */
-  if ((popup = popup_get()))
-    draw_popup(popup);
+  draw_popup();
 
   /* Redraw cursor. */
   term_move(cur_topline + cur_wp->topdelta, point_screen_column);
@@ -418,11 +433,12 @@ static void term_print(const char *s)
   size_t i;
 
   for (i = 0; *s != '\0'; s++)
-    if (*s == '\n') {
+    if (*s != '\n')
+      term_addch(*s);
+    else {
       term_clrtoeol();
       term_nl();
-    } else
-      term_addch(*s);
+    }
 }
 
 /*

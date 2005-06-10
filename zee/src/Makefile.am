@@ -50,7 +50,6 @@ zee_base_SOURCES =				\
 	line.c					\
 	macro.c					\
 	main.c					\
-	marker.c				\
 	minibuf.c				\
 	point.c					\
 	search.c				\

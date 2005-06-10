@@ -55,7 +55,7 @@ astr astr_new(void);
 /*
  * Deallocate the previously allocated string as.
  */
-void   astr_delete(astr as);
+void astr_delete(astr as);
 
 /*
  * Convert as into a C null-terminated string.
@@ -133,30 +133,16 @@ astr astr_remove(astr as, ptrdiff_t pos, size_t size);
 astr astr_truncate(astr as, ptrdiff_t pos);
 
 /*
- * Find the first occurrence of the argument string in as, returning
- * the position starting from the beginning of the string.
+ * Read a file into an astr.
  */
-int astr_find(const astr as, const astr src);
-int astr_find_cstr(const astr as, const char *s);
+astr astr_fread(FILE *fp);
 
 /*
- * Find the last occurrence of the argument string in as, returning
- * the position starting from the end of the string.
- */
-int astr_rfind(const astr as, const astr src);
-int astr_rfind_cstr(const astr as, const char *s);
-
-/*
- * Count the number of occurrences of a char in an astr.
- */
-size_t astr_count_char(astr as, int c);
-
-/*
- * Read a string from the stream f and return it. The trailing newline
+ * Read a line from the stream fp and return it. The trailing newline
  * is removed from the string. If the stream is at eof when astr_fgets
  * is called, it returns NULL.
  */
-astr astr_fgets(FILE *f);
+astr astr_fgets(FILE *fp);
 
 /*
  * Append formatted text to the argument string

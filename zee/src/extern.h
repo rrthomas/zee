@@ -56,7 +56,7 @@ void set_buffer_name(Buffer *bp, const char *name);
 void set_buffer_filename(Buffer *bp, const char *filename);
 Buffer *find_buffer(const char *name, int cflag);
 Buffer *get_next_buffer(void);
-char *make_buffer_name(const char *filename);
+astr make_buffer_name(const char *filename);
 void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
@@ -70,14 +70,19 @@ size_t tab_width(Buffer *bp);
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(int fileflag);
 void free_completion(Completion *cp);
-void completion_scroll_up(void);
-void completion_scroll_down(void);
 int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
 void resize_windows(void);
 void recenter(Window *wp);
+Line *popup_get(void);
+size_t popup_lines(void);
+void popup_set(astr as);
+void popup_clear(void);
+size_t popup_pos(void);
+void popup_scroll_up(void);
+void popup_scroll_down(void);
 
 /* editfns.c -------------------------------------------------------------- */
 void push_mark(void);
@@ -102,8 +107,7 @@ astr get_home_dir(void);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
 astr compact_path(const char *path);
 astr get_current_dir(int interactive);
-void open_file(char *path, size_t lineno);
-void read_from_disk(const char *filename);
+void read_file(const char *filename);
 int file_open(const char *filename);
 Completion *make_buffer_completion(void);
 int check_modified_buffer(Buffer *bp);
@@ -143,6 +147,13 @@ size_t strtochord(const char *buf);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
+void free_marker(Marker *marker);
+void move_marker(Marker *marker, Buffer *bp, Point pt);
+Marker *marker_new(Buffer *bp, Point pt);
+Marker *point_marker(void);
+Line *line_new(void);
+void line_delete(Line *lp);
+Line *string_to_lines(astr as, const char *eol, size_t *lines);
 void line_replace_text(Line **lp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
 int intercalate_char(int c);
@@ -175,12 +186,6 @@ Macro *get_macro(const char *name);
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
 extern int thisflag, lastflag, last_uniarg;
-
-/* marker.c --------------------------------------------------------------- */
-void free_marker(Marker *marker);
-void move_marker(Marker *marker, Buffer *bp, Point pt);
-Marker *marker_new(Buffer *bp, Point pt);
-Marker *point_marker(void);
 
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);
@@ -259,13 +264,9 @@ Window *window_new(void);
 void free_window(Window *wp);
 Window *find_window(const char *name);
 void free_windows(void);
-Window *popup_window(void);
 void set_current_window (Window *wp);
 void delete_window(Window *del_wp);
 Point window_pt(Window *wp);
-astr popup_get(void);
-void popup_set(astr as);
-void popup_clear(void);
 
 /* zmalloc.c -------------------------------------------------------------- */
 void *zmalloc(size_t size);
