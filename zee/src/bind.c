@@ -381,6 +381,7 @@ sequence.
 }
 END_DEFUN
 
+/* FIXME: will only find first binding; should find all of them. */
 DEFUN_INT("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
@@ -408,15 +409,14 @@ Argument is a command definition, usually a symbol with a function definition.
 }
 END_DEFUN
 
-const char *get_function_by_key_sequence(size_t key)
+const char *get_function_by_key(size_t key)
 {
   Binding *p;
 
   if (key & KBD_META && isdigit(key & 255))
     return "universal-argument";
 
-  p = get_binding(key);
-  if (p == NULL) {
+  if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
       return "self-insert-command";
     else

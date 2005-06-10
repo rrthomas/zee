@@ -40,7 +40,7 @@ int scroll_up(void);
 void bind_key_string(const char *keystr, Function func);
 size_t do_completion(astr as);
 astr minibuf_read_function_name(const char *fmt, ...);
-const char *get_function_by_key_sequence(size_t key);
+const char *get_function_by_key(size_t key);
 void process_key(size_t key);
 Function last_command(void);
 void free_bindings(void);

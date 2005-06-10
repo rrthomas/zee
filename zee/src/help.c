@@ -150,14 +150,20 @@ DEFUN_INT("help-key", help_key)
 Display the command invoked by a key sequence.
 +*/
 {
-  const char *name;
+  size_t key;
+  const char *cmd;
+  astr keyname;
 
   minibuf_write("Describe key:");
+  key = getkey();
+  keyname = chordtostr(key);
 
-  if ((name = get_function_by_key_sequence(getkey())) == NULL) {
-    minibuf_error("Key sequence is undefined");
+  if ((cmd = get_function_by_key(key)) == NULL) {
+    minibuf_error("%s is unbound", astr_cstr(keyname));
     ok = FALSE;
   } else
-    minibuf_write("Key sequence runs the command `%s'", name);
+    minibuf_write("%s runs the command `%s'", astr_cstr(keyname), cmd);
+
+  astr_delete(keyname);
 }
 END_DEFUN
