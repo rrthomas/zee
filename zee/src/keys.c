@@ -250,17 +250,3 @@ size_t strtochord(const char *buf)
 
   return key;
 }
-
-/*
- * Convert a key like "\\C-xrs" to "C-x r s"
- */
-astr simplify_key(char *key)
-{
-  size_t code;
-
-  if (key == NULL)
-    return astr_new();
-
-  code = strtochord(key);
-  return chordtostr(code);
-}

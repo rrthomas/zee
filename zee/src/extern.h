@@ -40,7 +40,7 @@ int scroll_up(void);
 void bind_key_string(const char *keystr, Function func);
 size_t do_completion(astr as);
 astr minibuf_read_function_name(const char *fmt, ...);
-const char *get_function_by_key_sequence(void);
+const char *get_function_by_key_sequence(size_t key);
 void process_key(size_t key);
 Function last_command(void);
 void free_bindings(void);
@@ -144,7 +144,6 @@ const char *next_history_element(History *hp);
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(size_t key);
 size_t strtochord(const char *buf);
-astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
 void free_marker(Marker *marker);

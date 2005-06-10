@@ -154,7 +154,7 @@ Display the command invoked by a key sequence.
 
   minibuf_write("Describe key:");
 
-  if ((name = get_function_by_key_sequence()) == NULL) {
+  if ((name = get_function_by_key_sequence(getkey())) == NULL) {
     minibuf_error("Key sequence is undefined");
     ok = FALSE;
   } else

@@ -39,7 +39,7 @@ static Function _last_command;
  * Key binding
  *--------------------------------------------------------------------------*/
 
-/* Binding vector, number of items, max number of items. */
+/* Binding vector, number of items, max number of items */
 static Binding **binding = NULL;
 static size_t nbindings, max_bindings = 0;
 
@@ -54,17 +54,28 @@ static Binding *get_binding(size_t key)
   return NULL;
 }
 
+static size_t function_to_binding(Function f)
+{
+  size_t i;
+
+  for (i = 0; i < nbindings; ++i)
+    if (binding[i]->func == f)
+      return binding[i]->key;
+
+  return KBD_NOKEY;
+}
+
 static void add_binding(Binding *p)
 {
   size_t i;
 
-  /* Reallocate vector if there is not enough space. */
+  /* Reallocate vector if there is not enough space */
   if (nbindings + 1 >= max_bindings) {
     max_bindings += 5;
     binding = zrealloc(binding, sizeof(p) * max_bindings);
   }
 
-  /* Insert the binding at the sorted position. */
+  /* Insert the binding at the sorted position */
   for (i = 0; i < nbindings; i++)
     if (binding[i]->key > p->key) {
       memmove(&binding[i + 1], &binding[i], sizeof(p) * (nbindings - i));
@@ -117,12 +128,12 @@ void process_key(size_t key)
     return;
 
   if (key & KBD_META && isdigit(key & 255))
-    /* Got an ESC x sequence where `x' is a digit. */
+    /* Got an ESC x sequence where `x' is a digit */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
     if ((p = get_binding(key)) == NULL) {
-      assert(cur_bp); /* FIXME: Remove this assumption. */
-      /* There are no bindings for the pressed key. */
+      assert(cur_bp); /* FIXME: Remove this assumption */
+      /* There are no bindings for the pressed key */
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       for (uni = 0;
            uni < last_uniarg && self_insert_command(key);
@@ -137,7 +148,7 @@ void process_key(size_t key)
   }
 
   /* Only add keystrokes if we're already in macro defining mode
-     before the function call, to cope with start-kbd-macro. */
+     before the function call, to cope with start-kbd-macro */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro();
 }
@@ -152,21 +163,18 @@ Function last_command(void)
  *--------------------------------------------------------------------------*/
 
 struct fentry {
-  /* The function name. */
+  /* The function name */
   const char *name;
 
-  /* The function pointer. */
+  /* The function pointer */
   Function func;
-
-  /* The assigned keys. */
-  char *key[3];
 };
 
 typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
 #define X(cmd_name, c_name) \
-	{cmd_name, F_ ## c_name, {NULL, NULL, NULL}},
+	{cmd_name, F_ ## c_name},
 #include "tbl_funcs.h"
 #undef X
 };
@@ -225,23 +233,6 @@ const char *get_function_name(Function p)
   return NULL;
 }
 
-static astr bindings_string(fentryp f)
-{
-  size_t i;
-  astr as = astr_new();
-
-  for (i = 0; i < 3; ++i) {
-    astr key = simplify_key(f->key[i]);
-    if (astr_len(key) > 0) {
-        astr_cat_cstr(as, (i == 0) ? "" : ", ");
-        astr_cat(as, key);
-    }
-    astr_delete(key);
-  }
-
-  return as;
-}
-
 /*
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
@@ -277,7 +268,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
     } else {
       astr as = astr_new();
       astr_cpy(as, ms);
-      /* Complete partial words if possible. */
+      /* Complete partial words if possible */
       if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
         astr_cpy_cstr(ms, cp->match);
       astr_delete(as);
@@ -289,7 +280,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
         }
       if (bsearch_function(astr_cstr(ms)) || get_macro(astr_cstr(ms))) {
         add_history_element(&functions_history, astr_cstr(ms));
-        minibuf_clear();        /* Remove any error message. */
+        minibuf_clear();        /* Remove any error message */
         break;
       } else {
         minibuf_error("Undefined function name `%s'", astr_cstr(ms));
@@ -397,32 +388,29 @@ Argument is a command definition, usually a symbol with a function definition.
 +*/
 {
   astr name;
-  fentryp f;
+  Function f;
 
   name = minibuf_read_function_name("Where is command: ");
 
-  if (name == NULL || (f = get_fentry(astr_cstr(name))) == NULL)
+  if (name == NULL || (f = get_function(astr_cstr(name))) == NULL)
     ok = FALSE;
   else {
-    if (f->key[0]) {
-      astr bindings = bindings_string(f);
-      astr as = astr_new();
-
-      astr_afmt(as, "%s is on %s", astr_cstr(name), astr_cstr(bindings));
+    size_t key = function_to_binding(f);
+    if (key != KBD_NOKEY) {
+      astr as = astr_new(), binding = chordtostr(key);
+      astr_afmt(as, "%s is on %s", astr_cstr(name), astr_cstr(binding));
       minibuf_write("%s", astr_cstr(as));
-
       astr_delete(as);
-      astr_delete(bindings);
+      astr_delete(binding);
     } else
       minibuf_write("%s is not on any key", astr_cstr(name));
   }
 }
 END_DEFUN
 
-const char *get_function_by_key_sequence(void)
+const char *get_function_by_key_sequence(size_t key)
 {
   Binding *p;
-  size_t key = getkey();
 
   if (key & KBD_META && isdigit(key & 255))
     return "universal-argument";
