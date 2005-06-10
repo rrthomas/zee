@@ -217,7 +217,7 @@ static int type_s(xprintf_struct *s, int width, int prec,
 }
 
 /*
- *  Read a serie of digits. Stop when non-digit is found.
+ *  Read a series of digits. Stop when non-digit is found.
  *  Return value: the value read (between 0 and 32767).
  *  Note: no checks are made against overflow. If the string contain a big
  *  number, then the return value won't be what we want (but, in this case,
