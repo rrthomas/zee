@@ -298,7 +298,7 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
     switch (c = getkey()) {
     case KBD_NOKEY:
       break;
-    case KBD_CTL | 'z':
+    case KBD_CTRL | 'z':
       mb_suspend();
       break;
     case KBD_RET:
@@ -310,23 +310,23 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       mb_cancel(saved);
       ret = TRUE;
       break;
-    case KBD_CTL | 'a':
+    case KBD_CTRL | 'a':
     case KBD_HOME:
       i = mb_bol();
       break;
-    case KBD_CTL | 'e':
+    case KBD_CTRL | 'e':
     case KBD_END:
       i = mb_eol(as);
       break;
-    case KBD_CTL | 'b':
+    case KBD_CTRL | 'b':
     case KBD_LEFT:
       i = mb_backward_char(i);
       break;
-    case KBD_CTL | 'f':
+    case KBD_CTRL | 'f':
     case KBD_RIGHT:
       i = mb_forward_char(i, as);
       break;
-    case KBD_CTL | 'k':
+    case KBD_CTRL | 'k':
       mb_kill_line(i, as);
       break;
     case KBD_BS:
@@ -339,7 +339,7 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
     case KBD_PGUP:
       thistab = mb_scroll_down(cp, thistab, lasttab);
       break;
-    case KBD_CTL | 'v':
+    case KBD_CTRL | 'v':
     case KBD_PGDN:
       thistab = mb_scroll_up(cp, thistab, lasttab);
       break;

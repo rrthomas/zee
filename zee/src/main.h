@@ -282,11 +282,12 @@ typedef size_t Font;
 #define KBD_NOKEY                       UINT_MAX
 
 /* Key modifiers */
-#define KBD_CTL                         01000
+#define KBD_CTRL                         01000
 #define KBD_META                        02000
 
 /* Common non-alphanumeric keys */
-#define KBD_CANCEL                      (KBD_CTL | 'g')
+#define KBD_CANCEL                      (KBD_CTRL | 'g')
+#define KBD_SPC				(' ')
 #define KBD_TAB                         00402
 #define KBD_RET                         00403
 #define KBD_PGUP                        00404

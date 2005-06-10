@@ -301,7 +301,7 @@ static int isearch(int dir)
         thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
-    } else if (c & KBD_CTL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
+    } else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
       /* Invert direction. */
       if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
         dir = ISEARCH_BACKWARD;
@@ -316,7 +316,7 @@ static int isearch(int dir)
       }
       else if (last_search != NULL)
         astr_cpy_cstr(pattern, last_search);
-    } else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
+    } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (c == KBD_RET && astr_len(pattern) == 0)
         if (dir == ISEARCH_FORWARD)
           FUNCALL(search_forward_regexp);

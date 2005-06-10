@@ -229,7 +229,7 @@ int universal_argument(int keytype, int xarg)
         arg = arg * 10 + digit;
 
       i++;
-    } else if (key == (KBD_CTL | 'u')) {
+    } else if (key == (KBD_CTRL | 'u')) {
       astr_cat_cstr(as, " C-u");
       if (i == 0)
         arg *= 4;
@@ -271,7 +271,7 @@ Repeating C-u without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
-  ok = universal_argument(KBD_CTL | 'u', 0);
+  ok = universal_argument(KBD_CTRL | 'u', 0);
 }
 END_DEFUN
 

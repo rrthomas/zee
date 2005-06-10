@@ -282,14 +282,14 @@ static int translate_key(int code)
 {
   switch (code) {
   case '\0':		/* C-@ */
-    return KBD_CTL | '@';
+    return KBD_CTRL | '@';
   case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
   case '\6':  case '\7':                          case '\12':
   case '\13': case '\14':             case '\16': case '\17':
   case '\20': case '\21': case '\22': case '\23': case '\24':
   case '\25': case '\26': case '\27': case '\30': case '\31':
   case '\32':		/* C-a ... C-z */
-    return KBD_CTL | ('a' + code - 1);
+    return KBD_CTRL | ('a' + code - 1);
   case '\11':
     return KBD_TAB;
   case '\15':
@@ -297,7 +297,7 @@ static int translate_key(int code)
   case '\33':		/* META */
     return KBD_META;
   case '\37':
-    return KBD_CTL | '_';
+    return KBD_CTRL | '_';
   case '\10':		/* BS */
     return KBD_BS;
   case KUP:

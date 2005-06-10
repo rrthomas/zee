@@ -222,7 +222,7 @@ static int translate_key(int c)
     ascii = scancode_to_ascii(scancode);
     if (ascii)
       return KBD_META | ascii |
-        ((key_shifts & KB_CTRL_FLAG) ? KBD_CTL : 0);
+        ((key_shifts & KB_CTRL_FLAG) ? KBD_CTRL : 0);
     else
       return KBD_NOKEY;
   }
@@ -257,19 +257,19 @@ static int translate_key(int c)
   case KEY_DOWN: return KBD_DOWN;
   case KEY_SPACE:
     if (key_shifts & KB_CTRL_FLAG)
-      return '@' | KBD_CTL;
+      return '@' | KBD_CTRL;
     else
       return ' ';
   default:
     if ((scancode >= KEY_0 && scancode <= KEY_9) &&
         (ascii < 32 || ascii == 127)) {
-      return ('0'+scancode-KEY_0) | KBD_CTL;
+      return ('0'+scancode-KEY_0) | KBD_CTRL;
     }
     else if (ascii >= 1 && ascii <= 'z'-'a'+1) {
       if ('a'+ascii-1 == 'g')
         return KBD_CANCEL;
       else
-        return ('a'+ascii-1) | KBD_CTL;
+        return ('a'+ascii-1) | KBD_CTRL;
     }
     else if (ascii >= ' ') {
       return ascii;
