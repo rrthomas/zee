@@ -45,19 +45,6 @@
  *--------------------------------------------------------------------------*/
 
 /*
- * The forward opaque types used in the editor.
- */
-typedef struct Point Point;
-typedef struct Marker Marker;
-typedef struct list_s Line;   /* This is evil! */
-typedef struct Undo Undo;
-typedef struct Region Region;
-typedef struct Buffer Buffer;
-typedef struct Window Window;
-typedef struct Completion Completion;
-typedef struct History History;
-
-/*
  * The type of a Zee exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
@@ -67,125 +54,129 @@ typedef int (*Function)(int argc, le *branch);
  * A line is a list whose items are astrs. The newline at the end of
  * each line is implicit.
  */
+typedef struct list_s Line;
 
-/* Point and Marker. */
-struct Point {
-  Line *p;                      /* Line pointer. */
-  size_t n;                     /* Line number. */
-  size_t o;                     /* Offset. */
-};
+/* Point and Marker */
+typedef struct Point {
+  Line *p;                      /* Line pointer */
+  size_t n;                     /* Line number */
+  size_t o;                     /* Offset */
+} Point;
 
+typedef struct Buffer Buffer; /* Forward reference */
+typedef struct Marker Marker;
 struct Marker {
-  Buffer *bp;             /* Buffer that points into. */
-  Point pt;               /* Point position. */
-  Marker *next;           /* Used to chain all markers in the buffer. */
+  Buffer *bp;             /* Buffer that points into */
+  Point pt;               /* Point position */
+  Marker *next;           /* Used to chain all markers in the buffer */
 };
 
-/* Undo delta types. */
+/* Undo delta types */
 enum {
-  UNDO_INSERT_CHAR,       /* Insert a character. */
-  UNDO_INSERT_BLOCK,      /* Insert a block of characters. */
-  UNDO_REMOVE_CHAR,       /* Remove a character. */
-  UNDO_REMOVE_BLOCK,      /* Remove a block of characters. */
-  UNDO_REPLACE_CHAR,      /* Replace a character. */
-  UNDO_REPLACE_BLOCK,     /* Replace a block of characters. */
-  UNDO_START_SEQUENCE,    /* Start a multi operation sequence. */
-  UNDO_END_SEQUENCE,      /* End a multi operation sequence. */
+  UNDO_INSERT_CHAR,       /* Insert a character */
+  UNDO_INSERT_BLOCK,      /* Insert a block of characters */
+  UNDO_REMOVE_CHAR,       /* Remove a character */
+  UNDO_REMOVE_BLOCK,      /* Remove a block of characters */
+  UNDO_REPLACE_CHAR,      /* Replace a character */
+  UNDO_REPLACE_BLOCK,     /* Replace a block of characters */
+  UNDO_START_SEQUENCE,    /* Start a multi operation sequence */
+  UNDO_END_SEQUENCE,      /* End a multi operation sequence */
   UNDO_INTERCALATE_CHAR   /* Insert a char without moving the
-                             current pointer. */
+                             current pointer */
 };
 
+typedef struct Undo Undo;
 struct Undo {
-  /* Next undo delta in list. */
+  /* Next undo delta in list */
   Undo *next;
 
-  /* The type of undo delta. */
+  /* The type of undo delta */
   int type;
 
   /* Where the undo delta need to be applied.
-     Warning!: Do not use the "pt.p" field. */
+     Warning!: Do not use the "pt.p" field */
   Point pt;
 
   /* Flag indicating that reverting this undo leaves the buffer
-     in an unchanged state. */
+     in an unchanged state */
   int unchanged;
 
-  /* The undo delta. */
+  /* The undo delta */
   union {
-    /* The character to insert or replace. */
+    /* The character to insert or replace */
     int c;
 
-    /* The block to insert. */
+    /* The block to insert */
     struct {
       char *text;
-      size_t osize;      /* Original size; only for replace. */
-      size_t size;       /* New block size. */
+      size_t osize;      /* Original size; only for replace */
+      size_t size;       /* New block size */
     } block;
   } delta;
 };
 
-struct Region {
-  Point start;            /* The region start. */
-  Point end;              /* The region end. */
-  size_t size;                /* The region size. */
+typedef struct Region {
+  Point start;            /* The region start */
+  Point end;              /* The region end */
+  size_t size;                /* The region size */
 
-  /* The total number of lines ('\n' newlines) in region. */
+  /* The total number of lines ('\n' newlines) in region */
   int num_lines;
-};
+} Region;
 
-/* Buffer flags or minor modes. */
+/* Buffer flags or minor modes */
 
-#define BFLAG_MODIFIED  (0x0001) /* The buffer has been modified. */
-#define BFLAG_NEEDNAME  (0x0002) /* On save, ask for a file name. */
-#define BFLAG_READONLY  (0x0004) /* The buffer cannot be modified. */
-#define BFLAG_AUTOFILL  (0x0008) /* The buffer is in Auto Fill mode. */
-#define BFLAG_ISEARCH   (0x0010) /* The buffer is in Isearch loop. */
+#define BFLAG_MODIFIED  (0x0001) /* The buffer has been modified */
+#define BFLAG_NEEDNAME  (0x0002) /* On save, ask for a file name */
+#define BFLAG_READONLY  (0x0004) /* The buffer cannot be modified */
+#define BFLAG_AUTOFILL  (0x0008) /* The buffer is in Auto Fill mode */
+#define BFLAG_ISEARCH   (0x0010) /* The buffer is in Isearch loop */
 
 /* Represents a buffer: an open file.
  * To support multiple simultaneous buffers, they can be organised into a linked
  * list using the 'next' field.
  * Every buffer has its own:
  *  - Point and mark (i.e. cursor and selection)
- *  - List of markers.
- *  - Undo history.
- *  - Flags, including the line terminator.
- *  - Filename.
+ *  - List of markers
+ *  - Undo history
+ *  - Flags, including the line terminator
+ *  - Filename
  */
 struct Buffer {
-  /* The next buffer in buffer list. */
+  /* The next buffer in buffer list */
   Buffer *next;
 
-  /* The lines of text. */
+  /* The lines of text */
   Line *lines;
 
-  /* The point. */
+  /* The point */
   Point pt;
 
-  /* The mark. */
+  /* The mark */
   Marker *mark;
 
-  /* Markers (points that are updated when text is modified).  */
+  /* Markers (points that are updated when text is modified) */
   Marker *markers;
 
-  /* The undo deltas recorded for this buffer. */
+  /* The undo deltas recorded for this buffer */
   Undo *next_undop;
   Undo *last_undop;
 
-  /* Buffer flags. */
+  /* Buffer flags */
   int flags;
   size_t mark_anchored : 1;
 
-  /* Buffer-local variables. */
+  /* Buffer-local variables */
   le *vars;
 
-  /* The total number of lines in the buffer. */
+  /* The total number of lines in the buffer */
   size_t num_lines;
 
-  /* The name of the buffer and the file name. */
+  /* The name of the buffer and the file name */
   char *name;
   char *filename;
 
-  /* EOL string (up to 2 chars) for this buffer. */
+  /* EOL string (up to 2 chars) for this buffer */
   char eol[3];
 };
 
@@ -194,11 +185,12 @@ struct Buffer {
  * display a buffer. To allow more than one window at a time, windows
  * can be organised into a linked list using the 'next' field.
  */
+typedef struct Window Window;
 struct Window {
-  /* The next window in window list. */
+  /* The next window in window list */
   Window *next;
 
-  /* The buffer displayed in window. */
+  /* The buffer displayed in window */
   Buffer *bp;
 
   /* The top line delta and last point line number.
@@ -229,48 +221,53 @@ enum {
   COMPLETION_NONUNIQUE
 };
 
-struct Completion {
-  /* This flag is set when the vector is sorted. */
+typedef struct Completion {
+  /* This flag is set when the vector is sorted */
   int fl_sorted;
-  /* This flag is set when a completion window has been popped up. */
+  /* This flag is set when a completion window has been popped up */
   int fl_poppedup;
 
-  /* This flag is set when the completion window should be closed. */
+  /* This flag is set when the completion window should be closed */
   int fl_close;
-  /* The old buffer. */
+  /* The old buffer */
   Buffer *old_bp;
 
-  /* This flag is set when this is a filename completion. */
+  /* This flag is set when this is a filename completion */
   int fl_dir;
   astr path;
 
-  /* This flag is set when the space character is allowed. */
+  /* This flag is set when the space character is allowed */
   int fl_space;
 
-  list completions;             /* The completions list. */
+  list completions;             /* The completions list */
 
-  list matches;                 /* The matches list. */
-  char *match;                  /* The match buffer. */
-  size_t matchsize;             /* The match buffer size. */
-};
+  list matches;                 /* The matches list */
+  char *match;                  /* The match buffer */
+  size_t matchsize;             /* The match buffer size */
+} Completion;
 
-struct History {
-  list elements;                /* Elements (strings).  */
+typedef struct History {
+  list elements;                /* Elements (strings) */
   list sel;
-};
+} History;
+
+typedef struct Binding {
+  size_t key;
+  Function func;
+} Binding;
 
 typedef struct Macro {
-  size_t nkeys;                 /* The number of keystrokes. */
-  size_t *keys;                 /* Vector of keystrokes. */
-  char *name;                   /* Name of the macro. */
-  struct Macro *next;           /* Next macro in the list. */
+  size_t nkeys;                 /* The number of keystrokes */
+  size_t *keys;                 /* Vector of keystrokes */
+  char *name;                   /* Name of the macro */
+  struct Macro *next;           /* Next macro in the list */
 } Macro;
 
 /* Type of font attributes */
 typedef size_t Font;
 
 /* Zee font codes
- * Designed to fit in an int, leaving room for a char underneath. */
+ * Designed to fit in an int, leaving room for a char underneath */
 #define FONT_NORMAL		0x000
 #define FONT_REVERSE		0x100
 
@@ -281,14 +278,14 @@ typedef size_t Font;
 #define GETKEY_DELAYED                  0x1
 #define GETKEY_UNFILTERED               0x2
 
-/* Special value returned in non blocking mode, when no key is pressed. */
+/* Special value returned in non blocking mode, when no key is pressed */
 #define KBD_NOKEY                       UINT_MAX
 
-/* Key modifiers. */
+/* Key modifiers */
 #define KBD_CTL                         01000
 #define KBD_META                        02000
 
-/* Common non-alphanumeric keys. */
+/* Common non-alphanumeric keys */
 #define KBD_CANCEL                      (KBD_CTL | 'g')
 #define KBD_TAB                         00402
 #define KBD_RET                         00403
@@ -320,19 +317,19 @@ typedef size_t Font;
  * Global flags.
  *--------------------------------------------------------------------------*/
 
-/* The last command was a C-p or a C-n. */
+/* The last command was a C-p or a C-n */
 #define FLAG_DONE_CPCN                  0x0001
-/* The last command was a kill. */
+/* The last command was a kill */
 #define FLAG_DONE_KILL                  0x0002
-/* Hint for the redisplay engine: a resync is required. */
+/* Hint for the redisplay engine: a resync is required */
 #define FLAG_NEED_RESYNC                0x0004
-/* Quit the editor as soon as possible. */
+/* Quit the editor as soon as possible */
 #define FLAG_QUIT                       0x0008
-/* The last command modified the universal argument variable `uniarg'. */
+/* The last command modified the universal argument variable `uniarg' */
 #define FLAG_SET_UNIARG                 0x0010
-/* We are defining a macro. */
+/* We are defining a macro */
 #define FLAG_DEFINING_MACRO             0x0020
-/* Encountered an error. */
+/* Encountered an error */
 #define FLAG_GOT_ERROR                  0x0040
 
 /*--------------------------------------------------------------------------
@@ -349,8 +346,8 @@ typedef size_t Font;
 #endif
 #endif
 
-/* Define an interactive function. */
-/* N.B. The function type is actually eval_cb. */
+/* Define an interactive function */
+/* N.B. The function type is actually eval_cb */
 #define DEFUN(lisp_name, c_func) \
         int F_ ## c_func(int argc, le *branch) \
         { \
@@ -367,15 +364,15 @@ typedef size_t Font;
           return ok; \
         }
 
-/* Call an interactive function. */
+/* Call an interactive function */
 #define FUNCALL(c_func)                         \
         F_ ## c_func(1, evalCastIntToLe(1))
-/* FIXME: the evalCastIntToLe above causes a space leak. */
+/* FIXME: the evalCastIntToLe above causes a space leak */
 
-/* Call an interactive function with an universal argument. */
+/* Call an interactive function with an universal argument */
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func(2, evalCastIntToLe(uniarg))
-/* FIXME: the evalCastIntToLe above causes a space leak. */
+/* FIXME: the evalCastIntToLe above causes a space leak */
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

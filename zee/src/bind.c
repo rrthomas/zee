@@ -39,18 +39,11 @@ static Function _last_command;
  * Key binding
  *--------------------------------------------------------------------------*/
 
-typedef struct binding *bindingp;
-
-struct binding {
-  size_t key;
-  Function func;
-};
-
 /* Binding vector, number of items, max number of items. */
-bindingp *binding = NULL;
+static Binding **binding = NULL;
 static size_t nbindings, max_bindings = 0;
 
-static bindingp get_binding(size_t key)
+static Binding *get_binding(size_t key)
 {
   size_t i;
 
@@ -61,7 +54,7 @@ static bindingp get_binding(size_t key)
   return NULL;
 }
 
-static void add_binding(bindingp p)
+static void add_binding(Binding *p)
 {
   size_t i;
 
@@ -85,7 +78,7 @@ static void add_binding(bindingp p)
 
 static void bind_key(size_t key, Function func)
 {
-  bindingp p, s;
+  Binding *p, *s;
 
   if ((s = get_binding(key)) == NULL) {
     p = zmalloc(sizeof(*p));
@@ -118,7 +111,7 @@ size_t do_completion(astr as)
 void process_key(size_t key)
 {
   int uni;
-  bindingp p;
+  Binding *p;
 
   if (key == KBD_NOKEY)
     return;
@@ -428,7 +421,7 @@ END_DEFUN
 
 const char *get_function_by_key_sequence(void)
 {
-  bindingp p;
+  Binding *p;
   size_t key = getkey();
 
   if (key & KBD_META && isdigit(key & 255))
