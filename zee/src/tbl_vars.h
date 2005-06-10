@@ -1,14 +1,12 @@
 /* Table of variables */
 
 /*
- * Add an entry to this list for declaring a new global variable.
- *
  * The first column specifies the variable name.
  * The second column specifies the variable type.
  *   - "b" for boolean ("true" or "false");
  *   - "" (empty string) for non-fixed format.
  * The third column specifies the default value.
- * The forth column specifies the variable documentation.
+ * The fourth column specifies the variable documentation.
  */
 
 X("auto-fill-mode",			"b", "false", "\
