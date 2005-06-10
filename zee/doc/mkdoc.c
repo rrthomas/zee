@@ -12,7 +12,6 @@
 
 /* #include other sources so this program can be easily built on the
    build host when cross-compiling */
-#include "strrstr.c"
 #include "vasprintf.c"
 #include "zmalloc.c"
 #include "astr.c"
@@ -77,34 +76,21 @@ static void parse(void)
   while ((buf = astr_fgets(input_file)) != NULL) {
     if (!strncmp(astr_cstr(buf), "DEFUN(", 6) ||
         !strncmp(astr_cstr(buf), "DEFUN_INT(", 10)) {
-      int i, j;
+      char *p, *q;
       astr sub;
-      i = astr_find_cstr(buf, "\"");
-      j = astr_rfind_cstr(buf, "\"");
-      if (i < 0 || j < 0 || i == j) {
+      p = strchr(astr_cstr(buf), '"');
+      q = strrchr(astr_cstr(buf), '"');
+      if (p == NULL || q == NULL || p == q) {
         fprintf(stderr, "mkdoc: invalid DEFUN() syntax\n");
         exit(1);
       }
-      sub = astr_substr(buf, i + 1, (size_t)(j - i - 1));
+      sub = astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1));
       astr_cpy(buf, sub);
       astr_delete(sub);
       fdecl(astr_cstr(buf));
     }
     astr_delete(buf);
   }
-}
-
-static astr texinfo_subst(astr as)
-{
-  ptrdiff_t i;
-  for (i = 0; i < (ptrdiff_t)astr_len(as); i++) {
-    int c = *astr_char(as, i);
-    if (c == '@' || c == '{' || c == '}') {
-      astr_insert_char(as, i, '@');
-      i++;
-    }
-  }
-  return as;
 }
 
 static void dump_help(void)

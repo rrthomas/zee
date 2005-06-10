@@ -27,7 +27,7 @@ dnl ==================================================================
 dnl Checks for functions.
 dnl ==================================================================
 
-AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
+AC_REPLACE_FUNCS(vasprintf getopt_long_only)
 AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
@@ -151,10 +151,6 @@ dnl Extra definitions for config.h
 dnl ==================================================================
 
 AH_BOTTOM([
-#ifndef HAVE_STRRSTR
-extern char *strrstr(const char *, const char *);
-#endif
-
 #define TEXT_NAME "Zee"
 ])
 
