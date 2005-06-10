@@ -278,11 +278,11 @@ static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, in
 
 astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp)
 {
-  int c, thistab, lasttab = COMPLETION_NOTCOMPLETING;
+  int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
   char *s[] = {"", " [No match]", " [Sole completion]", " [Complete, but not unique]", ""};
   char *saved = NULL;
-  astr as = astr_new();
+  astr as = astr_new(), retval = NULL;
 
   if (hp)
     prepare_history(hp);
@@ -303,10 +303,13 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       break;
     case KBD_RET:
       mb_return(saved);
-      return as;
+      retval = as;
+      ret = TRUE;
+      break;
     case KBD_CANCEL:
       mb_cancel(saved);
-      return NULL;
+      ret = TRUE;
+      break;
     case KBD_CTL | 'a':
     case KBD_HOME:
       i = mb_bol();
@@ -359,5 +362,14 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
     }
 
     lasttab = thistab;
+    if (ret)
+      break;
   }
+
+  if (cp->fl_poppedup) {
+    popup_clear();
+    term_refresh();
+  }
+
+  return retval;
 }
