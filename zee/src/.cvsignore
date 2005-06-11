@@ -2,6 +2,6 @@
 Makefile
 Makefile.in
 zee
-paths.h
+paths.h tbl_funcs.h
 astr
 test*.stdout
