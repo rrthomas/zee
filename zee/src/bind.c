@@ -167,14 +167,14 @@ typedef struct {
   Function func;                /* The function pointer */
 } FEntry;
 
-static FEntry fentry_table[] = {
+static FEntry ftable[] = {
 #define X(cmd_name, c_name) \
 	{cmd_name, F_ ## c_name},
 #include "tbl_funcs.h"
 #undef X
 };
 
-#define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))
+#define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
 static int fentry_compar(const void *p1, const void *p2)
 {
@@ -185,7 +185,7 @@ static const char *bsearch_function(const char *name)
 {
   FEntry key, *entryp;
   key.name = name;
-  entryp = bsearch(&key, fentry_table, fentry_table_size, sizeof(fentry_table[0]), fentry_compar);
+  entryp = bsearch(&key, ftable, fentries, sizeof(ftable[0]), fentry_compar);
   return entryp ? entryp->name : NULL;
 }
 
@@ -193,18 +193,18 @@ Function get_function(const char *name)
 {
   size_t i;
   if (name)
-    for (i = 0; i < fentry_table_size; i++)
-      if (strcmp(name, fentry_table[i].name) == 0)
-        return fentry_table[i].func;
+    for (i = 0; i < fentries; i++)
+      if (strcmp(name, ftable[i].name) == 0)
+        return ftable[i].func;
   return NULL;
 }
 
 const char *get_function_name(Function f)
 {
   size_t i;
-  for (i = 0; i < fentry_table_size; i++)
-    if (fentry_table[i].func == f)
-      return fentry_table[i].name;
+  for (i = 0; i < fentries; i++)
+    if (ftable[i].func == f)
+      return ftable[i].name;
   return NULL;
 }
 
@@ -226,8 +226,8 @@ astr minibuf_read_function_name(const char *fmt, ...)
   va_end(ap);
 
   cp = completion_new(FALSE);
-  for (i = 0; i < fentry_table_size; ++i)
-    list_append(cp->completions, zstrdup(fentry_table[i].name));
+  for (i = 0; i < fentries; ++i)
+    list_append(cp->completions, zstrdup(ftable[i].name));
 
   for (;;) {
     ms = minibuf_read_completion(buf, "", cp, &functions_history);
