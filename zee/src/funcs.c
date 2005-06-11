@@ -208,7 +208,9 @@ int universal_argument(int keytype, int xarg)
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
-    key = do_completion(as);
+    minibuf_write("%s", astr_cstr(as));
+    key = getkey();
+    minibuf_clear();
     astr_truncate(as, -1); /* Remove the '-' character. */
 
     /* Cancelled. */

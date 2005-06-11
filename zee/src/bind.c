@@ -108,15 +108,13 @@ void bind_key_string(const char *keystr, Function func)
     bind_key(key, func);
 }
 
-size_t do_completion(astr as)
+void free_bindings(void)
 {
-  size_t key;
-
-  minibuf_write("%s", astr_cstr(as));
-  key = getkey();
-  minibuf_clear();
-
-  return key;
+  size_t i;
+  for (i = 0; i < nbindings; ++i)
+    free(binding[i]);
+  free(binding);
+  free_history_elements(&functions_history);
 }
 
 void process_key(size_t key)
@@ -159,20 +157,15 @@ Function last_command(void)
 }
 
 /*--------------------------------------------------------------------------
- * Default functions binding.
+ * Function name to C function mapping
  *--------------------------------------------------------------------------*/
 
-struct fentry {
-  /* The function name */
-  const char *name;
+typedef struct {
+  const char *name;             /* The function name */
+  Function func;                /* The function pointer */
+} FEntry;
 
-  /* The function pointer */
-  Function func;
-};
-
-typedef struct fentry *fentryp;
-
-static struct fentry fentry_table[] = {
+static FEntry fentry_table[] = {
 #define X(cmd_name, c_name) \
 	{cmd_name, F_ ## c_name},
 #include "tbl_funcs.h"
@@ -181,34 +174,20 @@ static struct fentry fentry_table[] = {
 
 #define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))
 
-static int bind_compar(const void *p1, const void *p2)
+static int fentry_compar(const void *p1, const void *p2)
 {
-  return strcmp(((fentryp)p1)->name, ((fentryp)p2)->name);
-}
-
-static void recursive_free_bindings(void)
-{
-  size_t i;
-  for (i = 0; i < nbindings; ++i)
-    free(binding[i]);
-  free(binding);
-}
-
-void free_bindings(void)
-{
-  recursive_free_bindings();
-  free_history_elements(&functions_history);
+  return strcmp(((FEntry *)p1)->name, ((FEntry *)p2)->name);
 }
 
 static const char *bsearch_function(const char *name)
 {
-  struct fentry key, *entryp;
+  FEntry key, *entryp;
   key.name = name;
-  entryp = bsearch(&key, fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
+  entryp = bsearch(&key, fentry_table, fentry_table_size, sizeof(fentry_table[0]), fentry_compar);
   return entryp ? entryp->name : NULL;
 }
 
-static fentryp get_fentry(const char *name)
+static FEntry *get_fentry(const char *name)
 {
   size_t i;
   assert(name);
@@ -220,7 +199,7 @@ static fentryp get_fentry(const char *name)
 
 Function get_function(const char *name)
 {
-  fentryp f = get_fentry(name);
+  FEntry *f = get_fentry(name);
   return f ? f->func : NULL;
 }
 
