@@ -158,7 +158,7 @@ Display the command invoked by a key sequence.
   key = getkey();
   keyname = chordtostr(key);
 
-  if ((cmd = get_function_by_key(key)) == NULL) {
+  if ((cmd = binding_to_function(key)) == NULL) {
     minibuf_error("%s is unbound", astr_cstr(keyname));
     ok = FALSE;
   } else
