@@ -29,26 +29,30 @@
 #include "main.h"
 #include "extern.h"
 
-static list mark_ring = NULL;	/* Mark ring. */
+static list mark_ring = NULL;	/* Mark ring */
 
-/* Push the current mark in the mark-ring. */
+/*
+ * Push the current mark on to the the mark-ring
+ */
 void push_mark(void)
 {
   if (!mark_ring)
     mark_ring = list_new();
 
-  /* Save the mark.  */
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  /* Save the mark */
+  assert(cur_bp);
   assert(cur_bp->mark);
   list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
 }
 
-/* Pop a mark from the mark-ring a put it as current mark. */
+/*
+ * Pop a mark from the mark-ring and make it the current mark
+ */
 void pop_mark(void)
 {
   Marker *m = list_last(mark_ring)->item;
 
-  /* Replace the mark. */
+  /* Replace the mark */
   assert(m->bp->mark);
   free_marker(m->bp->mark);
 
@@ -58,10 +62,12 @@ void pop_mark(void)
   free_marker(m);
 }
 
-/* Set the mark to the point position. */
+/*
+ * Set the mark to point
+ */
 void set_mark(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   assert(cur_bp->mark);
   move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
 }
@@ -102,48 +108,54 @@ int char_before(Point *pt)
     return *astr_char(pt->p->item, (ptrdiff_t)(pt->o - 1));
 }
 
-/* This function returns the character following point in the current
-   buffer. */
+/*
+ * Return the character following point in the current buffer
+ */
 int following_char(void)
 {
   assert(cur_bp);
   return char_after(&cur_bp->pt);
 }
 
-/* This function returns the character preceding point in the current
-   buffer. */
+/*
+ * Return the character preceding point in the current buffer
+ */
 int preceding_char(void)
 {
   assert(cur_bp);
   return char_before(&cur_bp->pt);
 }
 
-/* This function returns TRUE if point is at the beginning of the
-   buffer. */
+/*
+ * Return flag indicating whether point is at the beginning of the buffer
+ */
 int bobp(void)
 {
   assert(cur_bp);
-  return (list_prev(cur_bp->pt.p) == cur_bp->lines &&
-          cur_bp->pt.o == 0);
+  return (bolp() && list_prev(cur_bp->pt.p) == cur_bp->lines);
 }
 
-/* This function returns TRUE if point is at the end of the
-   buffer. */
+/*
+ * Return a flag indicating whether point is at the end of the buffer
+ */
 int eobp(void)
 {
   assert(cur_bp);
-  return (list_next(cur_bp->pt.p) == cur_bp->lines &&
-          cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
+  return (eolp() && list_next(cur_bp->pt.p) == cur_bp->lines);
 }
 
-/* Returns TRUE if point is at the beginning of a line. */
+/*
+ * Return a flag indicating whether point is at the beginning of a line
+ */
 int bolp(void)
 {
   assert(cur_bp);
   return cur_bp->pt.o == 0;
 }
 
-/* Returns TRUE if point is at the end of a line. */
+/*
+ * Return a flag indicating whether point is at the end of a line
+ */
 int eolp(void)
 {
   assert(cur_bp);
