@@ -144,18 +144,26 @@ void line_delete(Line *lp)
  */
 Line *string_to_lines(astr as, const char *eol, size_t *lines)
 {
-  size_t i, eol_len = strlen(eol);
+  const char *p, *end = astr_cstr(as) + astr_len(as);
   Line *lp = line_new();
 
-  /* FIXME: Rewrite using strstr */
-  for (i = 0, *lines = 1; i < astr_len(as); i++)
-    if (strncmp(astr_char(as, (ptrdiff_t)i), eol, eol_len) != 0)
-      astr_cat_char(list_last(lp)->item, *astr_char(as, (ptrdiff_t)i));
-    else {
+  for (p = astr_cstr(as), *lines = 1; p < end;) {
+    const char *q;
+    if ((q = strstr(p, eol)) != NULL) {
+      astr_ncat(list_last(lp)->item, p, (size_t)(q - p));
       list_append(lp, astr_new());
       ++*lines;
-      i += eol_len - 1;
+      p = q + 1;
+    } else {                    /* End of string, or embedded NUL */
+      size_t len = strlen(p);
+      astr_ncat(list_last(lp)->item, p, len);
+      p += strlen(p);
+      if (p < end) {            /* Deal with embedded NULs */
+        astr_cat_char(as, '\0');
+        p++;            /* Strictly can only increment p if p < end */
+      }
     }
+  }
 
   return lp;
 }
