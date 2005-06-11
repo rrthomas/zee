@@ -187,20 +187,14 @@ static const char *bsearch_function(const char *name)
   return entryp ? entryp->name : NULL;
 }
 
-static FEntry *get_fentry(const char *name)
+Function get_function(const char *name)
 {
   size_t i;
   assert(name);
-  for (i = 0; i < fentry_table_size; ++i)
-    if (!strcmp(name, fentry_table[i].name))
-      return &fentry_table[i];
+  for (i = 0; i < fentry_table_size; i++)
+    if (strcmp(name, fentry_table[i].name) == 0)
+      return fentry_table[i].func;
   return NULL;
-}
-
-Function get_function(const char *name)
-{
-  FEntry *f = get_fentry(name);
-  return f ? f->func : NULL;
 }
 
 const char *get_function_name(Function p)
