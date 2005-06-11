@@ -1,6 +1,6 @@
-/* Table of commands
+/*
+ * Table of commands (name, C function)
  *
- * Add an entry to this list to declare a new command.
  * The list must be kept in alphabetical order.
  */
 
