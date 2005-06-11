@@ -89,8 +89,6 @@ void pop_mark(void);
 void set_mark(void);
 int is_empty_line(void);
 int is_blank_line(void);
-int char_after(Point *pt);
-int char_before(Point *pt);
 int following_char(void);
 int preceding_char(void);
 int bobp(void);
