@@ -83,19 +83,6 @@ size_t popup_pos(void);
 void popup_scroll_up(void);
 void popup_scroll_down(void);
 
-/* editfns.c -------------------------------------------------------------- */
-void push_mark(void);
-void pop_mark(void);
-void set_mark(void);
-int is_empty_line(void);
-int is_blank_line(void);
-int following_char(void);
-int preceding_char(void);
-int bobp(void);
-int eobp(void);
-int bolp(void);
-int eolp(void);
-
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);
@@ -147,9 +134,20 @@ void free_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
 Marker *marker_new(Buffer *bp, Point pt);
 Marker *point_marker(void);
+void push_mark(void);
+void pop_mark(void);
+void set_mark(void);
 Line *line_new(void);
 void line_delete(Line *lp);
 Line *string_to_lines(astr as, const char *eol, size_t *lines);
+int is_empty_line(void);
+int is_blank_line(void);
+int following_char(void);
+int preceding_char(void);
+int bobp(void);
+int eobp(void);
+int bolp(void);
+int eolp(void);
 void line_replace_text(Line **lp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
 int intercalate_char(int c);

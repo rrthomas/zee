@@ -38,7 +38,6 @@ zee_base_SOURCES =				\
 	buffer.c				\
 	completion.c				\
 	display.c				\
-	editfns.c				\
 	extern.h				\
 	file.c					\
 	funcs.c					\

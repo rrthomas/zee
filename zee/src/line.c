@@ -116,6 +116,53 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 }
 
 
+/*-----------------------------------------------------------------------
+  Mark ring
+  -----------------------------------------------------------------------*/
+static list mark_ring = NULL;	/* Mark ring */
+
+/*
+ * Push the current mark on to the the mark-ring
+ */
+void push_mark(void)
+{
+  if (!mark_ring)
+    mark_ring = list_new();
+
+  /* Save the mark */
+  assert(cur_bp);
+  assert(cur_bp->mark);
+  list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
+}
+
+/*
+ * Pop a mark from the mark-ring and make it the current mark
+ */
+void pop_mark(void)
+{
+  Marker *m = list_last(mark_ring)->item;
+
+  /* Replace the mark */
+  assert(m->bp->mark);
+  free_marker(m->bp->mark);
+
+  m->bp->mark = (m->pt.p) ? marker_new(m->bp, m->pt) : NULL;
+
+  list_betail(mark_ring);
+  free_marker(m);
+}
+
+/*
+ * Set the mark to point
+ */
+void set_mark(void)
+{
+  assert(cur_bp);
+  assert(cur_bp->mark);
+  move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
+}
+
+
 /*
  * Create a Line list.
  */
@@ -166,6 +213,92 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
   }
 
   return lp;
+}
+
+/*
+ * Return a flag indicating whether the current line is empty
+ */
+int is_empty_line(void)
+{
+  assert(cur_bp);
+  return astr_len(cur_bp->pt.p->item) == 0;
+}
+
+/*
+ * Return a flag indicating whether the current line is blank
+ */
+int is_blank_line(void)
+{
+  size_t c;
+  assert(cur_bp);
+  for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
+    if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
+      return FALSE;
+  return TRUE;
+}
+
+/*
+ * Return the character following point in the current buffer
+ */
+int following_char(void)
+{
+  assert(cur_bp);
+  if (eobp())
+    return '\0';
+  else if (eolp())
+    return '\n';
+  else
+    return *astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o);
+}
+
+/*
+ * Return the character preceding point in the current buffer
+ */
+int preceding_char(void)
+{
+  assert(cur_bp);
+  if (bobp())
+    return '\0';
+  else if (bolp())
+    return '\n';
+  else
+    return *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o - 1));
+}
+
+/*
+ * Return flag indicating whether point is at the beginning of the buffer
+ */
+int bobp(void)
+{
+  assert(cur_bp);
+  return (bolp() && list_prev(cur_bp->pt.p) == cur_bp->lines);
+}
+
+/*
+ * Return a flag indicating whether point is at the end of the buffer
+ */
+int eobp(void)
+{
+  assert(cur_bp);
+  return (eolp() && list_next(cur_bp->pt.p) == cur_bp->lines);
+}
+
+/*
+ * Return a flag indicating whether point is at the beginning of a line
+ */
+int bolp(void)
+{
+  assert(cur_bp);
+  return cur_bp->pt.o == 0;
+}
+
+/*
+ * Return a flag indicating whether point is at the end of a line
+ */
+int eolp(void)
+{
+  assert(cur_bp);
+  return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
 }
 
 /*
@@ -673,9 +806,9 @@ Delete all spaces and tabs around point, leaving one space.
 }
 END_DEFUN
 
-/***********************************************************************
+/*---------------------------------------------------------------------
 			 Indentation command
-***********************************************************************/
+  ---------------------------------------------------------------------*/
 
 /*
  * Go to cur_goalc() in the previous non-blank line.
