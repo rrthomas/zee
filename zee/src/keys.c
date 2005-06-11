@@ -1,4 +1,4 @@
-/* Key sequences functions
+/* Key chord functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004-2005 Reuben Thomas.
    All rights reserved.
@@ -32,72 +32,20 @@
 #include "main.h"
 #include "extern.h"
 
-/*
- * Array of key codes
- */
+/* Key code and name arrays */
+
 static size_t keycode[] = {
-  KBD_CTRL,
-  KBD_META,
-  KBD_SPC,
-  KBD_TAB,
-  KBD_RET,
-  KBD_PGUP,
-  KBD_PGDN,
-  KBD_HOME,
-  KBD_END,
-  KBD_DEL,
-  KBD_BS,
-  KBD_INS,
-  KBD_LEFT,
-  KBD_RIGHT,
-  KBD_UP,
-  KBD_DOWN,
-  KBD_F1,
-  KBD_F2,
-  KBD_F3,
-  KBD_F4,
-  KBD_F5,
-  KBD_F6,
-  KBD_F7,
-  KBD_F8,
-  KBD_F9,
-  KBD_F10,
-  KBD_F11,
-  KBD_F12,
+#define X(key_sym, key_name, key_code) \
+	key_sym,
+#include "tbl_keys.h"
+#undef X
 };
 
-/*
- * Array of key names in the same order as codes above
- */
 static const char *keyname[] = {
-  "C-",
-  "M-",
-  "SPC",
-  "TAB",
-  "RET",
-  "PGUP",
-  "PGDN",
-  "HOME",
-  "END",
-  "DEL",
-  "BS",
-  "INS",
-  "LEFT",
-  "RIGHT",
-  "UP",
-  "DOWN",
-  "F1",
-  "F2",
-  "F3",
-  "F4",
-  "F5",
-  "F6",
-  "F7",
-  "F8",
-  "F9",
-  "F10",
-  "F11",
-  "F12",
+#define X(key_sym, key_name, key_code) \
+	key_name,
+#include "tbl_keys.h"
+#undef X
 };
 
 /*

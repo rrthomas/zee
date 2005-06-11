@@ -278,41 +278,15 @@ typedef size_t Font;
 #define GETKEY_DELAYED                  0x1
 #define GETKEY_UNFILTERED               0x2
 
-/* Special value returned in non blocking mode, when no key is pressed */
-#define KBD_NOKEY                       UINT_MAX
-
-/* Key modifiers */
-#define KBD_CTRL                         01000
-#define KBD_META                        02000
-
-/* Common non-alphanumeric keys */
-#define KBD_CANCEL                      (KBD_CTRL | 'g')
-#define KBD_SPC				(' ')
-#define KBD_TAB                         00402
-#define KBD_RET                         00403
-#define KBD_PGUP                        00404
-#define KBD_PGDN                        00405
-#define KBD_HOME                        00406
-#define KBD_END                         00407
-#define KBD_DEL                         00410
-#define KBD_BS                          00411
-#define KBD_INS                         00412
-#define KBD_LEFT                        00413
-#define KBD_RIGHT                       00414
-#define KBD_UP                          00415
-#define KBD_DOWN                        00416
-#define KBD_F1                          00420
-#define KBD_F2                          00421
-#define KBD_F3                          00422
-#define KBD_F4                          00423
-#define KBD_F5                          00424
-#define KBD_F6                          00425
-#define KBD_F7                          00426
-#define KBD_F8                          00427
-#define KBD_F9                          00430
-#define KBD_F10                         00431
-#define KBD_F11                         00432
-#define KBD_F12                         00433
+/* Named keys */
+enum {
+#define X(key_sym, key_name, key_code) \
+	key_sym = key_code,
+#include "tbl_keys.h"
+#undef X
+  KBD_CANCEL = (KBD_CTRL | 'g'), /* Special key that shouldn't be in text tables */
+  KBD_NOKEY = INT_MAX
+};
 
 /*--------------------------------------------------------------------------
  * Global flags.
