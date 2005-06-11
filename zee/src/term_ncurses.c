@@ -208,7 +208,7 @@ static size_t translate_key(int c)
   }
 }
 
-size_t term_xgetkey(int mode, size_t arg)
+size_t term_xgetkey(int mode, size_t timeout)
 {
   size_t key;
 
@@ -216,7 +216,7 @@ size_t term_xgetkey(int mode, size_t arg)
     int c;
 
     if (mode & GETKEY_DELAYED)
-      wtimeout(stdscr, (int)arg);
+      wtimeout(stdscr, (int)timeout);
     c = getch();
     if (mode & GETKEY_DELAYED)
       wtimeout(stdscr, -1);
