@@ -981,7 +981,6 @@ the minibuffer.
     ok = FALSE;
   else {
     le *list = eval_expression(astr_cstr(expr));
-    /* FIXME: cons value on to front of values */
     leWipe(list);
     astr_delete(expr);
     ok = list == NULL;
