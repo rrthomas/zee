@@ -39,7 +39,7 @@ int scroll_up(void);
 /* bind.c ----------------------------------------------------------------- */
 void bind_key_string(const char *keystr, Function func);
 astr minibuf_read_function_name(const char *fmt, ...);
-const char *get_function_by_key(size_t key);
+const char *binding_to_function(size_t key);
 void process_key(size_t key);
 Function last_command(void);
 void free_bindings(void);

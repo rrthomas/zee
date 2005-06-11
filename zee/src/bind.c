@@ -347,7 +347,7 @@ Argument is a command definition, usually a symbol with a function definition.
 }
 END_DEFUN
 
-const char *get_function_by_key(size_t key)
+const char *binding_to_function(size_t key)
 {
   Binding *p;
 
