@@ -916,6 +916,42 @@ le *eval_cb_defun(int argc, le *branch)
 }
 
 
+static int execute_function(const char *name, int uniarg)
+{
+  Function func;
+  Macro *mp;
+
+  if ((func = get_function(name)))
+    return func(uniarg ? 1 : 0, evalCastIntToLe(uniarg));
+  else if ((mp = get_macro(name)))
+    return call_macro(mp);
+  else
+    return FALSE;
+}
+
+DEFUN_INT("execute-extended-command", execute_extended_command)
+/*+
+Read function name, then read its arguments and call it.
++*/
+{
+  astr name, msg = astr_new();
+
+  if (uniused && uniarg != 0)
+    astr_afmt(msg, "%d M-x ", uniarg);
+  else
+    astr_cat_cstr(msg, "M-x ");
+
+  name = minibuf_read_function_name(astr_cstr(msg));
+  astr_delete(msg);
+  if (name == NULL)
+    return FALSE;
+
+  ok = execute_function(astr_cstr(name), uniarg);
+  astr_delete(name);
+}
+END_DEFUN
+
+
 static le *eval_expression(const char *expr)
 {
   le *list = lisp_read_string(expr);

@@ -190,18 +190,18 @@ static const char *bsearch_function(const char *name)
 Function get_function(const char *name)
 {
   size_t i;
-  assert(name);
-  for (i = 0; i < fentry_table_size; i++)
-    if (strcmp(name, fentry_table[i].name) == 0)
-      return fentry_table[i].func;
+  if (name)
+    for (i = 0; i < fentry_table_size; i++)
+      if (strcmp(name, fentry_table[i].name) == 0)
+        return fentry_table[i].func;
   return NULL;
 }
 
-const char *get_function_name(Function p)
+const char *get_function_name(Function f)
 {
   size_t i;
-  for (i = 0; i < fentry_table_size; ++i)
-    if (fentry_table[i].func == p)
+  for (i = 0; i < fentry_table_size; i++)
+    if (fentry_table[i].func == f)
       return fentry_table[i].name;
   return NULL;
 }
@@ -268,41 +268,6 @@ astr minibuf_read_function_name(const char *fmt, ...)
   return ms;
 }
 
-static int execute_function(const char *name, int uniarg)
-{
-  Function func;
-  Macro *mp;
-
-  if ((func = get_function(name)))
-    return func(uniarg ? 1 : 0, evalCastIntToLe(uniarg));
-  else if ((mp = get_macro(name)))
-    return call_macro(mp);
-  else
-    return FALSE;
-}
-
-DEFUN_INT("execute-extended-command", execute_extended_command)
-/*+
-Read function name, then read its arguments and call it.
-+*/
-{
-  astr name, msg = astr_new();
-
-  if (uniused && uniarg != 0)
-    astr_afmt(msg, "%d M-x ", uniarg);
-  else
-    astr_cat_cstr(msg, "M-x ");
-
-  name = minibuf_read_function_name(astr_cstr(msg));
-  astr_delete(msg);
-  if (name == NULL)
-    return FALSE;
-
-  ok = execute_function(astr_cstr(name), uniarg);
-  astr_delete(name);
-}
-END_DEFUN
-
 DEFUN("global-set-key", global_set_key)
 /*+
 Bind a command to a key sequence.
@@ -366,7 +331,7 @@ Argument is a command definition, usually a symbol with a function definition.
 
   name = minibuf_read_function_name("Where is command: ");
 
-  if (name == NULL || (f = get_function(astr_cstr(name))) == NULL)
+  if ((f = get_function(astr_cstr(name))) == NULL)
     ok = FALSE;
   else {
     size_t key = function_to_binding(f);
