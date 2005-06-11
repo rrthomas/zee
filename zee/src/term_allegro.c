@@ -71,14 +71,12 @@ static void control_blink_state(void)
 {
   blink_state ^= 1;
 }
-
 END_OF_STATIC_FUNCTION(control_blink_state)
 
 static void inc_cur_time(void)
 {
   cur_time++;
 }
-
 END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
@@ -265,11 +263,11 @@ static int translate_key(int c)
         (ascii < 32 || ascii == 127)) {
       return ('0'+scancode-KEY_0) | KBD_CTRL;
     }
-    else if (ascii >= 1 && ascii <= 'z'-'a'+1) {
-      if ('a'+ascii-1 == 'g')
+    else if (ascii >= 1 && ascii <= 'z' - 'a' + 1) {
+      if ('a' + ascii - 1 == 'g')
         return KBD_CANCEL;
       else
-        return ('a'+ascii-1) | KBD_CTRL;
+        return ('a' + ascii - 1) | KBD_CTRL;
     }
     else if (ascii >= ' ') {
       return ascii;
@@ -279,13 +277,14 @@ static int translate_key(int c)
   return KBD_NOKEY;
 }
 
-static int hooked_readkey(size_t timeout)
+static int hooked_readkey(int mode, size_t timeout)
 {
   size_t beg_time = cur_time;
   term_refresh();
 
   cursor_state = TRUE;
-  while (!keypressed() && (!timeout || cur_time-beg_time < timeout))
+  while (!keypressed() && (!(mode & GETKEY_DELAYED) ||
+                           cur_time - beg_time < timeout))
     draw_cursor(blink_state);
 
   draw_cursor(FALSE);
@@ -294,15 +293,14 @@ static int hooked_readkey(size_t timeout)
   return readkey();
 }
 
-/* FIXME: make timeout of 0 with GETKEY_DELAYED work; see also hooked_readkey */
 size_t term_xgetkey(int mode, size_t timeout)
 {
   if (mode & GETKEY_UNFILTERED)
-    return hooked_readkey(timeout) & 0xff;
+    return hooked_readkey(mode, timeout) & 0xff;
   else {
-    size_t key = translate_key(hooked_readkey(timeout));
+    size_t key = translate_key(mode, hooked_readkey(mode, timeout));
     while (key == KBD_META) {
-      key = translate_key(hooked_readkey(0));
+      key = translate_key(0, hooked_readkey(0));
       key |= KBD_META;
     }
     return key;
