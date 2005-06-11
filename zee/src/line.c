@@ -166,7 +166,7 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
  */
 int intercalate_char(int c)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -184,7 +184,7 @@ int intercalate_char(int c)
  */
 int insert_char(int c)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -200,7 +200,7 @@ static void insert_expanded_tab(int (*inschr)(int chr))
   int c = get_goalc();
   int t;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   t = tab_width(cur_bp);
 
@@ -226,7 +226,7 @@ Convert the tabulation into spaces.
 {
   int i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (i = 0; i < uniarg; ++i)
@@ -248,7 +248,7 @@ int intercalate_newline()
   size_t lp1len, lp2len;
   astr as;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -362,7 +362,7 @@ void fill_break_line(void)
   size_t i, break_col = 0, excess = 0, old_col;
   size_t fillcol = get_variable_number("fill-column");
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   /* If we're not beyond fill-column, stop now. */
   if (get_goalc() <= fillcol)
@@ -415,7 +415,7 @@ Insert a newline, and move to left margin of the new line if it's blank.
 {
   int i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (i = 0; i < uniarg; ++i) {
@@ -438,7 +438,7 @@ Insert a newline and leave point before it.
 {
   int i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (i = 0; i < uniarg; ++i)
@@ -452,7 +452,7 @@ END_DEFUN
 
 void insert_string(const char *s)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
   undo_nosave = TRUE;
@@ -466,7 +466,7 @@ void insert_string(const char *s)
 
 void insert_nstring(const char *s, size_t size)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
@@ -480,7 +480,7 @@ void insert_nstring(const char *s, size_t size)
 
 int self_insert_command(size_t key)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   weigh_mark();
 
@@ -505,7 +505,7 @@ Whichever character you type to run this command is inserted.
   int i;
   size_t key = getkey();
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (i = 0; i < uniarg; ++i)
@@ -519,7 +519,7 @@ END_DEFUN
 
 int delete_char(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   weigh_mark();
 
@@ -581,7 +581,7 @@ Join lines if the character is a newline.
 {
   int i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (uniarg < 0)
     return FUNCALL_ARG(backward_delete_char, -uniarg);
@@ -618,7 +618,7 @@ Join lines if the character is a newline.
 {
   int i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (uniarg < 0)
     return FUNCALL_ARG(delete_char, -uniarg);
@@ -638,7 +638,7 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
 Delete all spaces and tabs around point.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
@@ -657,7 +657,7 @@ DEFUN_INT("just-one-space", just_one_space)
 Delete all spaces and tabs around point, leaving one space.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   FUNCALL(delete_horizontal_space);
   insert_char(' ');
@@ -689,7 +689,7 @@ DEFUN_INT("indent-relative", indent_relative)
 Indent line or insert a tab.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     ok = FALSE;
@@ -739,7 +739,7 @@ except that if there is a character in the first column of the line
 above, no indenting is performed.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     ok = FALSE;

@@ -43,7 +43,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 {
   Undo *up;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (undo_nosave)
     return;
@@ -94,7 +94,7 @@ static Undo *revert_action(Undo *up)
 {
   size_t i;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   doing_undo = TRUE;
 
@@ -182,7 +182,7 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   ok = FALSE;
 

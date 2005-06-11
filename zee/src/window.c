@@ -52,8 +52,7 @@ void check_windows(void)
     /* There must be a buffer displayed in the window. */
     assert(wp->bp);
 
-    if (wp == cur_wp) { /* FIXME: Should be (wp->bp == cur_bp), but currently
-                           that wouldn't work. */
+    if (wp == cur_wp) {
       /* There must not be a saved_pt. */
       assert(cur_wp->saved_pt == NULL);
     } else {
@@ -231,7 +230,7 @@ Window *find_window(const char *name)
 
 Point window_pt(Window *wp)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   /* The current window uses the current buffer point; all other
      windows have a saved point.  */

@@ -172,7 +172,7 @@ Buffer *find_buffer(const char *name, int cflag)
  */
 Buffer *get_next_buffer(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   return cur_bp->next ? cur_bp->next : head_bp;
 }
 
@@ -242,18 +242,17 @@ void switch_to_buffer(Buffer *bp)
  */
 int warn_if_readonly_buffer(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   if (cur_bp->flags & BFLAG_READONLY) {
     minibuf_error("Buffer is readonly: %s", cur_bp->name);
     return TRUE;
-  }
-
+  } else
   return FALSE;
 }
 
 int warn_if_no_mark(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   assert(cur_bp->mark);
   if (!cur_bp->mark_anchored) {
     minibuf_error("The mark is not active now");
@@ -287,7 +286,7 @@ void calculate_region(Region *rp, Point from, Point to)
  */
 int calculate_the_region(Region *rp)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   if (!cur_bp->mark_anchored)
     return FALSE;
 
@@ -344,13 +343,13 @@ size_t calculate_buffer_size(Buffer *bp)
 
 void anchor_mark(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   cur_bp->mark_anchored = TRUE;
 }
 
 void weigh_mark(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   cur_bp->mark_anchored = FALSE;
 }
 

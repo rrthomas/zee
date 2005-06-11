@@ -433,8 +433,6 @@ void file_close(Buffer *kill_bp)
   Buffer *bp, *next_bp;
   Window *wp;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
   if (kill_bp->next != NULL)
     next_bp = kill_bp->next;
   else
@@ -476,6 +474,8 @@ Kill the current buffer or the user specified one.
   astr ms;
   Completion *cp;
 
+  assert(cur_bp);
+
   cp = make_buffer_completion();
   if ((ms = minibuf_read_completion("Close file (default %s): ",
                                     "", cp, NULL, cur_bp->name)) == NULL)
@@ -508,7 +508,7 @@ static int file_insert(const char *filename)
   off_t i, size;
   char buf[BUFSIZ];
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (!exist_file(filename)) {
     minibuf_error("Unable to read file `%s'", filename);
@@ -652,7 +652,7 @@ DEFUN_INT("file-save", file_save)
 Save current buffer in visited file if modified.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   ok = file_save(cur_bp);
 }
 END_DEFUN
@@ -666,7 +666,7 @@ Makes buffer visit that file, and marks it not modified.
   char *fname;
   astr ms;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
 

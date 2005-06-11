@@ -68,14 +68,14 @@ void set_mark(void)
 
 int is_empty_line(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return astr_len(cur_bp->pt.p->item) == 0;
 }
 
 int is_blank_line(void)
 {
   size_t c;
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
     if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
       return FALSE;
@@ -106,7 +106,7 @@ int char_before(Point *pt)
    buffer. */
 int following_char(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return char_after(&cur_bp->pt);
 }
 
@@ -114,7 +114,7 @@ int following_char(void)
    buffer. */
 int preceding_char(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return char_before(&cur_bp->pt);
 }
 
@@ -122,7 +122,7 @@ int preceding_char(void)
    buffer. */
 int bobp(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return (list_prev(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == 0);
 }
@@ -131,7 +131,7 @@ int bobp(void)
    buffer. */
 int eobp(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return (list_next(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
 }
@@ -139,13 +139,13 @@ int eobp(void)
 /* Returns TRUE if point is at the beginning of a line. */
 int bolp(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return cur_bp->pt.o == 0;
 }
 
 /* Returns TRUE if point is at the end of a line. */
 int eolp(void)
 {
-  assert(cur_bp); /* FIXME: Check this assumption. */
+  assert(cur_bp);
   return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
 }

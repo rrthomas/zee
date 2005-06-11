@@ -67,7 +67,7 @@ DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 Change whether this buffer is visiting its file read-only.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   cur_bp->flags ^= BFLAG_READONLY;
 }
 END_DEFUN
@@ -79,7 +79,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   cur_bp->flags ^= BFLAG_AUTOFILL;
 }
 END_DEFUN
@@ -91,7 +91,7 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   if (lastflag & FLAG_SET_UNIARG)
     variableSetNumber(&cur_bp->vars, "fill-column", uniarg);
   else
@@ -118,7 +118,7 @@ END_DEFUN
 
 void exchange_point_and_mark(void)
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   assert(cur_bp->mark);
 
   /* Swap the point with the mark. */
@@ -282,7 +282,7 @@ DEFUN_INT("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   cur_bp->pt = line_beginning_position(0);
   while (!eolp()) {
     if (!isspace(following_char()))
@@ -303,7 +303,7 @@ static int forward_word(void)
 {
   int gotword = FALSE;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   for (;;) {
     while (!eolp()) {
@@ -348,7 +348,7 @@ static int backward_word(void)
 {
   int gotword = FALSE;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   for (;;) {
     if (bolp()) {
@@ -442,7 +442,7 @@ int forward_sexp(void)
   int double_quote = 0;
   int single_quote = 0;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   for (;;) {
     while (!eolp()) {
       int c = following_char();
@@ -513,7 +513,7 @@ int backward_sexp(void)
   int double_quote = 1;
   int single_quote = 1;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   for (;;) {
     if (bolp()) {
       if (!edit_navigate_up_line()) {
@@ -692,7 +692,7 @@ Fill paragraph at or after point.
   int i, start, end;
   Marker *m = point_marker();
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
   FUNCALL(forward_paragraph);
@@ -736,7 +736,7 @@ static int setcase_word(int rcase)
   int gotword;
   size_t i, size;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if (!ISWORDCHAR(following_char())) {
     if (!forward_word())
@@ -792,7 +792,7 @@ Convert following word (or argument N words) to lower case, moving over.
 {
   int uni;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -811,7 +811,7 @@ Convert following word (or argument N words) to upper case, moving over.
 {
   int uni;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -832,7 +832,7 @@ lower case.
 {
   int uni;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -855,7 +855,7 @@ current buffer.
 {
   astr ms;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     ok = cancel();
