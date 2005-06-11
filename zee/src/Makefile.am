@@ -53,7 +53,7 @@ zee_base_SOURCES =				\
 	minibuf.c				\
 	point.c					\
 	search.c				\
-	tbl_funcs.h				\
+	tbl_keys.h				\
 	tbl_vars.h				\
 	undo.c					\
 	variables.c				\
@@ -85,7 +85,7 @@ clean-local:
 	rm -f test*.stdout
 
 distclean-local:
-	rm -f paths.h
+	rm -f paths.h tbl_funcs.h
 
 help.o: paths.h
 

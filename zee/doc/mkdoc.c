@@ -1,14 +1,17 @@
 /*
- * A Quick & Dirty tool to produce the AUTODOC file.
+ * A quick & dirty tool to produce various documentation and header files
  */
 
 #include "config.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+
+/* Stub to make zmalloc etc. happy */
+#define die exit
 
 /* #include other sources so this program can be easily built on the
    build host when cross-compiling */
@@ -16,33 +19,55 @@
 #include "zmalloc.c"
 #include "astr.c"
 
-struct fentry {
-  char	*name;
-  astr	doc;
-} fentry_table[] = {
-#define X(zee_name, c_name) \
-  { zee_name, NULL },
-#include "tbl_funcs.h"
-#undef X
-};
+#define NAME "mkdoc"
 
-#define fentry_table_size (sizeof fentry_table  / sizeof fentry_table[0])
+static struct fentry {
+  const char *name;
+  astr doc;
+} *ftable;
 
-struct ventry {
-  char	*name;
-  char	*fmt;
-  char	*defvalue;
-  char	*doc;
-} ventry_table[] = {
+static size_t fentries = 0, fentries_max = 0;
+
+static struct ventry {
+  char *name;
+  char *fmt;
+  char *defvalue;
+  char *doc;
+} vtable[] = {
 #define X(name, fmt, defvalue, doc) \
 	{ name, fmt, defvalue, doc },
 #include "tbl_vars.h"
 #undef X
 };
 
-#define ventry_table_size (sizeof ventry_table / sizeof ventry_table[0])
+#define ventries (sizeof vtable / sizeof vtable[0])
 
-FILE *input_file;
+static FILE *input_file;
+
+static void add_func(const char *name, astr doc)
+{
+  size_t i;
+
+  /* Reallocate vector if there is not enough space */
+  if (fentries + 1 >= fentries_max) {
+    fentries_max += 16;
+    ftable = zrealloc(ftable, sizeof(ftable[0]) * fentries_max);
+  }
+
+  /* Insert the function at the sorted position */
+  for (i = 0; i < fentries; i++)
+    if (strcmp(ftable[i].name, name) > 0) {
+      memmove(&ftable[i + 1], &ftable[i], sizeof(ftable[0]) * (fentries - i));
+      ftable[i].name = zstrdup(name);
+      ftable[i].doc = doc;
+      break;
+    }
+  if (i == fentries) {
+    ftable[fentries].name = zstrdup(name);
+    ftable[fentries].doc = doc;
+  }
+  ++fentries;
+}
 
 static void fdecl(const char *name)
 {
@@ -52,8 +77,13 @@ static void fdecl(const char *name)
 
   while ((buf = astr_fgets(input_file)) != NULL) {
     if (s == 1) {
-      if (!strncmp(astr_cstr(buf), "+*/", 3))
+      if (!strncmp(astr_cstr(buf), "+*/", 3)) {
+        if (doc == NULL || astr_cmp_cstr(doc, "\n") == 0) {
+          fprintf(stderr, NAME ": no docstring for %s\n", name);
+          exit(1);
+        }
         break;
+      }
       astr_cat(doc, buf);
       astr_cat_char(doc, '\n');
     }
@@ -64,9 +94,14 @@ static void fdecl(const char *name)
     astr_delete(buf);
   }
 
-  for (i = 0; i < fentry_table_size; ++i)
-    if (!strcmp(name, fentry_table[i].name))
-      fentry_table[i].doc = doc;
+  /* Check function is not a duplicate */
+  for (i = 0; i < fentries; i++)
+    if (strcmp(name, ftable[i].name) == 0) {
+      fprintf(stderr, NAME ": duplicate function %s\n", name);
+      exit(1);
+    }
+
+  add_func(name, doc);
 }
 
 static void parse(void)
@@ -81,7 +116,7 @@ static void parse(void)
       p = strchr(astr_cstr(buf), '"');
       q = strrchr(astr_cstr(buf), '"');
       if (p == NULL || q == NULL || p == q) {
-        fprintf(stderr, "mkdoc: invalid DEFUN() syntax\n");
+        fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
         exit(1);
       }
       sub = astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1));
@@ -96,41 +131,54 @@ static void parse(void)
 static void dump_help(void)
 {
   unsigned i;
-  for (i = 0; i < fentry_table_size; ++i) {
-    astr doc = fentry_table[i].doc;
+  for (i = 0; i < fentries; ++i) {
+    astr doc = ftable[i].doc;
     if (doc)
       fprintf(stdout, "\fF_%s\n%s",
-              fentry_table[i].name, astr_cstr(doc));
+              ftable[i].name, astr_cstr(doc));
   }
-  for (i = 0; i < ventry_table_size; ++i)
+  for (i = 0; i < ventries; ++i)
     fprintf(stdout, "\fV_%s\n%s\n%s\n",
-            ventry_table[i].name, ventry_table[i].defvalue,
-            ventry_table[i].doc);
+            vtable[i].name, vtable[i].defvalue,
+            vtable[i].doc);
 }
 
-static void dump_func_table(void)
+static void dump_funcs(void)
 {
   unsigned i;
-  FILE *fp = fopen("zee_funcs.texi", "w");
+  FILE *fp1 = fopen("zee_funcs.texi", "w");
+  FILE *fp2 = fopen("tbl_funcs.h", "w");
 
-  assert(fp);
-  fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
-  fprintf(fp, "@table @code\n");
+  assert(fp1);
+  fprintf(fp1,
+          "@c Automatically generated file: DO NOT EDIT!\n"
+          "@table @code\n");
 
-  for (i = 0; i < fentry_table_size; ++i) {
-    astr doc = fentry_table[i].doc;
-    if (!doc || astr_len(doc) == 0) {
-      fprintf(stderr, "mkdoc: no docstring for %s\n", fentry_table[i].name);
-      exit(1);
-    }
-    fprintf(fp, "@item %s\n%s", fentry_table[i].name, astr_cstr(doc));
+  assert(fp2);
+  fprintf(fp2,
+          "/*\n"
+          " * Table of commands (name, C function)\n"
+          " *\n"
+          " * The list must be kept in alphabetical order.\n"
+          " */\n"
+          "\n");
+
+  for (i = 0; i < fentries; ++i) {
+    char *cname = zstrdup(ftable[i].name), *p;
+
+    for (p = strchr(cname, '-'); p != NULL; p = strchr(p, '-'))
+      *p = '_';
+
+    fprintf(fp1, "@item %s\n%s", ftable[i].name, astr_cstr(ftable[i].doc));
+    fprintf(fp2, "X(\"%s\", %s)\n", ftable[i].name, cname);
   }
 
-  fprintf(fp, "@end table");
-  fclose(fp);
+  fprintf(fp1, "@end table");
+  fclose(fp1);
+  fclose(fp2);
 }
 
-static void dump_var_table(void)
+static void dump_vars(void)
 {
   unsigned i;
   FILE *fp = fopen("zee_vars.texi", "w");
@@ -139,13 +187,13 @@ static void dump_var_table(void)
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
   fprintf(fp, "@table @code\n");
 
-  for (i = 0; i < ventry_table_size; ++i) {
-    astr doc = astr_cat_cstr(astr_new(), ventry_table[i].doc);
+  for (i = 0; i < ventries; ++i) {
+    astr doc = astr_cat_cstr(astr_new(), vtable[i].doc);
     if (!doc || astr_len(doc) == 0) {
-      fprintf(stderr, "mkdoc: no docstring for %s\n", ventry_table[i].name);
+      fprintf(stderr, NAME ": no docstring for %s\n", vtable[i].name);
       exit(1);
     }
-    fprintf(fp, "@item %s\n%s\n", ventry_table[i].name, astr_cstr(doc));
+    fprintf(fp, "@item %s\n%s\n", vtable[i].name, astr_cstr(doc));
     astr_delete(doc);
   }
 
@@ -157,7 +205,7 @@ static void process_file(char *filename)
 {
   if (filename != NULL && strcmp(filename, "-") != 0 &&
       (input_file = fopen(filename, "r")) == NULL) {
-    fprintf(stderr, "mkdoc:%s: %s\n",
+    fprintf(stderr, NAME ":%s: %s\n",
             filename, strerror(errno));
     exit(1);
   }
@@ -167,14 +215,6 @@ static void process_file(char *filename)
   fclose(input_file);
 }
 
-/*
- * Stub to make zmalloc &c. happy.
- */
-void die(int exitcode)
-{
-  exit(exitcode);
-}
-
 int main(int argc, char **argv)
 {
   int i;
@@ -182,8 +222,8 @@ int main(int argc, char **argv)
     process_file(argv[i]);
 
   dump_help();
-  dump_func_table();
-  dump_var_table();
+  dump_funcs();
+  dump_vars();
 
   return 0;
 }
