@@ -148,7 +148,7 @@ static void open_file_at(char *path, size_t lineno)
   /* Open file */
   astr_cat(dir, fname);
   astr_delete(fname);
-  file_open(astr_cstr(dir));
+  file_visit(astr_cstr(dir));
   astr_delete(dir);
 
   /* Update display */

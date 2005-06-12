@@ -262,13 +262,12 @@ astr get_home_dir(void)
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist.
  */
-void read_file(const char *filename)
+void file_open(Buffer *bp, const char *filename)
 {
   FILE *fp;
   char eolstr[3] = "\n";
   astr as = NULL;
   int ok = TRUE;
-  Buffer *bp = cur_bp;          /* FIXME: Pass bp as a parameter. */
 
   assert(bp);
 
@@ -297,7 +296,11 @@ void read_file(const char *filename)
     astr_delete(as);
 }
 
-int file_open(const char *filename)
+/*
+ * Switch to the buffer containing the given file, or load it into a
+ * new buffer if it isn't already being visited.
+ */
+int file_visit(const char *filename)
 {
   Buffer *bp;
   astr as;
@@ -325,7 +328,8 @@ int file_open(const char *filename)
   bp->filename = zstrdup(filename);
 
   switch_to_buffer(bp);
-  read_file(filename);
+  assert(cur_bp);
+  file_open(cur_bp, filename);
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -360,7 +364,7 @@ creating one if none already exists.
 
   if (ok) {
     if (astr_len(ms) > 0)
-      ok = file_open(astr_cstr(ms));
+      ok = file_visit(astr_cstr(ms));
     else
       ok = FALSE;
     astr_delete(ms);
