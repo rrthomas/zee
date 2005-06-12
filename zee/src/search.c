@@ -111,32 +111,24 @@ static void goto_linep(Line *lp)
 static int search_forward(Line *startp, size_t starto, const char *s)
 {
   Line *lp;
-  const char *sp, *sp2;
-  size_t s1size, s2size = strlen(s);
+  const char *sp;
+  size_t s1size, ssize = strlen(s);
 
   assert(cur_bp);
 
-  if (s2size < 1)
-    return FALSE;
-
-  for (lp = startp; lp != cur_bp->lines; lp = list_next(lp)) {
-    if (lp == startp) {
-      sp = astr_char(lp->item, (ptrdiff_t)starto);
-      s1size = astr_len(lp->item) - starto;
-    } else {
-      sp = astr_cstr(lp->item);
-      s1size = astr_len(lp->item);
-    }
-    if (s1size < 1)
-      continue;
-
-    sp2 = re_find_substr(sp, s1size, s, s2size,
-                         sp == astr_cstr(lp->item), TRUE, FALSE);
-
-    if (sp2 != NULL) {
-      goto_linep(lp);
-      cur_bp->pt.o = sp2 - astr_cstr(lp->item);
-      return TRUE;
+  if (ssize > 0) {
+    for (lp = startp, sp = astr_char(lp->item, (ptrdiff_t)starto), s1size = astr_len(lp->item) - starto;
+         lp != cur_bp->lines;
+         lp = list_next(lp), sp = astr_cstr(lp->item), s1size = astr_len(lp->item)) {
+      if (s1size > 0) {
+        const char *sp2 = re_find_substr(sp, s1size, s, ssize,
+                                         sp == astr_cstr(lp->item), TRUE, FALSE);
+        if (sp2 != NULL) {
+          goto_linep(lp);
+          cur_bp->pt.o = sp2 - astr_cstr(lp->item);
+          return TRUE;
+        }
+      }
     }
   }
 
@@ -146,30 +138,24 @@ static int search_forward(Line *startp, size_t starto, const char *s)
 static int search_backward(Line *startp, size_t starto, const char *s)
 {
   Line *lp;
-  const char *sp, *sp2;
   size_t s1size, ssize = strlen(s);
 
   assert(cur_bp);
 
-  if (ssize < 1)
-    return FALSE;
-
-  for (lp = startp; lp != cur_bp->lines; lp = list_prev(lp)) {
-    sp = astr_cstr(lp->item);
-    if (lp == startp)
-      s1size = starto;
-    else
-      s1size = astr_len(lp->item);
-    if (s1size < 1)
-      continue;
-
-    sp2 = re_find_substr(sp, s1size, s, ssize,
-                         TRUE, s1size == astr_len(lp->item), TRUE);
-
-    if (sp2 != NULL) {
-      goto_linep(lp);
-      cur_bp->pt.o = sp2 - astr_cstr(lp->item);
-      return TRUE;
+  if (ssize > 0) {
+    for (lp = startp, s1size = starto;
+         lp != cur_bp->lines;
+         lp = list_prev(lp), s1size = astr_len(lp->item)) {
+      const char *sp = astr_cstr(lp->item);
+      if (s1size > 0) {
+        const char *sp2 = re_find_substr(sp, s1size, s, ssize,
+                                         TRUE, s1size == astr_len(lp->item), TRUE);
+        if (sp2 != NULL) {
+          goto_linep(lp);
+          cur_bp->pt.o = sp2 - astr_cstr(lp->item);
+          return TRUE;
+        }
+      }
     }
   }
 
