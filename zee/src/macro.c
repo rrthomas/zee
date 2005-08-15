@@ -1,5 +1,7 @@
 /* Macro facility functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -15,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -42,13 +44,16 @@ static void macro_delete(Macro *mp)
 
 static void add_macro_key(Macro *mp, size_t key)
 {
-  mp->keys = zrealloc(mp->keys, sizeof(size_t) * ++mp->nkeys);
+  mp->nkeys++;
+  mp->keys = zrealloc(mp->keys, sizeof(size_t) * (mp->nkeys - 1),
+                      sizeof(size_t) * mp->nkeys);
   mp->keys[mp->nkeys - 1] = key;
 }
 
 void add_cmd_to_macro(void)
 {
   size_t i;
+  assert(cmd_mp);
   for (i = 0; i < cmd_mp->nkeys; i++)
     add_macro_key(cur_mp, cmd_mp->keys[i]);
   macro_delete(cmd_mp);

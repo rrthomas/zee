@@ -18,8 +18,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -243,9 +243,7 @@ int universal_argument(int keytype, int xarg)
         /* The default negative arg isn't -4, it's -1. */
         arg = 1;
       } else if (i != 0) {
-        /* If i == 0 do nothing (the Emacs behavior is a little
-           strange in this case, it waits for one more key that is
-           eaten, and then goes back to the normal state). */
+        /* If i == 0 do nothing. */
         ungetkey(key);
         break;
       }
@@ -890,9 +888,8 @@ current buffer.
         astr out = astr_new(), s;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
-          astr_cat(out, s);
+          astr_cat_delete(out, s);
           astr_cat_cstr(out, "\n");
-          astr_delete(s);
         }
         astr_delete(s);
         pclose(pipe);

@@ -51,7 +51,7 @@ static void add_func(const char *name, astr doc)
   /* Reallocate vector if there is not enough space */
   if (fentries + 1 >= fentries_max) {
     fentries_max += 16;
-    ftable = zrealloc(ftable, sizeof(ftable[0]) * fentries_max);
+    ftable = zrealloc(ftable, sizeof(ftable[0]) * fentries_max - 16, sizeof(ftable[0]) * fentries_max);
   }
 
   /* Insert the function at the sorted position */

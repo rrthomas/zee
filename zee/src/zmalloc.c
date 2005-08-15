@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -49,16 +49,19 @@ void *zmalloc(size_t size)
 /*
  * Resize an allocated memory area.
  */
-void *zrealloc(void *ptr, size_t size)
+void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 {
   void *newptr;
 
-  assert(size > 0);
+  assert(newsize > 0);
 
-  if ((newptr = realloc(ptr, size)) == NULL) {
+  if ((newptr = realloc(ptr, newsize)) == NULL) {
     fprintf(stderr, PACKAGE_NAME ": cannot reallocate memory\n");
     die(1);
   }
+
+  if (newsize > oldsize)
+    memset((char *)newptr + oldsize, 0, newsize - oldsize);
 
   return newptr;
 }

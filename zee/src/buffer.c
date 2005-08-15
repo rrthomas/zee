@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -358,7 +358,11 @@ void weigh_mark(void)
  */
 size_t tab_width(Buffer *bp)
 {
-  size_t t = get_variable_number_bp(bp, "tab-width");
+  size_t t;
+
+  assert(bp);
+
+  t = get_variable_number_bp(bp, "tab-width");
 
   return t ? t : 1;
 }

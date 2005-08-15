@@ -1,17 +1,17 @@
-; .zee sample configuration
+# .zee sample configuration
 
-; The default tabulation width [default: 8]
-(setq tab-width 8)
+# The default tabulation width [default: 8]
+setq tab-width 8
 
-; Standard indentation level [default: 4]
-; Default number of columns for margin-changing functions to indent.
-(setq standard-indent 4)
+# Standard indentation level [default: 4]
+# Default number of columns for margin-changing functions to indent.
+setq standard-indent 4
 
-; The default fill column (in Auto Fill Mode) [default: 72]
-(setq fill-column 72)
+# The default fill column (in Auto Fill Mode) [default: 72]
+setq fill-column 72
 
-; Enable the Auto Fill Mode [default: false]
-(setq auto-fill-mode false)
+# Enable the Auto Fill Mode [default: false]
+setq auto-fill-mode false
 
-; Preserve case in replacements by query-replace-regexp [default: true]
-(setq case-replace true)
+# Preserve case in replacements by query-replace-regexp [default: true]
+setq case-replace true

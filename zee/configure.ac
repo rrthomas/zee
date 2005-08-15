@@ -128,6 +128,7 @@ dnl ==================================================================
 
 AC_DEFUN([CHECK_CURSES],
 [
+        AC_MSG_CHECKING([use curses])
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
         AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),

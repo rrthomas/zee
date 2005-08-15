@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include <stdlib.h>
 #include <string.h>
@@ -99,10 +99,10 @@ le *leAddTail(le *list, le *element)
 
 le *leAddBranchElement(le *list, le *branch, int quoted)
 {
-  le *temp = leNew(NULL);
-  temp->branch = branch;
-  temp->quoted = quoted;
-  return leAddTail(list, temp);
+  le *newbranch = leNew(NULL);
+  newbranch->branch = branch;
+  newbranch->quoted = quoted;
+  return leAddTail(list, newbranch);
 }
 
 le *leAddDataElement(le *list, const char *data, int quoted)

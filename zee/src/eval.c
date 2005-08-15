@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include <assert.h>
 #include <stdio.h>
@@ -952,9 +952,9 @@ Read function name, then read its arguments and call it.
 END_DEFUN
 
 
-static le *eval_expression(const char *expr)
+static le *eval_expression(astr expr)
 {
-  le *list = lisp_read_string(expr);
+  le *list = lisp_read(expr);
   astr as = leDumpEval(list, 0);
 
   if (lastflag & FLAG_SET_UNIARG)
@@ -980,7 +980,7 @@ the minibuffer.
   if ((expr = minibuf_read("Eval: ", "")) == NULL)
     ok = FALSE;
   else {
-    le *list = eval_expression(astr_cstr(expr));
+    le *list = eval_expression(expr);
     leWipe(list);
     astr_delete(expr);
     ok = list == NULL;
@@ -1006,6 +1006,8 @@ Interactively, with prefix argument, print output into current buffer.
   expr = copy_text_block(r.start, r.size);
   cur_bp->pt = m->pt;
 
+  /* FIXME: expr needs to be an astr; make copy_text_block return an
+     astr */
   list = eval_expression(expr);
   free(expr);
   leWipe(list);

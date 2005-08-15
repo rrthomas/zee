@@ -1,6 +1,7 @@
 /* Incremental search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -17,8 +18,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -104,8 +105,6 @@ static void goto_linep(Line *lp)
   assert(cur_bp);
   cur_bp->pt = point_min(cur_bp);
   resync_display();
-  while (cur_bp->pt.p != lp)
-    edit_navigate_down_line();
 }
 
 static int search_forward(Line *startp, size_t starto, const char *s)
@@ -124,7 +123,8 @@ static int search_forward(Line *startp, size_t starto, const char *s)
         const char *sp2 = re_find_substr(sp, s1size, s, ssize,
                                          sp == astr_cstr(lp->item), TRUE, FALSE);
         if (sp2 != NULL) {
-          goto_linep(lp);
+          while (cur_bp->pt.p != lp)
+            edit_navigate_down_line();
           cur_bp->pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }
@@ -151,7 +151,8 @@ static int search_backward(Line *startp, size_t starto, const char *s)
         const char *sp2 = re_find_substr(sp, s1size, s, ssize,
                                          TRUE, s1size == astr_len(lp->item), TRUE);
         if (sp2 != NULL) {
-          goto_linep(lp);
+          while (cur_bp->pt.p != lp)
+            edit_navigate_up_line();
           cur_bp->pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }

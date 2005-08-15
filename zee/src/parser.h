@@ -17,28 +17,24 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #ifndef PARSER_H
 #define PARSER_H
 
-#include <stdio.h>
+#include <stddef.h>
 #include "lists.h"
 
 enum tokenname {
-  T_EOF,
-  T_CLOSEPAREN,
-  T_OPENPAREN,
-  T_NEWLINE,
+  T_CLOSE,
+  T_OPEN,
   T_QUOTE,
   T_WORD
 };
 
-typedef int (*getcCallback)(void);
-typedef void (*ungetcCallback)(int c);
-
-struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar,
-            struct le * list, int *line);
+void lisp_parse_init(astr as);
+void lisp_parse_end(void);
+struct le *lisp_parse(struct le *list);
 
 #endif

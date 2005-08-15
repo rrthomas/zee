@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -75,7 +75,9 @@ int is_regular_file(const char *filename)
   return FALSE;
 }
 
-/* Safe getcwd */
+/*
+ * Safe getcwd
+ */
 astr agetcwd(void)
 {
   size_t len = PATH_MAX;
@@ -84,7 +86,7 @@ astr agetcwd(void)
   astr as;
   while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
     len *= 2;
-    buf = zrealloc(buf, len);
+    buf = zrealloc(buf, len / 2, len);
   }
   /* If there was an error, return the empty string */
   if (res == NULL)

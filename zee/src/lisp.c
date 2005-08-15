@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include <stdio.h>
 #include <assert.h>
@@ -42,65 +42,31 @@ void lisp_finalise(void)
 }
 
 
-le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
+le *lisp_read(astr as)
 {
-  int lineno = 0;
-  struct le *list = NULL;
+  struct le *list;
 
-  return parseInFile(getcp, ungetcp, list, &lineno);
+  lisp_parse_init(as);
+  list = lisp_parse(NULL);
+
+  /* FIXME: Need to check indent is 0 (add lisp_parse_end) */
+  return list;
 }
 
-
-static const char *s;
-
-static int getc_string(void)
-{
-  int c = *s;
-
-  if (c)
-    s++;
-  else
-    c = EOF;
-
-  return c;
-}
-
-static void ungetc_string(int c)
-{
-  if (c != EOF)
-    s--;
-}
-
-le *lisp_read_string(const char *string)
-{
-  assert(string);
-  s = string;
-  return lisp_read(getc_string, ungetc_string);
-}
-
-
-static FILE *fp = NULL;
-
-static int getc_file(void)
-{
-  return getc(fp);
-}
-
-static void ungetc_file(int c)
-{
-  ungetc(c, fp);
-}
 
 le *lisp_read_file(const char *file)
 {
   le *list;
-  fp = fopen(file, "r");
+  FILE *fp = fopen(file, "r");
+  astr as;
 
   if (fp == NULL)
     return NULL;
 
-  list = lisp_read(getc_file, ungetc_file);
+  as = astr_fread(fp);
   fclose(fp);
+  list = lisp_read(as);
+  astr_delete(as);
 
   return list;
 }

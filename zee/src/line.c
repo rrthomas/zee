@@ -18,8 +18,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -302,8 +302,8 @@ int eolp(void)
 }
 
 /*
- * Insert the character at the current position.
- * This function doesn't change the current position of the pointer.
+ * Insert the character `c' at the current position.
+ * This function doesn't change the current position of point.
  */
 int intercalate_char(int c)
 {
@@ -327,36 +327,26 @@ int insert_char(int c)
 {
   assert(cur_bp);
 
-  if (warn_if_readonly_buffer())
+  if (intercalate_char(c)) {
+    adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
+    return TRUE;
+  } else
     return FALSE;
-
-  (void)intercalate_char(c);
-  adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
-
-  return TRUE;
-}
-
-static void insert_expanded_tab(int (*inschr)(int chr))
-{
-  int c = get_goalc();
-  int t;
-
-  assert(cur_bp);
-
-  t = tab_width(cur_bp);
-
-  for (c = t - c % t; c > 0; --c)
-    (*inschr)(' ');
 }
 
 static int insert_tab(void)
 {
   if (warn_if_readonly_buffer())
     return FALSE;
+  else {
+    int c = get_goalc();
+    int t = tab_width(cur_bp);
 
-  insert_expanded_tab(insert_char);
+    for (c = t - c % t; c > 0; c--)
+      insert_char(' ');
 
-  return TRUE;
+    return TRUE;
+  }
 }
 
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
@@ -403,7 +393,8 @@ int intercalate_newline()
   lp1 = cur_bp->pt.p;
 
   /* Update line linked list. */
-  lp2 = list_prepend(lp1, astr_new());
+  list_prepend(lp1, astr_new());
+  lp2 = list_next(lp1);
   ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */

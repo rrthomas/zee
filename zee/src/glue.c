@@ -15,8 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -84,12 +84,12 @@ void waitkey(size_t timeout)
   ungetkey(xgetkey(GETKEY_DELAYED, timeout));
 }
 
-
 void ungetkey(size_t key)
 {
   if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
     *keyp++ = key;
 }
+
 /*
  * Copy a region of text from the current buffer into an allocated buffer.
  *  start - the starting point.
@@ -100,13 +100,12 @@ void ungetkey(size_t key)
 char *copy_text_block(Point start, size_t size)
 {
   char *buf, *dp;
-  size_t max_size, n, i;
+  size_t n, i;
   Line *lp;
 
   assert(cur_bp);
 
-  max_size = 10;
-  dp = buf = (char *)zmalloc(max_size);
+  dp = buf = (char *)zmalloc(size);
 
   /* Have to do a linear search through the buffer to find the start of the
    * region. Doesn't matter where we start. Starting at 'cur_bp->pt' is a good
@@ -125,12 +124,6 @@ char *copy_text_block(Point start, size_t size)
 
   /* Copy one character at a time. */
   for (i = start.o; dp - buf < (int)size;) {
-    if (dp >= buf + max_size) {
-      int save_off = dp - buf;
-      max_size += 10 + (max_size >> 2);
-      buf = (char *)zrealloc(buf, max_size);
-      dp = buf + save_off;
-    }
     if (i < astr_len(lp->item))
       *dp++ = *astr_char(lp->item, (ptrdiff_t)(i++));
     else {
@@ -140,7 +133,7 @@ char *copy_text_block(Point start, size_t size)
     }
   }
 
-  return zrealloc(buf, size);
+  return buf;
 }
 
 /*

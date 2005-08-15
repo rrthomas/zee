@@ -15,8 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -139,8 +139,7 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
     as = completion_write(cp->completions, list_length(cp->completions));
   else
     as = completion_write(cp->matches, num);
-  astr_cat(popup, as);
-  astr_delete(as);
+  astr_cat_delete(popup, as);
 
   popup_set(popup);
   astr_delete(popup);

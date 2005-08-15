@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -27,126 +27,187 @@
 #include "main.h"
 #include "extern.h"
 
-static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokenname *tokenid)
+
+static list line_indent;     /* Current previous indentation levels */
+static list toktype_buf;            /* Pushed back token types */
+static list tok_buf;            /* Pushed back tokens */
+static size_t indent, line;
+static ptrdiff_t pos;
+static int bol = TRUE;
+static astr expr;
+
+void lisp_parse_init(astr as)
 {
-  int c;
-  int doublequotes = 0;
-  astr tok = astr_new();
+  pos = 0;
+  assert((expr = as));
+  indent = 0;
+  line = 0;
+  bol = TRUE;
+  line_indent = list_new();
+  toktype_buf = list_new();
+  tok_buf = list_new();
+}
 
-  *tokenid = T_EOF;
+void lisp_parse_end(void)
+{
+  list_delete(line_indent);
+  list_delete(toktype_buf);
+  list_delete(tok_buf);
+}
 
-  /* Chew space to next token */
+static int getachar(void)
+{
+  if ((size_t)pos < astr_len(expr))
+    return *astr_char(expr, pos++);
+  return EOF;
+}
+
+static void ungetachar(void)
+{
+  if (pos > 0 && (size_t)pos < astr_len(expr))
+    pos--;
+}
+
+/*
+ * Skip space to next non-space character
+ */
+static int getchar_skipspace(void) {
   do {
-    c = getachar();
+    int c = getachar();
 
-    /* Munch comments */
-    if (c == ';')
+    switch (c) {
+    case ' ':
+    case '\t':
+      if (bol)
+        /* FIXME: round \t up to next 8 spaces */
+        indent++;
+      break;
+
+    case '#':
+      /* Skip comment */
       do {
         c = getachar();
       } while (c != EOF && c != '\n');
-  } while (c != EOF && (c == ' ' || c == '\t'));
+      /* FALLTHROUGH */
 
-  /* Snag token */
-  if (c == '(') {
-    *tokenid = T_OPENPAREN;
-    return tok;
-  } else if (c == ')') {
-    *tokenid = T_CLOSEPAREN;
-    return tok;
-  } else if (c == '\'') {
-    *tokenid = T_QUOTE;
-    return tok;
-  } else if (c == '\n') {
-    *tokenid = T_NEWLINE;
-    return tok;
-  } else if (c == EOF) {
-    *tokenid = T_EOF;
-    return tok;
-  }
+    case '\n':
+      indent = 0;
+      bol = TRUE;
+      line++;
+      break;
 
-  /* It looks like a string. Snag to the next whitespace. */
-  if (c == '\"') {
-    doublequotes = 1;
-    c = getachar();
-  }
+    case '\\':
+      if ((c = getachar()) == '\n')
+        line++;                 /* For source position, count \n */
+      else
+        ungetachar();
+      break;
 
-  while (1) {
-    astr_cat_char(tok, (char)c);
-
-    if (!doublequotes) {
-      if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
-        ungetachar(c);
-        astr_truncate(tok, -1);
-
-        if (!astr_cmp_cstr(tok, "quote")) {
-          *tokenid = T_QUOTE;
-          return tok;
+    default:
+      if (bol) {
+        bol = FALSE;
+        if (indent <= (size_t)(list_head(line_indent))) {
+          while (!list_empty(line_indent) && indent <= (size_t)(list_head(line_indent))) {
+            (void)list_behead(line_indent);
+            list_append(toktype_buf, (void *)T_CLOSE);
+            list_append(tok_buf, astr_new());
+          }
         }
-        *tokenid = T_WORD;
-        return tok;
+        list_prepend(line_indent, (void *)indent);
+        list_append(toktype_buf, (void *)T_OPEN);
+        list_append(tok_buf, astr_new());
       }
-    } else {
-      switch (c) {
-      case '\n':
-      case '\r':
-      case EOF:
-        ungetachar(c);
-        /* Fall through */
-
-      case '\"':
-        astr_truncate(tok, -1);
-        *tokenid = T_WORD;
-        return tok;
-
-      }
+      return c;
     }
-
-    c = getachar();
-  }
-
-  return tok;
+  } while (1);
 }
 
-struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct le *list, int *line)
+static astr gettok(enum tokenname *toktype)
 {
-  astr tok;
-  enum tokenname tokenid;
-  int isquoted = 0;
+  int c;
+  astr tok = astr_new();
 
-  assert(getachar && ungetachar);
-
-  while (1) {
-    tok = snagAToken(getachar, ungetachar, &tokenid);
-
-    switch (tokenid) {
-    case T_QUOTE:
-      isquoted = 1;
+  if (list_empty(toktype_buf)) {
+    switch ((c = getchar_skipspace())) {
+    case '\'':
+      *toktype = T_QUOTE;
       break;
 
-    case T_OPENPAREN:
-      list = leAddBranchElement(list,
-                                parseInFile(getachar, ungetachar, NULL, line),
-                                isquoted);
-      isquoted = 0;
+    case EOF:
+      *toktype = T_CLOSE;
       break;
 
-    case T_NEWLINE:
-      isquoted = 0;
-      *line = *line +1;
+    case '\"':                    /* string */
+      do {
+        switch ((c = getachar())) {
+        case '\n':
+        case EOF:
+          ungetachar();
+          /* FALLTHROUGH */
+        case '\"':
+          *toktype = T_WORD;
+          break;
+        default:
+          astr_cat_char(tok, (char)c);
+        }
+      } while (*toktype != T_WORD);
       break;
 
-    case T_WORD:
-      list = leAddDataElement(list, astr_cstr(tok), isquoted);
-      isquoted = 0;
-      break;
+    default:                      /* word */
+      do {
+        astr_cat_char(tok, (char)c);
 
-    case T_CLOSEPAREN:
-    case T_EOF:
-      isquoted = 0;
-      astr_delete(tok);
-      return list;
+        if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
+          ungetachar();
+
+          if (!astr_cmp_cstr(tok, "quote"))
+            *toktype = T_QUOTE;
+          else {
+            astr_truncate(tok, -1);
+            *toktype = T_WORD;
+          }
+
+          break;
+        }
+
+        c = getachar();
+      } while (1);
     }
 
-    astr_delete(tok);
+    list_append(toktype_buf, (void *)*toktype);
+    list_append(tok_buf, tok);
   }
+
+  *toktype = (enum tokenname)list_behead(toktype_buf);
+  return (astr)list_behead(tok_buf);
+}
+
+struct le *lisp_parse(struct le *list)
+{
+  astr tok;
+  enum tokenname toktype;
+  int isquoted = FALSE;
+
+  do {
+    toktype = T_CLOSE;
+    tok = gettok(&toktype);
+
+    switch (toktype) {
+    case T_CLOSE:
+      astr_delete(tok);
+      return list;
+    case T_OPEN:
+      list = leAddBranchElement(list, lisp_parse(NULL), isquoted);
+      break;
+    case T_QUOTE:
+      break;
+    case T_WORD:
+      list = leAddDataElement(list, astr_cstr(tok), isquoted);
+      break;
+    }
+
+    isquoted = toktype == T_QUOTE;
+
+    astr_delete(tok);
+  } while (1);
 }

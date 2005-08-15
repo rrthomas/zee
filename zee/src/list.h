@@ -16,8 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #ifndef LIST_H
 #define LIST_H
@@ -35,8 +35,8 @@ struct list_s {
 list list_new(void);
 void list_delete(list l);
 size_t list_length(list l);
-list list_prepend(list l, void *i);
-list list_append(list l, void *i);
+void list_prepend(list l, void *i);
+void list_append(list l, void *i);
 void *list_head(list l);
 void *list_behead(list l);
 void *list_betail(list l);
@@ -47,5 +47,7 @@ void list_sort(list l, int (*cmp)(const void *p1, const void *p2));
 #define list_last(l)  ((l)->prev)
 #define list_next(l)  ((l)->next)
 #define list_prev(l)  ((l)->prev)
+
+#define list_empty(l)  ((l)->next == l)
 
 #endif

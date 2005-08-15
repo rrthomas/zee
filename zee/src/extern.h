@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp(Buffer *bp, Point pt);
@@ -164,8 +164,8 @@ void free_kill_ring(void);
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init(void);
 void lisp_finalise(void);
-le *lisp_read(getcCallback getcp, ungetcCallback ungetcp);
-le *lisp_read_string(const char *string);
+le *lisp_read(astr as);
+le *lisp_read_cstr(const char *string);
 le *lisp_read_file(const char *file);
 
 /* macro.c ---------------------------------------------------------------- */
@@ -207,10 +207,6 @@ Point line_end_position(int count);
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
 
-/* term_minibuf.c --------------------------------------------------------- */
-void term_minibuf_write(const char *fmt);
-astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-
 /* term_display.c --------------------------------------------------------- */
 int term_initted(void);
 void term_set_initted(void);
@@ -221,6 +217,10 @@ void term_display(void);
 void term_full_redisplay(void);
 void term_tidy(void);
 int term_printf(const char *fmt, ...);
+
+/* term_minibuf.c --------------------------------------------------------- */
+void term_minibuf_write(const char *fmt);
+astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 
 /* term_{allegro,epocemx,ncurses}.c --------------------------------------- */
 void term_init(void);
@@ -264,7 +264,7 @@ Point window_pt(Window *wp);
 
 /* zmalloc.c -------------------------------------------------------------- */
 void *zmalloc(size_t size);
-void *zrealloc(void *ptr, size_t size);
+void *zrealloc(void *ptr, size_t oldsize, size_t newsize);
 char *zstrdup(const char *s);
 int zvasprintf(char **ptr, const char *fmt, va_list vargs);
 int zasprintf(char **ptr, const char *fmt, ...);

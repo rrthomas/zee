@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -148,11 +148,9 @@ astr minibuf_read_dir(const char *fmt, const char *value, ...)
     fname = astr_new();
 
     expand_path(astr_cstr(as), astr_cstr(rbuf), dir, fname);
-    astr_cpy(rbuf, dir);
-    astr_cat(rbuf, fname);
+    astr_cat_delete(rbuf, dir);
+    astr_cat_delete(rbuf, fname);
 
-    astr_delete(dir);
-    astr_delete(fname);
     astr_delete(as);
     as = rbuf;
   }

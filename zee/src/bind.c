@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -72,7 +72,8 @@ static void add_binding(Binding *p)
   /* Reallocate vector if there is not enough space */
   if (nbindings + 1 >= max_bindings) {
     max_bindings += 5;
-    binding = zrealloc(binding, sizeof(p) * max_bindings);
+    binding = zrealloc(binding, sizeof(p) * (max_bindings - 5),
+                       sizeof(p) * max_bindings);
   }
 
   /* Insert the binding at the sorted position */

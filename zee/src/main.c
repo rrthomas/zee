@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #define DEBUG 1
 
@@ -146,8 +146,7 @@ static void open_file_at(char *path, size_t lineno)
   astr_delete(cwd);
 
   /* Open file */
-  astr_cat(dir, fname);
-  astr_delete(fname);
+  astr_cat_delete(dir, fname);
   file_visit(astr_cstr(dir));
   astr_delete(dir);
 
@@ -175,10 +174,14 @@ int main(int argc, char **argv)
       qflag = TRUE;
       break;
     case 'e':
-      list = lisp_read_string(optarg);
-      astr_cat_delete(as, leDumpEval(list, 0));
-      leWipe(list);
-      eflag = TRUE;
+      {
+        astr bs = astr_cpy_cstr(astr_new(), optarg);
+        list = lisp_read(bs);
+        astr_delete(bs);
+        astr_cat_delete(as, leDumpEval(list, 0));
+        leWipe(list);
+        eflag = TRUE;
+      }
       break;
     case 'l':
       list = lisp_read_file(optarg);
@@ -206,7 +209,7 @@ int main(int argc, char **argv)
   argc -= optind;
   argv += optind;
 
-  if (hflag || argc == 0) {
+  if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
             "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
             "\n"
@@ -223,8 +226,8 @@ int main(int argc, char **argv)
             "\n"
             "FILE                   visit FILE using file-open\n"
             "+LINE FILE             visit FILE using file-open, then go to line LINE\n"
-            "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
-            "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
+            "--eval EXPR            evaluate Lisp expression EXPR\n"
+            "--load, -l FILE        load file of Lisp code using the load function\n"
             );
     return 0;
   }

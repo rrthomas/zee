@@ -14,8 +14,8 @@
 
    You should have received a copy of the GNU Library General Public
    License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   write to the Free Software Foundation, Fifth Floor, 51 Franklin Street,
+   Boston, MA 02111-1301, USA.  */
 
 #ifndef _GETOPT_H
 
@@ -63,7 +63,7 @@ extern int optopt;
    The field `has_arg' is:
    no_argument		(or 0) if the option does not take an argument,
    required_argument	(or 1) if the option requires an argument,
-   optional_argument 	(or 2) if the option takes an optional argument.
+   optional_argument	(or 2) if the option takes an optional argument.
 
    If the field `flag' is not NULL, it points to a variable that is set
    to the value given in the field `val' when the option is found, but

@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -47,8 +47,9 @@ static void astr_resize(astr as, size_t reqsize)
 {
   assert(as != NULL);
   if (reqsize > as->maxlen) {
+    size_t oldmaxlen = as->maxlen;
     as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-    as->text = (char *)zrealloc(as->text, as->maxlen + 1);
+    as->text = (char *)zrealloc(as->text, oldmaxlen, as->maxlen + 1);
   }
 }
 
@@ -362,7 +363,8 @@ int main(void)
   astr_delete(as1);
   astr_delete(as2);
   astr_delete(as3);
-  printf("astr test successful.\n");
+
+  printf("astr tests successful.\n");
 
   return 0;
 }

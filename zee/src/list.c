@@ -16,8 +16,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include <stdlib.h>
 #include <assert.h>
@@ -61,8 +61,8 @@ size_t list_length(list l)
   return length;
 }
 
-/* Add an item to the head of a list, returning the new list head */
-list list_prepend(list l, void *i)
+/* Add an item to the head of a list */
+void list_prepend(list l, void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -70,12 +70,10 @@ list list_prepend(list l, void *i)
   n->prev = l;
   n->item = i;
   l->next = l->next->prev = n;
-
-  return n;
 }
 
-/* Add an item to the tail of a list, returning the new list tail */
-list list_append(list l, void *i)
+/* Add an item to the tail of a list */
+void list_append(list l, void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -83,8 +81,6 @@ list list_append(list l, void *i)
   n->prev = l->prev;
   n->item = i;
   l->prev = l->prev->next = n;
-
-  return n;
 }
 
 /* Return the first item of a list, or NULL if the list is empty */

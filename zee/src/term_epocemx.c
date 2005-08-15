@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -218,8 +218,8 @@ static void term_init_screen(void)
 {
   int size = term_width() * term_height();
 
-  screen.array = zmalloc(size * sizeof(int));
-  screen.oarray = zmalloc(size * sizeof(int));
+  screen.array = zmalloc(size * sizeof(size_t));
+  screen.oarray = zmalloc(size * sizeof(size_t));
   screen.curx = screen.cury = 0;
 
   term_clear(); /* Ensure the first call to term_refresh will update the screen. */

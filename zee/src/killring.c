@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
 #include "config.h"
 
@@ -31,6 +31,7 @@
 #include "main.h"
 #include "extern.h"
 
+/* FIXME: Implement as an astr */
 static char *kill_ring_text;
 static size_t kill_ring_size;
 static size_t kill_ring_maxsize;
@@ -46,10 +47,11 @@ static void flush_kill_ring(void)
 static void kill_ring_push_nstring(char *s, size_t size)
 {
   if (kill_ring_size + (int)size >= kill_ring_maxsize) {
+    size_t old_maxsize = kill_ring_maxsize;
     /* Increase size by at least 16 bytes to avoid too much
        reallocing. */
     kill_ring_maxsize += max(size, 16);
-    kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
+    kill_ring_text = (char *)zrealloc(kill_ring_text, old_maxsize, kill_ring_maxsize);
   }
   memcpy(kill_ring_text + kill_ring_size, s, size);
   kill_ring_size += size;
