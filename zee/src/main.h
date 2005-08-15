@@ -108,9 +108,8 @@ struct Undo {
 
     /* The block to insert */
     struct {
-      char *text;
-      size_t osize;      /* Original size; only for replace */
-      size_t size;       /* New block size */
+      astr text;                /* String */
+      size_t size; /* Block size for remove and (new size for) replace */
     } block;
   } delta;
 };

@@ -113,7 +113,7 @@ size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t timeout);
 void ungetkey(size_t key);
-char *copy_text_block(Point start, size_t size);
+astr copy_text_block(Point start, size_t size);
 astr shorten_string(char *s, int maxlen);
 void goto_point(Point pt);
 char *getln(FILE *fp);

@@ -97,15 +97,13 @@ void ungetkey(size_t key)
  * If the region includes any line endings, they are turned into '\n'
  * irrespective of 'cur_bp->eol', and count as one character.
  */
-char *copy_text_block(Point start, size_t size)
+astr copy_text_block(Point start, size_t size)
 {
-  char *buf, *dp;
   size_t n, i;
+  astr as = astr_new();
   Line *lp;
 
   assert(cur_bp);
-
-  dp = buf = (char *)zmalloc(size);
 
   /* Have to do a linear search through the buffer to find the start of the
    * region. Doesn't matter where we start. Starting at 'cur_bp->pt' is a good
@@ -123,17 +121,17 @@ char *copy_text_block(Point start, size_t size)
     while (++n < start.n);
 
   /* Copy one character at a time. */
-  for (i = start.o; dp - buf < (int)size;) {
+  for (i = start.o; astr_len(as) < size;) {
     if (i < astr_len(lp->item))
-      *dp++ = *astr_char(lp->item, (ptrdiff_t)(i++));
+      astr_cat_char(as, *astr_char(lp->item, (ptrdiff_t)(i++)));
     else {
-      *dp++ = '\n';
+      astr_cat_char(as, '\n');
       lp = list_next(lp);
       i = 0;
     }
   }
 
-  return buf;
+  return as;
 }
 
 /*

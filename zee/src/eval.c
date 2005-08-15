@@ -994,7 +994,7 @@ Evaluate sexp before point; print value in minibuffer.
 Interactively, with prefix argument, print output into current buffer.
 +*/
 {
-  char *expr;
+  astr expr;
   le *list;
   Marker *m = point_marker();
   Region r;
@@ -1006,10 +1006,8 @@ Interactively, with prefix argument, print output into current buffer.
   expr = copy_text_block(r.start, r.size);
   cur_bp->pt = m->pt;
 
-  /* FIXME: expr needs to be an astr; make copy_text_block return an
-     astr */
   list = eval_expression(expr);
-  free(expr);
+  astr_delete(expr);
   leWipe(list);
 
   ok = list == NULL;

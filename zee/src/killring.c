@@ -44,7 +44,7 @@ static void flush_kill_ring(void)
   kill_ring_text = NULL;
 }
 
-static void kill_ring_push_nstring(char *s, size_t size)
+static void kill_ring_push_nstring(const char *s, size_t size)
 {
   if (kill_ring_size + (int)size >= kill_ring_maxsize) {
     size_t old_maxsize = kill_ring_maxsize;
@@ -155,11 +155,9 @@ to make one entry in the kill ring.
     if (cur_bp->flags & BFLAG_READONLY) {
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
-      char *p;
-
-      p = copy_text_block(r.start, r.size);
-      kill_ring_push_nstring(p, r.size);
-      free(p);
+      astr as = copy_text_block(r.start, r.size);
+      kill_ring_push_nstring(astr_cstr(as), r.size);
+      astr_delete(as);
 
       warn_if_readonly_buffer();
     } else {
@@ -191,7 +189,6 @@ Save the region as if killed, but don't kill it.
 +*/
 {
   Region r;
-  char *p;
 
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
@@ -199,11 +196,13 @@ Save the region as if killed, but don't kill it.
   if (warn_if_no_mark())
     ok = FALSE;
   else {
+    astr as;
+
     calculate_the_region(&r);
 
-    p = copy_text_block(r.start, r.size);
-    kill_ring_push_nstring(p, r.size);
-    free(p);
+    as = copy_text_block(r.start, r.size);
+    kill_ring_push_nstring(astr_cstr(as), r.size);
+    astr_delete(as);
 
     thisflag |= FLAG_DONE_KILL;
     weigh_mark();

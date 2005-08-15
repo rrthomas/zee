@@ -867,15 +867,14 @@ current buffer.
       minibuf_error("Cannot open temporary file");
       ok = FALSE;
     } else {
-      char *p;
       FILE *pipe;
       Region r;
-      astr cmd = astr_new();
+      astr cmd = astr_new(), as;
 
       calculate_the_region(&r);
-      p = copy_text_block(r.start, r.size);
-      write(fd, p, r.size);
-      free(p);
+      as = copy_text_block(r.start, r.size);
+      write(fd, astr_cstr(as), r.size);
+      astr_delete(as);
 
       close(fd);
 

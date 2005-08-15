@@ -64,13 +64,11 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     up->delta.c = (char)arg1;
     break;
   case UNDO_INSERT_BLOCK:
-    up->delta.block.size = arg1;
     up->delta.block.text = copy_text_block(pt, arg1);
     break;
   case UNDO_REPLACE_BLOCK:
-    up->delta.block.osize = arg1;
-    up->delta.block.size = arg2;
     up->delta.block.text = copy_text_block(pt, arg1);
+    up->delta.block.size = arg2;
     break;
   case UNDO_REMOVE_BLOCK:
     up->delta.block.size = arg1;
@@ -85,6 +83,17 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 
   if (!doing_undo)
     cur_bp->next_undop = up;
+}
+
+static void insert_block(astr as) {
+  size_t i;
+  for (i = 0; i < astr_len(as); ++i) {
+    char c = *astr_char(as, (ptrdiff_t)i);
+    if (c != '\n')
+      insert_char(c);
+    else
+      insert_newline();
+  }
 }
 
 /*
@@ -125,13 +134,9 @@ static Undo *revert_action(Undo *up)
       intercalate_char(up->delta.c);
     break;
   case UNDO_INSERT_BLOCK:
-    undo_save(UNDO_REMOVE_BLOCK, up->pt, up->delta.block.size, 0);
+    undo_save(UNDO_REMOVE_BLOCK, up->pt, astr_len(up->delta.block.text), 0);
     undo_nosave = TRUE;
-    for (i = 0; i < up->delta.block.size; ++i)
-      if (up->delta.block.text[i] != '\n')
-        insert_char(up->delta.block.text[i]);
-      else
-        insert_newline();
+    insert_block(up->delta.block.text);
     undo_nosave = FALSE;
     break;
   case UNDO_REMOVE_CHAR:
@@ -153,15 +158,11 @@ static Undo *revert_action(Undo *up)
     break;
   case UNDO_REPLACE_BLOCK:
     undo_save(UNDO_REPLACE_BLOCK, up->pt,
-              up->delta.block.size, up->delta.block.osize);
+              up->delta.block.size, astr_len(up->delta.block.text));
     undo_nosave = TRUE;
     for (i = 0; i < up->delta.block.size; ++i)
       delete_char();
-    for (i = 0; i < up->delta.block.osize; ++i)
-      if (up->delta.block.text[i] != '\n')
-        insert_char(up->delta.block.text[i]);
-      else
-        insert_newline();
+    insert_block(up->delta.block.text);
     undo_nosave = FALSE;
     break;
   }
