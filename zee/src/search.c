@@ -98,15 +98,6 @@ static char *re_find_substr(const char *s1, size_t s1size,
   return ret;
 }
 
-/* FIXME: This function either shouldn't exist or should be somewhere
-   else, probably line.c or point.c. */
-static void goto_linep(Line *lp)
-{
-  assert(cur_bp);
-  cur_bp->pt = point_min(cur_bp);
-  resync_display();
-}
-
 static int search_forward(Line *startp, size_t starto, const char *s)
 {
   Line *lp;
@@ -117,7 +108,7 @@ static int search_forward(Line *startp, size_t starto, const char *s)
 
   if (ssize > 0) {
     for (lp = startp, sp = astr_char(lp->item, (ptrdiff_t)starto), s1size = astr_len(lp->item) - starto;
-         lp != cur_bp->lines;
+         lp != list_last(cur_bp->lines);
          lp = list_next(lp), sp = astr_cstr(lp->item), s1size = astr_len(lp->item)) {
       if (s1size > 0) {
         const char *sp2 = re_find_substr(sp, s1size, s, ssize,
@@ -144,7 +135,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
 
   if (ssize > 0) {
     for (lp = startp, s1size = starto;
-         lp != cur_bp->lines;
+         lp != list_first(cur_bp->lines);
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
       const char *sp = astr_cstr(lp->item);
       if (s1size > 0) {
