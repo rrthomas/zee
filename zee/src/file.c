@@ -509,6 +509,7 @@ Kill the current buffer or the user specified one.
 }
 END_DEFUN
 
+/* FIXME: Handle EOLs properly; common up with file_open */
 static int file_insert(const char *filename)
 {
   FILE *fp;
