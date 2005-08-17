@@ -903,11 +903,7 @@ current buffer.
         if (cur_bp->pt.p != r.start.p
             || r.start.o != cur_bp->pt.o)
           FUNCALL(exchange_point_and_mark);
-        undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
-        undo_nosave = TRUE;
-        while (r.size--)
-          FUNCALL(delete_char);
-        undo_nosave = FALSE;
+        FUNCALL_ARG(delete_char, (int)r.size);
         insert_string(astr_cstr(out));
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
