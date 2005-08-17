@@ -126,9 +126,6 @@ static Undo *revert_action(Undo *up)
     else
       intercalate_char(up->delta.c);
     break;
-  case UNDO_REMOVE_CHAR:
-    delete_char();
-    break;
   case UNDO_REPLACE_BLOCK:
     undo_save(UNDO_REPLACE_BLOCK, up->pt,
               up->delta.block.size, astr_len(up->delta.block.text));
