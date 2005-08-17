@@ -312,7 +312,7 @@ int intercalate_char(int c)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1, FALSE);
   astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -359,13 +359,13 @@ Convert the tabulation into spaces.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i)
     if (!insert_tab()) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -384,7 +384,7 @@ int intercalate_newline()
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1, FALSE);
 
   /* Calculate the two line lengths. */
   lp1len = cur_bp->pt.o;
@@ -549,7 +549,7 @@ Insert a newline, and move to left margin of the new line if it's blank.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i) {
     if (cur_bp->flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number("fill-column"))
@@ -559,21 +559,30 @@ Insert a newline, and move to left margin of the new line if it's blank.
       break;
     }
   }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
-void insert_nstring(const char *s, size_t size)
+void insert_nstring(const char *s, size_t size, int intercalate)
 {
   assert(cur_bp);
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size, FALSE);
   undo_nosave = TRUE;
+
   for (; size--; ++s)
-    if (*s == '\n')
+    if (*s == '\n') {
+      if (intercalate)
+        intercalate_newline();
+      else
       insert_newline();
-    else
-      insert_char(*s);
+    } else {
+      if (intercalate)
+        intercalate_char(*s);
+      else
+        insert_char(*s);
+    }
+
   undo_nosave = FALSE;
 }
 
@@ -581,7 +590,7 @@ astr delete_nstring(size_t size)
 {
   astr as = astr_new();
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0, FALSE);
   undo_nosave = TRUE;
   while (size--) {
     if (!eolp())
@@ -624,13 +633,13 @@ Whichever character you type to run this command is inserted.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i)
     if (!self_insert_command(key)) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -644,9 +653,7 @@ int delete_char(void)
     if (warn_if_readonly_buffer())
       return FALSE;
 
-    undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
-              (size_t)(*astr_char(cur_bp->pt.p->item,
-                                    (ptrdiff_t)cur_bp->pt.o)), 0);
+    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0, TRUE);
 
     /* Move the text one position backward after the point,
        if required. */
@@ -664,7 +671,7 @@ int delete_char(void)
     if (warn_if_readonly_buffer())
       return FALSE;
 
-    undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
+    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0, TRUE);
 
     lp1 = cur_bp->pt.p;
     lp2 = list_next(lp1);
@@ -703,13 +710,13 @@ Join lines if the character is a newline.
   if (uniarg < 0)
     return FUNCALL_ARG(backward_delete_char, -uniarg);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i)
     if (!delete_char()) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -740,13 +747,13 @@ Join lines if the character is a newline.
   if (uniarg < 0)
     return FUNCALL_ARG(delete_char, -uniarg);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i)
     if (!backward_delete_char()) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -757,7 +764,7 @@ Delete all spaces and tabs around point.
 {
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   while (!eolp() && isspace(following_char()))
     delete_char();
@@ -765,7 +772,7 @@ Delete all spaces and tabs around point.
   while (!bolp() && isspace(preceding_char()))
     backward_delete_char();
 
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -775,10 +782,10 @@ Delete all spaces and tabs around point, leaving one space.
 +*/
 {
   assert(cur_bp);
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   FUNCALL(delete_horizontal_space);
   insert_char(' ');
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -834,7 +841,7 @@ Indent line or insert a tab.
     free_marker(old_point);
 
     /* Indent. */
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     if (target_goalc > 0)
       /* If not at EOL on target line, insert spaces up to
          target_goalc. */
@@ -843,7 +850,7 @@ Indent line or insert a tab.
         insert_char(' ');
     else
       ok = insert_tab();
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   }
 }
 END_DEFUN
@@ -869,7 +876,7 @@ above, no indenting is performed.
       size_t pos;
       Marker *old_point = point_marker();
 
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
@@ -882,7 +889,7 @@ above, no indenting is performed.
       if (indent)
         FUNCALL(indent_relative);
 
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     }
   }
 }

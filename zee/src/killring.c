@@ -104,13 +104,13 @@ With prefix argument, kill that many lines from point.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (i = 0; i < uniarg; ++i)
     if (!kill_line()) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   weigh_mark();
 }
@@ -208,10 +208,10 @@ With argument, do this that many times.
     ok = FALSE;
   else {
     push_mark();
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     FUNCALL_ARG(mark_word, uniarg);
     FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     pop_mark();
 
     thisflag |= FLAG_DONE_KILL;
@@ -247,10 +247,10 @@ Negative arg -N means kill N sexps before the cursor.
     ok = FALSE;
   else {
     push_mark();
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     FUNCALL_ARG(mark_sexp, uniarg);
     FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     pop_mark();
 
     thisflag |= FLAG_DONE_KILL;
@@ -275,7 +275,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
     minibuf_error("Kill ring is empty");
   else if (!warn_if_readonly_buffer()) {
     set_mark_command();
-    insert_nstring(kill_ring_text, kill_ring_size);
+    insert_nstring(kill_ring_text, kill_ring_size, FALSE);
     weigh_mark();
     ok = TRUE;
   }

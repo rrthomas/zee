@@ -154,7 +154,7 @@ int intercalate_char(int c);
 void fill_break_line(void);
 int insert_newline(void);
 int intercalate_newline(void);
-void insert_nstring(const char *s, size_t size);
+void insert_nstring(const char *s, size_t size, int intercalate);
 astr delete_nstring(size_t size);
 int self_insert_command(size_t key);
 int delete_char(void);
@@ -240,7 +240,7 @@ extern int undo_nosave;
 
 void undo_start_sequence(void);
 void undo_end_sequence(void);
-void undo_save(int type, Point pt, size_t arg1, size_t arg2);
+void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);

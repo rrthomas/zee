@@ -39,7 +39,7 @@ static int doing_undo = FALSE;
 /*
  * Save a reverse delta for doing undo.
  */
-void undo_save(int type, Point pt, size_t arg1, size_t arg2)
+void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
 {
   Undo *up;
 
@@ -58,9 +58,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     up->unchanged = TRUE;
 
   switch (type) {
-  case UNDO_INTERCALATE_CHAR:
-    up->delta.c = (char)arg1;
-    break;
   case UNDO_REPLACE_BLOCK:
     up->delta.block.text = copy_text_block(pt, arg1);
     up->delta.block.size = arg2;
@@ -89,36 +86,27 @@ static Undo *revert_action(Undo *up)
   doing_undo = TRUE;
 
   if (up->type == UNDO_END_SEQUENCE) {
-    undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0, FALSE);
     up = up->next;
     while (up->type != UNDO_START_SEQUENCE) {
       up = revert_action(up);
     }
-    undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0, FALSE);
     goto_point(up->pt);
     return up->next;
   }
 
   goto_point(up->pt);
 
-  switch (up->type) {
-  case UNDO_INTERCALATE_CHAR:
-    if (up->delta.c == '\n')
-      intercalate_newline();
-    else
-      intercalate_char(up->delta.c);
-    break;
-  case UNDO_REPLACE_BLOCK:
-    undo_save(UNDO_REPLACE_BLOCK, up->pt,
-              up->delta.block.size, astr_len(up->delta.block.text));
-    undo_nosave = TRUE;
-    for (i = 0; i < up->delta.block.size; i++)
-      delete_char();
-    insert_nstring(astr_cstr(up->delta.block.text),
-                 astr_len(up->delta.block.text));
-    undo_nosave = FALSE;
-    break;
-  }
+  assert(up->type == UNDO_REPLACE_BLOCK);
+  undo_save(UNDO_REPLACE_BLOCK, up->pt,
+            up->delta.block.size, astr_len(up->delta.block.text), FALSE);
+  undo_nosave = TRUE;
+  for (i = 0; i < up->delta.block.size; i++)
+    delete_char();
+  insert_nstring(astr_cstr(up->delta.block.text),
+                 astr_len(up->delta.block.text), up->delta.block.intercalate);
+  undo_nosave = FALSE;
 
   doing_undo = FALSE;
 

@@ -528,7 +528,7 @@ static int file_insert(const char *filename)
   }
 
   if ((as = astr_fread(fp))) {
-    insert_nstring(astr_cstr(as), astr_len(as));
+    insert_nstring(astr_cstr(as), astr_len(as), FALSE);
     astr_delete(as);
   }
 

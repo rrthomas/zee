@@ -691,7 +691,7 @@ Fill paragraph at or after point.
   Marker *m = point_marker();
 
   assert(cur_bp);
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   FUNCALL(forward_paragraph);
   end = cur_bp->pt.n;
@@ -721,7 +721,7 @@ Fill paragraph at or after point.
   cur_bp->pt = m->pt;
   free_marker(m);
 
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -751,7 +751,7 @@ static int setcase_word(int rcase)
   }
   size = i-cur_bp->pt.o;
   if (size > 0)
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
+    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, size, FALSE);
 
   gotword = FALSE;
   while (cur_bp->pt.o < astr_len(cur_bp->pt.p->item)) {
@@ -792,13 +792,13 @@ Convert following word (or argument N words) to lower case, moving over.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word(LOWERCASE)) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -811,13 +811,13 @@ Convert following word (or argument N words) to upper case, moving over.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word(UPPERCASE)) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -832,13 +832,13 @@ lower case.
 
   assert(cur_bp);
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word(CAPITALIZE)) {
       ok = FALSE;
       break;
     }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -898,14 +898,14 @@ current buffer.
         raise(SIGWINCH);
 #endif
 
-        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
         calculate_the_region(&r);
         if (cur_bp->pt.p != r.start.p
             || r.start.o != cur_bp->pt.o)
           FUNCALL(exchange_point_and_mark);
         FUNCALL_ARG(delete_char, (int)r.size);
-        insert_nstring(astr_cstr(out), astr_len(out));
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+        insert_nstring(astr_cstr(out), astr_len(out), FALSE);
+        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
         astr_delete(out);
       }

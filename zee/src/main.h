@@ -73,8 +73,6 @@ struct Marker {
 
 /* Undo delta types */
 enum {
-  UNDO_INTERCALATE_CHAR,        /* Insert a char without moving the
-                                   current pointer */
   UNDO_REPLACE_BLOCK,           /* Replace a block of characters */
   UNDO_START_SEQUENCE,          /* Start a multi operation sequence */
   UNDO_END_SEQUENCE             /* End a multi operation sequence */
@@ -98,13 +96,11 @@ struct Undo {
 
   /* The undo delta */
   union {
-    /* The character to insert or replace */
-    int c;
-
-    /* The block to insert */
+    /* The block to replace */
     struct {
       astr text;                /* String */
-      size_t size; /* Block size for remove and (new size for) replace */
+      size_t size;              /* Block size for replace */
+      int intercalate;          /* TRUE means intercalate, FALSE insert */
     } block;
   } delta;
 };

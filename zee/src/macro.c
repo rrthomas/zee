@@ -189,7 +189,7 @@ defining others, use M-x name-last-kbd-macro.
 
     assert(cur_bp);
 
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     if (uniarg == 0)
       while (call_macro(cur_mp));
     else {
@@ -199,7 +199,7 @@ defining others, use M-x name-last-kbd-macro.
           break;
         }
     }
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   }
 }
 END_DEFUN

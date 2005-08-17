@@ -134,11 +134,11 @@ void process_key(size_t key)
       if (key <= 255) {
         assert(cur_bp); /* FIXME: Remove this assumption */
         /* There are no bindings for the pressed key */
-        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
         for (uni = 0;
              uni < last_uniarg && self_insert_command(key);
              ++uni);
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
       }
     } else {
       le *list = evalCastIntToLe(last_uniarg);
