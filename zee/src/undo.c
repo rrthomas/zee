@@ -41,11 +41,13 @@ static int doing_undo = FALSE;
  */
 void free_undo(Buffer *bp)
 {
-  Undo *up, *next_up;
-  /* Free all the undo operations. */
+  Undo *up;
+
+  assert(bp);
+
   up = bp->last_undop;
   while (up != NULL) {
-    next_up = up->next;
+    Undo *next_up = up->next;
     if (up->type == UNDO_REPLACE_BLOCK)
       astr_delete(up->delta.text);
     free(up);
