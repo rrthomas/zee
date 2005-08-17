@@ -58,7 +58,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     up->unchanged = TRUE;
 
   switch (type) {
-  case UNDO_INSERT_CHAR:
   case UNDO_INTERCALATE_CHAR:
     up->delta.c = (char)arg1;
     break;
@@ -114,12 +113,6 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   switch (up->type) {
-  case UNDO_INSERT_CHAR:
-    if (up->delta.c == '\n')
-      insert_newline();
-    else
-      insert_char(up->delta.c);
-    break;
   case UNDO_INTERCALATE_CHAR:
     if (up->delta.c == '\n')
       intercalate_newline();
