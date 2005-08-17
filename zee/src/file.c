@@ -513,7 +513,7 @@ END_DEFUN
 static int file_insert(const char *filename)
 {
   int fd;
-  off_t i, size;
+  off_t size;
   char buf[BUFSIZ];
 
   assert(cur_bp);
@@ -538,11 +538,7 @@ static int file_insert(const char *filename)
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, (size_t)size);
   undo_nosave = TRUE;
   while ((size = read(fd, buf, BUFSIZ)) > 0)
-    for (i = 0; i < size; i++)
-      if (buf[i] != '\n')
-        insert_char(buf[i]);
-      else
-        insert_newline();
+    insert_nstring(buf, size);
   undo_nosave = FALSE;
   close(fd);
 
