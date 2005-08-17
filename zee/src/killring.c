@@ -292,14 +292,8 @@ killed OR yanked.  Put point at end, and set mark at beginning.
     minibuf_error("Kill ring is empty");
   else if (!warn_if_readonly_buffer()) {
     set_mark_command();
-
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, kill_ring_size);
-    undo_nosave = TRUE;
     insert_nstring(kill_ring_text, kill_ring_size);
-    undo_nosave = FALSE;
-
     weigh_mark();
-
     ok = TRUE;
   }
 }
