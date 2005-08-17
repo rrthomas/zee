@@ -509,12 +509,10 @@ Kill the current buffer or the user specified one.
 }
 END_DEFUN
 
-/* FIXME: Use stdio, flen &c., and common up with file_open */
 static int file_insert(const char *filename)
 {
-  int fd;
-  off_t size;
-  char buf[BUFSIZ];
+  FILE *fp;
+  astr as;
 
   assert(cur_bp);
 
@@ -523,26 +521,18 @@ static int file_insert(const char *filename)
     return FALSE;
   }
 
-  if ((fd = open(filename, O_RDONLY)) < 0) {
+  if ((fp = fopen(filename, "r")) == NULL) {
     minibuf_write("%s: %s", filename, strerror(errno));
     return FALSE;
   }
 
-  size = lseek(fd, 0, SEEK_END);
-  if (size < 1) {
-    close(fd);
-    return TRUE;
-  }
-  lseek(fd, 0, SEEK_SET);
+  as = astr_fread(fp);
+  insert_nstring(astr_cstr(as), astr_len(as));
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, (size_t)size);
-  undo_nosave = TRUE;
-  while ((size = read(fd, buf, BUFSIZ)) > 0)
-    insert_nstring(buf, (size_t)size);
-  undo_nosave = FALSE;
-  close(fd);
+  if (as)
+    astr_delete(as);
 
-  return TRUE;
+  return fclose(fp) == 0;
 }
 
 DEFUN_INT("file-insert", file_insert)
