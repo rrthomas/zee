@@ -57,12 +57,6 @@ static void kill_ring_push_nstring(const char *s, size_t size)
   kill_ring_size += size;
 }
 
-static void kill_ring_push_char(int c)
-{
-  char ch = (char)c;
-  kill_ring_push_nstring(&ch, 1);
-}
-
 static int kill_line(void)
 {
   assert(cur_bp);
@@ -85,7 +79,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    kill_ring_push_char('\n');
+    kill_ring_push_nstring("\n", 1);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -157,19 +151,13 @@ to make one entry in the kill ring.
       warn_if_readonly_buffer();
     } else {
       size_t size = r.size;
+      astr as;
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
         FUNCALL(exchange_point_and_mark);
-      undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
-      undo_nosave = TRUE;
-      while (size--) {
-        if (!eolp())
-          kill_ring_push_char(following_char());
-        else
-          kill_ring_push_char('\n');
-        FUNCALL(delete_char);
-      }
-      undo_nosave = FALSE;
+      as = delete_nstring(size);
+      kill_ring_push_nstring(astr_cstr(as), size);
+      astr_delete(as);
     }
 
     thisflag |= FLAG_DONE_KILL;

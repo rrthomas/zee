@@ -588,12 +588,30 @@ void insert_nstring(const char *s, size_t size)
 
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = TRUE;
-  for (; 0 < size--; ++s)
+  for (; size--; ++s)
     if (*s == '\n')
       insert_newline();
     else
       insert_char(*s);
   undo_nosave = FALSE;
+}
+
+astr delete_nstring(size_t size)
+{
+  astr as = astr_new();
+
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+  undo_nosave = TRUE;
+  while (size--) {
+    if (!eolp())
+      astr_cat_char(as, following_char());
+    else
+      astr_cat_char(as, '\n');
+    FUNCALL(delete_char);
+  }
+  undo_nosave = FALSE;
+
+  return as;
 }
 
 int self_insert_command(size_t key)
