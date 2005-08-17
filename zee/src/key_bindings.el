@@ -129,7 +129,6 @@ global-set-key "M-h" 'mark-paragraph
 global-set-key "C-M-@" 'mark-sexp
 global-set-key "M-@" 'mark-word
 global-set-key "C-j" 'newline
-#global-set-key "C-o" 'open-line
 global-set-key "M-%" 'query-replace-regexp
 global-set-key "C-l" 'recenter
 global-set-key "C-@" 'set-mark-command

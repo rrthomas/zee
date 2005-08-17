@@ -563,25 +563,6 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-DEFUN_INT("open-line", open_line)
-/*+
-Insert a newline and leave point before it.
-+*/
-{
-  int i;
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (i = 0; i < uniarg; ++i)
-    if (!intercalate_newline()) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-}
-END_DEFUN
-
 void insert_nstring(const char *s, size_t size)
 {
   assert(cur_bp);
