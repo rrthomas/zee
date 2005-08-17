@@ -527,11 +527,10 @@ static int file_insert(const char *filename)
     return FALSE;
   }
 
-  as = astr_fread(fp);
-  insert_nstring(astr_cstr(as), astr_len(as));
-
-  if (as)
+  if ((as = astr_fread(fp))) {
+    insert_nstring(astr_cstr(as), astr_len(as));
     astr_delete(as);
+  }
 
   return fclose(fp) == 0;
 }
