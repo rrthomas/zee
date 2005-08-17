@@ -77,18 +77,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     cur_bp->next_undop = up;
 }
 
-static void insert_block(astr as)
-{
-  size_t i;
-  for (i = 0; i < astr_len(as); ++i) {
-    char c = *astr_char(as, (ptrdiff_t)i);
-    if (c != '\n')
-      insert_char(c);
-    else
-      insert_newline();
-  }
-}
-
 /*
  * Revert an action.  Return the next undo entry.
  */
@@ -126,7 +114,8 @@ static Undo *revert_action(Undo *up)
     undo_nosave = TRUE;
     for (i = 0; i < up->delta.block.size; i++)
       delete_char();
-    insert_block(up->delta.block.text);
+    insert_nstring(astr_cstr(up->delta.block.text),
+                 astr_len(up->delta.block.text));
     undo_nosave = FALSE;
     break;
   }
