@@ -63,15 +63,7 @@ void free_buffer(Buffer *bp)
 
   line_delete(bp->lines);
 
-  /* Free all the undo operations. */
-  up = bp->last_undop;
-  while (up != NULL) {
-    next_up = up->next;
-    if (up->type == UNDO_REPLACE_BLOCK)
-      astr_delete(up->delta.block.text);
-    free(up);
-    up = next_up;
-  }
+  free_undo(bp);
 
   /* Free markers. */
   while (bp->markers)

@@ -37,6 +37,23 @@ int undo_nosave = FALSE;
 static int doing_undo = FALSE;
 
 /*
+ * Free undo records for a buffer.
+ */
+void free_undo(Buffer *bp)
+{
+  Undo *up, *next_up;
+  /* Free all the undo operations. */
+  up = bp->last_undop;
+  while (up != NULL) {
+    next_up = up->next;
+    if (up->type == UNDO_REPLACE_BLOCK)
+      astr_delete(up->delta.text);
+    free(up);
+    up = next_up;
+  }
+}
+
+/*
  * Save a reverse delta for doing undo.
  */
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
@@ -57,14 +74,10 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
   if (!(cur_bp->flags & BFLAG_MODIFIED))
     up->unchanged = TRUE;
 
-  switch (type) {
-  case UNDO_REPLACE_BLOCK:
-    up->delta.block.text = copy_text_block(pt, arg1);
-    up->delta.block.size = arg2;
-    break;
-  case UNDO_START_SEQUENCE:
-  case UNDO_END_SEQUENCE:
-    break;
+  if (type == UNDO_REPLACE_BLOCK) {
+    up->delta.text = copy_text_block(pt, arg1);
+    up->delta.size = arg2;
+    up->delta.intercalate = intercalate;
   }
 
   up->next = cur_bp->last_undop;
@@ -100,12 +113,12 @@ static Undo *revert_action(Undo *up)
 
   assert(up->type == UNDO_REPLACE_BLOCK);
   undo_save(UNDO_REPLACE_BLOCK, up->pt,
-            up->delta.block.size, astr_len(up->delta.block.text), FALSE);
+            up->delta.size, astr_len(up->delta.text), FALSE);
   undo_nosave = TRUE;
-  for (i = 0; i < up->delta.block.size; i++)
+  for (i = 0; i < up->delta.size; i++)
     delete_char();
-  insert_nstring(astr_cstr(up->delta.block.text),
-                 astr_len(up->delta.block.text), up->delta.block.intercalate);
+  insert_nstring(astr_cstr(up->delta.text),
+                 astr_len(up->delta.text), up->delta.intercalate);
   undo_nosave = FALSE;
 
   doing_undo = FALSE;

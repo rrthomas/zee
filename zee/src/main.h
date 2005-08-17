@@ -95,13 +95,10 @@ struct Undo {
   int unchanged;
 
   /* The undo delta */
-  union {
-    /* The block to replace */
-    struct {
-      astr text;                /* String */
-      size_t size;              /* Block size for replace */
-      int intercalate;          /* TRUE means intercalate, FALSE insert */
-    } block;
+  struct {
+    astr text;                /* String */
+    size_t size;              /* Block size for replace */
+    int intercalate;          /* TRUE means intercalate, FALSE insert */
   } delta;
 };
 
