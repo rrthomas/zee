@@ -97,9 +97,8 @@ static Undo *revert_action(Undo *up)
   if (up->type == UNDO_END_SEQUENCE) {
     undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0, FALSE);
     up = up->next;
-    while (up->type != UNDO_START_SEQUENCE) {
+    while (up->type != UNDO_START_SEQUENCE)
       up = revert_action(up);
-    }
     undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0, FALSE);
     goto_point(up->pt);
     return up->next;
@@ -108,13 +107,9 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   assert(up->type == UNDO_REPLACE_BLOCK);
-  undo_save(UNDO_REPLACE_BLOCK, up->pt,
-            up->delta.size, astr_len(up->delta.text), FALSE);
-  undo_nosave = TRUE;
   astr_delete(delete_nstring(up->delta.size));
   insert_nstring(astr_cstr(up->delta.text),
                  astr_len(up->delta.text), up->delta.intercalate);
-  undo_nosave = FALSE;
 
   doing_undo = FALSE;
 
