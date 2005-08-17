@@ -538,7 +538,7 @@ static int file_insert(const char *filename)
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, (size_t)size);
   undo_nosave = TRUE;
   while ((size = read(fd, buf, BUFSIZ)) > 0)
-    insert_nstring(buf, size);
+    insert_nstring(buf, (size_t)size);
   undo_nosave = FALSE;
   close(fd);
 
