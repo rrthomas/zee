@@ -74,7 +74,6 @@ struct Marker {
 /* Undo delta types */
 enum {
   UNDO_INSERT_CHAR,       /* Insert a character */
-  UNDO_INSERT_BLOCK,      /* Insert a block of characters */
   UNDO_REMOVE_CHAR,       /* Remove a character */
   UNDO_REPLACE_CHAR,      /* Replace a character */
   UNDO_REPLACE_BLOCK,     /* Replace a block of characters */

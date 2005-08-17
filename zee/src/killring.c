@@ -71,7 +71,7 @@ static int kill_line(void)
     if (warn_if_readonly_buffer())
       return FALSE;
 
-    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt,
+    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt,
               astr_len(cur_bp->pt.p->item) - cur_bp->pt.o, 0);
     undo_nosave = TRUE;
     while (!eolp()) {
@@ -165,7 +165,7 @@ to make one entry in the kill ring.
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
         FUNCALL(exchange_point_and_mark);
-      undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
+      undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
       undo_nosave = TRUE;
       while (size--) {
         if (!eolp())
