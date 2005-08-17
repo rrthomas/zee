@@ -67,7 +67,7 @@ void free_buffer(Buffer *bp)
   up = bp->last_undop;
   while (up != NULL) {
     next_up = up->next;
-    if (up->delta.block.text)
+    if (up->type == UNDO_REPLACE_BLOCK)
       astr_delete(up->delta.block.text);
     free(up);
     up = next_up;
