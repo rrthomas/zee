@@ -68,13 +68,9 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
     return;
 
   up = (Undo *)zmalloc(sizeof(Undo));
-
   up->type = type;
   up->pt = pt;
-
-  /* If the buffer is currently unchanged, record the fact. */
-  if (!(cur_bp->flags & BFLAG_MODIFIED))
-    up->unchanged = TRUE;
+  up->unchanged = !(cur_bp->flags & BFLAG_MODIFIED);
 
   if (type == UNDO_REPLACE_BLOCK) {
     up->delta.text = copy_text_block(pt, arg1);
