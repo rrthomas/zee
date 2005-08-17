@@ -67,18 +67,13 @@ static int kill_line(void)
 {
   assert(cur_bp);
 
-  if (!eolp()) {
-    if (warn_if_readonly_buffer())
-      return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt,
-              astr_len(cur_bp->pt.p->item) - cur_bp->pt.o, 0);
-    undo_nosave = TRUE;
-    while (!eolp()) {
-      kill_ring_push_char(following_char());
-      FUNCALL(delete_char);
-    }
-    undo_nosave = FALSE;
+  if (!eolp()) {
+    size_t len = astr_len(cur_bp->pt.p->item) - cur_bp->pt.o;
+    kill_ring_push_nstring(astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o), (size_t)len);
+    FUNCALL_ARG(delete_char, (int)len);
 
     thisflag |= FLAG_DONE_KILL;
 
