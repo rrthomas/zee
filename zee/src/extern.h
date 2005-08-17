@@ -154,7 +154,6 @@ int intercalate_char(int c);
 void fill_break_line(void);
 int insert_newline(void);
 int intercalate_newline(void);
-void insert_string(const char *s);
 void insert_nstring(const char *s, size_t size);
 int self_insert_command(size_t key);
 int delete_char(void);

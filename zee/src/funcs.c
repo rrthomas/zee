@@ -904,7 +904,7 @@ current buffer.
             || r.start.o != cur_bp->pt.o)
           FUNCALL(exchange_point_and_mark);
         FUNCALL_ARG(delete_char, (int)r.size);
-        insert_string(astr_cstr(out));
+        insert_nstring(astr_cstr(out), astr_len(out));
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
         astr_delete(out);

@@ -951,14 +951,13 @@ Read function name, then read its arguments and call it.
 }
 END_DEFUN
 
-
 static le *eval_expression(astr expr)
 {
   le *list = lisp_read(expr);
   astr as = leDumpEval(list, 0);
 
   if (lastflag & FLAG_SET_UNIARG)
-    insert_string(astr_cstr(as));
+    insert_nstring(astr_cstr(as), astr_len(as));
   else
     term_minibuf_write(astr_cstr(as));
   astr_delete(as);

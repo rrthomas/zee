@@ -582,20 +582,6 @@ Insert a newline and leave point before it.
 }
 END_DEFUN
 
-void insert_string(const char *s)
-{
-  assert(cur_bp);
-
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, strlen(s));
-  undo_nosave = TRUE;
-  for (; *s != '\0'; ++s)
-    if (*s == '\n')
-      insert_newline();
-    else
-      insert_char(*s);
-  undo_nosave = FALSE;
-}
-
 void insert_nstring(const char *s, size_t size)
 {
   assert(cur_bp);
