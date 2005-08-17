@@ -115,8 +115,7 @@ static Undo *revert_action(Undo *up)
   undo_save(UNDO_REPLACE_BLOCK, up->pt,
             up->delta.size, astr_len(up->delta.text), FALSE);
   undo_nosave = TRUE;
-  for (i = 0; i < up->delta.size; i++)
-    delete_char();
+  astr_delete(delete_nstring(up->delta.size));
   insert_nstring(astr_cstr(up->delta.text),
                  astr_len(up->delta.text), up->delta.intercalate);
   undo_nosave = FALSE;

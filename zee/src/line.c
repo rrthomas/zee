@@ -597,7 +597,7 @@ astr delete_nstring(size_t size)
       astr_cat_char(as, following_char());
     else
       astr_cat_char(as, '\n');
-    FUNCALL(delete_char);
+    delete_char();
   }
   undo_nosave = FALSE;
 
