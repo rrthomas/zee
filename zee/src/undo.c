@@ -77,7 +77,8 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     cur_bp->next_undop = up;
 }
 
-static void insert_block(astr as) {
+static void insert_block(astr as)
+{
   size_t i;
   for (i = 0; i < astr_len(as); ++i) {
     char c = *astr_char(as, (ptrdiff_t)i);
