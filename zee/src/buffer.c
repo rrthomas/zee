@@ -59,8 +59,6 @@ static Buffer *buffer_new(void)
  */
 void free_buffer(Buffer *bp)
 {
-  Undo *up, *next_up;
-
   line_delete(bp->lines);
 
   free_undo(bp);

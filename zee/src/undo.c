@@ -92,8 +92,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
  */
 static Undo *revert_action(Undo *up)
 {
-  size_t i;
-
   assert(cur_bp);
 
   doing_undo = TRUE;
