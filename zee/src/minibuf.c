@@ -128,10 +128,9 @@ astr minibuf_read_dir(const char *fmt, const char *value, ...)
   fname = astr_new();
   expand_path(value, astr_cstr(rbuf), dir, fname);
   astr_delete(rbuf);
-  astr_cat_cstr(dir, astr_cstr(fname));
+  astr_cat_delete(dir, fname);
   rbuf = compact_path(astr_cstr(dir));
   astr_delete(dir);
-  astr_delete(fname);
 
   cp = completion_new(TRUE);
   as = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
@@ -148,7 +147,8 @@ astr minibuf_read_dir(const char *fmt, const char *value, ...)
     fname = astr_new();
 
     expand_path(astr_cstr(as), astr_cstr(rbuf), dir, fname);
-    astr_cat_delete(rbuf, dir);
+    astr_cpy(rbuf, dir);
+    astr_delete(dir);
     astr_cat_delete(rbuf, fname);
 
     astr_delete(as);
