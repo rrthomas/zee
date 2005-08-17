@@ -193,6 +193,8 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
  * Return a `~/foo' like path if the user is under his home directory,
  * and restart from / if // found,
  * else the unmodified path.
+ *
+ * FIXME: Change argument to an astr
  */
 astr compact_path(const char *path)
 {
@@ -533,7 +535,7 @@ static int file_insert(const char *filename)
   }
   lseek(fd, 0, SEEK_SET);
 
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (size_t)size, 0);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, (size_t)size);
   undo_nosave = TRUE;
   while ((size = read(fd, buf, BUFSIZ)) > 0)
     for (i = 0; i < size; i++)

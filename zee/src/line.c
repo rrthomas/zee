@@ -586,7 +586,7 @@ void insert_string(const char *s)
 {
   assert(cur_bp);
 
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, strlen(s));
   undo_nosave = TRUE;
   for (; *s != '\0'; ++s)
     if (*s == '\n')
@@ -600,7 +600,7 @@ void insert_nstring(const char *s, size_t size)
 {
   assert(cur_bp);
 
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = TRUE;
   for (; 0 < size--; ++s)
     if (*s == '\n')
