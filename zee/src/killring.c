@@ -31,30 +31,11 @@
 #include "main.h"
 #include "extern.h"
 
-/* FIXME: Implement as an astr */
-static char *kill_ring_text;
-static size_t kill_ring_size;
-static size_t kill_ring_maxsize;
+static astr kill_ring_text;
 
 static void flush_kill_ring(void)
 {
-  kill_ring_size = 0;
-  kill_ring_maxsize = 0;
-  free(kill_ring_text);
-  kill_ring_text = NULL;
-}
-
-static void kill_ring_push_nstring(const char *s, size_t size)
-{
-  if (kill_ring_size + (int)size >= kill_ring_maxsize) {
-    size_t old_maxsize = kill_ring_maxsize;
-    /* Increase size by at least 16 bytes to avoid too much
-       reallocing. */
-    kill_ring_maxsize += max(size, 16);
-    kill_ring_text = (char *)zrealloc(kill_ring_text, old_maxsize, kill_ring_maxsize);
-  }
-  memcpy(kill_ring_text + kill_ring_size, s, size);
-  kill_ring_size += size;
+  astr_truncate(kill_ring_text, 0);
 }
 
 static int kill_line(void)
@@ -66,7 +47,7 @@ static int kill_line(void)
 
   if (!eolp()) {
     size_t len = astr_len(cur_bp->pt.p->item) - cur_bp->pt.o;
-    kill_ring_push_nstring(astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o), (size_t)len);
+    astr_ncat(kill_ring_text, astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o), (size_t)len);
     FUNCALL_ARG(delete_char, (int)len);
 
     thisflag |= FLAG_DONE_KILL;
@@ -79,7 +60,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    kill_ring_push_nstring("\n", 1);
+    astr_cat_char(kill_ring_text, '\n');
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -145,19 +126,17 @@ to make one entry in the kill ring.
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr as = copy_text_block(r.start, r.size);
-      kill_ring_push_nstring(astr_cstr(as), r.size);
+      astr_cat(kill_ring_text, as);
       astr_delete(as);
 
       warn_if_readonly_buffer();
     } else {
-      size_t size = r.size;
       astr as;
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
         FUNCALL(exchange_point_and_mark);
-      delete_nstring(size, &as);
-      kill_ring_push_nstring(astr_cstr(as), size);
-      astr_delete(as);
+      delete_nstring(r.size, &as);
+      astr_cat_delete(kill_ring_text, as);
     }
 
     thisflag |= FLAG_DONE_KILL;
@@ -184,7 +163,7 @@ Save the region as if killed, but don't kill it.
     calculate_the_region(&r);
 
     as = copy_text_block(r.start, r.size);
-    kill_ring_push_nstring(astr_cstr(as), r.size);
+    astr_cat(kill_ring_text, as);
     astr_delete(as);
 
     thisflag |= FLAG_DONE_KILL;
@@ -271,18 +250,23 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   ok = FALSE;
 
-  if (kill_ring_size == 0)
+  if (astr_len(kill_ring_text) == 0)
     minibuf_error("Kill ring is empty");
   else if (!warn_if_readonly_buffer()) {
     set_mark_command();
-    insert_nstring(kill_ring_text, kill_ring_size, FALSE);
+    insert_nstring(astr_cstr(kill_ring_text), astr_len(kill_ring_text), FALSE);
     weigh_mark();
     ok = TRUE;
   }
 }
 END_DEFUN
 
+void init_kill_ring(void)
+{
+  kill_ring_text = astr_new();
+}
+
 void free_kill_ring(void)
 {
-  free(kill_ring_text);
+  astr_delete(kill_ring_text);
 }

@@ -251,6 +251,7 @@ int main(int argc, char **argv)
     }
 
     term_init();
+    init_kill_ring();
 
     /* Create first window */
     cur_wp = head_wp = window_new();

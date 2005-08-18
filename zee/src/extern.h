@@ -129,6 +129,10 @@ const char *next_history_element(History *hp);
 astr chordtostr(size_t key);
 size_t strtochord(const char *buf);
 
+/* killring.c ------------------------------------------------------------- */
+void init_kill_ring(void);
+void free_kill_ring(void);
+
 /* line.c ----------------------------------------------------------------- */
 void free_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
@@ -159,7 +163,6 @@ int delete_nstring(size_t size, astr *as);
 int self_insert_command(size_t key);
 int delete_char(void);
 int backward_delete_char(void);
-void free_kill_ring(void);
 
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init(void);
