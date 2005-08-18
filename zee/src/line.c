@@ -302,36 +302,14 @@ int eolp(void)
 }
 
 /*
- * Insert the character `c' at the current position.
- * This function doesn't change the current position of point.
- */
-int intercalate_char(int c)
-{
-  assert(cur_bp);
-
-  if (warn_if_readonly_buffer())
-    return FALSE;
-
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1, FALSE);
-  astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, c);
-  cur_bp->flags |= BFLAG_MODIFIED;
-
-  return TRUE;
-}
-
-/*
  * Insert the character `c' at the current point position
  * into the current buffer.
  */
 int insert_char(int c)
 {
-  assert(cur_bp);
+  char s = (char)c;
 
-  if (intercalate_char(c)) {
-    adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
-    return TRUE;
-  } else
-    return FALSE;
+  return insert_nstring(&s, 1, FALSE);
 }
 
 static int insert_tab(void)
@@ -563,45 +541,76 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-void insert_nstring(const char *s, size_t size, int intercalate)
+/* FIXME: Change arg to astr */
+int insert_nstring(const char *s, size_t size, int intercalate)
 {
   assert(cur_bp);
 
+  if (warn_if_readonly_buffer())
+    return FALSE;
+
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size, FALSE);
-  undo_nosave = TRUE;
 
   for (; size--; ++s)
     if (*s == '\n') {
       if (intercalate)
         intercalate_newline();
       else
-      insert_newline();
+        insert_newline();
     } else {
-      if (intercalate)
-        intercalate_char(*s);
-      else
-        insert_char(*s);
+      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, *s);
+      cur_bp->flags |= BFLAG_MODIFIED;
+      if (!intercalate)
+        adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
     }
 
-  undo_nosave = FALSE;
+  return TRUE;
 }
 
-astr delete_nstring(size_t size)
+int delete_nstring(size_t size, astr *as)
 {
-  astr as = astr_new();
+  weigh_mark();
+
+  if (warn_if_readonly_buffer())
+    return FALSE;
+
+  *as = astr_new();
 
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0, FALSE);
-  undo_nosave = TRUE;
+  cur_bp->flags |= BFLAG_MODIFIED;
   while (size--) {
     if (!eolp())
-      astr_cat_char(as, following_char());
+      astr_cat_char(*as, following_char());
     else
-      astr_cat_char(as, '\n');
-    delete_char();
-  }
-  undo_nosave = FALSE;
+      astr_cat_char(*as, '\n');
 
-  return as;
+    if (eobp()) {
+      minibuf_error("End of buffer");
+      return FALSE;
+    }
+
+    if (eolp()) {
+      Line *lp1 = cur_bp->pt.p;
+      Line *lp2 = list_next(lp1);
+      size_t lp1len = astr_len(lp1->item);
+
+      /* Move the next line of text into the current line. */
+      lp2 = list_next(cur_bp->pt.p);
+      astr_cat(lp1->item, list_next(cur_bp->pt.p)->item);
+      astr_delete(list_behead(lp1));
+      --cur_bp->num_lines;
+
+      adjust_markers(lp1, lp2, lp1len, -1, 0);
+
+      thisflag |= FLAG_NEED_RESYNC;
+    } else {
+      /* Move the text one position backward after the point. */
+      astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
+      adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
+    }
+  }
+
+  return TRUE;
 }
 
 int self_insert_command(size_t key)
@@ -645,56 +654,10 @@ END_DEFUN
 
 int delete_char(void)
 {
-  assert(cur_bp);
-
-  weigh_mark();
-
-  if (!eolp()) {
-    if (warn_if_readonly_buffer())
-      return FALSE;
-
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0, TRUE);
-
-    /* Move the text one position backward after the point,
-       if required. */
-    astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
-
-    adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
-
-    cur_bp->flags |= BFLAG_MODIFIED;
-
-    return TRUE;
-  } else if (!eobp()) {
-    Line *lp1, *lp2;
-    size_t lp1len;
-
-    if (warn_if_readonly_buffer())
-      return FALSE;
-
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0, TRUE);
-
-    lp1 = cur_bp->pt.p;
-    lp2 = list_next(lp1);
-    lp1len = astr_len(lp1->item);
-
-    /* Move the next line text into the current line. */
-    lp2 = list_next(cur_bp->pt.p);
-    astr_cat(lp1->item, list_next(cur_bp->pt.p)->item);
-    astr_delete(list_behead(lp1));
-    --cur_bp->num_lines;
-
-    adjust_markers(lp1, lp2, lp1len, -1, 0);
-
-    cur_bp->flags |= BFLAG_MODIFIED;
-
-    thisflag |= FLAG_NEED_RESYNC;
-
-    return TRUE;
-  }
-
-  minibuf_error("End of buffer");
-
-  return FALSE;
+  astr as;
+  int ok = delete_nstring(1, &as);
+  astr_delete(as);
+  return ok;
 }
 
 DEFUN_INT("delete-char", delete_char)
@@ -727,8 +690,7 @@ int backward_delete_char(void)
   if (edit_navigate_backward_char()) {
     delete_char();
     return TRUE;
-  }
-  else {
+  } else {
     minibuf_error("Beginning of buffer");
     return FALSE;
   }

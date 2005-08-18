@@ -29,10 +29,6 @@
 #include "main.h"
 #include "extern.h"
 
-/* This variable is set to TRUE when the `undo_save()' function should not
-   register the undo information. */
-int undo_nosave = FALSE;
-
 /* This variable is set to TRUE when the undo is in execution. */
 static int doing_undo = FALSE;
 
@@ -64,9 +60,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
 
   assert(cur_bp);
 
-  if (undo_nosave)
-    return;
-
   up = (Undo *)zmalloc(sizeof(Undo));
   up->type = type;
   up->pt = pt;
@@ -90,6 +83,8 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
  */
 static Undo *revert_action(Undo *up)
 {
+  astr as;
+
   assert(cur_bp);
 
   doing_undo = TRUE;
@@ -107,7 +102,8 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   assert(up->type == UNDO_REPLACE_BLOCK);
-  astr_delete(delete_nstring(up->delta.size));
+  delete_nstring(up->delta.size, &as);
+  astr_delete(as);
   insert_nstring(astr_cstr(up->delta.text),
                  astr_len(up->delta.text), up->delta.intercalate);
 

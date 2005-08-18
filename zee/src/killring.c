@@ -155,7 +155,7 @@ to make one entry in the kill ring.
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
         FUNCALL(exchange_point_and_mark);
-      as = delete_nstring(size);
+      delete_nstring(size, &as);
       kill_ring_push_nstring(astr_cstr(as), size);
       astr_delete(as);
     }
