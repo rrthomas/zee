@@ -19,6 +19,8 @@ zee_DATA =					\
 	key_bindings.el
 
 zee_base_SOURCES =				\
+	vector.c				\
+	vector.h				\
 	list.c					\
 	list.h					\
 	astr.c					\

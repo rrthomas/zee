@@ -32,7 +32,14 @@
 #include "extern.h"
 
 
-static Macro *cur_mp, *cmd_mp = NULL, *head_mp = NULL;
+static Macro *cur_mp = NULL, *cmd_mp = NULL, *head_mp = NULL;
+
+static Macro *macro_new(void)
+{
+  Macro *mp = zmalloc(sizeof(Macro));
+  mp->keys = vec_new(sizeof(size_t));
+  return mp;
+}
 
 static void macro_delete(Macro *mp)
 {
@@ -44,18 +51,15 @@ static void macro_delete(Macro *mp)
 
 static void add_macro_key(Macro *mp, size_t key)
 {
-  mp->nkeys++;
-  mp->keys = zrealloc(mp->keys, sizeof(size_t) * (mp->nkeys - 1),
-                      sizeof(size_t) * mp->nkeys);
-  mp->keys[mp->nkeys - 1] = key;
+  vec_item(mp->keys, vec_items(mp->keys), size_t) = key;
 }
 
 void add_cmd_to_macro(void)
 {
   size_t i;
   assert(cmd_mp);
-  for (i = 0; i < cmd_mp->nkeys; i++)
-    add_macro_key(cur_mp, cmd_mp->keys[i]);
+  for (i = 0; i < vec_items(cmd_mp->keys); i++)
+    add_macro_key(cur_mp, vec_item(cmd_mp->keys, i, size_t));
   macro_delete(cmd_mp);
   cmd_mp = NULL;
 }
@@ -63,7 +67,7 @@ void add_cmd_to_macro(void)
 void add_key_to_cmd(size_t key)
 {
   if (cmd_mp == NULL)
-    cmd_mp = zmalloc(sizeof(Macro));
+    cmd_mp = macro_new();
 
   add_macro_key(cmd_mp, key);
 }
@@ -94,7 +98,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
     minibuf_write("Defining keyboard macro...");
 
     thisflag |= FLAG_DEFINING_MACRO;
-    cur_mp = zmalloc(sizeof(Macro));
+    cur_mp = macro_new();
   }
 }
 END_DEFUN
@@ -124,7 +128,6 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 {
   astr ms;
   Macro *mp;
-  size_t size;
 
   if ((ms = minibuf_read("Name for last kbd macro: ", "")) == NULL) {
     minibuf_error("No command name given");
@@ -138,17 +141,14 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
       free(mp->keys);
     } else {
       /* Add a new macro to the list */
-      mp = zmalloc(sizeof(*mp));
+      mp = macro_new();
       mp->next = head_mp;
       mp->name = zstrdup(astr_cstr(ms));
       head_mp = mp;
     }
 
     /* Copy the keystrokes from cur_mp. */
-    mp->nkeys = cur_mp->nkeys;
-    size = sizeof(*(mp->keys)) * mp->nkeys;
-    mp->keys = zmalloc(size);
-    memcpy(mp->keys, cur_mp->keys, size);
+    mp->keys = vec_copy(cur_mp->keys);
   }
 }
 END_DEFUN
@@ -160,8 +160,10 @@ int call_macro(Macro *mp)
   int old_lastflag = lastflag;
   size_t i;
 
-  for (i = mp->nkeys - 1; i < mp->nkeys ; i--)
-    ungetkey(mp->keys[i]);
+  /* The loop termination condition is really i >= 0, but unsigned
+     types are always >= 0, and we can't easily get SIZE_T_MAX. */
+  for (i = vec_items(mp->keys) - 1; i < vec_items(mp->keys); i--)
+    ungetkey(vec_item(mp->keys, i, size_t));
 
   if (lastflag & FLAG_GOT_ERROR)
     ret = FALSE;

@@ -25,6 +25,7 @@
 
 #include <limits.h>
 
+#include "vector.h"
 #include "list.h"
 #include "astr.h"
 #include "parser.h"
@@ -244,8 +245,7 @@ typedef struct Binding {
 } Binding;
 
 typedef struct Macro {
-  size_t nkeys;                 /* The number of keystrokes */
-  size_t *keys;                 /* Vector of keystrokes */
+  vector *keys;                  /* Vector of keystrokes */
   char *name;                   /* Name of the macro */
   struct Macro *next;           /* Next macro in the list */
 } Macro;
