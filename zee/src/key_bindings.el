@@ -6,23 +6,16 @@
 
 # Character/line
 global-set-key "LEFT" 'edit-navigate-backward-char
-global-set-key "C-b" 'edit-navigate-backward-char
 global-set-key "RIGHT" 'edit-navigate-forward-char
 global-set-key "DOWN" 'edit-navigate-down-line
-global-set-key "C-n" 'edit-navigate-down-line
 global-set-key "UP" 'edit-navigate-up-line
-global-set-key "C-p" 'edit-navigate-up-line
 # Word/paragraph
 global-set-key "C-LEFT" 'backward-word
-global-set-key "M-b" 'backward-word
 global-set-key "C-RIGHT" 'forward-word
-global-set-key "M-f" 'forward-word
 global-set-key "M-{" 'backward-paragraph
 global-set-key "M-}" 'forward-paragraph
 # Line/page
-global-set-key "C-a" 'beginning-of-line
 global-set-key "HOME" 'beginning-of-line
-global-set-key "C-e" 'end-of-line
 global-set-key "END" 'end-of-line
 global-set-key "PGUP" 'scroll-down
 global-set-key "PGDN" 'scroll-up
