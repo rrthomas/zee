@@ -77,10 +77,13 @@ static int getchar_skipspace(void) {
 
     switch (c) {
     case ' ':
+      if (bol)
+        indent++;
+      break;
+
     case '\t':
       if (bol)
-        /* FIXME: round \t up to next 8 spaces */
-        indent++;
+        indent += 8 - indent % 8;
       break;
 
     case '#':
@@ -119,15 +122,16 @@ static int getchar_skipspace(void) {
       }
       return c;
     }
-  } while (1);
+  } while (TRUE);
 }
 
 static astr gettok(enum tokenname *toktype)
 {
   int c;
-  astr tok = astr_new();
 
   if (list_empty(toktype_buf)) {
+    astr tok = astr_new();
+
     switch ((c = getchar_skipspace())) {
     case '\'':
       *toktype = T_QUOTE;
@@ -171,7 +175,7 @@ static astr gettok(enum tokenname *toktype)
         }
 
         c = getachar();
-      } while (1);
+      } while (TRUE);
     }
 
     list_append(toktype_buf, (void *)*toktype);
@@ -184,30 +188,30 @@ static astr gettok(enum tokenname *toktype)
 
 struct le *lisp_parse(struct le *list)
 {
-  astr tok;
-  enum tokenname toktype;
   int isquoted = FALSE;
 
   do {
-    toktype = T_CLOSE;
-    tok = gettok(&toktype);
+    enum tokenname toktype = T_CLOSE;
+    astr tok = gettok(&toktype);
 
     switch (toktype) {
     case T_CLOSE:
       astr_delete(tok);
       return list;
+
     case T_OPEN:
       list = leAddBranchElement(list, lisp_parse(NULL), isquoted);
       break;
+
     case T_QUOTE:
+      isquoted = TRUE;
       break;
+
     case T_WORD:
       list = leAddDataElement(list, astr_cstr(tok), isquoted);
       break;
     }
 
-    isquoted = toktype == T_QUOTE;
-
     astr_delete(tok);
-  } while (1);
+  } while (TRUE);
 }

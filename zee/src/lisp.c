@@ -48,8 +48,8 @@ le *lisp_read(astr as)
 
   lisp_parse_init(as);
   list = lisp_parse(NULL);
+  lisp_parse_end();
 
-  /* FIXME: Need to check indent is 0 (add lisp_parse_end) */
   return list;
 }
 

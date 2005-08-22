@@ -236,9 +236,10 @@ int main(int argc, char **argv)
 
   setlocale(LC_ALL, "");
 
-  if (bflag)
-    printf(astr_cstr(as));
-  else {
+  if (astr_len(as) > 0)
+    printf("%s", astr_cstr(as));
+
+  if (!bflag) {
     if (!qflag) {
       le *list;
 
@@ -252,6 +253,7 @@ int main(int argc, char **argv)
 
     term_init();
     init_kill_ring();
+    init_bindings();
 
     /* Create first window */
     cur_wp = head_wp = window_new();
@@ -283,9 +285,6 @@ int main(int argc, char **argv)
         open_file_at(*argv++, line - 1);
     }
     term_display();
-
-    /* FIXME: at this point, display string 'as' in a new buffer if
-       non-empty. */
 
     /* Run the main loop. */
     loop();

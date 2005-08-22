@@ -957,7 +957,7 @@ static le *eval_expression(astr expr)
   astr as = leDumpEval(list, 0);
 
   if (lastflag & FLAG_SET_UNIARG)
-    insert_nstring(astr_cstr(as), astr_len(as), FALSE);
+    insert_nstring(as, FALSE);
   else
     term_minibuf_write(astr_cstr(as));
   astr_delete(as);

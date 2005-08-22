@@ -191,12 +191,9 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 
 /*
  * Return a `~/foo' like path if the user is under his home directory,
- * and restart from / if // found,
- * else the unmodified path.
- *
- * FIXME: Change argument to an astr
+ * and restart from / if // found, else the unmodified path.
  */
-astr compact_path(const char *path)
+astr compact_path(astr path)
 {
   astr buf = astr_new();
   struct passwd *pw;
@@ -204,20 +201,20 @@ astr compact_path(const char *path)
 
   if ((pw = getpwuid(getuid())) == NULL) {
     /* User not found in password file. */
-    astr_cpy_cstr(buf, path);
+    astr_cpy(buf, path);
     return buf;
   }
 
   /* Replace `/userhome/' (if existent) with `~/'. */
   i = strlen(pw->pw_dir);
-  if (!strncmp(pw->pw_dir, path, i)) {
+  if (!strncmp(pw->pw_dir, astr_cstr(path), i)) {
     astr_cpy_cstr(buf, "~/");
     if (!strcmp(pw->pw_dir, "/"))
-      astr_cat_cstr(buf, path + 1);
+      astr_cat_cstr(buf, astr_char(path, 1));
     else
-      astr_cat_cstr(buf, path + i + 1);
+      astr_cat_cstr(buf, astr_char(path, (ptrdiff_t)(i + 1)));
   } else
-    astr_cpy_cstr(buf, path);
+    astr_cpy(buf, path);
 
   return buf;
 }
@@ -263,35 +260,73 @@ astr get_home_dir(void)
 }
 
 /*
+ * Read the file contents into a string.
+ * Return quietly if the file doesn't exist.
+ */
+/* FIXME: Determine EOL here, not in file_open; then can use result in
+   file_insert.*/
+static int file_read(astr *as, const char *filename)
+{
+  FILE *fp;
+  int ok = TRUE;
+
+  if ((fp = fopen(filename, "r")) == NULL)
+    ok = FALSE;
+  else {
+    *as = astr_fread(fp);
+    ok = fclose(fp) == 0;
+  }
+
+  if (ok == FALSE)
+    if (errno != ENOENT)
+      minibuf_write("%s: %s", filename, strerror(errno));
+
+  return ok;
+}
+
+/*
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist.
  */
 void file_open(Buffer *bp, const char *filename)
 {
-  FILE *fp;
-  char eolstr[3] = "\n";
   astr as = NULL;
-  int ok = TRUE;
+  int ok;
 
   assert(bp);
 
-  if ((fp = fopen(filename, "r")) == NULL)
-    ok = FALSE;
-  else {
-    as = astr_fread(fp);
-    ok = fclose(fp) == 0;
-  }
+  ok = file_read(&as, filename);
 
   if (ok == FALSE) {
-    if (errno != ENOENT) {
-      minibuf_write("%s: %s", filename, strerror(errno));
+    if (errno != ENOENT)
       bp->flags |= BFLAG_READONLY;
-    }
   } else {
-    /* FIXME: scan buffer to determine correct eolstr. */
-    strcpy(bp->eol, eolstr);
+    /* Find EOL string */
+    char eolstr[3] = "\n", c = '\0';
+    size_t i;
 
+    assert(as);
+
+    for (i = 0; i < astr_len(as); i++) {
+      c = *astr_char(as, (ptrdiff_t)i);
+      if (c == '\n' || c == '\r')
+        break;
+    }
+
+    if (c == '\n' || c == '\r') {
+      *eolstr = c;
+      if (i < astr_len(as) - 1) {
+        char c2 = *astr_char(as, (ptrdiff_t)(i + 1));
+        if ((c2 == '\n' || c2 == '\r') && c != c2) {
+          eolstr[1] = c2;
+          eolstr[2] = '\0';
+        }
+      }
+    }
+
+    /* Add lines to buffer */
     line_delete(bp->lines);
+    strcpy(bp->eol, eolstr);
     bp->lines = string_to_lines(as, eolstr, &bp->num_lines);
     bp->pt.p = list_first(bp->lines);
   }
@@ -385,8 +420,7 @@ Select to the user specified buffer in the current window.
   Completion *cp;
   Buffer *bp;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
+  assert(cur_bp);
   bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
   cp = make_buffer_completion();
@@ -509,10 +543,9 @@ Kill the current buffer or the user specified one.
 }
 END_DEFUN
 
-/* FIXME: Handle EOLs properly; common up with file_open */
 static int file_insert(const char *filename)
 {
-  FILE *fp;
+  int ok;
   astr as;
 
   assert(cur_bp);
@@ -522,17 +555,12 @@ static int file_insert(const char *filename)
     return FALSE;
   }
 
-  if ((fp = fopen(filename, "r")) == NULL) {
-    minibuf_write("%s: %s", filename, strerror(errno));
-    return FALSE;
-  }
-
-  if ((as = astr_fread(fp))) {
-    insert_nstring(astr_cstr(as), astr_len(as), FALSE);
+  if ((ok = file_read(&as, filename)) != TRUE) {
+    insert_nstring(as, FALSE);
     astr_delete(as);
   }
 
-  return fclose(fp) == 0;
+  return ok;
 }
 
 DEFUN_INT("file-insert", file_insert)
@@ -561,26 +589,29 @@ Set mark after the inserted text.
 }
 END_DEFUN
 
-static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
+static int raw_write_to_disk(Buffer *bp, const char *filename)
 {
-  int fd;
-  size_t eol_len = strlen(bp->eol);
+  size_t eol_len;
+  FILE *fp;
   Line *lp;
 
-  if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
+  assert(bp);
+
+  if ((fp = fopen(filename, "w")) == NULL)
     return FALSE;
+
+  eol_len = strlen(bp->eol);
 
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
-    write(fd, astr_cstr(lp->item), astr_len(lp->item));
-    if (list_next(lp) != bp->lines)
-      write(fd, bp->eol, eol_len);
+    if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
+        (list_next(lp) != bp->lines && fwrite(bp->eol, sizeof(char), eol_len, fp) < eol_len)) {
+      fclose(fp);
+      return FALSE;
+    }
   }
 
-  if (close(fd) < 0)
-    return FALSE;
-
-  return TRUE;
+  return fclose(fp) == 0;
 }
 
 /*
@@ -588,7 +619,7 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
  */
 static int write_to_disk(Buffer *bp, const char *filename)
 {
-  if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
+  if (raw_write_to_disk(bp, filename) == FALSE) {
     minibuf_error("%s: %s", filename, strerror(errno));
     return FALSE;
   }
@@ -815,7 +846,7 @@ void die(int exitcode)
           astr_cpy_cstr(buf, bp->name);
         astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
         fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
-        raw_write_to_disk(bp, astr_cstr(buf), 0600);
+        raw_write_to_disk(bp, astr_cstr(buf));
         astr_delete(buf);
       }
     term_close();

@@ -40,64 +40,36 @@ static Function _last_command;
  *--------------------------------------------------------------------------*/
 
 /* Binding vector, number of items, max number of items */
-static Binding **binding = NULL;
-static size_t nbindings, max_bindings = 0;
+vector *bindings;
 
 static Binding *get_binding(size_t key)
 {
   size_t i;
 
-  for (i = 0; i < nbindings; ++i)
-    if (binding[i]->key == key)
-      return binding[i];
+  for (i = 0; i < vec_items(bindings); i++)
+    if (vec_item(bindings, i, Binding).key == key)
+      return (Binding *)vec_index(bindings, i);
 
   return NULL;
 }
 
-static size_t function_to_binding(Function f)
+static void add_binding(size_t key, Function func)
 {
-  size_t i;
+  Binding b;
 
-  for (i = 0; i < nbindings; ++i)
-    if (binding[i]->func == f)
-      return binding[i]->key;
+  b.key = key;
+  b.func = func;
 
-  return KBD_NOKEY;
-}
-
-static void add_binding(Binding *p)
-{
-  size_t i;
-
-  /* Reallocate vector if there is not enough space */
-  if (nbindings + 1 >= max_bindings) {
-    max_bindings += 5;
-    binding = zrealloc(binding, sizeof(p) * (max_bindings - 5),
-                       sizeof(p) * max_bindings);
-  }
-
-  /* Insert the binding at the sorted position */
-  for (i = 0; i < nbindings; i++)
-    if (binding[i]->key > p->key) {
-      memmove(&binding[i + 1], &binding[i], sizeof(p) * (nbindings - i));
-      binding[i] = p;
-      break;
-    }
-  if (i == nbindings)
-    binding[nbindings] = p;
-  ++nbindings;
+  vec_item(bindings, vec_items(bindings), Binding) = b;
 }
 
 static void bind_key(size_t key, Function func)
 {
-  Binding *p, *s;
+  Binding *s;
 
-  if ((s = get_binding(key)) == NULL) {
-    p = zmalloc(sizeof(*p));
-    p->key = key;
-    add_binding(p);
-    p->func = func;
-  } else
+  if ((s = get_binding(key)) == NULL)
+    add_binding(key, func);
+  else
     s->func = func;
 }
 
@@ -109,12 +81,14 @@ void bind_key_string(const char *keystr, Function func)
     bind_key(key, func);
 }
 
+void init_bindings(void)
+{
+  bindings = vec_new(sizeof(Binding));
+}
+
 void free_bindings(void)
 {
-  size_t i;
-  for (i = 0; i < nbindings; ++i)
-    free(binding[i]);
-  free(binding);
+  vec_delete(bindings);
   free_history_elements(&functions_history);
 }
 
@@ -132,8 +106,8 @@ void process_key(size_t key)
   else {
     if ((p = get_binding(key)) == NULL) {
       if (key <= 255) {
-        assert(cur_bp); /* FIXME: Remove this assumption */
         /* There are no bindings for the pressed key */
+        assert(cur_bp);
         undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
         for (uni = 0;
              uni < last_uniarg && self_insert_command(key);
@@ -322,7 +296,23 @@ sequence.
 }
 END_DEFUN
 
-/* FIXME: will only find first binding; should find all of them. */
+static astr function_to_binding(Function f)
+{
+  size_t i, n = 0;
+  astr as = astr_new();
+
+  for (i = 0; i < vec_items(bindings); i++)
+    if (vec_item(bindings, i, Binding).func == f) {
+      size_t key = vec_item(bindings, i, Binding).key;
+      astr binding = chordtostr(key);
+      astr_cat_cstr(as, (n++ == 0) ? "" : ", ");
+      astr_cat(as, binding);
+      astr_delete(binding);
+    }
+
+  return as;
+}
+
 DEFUN_INT("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
@@ -337,15 +327,14 @@ Argument is a command definition, usually a symbol with a function definition.
   if ((f = get_function(astr_cstr(name))) == NULL)
     ok = FALSE;
   else {
-    size_t key = function_to_binding(f);
-    if (key != KBD_NOKEY) {
-      astr as = astr_new(), binding = chordtostr(key);
-      astr_afmt(as, "%s is on %s", astr_cstr(name), astr_cstr(binding));
-      minibuf_write("%s", astr_cstr(as));
-      astr_delete(as);
-      astr_delete(binding);
-    } else
+    astr bindings = function_to_binding(f);
+
+    if (astr_len(bindings) > 0)
+      minibuf_write("%s is on %s", astr_cstr(name), astr_cstr(bindings));
+    else
       minibuf_write("%s is not on any key", astr_cstr(name));
+
+    astr_delete(bindings);
   }
 }
 END_DEFUN

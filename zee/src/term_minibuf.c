@@ -275,7 +275,9 @@ static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, in
   *_i = i;
 }
 
-
+/*
+ * Read a string from the minibuffer.
+ */
 astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp)
 {
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;

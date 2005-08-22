@@ -29,11 +29,10 @@ void resync_display(void)
 {
   int delta;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
+  assert(cur_wp);
 
-  delta = cur_bp->pt.n - cur_wp->lastpointn;
-
-  if (delta) {
+  if ((delta = cur_bp->pt.n - cur_wp->lastpointn)) {
     if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
         (delta < 0 && cur_wp->topdelta >= (size_t)(-delta)))
       cur_wp->topdelta += delta;

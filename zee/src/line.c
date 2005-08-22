@@ -101,7 +101,7 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 {
   Marker *pt = point_marker(), *marker;
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
+  assert(cur_bp);
   for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
     if (marker->pt.p == oldlp &&
         (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
@@ -307,9 +307,11 @@ int eolp(void)
  */
 int insert_char(int c)
 {
-  char s = (char)c;
+  astr as = astr_cat_char(astr_new(), (char)c);
+  int ret = insert_nstring(as, FALSE);
 
-  return insert_nstring(&s, 1, FALSE);
+  astr_delete(as);
+  return ret;
 }
 
 static int insert_tab(void)
@@ -433,32 +435,33 @@ static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
 /*
  * Replace text in the line "lp" with "newtext". If "replace_case" is
  * TRUE then the new characters will be the same case as the old.
+ * Return flag indicating whether modifications have been made.
  */
-void line_replace_text(Line **lp, size_t offset, size_t oldlen,
+int line_replace_text(Line **lp, size_t offset, size_t oldlen,
                        const char *newtext, size_t newlen, int replace_case)
 {
+  int changed = FALSE;
   char *newcopy = zstrdup(newtext);
 
-  assert(cur_bp); /* FIXME: Remove this assumption. */
-
   if (oldlen > 0) {
-    if (replace_case && lookup_bool_variable("case-replace")) {
+    if (replace_case && lookup_bool_variable("case-replace"))
       recase(newcopy, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
              oldlen);
-    }
 
     if (newlen != oldlen) {
-      cur_bp->flags |= BFLAG_MODIFIED;
       astr_replace_cstr((*lp)->item, (ptrdiff_t)offset, oldlen, newcopy);
       adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
+      changed = TRUE;
     } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
                       newcopy, newlen) != 0) {
       memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newcopy, newlen);
-      cur_bp->flags |= BFLAG_MODIFIED;
+      changed = TRUE;
     }
   }
 
   free(newcopy);
+
+  return changed;
 }
 
 /*
@@ -541,28 +544,31 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-/* FIXME: Change arg to astr */
-int insert_nstring(const char *s, size_t size, int intercalate)
+int insert_nstring(astr as, int intercalate)
 {
+  size_t i;
+
   assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size, FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len(as), FALSE);
 
-  for (; size--; ++s)
-    if (*s == '\n') {
+  for (i = 0; i < astr_len(as); i++) {
+    char c = *astr_char(as, (ptrdiff_t)i);
+    if (c == '\n') {
       if (intercalate)
         intercalate_newline();
       else
         insert_newline();
     } else {
-      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, *s);
+      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, c);
       cur_bp->flags |= BFLAG_MODIFIED;
       if (!intercalate)
         adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
     }
+  }
 
   return TRUE;
 }

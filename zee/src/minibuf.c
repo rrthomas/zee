@@ -129,7 +129,7 @@ astr minibuf_read_dir(const char *fmt, const char *value, ...)
   expand_path(value, astr_cstr(rbuf), dir, fname);
   astr_delete(rbuf);
   astr_cat_delete(dir, fname);
-  rbuf = compact_path(astr_cstr(dir));
+  rbuf = compact_path(dir);
   astr_delete(dir);
 
   cp = completion_new(TRUE);

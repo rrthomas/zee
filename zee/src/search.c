@@ -410,9 +410,10 @@ Replace occurrences of a regexp with other text.
                   make_point(cur_bp->pt.n,
                              cur_bp->pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
-        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
-                          astr_len(find), astr_cstr(repl), astr_len(repl),
-                          find_no_upper);
+        if (line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+                              astr_len(find), astr_cstr(repl), astr_len(repl),
+                              find_no_upper))
+          cur_bp->flags |= BFLAG_MODIFIED;
       }
 
       if (thisflag & FLAG_NEED_RESYNC)
@@ -493,9 +494,11 @@ what to do with it.
         undo_save(UNDO_REPLACE_BLOCK,
                   make_point(cur_bp->pt.n, cur_bp->pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
-        line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
-                          astr_len(find), astr_cstr(repl), astr_len(repl),
-                          find_no_upper);
+        if (line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+                              astr_len(find), astr_cstr(repl), astr_len(repl),
+                              find_no_upper))
+          cur_bp->flags |= BFLAG_MODIFIED;
+        /* FALLTHROUGH */
       nextmatch:
         if (exitloop)
           break;

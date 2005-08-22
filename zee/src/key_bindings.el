@@ -8,7 +8,6 @@
 global-set-key "LEFT" 'edit-navigate-backward-char
 global-set-key "C-b" 'edit-navigate-backward-char
 global-set-key "RIGHT" 'edit-navigate-forward-char
-# FIXME: Need a home-keys shortcut for edit-navigate-forward-char. Was C-f.
 global-set-key "DOWN" 'edit-navigate-down-line
 global-set-key "C-n" 'edit-navigate-down-line
 global-set-key "UP" 'edit-navigate-up-line
@@ -70,8 +69,8 @@ global-set-key "C-k" 'kill-region
 global-set-key "M-d" 'kill-word
 global-set-key "M-DEL" 'kill-word
 # Copy selection to clipboard.
-global-set-key "C-c" 'copy-region-as-kill
-global-set-key "M-w" 'copy-region-as-kill
+global-set-key "C-c" 'copy-region
+global-set-key "M-w" 'copy-region
 # Delete without modifying clipboard.
 global-set-key "BS" 'backward-delete-char
 global-set-key "M-BS" 'backward-kill-word

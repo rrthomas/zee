@@ -145,9 +145,9 @@ to make one entry in the kill ring.
 }
 END_DEFUN
 
-DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
+DEFUN_INT("copy-region", copy_region)
 /*+
-Save the region as if killed, but don't kill it.
+Copy the region to the kill ring.
 +*/
 {
   Region r;
@@ -254,7 +254,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
     minibuf_error("Kill ring is empty");
   else if (!warn_if_readonly_buffer()) {
     set_mark_command();
-    insert_nstring(astr_cstr(kill_ring_text), astr_len(kill_ring_text), FALSE);
+    insert_nstring(kill_ring_text, FALSE);
     weigh_mark();
     ok = TRUE;
   }

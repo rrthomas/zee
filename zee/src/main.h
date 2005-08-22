@@ -314,6 +314,7 @@ enum {
         int F_ ## c_func(int argc, le *branch) \
         { \
           int uniused = argc > 1, ok = TRUE;
+
 #define DEFUN_INT(lisp_name, c_func) \
 	DEFUN(lisp_name, c_func) \
           int uniarg = 1; \
@@ -322,14 +323,14 @@ enum {
             uniarg = evalCastLeToInt(value_le); \
             leWipe(value_le); \
           }
+
 #define END_DEFUN \
           return ok; \
         }
 
 /* Call an interactive function */
 #define FUNCALL(c_func)                         \
-        F_ ## c_func(1, evalCastIntToLe(1))
-/* FIXME: the evalCastIntToLe above causes a space leak */
+        F_ ## c_func(1, NULL)
 
 /* Call an interactive function with an universal argument */
 #define FUNCALL_ARG(c_func, uniarg)             \

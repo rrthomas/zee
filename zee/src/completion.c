@@ -216,7 +216,7 @@ static int completion_reread(Completion *cp, astr as)
   closedir(dir);
 
   astr_delete(cp->path);
-  cp->path = compact_path(astr_cstr(pdir));
+  cp->path = compact_path(pdir);
 
   astr_delete(buf);
   astr_delete(pdir);
