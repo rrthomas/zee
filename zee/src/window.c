@@ -67,7 +67,9 @@ void check_windows(void)
 
 Window *window_new(void)
 {
-  return zmalloc(sizeof(Window));
+  Window *wp = zmalloc(sizeof(Window));
+  wp->fheight = 1;              /* fheight must be > eheight */
+  return wp;
 }
 
 /*

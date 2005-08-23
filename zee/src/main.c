@@ -257,15 +257,20 @@ int main(int argc, char **argv)
 
     /* Create first window */
     cur_wp = head_wp = window_new();
-    cur_wp->fwidth = cur_wp->ewidth = term_width();
-    /* Save space for minibuffer. */
-    cur_wp->fheight = term_height() - 1;
-    /* Save space for status line. */
-    cur_wp->eheight = cur_wp->fheight - 1;
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
     bind_key_string("\\M-x", F_execute_extended_command);
+
+    /* Open files listed on command line. */
+    while (*argv) {
+      size_t line = 1;
+      if (**argv == '+')
+        line = strtoul(*argv++ + 1, NULL, 10);
+      if (*argv)
+        open_file_at(*argv++, line - 1);
+    }
+    resize_windows(); /* Can't run until there is at least one buffer */
 
     /* Write help message, but allow it to be overwritten by errors
        from loading key_bindings.el. */
@@ -276,14 +281,7 @@ int main(int argc, char **argv)
     astr_delete(leDumpEval(list, 0));
     leWipe(list);
 
-    /* Open files listed on command line. */
-    while (*argv) {
-      size_t line = 1;
-      if (**argv == '+')
-        line = strtoul(*argv++ + 1, NULL, 10);
-      if (*argv)
-        open_file_at(*argv++, line - 1);
-    }
+    /* Display help or error message. */
     term_display();
 
     /* Run the main loop. */
