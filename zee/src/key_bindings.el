@@ -30,8 +30,8 @@ global-set-key "C-END" 'end-of-buffer
 
 # FIXME: Not done yet.
 
-# Long distance navigation. These are like navigation commands but they don't
-# become selection commands when combined with SHIFT.
+# Absolute navigation. These are like navigation commands but they
+# don't become selection commands when combined with SHIFT.
 
 global-set-key "C-M-g" 'goto-char
 global-set-key "M-g" 'goto-line
