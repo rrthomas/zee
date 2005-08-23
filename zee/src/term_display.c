@@ -468,9 +468,10 @@ void resize_windows(void)
 
   /* Work out difference in window height; windows may be taller than
      terminal if the terminal was very short. */
-  for (hdelta = term_height(), wp = head_wp;
+  for (hdelta = term_height() - 1, wp = head_wp;
        wp != NULL;
-       hdelta -= wp->fheight, wp = wp->next);
+       hdelta -= wp->fheight, wp = wp->next)
+    ;
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
