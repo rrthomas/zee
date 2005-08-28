@@ -847,7 +847,7 @@ Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the contents of the region as
 input to the shell command.
 If the shell command produces any output, it is inserted into the
-current buffer.
+current buffer, overwriting the current region.
 +*/
 {
   astr ms;
@@ -899,7 +899,14 @@ current buffer.
         raise(SIGWINCH);
 #endif
 
+        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+        calculate_the_region(&r);
+        if (cur_bp->pt.p != r.start.p
+            || r.start.o != cur_bp->pt.o)
+          FUNCALL(exchange_point_and_mark);
+        FUNCALL_ARG(delete_char, (int)r.size);
         ok = insert_nstring(out, "\n", FALSE);
+        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
         astr_delete(out);
       }
