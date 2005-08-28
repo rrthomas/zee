@@ -241,22 +241,19 @@ END_DEFUN
 
 DEFUN_INT("yank", yank)
 /*+
-Reinsert the last stretch of killed text.
-More precisely, reinsert the stretch of killed text most recently
-killed OR yanked.  Put point at end, and set mark at beginning.
+Reinsert the stretch of killed text most recently killed or yanked.
+Set mark at beginning, and put point at end.
 +*/
 {
   assert(cur_bp);
 
-  ok = FALSE;
-
-  if (astr_len(kill_ring_text) == 0)
+  if (astr_len(kill_ring_text) == 0) {
     minibuf_error("Kill ring is empty");
-  else if (!warn_if_readonly_buffer()) {
+    ok = FALSE;
+  } else if (!warn_if_readonly_buffer()) {
     set_mark_command();
-    insert_nstring(kill_ring_text, FALSE);
+    insert_nstring(kill_ring_text, "\n", FALSE);
     weigh_mark();
-    ok = TRUE;
   }
 }
 END_DEFUN

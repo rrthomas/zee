@@ -104,7 +104,7 @@ static Undo *revert_action(Undo *up)
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->delta.size, &as);
   astr_delete(as);
-  insert_nstring(up->delta.text, up->delta.intercalate);
+  insert_nstring(up->delta.text, "\n", up->delta.intercalate);
 
   doing_undo = FALSE;
 

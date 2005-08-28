@@ -292,6 +292,7 @@ int main(int argc, char **argv)
     term_close();
 
     free_bindings();
+    free_kill_ring();
   }
 
   /* Free Lisp state. */
@@ -301,7 +302,6 @@ int main(int argc, char **argv)
 
   /* Free all the memory allocated. */
   astr_delete(as);
-  free_kill_ring();
   free_search_history();
   free_macros();
   free_windows();

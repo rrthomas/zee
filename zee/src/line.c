@@ -308,7 +308,7 @@ int eolp(void)
 int insert_char(int c)
 {
   astr as = astr_cat_char(astr_new(), (char)c);
-  int ret = insert_nstring(as, FALSE);
+  int ret = insert_nstring(as, "\n", FALSE);
 
   astr_delete(as);
   return ret;
@@ -353,7 +353,7 @@ END_DEFUN
  * Insert a newline at the current position without moving the cursor.
  * Update all other cursors if they point on the splitted line.
  */
-int intercalate_newline()
+static int intercalate_newline(void)
 {
   Line *lp1, *lp2;
   size_t lp1len, lp2len;
@@ -390,11 +390,6 @@ int intercalate_newline()
   thisflag |= FLAG_NEED_RESYNC;
 
   return TRUE;
-}
-
-int insert_newline(void)
-{
-  return intercalate_newline() && edit_navigate_forward_char();
 }
 
 /*
@@ -514,7 +509,7 @@ void fill_break_line(void)
     size_t last_col = cur_bp->pt.o - break_col;
     cur_bp->pt.o = break_col;
     FUNCALL(delete_horizontal_space);
-    insert_newline();
+    insert_char('\n');
     cur_bp->pt.o = last_col + excess;
   } else
     /* Undo fiddling with point. */
@@ -535,7 +530,7 @@ Insert a newline, and move to left margin of the new line if it's blank.
     if (cur_bp->flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
-    if (!insert_newline()) {
+    if (!insert_char('\n')) {
       ok = FALSE;
       break;
     }
@@ -544,9 +539,9 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-int insert_nstring(astr as, int intercalate)
+int insert_nstring(astr as, const char *eolstr, int intercalate)
 {
-  size_t i;
+  size_t i, eollen = strlen(eolstr);
 
   assert(cur_bp);
 
@@ -556,14 +551,13 @@ int insert_nstring(astr as, int intercalate)
   undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len(as), FALSE);
 
   for (i = 0; i < astr_len(as); i++) {
-    char c = *astr_char(as, (ptrdiff_t)i);
-    if (c == '\n') {
-      if (intercalate)
-        intercalate_newline();
-      else
-        insert_newline();
+    char *s = astr_char(as, (ptrdiff_t)i);
+    if (strncmp(s, eolstr, eollen) == 0) {
+      intercalate_newline();
+      if (!intercalate)
+        edit_navigate_forward_char();
     } else {
-      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, c);
+      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, *s);
       cur_bp->flags |= BFLAG_MODIFIED;
       if (!intercalate)
         adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
@@ -826,9 +820,9 @@ END_DEFUN
 DEFUN_INT("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
-Indentation is done using the `indent-relative' function,
-except that if there is a character in the first column of the line
-above, no indenting is performed.
+Indentation is done using the `indent-relative' command, except
+that if there is a character in the first column of the line above,
+no indenting is performed.
 +*/
 {
   assert(cur_bp);
@@ -840,7 +834,7 @@ above, no indenting is performed.
 
     weigh_mark();
 
-    if ((ok = insert_newline())) {
+    if ((ok = insert_char('\n'))) {
       size_t pos;
       Marker *old_point = point_marker();
 

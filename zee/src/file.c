@@ -260,15 +260,44 @@ astr get_home_dir(void)
 }
 
 /*
+ * Find EOL string of a file's contents.
+ */
+static astr find_eolstr(astr as)
+{
+  char c = '\0';
+  size_t i;
+  astr eolstr = astr_new();
+
+  assert(as);
+
+  astr_cat_char(eolstr, '\n');
+
+  for (i = 0; i < astr_len(as); i++) {
+    c = *astr_char(as, (ptrdiff_t)i);
+    if (c == '\n' || c == '\r')
+      break;
+  }
+
+  if (c == '\n' || c == '\r') {
+    astr_ncpy(eolstr, &c, 1);
+    if (i < astr_len(as) - 1) {
+      char c2 = *astr_char(as, (ptrdiff_t)(i + 1));
+      if ((c2 == '\n' || c2 == '\r') && c != c2)
+        astr_cat_char(eolstr, c2);
+    }
+  }
+
+  return eolstr;
+}
+
+/*
  * Read the file contents into a string.
  * Return quietly if the file doesn't exist.
  */
-/* FIXME: Determine EOL here, not in file_open; then can use result in
-   file_insert.*/
-static int file_read(astr *as, const char *filename)
+static astr file_read(astr *as, const char *filename)
 {
-  FILE *fp;
   int ok = TRUE;
+  FILE *fp;
 
   if ((fp = fopen(filename, "r")) == NULL)
     ok = FALSE;
@@ -277,11 +306,12 @@ static int file_read(astr *as, const char *filename)
     ok = fclose(fp) == 0;
   }
 
-  if (ok == FALSE)
+  if (ok == FALSE) {
     if (errno != ENOENT)
       minibuf_write("%s: %s", filename, strerror(errno));
-
-  return ok;
+    return NULL;
+  } else
+    return find_eolstr(*as);
 }
 
 /*
@@ -290,49 +320,27 @@ static int file_read(astr *as, const char *filename)
  */
 void file_open(Buffer *bp, const char *filename)
 {
-  astr as = NULL;
-  int ok;
+  astr as = NULL, eolstr;
 
   assert(bp);
 
-  ok = file_read(&as, filename);
+  eolstr = file_read(&as, filename);
 
-  if (ok == FALSE) {
+  if (eolstr == NULL) {
     if (errno != ENOENT)
       bp->flags |= BFLAG_READONLY;
   } else {
-    /* Find EOL string */
-    char eolstr[3] = "\n", c = '\0';
-    size_t i;
-
-    assert(as);
-
-    for (i = 0; i < astr_len(as); i++) {
-      c = *astr_char(as, (ptrdiff_t)i);
-      if (c == '\n' || c == '\r')
-        break;
-    }
-
-    if (c == '\n' || c == '\r') {
-      *eolstr = c;
-      if (i < astr_len(as) - 1) {
-        char c2 = *astr_char(as, (ptrdiff_t)(i + 1));
-        if ((c2 == '\n' || c2 == '\r') && c != c2) {
-          eolstr[1] = c2;
-          eolstr[2] = '\0';
-        }
-      }
-    }
+    /* Set buffer's EOL string */
+    strcpy(bp->eol, astr_cstr(eolstr));
 
     /* Add lines to buffer */
     line_delete(bp->lines);
-    strcpy(bp->eol, eolstr);
-    bp->lines = string_to_lines(as, eolstr, &bp->num_lines);
+    bp->lines = string_to_lines(as, astr_cstr(eolstr), &bp->num_lines);
     bp->pt.p = list_first(bp->lines);
-  }
 
-  if (as)
+    astr_delete(eolstr);
     astr_delete(as);
+  }
 }
 
 /*
@@ -545,8 +553,7 @@ END_DEFUN
 
 static int file_insert(const char *filename)
 {
-  int ok;
-  astr as;
+  astr as, eolstr;
 
   assert(cur_bp);
 
@@ -555,12 +562,13 @@ static int file_insert(const char *filename)
     return FALSE;
   }
 
-  if ((ok = file_read(&as, filename)) != TRUE) {
-    insert_nstring(as, FALSE);
+  if ((eolstr = file_read(&as, filename)) != NULL) {
+    insert_nstring(as, astr_cstr(eolstr), FALSE);
     astr_delete(as);
+    astr_delete(eolstr);
   }
 
-  return ok;
+  return eolstr != NULL;
 }
 
 DEFUN_INT("file-insert", file_insert)

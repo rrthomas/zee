@@ -311,31 +311,35 @@ enum {
 /* Define an interactive function */
 /* N.B. The function type is actually eval_cb */
 #define DEFUN(lisp_name, c_func) \
-        int F_ ## c_func(int argc, le *branch) \
-        { \
-          int uniused = argc > 1, ok = TRUE;
+  int F_ ## c_func(int argc, le *branch) \
+  { \
+    int uniused = argc > 1, ok = TRUE;
 
 #define DEFUN_INT(lisp_name, c_func) \
-	DEFUN(lisp_name, c_func) \
-          int uniarg = 1; \
-          if (uniused) { \
-            le *value_le = evaluateNode(branch); \
-            uniarg = evalCastLeToInt(value_le); \
-            leWipe(value_le); \
-          }
+  DEFUN(lisp_name, c_func) \
+  int uniarg = 1; \
+  if (uniused) { \
+    le *value_le = evaluateNode(branch); \
+    uniarg = evalCastLeToInt(value_le); \
+    leWipe(value_le); \
+  }
 
 #define END_DEFUN \
-          return ok; \
-        }
+    return ok; \
+  }
 
 /* Call an interactive function */
-#define FUNCALL(c_func)                         \
-        F_ ## c_func(1, NULL)
+#define FUNCALL(c_func) \
+  F_ ## c_func(1, NULL)
 
 /* Call an interactive function with an universal argument */
-#define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func(2, evalCastIntToLe(uniarg))
-/* FIXME: the evalCastIntToLe above causes a space leak */
+le *funcall_arg_uniarg;
+int funcall_arg_ok;
+#define FUNCALL_ARG(c_func, uniarg) \
+  (funcall_arg_uniarg = evalCastIntToLe(uniarg), \
+   funcall_arg_ok = F_ ## c_func(2, funcall_arg_uniarg), \
+   leWipe(funcall_arg_uniarg), \
+   funcall_arg_ok)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

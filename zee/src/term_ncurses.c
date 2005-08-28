@@ -1,6 +1,6 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -211,10 +211,9 @@ static size_t translate_key(int c)
 size_t term_xgetkey(int mode, size_t timeout)
 {
   size_t key;
+  int c;
 
   for (;;) {
-    int c;
-
     if (mode & GETKEY_DELAYED)
       wtimeout(stdscr, (int)timeout * 100);
     c = getch();
@@ -224,17 +223,16 @@ size_t term_xgetkey(int mode, size_t timeout)
     if (c == KEY_RESIZE) {
       term_set_size((size_t)COLS, (size_t)LINES);
       resize_windows();
-      continue;
-    }
+    } else
+      break;
+  }
 
-    if (mode & GETKEY_UNFILTERED)
-      key = (size_t)c;
-    else {
-      key = translate_key(c);
-      while (key == KBD_META)
-        key = translate_key(getch()) | KBD_META;
-    }
-    break;
+  if (mode & GETKEY_UNFILTERED)
+    key = (size_t)c;
+  else {
+    key = translate_key(c);
+    while (key == KBD_META)
+      key = translate_key(getch()) | KBD_META;
   }
 
   return key;

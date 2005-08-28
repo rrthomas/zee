@@ -482,7 +482,7 @@ void resize_windows(void)
       ++wp->eheight;
       --hdelta;
     }
-  } else { /* Decrease windows height. */
+  } else if (hdelta <= 0) { /* Decrease windows height. */
     int decreased = TRUE;
     while (decreased) {
       decreased = FALSE;
@@ -502,5 +502,6 @@ void resize_windows(void)
     }
   }
 
-  FUNCALL(recenter);
+  if (hdelta != 0)
+    FUNCALL(recenter);
 }

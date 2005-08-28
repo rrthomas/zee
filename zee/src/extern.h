@@ -101,7 +101,7 @@ void die(int exitcode);
 
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
-int set_mark_command(void);
+void set_mark_command(void);
 void exchange_point_and_mark(void);
 int universal_argument(int keytype, int xarg);
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
@@ -155,11 +155,8 @@ int bolp(void);
 int eolp(void);
 int line_replace_text(Line **lp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
-int intercalate_char(int c);
 void fill_break_line(void);
-int insert_newline(void);
-int intercalate_newline(void);
-int insert_nstring(astr as, int intercalate);
+int insert_nstring(astr as, const char *eolstr, int intercalate);
 int delete_nstring(size_t size, astr *as);
 int self_insert_command(size_t key);
 int delete_char(void);

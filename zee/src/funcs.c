@@ -99,11 +99,10 @@ that value, otherwise with the current column value.
 }
 END_DEFUN
 
-int set_mark_command(void)
+void set_mark_command(void)
 {
   set_mark();
   minibuf_write("Mark set");
-  return TRUE;
 }
 
 DEFUN_INT("set-mark-command", set_mark_command)
@@ -111,7 +110,7 @@ DEFUN_INT("set-mark-command", set_mark_command)
 Set mark at where point is.
 +*/
 {
-  ok = set_mark_command();
+  set_mark_command();
   anchor_mark();
 }
 END_DEFUN
@@ -895,20 +894,16 @@ current buffer.
         remove(tempfile);
 
 #ifdef CURSES
+        /* We have no way of knowing whether a sub-process caught a
+           SIGWINCH, so raise one. */
         raise(SIGWINCH);
 #endif
 
-        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-        calculate_the_region(&r);
-        if (cur_bp->pt.p != r.start.p
-            || r.start.o != cur_bp->pt.o)
-          FUNCALL(exchange_point_and_mark);
-        FUNCALL_ARG(delete_char, (int)r.size);
-        ok = insert_nstring(out, FALSE);
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+        ok = insert_nstring(out, "\n", FALSE);
 
         astr_delete(out);
       }
+
       astr_delete(cmd);
     }
   }
