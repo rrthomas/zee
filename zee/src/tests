@@ -23,7 +23,7 @@
 
 [ "$srcdir" = "" ] && srcdir="."
 
-for i in test1 test2 test3; do
+for i in test1 test2 test3 test4 test5; do
   ./zee -q --batch --load=$srcdir/$i.el > $i.stdout
   if ! diff $i.stdout $srcdir/$i.output; then
     exit 1
