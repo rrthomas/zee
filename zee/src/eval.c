@@ -956,10 +956,7 @@ static le *eval_expression(astr expr)
   le *list = lisp_read(expr);
   astr as = leDumpEval(list, 0);
 
-  if (lastflag & FLAG_SET_UNIARG)
-    insert_nstring(as, FALSE);
-  else
-    term_minibuf_write(astr_cstr(as));
+  insert_nstring(as, "\n", FALSE);
   astr_delete(as);
 
   return list;
@@ -967,11 +964,7 @@ static le *eval_expression(astr expr)
 
 DEFUN_INT("eval-expression", eval_expression)
 /*+
-Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
-Value is also consed on to front of the variable `values'.
-Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
-insert the result into the current buffer instead of printing it in
-the minibuffer.
+Evaluate EVAL-EXPRESSION-ARG and insert value into the buffer.
 +*/
 {
   astr expr;
@@ -982,15 +975,14 @@ the minibuffer.
     le *list = eval_expression(expr);
     leWipe(list);
     astr_delete(expr);
-    ok = list == NULL;
+    ok = list != NULL;
   }
 }
 END_DEFUN
 
 DEFUN_INT("eval-last-sexp", eval_last_sexp)
 /*+
-Evaluate sexp before point; print value in minibuffer.
-Interactively, with prefix argument, print output into current buffer.
+Evaluate sexp before point; insert value into current buffer.
 +*/
 {
   astr expr;
@@ -1009,6 +1001,6 @@ Interactively, with prefix argument, print output into current buffer.
   astr_delete(expr);
   leWipe(list);
 
-  ok = list == NULL;
+  ok = list != NULL;
 }
 END_DEFUN
