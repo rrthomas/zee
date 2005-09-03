@@ -262,13 +262,6 @@ void set_current_window (Window *wp);
 void delete_window(Window *del_wp);
 Point window_pt(Window *wp);
 
-/* zmalloc.c -------------------------------------------------------------- */
-void *zmalloc(size_t size);
-void *zrealloc(void *ptr, size_t oldsize, size_t newsize);
-char *zstrdup(const char *s);
-int zvasprintf(char **ptr, const char *fmt, va_list vargs);
-int zasprintf(char **ptr, const char *fmt, ...);
-
 
 /*
  * Declare external C functions for interactive commands.

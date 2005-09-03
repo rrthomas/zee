@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "main.h"
-#include "extern.h"
+#include "zmalloc.h"
 
 /*
  * Return a zeroed allocated memory area.

@@ -27,9 +27,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "zmalloc.h"
 #include "astr.h"
 #include "main.h"
-#include "extern.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
 

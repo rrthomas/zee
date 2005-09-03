@@ -25,6 +25,7 @@ zee_base_SOURCES =				\
 	list.h					\
 	astr.c					\
 	astr.h					\
+	zmalloc.h				\
 	zmalloc.c				\
 	eval.c					\
 	eval.h					\
@@ -70,11 +71,7 @@ else
 if EPOCEMX
 zee_SOURCES = $(zee_base_SOURCES) term_epocemx.c
 else
-if CURSES
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
-else
-zee_SOURCES = $(zee_base_SOURCES) term_termcap.c
-endif
 endif
 endif
 
