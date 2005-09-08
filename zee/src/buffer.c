@@ -240,7 +240,7 @@ int warn_if_no_mark(void)
 {
   assert(cur_bp);
   assert(cur_bp->mark);
-  if (!cur_bp->mark_anchored) {
+  if (!(cur_bp->flags & BFLAG_ANCHORED)) {
     minibuf_error("The mark is not active now");
     return TRUE;
   } else
@@ -273,7 +273,7 @@ void calculate_region(Region *rp, Point from, Point to)
 int calculate_the_region(Region *rp)
 {
   assert(cur_bp);
-  if (!cur_bp->mark_anchored)
+  if (!(cur_bp->flags & BFLAG_ANCHORED))
     return FALSE;
 
   calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
@@ -330,13 +330,13 @@ size_t calculate_buffer_size(Buffer *bp)
 void anchor_mark(void)
 {
   assert(cur_bp);
-  cur_bp->mark_anchored = TRUE;
+  cur_bp->flags |= BFLAG_ANCHORED;
 }
 
 void weigh_mark(void)
 {
   assert(cur_bp);
-  cur_bp->mark_anchored = FALSE;
+  cur_bp->flags &= ~BFLAG_ANCHORED;
 }
 
 /*

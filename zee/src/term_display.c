@@ -178,7 +178,7 @@ static void calculate_highlight_region(Region *r)
   assert(cur_bp);
   assert(cur_bp->mark);
   r->start = cur_bp->pt;
-  if (cur_bp->mark_anchored) {
+  if (cur_bp->flags & BFLAG_ANCHORED) {
     r->end = cur_bp->mark->pt;
     if (cmp_point(r->end, r->start) < 0)
       swap_point(&r->end, &r->start);

@@ -120,6 +120,7 @@ typedef struct Region {
 #define BFLAG_READONLY  (0x0004) /* The buffer cannot be modified */
 #define BFLAG_AUTOFILL  (0x0008) /* The buffer is in Auto Fill mode */
 #define BFLAG_ISEARCH   (0x0010) /* The buffer is in Isearch loop */
+#define BFLAG_ANCHORED  (0x0020) /* The mark is anchored */
 
 /* Represents a buffer: an open file.
  * To support multiple simultaneous buffers, they can be organised into a linked
@@ -153,7 +154,6 @@ struct Buffer {
 
   /* Buffer flags */
   int flags;
-  size_t mark_anchored : 1;
 
   /* Buffer-local variables */
   le *vars;

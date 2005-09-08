@@ -117,7 +117,7 @@ to make one entry in the kill ring.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (!cur_bp->mark_anchored)
+  if (!(cur_bp->flags & BFLAG_ANCHORED))
     ok = FUNCALL(kill_line);
   else {
     calculate_the_region(&r);
