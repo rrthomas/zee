@@ -622,14 +622,24 @@ static int raw_write_to_disk(Buffer *bp, const char *filename)
 /*
  * Write the buffer contents to a file.
  */
-static int write_to_disk(Buffer *bp, const char *filename)
+static void write_file(Buffer *bp, astr ms)
 {
-  if (raw_write_to_disk(bp, filename) == FALSE) {
-    minibuf_error("%s: %s", filename, strerror(errno));
-    return FALSE;
-  }
+  if (raw_write_to_disk(bp, astr_cstr(ms)) == FALSE) {
+    minibuf_error("%s: %s", astr_cstr(ms), strerror(errno));
+  } else {
+    Undo *up;
 
-  return TRUE;
+    minibuf_write("Wrote %s", astr_cstr(ms));
+    bp->flags &= ~BFLAG_MODIFIED;
+
+    /* Set unchanged flags to FALSE except for the
+       last undo action, which is set to TRUE. */
+    up = bp->last_undop;
+    if (up)
+      up->unchanged = TRUE;
+    for (up = up->next; up; up = up->next)
+      up->unchanged = FALSE;
+  }
 }
 
 static int file_save(Buffer *bp)
@@ -656,20 +666,7 @@ static int file_save(Buffer *bp)
       astr_cpy_cstr(ms, bp->filename);
     }
 
-    if (write_to_disk(bp, astr_cstr(ms))) {
-      Undo *up;
-
-      minibuf_write("Wrote %s", astr_cstr(ms));
-      bp->flags &= ~BFLAG_MODIFIED;
-
-      /* Set unchanged flags to FALSE except for the
-         last undo action, which is set to TRUE. */
-      up = bp->last_undop;
-      if (up)
-        up->unchanged = TRUE;
-      for (up = up->next; up; up = up->next)
-        up->unchanged = FALSE;
-    }
+    write_file(bp, ms);
 
     astr_delete(ms);
   }
@@ -710,10 +707,7 @@ Makes buffer visit that file, and marks it not modified.
 
     cur_bp->flags &= ~BFLAG_NEEDNAME;
 
-    if (write_to_disk(cur_bp, astr_cstr(ms))) {
-      minibuf_write("Wrote %s", astr_cstr(ms));
-      cur_bp->flags &= ~BFLAG_MODIFIED;
-    }
+    write_file(cur_bp, ms);
   }
 
   if (ms)

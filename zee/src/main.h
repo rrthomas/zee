@@ -88,8 +88,8 @@ struct Undo {
   /* The type of undo delta */
   int type;
 
-  /* Where the undo delta need to be applied.
-     Warning!: Do not use the "pt.p" field */
+  /* Where the undo delta needs to be applied.
+     Warning! Do not use the "pt.p" field */
   Point pt;
 
   /* Flag indicating that reverting this undo leaves the buffer
