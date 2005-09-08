@@ -123,43 +123,6 @@ static int in_region(size_t lineno, size_t x, Region *r)
   return cmp_point(r->start, pt) != 1 && cmp_point(pt, r->end) == -1;
 }
 
-/* Prints a line on the terminal.
- *  - Guess: 'line' is the line number measured on the terminal.
- *    (Question: why not within window?)
- *  - 'start_col' is the horizontal scroll offset: the character position (not
- *    cursor position) within 'lp' of the first character that should be
- *    displayed.
- *  - 'wp' is the window in which to display. Only used to find the display
- *    width.
- *  - 'lp' is the line to display.
- *  - 'lineno' is the line number of 'lp' within the buffer.
- *  - 'r' is a region to highlight: the current selection.
- */
-static void draw_line(size_t line, size_t startcol, Line *lp,
-		      size_t lineno, Region *r)
-{
-  size_t x, i;
-
-  term_move(line, 0);
-  for (x = 0, i = startcol; i < astr_len(lp->item) && x < win.ewidth; i++) {
-    if (in_region(lineno, i, r))
-      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
-    else
-      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
-  }
-
-  if (x >= term_width()) {
-    term_move(line, win.ewidth - 1);
-    term_addch('$');
-  } else
-    for (; x < win.ewidth; ++i) {
-      if (in_region(lineno, i, r))
-        outch(' ', FONT_REVERSE, &x);
-      else
-        x++;
-    }
-}
-
 /* Sets 'r->start' to the lesser of the point and mark,
  * and sets 'r->end' to the greater. If the mark is not anchored, it is treated
  * as if it were at the point.
@@ -177,17 +140,45 @@ static void calculate_highlight_region(Region *r)
     r->end = cur_bp->pt;
 }
 
+/* Prints a line on the terminal.
+ *  - 'line' is the line number on the terminal.
+ *  - 'start_col' is the horizontal scroll offset: the character position (not
+ *    cursor position) within 'lp' of the first character that should be
+ *    displayed.
+ *  - 'lp' is the line to display.
+ *  - 'lineno' is the line number of 'lp' within the buffer.
+ */
+static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
+{
+  size_t x, i;
+  Region r;
+
+  calculate_highlight_region(&r);
+
+  term_move(line, 0);
+  for (x = 0, i = startcol; i < astr_len(lp->item) && x < win.ewidth; i++) {
+    if (in_region(lineno, i, &r))
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
+    else
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
+  }
+
+  if (x >= term_width()) {
+    term_move(line, win.ewidth - 1);
+    term_addch('$');
+  } else
+    for (; x < win.ewidth && in_region(lineno, i, &r); ++i)
+      outch(' ', FONT_REVERSE, &x);
+}
+
 static void draw_window(size_t topline)
 {
   size_t i, startcol, lineno;
   Line *lp;
-  Region r;
   Point pt;
 
   assert(cur_bp);
   pt = cur_bp->pt;
-
-  calculate_highlight_region(&r);
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
@@ -207,7 +198,7 @@ static void draw_window(size_t topline)
 
     startcol = point_start_column;
 
-    draw_line(i, startcol, lp, lineno, &r);
+    draw_line(i, startcol, lp, lineno);
 
     if (point_start_column > 0) {
       term_move(i, 0);
