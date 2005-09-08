@@ -109,27 +109,18 @@ static void outch(int c, Font font, size_t *x)
   term_attrset(1, FONT_NORMAL);
 }
 
-/** Tests whether the specified line and offset is within the specified Region.
+/*
+ * Tests whether the specified line and offset is within the specified Region.
  * The offset is measured in characters, not in character positions.
- * (Question: this code is horrible. Why not just use cmp_point()?)
  */
 static int in_region(size_t lineno, size_t x, Region *r)
 {
-  if (lineno >= r->start.n && lineno <= r->end.n) {
-    if (r->start.n == r->end.n) {
-      if (x >= r->start.o && x < r->end.o)
-        return TRUE;
-    } else if (lineno == r->start.n) {
-      if (x >= r->start.o)
-        return TRUE;
-    } else if (lineno == r->end.n) {
-      if (x < r->end.o)
-        return TRUE;
-    } else
-      return TRUE;
-  }
+  Point pt;
 
-  return FALSE;
+  pt.n = lineno;
+  pt.o = x;
+
+  return cmp_point(r->start, pt) != 1 && cmp_point(pt, r->end) == -1;
 }
 
 /* Prints a line on the terminal.
