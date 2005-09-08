@@ -320,7 +320,7 @@ static int insert_tab(void)
     return FALSE;
   else {
     int c = get_goalc();
-    int t = tab_width(cur_bp);
+    int t = tab_width();
 
     for (c = t - c % t; c > 0; c--)
       insert_char(' ');

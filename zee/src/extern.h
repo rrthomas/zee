@@ -63,7 +63,7 @@ void set_temporary_buffer(Buffer *bp);
 size_t calculate_buffer_size(Buffer *bp);
 void anchor_mark(void);
 void weigh_mark(void);
-size_t tab_width(Buffer *bp);
+size_t tab_width(void);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(int fileflag);
@@ -245,9 +245,7 @@ void init_variables(void);
 int get_variable_bool(char *var);
 astr minibuf_read_variable_name(char *msg);
 void set_variable(const char *var, const char *val);
-char *get_variable_bp(Buffer *bp, const char *var);
 char *get_variable(const char *var);
-int get_variable_number_bp(Buffer *bp, char *var);
 int get_variable_number(char *var);
 
 

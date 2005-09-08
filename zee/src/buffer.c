@@ -342,13 +342,13 @@ void weigh_mark(void)
 /*
  * Return a safe tab width for the given buffer.
  */
-size_t tab_width(Buffer *bp)
+size_t tab_width(void)
 {
   size_t t;
 
-  assert(bp);
+  assert(cur_bp);
 
-  t = get_variable_number_bp(bp, "tab-width");
+  t = get_variable_number("tab-width");
 
-  return t ? t : 1;
+  return t ? t : 8;
 }

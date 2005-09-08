@@ -71,7 +71,7 @@ END_DEFUN
  */
 size_t get_goalc(void)
 {
-  size_t col = 0, t = tab_width(cur_bp), i;
+  size_t col = 0, t = tab_width(), i;
   const char *sp = astr_cstr(cur_bp->pt.p->item);
 
   for (i = 0; i < cur_bp->pt.o; i++) {
@@ -93,7 +93,7 @@ static void goto_goalc(int goalc)
   const char *sp;
 
   assert(cur_bp);
-  t = tab_width(cur_bp);
+  t = tab_width();
   sp = astr_cstr(cur_bp->pt.p->item);
 
   for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {

@@ -37,9 +37,9 @@
  * Default variables values table.
  */
 static struct var_entry {
-  char *var;	/* Variable name. */
-  char *fmt;	/* Variable format (boolean, etc.). */
-  char *val;	/* Default value. */
+  char *var;                    /* Variable name. */
+  char *fmt;                    /* Variable format (boolean, etc.). */
+  char *val;                    /* Default value. */
 } def_vars[] = {
 #define X(var, fmt, val, doc) { var, fmt, val },
 #include "tbl_vars.h"
@@ -65,12 +65,13 @@ void set_variable(const char *var, const char *val)
     variableSetString(&mainVarList, var, val);
 }
 
-char *get_variable_bp(Buffer *bp, const char *var)
+char *get_variable(const char *var)
 {
   char *s = NULL;
 
-  if (bp)
-    s = variableGetString(bp->vars, var);
+  /* Have to be able to run this before the first buffer is created. */
+  if (cur_bp)
+    s = variableGetString(cur_bp->vars, var);
 
   if (s == NULL)
     s = variableGetString(mainVarList, var);
@@ -78,26 +79,15 @@ char *get_variable_bp(Buffer *bp, const char *var)
   return s;
 }
 
-char *get_variable(const char *var)
-{
-  return get_variable_bp(cur_bp, var);
-}
-
-int get_variable_number_bp(Buffer *bp, char *var)
+int get_variable_number(char *var)
 {
   int t = 0;
-  char *s = get_variable_bp(bp, var);
+  char *s = get_variable(var);
 
   if (s)
     t = atoi(s);
 
   return t;
-}
-
-int get_variable_number(char *var)
-{
-  assert(cur_bp);
-  return get_variable_number_bp(cur_bp, var);
 }
 
 int get_variable_bool(char *var)

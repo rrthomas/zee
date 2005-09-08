@@ -184,7 +184,7 @@ static void draw_window(size_t topline)
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
        i > 0 && list_prev(lp) != cur_bp->lines; lp = list_prev(lp), --i, --lineno);
 
-  cur_tab_width = tab_width(cur_bp);
+  cur_tab_width = tab_width();
 
   /* Draw the window lines. */
   for (i = topline; i < win.eheight + topline; ++i, ++lineno) {
@@ -232,7 +232,7 @@ static char *make_mode_line_flags(void)
  */
 static void calculate_start_column(void)
 {
-  size_t col = 0, lastcol = 0, t = tab_width(cur_bp);
+  size_t col = 0, lastcol = 0, t = tab_width();
   int rpfact, lpfact;
   char *buf, *rp, *lp, *p;
   Point pt;
