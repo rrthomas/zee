@@ -33,9 +33,9 @@ le *mainVarList = NULL;
 le *defunList = NULL;
 
 
-le *variableFind(le *varlist, const char *key)
+static le *variableFind(le *varlist, const char *key)
 {
-  if (varlist != NULL && key != NULL)
+  if (key != NULL)
     for (; varlist; varlist = varlist->list_next)
       if (!strcmp(key, varlist->data))
         return varlist;

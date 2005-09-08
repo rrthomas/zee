@@ -51,7 +51,7 @@ void init_variables(void)
   struct var_entry *p;
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    set_variable(p->var, p->val);
+    variableSetString(&mainVarList, p->var, p->val);
 }
 
 void set_variable(const char *var, const char *val)
