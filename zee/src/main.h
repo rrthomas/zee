@@ -185,8 +185,9 @@ struct Window {
   size_t topdelta;
   int lastpointn;
 
-  /* The formal and effective width and height of window.
-   * (Question: definitions?)
+  /* The formal and effective width and height of the window.
+   * The formal height is the space used on the terminal;
+   * the effective height is the space available for the buffer display.
    */
   size_t fwidth, fheight;
   size_t ewidth, eheight;
