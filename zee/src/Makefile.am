@@ -97,3 +97,6 @@ paths.h:
 	        ! "cmp paths.h paths.h.tmp -s" ; then	\
 		mv paths.h.tmp paths.h ;		\
 	fi
+
+sloccount:
+	sloccount $(zee_base_SOURCES) $(EXTRA_DIST) term_*.c
