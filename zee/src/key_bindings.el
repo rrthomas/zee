@@ -102,8 +102,6 @@ global-set-key "M-\" 'delete-horizontal-space
 global-set-key "M- " 'just-one-space
 global-set-key "M-l" 'downcase-word
 global-set-key "M-)" 'end-kbd-macro
-global-set-key "M-:" 'eval-expression
-global-set-key "C-M-e" 'eval-last-sexp
 global-set-key "M-x" 'execute-extended-command
 global-set-key "M-q" 'fill-paragraph
 global-set-key "C-M-f" 'forward-sexp
