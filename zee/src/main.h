@@ -68,9 +68,9 @@ typedef struct Point {
 typedef struct Buffer Buffer; /* Forward reference */
 typedef struct Marker Marker;
 struct Marker {
-  Buffer *bp;             /* Buffer that points into */
-  Point pt;               /* Point position */
-  Marker *next;           /* Used to chain all markers in the buffer */
+  Buffer *bp;                   /* Buffer that points into */
+  Point pt;                     /* Point position */
+  Marker *next;          /* Used to chain all markers in the buffer */
 };
 
 /* Undo delta types */
@@ -98,16 +98,16 @@ struct Undo {
 
   /* The undo delta */
   struct {
-    astr text;                /* String */
-    size_t size;              /* Block size for replace */
-    int intercalate;          /* TRUE means intercalate, FALSE insert */
+    astr text;                  /* String */
+    size_t size;                /* Block size for replace */
+    int intercalate;        /* TRUE means intercalate, FALSE insert */
   } delta;
 };
 
 typedef struct Region {
-  Point start;            /* The region start */
-  Point end;              /* The region end */
-  size_t size;                /* The region size */
+  Point start;                  /* The region start */
+  Point end;                    /* The region end */
+  size_t size;                  /* The region size */
 
   /* The total number of lines ('\n' newlines) in region */
   int num_lines;
