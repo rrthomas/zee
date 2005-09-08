@@ -47,10 +47,10 @@ int cmp_point(Point pt1, Point pt2)
   if (pt1.n < pt2.n)
     return -1;
   else if (pt1.n > pt2.n)
-    return +1;
+    return 1;
   else
     return ((pt1.o < pt2.o) ? -1 :
-            (pt1.o > pt2.o) ? +1 : 0);
+            (pt1.o > pt2.o) ? 1 : 0);
 }
 
 int point_dist(Point pt1, Point pt2)
