@@ -57,7 +57,7 @@
   "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
 
 /* The current window; the first window in list. */
-Window *cur_wp = NULL, *head_wp = NULL;
+Window win;
 /* The current buffer; the first buffer in list. */
 Buffer *cur_bp = NULL, *head_bp = NULL;
 
@@ -86,10 +86,6 @@ static void loop(void)
     popup_clear();
     minibuf_clear();
     process_key(key);
-
-#ifdef DEBUG
-    check_windows();
-#endif
 
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;
@@ -255,22 +251,22 @@ int main(int argc, char **argv)
     init_kill_ring();
     init_bindings();
 
-    /* Create first window */
-    cur_wp = head_wp = window_new();
+    /* Initialise window */
+    win.fheight = 1;           /* fheight must be > eheight */
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
     bind_key_string("\\M-x", F_execute_extended_command);
 
-    /* Open files listed on command line. */
+    /* Open file given on command line. */
     while (*argv) {
       size_t line = 1;
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
-      if (*argv)
+      else if (*argv)
         open_file_at(*argv++, line - 1);
     }
-    resize_windows(); /* Can't run until there is at least one buffer */
+    resize_window(); /* Can't run until there is at least one buffer */
 
     /* Write help message, but allow it to be overwritten by errors
        from loading key_bindings.el. */
@@ -304,7 +300,6 @@ int main(int argc, char **argv)
   astr_delete(as);
   free_search_history();
   free_macros();
-  free_windows();
   free_buffers();
   free_minibuf();
 

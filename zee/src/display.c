@@ -30,28 +30,27 @@ void resync_display(void)
   int delta;
 
   assert(cur_bp);
-  assert(cur_wp);
 
-  if ((delta = cur_bp->pt.n - cur_wp->lastpointn)) {
-    if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
-        (delta < 0 && cur_wp->topdelta >= (size_t)(-delta)))
-      cur_wp->topdelta += delta;
-    else if (cur_bp->pt.n > cur_wp->eheight / 2)
-      cur_wp->topdelta = cur_wp->eheight / 2;
+  if ((delta = cur_bp->pt.n - win.lastpointn)) {
+    if ((delta > 0 && win.topdelta + delta < win.eheight) ||
+        (delta < 0 && win.topdelta >= (size_t)(-delta)))
+      win.topdelta += delta;
+    else if (cur_bp->pt.n > win.eheight / 2)
+      win.topdelta = win.eheight / 2;
     else
-      cur_wp->topdelta = cur_bp->pt.n;
+      win.topdelta = cur_bp->pt.n;
   }
-  cur_wp->lastpointn = cur_bp->pt.n;
+  win.lastpointn = cur_bp->pt.n;
 }
 
-void recenter(Window *wp)
+void recenter(void)
 {
-  Point pt = window_pt(wp);
+  assert(cur_bp);
 
-  if (pt.n > wp->eheight / 2)
-    wp->topdelta = wp->eheight / 2;
+  if (cur_bp->pt.n > win.eheight / 2)
+    win.topdelta = win.eheight / 2;
   else
-    wp->topdelta = pt.n;
+    win.topdelta = cur_bp->pt.n;
 }
 
 DEFUN_INT("recenter", recenter)
@@ -60,7 +59,7 @@ Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.
 +*/
 {
-  recenter(cur_wp);
+  recenter();
   term_full_redisplay();
 }
 END_DEFUN

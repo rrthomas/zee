@@ -59,7 +59,6 @@ zee_base_SOURCES =				\
 	tbl_vars.h				\
 	undo.c					\
 	variables.c				\
-	window.c				\
 	term_minibuf.c				\
 	term_display.c				\
 	main.h

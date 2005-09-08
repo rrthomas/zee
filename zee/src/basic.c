@@ -69,29 +69,18 @@ END_DEFUN
 /*
  * Get the goal column.  Take care of expanding tabulations.
  */
-size_t get_goalc_bp(Buffer *bp, Point pt)
+size_t get_goalc(void)
 {
-  size_t col = 0, t = tab_width(bp), i;
-  const char *sp = astr_cstr(pt.p->item);
+  size_t col = 0, t = tab_width(cur_bp), i;
+  const char *sp = astr_cstr(cur_bp->pt.p->item);
 
-  for (i = 0; i < pt.o; i++) {
+  for (i = 0; i < cur_bp->pt.o; i++) {
     if (sp[i] == '\t')
       col |= t - 1;
     ++col;
   }
 
   return col;
-}
-
-size_t get_goalc_wp(Window *wp)
-{
-  return get_goalc_bp(wp->bp, window_pt(wp));
-}
-
-size_t get_goalc(void)
-{
-  assert(cur_bp);
-  return get_goalc_bp(cur_bp, cur_bp->pt);
 }
 
 /*
@@ -422,7 +411,7 @@ int scroll_down(void)
 {
   assert(cur_bp);
   if (cur_bp->pt.n > 0)
-    return ngotoup(cur_wp->eheight) ? TRUE : FALSE;
+    return ngotoup(win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error("Beginning of buffer");
     return FALSE;
@@ -451,7 +440,7 @@ int scroll_up(void)
 {
   assert(cur_bp);
   if (cur_bp->pt.n < cur_bp->num_lines)
-    return ngotodown(cur_wp->eheight) ? TRUE : FALSE;
+    return ngotodown(win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error("End of buffer");
     return FALSE;

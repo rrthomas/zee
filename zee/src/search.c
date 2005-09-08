@@ -225,14 +225,14 @@ static int isearch(int dir)
 
   assert(cur_bp);
 
-  assert(cur_wp->bp->mark);
-  old_mark = marker_new(cur_wp->bp->mark->bp, cur_wp->bp->mark->pt);
+  assert(cur_bp->mark);
+  old_mark = marker_new(cur_bp->mark->bp, cur_bp->mark->pt);
 
   start = cur_bp->pt;
   cur = cur_bp->pt;
 
   /* I-search mode. */
-  cur_wp->bp->flags |= BFLAG_ISEARCH;
+  cur_bp->flags |= BFLAG_ISEARCH;
 
   for (;;) {
     /* Make the minibuf message. */
@@ -331,7 +331,7 @@ static int isearch(int dir)
   }
 
   /* done */
-  cur_wp->bp->flags &= ~BFLAG_ISEARCH;
+  cur_bp->flags &= ~BFLAG_ISEARCH;
 
   astr_delete(buf);
   astr_delete(pattern);

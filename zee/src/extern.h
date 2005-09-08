@@ -21,8 +21,6 @@
    02111-1301, USA.  */
 
 /* basic.c ---------------------------------------------------------------- */
-size_t get_goalc_bp(Buffer *bp, Point pt);
-size_t get_goalc_wp(Window *wp);
 size_t get_goalc(void);
 int edit_navigate_backward_char(void);
 int edit_navigate_forward_char(void);
@@ -74,8 +72,8 @@ int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
-void resize_windows(void);
-void recenter(Window *wp);
+void resize_window(void);
+void recenter(void);
 Line *popup_get(void);
 size_t popup_lines(void);
 void popup_set(astr as);
@@ -178,7 +176,7 @@ void free_macros(void);
 Macro *get_macro(const char *name);
 
 /* main.c ----------------------------------------------------------------- */
-extern Window *cur_wp, *head_wp;
+extern Window win;
 extern Buffer *cur_bp, *head_bp;
 extern int thisflag, lastflag, last_uniarg;
 
@@ -251,16 +249,6 @@ char *get_variable_bp(Buffer *bp, const char *var);
 char *get_variable(const char *var);
 int get_variable_number_bp(Buffer *bp, char *var);
 int get_variable_number(char *var);
-
-/* window.c --------------------------------------------------------------- */
-void check_windows(void);
-Window *window_new(void);
-void free_window(Window *wp);
-Window *find_window(const char *name);
-void free_windows(void);
-void set_current_window (Window *wp);
-void delete_window(Window *del_wp);
-Point window_pt(Window *wp);
 
 
 /*

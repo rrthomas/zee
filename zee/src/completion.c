@@ -105,7 +105,7 @@ static astr completion_write(list l, size_t size)
   astr as = astr_new();
 
   max = calculate_max_length(l, size) + 5;
-  numcols = (cur_wp->ewidth - 1) / max;
+  numcols = (win.ewidth - 1) / max;
 
   astr_cpy_cstr(as, "Possible completions are:\n");
   for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
@@ -130,8 +130,6 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
   astr popup = astr_new(), as;
 
   cp->fl_poppedup = 1;
-  if (head_wp->next == NULL)
-    cp->fl_close = 1;
 
   astr_cpy_cstr(popup, "Completions\n\n");
 
@@ -143,9 +141,6 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
 
   popup_set(popup);
   astr_delete(popup);
-
-  if (!cp->fl_close)
-    cp->old_bp = cur_bp;
 
   term_display();
 }

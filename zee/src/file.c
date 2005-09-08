@@ -481,7 +481,6 @@ int check_modified_buffer(Buffer *bp)
 void file_close(Buffer *kill_bp)
 {
   Buffer *bp, *next_bp;
-  Window *wp;
 
   if (kill_bp->next != NULL)
     next_bp = kill_bp->next;
@@ -489,12 +488,10 @@ void file_close(Buffer *kill_bp)
     next_bp = head_bp;
 
   /* Search for windows displaying the buffer to kill. */
-  for (wp = head_wp; wp != NULL; wp = wp->next)
-    if (wp->bp == kill_bp) {
-      wp->bp = next_bp;
-      wp->topdelta = 0;
-      wp->saved_pt = NULL;    /* The marker will be freed. */
-    }
+  if (cur_bp == kill_bp) {
+    cur_bp = next_bp;
+    win.topdelta = 0;
+  }
 
   /* Remove the buffer from the buffer list. */
   cur_bp = next_bp;

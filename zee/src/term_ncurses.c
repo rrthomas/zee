@@ -222,7 +222,7 @@ size_t term_xgetkey(int mode, size_t timeout)
 
     if (c == KEY_RESIZE) {
       term_set_size((size_t)COLS, (size_t)LINES);
-      resize_windows();
+      resize_window();
     } else
       break;
   }

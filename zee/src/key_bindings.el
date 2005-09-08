@@ -81,13 +81,6 @@ global-set-key "C-v" 'yank
 # The proposed meaning of ESC obviates the current behaviour of RET.
 global-set-key "C-f" 'isearch-forward-regexp
 
-# Window management.
-
-global-set-key "M-n" 'window-next
-global-set-key "M-o" 'window-split
-global-set-key "M-p" 'window-close-others
-global-set-key "M-w" 'window-close
-
 global-set-key "ESC" 'keyboard-quit
 global-set-key "C-g" 'keyboard-quit
 
@@ -106,7 +99,6 @@ global-set-key "C-M-b" 'backward-sexp
 global-set-key "M-e" 'call-last-kbd-macro
 global-set-key "M-c" 'capitalize-word
 global-set-key "M-\" 'delete-horizontal-space
-global-set-key "M-1" 'window-close-others
 global-set-key "M- " 'just-one-space
 global-set-key "M-l" 'downcase-word
 global-set-key "M-)" 'end-kbd-macro

@@ -176,9 +176,6 @@ struct Buffer {
  */
 typedef struct Window Window;
 struct Window {
-  /* The next window in window list */
-  Window *next;
-
   /* The buffer displayed in window */
   Buffer *bp;
 
@@ -187,13 +184,6 @@ struct Window {
    */
   size_t topdelta;
   int lastpointn;
-
-  /* The point line pointer, line number and offset (used to
-   * hold the point in non-current windows).
-   * (This can't be a property of 'bp' because we want separate
-   * cursors for each window even if they show the same buffer.)
-   */
-  Marker *saved_pt;
 
   /* The formal and effective width and height of window.
    * (Question: definitions?)
@@ -216,8 +206,6 @@ typedef struct Completion {
   /* This flag is set when a completion window has been popped up */
   int fl_poppedup;
 
-  /* This flag is set when the completion window should be closed */
-  int fl_close;
   /* The old buffer */
   Buffer *old_bp;
 

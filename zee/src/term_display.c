@@ -144,13 +144,13 @@ static int in_region(size_t lineno, size_t x, Region *r)
  *  - 'lineno' is the line number of 'lp' within the buffer.
  *  - 'r' is a region to highlight: the current selection.
  */
-static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
+static void draw_line(size_t line, size_t startcol, Line *lp,
 		      size_t lineno, Region *r)
 {
   size_t x, i;
 
   term_move(line, 0);
-  for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
+  for (x = 0, i = startcol; i < astr_len(lp->item) && x < win.ewidth; i++) {
     if (in_region(lineno, i, r))
       outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
     else
@@ -158,10 +158,10 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
   }
 
   if (x >= term_width()) {
-    term_move(line, wp->ewidth - 1);
+    term_move(line, win.ewidth - 1);
     term_addch('$');
   } else
-    for (; x < wp->ewidth; ++i) {
+    for (; x < win.ewidth; ++i) {
       if (in_region(lineno, i, r))
         outch(' ', FONT_REVERSE, &x);
       else
@@ -169,50 +169,54 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
     }
 }
 
-/* Sets 'r->start' to the lesser of the point and mark of the specified window,
+/* Sets 'r->start' to the lesser of the point and mark,
  * and sets 'r->end' to the greater. If the mark is not anchored, it is treated
  * as if it were at the point.
  */
-static void calculate_highlight_region(Window *wp, Region *r)
+static void calculate_highlight_region(Region *r)
 {
-  assert(wp->bp->mark);
-  r->start = window_pt(wp);
-  if (wp->bp->mark_anchored) {
-    r->end = wp->bp->mark->pt;
+  assert(cur_bp);
+  assert(cur_bp->mark);
+  r->start = cur_bp->pt;
+  if (cur_bp->mark_anchored) {
+    r->end = cur_bp->mark->pt;
     if (cmp_point(r->end, r->start) < 0)
       swap_point(&r->end, &r->start);
   } else
-    r->end = window_pt(wp);
+    r->end = cur_bp->pt;
 }
 
-static void draw_window(size_t topline, Window *wp)
+static void draw_window(size_t topline)
 {
   size_t i, startcol, lineno;
   Line *lp;
   Region r;
-  Point pt = window_pt(wp);
+  Point pt;
 
-  calculate_highlight_region(wp, &r);
+  assert(cur_bp);
+  pt = cur_bp->pt;
+
+  calculate_highlight_region(&r);
 
   /* Find the first line to display on the first screen line. */
-  for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno);
+  for (lp = pt.p, lineno = pt.n, i = win.topdelta;
+       i > 0 && list_prev(lp) != cur_bp->lines; lp = list_prev(lp), --i, --lineno);
 
-  cur_tab_width = tab_width(wp->bp);
+  cur_tab_width = tab_width(cur_bp);
 
   /* Draw the window lines. */
-  for (i = topline; i < wp->eheight + topline; ++i, ++lineno) {
+  for (i = topline; i < win.eheight + topline; ++i, ++lineno) {
     /* Clear the line. */
     term_move(i, 0);
     term_clrtoeol();
 
     /* If at the end of the buffer, don't write any text. */
-    if (lp == wp->bp->lines)
+    if (lp == cur_bp->lines)
       continue;
 
     startcol = point_start_column;
 
-    draw_line(i, startcol, wp, lp, lineno, &r);
+    draw_line(i, startcol, lp, lineno, &r);
 
     if (point_start_column > 0) {
       term_move(i, 0);
@@ -223,15 +227,15 @@ static void draw_window(size_t topline, Window *wp)
   }
 }
 
-static char *make_mode_line_flags(Window *wp)
+static char *make_mode_line_flags(void)
 {
   static char buf[3];
 
-  if ((wp->bp->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
+  if ((cur_bp->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
     buf[0] = '%', buf[1] = '*';
-  else if (wp->bp->flags & BFLAG_MODIFIED)
+  else if (cur_bp->flags & BFLAG_MODIFIED)
     buf[0] = buf[1] = '*';
-  else if (wp->bp->flags & BFLAG_READONLY)
+  else if (cur_bp->flags & BFLAG_READONLY)
     buf[0] = buf[1] = '%';
   else
     buf[0] = buf[1] = '-';
@@ -244,15 +248,18 @@ static char *make_mode_line_flags(Window *wp)
  * needs to get truncated.
  * Called only for the line where the point is.
  */
-static void calculate_start_column(Window *wp)
+static void calculate_start_column(void)
 {
-  size_t col = 0, lastcol = 0, t = tab_width(wp->bp);
+  size_t col = 0, lastcol = 0, t = tab_width(cur_bp);
   int rpfact, lpfact;
   char *buf, *rp, *lp, *p;
-  Point pt = window_pt(wp);
+  Point pt;
+
+  assert(cur_bp);
+  pt = cur_bp->pt;
 
   rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
-  rpfact = pt.o / (wp->ewidth / 3);
+  rpfact = pt.o / (win.ewidth / 3);
 
   for (lp = rp; lp >= astr_cstr(pt.p->item); --lp) {
     for (col = 0, p = lp; p < rp; ++p)
@@ -266,9 +273,9 @@ static void calculate_start_column(Window *wp)
         free(buf);
       }
 
-    lpfact = (lp - astr_cstr(pt.p->item)) / (wp->ewidth / 3);
+    lpfact = (lp - astr_cstr(pt.p->item)) / (win.ewidth / 3);
 
-    if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2)) {
+    if (col >= win.ewidth - 1 || lpfact < (rpfact - 2)) {
       point_start_column = lp + 1 - astr_cstr(pt.p->item);
       point_screen_column = lastcol;
       return;
@@ -281,46 +288,52 @@ static void calculate_start_column(Window *wp)
   point_screen_column = col;
 }
 
-static char *make_screen_pos(Window *wp, char **buf)
+static char *make_screen_pos(char **buf)
 {
-  Point pt = window_pt(wp);
+  Point pt;
 
-  if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
+  assert(cur_bp);
+  pt = cur_bp->pt;
+
+  if (cur_bp->num_lines <= win.eheight && win.topdelta == pt.n)
     zasprintf(buf, "All");
-  else if (pt.n == wp->topdelta)
+  else if (pt.n == win.topdelta)
     zasprintf(buf, "Top");
-  else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
+  else if (pt.n + (win.eheight - win.topdelta) > cur_bp->num_lines)
     zasprintf(buf, "Bot");
   else
-    zasprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
+    zasprintf(buf, "%2d%%", (int)((float)pt.n / cur_bp->num_lines * 100));
 
   return *buf;
 }
 
-static void draw_border(Window *wp)
+static void draw_border(void)
 {
   size_t i;
   term_attrset(1, FONT_REVERSE);
-  for (i = 0; i < wp->ewidth; ++i)
+  for (i = 0; i < win.ewidth; ++i)
     term_addch('-');
   term_attrset(1, FONT_NORMAL);
 }
 
-static void draw_status_line(size_t line, Window *wp)
+static void draw_status_line(size_t line)
 {
   int someflag = 0;
   char *buf;
-  Point pt = window_pt(wp);
+  Point pt;
+
+  assert(cur_bp);
+  pt = cur_bp->pt;
 
   term_move(line, 0);
-  draw_border(wp);
+  draw_border();
 
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  term_printf("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
+  term_printf("--%2s- %-18s (", make_mode_line_flags(), cur_bp->name);
 
-  if (wp->bp->flags & BFLAG_AUTOFILL) {
+  if (cur_bp->flags & BFLAG_AUTOFILL) {
     term_printf("Fill");
     someflag = 1;
   }
@@ -328,12 +341,11 @@ static void draw_status_line(size_t line, Window *wp)
     term_printf("%sDef", someflag ? " " : "");
     someflag = 1;
   }
-  if (wp->bp->flags & BFLAG_ISEARCH)
+  if (cur_bp->flags & BFLAG_ISEARCH)
     term_printf("%sIsearch", someflag ? " " : "");
 
   term_printf(")--L%d--C%d--%s",
-              pt.n + 1, get_goalc_wp(wp),
-              make_screen_pos(wp, &buf));
+              pt.n + 1, get_goalc(), make_screen_pos(&buf));
   free(buf);
 
   term_attrset(1, FONT_NORMAL);
@@ -355,7 +367,7 @@ static void draw_popup(void)
     if (term_height() - 3 > popup_lines())
       y = term_height() - 3 - popup_lines();
     term_move(y++, 0);
-    draw_border(cur_wp);
+    draw_border();
 
     /* Skip down to first line to display. */
     for (i = 0, lp = list_first(popup); i < popup_pos(); i++, lp = list_next(lp))
@@ -378,34 +390,29 @@ static void draw_popup(void)
 void term_display(void)
 {
   size_t topline;
-  Window *wp;
-
   cur_topline = topline = 0;
 
-  if (cur_wp && cur_wp->bp)
-    calculate_start_column(cur_wp);
+  if (cur_bp)
+    calculate_start_column();
 
-  for (wp = head_wp; wp != NULL; wp = wp->next) {
-    if (wp == cur_wp)
-      cur_topline = topline;
+  cur_topline = topline;
 
-    if (wp->bp) {
-      draw_window(topline, wp);
+  if (cur_bp) {
+    draw_window(topline);
 
-      /* Draw the status line only if there is available space after the
-         buffer text space. */
-      if (wp->fheight - wp->eheight > 0)
-        draw_status_line(topline + wp->eheight, wp);
-    }
-
-    topline += wp->fheight;
+    /* Draw the status line only if there is available space after the
+       buffer text space. */
+    if (win.fheight - win.eheight > 0)
+      draw_status_line(topline + win.eheight);
   }
+
+  topline += win.fheight;
 
   /* Draw the popup window. */
   draw_popup();
 
   /* Redraw cursor. */
-  term_move(cur_topline + cur_wp->topdelta, point_screen_column);
+  term_move(cur_topline + win.topdelta, point_screen_column);
 }
 
 void term_full_redisplay(void)
@@ -457,47 +464,38 @@ int term_printf(const char *fmt, ...)
   return res;
 }
 
-void resize_windows(void)
+void resize_window(void)
 {
-  Window *wp;
   int hdelta;
 
-  /* Resize windows horizontally. */
-  for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = term_width();
+  /* Resize window horizontally. */
+  win.fwidth = win.ewidth = term_width();
 
-  /* Work out difference in window height; windows may be taller than
+  /* Work out difference in window height; window may be taller than
      terminal if the terminal was very short. */
-  for (hdelta = term_height() - 1, wp = head_wp;
-       wp != NULL;
-       hdelta -= wp->fheight, wp = wp->next)
-    ;
+  hdelta = term_height() - 1;
+  hdelta -= win.fheight;
 
-  /* Resize windows vertically. */
-  if (hdelta > 0) { /* Increase windows height. */
-    for (wp = head_wp; hdelta > 0; wp = wp->next) {
-      if (wp == NULL)
-        wp = head_wp;
-      ++wp->fheight;
-      ++wp->eheight;
+  /* Resize window vertically. */
+  if (hdelta > 0) { /* Increase window height. */
+    while (hdelta > 0) {
+      ++win.fheight;
+      ++win.eheight;
       --hdelta;
     }
-  } else if (hdelta <= 0) { /* Decrease windows height. */
+  } else { /* Decrease window height. */
     int decreased = TRUE;
     while (decreased) {
       decreased = FALSE;
-      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next) {
-        if (wp->fheight > 2) {
-          --wp->fheight;
-          --wp->eheight;
+      while (hdelta < 0) {
+        if (win.fheight > 2) {
+          --win.fheight;
+          --win.eheight;
           ++hdelta;
           decreased = TRUE;
-        } else if (cur_wp != head_wp || cur_wp->next != NULL) {
-          Window *new_wp = wp->next;
-          delete_window(wp);
-          wp = new_wp;
-          decreased = TRUE;
-        }
+        } else
+          /* Can't erase windows any longer. */
+          assert(0);
       }
     }
   }

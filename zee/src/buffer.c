@@ -213,12 +213,8 @@ static void move_buffer_to_head(Buffer *bp)
  */
 void switch_to_buffer(Buffer *bp)
 {
-  /* The buffer is the current buffer; return safely.  */
-  if (cur_bp == bp)
-    return;
-
   /* Set current buffer.  */
-  cur_wp->bp = cur_bp = bp;
+  cur_bp = bp;
 
   /* Move the buffer to head.  */
   move_buffer_to_head(bp);
