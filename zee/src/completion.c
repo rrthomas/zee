@@ -129,7 +129,7 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
 {
   astr popup = astr_new(), as;
 
-  cp->fl_poppedup = 1;
+  cp->fl_poppedup = TRUE;
 
   astr_cpy_cstr(popup, "Completions\n\n");
 
@@ -167,7 +167,7 @@ static int completion_reread(Completion *cp, astr as)
   list_delete(cp->completions);
 
   cp->completions = list_new();
-  cp->fl_sorted = 0;
+  cp->fl_sorted = FALSE;
 
   buf = astr_new();
   pdir = astr_new();
