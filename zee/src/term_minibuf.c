@@ -260,19 +260,7 @@ static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr as)
     ding();
   else
     astr_insert_char(as, i++, c);
-  return(i);
-}
-
-static void mb_space_or_complete(Completion *cp, int c, int lasttab, astr as, int *_thistab, ptrdiff_t *_i)
-{
-  int thistab = *_thistab;
-  ptrdiff_t i = *_i;
-  if (cp != NULL && !cp->fl_space)
-    mb_complete(cp, lasttab, as, &thistab, &i);
-  else
-    astr_insert_char(as, i++, c);
-  *_thistab = thistab;
-  *_i = i;
+  return i;
 }
 
 /*
@@ -355,9 +343,6 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       break;
     case KBD_TAB:
       mb_complete(cp, lasttab, as, &thistab, &i);
-      break;
-    case ' ':
-      mb_space_or_complete(cp, c, lasttab, as, &thistab, &i);
       break;
     default:
       i = mb_self_insert(c, i, as);

@@ -205,9 +205,6 @@ typedef struct Completion {
   int fl_dir;
   astr path;
 
-  /* This flag is set when the space character is allowed */
-  int fl_space;
-
   list completions;             /* The completions list */
 
   list matches;                 /* The matches list */
@@ -226,7 +223,7 @@ typedef struct Binding {
 } Binding;
 
 typedef struct Macro {
-  vector *keys;                  /* Vector of keystrokes */
+  vector *keys;                 /* Vector of keystrokes */
   char *name;                   /* Name of the macro */
   struct Macro *next;           /* Next macro in the list */
 } Macro;
