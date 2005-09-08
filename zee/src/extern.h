@@ -242,7 +242,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
-int lookup_bool_variable(char *var);
+int get_variable_bool(char *var);
 astr minibuf_read_variable_name(char *msg);
 void set_variable(const char *var, const char *val);
 char *get_variable_bp(Buffer *bp, const char *var);

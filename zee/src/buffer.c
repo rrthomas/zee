@@ -100,7 +100,7 @@ Buffer *create_buffer(const char *name)
   bp->next = head_bp;
   head_bp = bp;
 
-  if (lookup_bool_variable("auto-fill-mode"))
+  if (get_variable_bool("auto-fill-mode"))
     bp->flags ^= BFLAG_AUTOFILL;
 
   return bp;

@@ -91,18 +91,3 @@ char *variableGetString(le *varlist, const char *key)
     return temp->branch->data;
   return NULL;
 }
-
-astr variableDump(le *varlist)
-{
-  astr as = astr_new();
-
-  for (; varlist; varlist = varlist->list_next) {
-    if (varlist->branch) {
-      astr_afmt(as, "%s \t", varlist->data);
-      astr_cat_delete(as, leDumpReformat(varlist->branch));
-      astr_cat_char(as, '\n');
-    }
-  }
-
-  return as;
-}

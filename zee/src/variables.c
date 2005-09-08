@@ -56,7 +56,13 @@ void init_variables(void)
 
 void set_variable(const char *var, const char *val)
 {
-  variableSetString(&mainVarList, var, val);
+  /* `tab-width' and `fill-column' automatically become buffer-local
+     when set in any fashion. */
+  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column")) {
+    assert(cur_bp);
+    variableSetString(&cur_bp->vars, var, val);
+  } else
+    variableSetString(&mainVarList, var, val);
 }
 
 char *get_variable_bp(Buffer *bp, const char *var)
@@ -94,7 +100,7 @@ int get_variable_number(char *var)
   return get_variable_number_bp(cur_bp, var);
 }
 
-int lookup_bool_variable(char *var)
+int get_variable_bool(char *var)
 {
   char *p;
 
@@ -174,14 +180,8 @@ Set a variable value to the user-specified value.
       if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
         ok = cancel();
 
-    if (ok) {
-      /* `tab-width' and `fill-column' automatically become
-         buffer-local when set in any fashion. */
-      if (!astr_cmp_cstr(var, "tab-width") || !astr_cmp_cstr(var, "fill-column"))
-        variableSetString(&cur_bp->vars, astr_cstr(var), astr_cstr(val));
-      else
-        set_variable(astr_cstr(var), astr_cstr(val));
-    }
+    if (ok)
+      set_variable(astr_cstr(var), astr_cstr(val));
   }
 }
 END_DEFUN
