@@ -28,10 +28,11 @@
 void resync_display(void)
 {
   int delta;
+  static size_t lastpointn = 0;
 
   assert(cur_bp);
 
-  if ((delta = cur_bp->pt.n - win.lastpointn)) {
+  if ((delta = cur_bp->pt.n - lastpointn)) {
     if ((delta > 0 && win.topdelta + delta < win.eheight) ||
         (delta < 0 && win.topdelta >= (size_t)(-delta)))
       win.topdelta += delta;
@@ -40,7 +41,7 @@ void resync_display(void)
     else
       win.topdelta = cur_bp->pt.n;
   }
-  win.lastpointn = cur_bp->pt.n;
+  lastpointn = cur_bp->pt.n;
 }
 
 void recenter(void)

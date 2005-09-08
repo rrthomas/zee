@@ -179,11 +179,8 @@ struct Window {
   /* The buffer displayed in window */
   Buffer *bp;
 
-  /* The top line delta and last point line number.
-   * (Question: definitions?)
-   */
+  /* The buffer line displayed in the topmost window line */
   size_t topdelta;
-  int lastpointn;
 
   /* The formal and effective width and height of the window.
    * The formal height is the space used on the terminal;
