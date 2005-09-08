@@ -201,9 +201,6 @@ typedef struct Completion {
   /* This flag is set when a completion window has been popped up */
   int fl_poppedup;
 
-  /* The old buffer */
-  Buffer *old_bp;
-
   /* This flag is set when this is a filename completion */
   int fl_dir;
   astr path;
