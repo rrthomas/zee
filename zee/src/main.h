@@ -176,9 +176,6 @@ struct Buffer {
  */
 typedef struct Window Window;
 struct Window {
-  /* The buffer displayed in window */
-  Buffer *bp;
-
   /* The buffer line displayed in the topmost window line */
   size_t topdelta;
 
