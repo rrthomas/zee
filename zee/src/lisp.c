@@ -24,7 +24,6 @@
 #include <assert.h>
 #include "main.h"
 #include "extern.h"
-#include "vars.h"
 #include "eval.h"
 
 

@@ -31,7 +31,71 @@
 #include "main.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
+
+
+le *mainVarList = NULL;
+le *defunList = NULL;
+
+
+static le *variableFind(le *varlist, const char *key)
+{
+  if (key != NULL)
+    for (; varlist; varlist = varlist->list_next)
+      if (!strcmp(key, varlist->data))
+        return varlist;
+
+  return NULL;
+}
+
+void variableSet(le **varlist, const char *key, le *value)
+{
+  if (key && value) {
+    le *temp = variableFind(*varlist, key);
+
+    if (temp)
+      leWipe(temp->branch);
+    else {
+      temp = leNew(key);
+      *varlist = leAddHead(*varlist, temp);
+    }
+
+    temp->branch = leDup(value);
+  }
+}
+
+void variableSetString(le **varlist, const char *key, const char *value)
+{
+  if (key && value) {
+    le *temp = leNew(value);
+    variableSet(varlist, key, temp);
+    leWipe(temp);
+  }
+}
+
+void variableSetNumber(le **varlist, char *key, int value)
+{
+  char *buf;
+
+  zasprintf(&buf, "%d", value);
+  variableSetString(varlist, key, buf);
+  free(buf);
+}
+
+le *variableGet(le *varlist, char *key)
+{
+  le *temp = variableFind(varlist, key);
+  return temp ? temp->branch : NULL;
+}
+
+char *variableGetString(le *varlist, const char *key)
+{
+  le *temp = variableFind(varlist, key);
+  if (temp && temp->branch && temp->branch->data
+      && countNodes(temp->branch) == 1)
+    return temp->branch->data;
+  return NULL;
+}
+
 
 /*
  * Default variables values table.
@@ -46,23 +110,21 @@ static struct var_entry {
 #undef X
 };
 
-void init_variables(void)
-{
-  struct var_entry *p;
-
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    variableSetString(&mainVarList, p->var, p->val);
-}
-
 void set_variable(const char *var, const char *val)
 {
-  /* `tab-width' and `fill-column' automatically become buffer-local
-     when set in any fashion. */
-  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column")) {
-    assert(cur_bp);
-    variableSetString(&cur_bp->vars, var, val);
-  } else
-    variableSetString(&mainVarList, var, val);
+  /* Variables automatically become buffer-local when set. */
+  assert(cur_bp);
+  variableSetString(&cur_bp->vars, var, val);
+}
+
+static struct var_entry *get_variable_default(const char *var)
+{
+  struct var_entry *p;
+  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
+    if (!strcmp(p->var, var))
+      return p;
+
+  return NULL;
 }
 
 char *get_variable(const char *var)
@@ -73,29 +135,31 @@ char *get_variable(const char *var)
   if (cur_bp)
     s = variableGetString(cur_bp->vars, var);
 
-  if (s == NULL)
-    s = variableGetString(mainVarList, var);
+  if (s == NULL) {
+    struct var_entry *p = get_variable_default(var);
+    if (p)
+      s = p->val;
+  }
 
   return s;
 }
 
 int get_variable_number(char *var)
 {
-  int t = 0;
-  char *s = get_variable(var);
+  char *s;
 
-  if (s)
-    t = atoi(s);
+  if ((s = get_variable(var)))
+    return atoi(s);
 
-  return t;
+  return 0;
 }
 
 int get_variable_bool(char *var)
 {
-  char *p;
+  char *s;
 
-  if ((p = get_variable(var)) != NULL)
-    return !strcmp(p, "true");
+  if ((s = get_variable(var)) != NULL)
+    return !strcmp(s, "true");
 
   return FALSE;
 }
@@ -136,16 +200,6 @@ astr minibuf_read_variable_name(char *msg)
   return ms;
 }
 
-static char *get_variable_format(const char *var)
-{
-  struct var_entry *p;
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!strcmp(p->var, var))
-      return p->fmt;
-
-  return "";
-}
-
 DEFUN_INT("set-variable", set_variable)
 /*+
 Set a variable value to the user-specified value.
@@ -159,7 +213,8 @@ Set a variable value to the user-specified value.
   if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
     ok = FALSE;
   else {
-    fmt = get_variable_format(astr_cstr(var));
+    struct var_entry *p = get_variable_default(astr_cstr(var));
+    fmt = p ? p->fmt : "";
     if (!strcmp(fmt, "b")) {
       int i;
       if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)

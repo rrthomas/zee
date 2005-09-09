@@ -47,7 +47,6 @@
 #include "paths.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
 
 #define VERSION_STRING TEXT_NAME " " VERSION
 
@@ -161,7 +160,6 @@ int main(int argc, char **argv)
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
   lisp_init();
-  init_variables();
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {

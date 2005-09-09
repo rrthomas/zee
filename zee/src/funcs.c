@@ -34,7 +34,6 @@
 
 #include "main.h"
 #include "extern.h"
-#include "vars.h"
 
 
 DEFUN_INT("suspend", suspend)

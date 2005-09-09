@@ -28,7 +28,6 @@
 #include "main.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
 
 
 static le *eval_cb_command_helper(Function f, int argc, le *branch)
