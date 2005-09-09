@@ -108,14 +108,8 @@ le *evaluateNode(le *node)
     else
       value = evaluateBranch(node->branch);
 
-  } else {
-    le *temp = variableGet(mainVarList, node->data);
-
-    if (temp != NULL)
-      value = leDup(temp);
-    else
+  } else
       value = leNew(node->data);
-  }
 
   return value;
 }
@@ -162,9 +156,8 @@ le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 
       newvalue = evaluateNode(current->list_next);
 
-      variableSet(&mainVarList,
-                  function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
-                  newvalue);
+      set_variable(function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
+                  newvalue->data);
 
       if (function == S_SET)
         leWipe(newkey);

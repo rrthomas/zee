@@ -33,11 +33,7 @@
 #include "eval.h"
 
 
-le *mainVarList = NULL;
-le *defunList = NULL;
-
-
-static le *variableFind(le *varlist, const char *key)
+static le *variable_find(le *varlist, const char *key)
 {
   if (key != NULL)
     for (; varlist; varlist = varlist->list_next)
@@ -50,7 +46,7 @@ static le *variableFind(le *varlist, const char *key)
 void variableSet(le **varlist, const char *key, le *value)
 {
   if (key && value) {
-    le *temp = variableFind(*varlist, key);
+    le *temp = variable_find(*varlist, key);
 
     if (temp)
       leWipe(temp->branch);
@@ -63,30 +59,6 @@ void variableSet(le **varlist, const char *key, le *value)
   }
 }
 
-void variableSetString(le **varlist, const char *key, const char *value)
-{
-  if (key && value) {
-    le *temp = leNew(value);
-    variableSet(varlist, key, temp);
-    leWipe(temp);
-  }
-}
-
-le *variableGet(le *varlist, char *key)
-{
-  le *temp = variableFind(varlist, key);
-  return temp ? temp->branch : NULL;
-}
-
-char *variableGetString(le *varlist, const char *key)
-{
-  le *temp = variableFind(varlist, key);
-  if (temp && temp->branch && temp->branch->data
-      && countNodes(temp->branch) == 1)
-    return temp->branch->data;
-  return NULL;
-}
-
 
 /*
  * Default variables values table.
@@ -94,19 +66,12 @@ char *variableGetString(le *varlist, const char *key)
 static struct var_entry {
   char *var;                    /* Variable name. */
   char *fmt;                    /* Variable format (boolean, etc.). */
-  char *val;                    /* Default value. */
+  const char *val;              /* Default value. */
 } def_vars[] = {
 #define X(var, fmt, val, doc) { var, fmt, val },
 #include "tbl_vars.h"
 #undef X
 };
-
-void set_variable(const char *var, const char *val)
-{
-  /* Variables automatically become buffer-local when set. */
-  assert(cur_bp);
-  variableSetString(&cur_bp->vars, var, val);
-}
 
 static struct var_entry *get_variable_default(const char *var)
 {
@@ -118,13 +83,34 @@ static struct var_entry *get_variable_default(const char *var)
   return NULL;
 }
 
-char *get_variable(const char *var)
+void set_variable(const char *var, const char *val)
 {
-  char *s = NULL;
+  /* Variables automatically become buffer-local when set if there is
+     a buffer. */
+  if (cur_bp) {
+    if (var && val) {
+      le *temp = leNew(val);
+      variableSet(&cur_bp->vars, var, temp);
+      leWipe(temp);
+    }
+  } else {
+    struct var_entry *p = get_variable_default(var);
+    if (var)
+      p->val = zstrdup(val);
+  }
+}
+
+const char *get_variable(const char *var)
+{
+  const char *s = NULL;
 
   /* Have to be able to run this before the first buffer is created. */
-  if (cur_bp)
-    s = variableGetString(cur_bp->vars, var);
+  if (cur_bp) {
+    le *temp = variable_find(cur_bp->vars, var);
+    if (temp && temp->branch && temp->branch->data
+        && countNodes(temp->branch) == 1)
+      s = temp->branch->data;
+  }
 
   if (s == NULL) {
     struct var_entry *p = get_variable_default(var);
@@ -137,7 +123,7 @@ char *get_variable(const char *var)
 
 int get_variable_number(char *var)
 {
-  char *s;
+  const char *s;
 
   if ((s = get_variable(var)))
     return atoi(s);
@@ -147,7 +133,7 @@ int get_variable_number(char *var)
 
 int get_variable_bool(char *var)
 {
-  char *s;
+  const char *s;
 
   if ((s = get_variable(var)) != NULL)
     return !strcmp(s, "true");
@@ -159,10 +145,10 @@ astr minibuf_read_variable_name(char *msg)
 {
   astr ms;
   Completion *cp = completion_new(FALSE);
-  le *lp;
+  struct var_entry *p;
 
-  for (lp = mainVarList; lp != NULL; lp = lp->list_next)
-    list_append(cp->completions, zstrdup(lp->data));
+  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
+    list_append(cp->completions, zstrdup(p->var));
 
   for (;;) {
     ms = minibuf_read_completion(msg, "", cp, NULL);

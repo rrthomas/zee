@@ -353,7 +353,7 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       break;
   }
 
-  if (cp->fl_poppedup) {
+  if (cp && cp->fl_poppedup) {
     popup_clear();
     term_refresh();
   }

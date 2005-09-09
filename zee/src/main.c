@@ -290,8 +290,6 @@ int main(int argc, char **argv)
   }
 
   /* Free Lisp state. */
-  variableFree(mainVarList);
-  variableFree(defunList);
   lisp_finalise();
 
   /* Free all the memory allocated. */
