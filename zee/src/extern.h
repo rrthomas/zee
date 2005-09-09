@@ -241,11 +241,11 @@ void free_undo(Buffer *bp);
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
-int get_variable_bool(char *var);
-astr minibuf_read_variable_name(char *msg);
 void set_variable(const char *var, const char *val);
 const char *get_variable(const char *var);
 int get_variable_number(char *var);
+int get_variable_bool(char *var);
+astr minibuf_read_variable_name(char *msg);
 
 
 /*
