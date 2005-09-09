@@ -90,11 +90,13 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
+  char *buf;
+
   assert(cur_bp);
-  if (lastflag & FLAG_SET_UNIARG)
-    variableSetNumber(&cur_bp->vars, "fill-column", uniarg);
-  else
-    variableSetNumber(&cur_bp->vars, "fill-column", (int)(cur_bp->pt.o + 1));
+
+  zasprintf(&buf, "%d", lastflag & FLAG_SET_UNIARG ? uniarg : (int)(cur_bp->pt.o + 1));
+  set_variable("fill-column", buf);
+  free(buf);
 }
 END_DEFUN
 

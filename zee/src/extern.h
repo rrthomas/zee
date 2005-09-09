@@ -249,7 +249,6 @@ extern le *defunList;
 
 void variableSet(le **varlist, const char *key, le *value);
 void variableSetString(le **varlist, const char *key, const char *value);
-void variableSetNumber(le **varlist, char *key, int value);
 le *variableGet(le *varlist, char *key);
 char *variableGetString(le *varlist, const char *key);
 int get_variable_bool(char *var);

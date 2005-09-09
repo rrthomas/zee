@@ -72,15 +72,6 @@ void variableSetString(le **varlist, const char *key, const char *value)
   }
 }
 
-void variableSetNumber(le **varlist, char *key, int value)
-{
-  char *buf;
-
-  zasprintf(&buf, "%d", value);
-  variableSetString(varlist, key, buf);
-  free(buf);
-}
-
 le *variableGet(le *varlist, char *key)
 {
   le *temp = variableFind(varlist, key);
