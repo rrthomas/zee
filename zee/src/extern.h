@@ -241,10 +241,6 @@ void free_undo(Buffer *bp);
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
-#define variableFree(L) \
-  leWipe(L)
-
-void variableSet(le **varlist, const char *key, le *value);
 int get_variable_bool(char *var);
 astr minibuf_read_variable_name(char *msg);
 void set_variable(const char *var, const char *val);

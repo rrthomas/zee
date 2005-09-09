@@ -43,7 +43,7 @@ static le *variable_find(le *varlist, const char *key)
   return NULL;
 }
 
-void variableSet(le **varlist, const char *key, le *value)
+static void variable_update(le **varlist, const char *key, le *value)
 {
   if (key && value) {
     le *temp = variable_find(*varlist, key);
@@ -90,7 +90,7 @@ void set_variable(const char *var, const char *val)
   if (cur_bp) {
     if (var && val) {
       le *temp = leNew(val);
-      variableSet(&cur_bp->vars, var, temp);
+      variable_update(&cur_bp->vars, var, temp);
       leWipe(temp);
     }
   } else {
