@@ -18,14 +18,15 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include "config.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
+#include "zmalloc.h"
 #include "vector.h"
 #include "main.h"
-#include "extern.h"
 
 /*
  * Create a vector whose items' size is size
