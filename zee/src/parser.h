@@ -28,7 +28,6 @@
 
 enum tokenname {
   T_CLOSE,
-  T_OPEN,
   T_QUOTE,
   T_WORD
 };

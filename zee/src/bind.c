@@ -116,7 +116,7 @@ void process_key(size_t key)
       }
     } else {
       le *list = evalCastIntToLe(last_uniarg);
-      p->func((lastflag & FLAG_SET_UNIARG) != 0, list);
+      p->func(((lastflag & FLAG_SET_UNIARG) != 0) ? &list : NULL);
       leWipe(list);
       _last_command = p->func;
     }
@@ -258,14 +258,10 @@ sequence.
   ok = FALSE;
 
   if (uniused) {
-    if (argc == 3) {
-      le *list = evaluateNode(branch->list_next);
-      keystr = astr_cpy_cstr(astr_new(), list->data);
-      leWipe(list);
-      list = evaluateNode(branch->list_next->list_next);
-      name = astr_cpy_cstr(astr_new(), list->data);
-      leWipe(list);
-    }
+    keystr = astr_cpy_cstr(astr_new(), (*node)->data);
+    *node = (*node)->list_next;
+    name = astr_cpy_cstr(astr_new(), (*node)->data);
+    *node = (*node)->list_next;
   } else {
     astr as;
 

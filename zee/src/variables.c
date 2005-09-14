@@ -107,8 +107,7 @@ const char *get_variable(const char *var)
   /* Have to be able to run this before the first buffer is created. */
   if (cur_bp) {
     le *temp = variable_find(cur_bp->vars, var);
-    if (temp && temp->branch && temp->branch->data
-        && countNodes(temp->branch) == 1)
+    if (temp && temp->branch && temp->branch->data)
       s = temp->branch->data;
   }
 

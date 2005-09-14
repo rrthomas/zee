@@ -38,7 +38,6 @@ typedef struct le {
 } le;
 
 le *leNew(const char *text);
-void leReallyWipe(le *list);
 void leWipe(le *list);
 
 le *leAddHead(le *list, le *element);
@@ -48,13 +47,6 @@ le *leAddBranchElement(le *list, le *branch, int quoted);
 le *leAddDataElement(le *list, const char *data, int quoted);
 le *leDup(le *list);
 
-void leClearTag(le *list);
-void leTagData(le *list, char *data, int tagval);
-void leTagReplace(le *list, int tagval, le *newinfo);
-
-astr leDump(le *list, int indent);
-astr leDumpEval(le *list, int indent);
-astr leDumpEvalTree(le *list, int indent);
-astr leDumpReformat(le *tree);
+void leEval(le *list);
 
 #endif

@@ -50,7 +50,7 @@
  * The type of a Zee exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function)(int argc, le *branch);
+typedef int (*Function)(le **branch);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -289,17 +289,19 @@ enum {
 /* Define an interactive function */
 /* N.B. The function type is actually eval_cb */
 #define DEFUN(lisp_name, c_func) \
-  int F_ ## c_func(int argc, le *branch) \
+  int F_ ## c_func(le **node) \
   { \
-    int uniused = argc > 1, ok = TRUE;
+    int uniused = *node != NULL, ok = TRUE; \
+    le *branch = *node;
 
 #define DEFUN_INT(lisp_name, c_func) \
   DEFUN(lisp_name, c_func) \
   int uniarg = 1; \
   if (uniused) { \
-    le *value_le = evaluateNode(branch); \
+    le *value_le = evaluateNode(node); \
     uniarg = evalCastLeToInt(value_le); \
     leWipe(value_le); \
+    (void)branch; \
   }
 
 #define END_DEFUN \
@@ -308,14 +310,14 @@ enum {
 
 /* Call an interactive function */
 #define FUNCALL(c_func) \
-  F_ ## c_func(1, NULL)
+  F_ ## c_func(NULL)
 
 /* Call an interactive function with an universal argument */
 le *funcall_arg_uniarg;
 int funcall_arg_ok;
 #define FUNCALL_ARG(c_func, uniarg) \
   (funcall_arg_uniarg = evalCastIntToLe(uniarg), \
-   funcall_arg_ok = F_ ## c_func(2, funcall_arg_uniarg), \
+   funcall_arg_ok = F_ ## c_func(&funcall_arg_uniarg), \
    leWipe(funcall_arg_uniarg), \
    funcall_arg_ok)
 

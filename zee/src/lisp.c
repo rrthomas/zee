@@ -27,20 +27,6 @@
 #include "eval.h"
 
 
-void lisp_init(void)
-{
-  leNIL = leNew("NIL");
-  leT = leNew("T");
-}
-
-
-void lisp_finalise(void)
-{
-  leReallyWipe(leNIL);
-  leReallyWipe(leT);
-}
-
-
 le *lisp_read(astr as)
 {
   struct le *list;

@@ -30,23 +30,41 @@
 #include "eval.h"
 
 
-static le *eval_cb_command_helper(Function f, int argc, le *branch)
+static le *eval_cb_command_helper(Function f, le **list)
 {
-  int ret = f(argc, branch);
-  return ret ? leT : leNIL;
+  f(list);
+  return *list;
 }
 
 #define X(cmd_name, c_name) \
-  static le *eval_cb_ ## c_name(int argc, le *branch) \
+  static le *eval_cb_ ## c_name(le **list) \
   { \
-    return eval_cb_command_helper(F_ ## c_name, argc, branch); \
+    return eval_cb_command_helper(F_ ## c_name, list); \
   }
 #include "tbl_funcs.h"
 #undef X
 
 
+static le *eval_cb_setq(le **list)
+{
+  char *newvalue = NULL;
+
+  if (*list != NULL) {
+    char *name = (*list)->data;
+    *list = (*list)->list_next;
+    if (*list != NULL) {
+      newvalue = (*list)->data;
+      *list = (*list)->list_next;
+    }
+
+    set_variable(name, newvalue);
+  }
+
+  return NULL;
+}
+
+
 static evalLookupNode evalTable[] = {
-  { "set"	, eval_cb_set		},
   { "setq"	, eval_cb_setq		},
 
 #define X(cmd_name, c_name) \
@@ -69,58 +87,22 @@ eval_cb lookupFunction(char *name)
 }
 
 
-le *evaluateBranch(le *trybranch)
+le *evaluateNode(le **node)
 {
-  le *keyword;
   eval_cb prim;
 
-  if (trybranch == NULL)
+  if (*node == NULL)
     return NULL;
 
-  if (trybranch->branch)
-    keyword = evaluateBranch(trybranch->branch);
-  else
-    keyword = leNew(trybranch->data);
+  assert((*node)->data);
+  prim = lookupFunction((*node)->data);
 
-  if (keyword->data == NULL) {
-    leWipe(keyword);
-    return leNIL;
-  }
+  *node = (*node)->list_next;
 
-  prim = lookupFunction(keyword->data);
-  leWipe(keyword);
   if (prim)
-    return prim(countNodes(trybranch), trybranch);
-
-  return NULL;
-}
-
-le *evaluateNode(le *node)
-{
-  le *value;
-
-  if (node == NULL)
-    return leNIL;
-
-  if (node->branch != NULL) {
-    if (node->quoted)
-      value = leDup(node->branch);
-    else
-      value = evaluateBranch(node->branch);
-
-  } else
-      value = leNew(node->data);
-
-  return value;
-}
-
-
-int countNodes(le *branch)
-{
-  int count;
-
-  for (count = 0; branch; branch = branch->list_next, count++);
-  return count;
+    return prim(node);
+  else
+    return *node;
 }
 
 
@@ -145,50 +127,15 @@ le *evalCastIntToLe(int intvalue)
 }
 
 
-le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
-{
-  le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
-
-  if (branch != NULL && argc >= 3) {
-    for (current = branch->list_next; current; current = current->list_next->list_next) {
-      if (newvalue != leNIL)
-        leWipe(newvalue);
-
-      newvalue = evaluateNode(current->list_next);
-
-      set_variable(function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
-                  newvalue->data);
-
-      if (function == S_SET)
-        leWipe(newkey);
-
-      if (current->list_next == NULL)
-        break;
-    }
-  }
-
-  return newvalue;
-}
-
-le* eval_cb_set(int argc, le *branch)
-{
-  return eval_cb_set_helper(S_SET, argc, branch);
-}
-
-le *eval_cb_setq(int argc, le *branch)
-{
-  return eval_cb_set_helper(S_SETQ, argc, branch);
-}
-
-
 static int execute_function(const char *name, int uniarg)
 {
   Function func;
   Macro *mp;
 
-  if ((func = get_function(name)))
-    return func(uniarg ? 1 : 0, evalCastIntToLe(uniarg));
-  else if ((mp = get_macro(name)))
+  if ((func = get_function(name))) {
+    le *arg = evalCastIntToLe(uniarg);
+    return func(uniarg ? &arg : NULL);
+  } else if ((mp = get_macro(name)))
     return call_macro(mp);
   else
     return FALSE;

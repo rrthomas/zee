@@ -161,8 +161,6 @@ int delete_char(void);
 int backward_delete_char(void);
 
 /* lisp.c ----------------------------------------------------------------- */
-void lisp_init(void);
-void lisp_finalise(void);
 le *lisp_read(astr as);
 le *lisp_read_cstr(const char *string);
 le *lisp_read_file(const char *file);
@@ -252,6 +250,6 @@ astr minibuf_read_variable_name(char *msg);
  * Declare external C functions for interactive commands.
  */
 #define X(cmd_name, c_name) \
-  extern int F_ ## c_name(int argc, le *branch);
+  extern int F_ ## c_name(le **branch);
 #include "tbl_funcs.h"
 #undef X

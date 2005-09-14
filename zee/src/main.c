@@ -157,10 +157,6 @@ int main(int argc, char **argv)
   astr as = astr_new();
   le *list;
 
-  /* Set up Lisp environment now so it's available to files and
-     expressions specified on the command-line. */
-  lisp_init();
-
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
@@ -172,14 +168,14 @@ int main(int argc, char **argv)
         astr bs = astr_cpy_cstr(astr_new(), optarg);
         list = lisp_read(bs);
         astr_delete(bs);
-        astr_cat_delete(as, leDumpEval(list, 0));
+        leEval(list);
         leWipe(list);
         eflag = TRUE;
       }
       break;
     case 'l':
       list = lisp_read_file(optarg);
-      astr_cat_delete(as, leDumpEval(list, 0));
+      leEval(list);
       leWipe(list);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
@@ -240,7 +236,7 @@ int main(int argc, char **argv)
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
       list = lisp_read_file(astr_cstr(as));
-      astr_delete(leDumpEval(list, 0));
+      leEval(list);
       astr_delete(as);
       leWipe(list);
     }
@@ -272,7 +268,7 @@ int main(int argc, char **argv)
 
     /* Load default bindings file. */
     list = lisp_read_file(PATH_DATA "/key_bindings.el");
-    astr_delete(leDumpEval(list, 0));
+    leEval(list);
     leWipe(list);
 
     /* Display help or error message. */
@@ -288,9 +284,6 @@ int main(int argc, char **argv)
     free_bindings();
     free_kill_ring();
   }
-
-  /* Free Lisp state. */
-  lisp_finalise();
 
   /* Free all the memory allocated. */
   astr_delete(as);

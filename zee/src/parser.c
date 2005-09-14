@@ -28,29 +28,25 @@
 #include "extern.h"
 
 
-static list line_indent;     /* Current previous indentation levels */
 static list toktype_buf;            /* Pushed back token types */
 static list tok_buf;            /* Pushed back tokens */
-static size_t indent, line;
+static size_t line;
 static ptrdiff_t pos;
-static int bol = TRUE;
+static int bol = TRUE, bof = TRUE;
 static astr expr;
 
 void lisp_parse_init(astr as)
 {
   pos = 0;
   assert((expr = as));
-  indent = 0;
   line = 0;
-  bol = TRUE;
-  line_indent = list_new();
+  bol = bof = TRUE;
   toktype_buf = list_new();
   tok_buf = list_new();
 }
 
 void lisp_parse_end(void)
 {
-  list_delete(line_indent);
   list_delete(toktype_buf);
   list_delete(tok_buf);
 }
@@ -77,13 +73,7 @@ static int getchar_skipspace(void) {
 
     switch (c) {
     case ' ':
-      if (bol)
-        indent++;
-      break;
-
     case '\t':
-      if (bol)
-        indent += 8 - indent % 8;
       break;
 
     case '#':
@@ -94,7 +84,6 @@ static int getchar_skipspace(void) {
       /* FALLTHROUGH */
 
     case '\n':
-      indent = 0;
       bol = TRUE;
       line++;
       break;
@@ -107,19 +96,6 @@ static int getchar_skipspace(void) {
       break;
 
     default:
-      if (bol) {
-        bol = FALSE;
-        if (indent <= (size_t)(list_head(line_indent))) {
-          while (!list_empty(line_indent) && indent <= (size_t)(list_head(line_indent))) {
-            (void)list_behead(line_indent);
-            list_append(toktype_buf, (void *)T_CLOSE);
-            list_append(tok_buf, astr_new());
-          }
-        }
-        list_prepend(line_indent, (void *)indent);
-        list_append(toktype_buf, (void *)T_OPEN);
-        list_append(tok_buf, astr_new());
-      }
       return c;
     }
   } while (TRUE);
@@ -198,10 +174,6 @@ struct le *lisp_parse(struct le *list)
     case T_CLOSE:
       astr_delete(tok);
       return list;
-
-    case T_OPEN:
-      list = leAddBranchElement(list, lisp_parse(NULL), isquoted);
-      break;
 
     case T_QUOTE:
       isquoted = TRUE;
