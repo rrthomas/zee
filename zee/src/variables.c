@@ -43,19 +43,19 @@ static le *variable_find(le *varlist, const char *key)
   return NULL;
 }
 
-static void variable_update(le **varlist, const char *key, le *value)
+static void variable_update(le **varlist, const char *key, const char *value)
 {
   if (key && value) {
     le *temp = variable_find(*varlist, key);
 
     if (temp)
-      leWipe(temp->branch);
+      free(temp->data);
     else {
       temp = leNew(key);
       *varlist = leAddHead(*varlist, temp);
     }
 
-    temp->branch = leDup(value);
+    temp->data = zstrdup(value);
   }
 }
 
@@ -88,11 +88,8 @@ void set_variable(const char *var, const char *val)
   /* Variables automatically become buffer-local when set if there is
      a buffer. */
   if (cur_bp) {
-    if (var && val) {
-      le *temp = leNew(val);
-      variable_update(&cur_bp->vars, var, temp);
-      leWipe(temp);
-    }
+    if (var && val)
+      variable_update(&cur_bp->vars, var, val);
   } else {
     struct var_entry *p = get_variable_default(var);
     if (var)
@@ -107,8 +104,8 @@ const char *get_variable(const char *var)
   /* Have to be able to run this before the first buffer is created. */
   if (cur_bp) {
     le *temp = variable_find(cur_bp->vars, var);
-    if (temp && temp->branch && temp->branch->data)
-      s = temp->branch->data;
+    if (temp && temp->data)
+      s = temp->data;
   }
 
   if (s == NULL) {

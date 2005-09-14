@@ -26,13 +26,10 @@
 #include "astr.h"
 
 typedef struct le {
-  /* either data or a branch */
-  struct le *branch;
   char *data;
   int quoted;
-  int tag;
 
-  /* for the next in the list in the current parenlevel */
+  /* for the next in the list */
   struct le *list_prev;
   struct le *list_next;
 } le;
@@ -43,7 +40,6 @@ void leWipe(le *list);
 le *leAddHead(le *list, le *element);
 le *leAddTail(le *list, le *element);
 
-le *leAddBranchElement(le *list, le *branch, int quoted);
 le *leAddDataElement(le *list, const char *data, int quoted);
 le *leDup(le *list);
 

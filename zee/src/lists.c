@@ -34,10 +34,8 @@ le *leNew(const char *text)
 {
   le *new = (le *)zmalloc(sizeof(le));
 
-  new->branch = NULL;
   new->data = text ? zstrdup(text) : NULL;
   new->quoted = 0;
-  new->tag = -1;
   new->list_prev = NULL;
   new->list_next = NULL;
 
@@ -48,7 +46,6 @@ void leWipe(le *list)
 {
   if (list) {
     /* free descendants */
-    leWipe(list->branch);
     leWipe(list->list_next);
 
     /* free ourself */
@@ -91,14 +88,6 @@ le *leAddTail(le *list, le *element)
 }
 
 
-le *leAddBranchElement(le *list, le *branch, int quoted)
-{
-  le *newbranch = leNew(NULL);
-  newbranch->branch = branch;
-  newbranch->quoted = quoted;
-  return leAddTail(list, newbranch);
-}
-
 le *leAddDataElement(le *list, const char *data, int quoted)
 {
   le *newdata = leNew(data);
@@ -114,7 +103,6 @@ le *leDup(le *list)
     return NULL;
 
   temp = leNew(list->data);
-  temp->branch = leDup(list->branch);
   temp->list_next = leDup(list->list_next);
 
   if (temp->list_next)
