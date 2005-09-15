@@ -187,7 +187,7 @@ Set a variable to the specified value.
   char *fmt;
   astr var, val = NULL;
 
-  if (uniused) {
+  if (argc > 0) {
     const char *newvalue = NULL;
 
     if (*lp != NULL) {

@@ -102,8 +102,9 @@ astr astr_cat_cstr(astr as, const char *s);
 astr astr_cat_char(astr as, int c);
 
 /*
- * Append the contents of src to as and free src.
+ * Perform astr_cpy or astr_cat and then free src.
  */
+astr astr_cpy_delete(astr as, const astr src);
 astr astr_cat_delete(astr as, const astr src);
 
 /*

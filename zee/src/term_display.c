@@ -32,22 +32,11 @@
 #include "config.h"
 #include "extern.h"
 
-static int initted = FALSE;
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
 static size_t point_start_column;
 static size_t point_screen_column;
-
-int term_initted(void)
-{
-  return initted;
-}
-
-void term_set_initted(void)
-{
-  initted = TRUE;
-}
 
 size_t term_width(void)
 {
@@ -123,7 +112,8 @@ static int in_region(size_t lineno, size_t x, Region *r)
   return cmp_point(r->start, pt) != 1 && cmp_point(pt, r->end) == -1;
 }
 
-/* Sets 'r->start' to the lesser of the point and mark,
+/*
+ * Sets 'r->start' to the lesser of the point and mark,
  * and sets 'r->end' to the greater. If the mark is not anchored, it is treated
  * as if it were at the point.
  */
@@ -140,7 +130,8 @@ static void calculate_highlight_region(Region *r)
     r->end = cur_bp->pt;
 }
 
-/* Prints a line on the terminal.
+/*
+ * Prints a line on the terminal.
  *  - 'line' is the line number on the terminal.
  *  - 'start_col' is the horizontal scroll offset: the character position (not
  *    cursor position) within 'lp' of the first character that should be
@@ -226,8 +217,8 @@ static char *make_mode_line_flags(void)
 }
 
 /*
- * This function calculates the best start column to draw if the line
- * needs to get truncated.
+ * Calculate the best start column to draw if the line needs to be
+ * truncated.
  * Called only for the line where the point is.
  */
 static void calculate_start_column(void)
@@ -366,8 +357,9 @@ static void draw_popup(void)
   }
 }
 
-/* Draws all the windows in turn, and draws the status line if any space
- * remains. Finally, moves the cursor to the correct position.
+/*
+ * Draw all the windows in turn, and draw the status line if any space
+ * remains. Finally, move the cursor to the correct position.
  */
 void term_display(void)
 {

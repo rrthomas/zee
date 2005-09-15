@@ -126,8 +126,7 @@ to make one entry in the kill ring.
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr as = copy_text_block(r.start, r.size);
-      astr_cat(kill_ring_text, as);
-      astr_delete(as);
+      astr_cat_delete(kill_ring_text, as);
 
       warn_if_readonly_buffer();
     } else {
@@ -163,8 +162,7 @@ Copy the region to the kill ring.
     calculate_the_region(&r);
 
     as = copy_text_block(r.start, r.size);
-    astr_cat(kill_ring_text, as);
-    astr_delete(as);
+    astr_cat_delete(kill_ring_text, as);
 
     thisflag |= FLAG_DONE_KILL;
     weigh_mark();
@@ -206,7 +204,7 @@ Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  ok = FUNCALL_ARG(kill_word, (uniused == 0) ? -1 : -uniarg);
+  ok = FUNCALL_ARG(kill_word, (argc == 0) ? -1 : -uniarg);
 }
 END_DEFUN
 

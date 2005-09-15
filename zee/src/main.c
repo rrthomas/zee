@@ -155,7 +155,6 @@ int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
   astr as = astr_new();
-  list lp;
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
@@ -166,17 +165,14 @@ int main(int argc, char **argv)
     case 'e':
       {
         astr bs = astr_cpy_cstr(astr_new(), optarg);
-        lp = cmd_read(bs);
-        astr_delete(bs);
-        evalList(lp);
-        leWipe(lp);
+        cmd_parse_init(bs);
+        cmd_eval();
+        cmd_parse_end();
         eflag = TRUE;
       }
       break;
     case 'l':
-      lp = cmd_read_file(optarg);
-      evalList(lp);
-      leWipe(lp);
+      cmd_eval_file(optarg);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
@@ -231,14 +227,10 @@ int main(int argc, char **argv)
 
   if (!bflag) {
     if (!qflag) {
-      list lp;
-
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
-      lp = cmd_read_file(astr_cstr(as));
-      evalList(lp);
+      cmd_eval_file(astr_cstr(as));
       astr_delete(as);
-      leWipe(lp);
     }
 
     term_init();
@@ -250,7 +242,7 @@ int main(int argc, char **argv)
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
-    bind_key_string("\\M-x", F_execute_extended_command);
+    bind_key(strtochord("\\M-x"), F_execute_command);
 
     /* Open file given on command line. */
     while (*argv) {
@@ -267,9 +259,7 @@ int main(int argc, char **argv)
     minibuf_write(about_minibuf_str);
 
     /* Load default bindings file. */
-    lp = cmd_read_file(PATH_DATA "/key_bindings.el");
-    evalList(lp);
-    leWipe(lp);
+    cmd_eval_file(PATH_DATA "/key_bindings.el");
 
     /* Display help or error message. */
     term_display();

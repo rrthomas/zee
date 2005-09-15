@@ -185,8 +185,7 @@ static int completion_reread(Completion *cp, astr as)
     }
     astr_cat_char(buf, *astr_char(as, (ptrdiff_t)i));
   }
-  astr_cpy(as, buf);
-  astr_delete(buf);
+  astr_cpy_delete(as, buf);
 
   buf = agetcwd();
   if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))

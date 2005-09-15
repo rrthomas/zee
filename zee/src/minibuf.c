@@ -147,8 +147,7 @@ astr minibuf_read_dir(const char *fmt, const char *value, ...)
     fname = astr_new();
 
     expand_path(astr_cstr(as), astr_cstr(rbuf), dir, fname);
-    astr_cpy(rbuf, dir);
-    astr_delete(dir);
+    astr_cpy_delete(rbuf, dir);
     astr_cat_delete(rbuf, fname);
 
     astr_delete(as);

@@ -379,8 +379,7 @@ static int intercalate_newline(void)
 
   /* Move the text after the point into the new line. */
   as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
-  astr_cpy(lp2->item, as);
-  astr_delete(as);
+  astr_cpy_delete(lp2->item, as);
   astr_truncate(lp1->item, (ptrdiff_t)lp1len);
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);

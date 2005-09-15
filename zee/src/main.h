@@ -24,6 +24,7 @@
 #define MAIN_H
 
 #include <limits.h>
+#include <stdlib.h>
 
 #include "zmalloc.h"
 #include "vector.h"
@@ -44,11 +45,8 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-/*
- * The type of a Zee exported function.  `uniarg' is the number of
- * times to repeat the function.
- */
-typedef int (*Function)(list *branch);
+/* The type of a Zee user command. */
+typedef int (*Function)(int argc, int uniarg, list *branch);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -241,6 +239,9 @@ typedef size_t Font;
 #define GETKEY_DELAYED                  0x1
 #define GETKEY_UNFILTERED               0x2
 
+/* Default waitkey pause in ds */
+#define WAITKEY_DEFAULT 20
+
 /* Named keys */
 enum {
 #define X(key_sym, key_name, key_code) \
@@ -286,15 +287,18 @@ enum {
 
 /* Define an interactive function */
 #define DEFUN(cmd_name, c_func) \
-  int F_ ## c_func(list *lp) \
+  int F_ ## c_func(int argc, int uniarg, list *lp) \
   { \
-    int uniused = lp && *lp != NULL, ok = TRUE;
+    int ok = TRUE; \
+    (void)uniarg; \
+    if (argc == 0) \
+      uniarg = 1;
+
 
 #define DEFUN_INT(cmd_name, c_func) \
   DEFUN(cmd_name, c_func) \
-  int uniarg = 1; \
-  if (uniused) { \
-    uniarg = evalCastLeToInt(*lp); \
+  if (lp && *lp) { \
+    uniarg = (*lp)->item ? atoi((char *)((*lp)->item)) : 0; \
     *lp = list_next(*lp); \
   }
 
@@ -304,13 +308,10 @@ enum {
 
 /* Call an interactive function */
 #define FUNCALL(c_func) \
-  F_ ## c_func(NULL)
+  F_ ## c_func(0, 0, NULL)
 
-/* Call an interactive function with an universal argument */
+/* Call an interactive function with a universal argument */
 #define FUNCALL_ARG(c_func, uniarg) \
-  execute_command(F_ ## c_func, uniarg)
-
-/* Default waitkey pause in ds */
-#define WAITKEY_DEFAULT 20
+  F_ ## c_func(1, uniarg, NULL)
 
 #endif /* !MAIN_H */

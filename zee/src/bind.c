@@ -33,7 +33,6 @@
 #include "extern.h"
 
 static History functions_history;
-static Function _last_command;
 
 /*--------------------------------------------------------------------------
  * Key binding
@@ -63,22 +62,16 @@ static void add_binding(size_t key, Function func)
   vec_item(bindings, vec_items(bindings), Binding) = b;
 }
 
-static void bind_key(size_t key, Function func)
+void bind_key(size_t key, Function func)
 {
   Binding *s;
+
+  assert(key != KBD_NOKEY);
 
   if ((s = get_binding(key)) == NULL)
     add_binding(key, func);
   else
     s->func = func;
-}
-
-void bind_key_string(const char *keystr, Function func)
-{
-  size_t key;
-
-  if ((key = strtochord(keystr)) != KBD_NOKEY)
-    bind_key(key, func);
 }
 
 void init_bindings(void)
@@ -114,11 +107,8 @@ void process_key(size_t key)
              ++uni);
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
       }
-    } else {
-      list lp = evalCastIntToLe(last_uniarg);
-      p->func(((lastflag & FLAG_SET_UNIARG) != 0) ? &lp : NULL);
-      leWipe(lp);
-    }
+    } else
+      p->func((lastflag & FLAG_SET_UNIARG) ? 1 : 0, last_uniarg, NULL);
   }
 
   /* Only add keystrokes if we're already in macro defining mode
@@ -251,8 +241,10 @@ sequence.
 
   ok = FALSE;
 
-  if (uniused) {
+  if (argc > 0) {
     keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    key = strtochord(astr_cstr(keystr));
+    astr_delete(keystr);
     *lp = list_next(*lp);
     name = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
     *lp = list_next(*lp);
@@ -272,11 +264,7 @@ sequence.
 
     if ((func = get_function(astr_cstr(name)))) {
       ok = TRUE;
-      if (uniused) {
-        bind_key_string(astr_cstr(keystr), func);
-        if (keystr)
-          astr_delete(keystr);
-      } else
+      if (key != KBD_NOKEY)
         bind_key(key, func);
     } else
       minibuf_error("No such function `%s'", astr_cstr(name));
@@ -296,8 +284,7 @@ static astr function_to_binding(Function f)
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       astr_cat_cstr(as, (n++ == 0) ? "" : ", ");
-      astr_cat(as, binding);
-      astr_delete(binding);
+      astr_cat_delete(as, binding);
     }
 
   return as;

@@ -35,22 +35,14 @@ static ptrdiff_t pos;
 static int bol = TRUE;
 static astr expr;
 
-void cmd_parse_init(astr as)
-{
-  pos = 0;
-  assert((expr = as));
-  line = 0;
-  bol = TRUE;
-}
-
-static int getachar(void)
+static int getch(void)
 {
   if ((size_t)pos < astr_len(expr))
     return *astr_char(expr, pos++);
   return EOF;
 }
 
-static void ungetachar(void)
+static void ungetch(void)
 {
   if (pos > 0 && (size_t)pos < astr_len(expr))
     pos--;
@@ -59,9 +51,9 @@ static void ungetachar(void)
 /*
  * Skip space to next non-space character
  */
-static int getchar_skipspace(void) {
+static int getch_skipspace(void) {
   do {
-    int c = getachar();
+    int c = getch();
 
     switch (c) {
     case ' ':
@@ -71,7 +63,7 @@ static int getchar_skipspace(void) {
     case '#':
       /* Skip comment */
       do {
-        c = getachar();
+        c = getch();
       } while (c != EOF && c != '\n');
       /* FALLTHROUGH */
 
@@ -81,10 +73,10 @@ static int getchar_skipspace(void) {
       break;
 
     case '\\':
-      if ((c = getachar()) == '\n')
+      if ((c = getch()) == '\n')
         line++;                 /* For source position, count \n */
       else
-        ungetachar();
+        ungetch();
       break;
 
     default:
@@ -93,26 +85,26 @@ static int getchar_skipspace(void) {
   } while (TRUE);
 }
 
-static astr gettok(int *eof)
+static astr gettok(void)
 {
   int c;
 
   astr tok = astr_new();
 
-  switch ((c = getchar_skipspace())) {
+  switch ((c = getch_skipspace())) {
   case EOF:
-    *eof = TRUE;
-    break;
+    astr_delete(tok);
+    return NULL;
 
   case '\"':                    /* string */
     {
       int eow = FALSE;
 
       do {
-        switch ((c = getachar())) {
+        switch ((c = getch())) {
         case '\n':
         case EOF:
-          ungetachar();
+          ungetch();
           /* FALLTHROUGH */
         case '\"':
           eow = TRUE;
@@ -129,56 +121,73 @@ static astr gettok(int *eof)
       astr_cat_char(tok, (char)c);
 
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
-        ungetachar();
+        ungetch();
 
         astr_truncate(tok, -1);
         break;
       }
 
-      c = getachar();
+      c = getch();
     } while (TRUE);
   }
 
   return tok;
 }
 
-void cmd_parse(list lp)
+void cmd_parse_init(astr as)
 {
-  int eof = FALSE;
+  pos = 0;
+  assert((expr = as));
+  line = 0;
+  bol = TRUE;
+}
+
+void cmd_parse_end(void)
+{
+  astr_delete(expr);
+  expr = NULL;
+}
+
+static int eval(list *node)
+{
+  Function prim;
+
+  if (*node == NULL)
+    return FALSE;
+
+  assert((*node)->item);
+  prim = get_function((char *)((*node)->item));
+
+  *node = list_next(*node);
+
+  if (prim)
+    return prim(1, 0, node);
+
+  return FALSE;
+}
+
+void cmd_eval(void)
+{
   astr tok;
+  list lp = list_new(), l;
 
-  do {
-    tok = gettok(&eof);
-    if (!eof)
-      list_append(lp, (void *)astr_cstr(tok));
-  } while (!eof);
+  while ((tok = gettok()))
+    list_append(lp, (void *)astr_cstr(tok));
 
-  astr_delete(tok);
+  for (l = list_first(lp); l->item; eval(&l))
+    ;
+
+  for (l = list_first(lp); l != lp; l = list_next(l))
+    free(l->item);
+  list_delete(lp);
 }
 
-list cmd_read(astr as)
+void cmd_eval_file(const char *file)
 {
-  list lp = list_new();
-
-  cmd_parse_init(as);
-  cmd_parse(lp);
-
-  return lp;
-}
-
-list cmd_read_file(const char *file)
-{
-  list lp;
-  FILE *fp = fopen(file, "r");
   astr as;
 
-  if (fp == NULL)
-    return NULL;
-
-  as = astr_fread(fp);
-  fclose(fp);
-  lp = cmd_read(as);
-  astr_delete(as);
-
-  return lp;
+  file_read(&as, file);
+  cmd_parse_init(as);
+  cmd_eval();
+  cmd_parse_end();
 }

@@ -35,11 +35,10 @@ int scroll_down(void);
 int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
-void bind_key_string(const char *keystr, Function func);
+void bind_key(size_t key, Function func);
 astr minibuf_read_function_name(const char *fmt, ...);
 const char *binding_to_function(size_t key);
 void process_key(size_t key);
-Function last_command(void);
 void init_bindings(void);
 void free_bindings(void);
 Function get_function(const char *name);
@@ -82,14 +81,6 @@ size_t popup_pos(void);
 void popup_scroll_up(void);
 void popup_scroll_down(void);
 
-/* eval.c ----------------------------------------------------------------- */
-int evaluateNode(list *node);
-void evalList(list lp);
-int evalCastLeToInt(list levalue);
-list evalCastIntToLe(int intvalue);
-void leWipe(list lp);
-int execute_command(Function func, int uniarg);
-
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);
@@ -98,6 +89,7 @@ astr get_home_dir(void);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
 astr compact_path(astr path);
 astr get_current_dir(int interactive);
+astr file_read(astr *as, const char *filename);
 void file_open(Buffer *bp, const char *filename);
 int file_visit(const char *filename);
 Completion *make_buffer_completion(void);
@@ -195,9 +187,9 @@ void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
 void cmd_parse_init(astr as);
-void cmd_parse(list lp);
-list cmd_read(astr as);
-list cmd_read_file(const char *file);
+void cmd_parse_end(void);
+void cmd_eval(void);
+void cmd_eval_file(const char *file);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);
@@ -214,8 +206,6 @@ Point line_end_position(int count);
 void free_search_history(void);
 
 /* term_display.c --------------------------------------------------------- */
-int term_initted(void);
-void term_set_initted(void);
 size_t term_width(void);
 size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
@@ -254,11 +244,8 @@ int get_variable_number(char *var);
 int get_variable_bool(char *var);
 astr minibuf_read_variable_name(char *msg);
 
-
-/*
- * Declare external C functions for interactive commands.
- */
+/* External C functions for interactive commands -------------------------- */
 #define X(cmd_name, c_name) \
-  extern int F_ ## c_name(list *branch);
+  int F_ ## c_name(int argc, int uniarg, list *branch);
 #include "tbl_funcs.h"
 #undef X

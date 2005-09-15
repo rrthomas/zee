@@ -242,8 +242,7 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
         astr_ncat(bs, cp->match, cp->matchsize);
         if (astr_cmp(as, bs) != 0)
           thistab = COMPLETION_NOTCOMPLETING;
-        astr_cpy(as, bs);
-        astr_delete(bs);
+        astr_cpy_delete(as, bs);
         break;
       case COMPLETION_NOTMATCHED:
         ding();

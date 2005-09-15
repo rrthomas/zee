@@ -92,6 +92,13 @@ astr astr_cpy(astr as, const astr src)
   return astr_ncpy(as, src->text, src->len);
 }
 
+astr astr_cpy_delete(astr as, const astr src)
+{
+  astr_cpy(as, src);
+  astr_delete(src);
+  return as;
+}
+
 astr astr_cpy_cstr(astr as, const char *s)
 {
   assert(s != NULL);
@@ -129,8 +136,7 @@ astr astr_cat_char(astr as, int c)
 
 astr astr_cat_delete(astr as, const astr src)
 {
-  assert(src != NULL);
-  astr_ncat(as, src->text, src->len);
+  astr_cat(as, src);
   astr_delete(src);
   return as;
 }
@@ -155,8 +161,7 @@ astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t cs
   tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
   astr_truncate(as, pos);
   astr_ncat(as, s, csize);
-  astr_cat(as, tail);
-  astr_delete(tail);
+  astr_cat_delete(as, tail);
 
   return as;
 }

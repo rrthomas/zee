@@ -294,7 +294,7 @@ static astr find_eolstr(astr as)
  * Read the file contents into a string.
  * Return quietly if the file doesn't exist.
  */
-static astr file_read(astr *as, const char *filename)
+astr file_read(astr *as, const char *filename)
 {
   int ok = TRUE;
   FILE *fp;
@@ -307,7 +307,7 @@ static astr file_read(astr *as, const char *filename)
   }
 
   if (ok == FALSE) {
-    if (errno != ENOENT)
+    if (cur_bp && errno != ENOENT)
       minibuf_write("%s: %s", filename, strerror(errno));
     return NULL;
   } else

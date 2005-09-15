@@ -94,7 +94,7 @@ that value, otherwise with the current column value.
 
   assert(cur_bp);
 
-  zasprintf(&buf, "%d", lastflag & FLAG_SET_UNIARG ? uniarg : (int)(cur_bp->pt.o + 1));
+  zasprintf(&buf, "%d", (argc > 0) ? uniarg : (int)(cur_bp->pt.o + 1));
   set_variable("fill-column", buf);
   free(buf);
 }
@@ -833,6 +833,36 @@ lower case.
       break;
     }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+}
+END_DEFUN
+
+DEFUN_INT("execute-command", execute_command)
+/*+
+Read command or macro name, then call it.
++*/
+{
+  astr name, msg = astr_new();
+  Function func;
+  Macro *mp;
+
+  if (lastflag & FLAG_SET_UNIARG)
+    astr_afmt(msg, "%d M-x ", uniarg);
+  else
+    astr_cat_cstr(msg, "M-x ");
+
+  name = minibuf_read_function_name(astr_cstr(msg));
+  astr_delete(msg);
+  if (name == NULL)
+    return FALSE;
+
+  if ((func = get_function(astr_cstr(name))))
+    ok = func((lastflag & FLAG_SET_UNIARG) ? 1 : 0, uniarg, NULL);
+  else if ((mp = get_macro(astr_cstr(name))))
+    ok = call_macro(mp);
+  else
+    ok = FALSE;
+
+  astr_delete(name);
 }
 END_DEFUN
 

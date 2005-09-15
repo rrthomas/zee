@@ -27,7 +27,6 @@ zee_base_SOURCES =				\
 	astr.h					\
 	zmalloc.h				\
 	zmalloc.c				\
-	eval.c					\
 	parser.c				\
 	basic.c					\
 	bind.c					\
