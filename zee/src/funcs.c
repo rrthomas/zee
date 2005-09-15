@@ -858,7 +858,7 @@ Read command or macro name, then call it.
   if ((func = get_function(astr_cstr(name))))
     ok = func((lastflag & FLAG_SET_UNIARG) ? 1 : 0, uniarg, NULL);
   else if ((mp = get_macro(astr_cstr(name))))
-    ok = call_macro(mp);
+    call_macro(mp);
   else
     ok = FALSE;
 

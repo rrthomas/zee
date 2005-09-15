@@ -30,17 +30,14 @@
 #include "extern.h"
 
 /*
- * Emit an error sound.
- * Also, calls cancel_mbd_macro() and sets FLAG_GOT_ERROR.
+ * Emit an error sound and cancel any macro definition.
  */
 void ding(void)
 {
-  if (thisflag & FLAG_DEFINING_MACRO)
-    cancel_kbd_macro();
-
   term_beep();
 
-  thisflag |= FLAG_GOT_ERROR;
+  if (thisflag & FLAG_DEFINING_MACRO)
+    cancel_kbd_macro();
 }
 
 #define MAX_KEY_BUF	16

@@ -268,8 +268,6 @@ enum {
 #define FLAG_SET_UNIARG                 0x0010
 /* We are defining a macro */
 #define FLAG_DEFINING_MACRO             0x0020
-/* Encountered an error */
-#define FLAG_GOT_ERROR                  0x0040
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

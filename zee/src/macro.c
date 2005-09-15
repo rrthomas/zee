@@ -153,31 +153,20 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 }
 END_DEFUN
 
-int call_macro(Macro *mp)
+void call_macro(Macro *mp)
 {
-  int ret = TRUE;
-  int old_thisflag = thisflag;
-  int old_lastflag = lastflag;
   size_t i;
 
   /* The loop termination condition is really i >= 0, but unsigned
      types are always >= 0, and we can't easily get SIZE_T_MAX. */
   for (i = vec_items(mp->keys) - 1; i < vec_items(mp->keys); i--)
     ungetkey(vec_item(mp->keys, i, size_t));
-
-  if (lastflag & FLAG_GOT_ERROR)
-    ret = FALSE;
-
-  thisflag = old_thisflag;
-  lastflag = old_lastflag;
-
-  return ret;
 }
 
 DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with C-x (.
-A prefix argument serves as a repeat count.  Zero means repeat until error.
+A prefix argument serves as a repeat count.
 
 To make a macro permanent so you can call it even after
 defining others, use M-x name-last-kbd-macro.
@@ -192,15 +181,8 @@ defining others, use M-x name-last-kbd-macro.
     assert(cur_bp);
 
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-    if (uniarg == 0)
-      while (call_macro(cur_mp));
-    else {
-      for (i = 0; i < uniarg; ++i)
-        if (!call_macro(cur_mp)) {
-          ok = FALSE;
-          break;
-        }
-    }
+    for (i = 0; i < uniarg; ++i)
+      call_macro(cur_mp);
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   }
 }
