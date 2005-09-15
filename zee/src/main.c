@@ -151,33 +151,6 @@ static void open_file_at(char *path, size_t lineno)
   resync_display();
 }
 
-static list lisp_read(astr as)
-{
-  list lp = list_new();
-
-  lisp_parse_init(as);
-  lisp_parse(lp);
-
-  return lp;
-}
-
-static list lisp_read_file(const char *file)
-{
-  list lp;
-  FILE *fp = fopen(file, "r");
-  astr as;
-
-  if (fp == NULL)
-    return NULL;
-
-  as = astr_fread(fp);
-  fclose(fp);
-  lp = lisp_read(as);
-  astr_delete(as);
-
-  return lp;
-}
-
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
@@ -193,7 +166,7 @@ int main(int argc, char **argv)
     case 'e':
       {
         astr bs = astr_cpy_cstr(astr_new(), optarg);
-        lp = lisp_read(bs);
+        lp = cmd_read(bs);
         astr_delete(bs);
         evalList(lp);
         leWipe(lp);
@@ -201,7 +174,7 @@ int main(int argc, char **argv)
       }
       break;
     case 'l':
-      lp = lisp_read_file(optarg);
+      lp = cmd_read_file(optarg);
       evalList(lp);
       leWipe(lp);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
@@ -262,7 +235,7 @@ int main(int argc, char **argv)
 
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
-      lp = lisp_read_file(astr_cstr(as));
+      lp = cmd_read_file(astr_cstr(as));
       evalList(lp);
       astr_delete(as);
       leWipe(lp);
@@ -294,7 +267,7 @@ int main(int argc, char **argv)
     minibuf_write(about_minibuf_str);
 
     /* Load default bindings file. */
-    lp = lisp_read_file(PATH_DATA "/key_bindings.el");
+    lp = cmd_read_file(PATH_DATA "/key_bindings.el");
     evalList(lp);
     leWipe(lp);
 

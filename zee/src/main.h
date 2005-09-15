@@ -285,13 +285,13 @@ enum {
 #endif
 
 /* Define an interactive function */
-#define DEFUN(lisp_name, c_func) \
+#define DEFUN(cmd_name, c_func) \
   int F_ ## c_func(list *lp) \
   { \
     int uniused = lp && *lp != NULL, ok = TRUE;
 
-#define DEFUN_INT(lisp_name, c_func) \
-  DEFUN(lisp_name, c_func) \
+#define DEFUN_INT(cmd_name, c_func) \
+  DEFUN(cmd_name, c_func) \
   int uniarg = 1; \
   if (uniused) { \
     uniarg = evalCastLeToInt(*lp); \
@@ -307,13 +307,8 @@ enum {
   F_ ## c_func(NULL)
 
 /* Call an interactive function with an universal argument */
-list funcall_arg_uniarg;
-int funcall_arg_ok;
 #define FUNCALL_ARG(c_func, uniarg) \
-  (funcall_arg_uniarg = evalCastIntToLe(uniarg), \
-   funcall_arg_ok = F_ ## c_func(&funcall_arg_uniarg), \
-   leWipe(funcall_arg_uniarg), \
-   funcall_arg_ok)
+  execute_command(F_ ## c_func, uniarg)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

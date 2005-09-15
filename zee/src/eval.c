@@ -84,15 +84,22 @@ void leWipe(list lp)
   }
 }
 
-static int execute_function(const char *name, int uniarg)
+int execute_command(Function func, int uniarg)
+{
+  list arg = evalCastIntToLe(uniarg);
+  int ok = func(uniarg ? &arg : NULL);
+  leWipe(arg);
+  return ok;
+}
+
+static int execute_command_or_macro(const char *name, int uniarg)
 {
   Function func;
   Macro *mp;
 
-  if ((func = get_function(name))) {
-    list arg = evalCastIntToLe(uniarg);
-    return func(uniarg ? &arg : NULL);
-  } else if ((mp = get_macro(name)))
+  if ((func = get_function(name)))
+    return execute_command(func, uniarg);
+  else if ((mp = get_macro(name)))
     return call_macro(mp);
   else
     return FALSE;
@@ -115,7 +122,7 @@ Read function name, then read its arguments and call it.
   if (name == NULL)
     return FALSE;
 
-  ok = execute_function(astr_cstr(name), uniarg);
+  ok = execute_command_or_macro(astr_cstr(name), uniarg);
   astr_delete(name);
 }
 END_DEFUN

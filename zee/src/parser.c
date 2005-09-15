@@ -35,7 +35,7 @@ static ptrdiff_t pos;
 static int bol = TRUE;
 static astr expr;
 
-void lisp_parse_init(astr as)
+void cmd_parse_init(astr as)
 {
   pos = 0;
   assert((expr = as));
@@ -142,7 +142,7 @@ static astr gettok(int *eof)
   return tok;
 }
 
-void lisp_parse(list lp)
+void cmd_parse(list lp)
 {
   int eof = FALSE;
   astr tok;
@@ -154,4 +154,31 @@ void lisp_parse(list lp)
   } while (!eof);
 
   astr_delete(tok);
+}
+
+list cmd_read(astr as)
+{
+  list lp = list_new();
+
+  cmd_parse_init(as);
+  cmd_parse(lp);
+
+  return lp;
+}
+
+list cmd_read_file(const char *file)
+{
+  list lp;
+  FILE *fp = fopen(file, "r");
+  astr as;
+
+  if (fp == NULL)
+    return NULL;
+
+  as = astr_fread(fp);
+  fclose(fp);
+  lp = cmd_read(as);
+  astr_delete(as);
+
+  return lp;
 }

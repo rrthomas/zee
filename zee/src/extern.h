@@ -88,6 +88,7 @@ void evalList(list lp);
 int evalCastLeToInt(list levalue);
 list evalCastIntToLe(int intvalue);
 void leWipe(list lp);
+int execute_command(Function func, int uniarg);
 
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
@@ -193,8 +194,10 @@ astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, Histo
 void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
-void lisp_parse_init(astr as);
-void lisp_parse(list lp);
+void cmd_parse_init(astr as);
+void cmd_parse(list lp);
+list cmd_read(astr as);
+list cmd_read_file(const char *file);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);
