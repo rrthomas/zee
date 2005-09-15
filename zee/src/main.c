@@ -242,7 +242,7 @@ int main(int argc, char **argv)
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
-    bind_key(strtochord("\\M-x"), F_execute_command);
+    bind_key(strtochord("M-x"), F_execute_command);
 
     /* Open file given on command line. */
     while (*argv) {
