@@ -670,15 +670,9 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
-  if (last_command() == F_mark_paragraph) {
-    FUNCALL(exchange_point_and_mark);
-    FUNCALL_ARG(forward_paragraph, uniarg);
-    FUNCALL(exchange_point_and_mark);
-  } else {
-    FUNCALL_ARG(forward_paragraph, uniarg);
-    FUNCALL(set_mark_command);
-    FUNCALL_ARG(backward_paragraph, uniarg);
-  }
+  FUNCALL_ARG(forward_paragraph, uniarg);
+  FUNCALL(set_mark_command);
+  FUNCALL_ARG(backward_paragraph, uniarg);
 }
 END_DEFUN
 

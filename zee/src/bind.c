@@ -118,7 +118,6 @@ void process_key(size_t key)
       list lp = evalCastIntToLe(last_uniarg);
       p->func(((lastflag & FLAG_SET_UNIARG) != 0) ? &lp : NULL);
       leWipe(lp);
-      _last_command = p->func;
     }
   }
 
@@ -126,11 +125,6 @@ void process_key(size_t key)
      before the function call, to cope with start-kbd-macro */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro();
-}
-
-Function last_command(void)
-{
-  return _last_command;
 }
 
 /*--------------------------------------------------------------------------
