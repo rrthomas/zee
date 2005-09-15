@@ -30,32 +30,38 @@
 
 #include "main.h"
 #include "extern.h"
-#include "eval.h"
 
 
-static le *variable_find(le *varlist, const char *key)
+typedef struct {
+  const char *key;
+  const char *value;
+} vpair;
+
+static list variable_find(list varlist, const char *key)
 {
   if (key != NULL)
-    for (; varlist; varlist = varlist->list_next)
-      if (!strcmp(key, varlist->data))
+    for (; varlist; varlist = list_next(varlist))
+      if (!strcmp(key, ((vpair *)(varlist->item))->key))
         return varlist;
 
   return NULL;
 }
 
-static void variable_update(le **varlist, const char *key, const char *value)
+static void variable_update(list varlist, const char *key, const char *value)
 {
   if (key && value) {
-    le *temp = variable_find(*varlist, key);
+    list temp = variable_find(varlist, key);
 
-    if (temp)
-      free(temp->data);
+    if (temp && temp->item)
+      free((void *)(((vpair *)(temp->item))->value));
     else {
-      temp = leNew(key);
-      *varlist = leAddHead(*varlist, temp);
+      vpair *vp = zmalloc(sizeof(vpair));
+      vp->key = zstrdup(key);
+      list_prepend(varlist, vp);
+      temp = list_first(varlist);
     }
 
-    temp->data = zstrdup(value);
+    ((vpair *)(temp->item))->value = zstrdup(value);
   }
 }
 
@@ -89,7 +95,7 @@ void set_variable(const char *var, const char *val)
      a buffer. */
   if (cur_bp) {
     if (var && val)
-      variable_update(&cur_bp->vars, var, val);
+      variable_update(cur_bp->vars, var, val);
   } else {
     struct var_entry *p = get_variable_default(var);
     if (var)
@@ -103,9 +109,9 @@ const char *get_variable(const char *var)
 
   /* Have to be able to run this before the first buffer is created. */
   if (cur_bp) {
-    le *temp = variable_find(cur_bp->vars, var);
-    if (temp && temp->data)
-      s = temp->data;
+    list temp = variable_find(cur_bp->vars, var);
+    if (temp && temp->item)
+      s = (char *)(temp->item);
   }
 
   if (s == NULL) {
@@ -173,33 +179,46 @@ astr minibuf_read_variable_name(char *msg)
   return ms;
 }
 
-DEFUN_INT("set-variable", set_variable)
+DEFUN("set-variable", set_variable)
 /*+
-Set a variable value to the user-specified value.
+Set a variable to the specified value.
 +*/
 {
   char *fmt;
   astr var, val = NULL;
 
-  assert(cur_bp);
+  if (uniused) {
+    const char *newvalue = NULL;
 
-  if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
-    ok = FALSE;
-  else {
-    struct var_entry *p = get_variable_default(astr_cstr(var));
-    fmt = p ? p->fmt : "";
-    if (!strcmp(fmt, "b")) {
-      int i;
-      if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)
-        ok = cancel();
-      else
-        astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
-    } else /* Non-boolean variable. */
-      if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
-        ok = cancel();
+    if (*lp != NULL) {
+      const char *name = (char *)((*lp)->item);
+      *lp = list_next(*lp);
+      if (*lp != NULL) {
+        newvalue = (char *)((*lp)->item);
+        *lp = list_next(*lp);
+      }
 
-    if (ok)
-      set_variable(astr_cstr(var), astr_cstr(val));
+      set_variable(name, newvalue);
+    }
+  } else {
+    if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
+      ok = FALSE;
+    else {
+      struct var_entry *p = get_variable_default(astr_cstr(var));
+      fmt = p ? p->fmt : "";
+      if (!strcmp(fmt, "b")) {
+        int i;
+        if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)
+          ok = cancel();
+        else
+          astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
+      } else                      /* Non-boolean variable. */
+        if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
+          ok = cancel();
+
+      if (ok)
+        set_variable(astr_cstr(var), astr_cstr(val));
+    }
   }
 }
 END_DEFUN

@@ -46,7 +46,7 @@
 #include "main.h"
 #include "paths.h"
 #include "extern.h"
-#include "eval.h"
+
 
 #define VERSION_STRING TEXT_NAME " " VERSION
 
@@ -151,11 +151,38 @@ static void open_file_at(char *path, size_t lineno)
   resync_display();
 }
 
+static list lisp_read(astr as)
+{
+  list lp = list_new();
+
+  lisp_parse_init(as);
+  lisp_parse(lp);
+
+  return lp;
+}
+
+static list lisp_read_file(const char *file)
+{
+  list lp;
+  FILE *fp = fopen(file, "r");
+  astr as;
+
+  if (fp == NULL)
+    return NULL;
+
+  as = astr_fread(fp);
+  fclose(fp);
+  lp = lisp_read(as);
+  astr_delete(as);
+
+  return lp;
+}
+
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
   astr as = astr_new();
-  le *list;
+  list lp;
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
@@ -166,17 +193,17 @@ int main(int argc, char **argv)
     case 'e':
       {
         astr bs = astr_cpy_cstr(astr_new(), optarg);
-        list = lisp_read(bs);
+        lp = lisp_read(bs);
         astr_delete(bs);
-        leEval(list);
-        leWipe(list);
+        evalList(lp);
+        leWipe(lp);
         eflag = TRUE;
       }
       break;
     case 'l':
-      list = lisp_read_file(optarg);
-      leEval(list);
-      leWipe(list);
+      lp = lisp_read_file(optarg);
+      evalList(lp);
+      leWipe(lp);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
@@ -231,14 +258,14 @@ int main(int argc, char **argv)
 
   if (!bflag) {
     if (!qflag) {
-      le *list;
+      list lp;
 
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
-      list = lisp_read_file(astr_cstr(as));
-      leEval(list);
+      lp = lisp_read_file(astr_cstr(as));
+      evalList(lp);
       astr_delete(as);
-      leWipe(list);
+      leWipe(lp);
     }
 
     term_init();
@@ -267,9 +294,9 @@ int main(int argc, char **argv)
     minibuf_write(about_minibuf_str);
 
     /* Load default bindings file. */
-    list = lisp_read_file(PATH_DATA "/key_bindings.el");
-    leEval(list);
-    leWipe(list);
+    lp = lisp_read_file(PATH_DATA "/key_bindings.el");
+    evalList(lp);
+    leWipe(lp);
 
     /* Display help or error message. */
     term_display();

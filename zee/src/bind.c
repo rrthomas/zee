@@ -115,9 +115,9 @@ void process_key(size_t key)
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
       }
     } else {
-      le *list = evalCastIntToLe(last_uniarg);
-      p->func(((lastflag & FLAG_SET_UNIARG) != 0) ? &list : NULL);
-      leWipe(list);
+      list lp = evalCastIntToLe(last_uniarg);
+      p->func(((lastflag & FLAG_SET_UNIARG) != 0) ? &lp : NULL);
+      leWipe(lp);
       _last_command = p->func;
     }
   }
@@ -258,10 +258,10 @@ sequence.
   ok = FALSE;
 
   if (uniused) {
-    keystr = astr_cpy_cstr(astr_new(), (*node)->data);
-    *node = (*node)->list_next;
-    name = astr_cpy_cstr(astr_new(), (*node)->data);
-    *node = (*node)->list_next;
+    keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    *lp = list_next(*lp);
+    name = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    *lp = list_next(*lp);
   } else {
     astr as;
 

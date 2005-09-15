@@ -29,8 +29,6 @@
 #include "vector.h"
 #include "list.h"
 #include "astr.h"
-#include "parser.h"
-#include "eval.h"
 
 #undef TRUE
 #define TRUE                            1
@@ -50,7 +48,7 @@
  * The type of a Zee exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function)(le **branch);
+typedef int (*Function)(list *branch);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -156,7 +154,7 @@ struct Buffer {
   int flags;
 
   /* Buffer-local variables */
-  le *vars;
+  list vars;
 
   /* The total number of lines in the buffer */
   size_t num_lines;
@@ -287,21 +285,17 @@ enum {
 #endif
 
 /* Define an interactive function */
-/* N.B. The function type is actually eval_cb */
 #define DEFUN(lisp_name, c_func) \
-  int F_ ## c_func(le **node) \
+  int F_ ## c_func(list *lp) \
   { \
-    int uniused = *node != NULL, ok = TRUE; \
-    le *branch = *node;
+    int uniused = lp && *lp != NULL, ok = TRUE;
 
 #define DEFUN_INT(lisp_name, c_func) \
   DEFUN(lisp_name, c_func) \
   int uniarg = 1; \
   if (uniused) { \
-    le *value_le = evaluateNode(node); \
-    uniarg = evalCastLeToInt(value_le); \
-    leWipe(value_le); \
-    (void)branch; \
+    uniarg = evalCastLeToInt(*lp); \
+    *lp = list_next(*lp); \
   }
 
 #define END_DEFUN \
@@ -313,7 +307,7 @@ enum {
   F_ ## c_func(NULL)
 
 /* Call an interactive function with an universal argument */
-le *funcall_arg_uniarg;
+list funcall_arg_uniarg;
 int funcall_arg_ok;
 #define FUNCALL_ARG(c_func, uniarg) \
   (funcall_arg_uniarg = evalCastIntToLe(uniarg), \

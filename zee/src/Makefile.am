@@ -28,12 +28,7 @@ zee_base_SOURCES =				\
 	zmalloc.h				\
 	zmalloc.c				\
 	eval.c					\
-	eval.h					\
-	lists.c					\
-	lists.h					\
 	parser.c				\
-	parser.h				\
-	lisp.c					\
 	basic.c					\
 	bind.c					\
 	buffer.c				\

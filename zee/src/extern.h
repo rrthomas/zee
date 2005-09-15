@@ -82,6 +82,13 @@ size_t popup_pos(void);
 void popup_scroll_up(void);
 void popup_scroll_down(void);
 
+/* eval.c ----------------------------------------------------------------- */
+int evaluateNode(list *node);
+void evalList(list lp);
+int evalCastLeToInt(list levalue);
+list evalCastIntToLe(int intvalue);
+void leWipe(list lp);
+
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);
@@ -160,11 +167,6 @@ int self_insert_command(size_t key);
 int delete_char(void);
 int backward_delete_char(void);
 
-/* lisp.c ----------------------------------------------------------------- */
-le *lisp_read(astr as);
-le *lisp_read_cstr(const char *string);
-le *lisp_read_file(const char *file);
-
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
 void add_cmd_to_macro(void);
@@ -189,6 +191,10 @@ int minibuf_read_boolean(const char *fmt, ...);
 astr minibuf_read_dir(const char *fmt, const char *value, ...);
 astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
 void minibuf_clear(void);
+
+/* parser.c --------------------------------------------------------------- */
+void lisp_parse_init(astr as);
+void lisp_parse(list lp);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);
@@ -250,6 +256,6 @@ astr minibuf_read_variable_name(char *msg);
  * Declare external C functions for interactive commands.
  */
 #define X(cmd_name, c_name) \
-  extern int F_ ## c_name(le **branch);
+  extern int F_ ## c_name(list *branch);
 #include "tbl_funcs.h"
 #undef X

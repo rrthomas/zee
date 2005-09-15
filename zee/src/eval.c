@@ -27,105 +27,62 @@
 
 #include "main.h"
 #include "extern.h"
-#include "eval.h"
 
 
-static le *eval_cb_command_helper(Function f, le **list)
+int evaluateNode(list *node)
 {
-  f(list);
-  return *list;
-}
-
-#define X(cmd_name, c_name) \
-  static le *eval_cb_ ## c_name(le **list) \
-  { \
-    return eval_cb_command_helper(F_ ## c_name, list); \
-  }
-#include "tbl_funcs.h"
-#undef X
-
-
-static le *eval_cb_setq(le **list)
-{
-  char *newvalue = NULL;
-
-  if (*list != NULL) {
-    char *name = (*list)->data;
-    *list = (*list)->list_next;
-    if (*list != NULL) {
-      newvalue = (*list)->data;
-      *list = (*list)->list_next;
-    }
-
-    set_variable(name, newvalue);
-  }
-
-  return NULL;
-}
-
-
-static evalLookupNode evalTable[] = {
-  { "setq"	, eval_cb_setq		},
-
-#define X(cmd_name, c_name) \
-	{ cmd_name, eval_cb_ ## c_name },
-#include "tbl_funcs.h"
-#undef X
-
-  { NULL	, NULL			}
-};
-
-
-eval_cb lookupFunction(char *name)
-{
-  int i;
-  for (i = 0; evalTable[i].word; i++)
-    if (!strcmp(evalTable[i].word, name))
-      return evalTable[i].callback;
-
-  return NULL;
-}
-
-
-le *evaluateNode(le **node)
-{
-  eval_cb prim;
+  Function prim;
 
   if (*node == NULL)
-    return NULL;
+    return FALSE;
 
-  assert((*node)->data);
-  prim = lookupFunction((*node)->data);
+  assert((*node)->item);
+  prim = get_function((char *)((*node)->item));
 
-  *node = (*node)->list_next;
+  *node = list_next(*node);
 
   if (prim)
     return prim(node);
-  else
-    return *node;
+
+  return FALSE;
 }
 
-
-int evalCastLeToInt(const le *levalue)
+void evalList(list lp)
 {
-  if (levalue == NULL || levalue->data == NULL)
+  for (lp = list_next(lp); lp->item; evaluateNode(&lp))
+    ;
+}
+
+int evalCastLeToInt(list levalue)
+{
+  if (levalue->item == NULL)
     return 0;
 
-  return atoi(levalue->data);
+  return atoi((char *)(levalue->item));
 }
 
-le *evalCastIntToLe(int intvalue)
+list evalCastIntToLe(int intvalue)
 {
   char *buf;
-  le *list;
+  list lp = list_new();
 
   zasprintf(&buf, "%d", intvalue);
-  list = leNew(buf);
-  free(buf);
+  lp->item = buf;
 
-  return list;
+  return lp;
 }
 
+void leWipe(list lp)
+{
+  if (lp) {
+    list l;
+
+    for (l = list_first(lp); l != lp; l = list_next(l))
+      free(l->item);
+
+    list_delete(lp);
+  }
+}
 
 static int execute_function(const char *name, int uniarg)
 {
@@ -133,7 +90,7 @@ static int execute_function(const char *name, int uniarg)
   Macro *mp;
 
   if ((func = get_function(name))) {
-    le *arg = evalCastIntToLe(uniarg);
+    list arg = evalCastIntToLe(uniarg);
     return func(uniarg ? &arg : NULL);
   } else if ((mp = get_macro(name)))
     return call_macro(mp);

@@ -86,12 +86,7 @@ void list_append(list l, void *i)
 /* Return the first item of a list, or NULL if the list is empty */
 void *list_head(list l)
 {
-  list p = l->next;
-
-  if (p == l)
-    return NULL;
-
-  return p->item;
+  return l == l->next ? NULL : l->next->item;
 }
 
 /* Remove the first item of a list, returning the item, or NULL if the

@@ -28,11 +28,11 @@
 #include "extern.h"
 
 
-static list toktype_buf;            /* Pushed back token types */
-static list tok_buf;            /* Pushed back tokens */
 static size_t line;
 static ptrdiff_t pos;
-static int bol = TRUE, bof = TRUE;
+/* FIXME: either use \n tokens to limit each exp to one line, or
+   remove bol */
+static int bol = TRUE;
 static astr expr;
 
 void lisp_parse_init(astr as)
@@ -40,15 +40,7 @@ void lisp_parse_init(astr as)
   pos = 0;
   assert((expr = as));
   line = 0;
-  bol = bof = TRUE;
-  toktype_buf = list_new();
-  tok_buf = list_new();
-}
-
-void lisp_parse_end(void)
-{
-  list_delete(toktype_buf);
-  list_delete(tok_buf);
+  bol = TRUE;
 }
 
 static int getachar(void)
@@ -101,23 +93,21 @@ static int getchar_skipspace(void) {
   } while (TRUE);
 }
 
-static astr gettok(enum tokenname *toktype)
+static astr gettok(int *eof)
 {
   int c;
 
-  if (list_empty(toktype_buf)) {
-    astr tok = astr_new();
+  astr tok = astr_new();
 
-    switch ((c = getchar_skipspace())) {
-    case '\'':
-      *toktype = T_QUOTE;
-      break;
+  switch ((c = getchar_skipspace())) {
+  case EOF:
+    *eof = TRUE;
+    break;
 
-    case EOF:
-      *toktype = T_CLOSE;
-      break;
+  case '\"':                    /* string */
+    {
+      int eow = FALSE;
 
-    case '\"':                    /* string */
       do {
         switch ((c = getachar())) {
         case '\n':
@@ -125,65 +115,43 @@ static astr gettok(enum tokenname *toktype)
           ungetachar();
           /* FALLTHROUGH */
         case '\"':
-          *toktype = T_WORD;
+          eow = TRUE;
           break;
         default:
           astr_cat_char(tok, (char)c);
         }
-      } while (*toktype != T_WORD);
-      break;
-
-    default:                      /* word */
-      do {
-        astr_cat_char(tok, (char)c);
-
-        if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
-          ungetachar();
-
-          if (!astr_cmp_cstr(tok, "quote"))
-            *toktype = T_QUOTE;
-          else {
-            astr_truncate(tok, -1);
-            *toktype = T_WORD;
-          }
-
-          break;
-        }
-
-        c = getachar();
-      } while (TRUE);
+      } while (!eow);
     }
+    break;
 
-    list_append(toktype_buf, (void *)*toktype);
-    list_append(tok_buf, tok);
+  default:                      /* word */
+    do {
+      astr_cat_char(tok, (char)c);
+
+      if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
+        ungetachar();
+
+        astr_truncate(tok, -1);
+        break;
+      }
+
+      c = getachar();
+    } while (TRUE);
   }
 
-  *toktype = (enum tokenname)list_behead(toktype_buf);
-  return (astr)list_behead(tok_buf);
+  return tok;
 }
 
-struct le *lisp_parse(struct le *list)
+void lisp_parse(list lp)
 {
-  int isquoted = FALSE;
+  int eof = FALSE;
+  astr tok;
 
   do {
-    enum tokenname toktype = T_CLOSE;
-    astr tok = gettok(&toktype);
+    tok = gettok(&eof);
+    if (!eof)
+      list_append(lp, (void *)astr_cstr(tok));
+  } while (!eof);
 
-    switch (toktype) {
-    case T_CLOSE:
-      astr_delete(tok);
-      return list;
-
-    case T_QUOTE:
-      isquoted = TRUE;
-      break;
-
-    case T_WORD:
-      list = leAddDataElement(list, astr_cstr(tok), isquoted);
-      break;
-    }
-
-    astr_delete(tok);
-  } while (TRUE);
+  astr_delete(tok);
 }
