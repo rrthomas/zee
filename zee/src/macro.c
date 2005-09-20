@@ -153,6 +153,9 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 }
 END_DEFUN
 
+/* FIXME: macros should be executed immediately and abort on error;
+   they should be stored as a macro list, not a series of
+   keystrokes. */
 void call_macro(Macro *mp)
 {
   size_t i;
