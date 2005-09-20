@@ -317,7 +317,7 @@ int edit_navigate_backward_char(void)
 
 DEFUN_INT("edit-navigate-backward-char", edit_navigate_backward_char)
 /*+
-Move point left N characters (right if N is negative).
+Move point left one character.
 On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
@@ -347,7 +347,7 @@ int edit_navigate_forward_char(void)
 
 DEFUN_INT("edit-navigate-forward-char", edit_navigate_forward_char)
 /*+
-Move point right N characters (left if N is negative).
+Move point right one character.
 On reaching end of buffer, stop and signal error.
 +*/
 {

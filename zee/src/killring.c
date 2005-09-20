@@ -78,7 +78,6 @@ static int kill_line(void)
 DEFUN_INT("kill-line", kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
-With prefix argument, kill that many lines from point.
 +*/
 {
   if (!(lastflag & FLAG_DONE_KILL))

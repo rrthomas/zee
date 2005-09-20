@@ -544,9 +544,7 @@ END_DEFUN
 
 DEFUN_INT("mark-sexp", mark_sexp)
 /*+
-Set mark ARG sexps from point.
-The place mark goes is the same place C-M-f would
-move to with the same argument.
+Set mark a sexp from point.
 +*/
 {
   FUNCALL(set_mark_command);
@@ -571,7 +569,7 @@ END_DEFUN
 
 DEFUN_INT("forward-paragraph", forward_paragraph)
 /*+
-Move forward to end of paragraph.  With argument N, do it N times.
+Move forward to end of paragraph.
 +*/
 {
   while (edit_navigate_down_line() && is_empty_line())
@@ -710,7 +708,7 @@ END_DEFUN
 
 DEFUN_INT("upcase-word", upcase_word)
 /*+
-Convert following word (or argument N words) to upper case, moving over.
+Convert following word to upper case, moving over.
 +*/
 {
   ok = setcase_word(UPPERCASE);
@@ -719,8 +717,8 @@ END_DEFUN
 
 DEFUN_INT("capitalize-word", capitalize_word)
 /*+
-Capitalize the following word (or argument N words), moving over.
-This gives the word(s) a first character in upper case and the rest
+Capitalize the following word, moving over.
+This gives the word a first character in upper case and the rest
 lower case.
 +*/
 {
@@ -731,6 +729,7 @@ END_DEFUN
 DEFUN_INT("execute-command", execute_command)
 /*+
 Read command or macro name, then call it.
+FIXME: Make it work non-interactively.
 +*/
 {
   astr name, msg = astr_new();

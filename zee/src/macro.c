@@ -166,7 +166,6 @@ void call_macro(Macro *mp)
 DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with C-x (.
-A prefix argument serves as a repeat count.
 
 To make a macro permanent so you can call it even after
 defining others, use M-x name-last-kbd-macro.
