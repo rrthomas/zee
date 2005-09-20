@@ -398,8 +398,7 @@ DEFUN_INT("scroll-down", scroll_down)
 Scroll text of current window downward near full screen.
 +*/
 {
-  if (!scroll_down())
-    ok = FALSE;
+  ok = scroll_down();
 }
 END_DEFUN
 
@@ -419,7 +418,6 @@ DEFUN_INT("scroll-up", scroll_up)
 Scroll text of current window upward near full screen.
 +*/
 {
-  if (!scroll_up())
-    ok = FALSE;
+  ok = scroll_up();
 }
 END_DEFUN
