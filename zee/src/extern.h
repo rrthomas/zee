@@ -199,8 +199,8 @@ int count_lines(Point pt1, Point pt2);
 void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);
-Point line_beginning_position(int count);
-Point line_end_position(int count);
+Point line_beginning_position(void);
+Point line_end_position(void);
 
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);

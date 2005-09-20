@@ -112,7 +112,7 @@ Point point_max(Buffer *bp)
   return pt;
 }
 
-Point line_beginning_position(int count)
+Point line_beginning_position(void)
 {
   Point pt;
 
@@ -123,18 +123,29 @@ Point line_beginning_position(int count)
   pt = cur_bp->pt;
   pt.o = 0;
 
-  count--;
-  for (; count < 0 && list_prev(pt.p) != cur_bp->lines; pt.n--, count++)
-      pt.p = list_prev(pt.p);
-  for (; count > 0 && list_next(pt.p) != cur_bp->lines; pt.n++, count--)
+  if (list_next(pt.p) != cur_bp->lines) {
       pt.p = list_next(pt.p);
+      pt.n++;
+  }
 
   return pt;
 }
 
-Point line_end_position(int count)
+Point line_end_position(void)
 {
-  Point pt = line_beginning_position(count);
+  Point pt;
+
+  assert(cur_bp);
+
+  /* Copy current point position without offset (beginning of
+   * line). */
+  pt = cur_bp->pt;
   pt.o = astr_len(pt.p->item);
+
+  if (list_prev(pt.p) != cur_bp->lines) {
+    pt.p = list_prev(pt.p);
+    pt.n--;
+  }
+
   return pt;
 }

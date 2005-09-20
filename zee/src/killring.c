@@ -46,9 +46,12 @@ static int kill_line(void)
     return FALSE;
 
   if (!eolp()) {
-    size_t len = astr_len(cur_bp->pt.p->item) - cur_bp->pt.o;
+    size_t i, len = astr_len(cur_bp->pt.p->item) - cur_bp->pt.o;
+
     astr_ncat(kill_ring_text, astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o), (size_t)len);
-    FUNCALL_ARG(delete_char, (int)len);
+    /* FIXME: implement the next line with a repeat command */
+    for (i = 0; i < len; i++)
+      FUNCALL(delete_char);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -78,20 +81,11 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 With prefix argument, kill that many lines from point.
 +*/
 {
-  int i;
-
-  assert(cur_bp);
-
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i)
-    if (!kill_line()) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  if (!kill_line())
+    ok = FALSE;
 
   weigh_mark();
 }
@@ -173,7 +167,6 @@ END_DEFUN
 DEFUN_INT("kill-word", kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
-With argument, do this that many times.
 +*/
 {
   assert(cur_bp);
@@ -186,7 +179,7 @@ With argument, do this that many times.
   else {
     push_mark();
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-    FUNCALL_ARG(mark_word, uniarg);
+    FUNCALL(mark_word);
     FUNCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     pop_mark();
@@ -201,18 +194,17 @@ END_DEFUN
 DEFUN_INT("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
-With argument, do this that many times.
+FIXME: At the moment this kills forwards!
 +*/
 {
-  ok = FUNCALL_ARG(kill_word, (argc == 0) ? -1 : -uniarg);
+  ok = FUNCALL(kill_word);
 }
 END_DEFUN
 
 DEFUN_INT("kill-sexp", kill_sexp)
 /*+
 Kill the sexp (balanced expression) following the cursor.
-With ARG, kill that many sexps after the cursor.
-Negative arg -N means kill N sexps before the cursor.
+FIXME: Can't currently kill backwards.
 +*/
 {
   assert(cur_bp);
@@ -225,7 +217,7 @@ Negative arg -N means kill N sexps before the cursor.
   else {
     push_mark();
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-    FUNCALL_ARG(mark_sexp, uniarg);
+    FUNCALL(mark_sexp);
     FUNCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
     pop_mark();

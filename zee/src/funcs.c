@@ -281,7 +281,7 @@ Move point to the first non-whitespace character on this line.
 +*/
 {
   assert(cur_bp);
-  cur_bp->pt = line_beginning_position(0);
+  cur_bp->pt.o = 0;
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
@@ -325,20 +325,10 @@ static int forward_word(void)
 
 DEFUN_INT("forward-word", forward_word)
 /*+
-Move point forward one word (backward if the argument is negative).
-With argument, do this that many times.
+Move point forward one word.
 +*/
 {
-  int uni;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(backward_word, -uniarg);
-  else
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!forward_word()) {
-        ok = FALSE;
-        break;
-      }
+  ok = forward_word();
 }
 END_DEFUN
 
@@ -372,20 +362,9 @@ static int backward_word(void)
 DEFUN_INT("backward-word", backward_word)
 /*+
 Move backward until encountering the beginning of a word.
-With argument, do this that many times.
-If the argument is negative, move forward.
 +*/
 {
-  int uni;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(forward_word, -uniarg);
-  else
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!backward_word()) {
-        ok = FALSE;
-        break;
-      }
+  ok = backward_word();
 }
 END_DEFUN
 
@@ -487,20 +466,9 @@ int forward_sexp(void)
 DEFUN_INT("forward-sexp", forward_sexp)
 /*+
 Move forward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move backward across N balanced expressions.
 +*/
 {
-  int uni;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(backward_sexp, -uniarg);
-  else
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!forward_sexp()) {
-        ok = FALSE;
-        break;
-      }
+  ok = forward_sexp();
 }
 END_DEFUN
 
@@ -557,20 +525,9 @@ int backward_sexp(void)
 DEFUN_INT("backward-sexp", backward_sexp)
 /*+
 Move backward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move forward across N balanced expressions.
 +*/
 {
-  int uni;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(forward_sexp, -uniarg);
-  else
-    for (uni = 0; uni < uniarg; ++uni)
-      if (!backward_sexp()) {
-        ok = FALSE;
-        break;
-      }
+  ok = backward_sexp();
 }
 END_DEFUN
 
@@ -580,7 +537,7 @@ Set mark ARG words away from point.
 +*/
 {
   FUNCALL(set_mark_command);
-  if ((ok = FUNCALL_ARG(forward_word, uniarg)))
+  if ((ok = FUNCALL(forward_word)))
     FUNCALL(exchange_point_and_mark);
 }
 END_DEFUN
@@ -593,53 +550,22 @@ move to with the same argument.
 +*/
 {
   FUNCALL(set_mark_command);
-  if ((ok = FUNCALL_ARG(forward_sexp, uniarg)))
+  if ((ok = FUNCALL(forward_sexp)))
     FUNCALL(exchange_point_and_mark);
-}
-END_DEFUN
-
-DEFUN_INT("forward-line", forward_line)
-/*+
-Move N lines forward (backward if N is negative).
-Precisely, if point is on line I, move to the start of line I + N.
-+*/
-{
-  FUNCALL(beginning_of_line);
-
-  if (uniarg < 0) {
-    while (uniarg++)
-      if (!edit_navigate_up_line()) {
-        ok = FALSE;
-        break;
-      }
-  } else {
-    if (uniarg == 0)
-      uniarg = 1;
-
-    while (uniarg--)
-      if (!edit_navigate_down_line()) {
-        ok = FALSE;
-        break;
-      }
-  }
 }
 END_DEFUN
 
 DEFUN_INT("backward-paragraph", backward_paragraph)
 /*+
-Move backward to start of paragraph.  With argument N, do it N times.
+Move backward to start of paragraph.
 +*/
 {
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(forward_paragraph, -uniarg);
-  else {
-    do {
-      while (edit_navigate_up_line() && is_empty_line());
-      while (edit_navigate_up_line() && !is_empty_line());
-    } while (--uniarg > 0);
+  while (edit_navigate_up_line() && is_empty_line())
+    ;
+  while (edit_navigate_up_line() && !is_empty_line())
+    ;
 
-    FUNCALL(beginning_of_line);
-  }
+  FUNCALL(beginning_of_line);
 }
 END_DEFUN
 
@@ -648,19 +574,15 @@ DEFUN_INT("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(backward_paragraph, -uniarg);
-  else {
-    do {
-      while (edit_navigate_down_line() && is_empty_line());
-      while (edit_navigate_down_line() && !is_empty_line());
-    } while (--uniarg > 0);
+  while (edit_navigate_down_line() && is_empty_line())
+    ;
+  while (edit_navigate_down_line() && !is_empty_line())
+    ;
 
-    if (is_empty_line())
-      FUNCALL(beginning_of_line);
-    else
-      FUNCALL(end_of_line);
-  }
+  if (is_empty_line())
+    FUNCALL(beginning_of_line);
+  else
+    FUNCALL(end_of_line);
 }
 END_DEFUN
 
@@ -670,9 +592,9 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
-  FUNCALL_ARG(forward_paragraph, uniarg);
+  FUNCALL(forward_paragraph);
   FUNCALL(set_mark_command);
-  FUNCALL_ARG(backward_paragraph, uniarg);
+  FUNCALL(backward_paragraph);
 }
 END_DEFUN
 
@@ -779,20 +701,10 @@ static int setcase_word(int rcase)
 
 DEFUN_INT("downcase-word", downcase_word)
 /*+
-Convert following word (or argument N words) to lower case, moving over.
+Convert following word to lower case, moving over.
 +*/
 {
-  int uni;
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!setcase_word(LOWERCASE)) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = setcase_word(LOWERCASE);
 }
 END_DEFUN
 
@@ -801,17 +713,7 @@ DEFUN_INT("upcase-word", upcase_word)
 Convert following word (or argument N words) to upper case, moving over.
 +*/
 {
-  int uni;
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!setcase_word(UPPERCASE)) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = setcase_word(UPPERCASE);
 }
 END_DEFUN
 
@@ -822,17 +724,7 @@ This gives the word(s) a first character in upper case and the rest
 lower case.
 +*/
 {
-  int uni;
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!setcase_word(CAPITALIZE)) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = setcase_word(CAPITALIZE);
 }
 END_DEFUN
 
@@ -845,10 +737,7 @@ Read command or macro name, then call it.
   Function func;
   Macro *mp;
 
-  if (lastflag & FLAG_SET_UNIARG)
-    astr_afmt(msg, "%d M-x ", uniarg);
-  else
-    astr_cat_cstr(msg, "M-x ");
+  astr_cat_cstr(msg, "M-x ");
 
   name = minibuf_read_function_name(astr_cstr(msg));
   astr_delete(msg);
@@ -856,7 +745,7 @@ Read command or macro name, then call it.
     return FALSE;
 
   if ((func = get_function(astr_cstr(name))))
-    ok = func((lastflag & FLAG_SET_UNIARG) ? 1 : 0, uniarg, NULL);
+    ok = func(0, 0, NULL);
   else if ((mp = get_macro(astr_cstr(name))))
     call_macro(mp);
   else
@@ -909,6 +798,7 @@ current buffer, overwriting the current region.
         ok = FALSE;
       } else {
         astr out = astr_new(), s;
+        size_t i;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
           astr_cat_delete(out, s);
@@ -929,7 +819,9 @@ current buffer, overwriting the current region.
         if (cur_bp->pt.p != r.start.p
             || r.start.o != cur_bp->pt.o)
           FUNCALL(exchange_point_and_mark);
-        FUNCALL_ARG(delete_char, (int)r.size);
+        /* FIXME: implement this with a repeat call */
+        for (i = 0; i < r.size; i++)
+          FUNCALL(delete_char);
         ok = insert_nstring(out, "\n", FALSE);
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 

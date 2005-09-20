@@ -175,16 +175,8 @@ defining others, use M-x name-last-kbd-macro.
   if (cur_mp == NULL) {
     minibuf_error("No kbd macro has been defined");
     ok = FALSE;
-  } else {
-    int i;
-
-    assert(cur_bp);
-
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-    for (i = 0; i < uniarg; ++i)
-      call_macro(cur_mp);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  }
+  } else
+    call_macro(cur_mp);
 }
 END_DEFUN
 

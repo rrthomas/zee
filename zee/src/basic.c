@@ -42,7 +42,7 @@ Move point to beginning of current line.
 +*/
 {
   assert(cur_bp);
-  cur_bp->pt = line_beginning_position(uniarg);
+  cur_bp->pt = line_beginning_position();
 
   /* Change the `goalc' to the beginning of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -57,7 +57,7 @@ Move point to end of current line.
 +*/
 {
   assert(cur_bp);
-  cur_bp->pt = line_end_position(uniarg);
+  cur_bp->pt = line_end_position();
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -138,17 +138,11 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(edit_navigate_down_line, -uniarg);
-  else if (!bobp()) {
-    for (i = 0; i < uniarg; i++)
-      if (!edit_navigate_up_line()) {
-        thisflag |= FLAG_DONE_CPCN;
-        FUNCALL(beginning_of_line);
-        break;
-      }
+  if (!bobp()) {
+    if (!edit_navigate_up_line()) {
+      thisflag |= FLAG_DONE_CPCN;
+      FUNCALL(beginning_of_line);
+    }
   } else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 }
@@ -182,18 +176,13 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(edit_navigate_up_line, -uniarg);
-  else if (!eobp()) {
-    int i;
-    for (i = 0; i < uniarg; i++)
-      if (!edit_navigate_down_line()) {
-        int old = cur_goalc;
-        thisflag |= FLAG_DONE_CPCN;
-        FUNCALL(end_of_line);
-        cur_goalc = old;
-        break;
-      }
+  if (!eobp()) {
+    if (!edit_navigate_down_line()) {
+      int old = cur_goalc;
+      thisflag |= FLAG_DONE_CPCN;
+      FUNCALL(end_of_line);
+      cur_goalc = old;
+    }
   } else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 }
@@ -332,17 +321,10 @@ Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(edit_navigate_forward_char, -uniarg);
-  else
-    for (i = 0; i < uniarg; i++)
-      if (!edit_navigate_backward_char()) {
-        minibuf_error("Beginning of buffer");
-        ok = FALSE;
-        break;
-      }
+  if (!edit_navigate_backward_char()) {
+    minibuf_error("Beginning of buffer");
+    ok = FALSE;
+  }
 }
 END_DEFUN
 
@@ -369,17 +351,10 @@ Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(edit_navigate_backward_char, -uniarg);
-  else
-    for (i = 0; i < uniarg; i++)
-      if (!edit_navigate_forward_char()) {
-        minibuf_error("End of buffer");
-        ok = FALSE;
-        break;
-      }
+  if (!edit_navigate_forward_char()) {
+    minibuf_error("End of buffer");
+    ok = FALSE;
+  }
 }
 END_DEFUN
 
@@ -423,16 +398,8 @@ DEFUN_INT("scroll-down", scroll_down)
 Scroll text of current window downward near full screen.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(scroll_up, -uniarg);
-  else
-    for (i = 0; i < uniarg; i++)
-      if (!scroll_down()) {
-        ok = FALSE;
-        break;
-      }
+  if (!scroll_down())
+    ok = FALSE;
 }
 END_DEFUN
 
@@ -452,15 +419,7 @@ DEFUN_INT("scroll-up", scroll_up)
 Scroll text of current window upward near full screen.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    ok = FUNCALL_ARG(scroll_down, -uniarg);
-  else
-    for (i = 0; i < uniarg; i++)
-      if (!scroll_up()) {
-        ok = FALSE;
-        break;
-      }
+  if (!scroll_up())
+    ok = FALSE;
 }
 END_DEFUN

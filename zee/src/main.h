@@ -308,8 +308,4 @@ enum {
 #define FUNCALL(c_func) \
   F_ ## c_func(0, 0, NULL)
 
-/* Call an interactive function with a universal argument */
-#define FUNCALL_ARG(c_func, uniarg) \
-  F_ ## c_func(1, uniarg, NULL)
-
 #endif /* !MAIN_H */

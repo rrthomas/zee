@@ -335,17 +335,7 @@ Insert spaces or tabs to next defined tab-stop column.
 Convert the tabulation into spaces.
 +*/
 {
-  int i;
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i)
-    if (!insert_tab()) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = insert_tab();
 }
 END_DEFUN
 
@@ -525,15 +515,10 @@ Insert a newline, and move to left margin of the new line if it's blank.
   assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i) {
-    if (cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number("fill-column"))
-      fill_break_line();
-    if (!insert_char('\n')) {
-      ok = FALSE;
-      break;
-    }
-  }
+  if (cur_bp->flags & BFLAG_AUTOFILL &&
+      get_goalc() > (size_t)get_variable_number("fill-column"))
+    fill_break_line();
+  ok = insert_char('\n');
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 }
 END_DEFUN
@@ -636,18 +621,7 @@ Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  int i;
-  size_t key = getkey();
-
-  assert(cur_bp);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i)
-    if (!self_insert_command(key)) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = self_insert_command(getkey());
 }
 END_DEFUN
 
@@ -665,20 +639,7 @@ Delete the following character.
 Join lines if the character is a newline.
 +*/
 {
-  int i;
-
-  assert(cur_bp);
-
-  if (uniarg < 0)
-    return FUNCALL_ARG(backward_delete_char, -uniarg);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i)
-    if (!delete_char()) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = delete_char();
 }
 END_DEFUN
 
@@ -701,20 +662,7 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  int i;
-
-  assert(cur_bp);
-
-  if (uniarg < 0)
-    return FUNCALL_ARG(delete_char, -uniarg);
-
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  for (i = 0; i < uniarg; ++i)
-    if (!backward_delete_char()) {
-      ok = FALSE;
-      break;
-    }
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  ok = backward_delete_char();
 }
 END_DEFUN
 
@@ -762,7 +710,7 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
+  while (FUNCALL(edit_navigate_up_line) && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)

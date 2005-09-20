@@ -85,6 +85,8 @@ void free_bindings(void)
   free_history_elements(&functions_history);
 }
 
+/* FIXME: Handling of uniarg should be done exclusively by
+   universal-argument. */
 void process_key(size_t key)
 {
   int uni;
@@ -107,8 +109,12 @@ void process_key(size_t key)
              ++uni);
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
       }
-    } else
-      p->func((lastflag & FLAG_SET_UNIARG) ? 1 : 0, last_uniarg, NULL);
+    } else {
+      if (lastflag & FLAG_SET_UNIARG)
+        for (uni = 0;
+             uni < last_uniarg && p->func(0, 0, NULL);
+             uni++);
+    }
   }
 
   /* Only add keystrokes if we're already in macro defining mode
