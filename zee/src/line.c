@@ -510,8 +510,6 @@ DEFUN_INT("newline", newline)
 Insert a newline, and move to left margin of the new line if it's blank.
 +*/
 {
-  int i;
-
   assert(cur_bp);
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
