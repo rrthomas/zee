@@ -61,7 +61,7 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  addch((chtype)c);
+  addch((chtype)(c & ~A_ATTRIBUTES));
 }
 
 void term_nl(void)
@@ -177,6 +177,12 @@ static size_t translate_key(int c)
     return KBD_UP;
   case KEY_DOWN:
     return KBD_DOWN;
+#ifdef KEY_SLEFT
+  case KEY_SLEFT:
+    return KBD_SLEFT;
+  case KEY_SRIGHT:
+    return KBD_SRIGHT;
+#endif
   case KEY_F(1):
     return KBD_F1;
   case KEY_F(2):
