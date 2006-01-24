@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl FIXME: Make zee.pkg get version number from here
-AC_INIT(zee, 0.4, zee-devel@lists.sourceforge.net)
+AC_INIT(zee, 0.5, zee-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
