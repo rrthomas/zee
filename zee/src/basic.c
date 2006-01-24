@@ -188,19 +188,6 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-/*
- * Go to the line `to_line', counting from 0.  Point will end up in
- * "random" column.
- */
-void goto_line(size_t to_line)
-{
-  assert(cur_bp);
-  if (cur_bp->pt.n > to_line)
-    ngotoup(cur_bp->pt.n - to_line);
-  else if (cur_bp->pt.n < to_line)
-    ngotodown(to_line - cur_bp->pt.n);
-}
-
 DEFUN_INT("goto-char", goto_char)
 /*+
 Read a number N and move the cursor to character number N.
@@ -229,6 +216,30 @@ Position 1 is the beginning of the buffer.
   }
 }
 END_DEFUN
+
+/*
+ * Go to the line `to_line', counting from 0.  Point will end up in
+ * "random" column.
+ */
+void goto_line(size_t to_line)
+{
+  int up;
+  size_t off;
+  Function f;
+
+  assert(cur_bp);
+  up = cur_bp->pt.n > to_line;
+  if (up) {
+    off = cur_bp->pt.n - to_line;
+    f = F_edit_navigate_up_line;
+  } else {
+    off = to_line - cur_bp->pt.n;
+    f = F_edit_navigate_down_line;
+  }
+
+  for (; off > 0 && list_prev(cur_bp->pt.p) != cur_bp->lines; off--)
+    f(0, 0, NULL);
+}
 
 DEFUN_INT("goto-line", goto_line)
 /*+
@@ -355,69 +366,5 @@ On reaching end of buffer, stop and signal error.
     minibuf_error("End of buffer");
     ok = FALSE;
   }
-}
-END_DEFUN
-
-int ngotoup(size_t n)
-{
-  assert(cur_bp);
-  for (; n > 0; n--)
-    if (list_prev(cur_bp->pt.p) != cur_bp->lines)
-      FUNCALL(edit_navigate_up_line);
-    else
-      return FALSE;
-
-  return TRUE;
-}
-
-int ngotodown(size_t n)
-{
-  assert(cur_bp);
-  for (; n > 0; n--)
-    if (list_next(cur_bp->pt.p) != cur_bp->lines)
-      FUNCALL(edit_navigate_down_line);
-    else
-      return FALSE;
-
-  return TRUE;
-}
-
-int scroll_down(void)
-{
-  assert(cur_bp);
-  if (cur_bp->pt.n > 0)
-    return ngotoup(win.eheight) ? TRUE : FALSE;
-  else {
-    minibuf_error("Beginning of buffer");
-    return FALSE;
-  }
-}
-
-DEFUN_INT("scroll-down", scroll_down)
-/*+
-Scroll text of current window downward near full screen.
-+*/
-{
-  ok = scroll_down();
-}
-END_DEFUN
-
-int scroll_up(void)
-{
-  assert(cur_bp);
-  if (cur_bp->pt.n < cur_bp->num_lines)
-    return ngotodown(win.eheight) ? TRUE : FALSE;
-  else {
-    minibuf_error("End of buffer");
-    return FALSE;
-  }
-}
-
-DEFUN_INT("scroll-up", scroll_up)
-/*+
-Scroll text of current window upward near full screen.
-+*/
-{
-  ok = scroll_up();
 }
 END_DEFUN

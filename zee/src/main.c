@@ -147,8 +147,7 @@ static void open_file_at(char *path, size_t lineno)
   astr_delete(dir);
 
   /* Update display */
-  if (lineno > 0)
-    ngotodown(lineno);
+  goto_line(lineno);
   resync_display();
 }
 

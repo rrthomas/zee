@@ -28,11 +28,7 @@ void goto_line(size_t to_line);
 void gotobob(void);
 void gotoeob(void);
 int edit_navigate_down_line(void);
-int ngotodown(size_t n);
-int ngotoup(size_t n);
 int edit_navigate_up_line(void);
-int scroll_down(void);
-int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(size_t key, Function func);
