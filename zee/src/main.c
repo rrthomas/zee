@@ -51,11 +51,12 @@
 #define VERSION_STRING TEXT_NAME " " VERSION
 
 #define COPYRIGHT_STRING \
-  "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
-  "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"\
-  "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
+  "Copyright (c) 2003-2006 Reuben Thomas <rrt@sc3d.org>\n"\
+  "Copyright (c) 2005-2006 Alistair Turbull <apt1002@mupsych.org>\n"\
+  "Copyright (c) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
+  "Copyright (c) 2003-2004 David A. Capello <dacap@users.sourceforge.net>"
 
-/* The current window; the first window in list. */
+/* The window. */
 Window win;
 /* The current buffer; the first buffer in list. */
 Buffer *cur_bp = NULL, *head_bp = NULL;

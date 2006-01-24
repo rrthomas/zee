@@ -29,7 +29,7 @@ Foundation,  Fifth Floor, 51 Franklin Street, Boston, MA 02111-1301, USA.
 ====================
 
 Hacked from xnprintf version of 29th December 2002 to provide only
-vasprintf by Reuben Thomas <rrt@sc3d.org> for Zee.
+vasprintf by Reuben Thomas <rrt@sc3d.org>.
 
 ====================
 

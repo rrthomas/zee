@@ -50,8 +50,9 @@ distclean-local:
 
 BANNER.EPOC:
 	@echo '$(TEXT_NAME) $(VERSION)' >>BANNER.EPOC.tmp
+	@echo '© Reuben Thomas 2003-2006' >>BANNER.EPOC.tmp
+	@echo '© Alistair Turnbull 2005-2006' >>BANNER.EPOC.tmp
 	@echo '© Sandro Sigala 1998-2004' >>BANNER.EPOC.tmp
-	@echo '© Reuben Thomas 2003-2005' >>BANNER.EPOC.tmp
 	@echo '© David A. Capello 2004' >>BANNER.EPOC.tmp
 	@echo 'http://$(PACKAGE_NAME).sourceforge.net/' >>BANNER.EPOC.tmp
 	@echo 'All rights reserved. This software has no warranty.' >>BANNER.EPOC.tmp
