@@ -1,6 +1,6 @@
 /* Global functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -24,7 +24,7 @@
 size_t get_goalc(void);
 int edit_navigate_backward_char(void);
 int edit_navigate_forward_char(void);
-void goto_line(size_t to_line);
+int goto_line(size_t to_line);
 void gotobob(void);
 void gotoeob(void);
 int edit_navigate_down_line(void);
@@ -47,10 +47,7 @@ void free_buffer(Buffer *bp);
 void free_buffers(void);
 void set_buffer_name(Buffer *bp, const char *name);
 void set_buffer_filename(Buffer *bp, const char *filename);
-Buffer *find_buffer(const char *name, int cflag);
-Buffer *get_next_buffer(void);
 astr make_buffer_name(const char *filename);
-void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 int calculate_the_region(Region *rp);

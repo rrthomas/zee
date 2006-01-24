@@ -30,9 +30,8 @@
 
 static size_t line;
 static ptrdiff_t pos;
-/* FIXME: either use \n tokens to limit each exp to one line, or
-   remove bol */
-static int bol = TRUE;
+/* FIXME: Use \n tokens to limit each exp to one line */
+static int bol;
 static astr expr;
 
 static int getch(void)

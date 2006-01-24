@@ -37,17 +37,9 @@ global-set-key "C-M-g" goto-char
 global-set-key "M-g" goto-line
 
 # Open, save, close, quit etc.
-
-# Open
-global-set-key "C-o" file-open
-global-set-key "C-p" file-switch
-global-set-key "C-M-x" file-switch
 # Save
 global-set-key "C-s" file-save
-# Close
-global-set-key "C-w" file-close
 # Quit
-global-set-key "M-C-q" file-quit
 global-set-key "M-q" file-quit
 global-set-key "C-q" file-quit
 

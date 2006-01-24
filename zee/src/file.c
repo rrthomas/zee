@@ -344,19 +344,11 @@ static int is_regular_file(const char *filename)
 }
 
 /*
- * Switch to the buffer containing the given file, or load it into a
- * new buffer if it isn't already being visited.
+ * Load the given file into a new buffer.
  */
 int file_visit(const char *filename)
 {
-  Buffer *bp;
   astr as;
-
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->filename != NULL && !strcmp(bp->filename, filename)) {
-      switch_to_buffer(bp);
-      return TRUE;
-    }
 
   as = make_buffer_name(filename);
   if (astr_len(as) == 0) {
@@ -370,11 +362,10 @@ int file_visit(const char *filename)
     return FALSE;
   }
 
-  bp = create_buffer(astr_cstr(as));
+  cur_bp = create_buffer(astr_cstr(as));
   astr_delete(as);
-  bp->filename = zstrdup(filename);
+  cur_bp->filename = zstrdup(filename);
 
-  switch_to_buffer(bp);
   assert(cur_bp);
   file_open(cur_bp, filename);
 
@@ -382,76 +373,6 @@ int file_visit(const char *filename)
 
   return TRUE;
 }
-
-DEFUN_INT("file-open", file_open)
-/*+
-Edit file FILENAME.
-Switch to a buffer visiting file FILENAME,
-creating one if none already exists.
-+*/
-{
-  astr ms, buf;
-
-  buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Open file: ", astr_cstr(buf))) == NULL)
-    ok = cancel();
-  astr_delete(buf);
-
-  if (ok) {
-    if (astr_len(ms) > 0)
-      ok = file_visit(astr_cstr(ms));
-    else
-      ok = FALSE;
-    astr_delete(ms);
-  }
-}
-END_DEFUN
-
-static Completion *make_buffer_completion(void)
-{
-  Buffer *bp;
-  Completion *cp;
-
-  cp = completion_new(FALSE);
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    list_append(cp->completions, zstrdup(bp->name));
-
-  return cp;
-}
-
-DEFUN_INT("file-switch", file_switch)
-/*+
-Select to the user specified buffer in the current window.
-+*/
-{
-  astr ms;
-  Completion *cp;
-  Buffer *bp;
-
-  assert(cur_bp);
-  bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-
-  cp = make_buffer_completion();
-  ms = minibuf_read_completion("Switch to buffer (default %s): ",
-                               "", cp, NULL, bp->name);
-  free_completion(cp);
-  if (ms == NULL)
-    ok = cancel();
-  else {
-    if (astr_len(ms) > 0) {
-      if ((bp = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
-        minibuf_error("Buffer `%s' not found", astr_cstr(ms));
-        ok = FALSE;
-      }
-    }
-
-    switch_to_buffer(bp);
-    astr_delete(ms);
-
-    ok = TRUE;
-  }
-}
-END_DEFUN
 
 /*
  * Check if the buffer has been modified.  If so, asks the user if
@@ -473,80 +394,6 @@ static int check_modified_buffer(Buffer *bp)
 
   return TRUE;
 }
-
-/*
- * Remove the specified buffer from the buffer list and deallocate
- * its space.
- */
-static void file_close(Buffer *kill_bp)
-{
-  Buffer *bp, *next_bp;
-
-  if (kill_bp->next != NULL)
-    next_bp = kill_bp->next;
-  else
-    next_bp = head_bp;
-
-  /* Search for windows displaying the buffer to kill. */
-  if (cur_bp == kill_bp) {
-    cur_bp = next_bp;
-    win.topdelta = 0;
-  }
-
-  /* Remove the buffer from the buffer list. */
-  cur_bp = next_bp;
-  if (head_bp == kill_bp)
-    head_bp = head_bp->next;
-  if (head_bp) {
-    for (bp = head_bp; bp->next != NULL; bp = bp->next)
-      if (bp->next == kill_bp) {
-        bp->next = bp->next->next;
-        break;
-      }
-  } else
-    /* If we just deleted the last buffer, quit. */
-    thisflag |= FLAG_QUIT;
-
-  free_buffer(kill_bp);
-
-  thisflag |= FLAG_NEED_RESYNC;
-}
-
-DEFUN_INT("file-close", file_close)
-/*+
-Kill the current buffer or the user specified one.
-+*/
-{
-  Buffer *bp;
-  astr ms;
-  Completion *cp;
-
-  assert(cur_bp);
-
-  cp = make_buffer_completion();
-  if ((ms = minibuf_read_completion("Close file (default %s): ",
-                                    "", cp, NULL, cur_bp->name)) == NULL)
-    ok = cancel();
-  free_completion(cp);
-
-  if (ok) {
-    if (astr_len(ms) > 0) {
-      if ((bp = find_buffer(astr_cstr(ms), FALSE)) == NULL) {
-        minibuf_error("Buffer `%s' not found", astr_cstr(ms));
-        ok = FALSE;
-      }
-    } else
-      bp = cur_bp;
-
-    if (ok && check_modified_buffer(bp))
-      file_close(bp);
-    else
-      ok = FALSE;
-
-    astr_delete(ms);
-  }
-}
-END_DEFUN
 
 static int file_insert(const char *filename)
 {
@@ -715,110 +562,25 @@ Makes buffer visit that file, and marks it not modified.
 }
 END_DEFUN
 
-static int file_save_some(void)
-{
-  Buffer *bp;
-  int i = 0, noask = FALSE, c;
-
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED) {
-      char *fname = bp->filename != NULL ? bp->filename : bp->name;
-
-      ++i;
-
-      if (noask)
-        file_save(bp);
-      else {
-        for (;;) {
-          minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
-
-          c = getkey();
-          switch (c) {
-          case KBD_CANCEL:
-          case KBD_RET:
-          case ' ':
-          case 'y':
-          case 'n':
-          case 'q':
-          case '.':
-          case '!':
-            goto exitloop;
-          }
-
-          minibuf_error("Please answer y, n, !, . or q.");
-          waitkey(WAITKEY_DEFAULT);
-        }
-
-      exitloop:
-        minibuf_clear();
-
-        switch (c) {
-        case KBD_CANCEL: /* C-g */
-          return cancel();
-        case 'q':
-          goto endoffunc;
-        case '.':
-          file_save(bp);
-          ++i;
-          return TRUE;
-        case '!':
-          noask = TRUE;
-          /* FALLTHROUGH */
-        case ' ':
-        case 'y':
-          file_save(bp);
-          ++i;
-          break;
-        case 'n':
-        case KBD_RET:
-        case KBD_DEL:
-          break;
-        }
-      }
-    }
-
- endoffunc:
-  if (i == 0)
-    minibuf_write("(No files need saving)");
-
-  return TRUE;
-}
-
-
-DEFUN_INT("file-save-some", file_save_some)
-/*+
-Save some modified file-visiting buffers.  Asks user about each one.
-+*/
-{
-  ok = file_save_some();
-}
-END_DEFUN
-
 DEFUN_INT("file-quit", file_quit)
 /*+
 Offer to save each buffer, then kill this process.
 +*/
 {
-  Buffer *bp;
   int ans, i = 0;
 
-  if (!file_save_some())
-    ok = FALSE;
-  else {
-    for (bp = head_bp; bp != NULL; bp = bp->next)
-      if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
-        ++i;
+  if (cur_bp->flags & BFLAG_MODIFIED && !(cur_bp->flags & BFLAG_NEEDNAME))
+    ++i;
 
-    if (i > 0) {
-      if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
-        ok = cancel();
-      else if (!ans)
-        ok = FALSE;
-    }
-
-    if (ok)
-      thisflag |= FLAG_QUIT;
+  if (i > 0) {
+    if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
+      ok = cancel();
+    else if (!ans)
+      ok = FALSE;
   }
+
+  if (ok)
+    thisflag |= FLAG_QUIT;
 }
 END_DEFUN
 
@@ -829,25 +591,23 @@ END_DEFUN
 void die(int exitcode)
 {
   static int already_dying;
-  Buffer *bp;
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else {
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
-    for (bp = head_bp; bp != NULL; bp = bp->next)
-      if (bp->flags & BFLAG_MODIFIED) {
-        astr buf = astr_new();
-        if (bp->filename != NULL)
-          astr_cpy_cstr(buf, bp->filename);
-        else
-          astr_cpy_cstr(buf, bp->name);
-        astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
-        fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
-        raw_write_to_disk(bp, astr_cstr(buf));
-        astr_delete(buf);
-      }
+    if (cur_bp->flags & BFLAG_MODIFIED) {
+      astr buf = astr_new();
+      if (cur_bp->filename != NULL)
+        astr_cpy_cstr(buf, cur_bp->filename);
+      else
+        astr_cpy_cstr(buf, cur_bp->name);
+      astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
+      fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
+      raw_write_to_disk(cur_bp, astr_cstr(buf));
+      astr_delete(buf);
+    }
     term_close();
   }
   exit(exitcode);

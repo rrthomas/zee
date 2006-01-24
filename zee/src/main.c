@@ -58,8 +58,8 @@
 
 /* The window. */
 Window win;
-/* The current buffer; the first buffer in list. */
-Buffer *cur_bp = NULL, *head_bp = NULL;
+/* The buffer. */
+Buffer *cur_bp = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;

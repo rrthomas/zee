@@ -79,12 +79,7 @@ void free_buffer(Buffer *bp)
  */
 void free_buffers(void)
 {
-  Buffer *bp, *next;
-
-  for (bp = head_bp; bp != NULL; bp = next) {
-    next = bp->next;
-    free_buffer(bp);
-  }
+  free_buffer(cur_bp);
 }
 
 /*
@@ -96,9 +91,6 @@ Buffer *create_buffer(const char *name)
 
   bp = buffer_new();
   set_buffer_name(bp, name);
-
-  bp->next = head_bp;
-  head_bp = bp;
 
   if (get_variable_bool("auto-fill-mode"))
     bp->flags ^= BFLAG_AUTOFILL;
@@ -131,49 +123,12 @@ void set_buffer_filename(Buffer *bp, const char *filename)
 }
 
 /*
- * Search for a buffer named `name'.  If not buffer is found and
- * the `cflag' variable is set to `TRUE', create a new buffer.
- */
-Buffer *find_buffer(const char *name, int cflag)
-{
-  Buffer *bp;
-
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (!strcmp(bp->name, name))
-      return bp;
-
-  /*
-   * Create flag not specified, return NULL.
-   */
-  if (!cflag)
-    return NULL;
-
-  /*
-   * No buffer found with the specified name, then
-   * create one.
-   */
-  bp = create_buffer(name);
-
-  return bp;
-}
-
-/*
- * Find the next buffer in buffer list.
- */
-Buffer *get_next_buffer(void)
-{
-  assert(cur_bp);
-  return cur_bp->next ? cur_bp->next : head_bp;
-}
-
-/*
  * Create a buffer name using the file name.
  */
 astr make_buffer_name(const char *filename)
 {
   const char *p;
   astr name = astr_new();
-  size_t i;
 
   if ((p = strrchr(filename, '/')) == NULL)
     p = filename;
@@ -181,45 +136,7 @@ astr make_buffer_name(const char *filename)
     ++p;
   astr_cpy_cstr(name, p);
 
-  /* This loop will terminate at the latest after checking all the
-     buffers. */
-  for (i = 2; find_buffer(astr_cstr(name), FALSE) != NULL; i++)
-    astr_afmt(name, "%s<%d>", p, i);
-
   return name;
-}
-
-/* Move the selected buffer to head.  */
-
-static void move_buffer_to_head(Buffer *bp)
-{
-  Buffer *it, *prev = NULL;
-
-  for (it = head_bp; it; it = it->next) {
-    if (bp == it) {
-      if (prev) {
-        prev->next = bp->next;
-        bp->next = head_bp;
-        head_bp = bp;
-      }
-      break;
-    }
-    prev = it;
-  }
-}
-
-/*
- * Switch to the specified buffer.
- */
-void switch_to_buffer(Buffer *bp)
-{
-  /* Set current buffer.  */
-  cur_bp = bp;
-
-  /* Move the buffer to head.  */
-  move_buffer_to_head(bp);
-
-  thisflag |= FLAG_NEED_RESYNC;
 }
 
 /*
@@ -278,34 +195,6 @@ int calculate_the_region(Region *rp)
 
   calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
   return TRUE;
-}
-
-/*
- * Set the specified buffer temporary flag and move the buffer
- * to the end of the buffer list.
- */
-void set_temporary_buffer(Buffer *bp)
-{
-  Buffer *bp0;
-
-  if (bp == head_bp) {
-    if (head_bp->next == NULL)
-      return;
-    head_bp = head_bp->next;
-  } else if (bp->next == NULL)
-    return;
-
-  for (bp0 = head_bp; bp0 != NULL; bp0 = bp0->next)
-    if (bp0->next == bp) {
-      bp0->next = bp0->next->next;
-      break;
-    }
-
-  for (bp0 = head_bp; bp0->next != NULL; bp0 = bp0->next)
-    ;
-
-  bp0->next = bp;
-  bp->next = NULL;
 }
 
 size_t calculate_buffer_size(Buffer *bp)

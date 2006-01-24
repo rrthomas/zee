@@ -1,6 +1,6 @@
 /* Basic movement functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -221,9 +221,9 @@ END_DEFUN
  * Go to the line `to_line', counting from 0.  Point will end up in
  * "random" column.
  */
-void goto_line(size_t to_line)
+int goto_line(size_t to_line)
 {
-  int up;
+  int up, ok = TRUE;
   size_t off;
   Function f;
 
@@ -237,8 +237,10 @@ void goto_line(size_t to_line)
     f = F_edit_navigate_down_line;
   }
 
-  for (; off > 0 && list_prev(cur_bp->pt.p) != cur_bp->lines; off--)
-    f(0, 0, NULL);
+  for (; off > 0 && list_prev(cur_bp->pt.p) != cur_bp->lines && (ok = f(0, 0, NULL)); off--)
+    ;
+
+  return ok;
 }
 
 DEFUN_INT("goto-line", goto_line)
@@ -363,6 +365,34 @@ On reaching end of buffer, stop and signal error.
 +*/
 {
   if (!edit_navigate_forward_char()) {
+    minibuf_error("End of buffer");
+    ok = FALSE;
+  }
+}
+END_DEFUN
+
+DEFUN_INT("scroll-down", scroll_down)
+/*+
+Scroll text of current window downward near full screen.
++*/
+{
+  if (cur_bp->pt.n > 0)
+    ok = goto_line(cur_bp->pt.n - win.eheight) ? TRUE : FALSE;
+  else {
+    minibuf_error("Beginning of buffer");
+    ok = FALSE;
+  }
+}
+END_DEFUN
+
+DEFUN_INT("scroll-up", scroll_up)
+/*+
+Scroll text of current window upward near full screen.
++*/
+{
+  if (cur_bp->pt.n < cur_bp->num_lines)
+    ok = goto_line(cur_bp->pt.n + win.eheight) ? TRUE : FALSE;
+  else {
     minibuf_error("End of buffer");
     ok = FALSE;
   }
