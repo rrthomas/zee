@@ -158,8 +158,6 @@ static void dump_funcs(void)
   fprintf(fp2,
           "/*\n"
           " * Table of commands (name, C function)\n"
-          " *\n"
-          " * The list must be kept in alphabetical order.\n"
           " */\n"
           "\n");
 
