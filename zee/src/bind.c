@@ -38,7 +38,7 @@ static History functions_history;
  * Key binding
  *--------------------------------------------------------------------------*/
 
-/* Binding vector, number of items, max number of items */
+/* Bindings vector */
 vector *bindings;
 
 static Binding *get_binding(size_t key)
@@ -100,8 +100,8 @@ void process_key(size_t key)
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
     if ((p = get_binding(key)) == NULL) {
+      /* There are no bindings for the pressed key */
       if (key <= 255) {
-        /* There are no bindings for the pressed key */
         assert(cur_bp);
         undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
         for (uni = 0;
