@@ -558,9 +558,9 @@ DEFUN_INT("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.
 +*/
 {
-  while (edit_navigate_up_line() && is_empty_line())
+  while (is_empty_line() && edit_navigate_up_line())
     ;
-  while (edit_navigate_up_line() && !is_empty_line())
+  while (!is_empty_line() && edit_navigate_up_line())
     ;
 
   FUNCALL(beginning_of_line);
@@ -572,9 +572,9 @@ DEFUN_INT("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.
 +*/
 {
-  while (edit_navigate_down_line() && is_empty_line())
+  while (is_empty_line() && edit_navigate_down_line())
     ;
-  while (edit_navigate_down_line() && !is_empty_line())
+  while (!is_empty_line() && edit_navigate_down_line())
     ;
 
   if (is_empty_line())
