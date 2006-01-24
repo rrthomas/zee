@@ -90,7 +90,6 @@ void free_bindings(void)
 void process_key(size_t key)
 {
   int uni;
-  Binding *p;
 
   if (key == KBD_NOKEY)
     return;
@@ -99,22 +98,15 @@ void process_key(size_t key)
     /* Got an ESC x sequence where `x' is a digit */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
-    if ((p = get_binding(key)) == NULL) {
-      /* There are no bindings for the pressed key */
-      if (key <= 255) {
-        assert(cur_bp);
-        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-        for (uni = 0;
-             uni < last_uniarg && self_insert_command(key);
-             ++uni);
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-      }
-    } else {
-      if (lastflag & FLAG_SET_UNIARG)
-        for (uni = 0;
-             uni < last_uniarg && p->func(0, 0, NULL);
-             uni++);
-    }
+    Binding *p = get_binding(key);
+
+    assert(cur_bp);
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    for (uni = 0;
+         uni < last_uniarg &&
+           (p ? p->func(0, 0, NULL) : self_insert_command(key));
+         uni++);
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   }
 
   /* Only add keystrokes if we're already in macro defining mode
