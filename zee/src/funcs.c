@@ -116,21 +116,14 @@ Set mark at where point is.
 }
 END_DEFUN
 
-void exchange_point_and_mark(void)
-{
-  assert(cur_bp);
-  assert(cur_bp->mark);
-
-  /* Swap the point with the mark. */
-  swap_point(&cur_bp->pt, &cur_bp->mark->pt);
-}
-
 DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
 /*+
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
-  exchange_point_and_mark();
+  assert(cur_bp);
+  assert(cur_bp->mark);
+  swap_point(&cur_bp->pt, &cur_bp->mark->pt);
   anchor_mark();
   thisflag |= FLAG_NEED_RESYNC;
 }
@@ -194,17 +187,18 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
-int universal_argument(int keytype, int xarg)
+DEFUN_INT("universal-argument", universal_argument)
+/*+
+Begin a numeric argument for the following command.
+Digits or minus sign following C-u make up the numeric argument.
+C-u following the digits or minus sign ends the argument.
++*/
 {
-  int i = 0, arg = 4, sgn = 1, digit;
-  size_t key;
+  size_t key, i = 0, arg = 0, digit;
+  int sgn = 1;
   astr as = astr_new();
 
-  if (keytype == KBD_META) {
-    astr_cpy_cstr(as, "ESC");
-    ungetkey((size_t)(xarg + '0'));
-  } else
-    astr_cpy_cstr(as, "C-u");
+  ok = TRUE;
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
@@ -213,39 +207,21 @@ int universal_argument(int keytype, int xarg)
     minibuf_clear();
     astr_truncate(as, -1); /* Remove the '-' character. */
 
-    /* Cancelled. */
-    if (key == KBD_CANCEL)
-      return cancel();
-    /* Digit pressed. */
-    else if (isdigit(key & 0xff)) {
+    if (key == KBD_CANCEL) {
+      ok = cancel();
+      break;
+    } else if (isdigit(key & 0xff)) {
+      /* Digit pressed. */
       digit = (key & 0xff) - '0';
-
-      if (key & KBD_META)
-        astr_cat_cstr(as, " ESC");
-
       astr_afmt(as, " %d", digit);
-
-      if (i == 0)
-        arg = digit;
-      else
-        arg = arg * 10 + digit;
-
+      arg = arg * 10 + digit;
       i++;
-    } else if (key == (KBD_CTRL | 'u')) {
-      astr_cat_cstr(as, " C-u");
-      if (i == 0)
-        arg *= 4;
-    } else if (key == '-') {
-      /* After any number && if sign doesn't change. */
-      if (i == 0 && sgn > 0) {
+    } else if (key == (KBD_CTRL | 'u'))
+      break;
+    else if (key == '-' && i == 0) {
+      if (sgn > 0) {
         sgn = -sgn;
         astr_cat_cstr(as, " -");
-        /* The default negative arg isn't -4, it's -1. */
-        arg = 1;
-      } else if (i != 0) {
-        /* If i == 0 do nothing. */
-        ungetkey(key);
-        break;
       }
     } else {
       ungetkey(key);
@@ -257,21 +233,6 @@ int universal_argument(int keytype, int xarg)
   thisflag |= FLAG_SET_UNIARG;
   minibuf_clear();
   astr_delete(as);
-
-  return TRUE;
-}
-
-DEFUN_INT("universal-argument", universal_argument)
-/*+
-Begin a numeric argument for the following command.
-Digits or minus sign following C-u make up the numeric argument.
-C-u following the digits or minus sign ends the argument.
-C-u without digits or minus sign provides 4 as argument.
-Repeating C-u without digits or minus sign multiplies the argument
-by 4 each time.
-+*/
-{
-  ok = universal_argument(KBD_CTRL | 'u', 0);
 }
 END_DEFUN
 
@@ -412,7 +373,7 @@ END_DEFUN
 		}							\
 	}
 
-int forward_sexp(void)
+static int forward_sexp(void)
 {
   int gotsexp = FALSE;
   int level = 0;
@@ -472,7 +433,7 @@ Move forward across one balanced expression (sexp).
 }
 END_DEFUN
 
-int backward_sexp(void)
+static int backward_sexp(void)
 {
   int gotsexp = FALSE;
   int level = 0;

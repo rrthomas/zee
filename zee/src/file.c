@@ -49,7 +49,7 @@
 #include "main.h"
 #include "extern.h"
 
-int exist_file(const char *filename)
+static int exist_file(const char *filename)
 {
   struct stat st;
 
@@ -58,21 +58,6 @@ int exist_file(const char *filename)
       return FALSE;
 
   return TRUE;
-}
-
-int is_regular_file(const char *filename)
-{
-  struct stat st;
-
-  if (stat(filename, &st) == -1) {
-    if (errno == ENOENT)
-      return TRUE;
-    return FALSE;
-  }
-  if (S_ISREG(st.st_mode))
-    return TRUE;
-
-  return FALSE;
 }
 
 /*
@@ -343,6 +328,21 @@ void file_open(Buffer *bp, const char *filename)
   }
 }
 
+static int is_regular_file(const char *filename)
+{
+  struct stat st;
+
+  if (stat(filename, &st) == -1) {
+    if (errno == ENOENT)
+      return TRUE;
+    return FALSE;
+  }
+  if (S_ISREG(st.st_mode))
+    return TRUE;
+
+  return FALSE;
+}
+
 /*
  * Switch to the buffer containing the given file, or load it into a
  * new buffer if it isn't already being visited.
@@ -383,18 +383,6 @@ int file_visit(const char *filename)
   return TRUE;
 }
 
-Completion *make_buffer_completion(void)
-{
-  Buffer *bp;
-  Completion *cp;
-
-  cp = completion_new(FALSE);
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    list_append(cp->completions, zstrdup(bp->name));
-
-  return cp;
-}
-
 DEFUN_INT("file-open", file_open)
 /*+
 Edit file FILENAME.
@@ -418,6 +406,18 @@ creating one if none already exists.
   }
 }
 END_DEFUN
+
+static Completion *make_buffer_completion(void)
+{
+  Buffer *bp;
+  Completion *cp;
+
+  cp = completion_new(FALSE);
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    list_append(cp->completions, zstrdup(bp->name));
+
+  return cp;
+}
 
 DEFUN_INT("file-switch", file_switch)
 /*+
@@ -458,7 +458,7 @@ END_DEFUN
  * he/she wants to save the changes.  If the response is positive, return
  * TRUE, else FALSE.
  */
-int check_modified_buffer(Buffer *bp)
+static int check_modified_buffer(Buffer *bp)
 {
   int ans;
 
@@ -478,7 +478,7 @@ int check_modified_buffer(Buffer *bp)
  * Remove the specified buffer from the buffer list and deallocate
  * its space.
  */
-void file_close(Buffer *kill_bp)
+static void file_close(Buffer *kill_bp)
 {
   Buffer *bp, *next_bp;
 
