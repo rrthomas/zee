@@ -230,13 +230,6 @@ int main(int argc, char **argv)
     init_kill_ring();
     init_bindings();
 
-    if (!qflag) {
-      astr as = get_home_dir();
-      astr_cat_cstr(as, "/." PACKAGE_NAME);
-      cmd_eval_file(astr_cstr(as));
-      astr_delete(as);
-    }
-
     /* Initialise window */
     win.fheight = 1;           /* fheight must be > eheight */
 
@@ -252,14 +245,22 @@ int main(int argc, char **argv)
       else if (*argv)
         open_file_at(*argv++, line - 1);
     }
-    resize_window(); /* Can't run until there is at least one buffer */
+    resize_window(); /* Can't run until there is a buffer */
 
     /* Write help message, but allow it to be overwritten by errors
-       from loading key_bindings.el. */
+       from loading init files */
     minibuf_write(about_minibuf_str);
 
     /* Load default bindings file. */
     cmd_eval_file(PATH_DATA "/key_bindings.el");
+
+    /* Load user init file */
+    if (!qflag) {
+      astr as = get_home_dir();
+      astr_cat_cstr(as, "/." PACKAGE_NAME);
+      cmd_eval_file(astr_cstr(as));
+      astr_delete(as);
+    }
 
     /* Display help or error message. */
     term_display();
