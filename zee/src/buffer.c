@@ -148,7 +148,6 @@ astr make_buffer_name(const char *filename)
  */
 int warn_if_readonly_buffer(void)
 {
-  assert(cur_bp);
   if (cur_bp->flags & BFLAG_READONLY) {
     minibuf_error("Buffer is readonly: %s", cur_bp->name);
     return TRUE;
@@ -158,7 +157,6 @@ int warn_if_readonly_buffer(void)
 
 int warn_if_no_mark(void)
 {
-  assert(cur_bp);
   assert(cur_bp->mark);
   if (!(cur_bp->flags & BFLAG_ANCHORED)) {
     minibuf_error("The mark is not active now");
@@ -192,7 +190,6 @@ void calculate_region(Region *rp, Point from, Point to)
  */
 int calculate_the_region(Region *rp)
 {
-  assert(cur_bp);
   if (!(cur_bp->flags & BFLAG_ANCHORED))
     return FALSE;
 
@@ -221,13 +218,11 @@ size_t calculate_buffer_size(Buffer *bp)
 
 void anchor_mark(void)
 {
-  assert(cur_bp);
   cur_bp->flags |= BFLAG_ANCHORED;
 }
 
 void weigh_mark(void)
 {
-  assert(cur_bp);
   cur_bp->flags &= ~BFLAG_ANCHORED;
 }
 
@@ -236,11 +231,6 @@ void weigh_mark(void)
  */
 size_t tab_width(void)
 {
-  size_t t;
-
-  assert(cur_bp);
-
-  t = get_variable_number("tab-width");
-
+  size_t t = get_variable_number("tab-width");
   return t ? t : 8;
 }

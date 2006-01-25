@@ -56,11 +56,8 @@ void free_undo(Buffer *bp)
  */
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
 {
-  Undo *up;
+  Undo *up = (Undo *)zmalloc(sizeof(Undo));
 
-  assert(cur_bp);
-
-  up = (Undo *)zmalloc(sizeof(Undo));
   up->type = type;
   up->pt = pt;
   up->unchanged = !(cur_bp->flags & BFLAG_MODIFIED);
@@ -84,8 +81,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
 static Undo *revert_action(Undo *up)
 {
   astr as;
-
-  assert(cur_bp);
 
   doing_undo = TRUE;
 
@@ -122,8 +117,6 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 +*/
 {
-  assert(cur_bp);
-
   ok = FALSE;
 
   if (warn_if_readonly_buffer());

@@ -59,7 +59,7 @@
 /* The window. */
 Window win;
 /* The buffer. */
-Buffer *cur_bp = NULL;
+Buffer buf;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;

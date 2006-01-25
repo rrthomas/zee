@@ -41,7 +41,6 @@ DEFUN_INT("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  assert(cur_bp);
   cur_bp->pt = line_beginning_position();
 
   /* Change the `goalc' to the beginning of line for next
@@ -56,7 +55,6 @@ DEFUN_INT("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  assert(cur_bp);
   cur_bp->pt = line_end_position();
 
   /* Change the `goalc' to the end of line for next
@@ -92,7 +90,6 @@ static void goto_goalc(int goalc)
   size_t i;
   const char *sp;
 
-  assert(cur_bp);
   t = tab_width();
   sp = astr_cstr(cur_bp->pt.p->item);
 
@@ -112,7 +109,6 @@ static void goto_goalc(int goalc)
 
 int edit_navigate_up_line(void)
 {
-  assert(cur_bp);
   if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
@@ -150,7 +146,6 @@ END_DEFUN
 
 int edit_navigate_down_line(void)
 {
-  assert(cur_bp);
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
@@ -227,7 +222,6 @@ int goto_line(size_t to_line)
   size_t off;
   Function f;
 
-  assert(cur_bp);
   up = cur_bp->pt.n > to_line;
   if (up) {
     off = cur_bp->pt.n - to_line;
@@ -252,8 +246,6 @@ Line 1 is the beginning of the buffer.
   size_t to_line = 0;
   astr ms;
 
-  assert(cur_bp);
-
   do {
     if ((ms = minibuf_read("Goto line: ", "")) == NULL) {
       ok = cancel();
@@ -276,7 +268,6 @@ END_DEFUN
  */
 void gotobob(void)
 {
-  assert(cur_bp);
   cur_bp->pt = point_min(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
@@ -296,7 +287,6 @@ END_DEFUN
  */
 void gotoeob(void)
 {
-  assert(cur_bp);
   cur_bp->pt = point_max(cur_bp);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
@@ -313,7 +303,6 @@ END_DEFUN
 
 int edit_navigate_backward_char(void)
 {
-  assert(cur_bp);
   if (!bolp()) {
     cur_bp->pt.o--;
     return TRUE;
@@ -343,7 +332,6 @@ END_DEFUN
 
 int edit_navigate_forward_char(void)
 {
-  assert(cur_bp);
   if (!eolp()) {
     cur_bp->pt.o++;
     return TRUE;

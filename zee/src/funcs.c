@@ -66,7 +66,6 @@ DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 Change whether this buffer is visiting its file read-only.
 +*/
 {
-  assert(cur_bp);
   cur_bp->flags ^= BFLAG_READONLY;
 }
 END_DEFUN
@@ -78,7 +77,6 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 +*/
 {
-  assert(cur_bp);
   cur_bp->flags ^= BFLAG_AUTOFILL;
 }
 END_DEFUN
@@ -91,8 +89,6 @@ that value, otherwise with the current column value.
 +*/
 {
   char *buf;
-
-  assert(cur_bp);
 
   zasprintf(&buf, "%d", (argc > 0) ? uniarg : (int)(cur_bp->pt.o + 1));
   set_variable("fill-column", buf);
@@ -121,7 +117,6 @@ DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
-  assert(cur_bp);
   assert(cur_bp->mark);
   swap_point(&cur_bp->pt, &cur_bp->mark->pt);
   anchor_mark();
@@ -241,7 +236,6 @@ DEFUN_INT("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  assert(cur_bp);
   cur_bp->pt.o = 0;
   while (!eolp()) {
     if (!isspace(following_char()))
@@ -261,8 +255,6 @@ END_DEFUN
 static int forward_word(void)
 {
   int gotword = FALSE;
-
-  assert(cur_bp);
 
   for (;;) {
     while (!eolp()) {
@@ -296,8 +288,6 @@ END_DEFUN
 static int backward_word(void)
 {
   int gotword = FALSE;
-
-  assert(cur_bp);
 
   for (;;) {
     if (bolp()) {
@@ -380,7 +370,6 @@ static int forward_sexp(void)
   int double_quote = 0;
   int single_quote = 0;
 
-  assert(cur_bp);
   for (;;) {
     while (!eolp()) {
       int c = following_char();
@@ -440,7 +429,6 @@ static int backward_sexp(void)
   int double_quote = 1;
   int single_quote = 1;
 
-  assert(cur_bp);
   for (;;) {
     if (bolp()) {
       if (!edit_navigate_up_line()) {
@@ -565,7 +553,6 @@ Fill paragraph at or after point.
   int i, start, end;
   Marker *m = point_marker();
 
-  assert(cur_bp);
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   FUNCALL(forward_paragraph);
@@ -608,8 +595,6 @@ static int setcase_word(int rcase)
 {
   int gotword;
   size_t i, size;
-
-  assert(cur_bp);
 
   if (!ISWORDCHAR(following_char())) {
     if (!forward_word())
@@ -725,8 +710,6 @@ current buffer, overwriting the current region.
 +*/
 {
   astr ms;
-
-  assert(cur_bp);
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
     ok = cancel();

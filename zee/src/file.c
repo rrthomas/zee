@@ -212,7 +212,7 @@ astr get_current_dir(int interactive)
 {
   astr buf;
 
-  if (interactive && cur_bp && cur_bp->filename != NULL) {
+  if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
     char *sep;
@@ -292,7 +292,8 @@ astr file_read(astr *as, const char *filename)
   }
 
   if (ok == FALSE) {
-    if (cur_bp && errno != ENOENT)
+    /* FIXME: Check terminal is initialised */
+    if (errno != ENOENT)
       minibuf_write("%s: %s", filename, strerror(errno));
     return NULL;
   } else
@@ -366,7 +367,6 @@ int file_visit(const char *filename)
   astr_delete(as);
   cur_bp->filename = zstrdup(filename);
 
-  assert(cur_bp);
   file_open(cur_bp, filename);
 
   thisflag |= FLAG_NEED_RESYNC;
@@ -377,8 +377,6 @@ int file_visit(const char *filename)
 static int file_insert(const char *filename)
 {
   astr as, eolstr;
-
-  assert(cur_bp);
 
   if (!exist_file(filename)) {
     minibuf_error("Unable to read file `%s'", filename);
@@ -505,7 +503,6 @@ DEFUN_INT("file-save", file_save)
 Save current buffer in visited file if modified.
 +*/
 {
-  assert(cur_bp);
   ok = file_save(cur_bp);
 }
 END_DEFUN
@@ -516,14 +513,10 @@ Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
 +*/
 {
-  char *fname;
-  astr ms;
+  char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
+  astr ms = minibuf_read_dir("Write file: ", fname);
 
-  assert(cur_bp);
-
-  fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
-
-  if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
+  if (ms == NULL)
     ok = cancel();
   else if (astr_len(ms) == 0)
     ok = FALSE;
@@ -573,7 +566,7 @@ void die(int exitcode)
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
-  else if (cur_bp && cur_bp->flags & BFLAG_MODIFIED) {
+  else if (cur_bp->flags & BFLAG_MODIFIED) {
     astr buf = astr_new();
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffer...\r\n");

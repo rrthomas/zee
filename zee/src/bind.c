@@ -95,7 +95,6 @@ void process_key(size_t key)
   if (key == KBD_NOKEY)
     return;
 
-  assert(cur_bp);
   if (p == NULL)
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   for (uni = 0;

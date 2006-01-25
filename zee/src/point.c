@@ -29,8 +29,6 @@ Point make_point(size_t lineno, size_t offset)
 {
   Point pt;
 
-  assert(cur_bp);
-
   pt.p = list_next(cur_bp->lines);
   pt.n = lineno;
   pt.o = offset;
@@ -105,7 +103,6 @@ Point point_min(Buffer *bp)
 Point point_max(Buffer *bp)
 {
   Point pt;
-  assert(cur_bp);
   pt.p = list_prev(bp->lines);
   pt.n = cur_bp->num_lines;
   pt.o = astr_len(list_prev(bp->lines)->item);
@@ -115,8 +112,6 @@ Point point_max(Buffer *bp)
 Point line_beginning_position(void)
 {
   Point pt;
-
-  assert(cur_bp);
 
   /* Copy current point position without offset (beginning of
    * line). */
@@ -134,8 +129,6 @@ Point line_beginning_position(void)
 Point line_end_position(void)
 {
   Point pt;
-
-  assert(cur_bp);
 
   /* Copy current point position without offset (beginning of
    * line). */

@@ -96,18 +96,14 @@ void ungetkey(size_t key)
  */
 astr copy_text_block(Point start, size_t size)
 {
-  size_t n, i;
+  size_t n = cur_bp->pt.n, i;
   astr as = astr_new();
-  Line *lp;
-
-  assert(cur_bp);
+  Line *lp = cur_bp->pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the
    * region. Doesn't matter where we start. Starting at 'cur_bp->pt' is a good
    * heuristic.
    */
-  lp = cur_bp->pt.p;
-  n = cur_bp->pt.n;
   if (n > start.n)
     do
       lp = list_prev(lp);
@@ -155,8 +151,6 @@ astr shorten_string(char *s, int maxlen)
  */
 void goto_point(Point pt)
 {
-  assert(cur_bp);
-
   if (cur_bp->pt.n > pt.n)
     do
       FUNCALL(edit_navigate_up_line);

@@ -119,7 +119,6 @@ static int in_region(size_t lineno, size_t x, Region *r)
  */
 static void calculate_highlight_region(Region *r)
 {
-  assert(cur_bp);
   assert(cur_bp->mark);
   r->start = cur_bp->pt;
   if (cur_bp->flags & BFLAG_ANCHORED) {
@@ -166,10 +165,7 @@ static void draw_window(size_t topline)
 {
   size_t i, startcol, lineno;
   Line *lp;
-  Point pt;
-
-  assert(cur_bp);
-  pt = cur_bp->pt;
+  Point pt = cur_bp->pt;
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
@@ -226,10 +222,7 @@ static void calculate_start_column(void)
   size_t col = 0, lastcol = 0, t = tab_width();
   int rpfact, lpfact;
   char *buf, *rp, *lp, *p;
-  Point pt;
-
-  assert(cur_bp);
-  pt = cur_bp->pt;
+  Point pt = cur_bp->pt;
 
   rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
   rpfact = pt.o / (win.ewidth / 3);
@@ -263,10 +256,7 @@ static void calculate_start_column(void)
 
 static char *make_screen_pos(char **buf)
 {
-  Point pt;
-
-  assert(cur_bp);
-  pt = cur_bp->pt;
+  Point pt = cur_bp->pt;
 
   if (cur_bp->num_lines <= win.eheight && win.topdelta == pt.n)
     zasprintf(buf, "All");
@@ -293,10 +283,7 @@ static void draw_status_line(size_t line)
 {
   int someflag = 0;
   char *buf;
-  Point pt;
-
-  assert(cur_bp);
-  pt = cur_bp->pt;
+  Point pt = cur_bp->pt;
 
   term_move(line, 0);
   draw_border();
@@ -364,21 +351,16 @@ static void draw_popup(void)
 void term_display(void)
 {
   size_t topline;
+
   cur_topline = topline = 0;
-
-  if (cur_bp)
-    calculate_start_column();
-
+  calculate_start_column();
   cur_topline = topline;
+  draw_window(topline);
 
-  if (cur_bp) {
-    draw_window(topline);
-
-    /* Draw the status line only if there is available space after the
-       buffer text space. */
-    if (win.fheight - win.eheight > 0)
-      draw_status_line(topline + win.eheight);
-  }
+  /* Draw the status line only if there is available space after the
+     buffer text space. */
+  if (win.fheight - win.eheight > 0)
+    draw_status_line(topline + win.eheight);
 
   topline += win.fheight;
 

@@ -40,8 +40,6 @@ static void flush_kill_ring(void)
 
 static int kill_line(void)
 {
-  assert(cur_bp);
-
   if (warn_if_readonly_buffer())
     return FALSE;
 
@@ -107,8 +105,6 @@ to make one entry in the kill ring.
 {
   Region r;
 
-  assert(cur_bp);
-
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -170,8 +166,6 @@ DEFUN_INT("kill-word", kill_word)
 Kill characters forward until encountering the end of a word.
 +*/
 {
-  assert(cur_bp);
-
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -208,8 +202,6 @@ Kill the sexp (balanced expression) following the cursor.
 FIXME: Can't currently kill backwards.
 +*/
 {
-  assert(cur_bp);
-
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
@@ -236,8 +228,6 @@ Reinsert the stretch of killed text most recently killed or yanked.
 Set mark at beginning, and put point at end.
 +*/
 {
-  assert(cur_bp);
-
   if (astr_len(kill_ring_text) == 0) {
     minibuf_error("Kill ring is empty");
     ok = FALSE;

@@ -93,7 +93,6 @@ Marker *marker_new(Buffer *bp, Point pt)
 
 Marker *point_marker(void)
 {
-  assert(cur_bp);
   return marker_new(cur_bp, cur_bp->pt);
 }
 
@@ -101,7 +100,6 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 {
   Marker *pt = point_marker(), *marker;
 
-  assert(cur_bp);
   for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
     if (marker->pt.p == oldlp &&
         (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
@@ -130,7 +128,6 @@ void push_mark(void)
     mark_ring = list_new();
 
   /* Save the mark */
-  assert(cur_bp);
   assert(cur_bp->mark);
   list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
 }
@@ -157,7 +154,6 @@ void pop_mark(void)
  */
 void set_mark(void)
 {
-  assert(cur_bp);
   assert(cur_bp->mark);
   move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
 }
@@ -220,7 +216,6 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
  */
 int is_empty_line(void)
 {
-  assert(cur_bp);
   return astr_len(cur_bp->pt.p->item) == 0;
 }
 
@@ -230,7 +225,7 @@ int is_empty_line(void)
 int is_blank_line(void)
 {
   size_t c;
-  assert(cur_bp);
+
   for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
     if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
       return FALSE;
@@ -242,7 +237,6 @@ int is_blank_line(void)
  */
 int following_char(void)
 {
-  assert(cur_bp);
   if (eobp())
     return '\0';
   else if (eolp())
@@ -256,7 +250,6 @@ int following_char(void)
  */
 int preceding_char(void)
 {
-  assert(cur_bp);
   if (bobp())
     return '\0';
   else if (bolp())
@@ -270,7 +263,6 @@ int preceding_char(void)
  */
 int bobp(void)
 {
-  assert(cur_bp);
   return (bolp() && list_prev(cur_bp->pt.p) == cur_bp->lines);
 }
 
@@ -279,7 +271,6 @@ int bobp(void)
  */
 int eobp(void)
 {
-  assert(cur_bp);
   return (eolp() && list_next(cur_bp->pt.p) == cur_bp->lines);
 }
 
@@ -288,7 +279,6 @@ int eobp(void)
  */
 int bolp(void)
 {
-  assert(cur_bp);
   return cur_bp->pt.o == 0;
 }
 
@@ -297,7 +287,6 @@ int bolp(void)
  */
 int eolp(void)
 {
-  assert(cur_bp);
   return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
 }
 
@@ -348,8 +337,6 @@ static int intercalate_newline(void)
   Line *lp1, *lp2;
   size_t lp1len, lp2len;
   astr as;
-
-  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -459,8 +446,6 @@ void fill_break_line(void)
   size_t i, break_col = 0, excess = 0, old_col;
   size_t fillcol = get_variable_number("fill-column");
 
-  assert(cur_bp);
-
   /* If we're not beyond fill-column, stop now. */
   if (get_goalc() <= fillcol)
     return;
@@ -510,8 +495,6 @@ DEFUN_INT("newline", newline)
 Insert a newline, and move to left margin of the new line if it's blank.
 +*/
 {
-  assert(cur_bp);
-
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   if (cur_bp->flags & BFLAG_AUTOFILL &&
       get_goalc() > (size_t)get_variable_number("fill-column"))
@@ -524,8 +507,6 @@ END_DEFUN
 int insert_nstring(astr as, const char *eolstr, int intercalate)
 {
   size_t i, eollen = strlen(eolstr);
-
-  assert(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -597,8 +578,6 @@ int delete_nstring(size_t size, astr *as)
 
 int self_insert_command(size_t key)
 {
-  assert(cur_bp);
-
   weigh_mark();
 
   if (key <= 255) {
@@ -669,8 +648,6 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
 Delete all spaces and tabs around point.
 +*/
 {
-  assert(cur_bp);
-
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   while (!eolp() && isspace(following_char()))
@@ -688,7 +665,6 @@ DEFUN_INT("just-one-space", just_one_space)
 Delete all spaces and tabs around point, leaving one space.
 +*/
 {
-  assert(cur_bp);
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   FUNCALL(delete_horizontal_space);
   insert_char(' ');
@@ -720,8 +696,6 @@ DEFUN_INT("indent-relative", indent_relative)
 Indent line or insert a tab.
 +*/
 {
-  assert(cur_bp);
-
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
@@ -770,8 +744,6 @@ that if there is a character in the first column of the line above,
 no indenting is performed.
 +*/
 {
-  assert(cur_bp);
-
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
