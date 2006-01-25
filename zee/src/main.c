@@ -226,16 +226,16 @@ int main(int argc, char **argv)
     printf("%s", astr_cstr(as));
 
   if (!bflag) {
+    term_init();
+    init_kill_ring();
+    init_bindings();
+
     if (!qflag) {
       astr as = get_home_dir();
       astr_cat_cstr(as, "/." PACKAGE_NAME);
       cmd_eval_file(astr_cstr(as));
       astr_delete(as);
     }
-
-    term_init();
-    init_kill_ring();
-    init_bindings();
 
     /* Initialise window */
     win.fheight = 1;           /* fheight must be > eheight */
