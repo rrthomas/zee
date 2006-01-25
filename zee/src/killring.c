@@ -83,8 +83,10 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
   if (!kill_line())
     ok = FALSE;
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
 
   weigh_mark();
 }
