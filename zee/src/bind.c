@@ -64,14 +64,14 @@ static void add_binding(size_t key, Function func)
 
 void bind_key(size_t key, Function func)
 {
-  Binding *s;
+  Binding *p;
 
   assert(key != KBD_NOKEY);
 
-  if ((s = get_binding(key)) == NULL)
+  if ((p = get_binding(key)) == NULL)
     add_binding(key, func);
   else
-    s->func = func;
+    p->func = func;
 }
 
 void init_bindings(void)
