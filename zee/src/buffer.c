@@ -51,6 +51,9 @@ static Buffer *buffer_new(void)
   /* Set default EOL string. */
   bp->eol[0] = '\n';
 
+  /* Allocate the variables list. */
+  bp->vars = list_new();
+
   return bp;
 }
 

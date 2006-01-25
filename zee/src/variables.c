@@ -39,10 +39,12 @@ typedef struct {
 
 static list variable_find(list varlist, const char *key)
 {
+  list p;
+
   if (key != NULL)
-    for (; varlist; varlist = list_next(varlist))
-      if (!strcmp(key, ((vpair *)(varlist->item))->key))
-        return varlist;
+    for (p = list_first(varlist); p != varlist; p = list_next(p))
+      if (!strcmp(key, ((vpair *)(p->item))->key))
+        return p;
 
   return NULL;
 }
