@@ -42,9 +42,8 @@ const char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region(Region *rp, Point from, Point to);
-Buffer *create_buffer(const char *name);
+void create_buffer(const char *name);
 void free_buffer(Buffer *bp);
-void free_buffers(void);
 void set_buffer_name(Buffer *bp, const char *name);
 void set_buffer_filename(Buffer *bp, const char *filename);
 astr make_buffer_name(const char *filename);
@@ -153,7 +152,7 @@ Macro *get_macro(const char *name);
 
 /* main.c ----------------------------------------------------------------- */
 extern Window win;
-extern Buffer *cur_bp, *head_bp;
+extern Buffer buf;
 extern int thisflag, lastflag, last_uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */

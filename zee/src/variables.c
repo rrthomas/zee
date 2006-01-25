@@ -95,14 +95,8 @@ void set_variable(const char *var, const char *val)
 {
   /* Variables automatically become buffer-local when set if there is
      a buffer. */
-  if (cur_bp) {
-    if (var && val)
-      variable_update(cur_bp->vars, var, val);
-  } else {
-    struct var_entry *p = get_variable_default(var);
-    if (var)
-      p->val = zstrdup(val);
-  }
+  if (var && val)
+    variable_update(buf.vars, var, val);
 }
 
 const char *get_variable(const char *var)
@@ -110,8 +104,8 @@ const char *get_variable(const char *var)
   const char *s = NULL;
 
   /* Have to be able to run this before the first buffer is created. */
-  if (cur_bp) {
-    list temp = variable_find(cur_bp->vars, var);
+  if (buf.vars) {
+    list temp = variable_find(buf.vars, var);
     if (temp && temp->item)
       s = (char *)(temp->item);
   }

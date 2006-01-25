@@ -66,7 +66,7 @@ DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
 Change whether this buffer is visiting its file read-only.
 +*/
 {
-  cur_bp->flags ^= BFLAG_READONLY;
+  buf.flags ^= BFLAG_READONLY;
 }
 END_DEFUN
 
@@ -77,7 +77,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 +*/
 {
-  cur_bp->flags ^= BFLAG_AUTOFILL;
+  buf.flags ^= BFLAG_AUTOFILL;
 }
 END_DEFUN
 
@@ -88,11 +88,11 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
-  char *buf;
+  char *s;
 
-  zasprintf(&buf, "%d", (argc > 0) ? uniarg : (int)(cur_bp->pt.o + 1));
-  set_variable("fill-column", buf);
-  free(buf);
+  zasprintf(&s, "%d", (argc > 0) ? uniarg : (int)(buf.pt.o + 1));
+  set_variable("fill-column", s);
+  free(s);
 }
 END_DEFUN
 
@@ -117,8 +117,8 @@ DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
-  assert(cur_bp->mark);
-  swap_point(&cur_bp->pt, &cur_bp->mark->pt);
+  assert(buf.mark);
+  swap_point(&buf.pt, &buf.mark->pt);
   anchor_mark();
   thisflag |= FLAG_NEED_RESYNC;
 }
@@ -236,7 +236,7 @@ DEFUN_INT("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  cur_bp->pt.o = 0;
+  buf.pt.o = 0;
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
@@ -264,14 +264,14 @@ static int forward_word(void)
           return TRUE;
       } else
         gotword = TRUE;
-      cur_bp->pt.o++;
+      buf.pt.o++;
     }
     if (gotword)
       return TRUE;
-    cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
+    buf.pt.o = astr_len(buf.pt.p->item);
     if (!edit_navigate_down_line())
       break;
-    cur_bp->pt.o = 0;
+    buf.pt.o = 0;
   }
   return FALSE;
 }
@@ -293,7 +293,7 @@ static int backward_word(void)
     if (bolp()) {
       if (!edit_navigate_up_line())
         break;
-      cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
+      buf.pt.o = astr_len(buf.pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -302,7 +302,7 @@ static int backward_word(void)
           return TRUE;
       } else
         gotword = TRUE;
-      cur_bp->pt.o--;
+      buf.pt.o--;
     }
     if (gotword)
       return TRUE;
@@ -376,24 +376,24 @@ static int forward_sexp(void)
 
       /* Jump quotes that aren't sexp separators. */
       if (c == '\\'
-          && cur_bp->pt.o+1 < astr_len(cur_bp->pt.p->item)
-          && ((*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o + 1))
+          && buf.pt.o+1 < astr_len(buf.pt.p->item)
+          && ((*astr_char(buf.pt.p->item, (ptrdiff_t)(buf.pt.o + 1))
                == '\"') ||
-              (*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o + 1))
+              (*astr_char(buf.pt.p->item, (ptrdiff_t)(buf.pt.o + 1))
                   == '\''))) {
-        cur_bp->pt.o++;
+        buf.pt.o++;
         c = 'a'; /* Convert \' and \" into a word char. */
       }
 
       CONTROL_SEXP_LEVEL(ISOPENBRACKETCHAR,
                          ISCLOSEBRACKETCHAR);
 
-      cur_bp->pt.o++;
+      buf.pt.o++;
 
       if (!ISSEXPCHAR(c)) {
         if (gotsexp && level == 0) {
           if (!ISSEXPSEPARATOR(c))
-            cur_bp->pt.o--;
+            buf.pt.o--;
           return TRUE;
         }
       }
@@ -402,13 +402,13 @@ static int forward_sexp(void)
     }
     if (gotsexp && level == 0)
       return TRUE;
-    cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
+    buf.pt.o = astr_len(buf.pt.p->item);
     if (!edit_navigate_down_line()) {
       if (level != 0)
         minibuf_error("Scan error: \"Unbalanced parentheses\"");
       break;
     }
-    cur_bp->pt.o = 0;
+    buf.pt.o = 0;
   }
   return FALSE;
 }
@@ -436,17 +436,17 @@ static int backward_sexp(void)
           minibuf_error("Scan error: \"Unbalanced parentheses\"");
         break;
       }
-      cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
+      buf.pt.o = astr_len(buf.pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
 
       /* Jump quotes that doesn't are sexp separators.  */
       if (((c == '\'') || (c == '\"'))
-          && cur_bp->pt.o-1 > 0
-          && (*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o - 2))
+          && buf.pt.o-1 > 0
+          && (*astr_char(buf.pt.p->item, (ptrdiff_t)(buf.pt.o - 2))
               == '\\')) {
-        cur_bp->pt.o--;
+        buf.pt.o--;
         c = 'a'; /* Convert \' and \" like a
                     word char */
       }
@@ -454,12 +454,12 @@ static int backward_sexp(void)
       CONTROL_SEXP_LEVEL(ISCLOSEBRACKETCHAR,
                          ISOPENBRACKETCHAR);
 
-      cur_bp->pt.o--;
+      buf.pt.o--;
 
       if (!ISSEXPCHAR(c)) {
         if (gotsexp && level == 0) {
           if (!ISSEXPSEPARATOR(c))
-            cur_bp->pt.o++;
+            buf.pt.o++;
           return TRUE;
         }
       } else
@@ -553,15 +553,15 @@ Fill paragraph at or after point.
   int i, start, end;
   Marker *m = point_marker();
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
 
   FUNCALL(forward_paragraph);
-  end = cur_bp->pt.n;
+  end = buf.pt.n;
   if (is_empty_line())
     end--;
 
   FUNCALL(backward_paragraph);
-  start = cur_bp->pt.n;
+  start = buf.pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
     edit_navigate_down_line();
     start++;
@@ -580,10 +580,10 @@ Fill paragraph at or after point.
 
   thisflag &= ~FLAG_DONE_CPCN;
 
-  cur_bp->pt = m->pt;
+  buf.pt = m->pt;
   free_marker(m);
 
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -603,19 +603,19 @@ static int setcase_word(int rcase)
       return FALSE;
   }
 
-  i = cur_bp->pt.o;
-  while (i < astr_len(cur_bp->pt.p->item)) {
-    if (!ISWORDCHAR(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)i)))
+  i = buf.pt.o;
+  while (i < astr_len(buf.pt.p->item)) {
+    if (!ISWORDCHAR(*astr_char(buf.pt.p->item, (ptrdiff_t)i)))
       break;
     ++i;
   }
-  size = i-cur_bp->pt.o;
+  size = i-buf.pt.o;
   if (size > 0)
-    undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, size, FALSE);
+    undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, size, FALSE);
 
   gotword = FALSE;
-  while (cur_bp->pt.o < astr_len(cur_bp->pt.p->item)) {
-    char *p = astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o);
+  while (buf.pt.o < astr_len(buf.pt.p->item)) {
+    char *p = astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
     if (!ISWORDCHAR(*p))
       break;
     if (isalpha(*p)) {
@@ -635,10 +635,10 @@ static int setcase_word(int rcase)
       }
     }
     gotword = TRUE;
-    cur_bp->pt.o++;
+    buf.pt.o++;
   }
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  buf.flags |= BFLAG_MODIFIED;
 
   return TRUE;
 }
@@ -757,16 +757,16 @@ current buffer, overwriting the current region.
         raise(SIGWINCH);
 #endif
 
-        undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+        undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
         calculate_the_region(&r);
-        if (cur_bp->pt.p != r.start.p
-            || r.start.o != cur_bp->pt.o)
+        if (buf.pt.p != r.start.p
+            || r.start.o != buf.pt.o)
           FUNCALL(exchange_point_and_mark);
         /* FIXME: implement this with a repeat call */
         for (i = 0; i < r.size; i++)
           FUNCALL(delete_char);
         ok = insert_nstring(out, "\n", FALSE);
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+        undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 
         astr_delete(out);
       }

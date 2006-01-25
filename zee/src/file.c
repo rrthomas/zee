@@ -210,24 +210,24 @@ astr compact_path(astr path)
  */
 astr get_current_dir(int interactive)
 {
-  astr buf;
+  astr as;
 
-  if (interactive && cur_bp->filename != NULL) {
+  if (interactive && buf.filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
     char *sep;
 
-    buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
-    if ((sep = strrchr(astr_cstr(buf), '/')) != NULL)
-      astr_truncate(buf, sep - astr_cstr(buf));
+    as = astr_cpy_cstr(astr_new(), buf.filename);
+    if ((sep = strrchr(astr_cstr(as), '/')) != NULL)
+      astr_truncate(as, sep - astr_cstr(as));
   } else
     /* Get the current directory name from the system. */
-    buf = agetcwd();
+    as = agetcwd();
 
-  if (*astr_char(buf, -1) != '/')
-    astr_cat_cstr(buf, "/");
+  if (*astr_char(as, -1) != '/')
+    astr_cat_cstr(as, "/");
 
-  return buf;
+  return as;
 }
 
 /*
@@ -363,11 +363,11 @@ int file_visit(const char *filename)
     return FALSE;
   }
 
-  cur_bp = create_buffer(astr_cstr(as));
+  create_buffer(astr_cstr(as));
   astr_delete(as);
-  cur_bp->filename = zstrdup(filename);
+  buf.filename = zstrdup(filename);
 
-  file_open(cur_bp, filename);
+  file_open(&buf, filename);
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -503,7 +503,7 @@ DEFUN_INT("file-save", file_save)
 Save current buffer in visited file if modified.
 +*/
 {
-  ok = file_save(cur_bp);
+  ok = file_save(&buf);
 }
 END_DEFUN
 
@@ -513,7 +513,7 @@ Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
 +*/
 {
-  char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
+  char *fname = buf.filename != NULL ? buf.filename : buf.name;
   astr ms = minibuf_read_dir("Write file: ", fname);
 
   if (ms == NULL)
@@ -522,11 +522,11 @@ Makes buffer visit that file, and marks it not modified.
     ok = FALSE;
 
   if (ok) {
-    set_buffer_filename(cur_bp, astr_cstr(ms));
+    set_buffer_filename(&buf, astr_cstr(ms));
 
-    cur_bp->flags &= ~BFLAG_NEEDNAME;
+    buf.flags &= ~BFLAG_NEEDNAME;
 
-    write_file(cur_bp, ms);
+    write_file(&buf, ms);
   }
 
   if (ms)
@@ -541,7 +541,7 @@ Offer to save each buffer, then kill this process.
 {
   int ans, i = 0;
 
-  if (cur_bp->flags & BFLAG_MODIFIED && !(cur_bp->flags & BFLAG_NEEDNAME))
+  if (buf.flags & BFLAG_MODIFIED && !(buf.flags & BFLAG_NEEDNAME))
     ++i;
 
   if (i > 0) {
@@ -566,18 +566,18 @@ void die(int exitcode)
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
-  else if (cur_bp->flags & BFLAG_MODIFIED) {
-    astr buf = astr_new();
+  else if (buf.flags & BFLAG_MODIFIED) {
+    astr as = astr_new();
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
-    if (cur_bp->filename != NULL)
-      astr_cpy_cstr(buf, cur_bp->filename);
+    if (buf.filename != NULL)
+      astr_cpy_cstr(as, buf.filename);
     else
-      astr_cpy_cstr(buf, cur_bp->name);
-    astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
-    fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
-    raw_write_to_disk(cur_bp, astr_cstr(buf));
-    astr_delete(buf);
+      astr_cpy_cstr(as, buf.name);
+    astr_cat_cstr(as, "." PACKAGE_NAME "SAVE");
+    fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
+    raw_write_to_disk(&buf, astr_cstr(as));
+    astr_delete(as);
     term_close();
   }
   exit(exitcode);

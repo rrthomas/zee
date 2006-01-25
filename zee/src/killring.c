@@ -44,9 +44,9 @@ static int kill_line(void)
     return FALSE;
 
   if (!eolp()) {
-    size_t i, len = astr_len(cur_bp->pt.p->item) - cur_bp->pt.o;
+    size_t i, len = astr_len(buf.pt.p->item) - buf.pt.o;
 
-    astr_ncat(kill_ring_text, astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o), (size_t)len);
+    astr_ncat(kill_ring_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
     /* FIXME: implement the next line with a repeat command */
     for (i = 0; i < len; i++)
       FUNCALL(delete_char);
@@ -57,7 +57,7 @@ static int kill_line(void)
       return TRUE;
   }
 
-  if (list_next(cur_bp->pt.p) != cur_bp->lines) {
+  if (list_next(buf.pt.p) != buf.lines) {
     if (!FUNCALL(delete_char))
       return FALSE;
 
@@ -81,10 +81,10 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   if (!kill_line())
     ok = FALSE;
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 
   weigh_mark();
 }
@@ -108,12 +108,12 @@ to make one entry in the kill ring.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (!(cur_bp->flags & BFLAG_ANCHORED))
+  if (!(buf.flags & BFLAG_ANCHORED))
     ok = FUNCALL(kill_line);
   else {
     calculate_the_region(&r);
 
-    if (cur_bp->flags & BFLAG_READONLY) {
+    if (buf.flags & BFLAG_READONLY) {
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr as = copy_text_block(r.start, r.size);
@@ -123,7 +123,7 @@ to make one entry in the kill ring.
     } else {
       astr as;
 
-      if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+      if (buf.pt.p != r.start.p || r.start.o != buf.pt.o)
         FUNCALL(exchange_point_and_mark);
       delete_nstring(r.size, &as);
       astr_cat_delete(kill_ring_text, as);
@@ -173,10 +173,10 @@ Kill characters forward until encountering the end of a word.
     ok = FALSE;
   else {
     push_mark();
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
     FUNCALL(mark_word);
     FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
     pop_mark();
 
     thisflag |= FLAG_DONE_KILL;
@@ -209,10 +209,10 @@ FIXME: Can't currently kill backwards.
     ok = FALSE;
   else {
     push_mark();
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
     FUNCALL(mark_sexp);
     FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
     pop_mark();
 
     thisflag |= FLAG_DONE_KILL;

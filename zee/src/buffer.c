@@ -37,24 +37,20 @@
  * The allocation of the first empty line is done here to simplify
  * the code.
  */
-static Buffer *buffer_new(void)
+static void buffer_new(void)
 {
-  Buffer *bp = (Buffer *)zmalloc(sizeof(Buffer));
-
   /* Allocate the lines. */
-  bp->lines = line_new();
-  bp->pt.p = list_first(bp->lines);
+  buf.lines = line_new();
+  buf.pt.p = list_first(buf.lines);
 
   /* Set the initial mark (needs limit marker to be set up). */
-  bp->mark = marker_new(bp, point_min(bp));
+  buf.mark = marker_new(&buf, point_min(&buf));
 
   /* Set default EOL string. */
-  bp->eol[0] = '\n';
+  buf.eol[0] = '\n';
 
   /* Allocate the variables list. */
-  bp->vars = list_new();
-
-  return bp;
+  buf.vars = list_new();
 }
 
 /*
@@ -73,32 +69,18 @@ void free_buffer(Buffer *bp)
   /* Free the name and the filename. */
   free(bp->name);
   free(bp->filename);
-
-  free(bp);
-}
-
-/*
- * Free all the allocated buffers (used at exit).
- */
-void free_buffers(void)
-{
-  free_buffer(cur_bp);
 }
 
 /*
  * Allocate a new buffer and insert it into the buffer list.
  */
-Buffer *create_buffer(const char *name)
+void create_buffer(const char *name)
 {
-  Buffer *bp;
-
-  bp = buffer_new();
-  set_buffer_name(bp, name);
+  buffer_new();
+  set_buffer_name(&buf, name);
 
   if (get_variable_bool("auto-fill-mode"))
-    bp->flags ^= BFLAG_AUTOFILL;
-
-  return bp;
+    buf.flags ^= BFLAG_AUTOFILL;
 }
 
 /*
@@ -148,8 +130,8 @@ astr make_buffer_name(const char *filename)
  */
 int warn_if_readonly_buffer(void)
 {
-  if (cur_bp->flags & BFLAG_READONLY) {
-    minibuf_error("Buffer is readonly: %s", cur_bp->name);
+  if (buf.flags & BFLAG_READONLY) {
+    minibuf_error("Buffer is readonly: %s", buf.name);
     return TRUE;
   } else
   return FALSE;
@@ -157,8 +139,8 @@ int warn_if_readonly_buffer(void)
 
 int warn_if_no_mark(void)
 {
-  assert(cur_bp->mark);
-  if (!(cur_bp->flags & BFLAG_ANCHORED)) {
+  assert(buf.mark);
+  if (!(buf.flags & BFLAG_ANCHORED)) {
     minibuf_error("The mark is not active now");
     return TRUE;
   } else
@@ -190,10 +172,10 @@ void calculate_region(Region *rp, Point from, Point to)
  */
 int calculate_the_region(Region *rp)
 {
-  if (!(cur_bp->flags & BFLAG_ANCHORED))
+  if (!(buf.flags & BFLAG_ANCHORED))
     return FALSE;
 
-  calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
+  calculate_region(rp, buf.pt, buf.mark->pt);
   return TRUE;
 }
 
@@ -218,12 +200,12 @@ size_t calculate_buffer_size(Buffer *bp)
 
 void anchor_mark(void)
 {
-  cur_bp->flags |= BFLAG_ANCHORED;
+  buf.flags |= BFLAG_ANCHORED;
 }
 
 void weigh_mark(void)
 {
-  cur_bp->flags &= ~BFLAG_ANCHORED;
+  buf.flags &= ~BFLAG_ANCHORED;
 }
 
 /*

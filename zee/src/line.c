@@ -93,23 +93,23 @@ Marker *marker_new(Buffer *bp, Point pt)
 
 Marker *point_marker(void)
 {
-  return marker_new(cur_bp, cur_bp->pt);
+  return marker_new(&buf, buf.pt);
 }
 
 static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int offset)
 {
   Marker *pt = point_marker(), *marker;
 
-  for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
+  for (marker = buf.markers; marker != NULL; marker = marker->next)
     if (marker->pt.p == oldlp &&
         (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
       marker->pt.p = newlp;
       marker->pt.o -= pointo * dir - offset;
       marker->pt.n += dir;
-    } else if (marker->pt.n > cur_bp->pt.n)
+    } else if (marker->pt.n > buf.pt.n)
       marker->pt.n += dir;
 
-  cur_bp->pt = pt->pt;
+  buf.pt = pt->pt;
   free_marker(pt);
 }
 
@@ -128,8 +128,8 @@ void push_mark(void)
     mark_ring = list_new();
 
   /* Save the mark */
-  assert(cur_bp->mark);
-  list_append(mark_ring, marker_new(cur_bp->mark->bp, cur_bp->mark->pt));
+  assert(buf.mark);
+  list_append(mark_ring, marker_new(buf.mark->bp, buf.mark->pt));
 }
 
 /*
@@ -154,8 +154,8 @@ void pop_mark(void)
  */
 void set_mark(void)
 {
-  assert(cur_bp->mark);
-  move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
+  assert(buf.mark);
+  move_marker(buf.mark, &buf, buf.pt);
 }
 
 
@@ -216,7 +216,7 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
  */
 int is_empty_line(void)
 {
-  return astr_len(cur_bp->pt.p->item) == 0;
+  return astr_len(buf.pt.p->item) == 0;
 }
 
 /*
@@ -226,8 +226,8 @@ int is_blank_line(void)
 {
   size_t c;
 
-  for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
-    if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
+  for (c = 0; c < astr_len(buf.pt.p->item); c++)
+    if (!isspace(*astr_char(buf.pt.p->item, (ptrdiff_t)c)))
       return FALSE;
   return TRUE;
 }
@@ -242,7 +242,7 @@ int following_char(void)
   else if (eolp())
     return '\n';
   else
-    return *astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o);
+    return *astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
 }
 
 /*
@@ -255,7 +255,7 @@ int preceding_char(void)
   else if (bolp())
     return '\n';
   else
-    return *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o - 1));
+    return *astr_char(buf.pt.p->item, (ptrdiff_t)(buf.pt.o - 1));
 }
 
 /*
@@ -263,7 +263,7 @@ int preceding_char(void)
  */
 int bobp(void)
 {
-  return (bolp() && list_prev(cur_bp->pt.p) == cur_bp->lines);
+  return (bolp() && list_prev(buf.pt.p) == buf.lines);
 }
 
 /*
@@ -271,7 +271,7 @@ int bobp(void)
  */
 int eobp(void)
 {
-  return (eolp() && list_next(cur_bp->pt.p) == cur_bp->lines);
+  return (eolp() && list_next(buf.pt.p) == buf.lines);
 }
 
 /*
@@ -279,7 +279,7 @@ int eobp(void)
  */
 int bolp(void)
 {
-  return cur_bp->pt.o == 0;
+  return buf.pt.o == 0;
 }
 
 /*
@@ -287,7 +287,7 @@ int bolp(void)
  */
 int eolp(void)
 {
-  return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
+  return buf.pt.o == astr_len(buf.pt.p->item);
 }
 
 /*
@@ -341,18 +341,18 @@ static int intercalate_newline(void)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1, FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, 1, FALSE);
 
   /* Calculate the two line lengths. */
-  lp1len = cur_bp->pt.o;
-  lp2len = astr_len(cur_bp->pt.p->item) - lp1len;
+  lp1len = buf.pt.o;
+  lp2len = astr_len(buf.pt.p->item) - lp1len;
 
-  lp1 = cur_bp->pt.p;
+  lp1 = buf.pt.p;
 
   /* Update line linked list. */
   list_prepend(lp1, astr_new());
   lp2 = list_next(lp1);
-  ++cur_bp->num_lines;
+  ++buf.num_lines;
 
   /* Move the text after the point into the new line. */
   as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
@@ -361,7 +361,7 @@ static int intercalate_newline(void)
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  buf.flags |= BFLAG_MODIFIED;
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -451,15 +451,15 @@ void fill_break_line(void)
     return;
 
   /* Move cursor back to fill column */
-  old_col = cur_bp->pt.o;
+  old_col = buf.pt.o;
   while (get_goalc() > fillcol + 1) {
-    cur_bp->pt.o--;
+    buf.pt.o--;
     excess++;
   }
 
   /* Find break point moving left from fill-column. */
-  for (i = cur_bp->pt.o; i > 0; i--) {
-    int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(i - 1));
+  for (i = buf.pt.o; i > 0; i--) {
+    int c = *astr_char(buf.pt.p->item, (ptrdiff_t)(i - 1));
     if (isspace(c)) {
       break_col = i;
       break;
@@ -469,8 +469,8 @@ void fill_break_line(void)
   /* If no break point moving left from fill-column, find first
      possible moving right. */
   if (break_col == 0) {
-    for (i = cur_bp->pt.o + 1; i < astr_len(cur_bp->pt.p->item); i++) {
-      int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(i - 1));
+    for (i = buf.pt.o + 1; i < astr_len(buf.pt.p->item); i++) {
+      int c = *astr_char(buf.pt.p->item, (ptrdiff_t)(i - 1));
       if (isspace(c)) {
         break_col = i;
         break;
@@ -480,14 +480,14 @@ void fill_break_line(void)
 
   if (break_col >= 1) {
     /* Break line. */
-    size_t last_col = cur_bp->pt.o - break_col;
-    cur_bp->pt.o = break_col;
+    size_t last_col = buf.pt.o - break_col;
+    buf.pt.o = break_col;
     FUNCALL(delete_horizontal_space);
     insert_char('\n');
-    cur_bp->pt.o = last_col + excess;
+    buf.pt.o = last_col + excess;
   } else
     /* Undo fiddling with point. */
-    cur_bp->pt.o = old_col;
+    buf.pt.o = old_col;
 }
 
 DEFUN_INT("newline", newline)
@@ -495,12 +495,12 @@ DEFUN_INT("newline", newline)
 Insert a newline, and move to left margin of the new line if it's blank.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
-  if (cur_bp->flags & BFLAG_AUTOFILL &&
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+  if (buf.flags & BFLAG_AUTOFILL &&
       get_goalc() > (size_t)get_variable_number("fill-column"))
     fill_break_line();
   ok = insert_char('\n');
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -511,7 +511,7 @@ int insert_nstring(astr as, const char *eolstr, int intercalate)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len(as), FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as), FALSE);
 
   for (i = 0; i < astr_len(as); i++) {
     char *s = astr_char(as, (ptrdiff_t)i);
@@ -520,10 +520,10 @@ int insert_nstring(astr as, const char *eolstr, int intercalate)
       if (!intercalate)
         edit_navigate_forward_char();
     } else {
-      astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, *s);
-      cur_bp->flags |= BFLAG_MODIFIED;
+      astr_insert_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o, *s);
+      buf.flags |= BFLAG_MODIFIED;
       if (!intercalate)
-        adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
+        adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, 1);
     }
   }
 
@@ -539,8 +539,8 @@ int delete_nstring(size_t size, astr *as)
 
   *as = astr_new();
 
-  undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0, FALSE);
-  cur_bp->flags |= BFLAG_MODIFIED;
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, 0, FALSE);
+  buf.flags |= BFLAG_MODIFIED;
   while (size--) {
     if (!eolp())
       astr_cat_char(*as, following_char());
@@ -553,23 +553,23 @@ int delete_nstring(size_t size, astr *as)
     }
 
     if (eolp()) {
-      Line *lp1 = cur_bp->pt.p;
+      Line *lp1 = buf.pt.p;
       Line *lp2 = list_next(lp1);
       size_t lp1len = astr_len(lp1->item);
 
       /* Move the next line of text into the current line. */
-      lp2 = list_next(cur_bp->pt.p);
-      astr_cat(lp1->item, list_next(cur_bp->pt.p)->item);
+      lp2 = list_next(buf.pt.p);
+      astr_cat(lp1->item, list_next(buf.pt.p)->item);
       astr_delete(list_behead(lp1));
-      --cur_bp->num_lines;
+      --buf.num_lines;
 
       adjust_markers(lp1, lp2, lp1len, -1, 0);
 
       thisflag |= FLAG_NEED_RESYNC;
     } else {
       /* Move the text one position backward after the point. */
-      astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
-      adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
+      astr_remove(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 1);
+      adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, -1);
     }
   }
 
@@ -581,7 +581,7 @@ int self_insert_command(size_t key)
   weigh_mark();
 
   if (key <= 255) {
-    if (isspace(key) && cur_bp->flags & BFLAG_AUTOFILL &&
+    if (isspace(key) && buf.flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
     insert_char((int)key);
@@ -648,7 +648,7 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
 Delete all spaces and tabs around point.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
 
   while (!eolp() && isspace(following_char()))
     delete_char();
@@ -656,7 +656,7 @@ Delete all spaces and tabs around point.
   while (!bolp() && isspace(preceding_char()))
     backward_delete_char();
 
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -665,10 +665,10 @@ DEFUN_INT("just-one-space", just_one_space)
 Delete all spaces and tabs around point, leaving one space.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   FUNCALL(delete_horizontal_space);
   insert_char(' ');
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
 END_DEFUN
 
@@ -718,11 +718,11 @@ Indent line or insert a tab.
     if (!eolp())
       target_goalc = get_goalc();
 
-    cur_bp->pt = old_point->pt;
+    buf.pt = old_point->pt;
     free_marker(old_point);
 
     /* Indent. */
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
     if (target_goalc > 0)
       /* If not at EOL on target line, insert spaces up to
          target_goalc. */
@@ -731,7 +731,7 @@ Indent line or insert a tab.
         insert_char(' ');
     else
       ok = insert_tab();
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
   }
 }
 END_DEFUN
@@ -755,20 +755,20 @@ no indenting is performed.
       size_t pos;
       Marker *old_point = point_marker();
 
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+      undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
 
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
       pos = get_goalc();
       indent = pos > 0 || (!eolp() && isspace(following_char()));
-      cur_bp->pt = old_point->pt;
+      buf.pt = old_point->pt;
       free_marker(old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)
         FUNCALL(indent_relative);
 
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+      undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
     }
   }
 }

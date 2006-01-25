@@ -28,26 +28,26 @@
 void resync_display(void)
 {
   static size_t lastpointn = 0;
-  int delta = cur_bp->pt.n - lastpointn;
+  int delta = buf.pt.n - lastpointn;
 
   if (delta) {
     if ((delta > 0 && win.topdelta + delta < win.eheight) ||
         (delta < 0 && win.topdelta >= (size_t)(-delta)))
       win.topdelta += delta;
-    else if (cur_bp->pt.n > win.eheight / 2)
+    else if (buf.pt.n > win.eheight / 2)
       win.topdelta = win.eheight / 2;
     else
-      win.topdelta = cur_bp->pt.n;
+      win.topdelta = buf.pt.n;
   }
-  lastpointn = cur_bp->pt.n;
+  lastpointn = buf.pt.n;
 }
 
 void recenter(void)
 {
-  if (cur_bp->pt.n > win.eheight / 2)
+  if (buf.pt.n > win.eheight / 2)
     win.topdelta = win.eheight / 2;
   else
-    win.topdelta = cur_bp->pt.n;
+    win.topdelta = buf.pt.n;
 }
 
 DEFUN_INT("recenter", recenter)

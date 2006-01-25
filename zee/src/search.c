@@ -106,15 +106,15 @@ static int search_forward(Line *startp, size_t starto, const char *s)
 
   if (ssize > 0) {
     for (lp = startp, sp = astr_char(lp->item, (ptrdiff_t)starto), s1size = astr_len(lp->item) - starto;
-         lp != list_last(cur_bp->lines);
+         lp != list_last(buf.lines);
          lp = list_next(lp), sp = astr_cstr(lp->item), s1size = astr_len(lp->item)) {
       if (s1size > 0) {
         const char *sp2 = re_find_substr(sp, s1size, s, ssize,
                                          sp == astr_cstr(lp->item), TRUE, FALSE);
         if (sp2 != NULL) {
-          while (cur_bp->pt.p != lp)
+          while (buf.pt.p != lp)
             edit_navigate_down_line();
-          cur_bp->pt.o = sp2 - astr_cstr(lp->item);
+          buf.pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }
       }
@@ -131,16 +131,16 @@ static int search_backward(Line *startp, size_t starto, const char *s)
 
   if (ssize > 0) {
     for (lp = startp, s1size = starto;
-         lp != list_first(cur_bp->lines);
+         lp != list_first(buf.lines);
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
       const char *sp = astr_cstr(lp->item);
       if (s1size > 0) {
         const char *sp2 = re_find_substr(sp, s1size, s, ssize,
                                          TRUE, s1size == astr_len(lp->item), TRUE);
         if (sp2 != NULL) {
-          while (cur_bp->pt.p != lp)
+          while (buf.pt.p != lp)
             edit_navigate_up_line();
-          cur_bp->pt.o = sp2 - astr_cstr(lp->item);
+          buf.pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }
       }
@@ -167,7 +167,7 @@ Search forward from point for regular expression REGEXP.
     free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
-    if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
+    if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
       minibuf_error("Failing regexp search: `%s'", astr_cstr(ms));
       ok = FALSE;
     }
@@ -191,7 +191,7 @@ Search backward from point for match for regular expression REGEXP.
     free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
-    if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(ms))) {
+    if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
       minibuf_error("Failing regexp search backward: `%s'", ms);
       ok = FALSE;
     }
@@ -210,24 +210,24 @@ static int isearch(int dir)
 {
   int c;
   int last = TRUE;
-  astr buf = astr_new();
+  astr as = astr_new();
   astr pattern = astr_new();
   Point start, cur;
   Marker *old_mark;
 
-  assert(cur_bp->mark);
-  old_mark = marker_new(cur_bp->mark->bp, cur_bp->mark->pt);
+  assert(buf.mark);
+  old_mark = marker_new(buf.mark->bp, buf.mark->pt);
 
-  start = cur_bp->pt;
-  cur = cur_bp->pt;
+  start = buf.pt;
+  cur = buf.pt;
 
   /* I-search mode. */
-  cur_bp->flags |= BFLAG_ISEARCH;
+  buf.flags |= BFLAG_ISEARCH;
 
   for (;;) {
     /* Make the minibuf message. */
-    astr_truncate(buf, 0);
-    astr_afmt(buf, "%sI-search%s: %s",
+    astr_truncate(as, 0);
+    astr_afmt(as, "%sI-search%s: %s",
               (last ? "Regexp " : "Failing regexp "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
@@ -239,16 +239,16 @@ static int isearch(int dir)
           (strncmp(re_find_err, "Invalid ", 8) == 0)) {
         re_find_err = "incomplete input";
       }
-      astr_afmt(buf, " [%s]", re_find_err);
+      astr_afmt(as, " [%s]", re_find_err);
       re_find_err = NULL;
     }
 
-    minibuf_write("%s", astr_cstr(buf));
+    minibuf_write("%s", astr_cstr(as));
 
     c = getkey();
 
     if (c == KBD_CANCEL) {
-      cur_bp->pt = start;
+      buf.pt = start;
       thisflag |= FLAG_NEED_RESYNC;
 
       /* "Quit" (also it calls ding() and stops
@@ -256,18 +256,18 @@ static int isearch(int dir)
       cancel();
 
       /* Restore old mark position. */
-      assert(cur_bp->mark);
-      free_marker(cur_bp->mark);
+      assert(buf.mark);
+      free_marker(buf.mark);
 
       if (old_mark)
-        cur_bp->mark = marker_new(old_mark->bp, old_mark->pt);
+        buf.mark = marker_new(old_mark->bp, old_mark->pt);
       else
-        cur_bp->mark = old_mark;
+        buf.mark = old_mark;
       break;
     } else if (c == KBD_BS) {
       if (astr_len(pattern) > 0) {
         astr_truncate(pattern, -1);
-        cur_bp->pt = start;
+        buf.pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
@@ -279,7 +279,7 @@ static int isearch(int dir)
         dir = ISEARCH_FORWARD;
       if (astr_len(pattern) > 0) {
         /* Find next match. */
-        cur = cur_bp->pt;
+        cur = buf.pt;
         /* Save search string. */
         free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
@@ -295,7 +295,7 @@ static int isearch(int dir)
       else if (astr_len(pattern) > 0) {
         /* Save mark. */
         set_mark();
-        cur_bp->mark->pt = start;
+        buf.mark->pt = start;
 
         /* Save search string. */
         free(last_search);
@@ -321,9 +321,9 @@ static int isearch(int dir)
   }
 
   /* done */
-  cur_bp->flags &= ~BFLAG_ISEARCH;
+  buf.flags &= ~BFLAG_ISEARCH;
 
-  astr_delete(buf);
+  astr_delete(as);
   astr_delete(pattern);
 
   if (old_mark)
@@ -392,16 +392,16 @@ Replace occurrences of a regexp with other text.
     if ((repl = minibuf_read("Replace `%s' with: ", "", astr_cstr(find))) == NULL)
       ok = cancel();
     else {
-      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(find))) {
+      while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(cur_bp->pt.n,
-                             cur_bp->pt.o - astr_len(find)),
+                  make_point(buf.pt.n,
+                             buf.pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
-        if (line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+        if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
                               astr_len(find), astr_cstr(repl), astr_len(repl),
                               find_no_upper))
-          cur_bp->flags |= BFLAG_MODIFIED;
+          buf.flags |= BFLAG_MODIFIED;
       }
 
       if (thisflag & FLAG_NEED_RESYNC)
@@ -435,7 +435,7 @@ what to do with it.
       ok = cancel();
     if (ok) {
       /* Spaghetti code follows... :-( */
-      while (search_forward(cur_bp->pt.p, cur_bp->pt.o, astr_cstr(find))) {
+      while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
         if (!noask) {
           int c;
           if (thisflag & FLAG_NEED_RESYNC)
@@ -478,12 +478,12 @@ what to do with it.
       replblock:
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(cur_bp->pt.n, cur_bp->pt.o - astr_len(find)),
+                  make_point(buf.pt.n, buf.pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
-        if (line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - astr_len(find),
+        if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
                               astr_len(find), astr_cstr(repl), astr_len(repl),
                               find_no_upper))
-          cur_bp->flags |= BFLAG_MODIFIED;
+          buf.flags |= BFLAG_MODIFIED;
         /* FALLTHROUGH */
       nextmatch:
         if (exitloop)

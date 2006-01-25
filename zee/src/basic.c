@@ -41,7 +41,7 @@ DEFUN_INT("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  cur_bp->pt = line_beginning_position();
+  buf.pt = line_beginning_position();
 
   /* Change the `goalc' to the beginning of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -55,7 +55,7 @@ DEFUN_INT("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  cur_bp->pt = line_end_position();
+  buf.pt = line_end_position();
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -70,9 +70,9 @@ END_DEFUN
 size_t get_goalc(void)
 {
   size_t col = 0, t = tab_width(), i;
-  const char *sp = astr_cstr(cur_bp->pt.p->item);
+  const char *sp = astr_cstr(buf.pt.p->item);
 
-  for (i = 0; i < cur_bp->pt.o; i++) {
+  for (i = 0; i < buf.pt.o; i++) {
     if (sp[i] == '\t')
       col |= t - 1;
     ++col;
@@ -91,9 +91,9 @@ static void goto_goalc(int goalc)
   const char *sp;
 
   t = tab_width();
-  sp = astr_cstr(cur_bp->pt.p->item);
+  sp = astr_cstr(buf.pt.p->item);
 
-  for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {
+  for (i = 0; i < astr_len(buf.pt.p->item); i++) {
     if (col == goalc)
       break;
     else if (sp[i] == '\t') {
@@ -104,19 +104,19 @@ static void goto_goalc(int goalc)
       ++col;
   }
 
-  cur_bp->pt.o = i;
+  buf.pt.o = i;
 }
 
 int edit_navigate_up_line(void)
 {
-  if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
+  if (list_prev(buf.pt.p) != buf.lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    cur_bp->pt.p = list_prev(cur_bp->pt.p);
-    cur_bp->pt.n--;
+    buf.pt.p = list_prev(buf.pt.p);
+    buf.pt.n--;
 
     goto_goalc(cur_goalc);
 
@@ -146,14 +146,14 @@ END_DEFUN
 
 int edit_navigate_down_line(void)
 {
-  if (list_next(cur_bp->pt.p) != cur_bp->lines) {
+  if (list_next(buf.pt.p) != buf.lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    cur_bp->pt.p = list_next(cur_bp->pt.p);
-    cur_bp->pt.n++;
+    buf.pt.p = list_next(buf.pt.p);
+    buf.pt.n++;
 
     goto_goalc(cur_goalc);
 
@@ -222,16 +222,16 @@ int goto_line(size_t to_line)
   size_t off;
   Function f;
 
-  up = cur_bp->pt.n > to_line;
+  up = buf.pt.n > to_line;
   if (up) {
-    off = cur_bp->pt.n - to_line;
+    off = buf.pt.n - to_line;
     f = F_edit_navigate_up_line;
   } else {
-    off = to_line - cur_bp->pt.n;
+    off = to_line - buf.pt.n;
     f = F_edit_navigate_down_line;
   }
 
-  for (; off > 0 && list_prev(cur_bp->pt.p) != cur_bp->lines && (ok = f(0, 0, NULL)); off--)
+  for (; off > 0 && list_prev(buf.pt.p) != buf.lines && (ok = f(0, 0, NULL)); off--)
     ;
 
   return ok;
@@ -258,7 +258,7 @@ Line 1 is the beginning of the buffer.
 
   if (ok) {
     goto_line(to_line - 1);
-    cur_bp->pt.o = 0;
+    buf.pt.o = 0;
   }
 }
 END_DEFUN
@@ -268,7 +268,7 @@ END_DEFUN
  */
 void gotobob(void)
 {
-  cur_bp->pt = point_min(cur_bp);
+  buf.pt = point_min(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -287,7 +287,7 @@ END_DEFUN
  */
 void gotoeob(void)
 {
-  cur_bp->pt = point_max(cur_bp);
+  buf.pt = point_max(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -304,12 +304,12 @@ END_DEFUN
 int edit_navigate_backward_char(void)
 {
   if (!bolp()) {
-    cur_bp->pt.o--;
+    buf.pt.o--;
     return TRUE;
   } else if (!bobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    cur_bp->pt.p = list_prev(cur_bp->pt.p);
-    cur_bp->pt.n--;
+    buf.pt.p = list_prev(buf.pt.p);
+    buf.pt.n--;
     FUNCALL(end_of_line);
     return TRUE;
   }
@@ -333,12 +333,12 @@ END_DEFUN
 int edit_navigate_forward_char(void)
 {
   if (!eolp()) {
-    cur_bp->pt.o++;
+    buf.pt.o++;
     return TRUE;
   } else if (!eobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    cur_bp->pt.p = list_next(cur_bp->pt.p);
-    cur_bp->pt.n++;
+    buf.pt.p = list_next(buf.pt.p);
+    buf.pt.n++;
     FUNCALL(beginning_of_line);
     return TRUE;
   }
@@ -364,8 +364,8 @@ DEFUN_INT("scroll-down", scroll_down)
 Scroll text of current window downward near full screen.
 +*/
 {
-  if (cur_bp->pt.n > 0)
-    ok = goto_line(cur_bp->pt.n - win.eheight) ? TRUE : FALSE;
+  if (buf.pt.n > 0)
+    ok = goto_line(buf.pt.n - win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error("Beginning of buffer");
     ok = FALSE;
@@ -378,8 +378,8 @@ DEFUN_INT("scroll-up", scroll_up)
 Scroll text of current window upward near full screen.
 +*/
 {
-  if (cur_bp->pt.n < cur_bp->num_lines)
-    ok = goto_line(cur_bp->pt.n + win.eheight) ? TRUE : FALSE;
+  if (buf.pt.n < buf.num_lines)
+    ok = goto_line(buf.pt.n + win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error("End of buffer");
     ok = FALSE;

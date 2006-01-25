@@ -119,14 +119,14 @@ static int in_region(size_t lineno, size_t x, Region *r)
  */
 static void calculate_highlight_region(Region *r)
 {
-  assert(cur_bp->mark);
-  r->start = cur_bp->pt;
-  if (cur_bp->flags & BFLAG_ANCHORED) {
-    r->end = cur_bp->mark->pt;
+  assert(buf.mark);
+  r->start = buf.pt;
+  if (buf.flags & BFLAG_ANCHORED) {
+    r->end = buf.mark->pt;
     if (cmp_point(r->end, r->start) < 0)
       swap_point(&r->end, &r->start);
   } else
-    r->end = cur_bp->pt;
+    r->end = buf.pt;
 }
 
 /*
@@ -165,11 +165,11 @@ static void draw_window(size_t topline)
 {
   size_t i, startcol, lineno;
   Line *lp;
-  Point pt = cur_bp->pt;
+  Point pt = buf.pt;
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
-       i > 0 && list_prev(lp) != cur_bp->lines; lp = list_prev(lp), --i, --lineno);
+       i > 0 && list_prev(lp) != buf.lines; lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width();
 
@@ -180,7 +180,7 @@ static void draw_window(size_t topline)
     term_clrtoeol();
 
     /* If at the end of the buffer, don't write any text. */
-    if (lp == cur_bp->lines)
+    if (lp == buf.lines)
       continue;
 
     startcol = point_start_column;
@@ -198,18 +198,18 @@ static void draw_window(size_t topline)
 
 static char *make_mode_line_flags(void)
 {
-  static char buf[3];
+  static char s[3];
 
-  if ((cur_bp->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
-    buf[0] = '%', buf[1] = '*';
-  else if (cur_bp->flags & BFLAG_MODIFIED)
-    buf[0] = buf[1] = '*';
-  else if (cur_bp->flags & BFLAG_READONLY)
-    buf[0] = buf[1] = '%';
+  if ((buf.flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
+    s[0] = '%', s[1] = '*';
+  else if (buf.flags & BFLAG_MODIFIED)
+    s[0] = s[1] = '*';
+  else if (buf.flags & BFLAG_READONLY)
+    s[0] = s[1] = '%';
   else
-    buf[0] = buf[1] = '-';
+    s[0] = s[1] = '-';
 
-  return buf;
+  return s;
 }
 
 /*
@@ -221,8 +221,8 @@ static void calculate_start_column(void)
 {
   size_t col = 0, lastcol = 0, t = tab_width();
   int rpfact, lpfact;
-  char *buf, *rp, *lp, *p;
-  Point pt = cur_bp->pt;
+  char *s, *rp, *lp, *p;
+  Point pt = buf.pt;
 
   rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
   rpfact = pt.o / (win.ewidth / 3);
@@ -235,8 +235,8 @@ static void calculate_start_column(void)
       } else if (isprint(*p))
         ++col;
       else {
-        col += make_char_printable(&buf, (size_t)*p);
-        free(buf);
+        col += make_char_printable(&s, (size_t)*p);
+        free(s);
       }
 
     lpfact = (lp - astr_cstr(pt.p->item)) / (win.ewidth / 3);
@@ -254,20 +254,20 @@ static void calculate_start_column(void)
   point_screen_column = col;
 }
 
-static char *make_screen_pos(char **buf)
+static char *make_screen_pos(char **s)
 {
-  Point pt = cur_bp->pt;
+  Point pt = buf.pt;
 
-  if (cur_bp->num_lines <= win.eheight && win.topdelta == pt.n)
-    zasprintf(buf, "All");
+  if (buf.num_lines <= win.eheight && win.topdelta == pt.n)
+    zasprintf(s, "All");
   else if (pt.n == win.topdelta)
-    zasprintf(buf, "Top");
-  else if (pt.n + (win.eheight - win.topdelta) > cur_bp->num_lines)
-    zasprintf(buf, "Bot");
+    zasprintf(s, "Top");
+  else if (pt.n + (win.eheight - win.topdelta) > buf.num_lines)
+    zasprintf(s, "Bot");
   else
-    zasprintf(buf, "%2d%%", (int)((float)pt.n / cur_bp->num_lines * 100));
+    zasprintf(s, "%2d%%", (int)((float)pt.n / buf.num_lines * 100));
 
-  return *buf;
+  return *s;
 }
 
 static void draw_border(void)
@@ -282,8 +282,8 @@ static void draw_border(void)
 static void draw_status_line(size_t line)
 {
   int someflag = 0;
-  char *buf;
-  Point pt = cur_bp->pt;
+  char *s;
+  Point pt = buf.pt;
 
   term_move(line, 0);
   draw_border();
@@ -291,9 +291,9 @@ static void draw_status_line(size_t line)
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  term_printf("--%2s- %-18s (", make_mode_line_flags(), cur_bp->name);
+  term_printf("--%2s- %-18s (", make_mode_line_flags(), buf.name);
 
-  if (cur_bp->flags & BFLAG_AUTOFILL) {
+  if (buf.flags & BFLAG_AUTOFILL) {
     term_printf("Fill");
     someflag = 1;
   }
@@ -301,12 +301,12 @@ static void draw_status_line(size_t line)
     term_printf("%sDef", someflag ? " " : "");
     someflag = 1;
   }
-  if (cur_bp->flags & BFLAG_ISEARCH)
+  if (buf.flags & BFLAG_ISEARCH)
     term_printf("%sIsearch", someflag ? " " : "");
 
   term_printf(")--L%d--C%d--%s",
-              pt.n + 1, get_goalc(), make_screen_pos(&buf));
-  free(buf);
+              pt.n + 1, get_goalc(), make_screen_pos(&s));
+  free(s);
 
   term_attrset(1, FONT_NORMAL);
 }

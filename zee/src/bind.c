@@ -96,13 +96,13 @@ void process_key(size_t key)
     return;
 
   if (p == NULL)
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   for (uni = 0;
        uni < last_uniarg &&
          (p ? p->func(0, 0, NULL) : self_insert_command(key));
        uni++);
   if (p == NULL)
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the function call, to cope with start-kbd-macro */

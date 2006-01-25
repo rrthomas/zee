@@ -60,7 +60,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
 
   up->type = type;
   up->pt = pt;
-  up->unchanged = !(cur_bp->flags & BFLAG_MODIFIED);
+  up->unchanged = !(buf.flags & BFLAG_MODIFIED);
 
   if (type == UNDO_REPLACE_BLOCK) {
     up->delta.text = copy_text_block(pt, arg1);
@@ -68,11 +68,11 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
     up->delta.intercalate = intercalate;
   }
 
-  up->next = cur_bp->last_undop;
-  cur_bp->last_undop = up;
+  up->next = buf.last_undop;
+  buf.last_undop = up;
 
   if (!doing_undo)
-    cur_bp->next_undop = up;
+    buf.next_undop = up;
 }
 
 /*
@@ -106,7 +106,7 @@ static Undo *revert_action(Undo *up)
   /* If reverting this undo action leaves the buffer unchanged,
      unset the modified flag. */
   if (up->unchanged)
-    cur_bp->flags &= ~BFLAG_MODIFIED;
+    buf.flags &= ~BFLAG_MODIFIED;
 
   return up->next;
 }
@@ -120,11 +120,11 @@ Repeat this command to undo more changes.
   ok = FALSE;
 
   if (warn_if_readonly_buffer());
-  else if (cur_bp->next_undop == NULL) {
+  else if (buf.next_undop == NULL) {
     minibuf_error("No further undo information");
-    cur_bp->next_undop = cur_bp->last_undop;
+    buf.next_undop = buf.last_undop;
   } else {
-    cur_bp->next_undop = revert_action(cur_bp->next_undop);
+    buf.next_undop = revert_action(buf.next_undop);
     minibuf_write("Undo!");
     ok = TRUE;
   }

@@ -280,7 +280,7 @@ int main(int argc, char **argv)
   astr_delete(as);
   free_search_history();
   free_macros();
-  free_buffers();
+  free_buffer(&buf);
   free_minibuf();
 
   return 0;

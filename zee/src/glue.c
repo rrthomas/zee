@@ -92,16 +92,16 @@ void ungetkey(size_t key)
  *  start - the starting point.
  *  size - number of characters to copy.
  * If the region includes any line endings, they are turned into '\n'
- * irrespective of 'cur_bp->eol', and count as one character.
+ * irrespective of 'buf.eol', and count as one character.
  */
 astr copy_text_block(Point start, size_t size)
 {
-  size_t n = cur_bp->pt.n, i;
+  size_t n = buf.pt.n, i;
   astr as = astr_new();
-  Line *lp = cur_bp->pt.p;
+  Line *lp = buf.pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the
-   * region. Doesn't matter where we start. Starting at 'cur_bp->pt' is a good
+   * region. Doesn't matter where we start. Starting at 'buf.pt' is a good
    * heuristic.
    */
   if (n > start.n)
@@ -151,21 +151,21 @@ astr shorten_string(char *s, int maxlen)
  */
 void goto_point(Point pt)
 {
-  if (cur_bp->pt.n > pt.n)
+  if (buf.pt.n > pt.n)
     do
       FUNCALL(edit_navigate_up_line);
-    while (cur_bp->pt.n > pt.n);
-  else if (cur_bp->pt.n < pt.n)
+    while (buf.pt.n > pt.n);
+  else if (buf.pt.n < pt.n)
     do
       FUNCALL(edit_navigate_down_line);
-    while (cur_bp->pt.n < pt.n);
+    while (buf.pt.n < pt.n);
 
-  if (cur_bp->pt.o > pt.o)
+  if (buf.pt.o > pt.o)
     do
       FUNCALL(edit_navigate_backward_char);
-    while (cur_bp->pt.o > pt.o);
-  else if (cur_bp->pt.o < pt.o)
+    while (buf.pt.o > pt.o);
+  else if (buf.pt.o < pt.o)
     do
       FUNCALL(edit_navigate_forward_char);
-    while (cur_bp->pt.o < pt.o);
+    while (buf.pt.o < pt.o);
 }
