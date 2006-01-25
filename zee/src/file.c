@@ -374,27 +374,6 @@ int file_visit(const char *filename)
   return TRUE;
 }
 
-/*
- * Check if the buffer has been modified.  If so, asks the user if
- * he/she wants to save the changes.  If the response is positive, return
- * TRUE, else FALSE.
- */
-static int check_modified_buffer(Buffer *bp)
-{
-  int ans;
-
-  if (bp->flags & BFLAG_MODIFIED)
-    for (;;) {
-      if ((ans = minibuf_read_yesno("Buffer %s modified; kill anyway? (yes or no) ", bp->name)) == -1)
-        return cancel();
-      else if (!ans)
-        return FALSE;
-      break;
-    }
-
-  return TRUE;
-}
-
 static int file_insert(const char *filename)
 {
   astr as, eolstr;
@@ -586,7 +565,7 @@ END_DEFUN
 
 /*
  * Function called on unexpected error or crash (SIGSEGV).
- * Attempts to save modified buffers.
+ * Attempts to save buffer if modified.
  */
 void die(int exitcode)
 {
@@ -594,20 +573,18 @@ void die(int exitcode)
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
-  else {
+  else if (cur_bp && cur_bp->flags & BFLAG_MODIFIED) {
+    astr buf = astr_new();
     already_dying = TRUE;
-    fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
-    if (cur_bp->flags & BFLAG_MODIFIED) {
-      astr buf = astr_new();
-      if (cur_bp->filename != NULL)
-        astr_cpy_cstr(buf, cur_bp->filename);
-      else
-        astr_cpy_cstr(buf, cur_bp->name);
-      astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
-      fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
-      raw_write_to_disk(cur_bp, astr_cstr(buf));
-      astr_delete(buf);
-    }
+    fprintf(stderr, "Trying to save modified buffer...\r\n");
+    if (cur_bp->filename != NULL)
+      astr_cpy_cstr(buf, cur_bp->filename);
+    else
+      astr_cpy_cstr(buf, cur_bp->name);
+    astr_cat_cstr(buf, "." PACKAGE_NAME "SAVE");
+    fprintf(stderr, "Saving %s...\r\n", astr_cstr(buf));
+    raw_write_to_disk(cur_bp, astr_cstr(buf));
+    astr_delete(buf);
     term_close();
   }
   exit(exitcode);
@@ -615,7 +592,7 @@ void die(int exitcode)
 
 DEFUN_INT("file-change-directory", file_change_directory)
 /*+
-Make DIR become the current default directory.
+Make DIR the current directory.
 +*/
 {
   astr ms, buf;
