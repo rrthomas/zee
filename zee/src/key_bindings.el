@@ -20,9 +20,7 @@ global-set-key "END" end-of-line
 global-set-key "PGUP" scroll-down
 global-set-key "PGDN" scroll-up
 # Whole buffer
-global-set-key "M-<" beginning-of-buffer
 global-set-key "C-HOME" beginning-of-buffer
-global-set-key "M->" end-of-buffer
 global-set-key "C-END" end-of-buffer
 
 # Selection. The goal is that any navigation command can be combined with
@@ -40,7 +38,6 @@ global-set-key "M-g" goto-line
 # Save
 global-set-key "C-s" file-save
 # Quit
-global-set-key "M-q" file-quit
 global-set-key "C-q" file-quit
 
 # Undo, cut, copy, paste, delete etc.
@@ -50,19 +47,14 @@ global-set-key "C--" undo
 global-set-key "C-z" undo
 # Cut selection to clipboard.
 global-set-key "C-x" kill-region
-global-set-key "C-k" kill-region
-global-set-key "M-d" kill-word
 global-set-key "M-DEL" kill-word
 # Copy selection to clipboard.
 global-set-key "C-c" copy-region
-global-set-key "M-w" copy-region
 # Delete without modifying clipboard.
 global-set-key "BS" backward-delete-char
 global-set-key "M-BS" backward-kill-word
-global-set-key "C-d" delete-char
 global-set-key "DEL" delete-char
 # Paste.
-global-set-key "C-y" yank
 global-set-key "C-v" yank
 
 # Search
