@@ -222,7 +222,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
   return ms;
 }
 
-DEFUN("global-set-key", global_set_key)
+DEFUN("set-key", set_key)
 /*+
 Bind a command to a key sequence.
 Read key sequence and function name, and bind the function to the key
