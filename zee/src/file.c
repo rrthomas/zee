@@ -545,7 +545,7 @@ Offer to save each buffer, then kill this process.
     ++i;
 
   if (i > 0) {
-    if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
+    if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ", "")) == -1)
       ok = cancel();
     else if (!ans)
       ok = FALSE;
