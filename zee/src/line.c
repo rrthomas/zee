@@ -684,7 +684,7 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (FUNCALL(edit_navigate_up_line) && is_blank_line());
+  while (edit_navigate_up_line() && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
