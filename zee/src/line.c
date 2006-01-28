@@ -318,7 +318,7 @@ static int insert_tab(void)
   }
 }
 
-DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
+DEFUN("tab-to-tab-stop", tab_to_tab_stop)
 /*+
 Insert spaces or tabs to next defined tab-stop column.
 Convert the tabulation into spaces.
@@ -490,7 +490,7 @@ void fill_break_line(void)
     buf.pt.o = old_col;
 }
 
-DEFUN_INT("newline", newline)
+DEFUN("newline", newline)
 /*+
 Insert a newline, and move to left margin of the new line if it's blank.
 +*/
@@ -592,7 +592,7 @@ int self_insert_command(size_t key)
   }
 }
 
-DEFUN_INT("self-insert-command", self_insert_command)
+DEFUN("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
 Whichever character you type to run this command is inserted.
@@ -610,7 +610,7 @@ int delete_char(void)
   return ok;
 }
 
-DEFUN_INT("delete-char", delete_char)
+DEFUN("delete-char", delete_char)
 /*+
 Delete the following character.
 Join lines if the character is a newline.
@@ -633,7 +633,7 @@ int backward_delete_char(void)
   }
 }
 
-DEFUN_INT("backward-delete-char", backward_delete_char)
+DEFUN("backward-delete-char", backward_delete_char)
 /*+
 Delete the previous character.
 Join lines if the character is a newline.
@@ -643,7 +643,7 @@ Join lines if the character is a newline.
 }
 END_DEFUN
 
-DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
+DEFUN("delete-horizontal-space", delete_horizontal_space)
 /*+
 Delete all spaces and tabs around point.
 +*/
@@ -660,7 +660,7 @@ Delete all spaces and tabs around point.
 }
 END_DEFUN
 
-DEFUN_INT("just-one-space", just_one_space)
+DEFUN("just-one-space", just_one_space)
 /*+
 Delete all spaces and tabs around point, leaving one space.
 +*/
@@ -691,7 +691,7 @@ static void previous_nonblank_goalc(void)
     edit_navigate_forward_char();
 }
 
-DEFUN_INT("indent-relative", indent_relative)
+DEFUN("indent-relative", indent_relative)
 /*+
 Indent line or insert a tab.
 +*/
@@ -736,7 +736,7 @@ Indent line or insert a tab.
 }
 END_DEFUN
 
-DEFUN_INT("newline-and-indent", newline_and_indent)
+DEFUN("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
 Indentation is done using the `indent-relative' command, except

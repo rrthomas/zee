@@ -36,7 +36,7 @@
    used.  */
 static int cur_goalc;
 
-DEFUN_INT("beginning-of-line", beginning_of_line)
+DEFUN("beginning-of-line", beginning_of_line)
 /*+
 Move point to beginning of current line.
 +*/
@@ -50,7 +50,7 @@ Move point to beginning of current line.
 }
 END_DEFUN
 
-DEFUN_INT("end-of-line", end_of_line)
+DEFUN("end-of-line", end_of_line)
 /*+
 Move point to end of current line.
 +*/
@@ -126,7 +126,7 @@ int edit_navigate_up_line(void)
   return FALSE;
 }
 
-DEFUN_INT("edit-navigate-up-line", edit_navigate_up_line)
+DEFUN("edit-navigate-up-line", edit_navigate_up_line)
 /*+
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -163,7 +163,7 @@ int edit_navigate_down_line(void)
   return FALSE;
 }
 
-DEFUN_INT("edit-navigate-down-line", edit_navigate_down_line)
+DEFUN("edit-navigate-down-line", edit_navigate_down_line)
 /*+
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -183,7 +183,7 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-DEFUN_INT("goto-char", goto_char)
+DEFUN("goto-char", goto_char)
 /*+
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
@@ -237,7 +237,7 @@ int goto_line(size_t to_line)
   return ok;
 }
 
-DEFUN_INT("goto-line", goto_line)
+DEFUN("goto-line", goto_line)
 /*+
 Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
@@ -272,7 +272,7 @@ void gotobob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN_INT("beginning-of-buffer", beginning_of_buffer)
+DEFUN("beginning-of-buffer", beginning_of_buffer)
 /*+
 Move point to the beginning of the buffer; leave mark at previous position.
 +*/
@@ -291,7 +291,7 @@ void gotoeob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN_INT("end-of-buffer", end_of_buffer)
+DEFUN("end-of-buffer", end_of_buffer)
 /*+
 Move point to the end of the buffer; leave mark at previous position.
 +*/
@@ -317,7 +317,7 @@ int edit_navigate_backward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("edit-navigate-backward-char", edit_navigate_backward_char)
+DEFUN("edit-navigate-backward-char", edit_navigate_backward_char)
 /*+
 Move point left one character.
 On attempt to pass beginning or end of buffer, stop and signal error.
@@ -346,7 +346,7 @@ int edit_navigate_forward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("edit-navigate-forward-char", edit_navigate_forward_char)
+DEFUN("edit-navigate-forward-char", edit_navigate_forward_char)
 /*+
 Move point right one character.
 On reaching end of buffer, stop and signal error.
@@ -359,7 +359,7 @@ On reaching end of buffer, stop and signal error.
 }
 END_DEFUN
 
-DEFUN_INT("scroll-down", scroll_down)
+DEFUN("scroll-down", scroll_down)
 /*+
 Scroll text of current window downward near full screen.
 +*/
@@ -373,7 +373,7 @@ Scroll text of current window downward near full screen.
 }
 END_DEFUN
 
-DEFUN_INT("scroll-up", scroll_up)
+DEFUN("scroll-up", scroll_up)
 /*+
 Scroll text of current window upward near full screen.
 +*/

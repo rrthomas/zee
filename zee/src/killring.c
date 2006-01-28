@@ -73,7 +73,7 @@ static int kill_line(void)
   return FALSE;
 }
 
-DEFUN_INT("kill-line", kill_line)
+DEFUN("kill-line", kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 +*/
@@ -90,7 +90,7 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 }
 END_DEFUN
 
-DEFUN_INT("kill-region", kill_region)
+DEFUN("kill-region", kill_region)
 /*+
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
@@ -135,7 +135,7 @@ to make one entry in the kill ring.
 }
 END_DEFUN
 
-DEFUN_INT("copy-region", copy_region)
+DEFUN("copy-region", copy_region)
 /*+
 Copy the region to the kill ring.
 +*/
@@ -161,7 +161,7 @@ Copy the region to the kill ring.
 }
 END_DEFUN
 
-DEFUN_INT("kill-word", kill_word)
+DEFUN("kill-word", kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
 +*/
@@ -186,7 +186,7 @@ Kill characters forward until encountering the end of a word.
 }
 END_DEFUN
 
-DEFUN_INT("backward-kill-word", backward_kill_word)
+DEFUN("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
 FIXME: At the moment this kills forwards!
@@ -196,7 +196,7 @@ FIXME: At the moment this kills forwards!
 }
 END_DEFUN
 
-DEFUN_INT("kill-sexp", kill_sexp)
+DEFUN("kill-sexp", kill_sexp)
 /*+
 Kill the sexp (balanced expression) following the cursor.
 FIXME: Can't currently kill backwards.
@@ -222,7 +222,7 @@ FIXME: Can't currently kill backwards.
 }
 END_DEFUN
 
-DEFUN_INT("yank", yank)
+DEFUN("yank", yank)
 /*+
 Reinsert the stretch of killed text most recently killed or yanked.
 Set mark at beginning, and put point at end.

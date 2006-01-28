@@ -80,7 +80,7 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN_INT("start-kbd-macro", start_kbd_macro)
+DEFUN("start-kbd-macro", start_kbd_macro)
 /*+
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
@@ -103,7 +103,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 }
 END_DEFUN
 
-DEFUN_INT("end-kbd-macro", end_kbd_macro)
+DEFUN("end-kbd-macro", end_kbd_macro)
 /*+
 Finish defining a keyboard macro.
 The definition was started by C-x (.
@@ -118,7 +118,7 @@ The macro is now available for use via C-x e.
 }
 END_DEFUN
 
-DEFUN_INT("name-last-kbd-macro", name_last_kbd_macro)
+DEFUN("name-last-kbd-macro", name_last_kbd_macro)
 /*+
 Assign a name to the last keyboard macro defined.
 Argument SYMBOL is the name to define.
@@ -166,7 +166,7 @@ void call_macro(Macro *mp)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
-DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
+DEFUN("call-last-kbd-macro", call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with C-x (.
 

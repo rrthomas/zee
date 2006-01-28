@@ -152,7 +152,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
 
 static char *last_search = NULL;
 
-DEFUN_INT("search-forward-regexp", search_forward_regexp)
+DEFUN("search-forward-regexp", search_forward_regexp)
 /*+
 Search forward from point for regular expression REGEXP.
 +*/
@@ -176,7 +176,7 @@ Search forward from point for regular expression REGEXP.
 }
 END_DEFUN
 
-DEFUN_INT("search-backward-regexp", search_backward_regexp)
+DEFUN("search-backward-regexp", search_backward_regexp)
 /*+
 Search backward from point for match for regular expression REGEXP.
 +*/
@@ -332,7 +332,7 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN_INT("isearch-forward-regexp", isearch_forward_regexp)
+DEFUN("isearch-forward-regexp", isearch_forward_regexp)
 /*+
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -345,7 +345,7 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
+DEFUN("isearch-backward-regexp", isearch_backward_regexp)
 /*+
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -374,7 +374,7 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN_INT("replace-regexp", replace_regexp)
+DEFUN("replace-regexp", replace_regexp)
 /*+
 Replace occurrences of a regexp with other text.
 +*/
@@ -414,7 +414,7 @@ Replace occurrences of a regexp with other text.
 }
 END_DEFUN
 
-DEFUN_INT("query-replace-regexp", query_replace_regexp)
+DEFUN("query-replace-regexp", query_replace_regexp)
 /*+
 Replace occurrences of a regexp with other text.
 As each match is found, the user must type a character saying

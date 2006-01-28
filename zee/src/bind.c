@@ -301,7 +301,7 @@ static astr function_to_binding(Function f)
   return as;
 }
 
-DEFUN_INT("where-is", where_is)
+DEFUN("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command definition, usually a symbol with a function definition.

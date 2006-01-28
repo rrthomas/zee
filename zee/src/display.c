@@ -50,7 +50,7 @@ void recenter(void)
     win.topdelta = buf.pt.n;
 }
 
-DEFUN_INT("recenter", recenter)
+DEFUN("recenter", recenter)
 /*+
 Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.

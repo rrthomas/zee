@@ -111,7 +111,7 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEFUN_INT("undo", undo)
+DEFUN("undo", undo)
 /*+
 Undo some previous changes.
 Repeat this command to undo more changes.

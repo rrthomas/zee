@@ -36,7 +36,7 @@
 #include "extern.h"
 
 
-DEFUN_INT("suspend", suspend)
+DEFUN("suspend", suspend)
 /*+
 Stop and return to superior process.
 +*/
@@ -52,7 +52,7 @@ int cancel(void)
   return FALSE;
 }
 
-DEFUN_INT("keyboard-quit", keyboard_quit)
+DEFUN("keyboard-quit", keyboard_quit)
 /*+
 Cancel current command.
 +*/
@@ -61,7 +61,7 @@ Cancel current command.
 }
 END_DEFUN
 
-DEFUN_INT("edit-toggle-read-only", edit_toggle_read_only)
+DEFUN("edit-toggle-read-only", edit_toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.
 +*/
@@ -70,7 +70,7 @@ Change whether this buffer is visiting its file read-only.
 }
 END_DEFUN
 
-DEFUN_INT("auto-fill-mode", auto_fill_mode)
+DEFUN("auto-fill-mode", auto_fill_mode)
 /*+
 Toggle Auto Fill mode.
 In Auto Fill mode, inserting a space at a column beyond `fill-column'
@@ -102,7 +102,7 @@ void set_mark_command(void)
   minibuf_write("Mark set");
 }
 
-DEFUN_INT("set-mark-command", set_mark_command)
+DEFUN("set-mark-command", set_mark_command)
 /*+
 Set mark at where point is.
 +*/
@@ -112,7 +112,7 @@ Set mark at where point is.
 }
 END_DEFUN
 
-DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
+DEFUN("exchange-point-and-mark", exchange_point_and_mark)
 /*+
 Put the mark where point is now, and point where the mark is now.
 +*/
@@ -124,7 +124,7 @@ Put the mark where point is now, and point where the mark is now.
 }
 END_DEFUN
 
-DEFUN_INT("mark-whole-buffer", mark_whole_buffer)
+DEFUN("mark-whole-buffer", mark_whole_buffer)
 /*+
 Put point at beginning and mark at end of buffer.
 +*/
@@ -161,7 +161,7 @@ static int quoted_insert_octal(int c1)
   return TRUE;
 }
 
-DEFUN_INT("quoted-insert", quoted_insert)
+DEFUN("quoted-insert", quoted_insert)
 /*+
 Read next input character and insert it.
 This is useful for inserting control characters.
@@ -182,7 +182,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
-DEFUN_INT("universal-argument", universal_argument)
+DEFUN("universal-argument", universal_argument)
 /*+
 Begin a numeric argument for the following command.
 Digits or minus sign following C-u make up the numeric argument.
@@ -231,7 +231,7 @@ C-u following the digits or minus sign ends the argument.
 }
 END_DEFUN
 
-DEFUN_INT("back-to-indentation", back_to_indentation)
+DEFUN("back-to-indentation", back_to_indentation)
 /*+
 Move point to the first non-whitespace character on this line.
 +*/
@@ -276,7 +276,7 @@ static int forward_word(void)
   return FALSE;
 }
 
-DEFUN_INT("forward-word", forward_word)
+DEFUN("forward-word", forward_word)
 /*+
 Move point forward one word.
 +*/
@@ -310,7 +310,7 @@ static int backward_word(void)
   return FALSE;
 }
 
-DEFUN_INT("backward-word", backward_word)
+DEFUN("backward-word", backward_word)
 /*+
 Move backward until encountering the beginning of a word.
 +*/
@@ -413,7 +413,7 @@ static int forward_sexp(void)
   return FALSE;
 }
 
-DEFUN_INT("forward-sexp", forward_sexp)
+DEFUN("forward-sexp", forward_sexp)
 /*+
 Move forward across one balanced expression (sexp).
 +*/
@@ -471,7 +471,7 @@ static int backward_sexp(void)
   return FALSE;
 }
 
-DEFUN_INT("backward-sexp", backward_sexp)
+DEFUN("backward-sexp", backward_sexp)
 /*+
 Move backward across one balanced expression (sexp).
 +*/
@@ -480,7 +480,7 @@ Move backward across one balanced expression (sexp).
 }
 END_DEFUN
 
-DEFUN_INT("mark-word", mark_word)
+DEFUN("mark-word", mark_word)
 /*+
 Set mark ARG words away from point.
 +*/
@@ -491,7 +491,7 @@ Set mark ARG words away from point.
 }
 END_DEFUN
 
-DEFUN_INT("mark-sexp", mark_sexp)
+DEFUN("mark-sexp", mark_sexp)
 /*+
 Set mark a sexp from point.
 +*/
@@ -502,7 +502,7 @@ Set mark a sexp from point.
 }
 END_DEFUN
 
-DEFUN_INT("backward-paragraph", backward_paragraph)
+DEFUN("backward-paragraph", backward_paragraph)
 /*+
 Move backward to start of paragraph.
 +*/
@@ -516,7 +516,7 @@ Move backward to start of paragraph.
 }
 END_DEFUN
 
-DEFUN_INT("forward-paragraph", forward_paragraph)
+DEFUN("forward-paragraph", forward_paragraph)
 /*+
 Move forward to end of paragraph.
 +*/
@@ -533,7 +533,7 @@ Move forward to end of paragraph.
 }
 END_DEFUN
 
-DEFUN_INT("mark-paragraph", mark_paragraph)
+DEFUN("mark-paragraph", mark_paragraph)
 /*+
 Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
@@ -545,7 +545,7 @@ The paragraph marked is the one that contains point or follows point.
 }
 END_DEFUN
 
-DEFUN_INT("fill-paragraph", fill_paragraph)
+DEFUN("fill-paragraph", fill_paragraph)
 /*+
 Fill paragraph at or after point.
 +*/
@@ -643,7 +643,7 @@ static int setcase_word(int rcase)
   return TRUE;
 }
 
-DEFUN_INT("downcase-word", downcase_word)
+DEFUN("downcase-word", downcase_word)
 /*+
 Convert following word to lower case, moving over.
 +*/
@@ -652,7 +652,7 @@ Convert following word to lower case, moving over.
 }
 END_DEFUN
 
-DEFUN_INT("upcase-word", upcase_word)
+DEFUN("upcase-word", upcase_word)
 /*+
 Convert following word to upper case, moving over.
 +*/
@@ -661,7 +661,7 @@ Convert following word to upper case, moving over.
 }
 END_DEFUN
 
-DEFUN_INT("capitalize-word", capitalize_word)
+DEFUN("capitalize-word", capitalize_word)
 /*+
 Capitalize the following word, moving over.
 This gives the word a first character in upper case and the rest
@@ -672,7 +672,7 @@ lower case.
 }
 END_DEFUN
 
-DEFUN_INT("execute-command", execute_command)
+DEFUN("execute-command", execute_command)
 /*+
 Read command or macro name, then call it.
 FIXME: Make it work non-interactively.
@@ -700,7 +700,7 @@ FIXME: Make it work non-interactively.
 }
 END_DEFUN
 
-DEFUN_INT("shell-command", shell_command)
+DEFUN("shell-command", shell_command)
 /*+
 Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the contents of the region as

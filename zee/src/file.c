@@ -370,7 +370,7 @@ static int file_insert(const char *filename)
   return eolstr != NULL;
 }
 
-DEFUN_INT("file-insert", file_insert)
+DEFUN("file-insert", file_insert)
 /*+
 Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
@@ -484,7 +484,7 @@ Make buffer visit that file, and mark it not modified.
 }
 END_DEFUN
 
-DEFUN_INT("file-quit", file_quit)
+DEFUN("file-quit", file_quit)
 /*+
 Offer to the buffer, then quit.
 +*/
