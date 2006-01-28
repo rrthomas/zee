@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2005 Reuben Thomas.
+   Copyright (c) 2004-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
