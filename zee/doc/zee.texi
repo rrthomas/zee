@@ -20,8 +20,8 @@
 
 @titlepage
 @title The Zee Manual
-@subtitle for Zee version 0.2
-@subtitle January 2005
+@subtitle for Zee version 0.5
+@subtitle January 2006
 @author Reuben Thomas
 
 @page
@@ -44,7 +44,6 @@ Zee is a customizable, self-documenting real-time display editor.
 * Features::                    The characteristics of Zee.
 * Invoking Zee::               Command line options that you can give to Zee.
 * Initialization file::         The ``.zee'' initialization file.
-* Getting help::                How to get help in Zee.
 * Key names::                   How the keys are named.
 * Functions::                   The list of functions.
 * Variables::                   The list of variables.
@@ -68,15 +67,14 @@ It is very useful for small footprint installations (e.g. on floppy disk)
 or quick editing sessions.
 @item 8-bit clean.
 Zee can operate with binary files.
-@item Looks like @emph{Emacs}.
-Most Zee key sequences and function names are identical to Emacs ones.
+@item Looks familiar.
+Most Zee key sequences and function names are identical to standard CUA
+ones (as used in Microsoft Windows, Mac OS and other common GUIs).
 @item Multi buffer editing with multi level undo.
 Zee can open an infinite number of files and can record an infinite
 sequence of undo operations (limited only by the amount of free memory).
 @item Multi window.
 Zee can display multiple windows on the screen.
-@item Killing and yanking.
-The killing and yanking features of Emacs are available in Zee.
 @item Minibuffer completion.
 This works for @kbd{M-x} commands and for file names.
 @item Auto fill (word wrap).
@@ -116,7 +114,7 @@ Print version information and exit.
 @end table
 
 @c ---------------------------------------------------------------------------
-@node Initialization file, Getting help, Invoking Zee, Top
+@node Initialization file, Key names, Invoking Zee, Top
 @chapter Initialization file
 
 When Zee is started, it normally loads the @file{.zee} file in your
@@ -146,29 +144,7 @@ This is the initialization file that comes with the Zee sources.
 @include dotzee.texi
 
 @c ---------------------------------------------------------------------------
-@node Getting help, Key names, Initialization file, Top
-@chapter Getting help
-
-This table contains the commands that can be used during an editing
-session to get help.
-
-@table @kbd
-@item C-h c
-Describe briefly a key sequence.
-@item C-h f
-Describe a function.
-@item C-h k
-Describe a key sequence.
-@item C-h b
-Show the defined bindings.
-@item C-h v
-Describe a variable.
-@item C-h w
-Show the key or keys to which a command is bound.
-@end table
-
-@c ---------------------------------------------------------------------------
-@node Key names, Functions, Getting help, Top
+@node Key names, Functions, Initialization file, Top
 @chapter Key names
 
 This table contains the names of the keys that are used in Zee.
