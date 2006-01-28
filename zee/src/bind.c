@@ -74,6 +74,14 @@ void bind_key(size_t key, Function func)
     p->func = func;
 }
 
+static void unbind_key(size_t key)
+{
+  Binding *p;
+
+  if ((p = get_binding(key)) != NULL)
+    vec_shrink(bindings, vec_offset(bindings, p, Binding), 1);
+}
+
 void init_bindings(void)
 {
   bindings = vec_new(sizeof(Binding));
@@ -127,19 +135,6 @@ static FEntry ftable[] = {
 };
 
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
-
-static int fentry_compar(const void *p1, const void *p2)
-{
-  return strcmp(((FEntry *)p1)->name, ((FEntry *)p2)->name);
-}
-
-static const char *bsearch_function(const char *name)
-{
-  FEntry key, *entryp;
-  key.name = name;
-  entryp = bsearch(&key, ftable, fentries, sizeof(ftable[0]), fentry_compar);
-  return entryp ? entryp->name : NULL;
-}
 
 Function get_function(const char *name)
 {
@@ -205,7 +200,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
           astr_cpy_cstr(ms, p->item);
           break;
         }
-      if (bsearch_function(astr_cstr(ms)) || get_macro(astr_cstr(ms))) {
+      if (get_function(astr_cstr(ms)) || get_macro(astr_cstr(ms))) {
         add_history_element(&functions_history, astr_cstr(ms));
         minibuf_clear();        /* Remove any error message */
         break;
@@ -222,20 +217,43 @@ astr minibuf_read_function_name(const char *fmt, ...)
   return ms;
 }
 
-DEFUN("set-key", set_key)
+DEFUN("unbind-key", unbind_key)
+{
 /*+
-Bind a command to a key sequence.
-Read key sequence and function name, and bind the function to the key
-sequence.
+Unbind a key.
+Read key chord, and unbind it.
++*/
+  size_t key = KBD_NOKEY;
+
+  if (argc > 0) {
+    astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    key = strtochord(astr_cstr(keystr));
+    astr_delete(keystr);
+    *lp = list_next(*lp);
+  } else {
+    minibuf_write("Unbind key: ");
+    key = getkey();
+  }
+
+  unbind_key(key);
+}
+END_DEFUN
+
+DEFUN("bind-key", bind_key)
+/*+
+Bind a command to a key chord.
+Read key chord and function name, and bind the function to the key
+chord.
 +*/
 {
   size_t key = KBD_NOKEY;
-  astr keystr = NULL, name = NULL;
+  astr name = NULL;
 
   ok = FALSE;
 
   if (argc > 0) {
-    keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+
     key = strtochord(astr_cstr(keystr));
     astr_delete(keystr);
     *lp = list_next(*lp);
@@ -244,11 +262,11 @@ sequence.
   } else {
     astr as;
 
-    minibuf_write("Set key globally: ");
+    minibuf_write("Bind key: ");
     key = getkey();
 
     as = chordtostr(key);
-    name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
+    name = minibuf_read_function_name("Bind key %s to command: ", astr_cstr(as));
     astr_delete(as);
   }
 
