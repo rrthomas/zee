@@ -502,15 +502,12 @@ END_DEFUN
 
 DEFUN_INT("file-quit", file_quit)
 /*+
-Offer to save each buffer, then kill this process.
+Offer to the buffer, then quit.
 +*/
 {
-  int ans, i = 0;
+  if (buf.flags & BFLAG_MODIFIED && !(buf.flags & BFLAG_NEEDNAME)) {
+    int ans;
 
-  if (buf.flags & BFLAG_MODIFIED && !(buf.flags & BFLAG_NEEDNAME))
-    ++i;
-
-  if (i > 0) {
     if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ", "")) == -1)
       ok = cancel();
     else if (!ans)
