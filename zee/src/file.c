@@ -445,44 +445,31 @@ static void write_file(Buffer *bp, astr ms)
   }
 }
 
-static int file_save(Buffer *bp)
-{
-  char *fname = bp->filename != NULL ? bp->filename : bp->name;
-  astr ms;
-
-  if (!(bp->flags & BFLAG_MODIFIED))
-    minibuf_write("(No changes need to be saved)");
-  else {
-    if (bp->flags & BFLAG_NEEDNAME) {
-      if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
-        return cancel();
-      if (astr_len(ms) == 0) {
-        astr_delete(ms);
-        return FALSE;
-      }
-
-      set_buffer_filename(bp, astr_cstr(ms));
-
-      bp->flags &= ~BFLAG_NEEDNAME;
-    } else {
-      ms = astr_new();
-      astr_cpy_cstr(ms, bp->filename);
-    }
-
-    write_file(bp, ms);
-
-    astr_delete(ms);
-  }
-
-  return TRUE;
-}
-
 DEFUN_INT("file-save", file_save)
 /*+
 Save current buffer in visited file if modified.
 +*/
 {
-  ok = file_save(&buf);
+  astr ms;
+
+  if (buf.flags & BFLAG_NEEDNAME) {
+    char *fname = buf.filename != NULL ? buf.filename : buf.name;
+
+    if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
+      ok = cancel();
+    else if (astr_len(ms) == 0)
+      ok = FALSE;
+    else {
+      set_buffer_filename(&buf, astr_cstr(ms));
+      buf.flags &= ~BFLAG_NEEDNAME;
+    }
+  } else {
+    ms = astr_new();
+    astr_cpy_cstr(ms, buf.filename);
+  }
+
+  write_file(&buf, ms);
+  astr_delete(ms);
 }
 END_DEFUN
 
