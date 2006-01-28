@@ -2,7 +2,7 @@
   #                                                                           #
   #                                vasprintf                                  #
   #                                                                           #
-  #               Copyright (c) 2002-2003 David TAILLANDIER                   #
+  #               Copyright (c) 2002-2005 David TAILLANDIER                   #
   #                                                                           #
   ###########################################################################*/
 
@@ -28,8 +28,7 @@ Foundation,  Fifth Floor, 51 Franklin Street, Boston, MA 02111-1301, USA.
 
 ====================
 
-Hacked from xnprintf version of 29th December 2002 to provide only
-vasprintf by Reuben Thomas <rrt@sc3d.org>.
+Hacked from xnprintf to provide only vasprintf by Reuben Thomas <rrt@sc3d.org>.
 
 ====================
 
@@ -433,8 +432,8 @@ static int dispatch(xprintf_struct *s)
     /* char */
   case 'c':
     if (modifier != -1)
-      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
-    INCOHERENT();
+      INCOHERENT();
+    return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
     /* 'int' instead of 'char' because default promotion is 'int' */
 
     /* math */
