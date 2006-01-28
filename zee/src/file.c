@@ -329,21 +329,6 @@ void file_open(Buffer *bp, const char *filename)
   }
 }
 
-static int is_regular_file(const char *filename)
-{
-  struct stat st;
-
-  if (stat(filename, &st) == -1) {
-    if (errno == ENOENT)
-      return TRUE;
-    return FALSE;
-  }
-  if (S_ISREG(st.st_mode))
-    return TRUE;
-
-  return FALSE;
-}
-
 /*
  * Load the given file into a new buffer.
  */
@@ -354,12 +339,6 @@ int file_visit(const char *filename)
   as = make_buffer_name(filename);
   if (astr_len(as) == 0) {
     astr_delete(as);
-    return FALSE;
-  }
-
-  if (!is_regular_file(filename)) {
-    minibuf_error("%s is not a regular file", filename);
-    waitkey(WAITKEY_DEFAULT);
     return FALSE;
   }
 
