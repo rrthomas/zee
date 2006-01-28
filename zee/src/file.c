@@ -232,15 +232,15 @@ astr get_current_dir(int interactive)
 
 /*
  * Get HOME directory.
+ * If none, return blank string.
  */
 astr get_home_dir(void)
 {
   char *s = getenv("HOME");
-  astr as;
+  astr as = astr_new();
+
   if (s != NULL && strlen(s) < PATH_MAX)
-    as = astr_cat_cstr(astr_new(), s);
-  else
-    as = agetcwd();
+    as = astr_cpy_cstr(as, s);
   return as;
 }
 

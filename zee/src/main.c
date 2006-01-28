@@ -257,8 +257,10 @@ int main(int argc, char **argv)
     /* Load user init file */
     if (!qflag) {
       astr as = get_home_dir();
-      astr_cat_cstr(as, "/." PACKAGE_NAME);
-      cmd_eval_file(astr_cstr(as));
+      if (astr_len(as) > 0) {
+        astr_cat_cstr(as, "/." PACKAGE_NAME);
+        cmd_eval_file(astr_cstr(as));
+      }
       astr_delete(as);
     }
 
