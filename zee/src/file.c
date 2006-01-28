@@ -545,32 +545,3 @@ void die(int exitcode)
   }
   exit(exitcode);
 }
-
-DEFUN_INT("file-change-directory", file_change_directory)
-/*+
-Make DIR the current directory.
-+*/
-{
-  astr ms, buf;
-
-  buf = get_current_dir(TRUE);
-  if ((ms = minibuf_read_dir("Change default directory: ",
-                             astr_cstr(buf))) == NULL)
-    ok = cancel();
-  astr_delete(buf);
-
-  if (ok)
-    if (astr_len(ms) > 0) {
-      struct stat st;
-      if (stat(astr_cstr(ms), &st) != 0 || !S_ISDIR(st.st_mode)) {
-        minibuf_error("`%s' is not a directory", astr_cstr(ms));
-        ok = FALSE;
-      } else if (chdir(astr_cstr(ms)) == -1) {
-        minibuf_write("%s: %s", astr_cstr(ms), strerror(errno));
-        ok = FALSE;
-      }
-
-      astr_delete(ms);
-    }
-}
-END_DEFUN
