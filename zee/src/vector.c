@@ -1,5 +1,5 @@
 /* Vectors (auto-extending arrays)
-   Copyright (c) 2005 Reuben Thomas.  All rights reserved.
+   Copyright (c) 1999-2006 Reuben Thomas.  All rights reserved.
 
    This file is part of Zee.
 
@@ -53,11 +53,10 @@ void vec_delete(vector *v)
 /*
  * Resize a vector v to items elements
  */
-static vector *resize(vector *v, size_t items)
+static void resize(vector *v, size_t items)
 {
   v->array = zrealloc(v->array, v->size * vec_itemsize(v), items * vec_itemsize(v));
   v->size = items;
-  return v;
 }
 
 /*
@@ -66,10 +65,25 @@ static vector *resize(vector *v, size_t items)
 void *vec_index(vector *v, size_t idx)
 {
   if (idx >= v->size)
-    v = resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
+    resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
   if (idx >= vec_items(v))
     vec_items(v) = idx + 1;
   return (void *)((char *)v->array + idx * vec_itemsize(v));
+}
+
+/*
+ * Shrink a vector v at index idx by items items
+ */
+void vec_shrink(vector *v, size_t idx, size_t items)
+{
+  if (idx >= v->size)
+    return;
+  if (idx + items > v->size)
+    items = v->size - idx;
+  memcpy((char *)v->array + idx * vec_itemsize(v),
+         (char *)v->array + (idx + items) * vec_itemsize(v),
+         items * vec_itemsize(v));
+  resize(v, v->size - items);
 }
 
 /*

@@ -1,5 +1,5 @@
 /* Vectors (auto-extending arrays)
-   Copyright (c) 2005 Reuben Thomas.  All rights reserved.
+   Copyright (c) 1999-2006 Reuben Thomas.  All rights reserved.
 
    This file is part of Zee.
 
@@ -34,11 +34,18 @@ typedef struct {
 vector *vec_new(size_t itemsize);
 void vec_delete(vector *v);
 void *vec_index(vector *v, size_t idx);
+void vec_shrink(vector *v, size_t idx, size_t items);
 vector *vec_copy(vector *v);
 
-#define vec_item(v, idx, ty)         (*(ty *)vec_index((v), (idx)))
-#define vec_itemsize(v) (v)->itemsize
-#define vec_items(v)    (v)->items
-#define vec_array(v)    (v)->array
+#define vec_item(v, idx, ty) \
+  (*(ty *)vec_index((v), (idx)))
+#define vec_itemsize(v) \
+  (v)->itemsize
+#define vec_items(v) \
+  (v)->items
+#define vec_array(v) \
+  (v)->array
+#define vec_offset(v, obj, ty) \
+  (size_t)((obj - (ty *)((v)->array)))
 
 #endif
