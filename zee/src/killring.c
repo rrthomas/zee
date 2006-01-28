@@ -196,32 +196,6 @@ FIXME: At the moment this kills forwards!
 }
 END_DEFUN
 
-DEFUN("kill-sexp", kill_sexp)
-/*+
-Kill the sexp (balanced expression) following the cursor.
-FIXME: Can't currently kill backwards.
-+*/
-{
-  if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring();
-
-  if (warn_if_readonly_buffer())
-    ok = FALSE;
-  else {
-    push_mark();
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
-    FUNCALL(mark_sexp);
-    FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
-    pop_mark();
-
-    thisflag |= FLAG_DONE_KILL;
-
-    minibuf_write("");	/* Don't write "Set mark" message.  */
-  }
-}
-END_DEFUN
-
 DEFUN("yank", yank)
 /*+
 Reinsert the stretch of killed text most recently killed or yanked.

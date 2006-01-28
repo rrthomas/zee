@@ -79,7 +79,6 @@ bind-key "TAB" indent-relative
 # SUGGESTION: remove these from the default keymap?
 
 bind-key "M-m" back-to-indentation
-bind-key "C-M-b" backward-sexp
 bind-key "M-e" call-last-kbd-macro
 bind-key "M-c" capitalize-word
 bind-key "M-\" delete-horizontal-space
@@ -87,11 +86,8 @@ bind-key "M- " just-one-space
 bind-key "M-l" downcase-word
 bind-key "M-)" end-kbd-macro
 bind-key "M-q" fill-paragraph
-bind-key "C-M-f" forward-sexp
 bind-key "C-r" isearch-backward-regexp
-bind-key "C-M-k" kill-sexp
 bind-key "M-h" mark-paragraph
-bind-key "C-M-@" mark-sexp
 bind-key "M-@" mark-word
 bind-key "C-j" newline
 bind-key "M-%" query-replace-regexp
