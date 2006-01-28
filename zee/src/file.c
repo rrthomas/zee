@@ -450,48 +450,33 @@ DEFUN_INT("file-save", file_save)
 Save buffer in visited file.
 +*/
 {
-  astr ms;
-
-  if (buf.flags & BFLAG_NEEDNAME) {
-    char *fname = buf.filename != NULL ? buf.filename : buf.name;
-
-    if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
-      ok = cancel();
-    else if (astr_len(ms) == 0)
-      ok = FALSE;
-    else {
-      set_buffer_filename(&buf, astr_cstr(ms));
-      buf.flags &= ~BFLAG_NEEDNAME;
-    }
-  } else {
-    ms = astr_new();
+  if (buf.flags & BFLAG_NEEDNAME)
+    FUNCALL(file_save_as);
+  else {
+    astr ms = astr_new();
     astr_cpy_cstr(ms, buf.filename);
+    write_file(&buf, ms);
+    astr_delete(ms);
   }
-
-  write_file(&buf, ms);
-  astr_delete(ms);
 }
 END_DEFUN
 
 DEFUN_INT("file-save-as", file_save_as)
 /*+
-Write current buffer into the user specified file.
-Makes buffer visit that file, and marks it not modified.
+Write buffer into the user specified file.
+Make buffer visit that file, and mark it not modified.
 +*/
 {
   char *fname = buf.filename != NULL ? buf.filename : buf.name;
-  astr ms = minibuf_read_dir("Write file: ", fname);
+  astr ms = minibuf_read_dir("File to save in: ", fname);
 
   if (ms == NULL)
     ok = cancel();
   else if (astr_len(ms) == 0)
     ok = FALSE;
-
-  if (ok) {
+  else {
     set_buffer_filename(&buf, astr_cstr(ms));
-
     buf.flags &= ~BFLAG_NEEDNAME;
-
     write_file(&buf, ms);
   }
 
