@@ -289,6 +289,7 @@ enum {
   { \
     int ok = TRUE; \
     (void)uniarg; \
+    (void)lp; \
     if (argc == 0) \
       uniarg = 1;
 

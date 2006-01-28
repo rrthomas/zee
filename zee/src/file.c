@@ -49,13 +49,12 @@
 #include "main.h"
 #include "extern.h"
 
-static int exist_file(const char *filename)
+static int file_exists(const char *filename)
 {
   struct stat st;
 
   if (stat(filename, &st) == -1)
-    if (errno == ENOENT)
-      return FALSE;
+    return FALSE;
 
   return TRUE;
 }
@@ -357,7 +356,7 @@ static int file_insert(const char *filename)
 {
   astr as, eolstr;
 
-  if (!exist_file(filename)) {
+  if (!file_exists(filename)) {
     minibuf_error("Unable to read file `%s'", filename);
     return FALSE;
   }
@@ -445,7 +444,7 @@ static void write_file(Buffer *bp, astr ms)
   }
 }
 
-DEFUN_INT("file-save", file_save)
+DEFUN("file-save", file_save)
 /*+
 Save buffer in visited file.
 +*/
@@ -461,7 +460,7 @@ Save buffer in visited file.
 }
 END_DEFUN
 
-DEFUN_INT("file-save-as", file_save_as)
+DEFUN("file-save-as", file_save_as)
 /*+
 Write buffer into the user specified file.
 Make buffer visit that file, and mark it not modified.

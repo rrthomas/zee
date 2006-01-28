@@ -30,7 +30,8 @@
 
 static size_t line;
 static ptrdiff_t pos;
-/* FIXME: Use \n tokens to limit each exp to one line */
+/* FIXME: Use \n tokens to limit each exp to one line, and if we get
+   an error during a line, abort the rest of the line. */
 static int bol;
 static astr expr;
 
