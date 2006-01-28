@@ -447,7 +447,7 @@ static void write_file(Buffer *bp, astr ms)
 
 DEFUN_INT("file-save", file_save)
 /*+
-Save current buffer in visited file if modified.
+Save buffer in visited file.
 +*/
 {
   astr ms;
