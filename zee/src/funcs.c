@@ -591,8 +591,8 @@ END_DEFUN
 
 static int setcase_word(int rcase)
 {
-  int firstchar;
   size_t i, size;
+  int firstchar;
 
   if (!isalnum(following_char())) {
     if (!forward_word())
@@ -607,12 +607,11 @@ static int setcase_word(int rcase)
       break;
     ++i;
   }
-  size = i - buf.pt.o;
-  if (size > 0)
+  if ((size = i - buf.pt.o) > 0)
     undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, size, FALSE);
 
   for (firstchar = TRUE;
-       buf.pt.o < astr_len(buf.pt.p->item);
+       buf.pt.o < i;
        buf.pt.o++, firstchar = FALSE) {
     char *p = astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
 
