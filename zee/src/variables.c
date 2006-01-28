@@ -1,6 +1,6 @@
 /* Variables handling functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -95,8 +95,7 @@ void set_variable(const char *var, const char *val)
 {
   /* Variables automatically become buffer-local when set if there is
      a buffer. */
-  if (var && val)
-    variable_update(buf.vars, var, val);
+  variable_update(buf.vars, var, val);
 }
 
 const char *get_variable(const char *var)
