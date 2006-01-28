@@ -250,8 +250,6 @@ END_DEFUN
 			  Move through words
 ***********************************************************************/
 
-#define ISWORDCHAR(c)	(isalnum(c) || c == '$')
-
 static int forward_word(void)
 {
   int gotword = FALSE;
@@ -259,7 +257,7 @@ static int forward_word(void)
   for (;;) {
     while (!eolp()) {
       int c = following_char();
-      if (!ISWORDCHAR(c)) {
+      if (!isalnum(c)) {
         if (gotword)
           return TRUE;
       } else
@@ -297,7 +295,7 @@ static int backward_word(void)
     }
     while (!bolp()) {
       int c = preceding_char();
-      if (!ISWORDCHAR(c)) {
+      if (!isalnum(c)) {
         if (gotword)
           return TRUE;
       } else
@@ -593,10 +591,10 @@ END_DEFUN
 
 static int setcase_word(int rcase)
 {
-  int gotword;
+  int firstchar;
   size_t i, size;
 
-  if (!ISWORDCHAR(following_char())) {
+  if (!isalnum(following_char())) {
     if (!forward_word())
       return FALSE;
     if (!backward_word())
@@ -605,37 +603,28 @@ static int setcase_word(int rcase)
 
   i = buf.pt.o;
   while (i < astr_len(buf.pt.p->item)) {
-    if (!ISWORDCHAR(*astr_char(buf.pt.p->item, (ptrdiff_t)i)))
+    if (!isalnum(*astr_char(buf.pt.p->item, (ptrdiff_t)i)))
       break;
     ++i;
   }
-  size = i-buf.pt.o;
+  size = i - buf.pt.o;
   if (size > 0)
     undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, size, FALSE);
 
-  gotword = FALSE;
-  while (buf.pt.o < astr_len(buf.pt.p->item)) {
+  for (firstchar = TRUE;
+       buf.pt.o < astr_len(buf.pt.p->item);
+       buf.pt.o++, firstchar = FALSE) {
     char *p = astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
-    if (!ISWORDCHAR(*p))
-      break;
+
     if (isalpha(*p)) {
-      int oldc = *p, newc;
       if (rcase == UPPERCASE)
-        newc = toupper(oldc);
+        *p = toupper(*p);
       else if (rcase == LOWERCASE)
-        newc = tolower(oldc);
-      else { /* rcase == CAPITALIZE */
-        if (!gotword)
-          newc = toupper(oldc);
-        else
-          newc = tolower(oldc);
-      }
-      if (oldc != newc) {
-        *p = newc;
-      }
-    }
-    gotword = TRUE;
-    buf.pt.o++;
+        *p = tolower(*p);
+      else if (rcase == CAPITALIZE)
+        *p = firstchar ? toupper(*p) : tolower(*p);
+    } else if (!isdigit(*p))
+      break;
   }
 
   buf.flags |= BFLAG_MODIFIED;
@@ -664,8 +653,6 @@ END_DEFUN
 DEFUN("capitalize-word", capitalize_word)
 /*+
 Capitalize the following word, moving over.
-This gives the word a first character in upper case and the rest
-lower case.
 +*/
 {
   ok = setcase_word(CAPITALIZE);
