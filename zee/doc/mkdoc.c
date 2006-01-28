@@ -18,13 +18,16 @@
 #include "vasprintf.c"
 #include "zmalloc.c"
 #include "astr.c"
+#include "vector.c"
 
 #define NAME "mkdoc"
 
 static struct fentry {
   const char *name;
   astr doc;
-} *ftable;
+};
+
+static vector *ftable;
 
 static size_t fentries = 0, fentries_max = 0;
 
@@ -46,34 +49,17 @@ static FILE *input_file;
 
 static void add_func(const char *name, astr doc)
 {
-  size_t i;
-
-  /* Reallocate vector if there is not enough space */
-  if (fentries + 1 >= fentries_max) {
-    fentries_max += 16;
-    ftable = zrealloc(ftable, sizeof(ftable[0]) * fentries_max - 16, sizeof(ftable[0]) * fentries_max);
-  }
-
-  /* Insert the function at the sorted position */
-  for (i = 0; i < fentries; i++)
-    if (strcmp(ftable[i].name, name) > 0) {
-      memmove(&ftable[i + 1], &ftable[i], sizeof(ftable[0]) * (fentries - i));
-      ftable[i].name = zstrdup(name);
-      ftable[i].doc = doc;
-      break;
-    }
-  if (i == fentries) {
-    ftable[fentries].name = zstrdup(name);
-    ftable[fentries].doc = doc;
-  }
-  ++fentries;
+  struct fentry func;
+  func.name = zstrdup(name);
+  func.doc = doc;
+  vec_item(ftable, fentries++, struct fentry) = func;
 }
 
 static void fdecl(const char *name)
 {
   astr doc = astr_new();
   astr buf;
-  unsigned s = 0, i;
+  size_t s = 0, i;
 
   while ((buf = astr_fgets(input_file)) != NULL) {
     if (s == 1) {
@@ -96,7 +82,7 @@ static void fdecl(const char *name)
 
   /* Check function is not a duplicate */
   for (i = 0; i < fentries; i++)
-    if (strcmp(name, ftable[i].name) == 0) {
+    if (strcmp(name, vec_item(ftable, i, struct fentry).name) == 0) {
       fprintf(stderr, NAME ": duplicate function %s\n", name);
       exit(1);
     }
@@ -130,12 +116,12 @@ static void parse(void)
 
 static void dump_help(void)
 {
-  unsigned i;
+  size_t i;
   for (i = 0; i < fentries; ++i) {
-    astr doc = ftable[i].doc;
+    astr doc = vec_item(ftable, i, struct fentry).doc;
     if (doc)
       fprintf(stdout, "\fF_%s\n%s",
-              ftable[i].name, astr_cstr(doc));
+              vec_item(ftable, i, struct fentry).name, astr_cstr(doc));
   }
   for (i = 0; i < ventries; ++i)
     fprintf(stdout, "\fV_%s\n%s\n%s\n",
@@ -145,7 +131,7 @@ static void dump_help(void)
 
 static void dump_funcs(void)
 {
-  unsigned i;
+  size_t i;
   FILE *fp1 = fopen("zee_funcs.texi", "w");
   FILE *fp2 = fopen("tbl_funcs.h", "w");
 
@@ -162,13 +148,13 @@ static void dump_funcs(void)
           "\n");
 
   for (i = 0; i < fentries; ++i) {
-    char *cname = zstrdup(ftable[i].name), *p;
+    char *cname = zstrdup(vec_item(ftable, i, struct fentry).name), *p;
 
     for (p = strchr(cname, '-'); p != NULL; p = strchr(p, '-'))
       *p = '_';
 
-    fprintf(fp1, "@item %s\n%s", ftable[i].name, astr_cstr(ftable[i].doc));
-    fprintf(fp2, "X(\"%s\", %s)\n", ftable[i].name, cname);
+    fprintf(fp1, "@item %s\n%s", vec_item(ftable, i, struct fentry).name, astr_cstr(vec_item(ftable, i, struct fentry).doc));
+    fprintf(fp2, "X(\"%s\", %s)\n", vec_item(ftable, i, struct fentry).name, cname);
   }
 
   fprintf(fp1, "@end table");
@@ -178,7 +164,7 @@ static void dump_funcs(void)
 
 static void dump_vars(void)
 {
-  unsigned i;
+  size_t i;
   FILE *fp = fopen("zee_vars.texi", "w");
 
   assert(fp);
@@ -216,12 +202,17 @@ static void process_file(char *filename)
 int main(int argc, char **argv)
 {
   int i;
+
+  ftable = vec_new(sizeof(struct fentry));
+
   for (i = 1; i < argc; i++)
     process_file(argv[i]);
 
   dump_help();
   dump_funcs();
   dump_vars();
+
+  vec_delete(ftable);
 
   return 0;
 }
