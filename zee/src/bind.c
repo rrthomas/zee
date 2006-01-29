@@ -277,6 +277,8 @@ chord.
       ok = TRUE;
       if (key != KBD_NOKEY)
         bind_key(key, func);
+      else
+        minibuf_error("Invalid key");
     } else
       minibuf_error("No such function `%s'", astr_cstr(name));
 

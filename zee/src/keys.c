@@ -113,5 +113,8 @@ size_t strtochord(const char *buf)
     len += l;
   } while (k == KBD_CTRL || k == KBD_META);
 
+  if (len != strlen(buf))
+    key = KBD_NOKEY;
+
   return key;
 }
