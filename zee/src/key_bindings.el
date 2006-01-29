@@ -65,7 +65,7 @@ bind-key "C-v" yank
 # The proposed meaning of ESC obviates the current behaviour of RET.
 bind-key "C-f" isearch-forward-regexp
 
-bind-key "ESC" keyboard-quit
+#bind-key "ESC" keyboard-quit
 bind-key "C-g" keyboard-quit
 
 # Insert special characters.
