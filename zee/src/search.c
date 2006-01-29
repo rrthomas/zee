@@ -40,9 +40,9 @@
 
 static History regexp_history;
 
-static const char *re_find_err = NULL;
+static const char *find_err = NULL;
 
-static char *re_find_substr(const char *s1, size_t s1size,
+static char *find_substr(const char *s1, size_t s1size,
 			    const char *s2, size_t s2size,
 			    int bol, int eol, int backward)
 {
@@ -50,9 +50,6 @@ static char *re_find_substr(const char *s1, size_t s1size,
   struct re_registers search_regs;
   char *ret = NULL;
   int index;
-  reg_syntax_t old_syntax;
-
-  old_syntax = re_set_syntax(RE_SYNTAX_EMACS);
 
   search_regs.num_regs = 1;
   search_regs.start = zmalloc(sizeof(regoff_t));
@@ -63,8 +60,8 @@ static char *re_find_substr(const char *s1, size_t s1size,
   pattern.buffer = NULL;
   pattern.allocated = 0;
 
-  re_find_err = re_compile_pattern(s2, (int)s2size, &pattern);
-  if (!re_find_err) {
+  find_err = re_compile_pattern(s2, (int)s2size, &pattern);
+  if (!find_err) {
     pattern.not_bol = !bol;
     pattern.not_eol = !eol;
 
@@ -83,7 +80,6 @@ static char *re_find_substr(const char *s1, size_t s1size,
     }
   }
 
-  re_set_syntax(old_syntax);
   regfree(&pattern);
 
   free(search_regs.start);
@@ -103,7 +99,7 @@ static int search_forward(Line *startp, size_t starto, const char *s)
          lp != list_last(buf.lines);
          lp = list_next(lp), sp = astr_cstr(lp->item), s1size = astr_len(lp->item)) {
       if (s1size > 0) {
-        const char *sp2 = re_find_substr(sp, s1size, s, ssize,
+        const char *sp2 = find_substr(sp, s1size, s, ssize,
                                          sp == astr_cstr(lp->item), TRUE, FALSE);
         if (sp2 != NULL) {
           while (buf.pt.p != lp)
@@ -129,7 +125,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
       const char *sp = astr_cstr(lp->item);
       if (s1size > 0) {
-        const char *sp2 = re_find_substr(sp, s1size, s, ssize,
+        const char *sp2 = find_substr(sp, s1size, s, ssize,
                                          TRUE, s1size == astr_len(lp->item), TRUE);
         if (sp2 != NULL) {
           while (buf.pt.p != lp)
@@ -227,14 +223,14 @@ static int isearch(int dir)
               astr_cstr(pattern));
 
     /* Regex error. */
-    if (re_find_err) {
-      if ((strncmp(re_find_err, "Premature ", 10) == 0) ||
-          (strncmp(re_find_err, "Unmatched ", 10) == 0) ||
-          (strncmp(re_find_err, "Invalid ", 8) == 0)) {
-        re_find_err = "incomplete input";
+    if (find_err) {
+      if ((strncmp(find_err, "Premature ", 10) == 0) ||
+          (strncmp(find_err, "Unmatched ", 10) == 0) ||
+          (strncmp(find_err, "Invalid ", 8) == 0)) {
+        find_err = "incomplete input";
       }
-      astr_afmt(as, " [%s]", re_find_err);
-      re_find_err = NULL;
+      astr_afmt(as, " [%s]", find_err);
+      find_err = NULL;
     }
 
     minibuf_write("%s", astr_cstr(as));
@@ -244,9 +240,6 @@ static int isearch(int dir)
     if (c == KBD_CANCEL) {
       buf.pt = start;
       thisflag |= FLAG_NEED_RESYNC;
-
-      /* "Quit" (also it calls ding() and stops
-         recording macros). */
       cancel();
 
       /* Restore old mark position. */
