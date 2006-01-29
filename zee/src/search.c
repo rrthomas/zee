@@ -1,4 +1,4 @@
-/* Incremental search and replace functions
+/* Search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
    Copyright (c) 2005-2006 Reuben Thomas.
@@ -81,12 +81,6 @@ static char *re_find_substr(const char *s1, size_t s1size,
       else
         ret = ((char *)s1) + search_regs.start[0];
     }
-    else if (index == -1) {
-      /* no match */
-    }
-    else {
-      /* error */
-    }
   }
 
   re_set_syntax(old_syntax);
@@ -152,7 +146,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
 
 static char *last_search = NULL;
 
-DEFUN("search-forward-regexp", search_forward_regexp)
+DEFUN("search-forward", search_forward)
 /*+
 Search forward from point for regular expression REGEXP.
 +*/
@@ -176,7 +170,7 @@ Search forward from point for regular expression REGEXP.
 }
 END_DEFUN
 
-DEFUN("search-backward-regexp", search_backward_regexp)
+DEFUN("search-backward", search_backward)
 /*+
 Search backward from point for match for regular expression REGEXP.
 +*/
@@ -289,9 +283,9 @@ static int isearch(int dir)
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (c == KBD_RET && astr_len(pattern) == 0)
         if (dir == ISEARCH_FORWARD)
-          FUNCALL(search_forward_regexp);
+          FUNCALL(search_forward);
         else
-          FUNCALL(search_backward_regexp);
+          FUNCALL(search_backward);
       else if (astr_len(pattern) > 0) {
         /* Save mark. */
         set_mark();
@@ -332,7 +326,7 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN("isearch-forward-regexp", isearch_forward_regexp)
+DEFUN("isearch-forward", isearch_forward)
 /*+
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -345,7 +339,7 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-DEFUN("isearch-backward-regexp", isearch_backward_regexp)
+DEFUN("isearch-backward", isearch_backward)
 /*+
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -374,7 +368,7 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN("replace-regexp", replace_regexp)
+DEFUN("replace", replace)
 /*+
 Replace occurrences of a regexp with other text.
 +*/
@@ -414,7 +408,7 @@ Replace occurrences of a regexp with other text.
 }
 END_DEFUN
 
-DEFUN("query-replace-regexp", query_replace_regexp)
+DEFUN("query-replace", query_replace)
 /*+
 Replace occurrences of a regexp with other text.
 As each match is found, the user must type a character saying
