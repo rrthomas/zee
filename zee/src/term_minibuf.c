@@ -154,7 +154,7 @@ static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
 {
   if (cp == NULL)
     ding();
-  else if (cp->fl_poppedup) {
+  else if (cp->flags & COMPLETION_POPPEDUP) {
     popup_scroll_down();
     thistab = lasttab;
   }
@@ -165,7 +165,7 @@ static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
 {
   if (cp == NULL)
     ding();
-  else if (cp->fl_poppedup) {
+  else if (cp->flags & COMPLETION_POPPEDUP) {
     popup_scroll_up();
     thistab = lasttab;
   }
@@ -220,7 +220,8 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
     ding();
   else {
     if (lasttab != COMPLETION_NOTCOMPLETING &&
-        lasttab != COMPLETION_NOTMATCHED && cp->fl_poppedup) {
+        lasttab != COMPLETION_NOTMATCHED &&
+        cp->flags & COMPLETION_POPPEDUP) {
       popup_scroll_up();
       thistab = lasttab;
     } else {
@@ -234,11 +235,11 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
       case COMPLETION_MATCHED:
       case COMPLETION_MATCHEDNONUNIQUE:
         i = cp->matchsize;
-        if (cp->fl_dir)
-          i += astr_len(cp->path);
         bs = astr_new();
-        if (cp->fl_dir)
+        if (cp->flags & COMPLETION_FILENAME) {
+          i += astr_len(cp->path);
           astr_cat(bs, cp->path);
+        }
         astr_ncat(bs, cp->match, cp->matchsize);
         if (astr_cmp(as, bs) != 0)
           thistab = COMPLETION_NOTCOMPLETING;
@@ -352,7 +353,7 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       break;
   }
 
-  if (cp && cp->fl_poppedup) {
+  if (cp && cp->flags & COMPLETION_POPPEDUP) {
     popup_clear();
     term_refresh();
   }

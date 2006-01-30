@@ -58,7 +58,7 @@ Completion *completion_new(int fileflag)
 
   if (fileflag) {
     cp->path = astr_new();
-    cp->fl_dir = TRUE;
+    cp->flags |= COMPLETION_FILENAME;
   }
 
   return cp;
@@ -75,7 +75,7 @@ void free_completion(Completion *cp)
     free(p->item);
   list_delete(cp->completions);
   list_delete(cp->matches);
-  if (cp->fl_dir)
+  if (cp->flags & COMPLETION_FILENAME)
     astr_delete(cp->path);
   free(cp);
 }
@@ -129,8 +129,7 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
 {
   astr popup = astr_new(), as;
 
-  cp->fl_poppedup = TRUE;
-
+  cp->flags |= COMPLETION_POPPEDUP;
   astr_cpy_cstr(popup, "Completions\n\n");
 
   if (allflag)
@@ -167,7 +166,7 @@ static int completion_reread(Completion *cp, astr as)
   list_delete(cp->completions);
 
   cp->completions = list_new();
-  cp->fl_sorted = FALSE;
+  cp->flags &= ~COMPLETION_SORTED;
 
   buf = astr_new();
   pdir = astr_new();
@@ -232,13 +231,13 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   list_delete(cp->matches);
   cp->matches = list_new();
 
-  if (cp->fl_dir)
+  if (cp->flags & COMPLETION_FILENAME)
     if (!completion_reread(cp, search))
       return COMPLETION_NOTMATCHED;
 
-  if (!cp->fl_sorted) {
+  if (!cp->flags & COMPLETION_SORTED) {
     list_sort(cp->completions, hcompar);
-    cp->fl_sorted = 1;
+    cp->flags |= COMPLETION_SORTED;
   }
 
   ssize = astr_len(search);

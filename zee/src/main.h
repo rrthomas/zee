@@ -180,14 +180,12 @@ enum {
   COMPLETION_NONUNIQUE
 };
 
-typedef struct {
-  /* This flag is set when the vector is sorted */
-  int fl_sorted;
-  /* This flag is set when a completion window has been popped up */
-  int fl_poppedup;
+#define COMPLETION_SORTED               0x1
+#define COMPLETION_POPPEDUP             0x2
+#define COMPLETION_FILENAME             0x4
 
-  /* This flag is set when this is a filename completion */
-  int fl_dir;
+typedef struct {
+  int flags;                    /* flags */
   astr path;
 
   list completions;             /* The completions list */
