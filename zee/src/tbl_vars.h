@@ -12,7 +12,7 @@
 X("auto-fill-mode",			"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("case-replace",			"b", "true", "\
-Non-nil means `query-replace-regexp' should preserve case in replacements.")
+Non-nil means `query-replace' should preserve case in replacements.")
 X("fill-column",			"", "72", "\
 Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")

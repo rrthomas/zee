@@ -13,5 +13,5 @@ setq fill-column 72
 # Enable the Auto Fill Mode [default: false]
 setq auto-fill-mode false
 
-# Preserve case in replacements by query-replace-regexp [default: true]
+# Preserve case in replacements by query-replace [default: true]
 setq case-replace true
