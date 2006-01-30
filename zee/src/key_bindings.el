@@ -63,7 +63,7 @@ bind-key "C-v" yank
 # Having it hard-wired is obviously broken, but something neutral like RET
 # would be better.
 # The proposed meaning of ESC obviates the current behaviour of RET.
-bind-key "C-f" isearch-forward-regexp
+bind-key "C-f" isearch-forward
 
 #bind-key "ESC" keyboard-quit
 bind-key "C-g" keyboard-quit
@@ -86,11 +86,11 @@ bind-key "M- " just-one-space
 bind-key "M-l" downcase-word
 bind-key "M-)" end-kbd-macro
 bind-key "M-q" fill-paragraph
-bind-key "C-r" isearch-backward-regexp
+bind-key "C-r" isearch-backward
 bind-key "M-h" mark-paragraph
 bind-key "M-@" mark-word
 bind-key "C-j" newline
-bind-key "M-%" query-replace-regexp
+bind-key "M-%" query-replace
 bind-key "C-l" recenter
 bind-key "C-@" set-mark-command
 bind-key "M-!" shell-command
