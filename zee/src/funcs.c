@@ -250,42 +250,43 @@ END_DEFUN
 			  Move through words
 ***********************************************************************/
 
-static int forward_word(void)
+DEFUN("forward-word", forward_word)
+/*+
+Move point forward one word.
++*/
 {
   int gotword = FALSE;
+
+  ok = FALSE;
 
   for (;;) {
     while (!eolp()) {
       int c = following_char();
       if (!isalnum(c)) {
         if (gotword)
-          return TRUE;
+          break;
       } else
         gotword = TRUE;
       buf.pt.o++;
     }
     if (gotword)
-      return TRUE;
+      ok = TRUE;
     buf.pt.o = astr_len(buf.pt.p->item);
     if (!edit_navigate_down_line())
       break;
     buf.pt.o = 0;
   }
-  return FALSE;
-}
-
-DEFUN("forward-word", forward_word)
-/*+
-Move point forward one word.
-+*/
-{
-  ok = forward_word();
 }
 END_DEFUN
 
-static int backward_word(void)
+DEFUN("backward-word", backward_word)
+/*+
+Move backward until encountering the beginning of a word.
++*/
 {
   int gotword = FALSE;
+
+  ok = FALSE;
 
   for (;;) {
     if (bolp()) {
@@ -297,23 +298,14 @@ static int backward_word(void)
       int c = preceding_char();
       if (!isalnum(c)) {
         if (gotword)
-          return TRUE;
+          break;
       } else
         gotword = TRUE;
       buf.pt.o--;
     }
     if (gotword)
-      return TRUE;
+      ok = TRUE;
   }
-  return FALSE;
-}
-
-DEFUN("backward-word", backward_word)
-/*+
-Move backward until encountering the beginning of a word.
-+*/
-{
-  ok = backward_word();
 }
 END_DEFUN
 
@@ -423,9 +415,9 @@ static int setcase_word(int rcase)
   int firstchar;
 
   if (!isalnum(following_char())) {
-    if (!forward_word())
+    if (!FUNCALL(forward_word))
       return FALSE;
-    if (!backward_word())
+    if (!FUNCALL(backward_word))
       return FALSE;
   }
 
