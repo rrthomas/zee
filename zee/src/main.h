@@ -61,7 +61,6 @@ typedef struct Point {
   size_t o;                     /* Offset */
 } Point;
 
-typedef struct Buffer Buffer; /* Forward reference */
 typedef struct Marker Marker;
 struct Marker {
   Point pt;                     /* Point position */
@@ -118,8 +117,6 @@ typedef struct Region {
 #define BFLAG_ANCHORED  (0x0020) /* The mark is anchored */
 
 /* Represents a buffer: an open file.
- * To support multiple simultaneous buffers, they can be organised into a linked
- * list using the 'next' field.
  * Every buffer has its own:
  *  - Point and mark (i.e. cursor and selection)
  *  - List of markers
@@ -163,8 +160,7 @@ struct Buffer {
 
 /*
  * Represents a window on the screen: a rectangular area used to
- * display a buffer. To allow more than one window at a time, windows
- * can be organised into a linked list using the 'next' field.
+ * display a buffer.
  */
 typedef struct Window Window;
 struct Window {
