@@ -93,7 +93,7 @@ static void loop(void)
 }
 
 /* FIXME: Make a hardwired quit keystroke */
-static char about_minibuf_str[] = "Welcome to " TEXT_NAME "!  To exit press Ctrl-q";
+static char about_minibuf_str[] = "Welcome to " VERSION_STRING "!  To exit press Ctrl-q";
 
 static void segv_sig_handler(int signo)
 {
