@@ -128,9 +128,6 @@ typedef struct Region {
  *  - Filename
  */
 struct Buffer {
-  /* The next buffer in buffer list */
-  Buffer *next;
-
   /* The lines of text */
   Line *lines;
 
