@@ -161,7 +161,7 @@ astr minibuf_read_variable_name(char *msg)
       minibuf_error("No variable name given");
       return NULL;
     } else if (get_variable(astr_cstr(ms)) == NULL) {
-      minibuf_error("Undefined variable name `%s'", astr_cstr(ms));
+      minibuf_error("There is no variable called `%s'", astr_cstr(ms));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
