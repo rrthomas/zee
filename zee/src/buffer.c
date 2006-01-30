@@ -44,7 +44,7 @@ static void buffer_new(void)
   buf.pt.p = list_first(buf.lines);
 
   /* Set the initial mark (needs limit marker to be set up). */
-  buf.mark = marker_new(&buf, point_min(&buf));
+  buf.mark = marker_new(point_min(&buf));
 
   /* Set default EOL string. */
   buf.eol[0] = '\n';

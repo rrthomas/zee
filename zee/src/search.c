@@ -204,7 +204,7 @@ static int isearch(int dir)
   Marker *old_mark;
 
   assert(buf.mark);
-  old_mark = marker_new(buf.mark->bp, buf.mark->pt);
+  old_mark = marker_new(buf.mark->pt);
 
   start = buf.pt;
   cur = buf.pt;
@@ -245,7 +245,7 @@ static int isearch(int dir)
       free_marker(buf.mark);
 
       if (old_mark)
-        buf.mark = marker_new(old_mark->bp, old_mark->pt);
+        buf.mark = marker_new(old_mark->pt);
       else
         buf.mark = old_mark;
       break;

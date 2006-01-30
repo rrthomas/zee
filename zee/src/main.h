@@ -45,7 +45,7 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-/* The type of a Zee user command. */
+/* The type of a user command. */
 typedef int (*Function)(int argc, int uniarg, list *branch);
 
 /* Line.
@@ -64,7 +64,6 @@ typedef struct Point {
 typedef struct Buffer Buffer; /* Forward reference */
 typedef struct Marker Marker;
 struct Marker {
-  Buffer *bp;                   /* Buffer that points into */
   Point pt;                     /* Point position */
   Marker *next;          /* Used to chain all markers in the buffer */
 };
@@ -227,7 +226,7 @@ typedef struct Macro {
 /* Type of font attributes */
 typedef size_t Font;
 
-/* Zee font codes
+/* Font codes
  * Designed to fit in an int, leaving room for a char underneath */
 #define FONT_NORMAL		0x000
 #define FONT_REVERSE		0x100

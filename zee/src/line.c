@@ -42,18 +42,14 @@ static void unchain_marker(Marker *marker)
 {
   Marker *m, *next, *prev = NULL;
 
-  if (!marker->bp)
-    return;
-
-  for (m = marker->bp->markers; m; m = next) {
+  for (m = buf.markers; m; m = next) {
     next = m->next;
     if (m == marker) {
       if (prev)
         prev->next = next;
       else
-        m->bp->markers = next;
+        buf.markers = next;
 
-      m->bp = NULL;
       break;
     }
     prev = m;
@@ -66,41 +62,23 @@ void free_marker(Marker *marker)
   free(marker);
 }
 
-void move_marker(Marker *marker, Buffer *bp, Point pt)
-{
-  assert(marker);
-
-  if (bp != marker->bp) {
-    /* Unchain with the previous pointed buffer. */
-    unchain_marker(marker);
-
-    /* Change the buffer. */
-    marker->bp = bp;
-
-    /* Chain with the new buffer. */
-    marker->next = bp->markers;
-    bp->markers = marker;
-  }
-
-  /* Change the point. */
-  marker->pt = pt;
-}
-
-Marker *marker_new(Buffer *bp, Point pt)
+Marker *marker_new(Point pt)
 {
   Marker *marker = zmalloc(sizeof(Marker));
-  move_marker(marker, bp, pt);
+  marker->next = buf.markers;
+  buf.markers = marker;
+  marker->pt = pt;
   return marker;
 }
 
 Marker *point_marker(void)
 {
-  return marker_new(&buf, buf.pt);
+  return marker_new(buf.pt);
 }
 
 static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int offset)
 {
-  Marker *pt = point_marker(), *marker;
+  Marker *m = point_marker(), *marker;
 
   for (marker = buf.markers; marker != NULL; marker = marker->next)
     if (marker->pt.p == oldlp &&
@@ -111,8 +89,8 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
     } else if (marker->pt.n > buf.pt.n)
       marker->pt.n += dir;
 
-  buf.pt = pt->pt;
-  free_marker(pt);
+  buf.pt = m->pt;
+  free_marker(m);
 }
 
 /*
@@ -121,7 +99,7 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 Marker *get_mark(void)
 {
   assert(buf.mark);
-  return marker_new(buf.mark->bp, buf.mark->pt);
+  return marker_new(buf.mark->pt);
 }
 
 /*
@@ -129,7 +107,7 @@ Marker *get_mark(void)
  */
 void set_mark(Marker *m)
 {
-  move_marker(buf.mark, m->bp, m->pt);
+  buf.mark->pt = m->pt;
 }
 
 /*
@@ -137,7 +115,7 @@ void set_mark(Marker *m)
  */
 void set_mark_to_point(void)
 {
-  move_marker(buf.mark, &buf, buf.pt);
+  buf.mark->pt = buf.pt;
 }
 
 
@@ -338,7 +316,6 @@ static int intercalate_newline(void)
   adjust_markers(lp2, lp1, lp1len, 1, 0);
 
   buf.flags |= BFLAG_MODIFIED;
-
   thisflag |= FLAG_NEED_RESYNC;
 
   return TRUE;

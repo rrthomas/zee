@@ -107,8 +107,7 @@ void free_kill_ring(void);
 
 /* line.c ----------------------------------------------------------------- */
 void free_marker(Marker *marker);
-void move_marker(Marker *marker, Buffer *bp, Point pt);
-Marker *marker_new(Buffer *bp, Point pt);
+Marker *marker_new(Point pt);
 Marker *point_marker(void);
 Marker *get_mark(void);
 void set_mark(Marker *m);
