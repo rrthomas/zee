@@ -90,7 +90,7 @@ that value, otherwise with the current column value.
 {
   char *s;
 
-  zasprintf(&s, "%d", (argc > 0) ? uniarg : (int)(buf.pt.o + 1));
+  zasprintf(&s, "%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1));
   set_variable("fill-column", s);
   free(s);
 }
@@ -387,7 +387,7 @@ Fill paragraph at or after point.
 
   for (i = start; i < end; i++) {
     FUNCALL(end_of_line);
-    delete_char();
+    FUNCALL(delete_char);
     FUNCALL(delete_horizontal_space);
     insert_char(' ');
   }

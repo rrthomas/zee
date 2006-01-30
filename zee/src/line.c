@@ -570,39 +570,25 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-int self_insert_command(size_t key)
-{
-  weigh_mark();
-
-  if (key <= 255) {
-    if (isspace(key) && buf.flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number("fill-column"))
-      fill_break_line();
-    insert_char((int)key);
-    return TRUE;
-  } else {
-    ding();
-    return FALSE;
-  }
-}
-
 DEFUN("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  ok = self_insert_command(getkey());
+  weigh_mark();
+
+  if (intarg <= 255) {
+    if (isspace(intarg) && buf.flags & BFLAG_AUTOFILL &&
+        get_goalc() > (size_t)get_variable_number("fill-column"))
+      fill_break_line();
+    insert_char(intarg);
+  } else {
+    ding();
+    ok = FALSE;
+  }
 }
 END_DEFUN
-
-int delete_char(void)
-{
-  astr as;
-  int ok = delete_nstring(1, &as);
-  astr_delete(as);
-  return ok;
-}
 
 DEFUN("delete-char", delete_char)
 /*+
@@ -610,22 +596,11 @@ Delete the following character.
 Join lines if the character is a newline.
 +*/
 {
-  ok = delete_char();
+  astr as;
+  ok = delete_nstring(1, &as);
+  astr_delete(as);
 }
 END_DEFUN
-
-int backward_delete_char(void)
-{
-  weigh_mark();
-
-  if (edit_navigate_backward_char()) {
-    delete_char();
-    return TRUE;
-  } else {
-    minibuf_error("Beginning of buffer");
-    return FALSE;
-  }
-}
 
 DEFUN("backward-delete-char", backward_delete_char)
 /*+
@@ -633,7 +608,14 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  ok = backward_delete_char();
+  weigh_mark();
+
+  if (edit_navigate_backward_char())
+    FUNCALL(delete_char);
+  else {
+    minibuf_error("Beginning of buffer");
+    ok = FALSE;
+  }
 }
 END_DEFUN
 
@@ -645,10 +627,10 @@ Delete all spaces and tabs around point.
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
 
   while (!eolp() && isspace(following_char()))
-    delete_char();
+    FUNCALL(delete_char);
 
   while (!bolp() && isspace(preceding_char()))
-    backward_delete_char();
+    FUNCALL(backward_delete_char);
 
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
@@ -741,11 +723,10 @@ no indenting is performed.
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
-    int indent;
-
     weigh_mark();
 
     if ((ok = insert_char('\n'))) {
+      int indent;
       size_t pos;
       Marker *old_point = point_marker();
 

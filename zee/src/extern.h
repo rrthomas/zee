@@ -138,9 +138,6 @@ int insert_char(int c);
 void fill_break_line(void);
 int insert_nstring(astr as, const char *eolstr, int intercalate);
 int delete_nstring(size_t size, astr *as);
-int self_insert_command(size_t key);
-int delete_char(void);
-int backward_delete_char(void);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);

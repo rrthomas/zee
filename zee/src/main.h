@@ -285,19 +285,19 @@ enum {
 
 /* Define an interactive function */
 #define DEFUN(cmd_name, c_func) \
-  int F_ ## c_func(int argc, int uniarg, list *lp) \
+  int F_ ## c_func(int argc, int intarg, list *lp) \
   { \
     int ok = TRUE; \
-    (void)uniarg; \
+    (void)intarg; \
     (void)lp; \
     if (argc == 0) \
-      uniarg = 1;
+      intarg = 1;
 
 
 #define DEFUN_INT(cmd_name, c_func) \
   DEFUN(cmd_name, c_func) \
   if (lp && *lp) { \
-    uniarg = (*lp)->item ? atoi((char *)((*lp)->item)) : 0; \
+    intarg = (*lp)->item ? atoi((char *)((*lp)->item)) : 0; \
     *lp = list_next(*lp); \
   }
 
@@ -308,5 +308,9 @@ enum {
 /* Call an interactive function */
 #define FUNCALL(c_func) \
   F_ ## c_func(0, 0, NULL)
+
+/* Call an interactive function with an integer argument */
+#define FUNCALL_INT(c_func, arg) \
+  F_ ## c_func(1, arg, NULL)
 
 #endif /* !MAIN_H */

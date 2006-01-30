@@ -93,7 +93,7 @@ void free_bindings(void)
   free_history_elements(&functions_history);
 }
 
-/* FIXME: Handling of uniarg should be done exclusively by
+/* FIXME: Handling of universal arg should be done exclusively by
    universal-argument. */
 void process_key(size_t key)
 {
@@ -107,7 +107,7 @@ void process_key(size_t key)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   for (uni = 0;
        uni < last_uniarg &&
-         (p ? p->func(0, 0, NULL) : self_insert_command(key));
+         (p ? p->func(0, 0, NULL) : FUNCALL_INT(self_insert_command, key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
