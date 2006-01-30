@@ -160,7 +160,7 @@ END_DEFUN
  */
 int goto_column(size_t to_col)
 {
-  int ok;
+  int ok = TRUE;
 
   if (buf.pt.o > to_col)
     do
