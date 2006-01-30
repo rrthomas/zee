@@ -548,7 +548,6 @@ current buffer, overwriting the current region.
         ok = FALSE;
       } else {
         astr out = astr_new(), s;
-        size_t i;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
           astr_cat_delete(out, s);
@@ -569,9 +568,8 @@ current buffer, overwriting the current region.
         if (buf.pt.p != r.start.p
             || r.start.o != buf.pt.o)
           FUNCALL(exchange_point_and_mark);
-        /* FIXME: implement this with a repeat call */
-        for (i = 0; i < r.size; i++)
-          FUNCALL(delete_char);
+        delete_nstring(r.size, &s);
+        astr_delete(s);
         ok = insert_nstring(out, "\n", FALSE);
         undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 
