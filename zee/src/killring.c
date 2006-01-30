@@ -40,16 +40,17 @@ static void flush_kill_ring(void)
 
 static int kill_line(void)
 {
+  astr as;
+
   if (warn_if_readonly_buffer())
     return FALSE;
 
   if (!eolp()) {
-    size_t i, len = astr_len(buf.pt.p->item) - buf.pt.o;
+    size_t len = astr_len(buf.pt.p->item) - buf.pt.o;
 
     astr_ncat(kill_ring_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
-    /* FIXME: implement the next line with a repeat command */
-    for (i = 0; i < len; i++)
-      FUNCALL(delete_char);
+    delete_nstring(len, &as);
+    astr_delete(as);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -208,7 +209,7 @@ END_DEFUN
 
 DEFUN("yank", yank)
 /*+
-Reinsert the stretch of killed text most recently killed or yanked.
+Reinsert the stretch of killed text most recently killed.
 Set mark at beginning, and put point at end.
 +*/
 {
@@ -217,7 +218,7 @@ Set mark at beginning, and put point at end.
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
-    insert_nstring(kill_ring_text, "\n", FALSE);
+    insert_nstring(kill_ring_text, buf.eol, FALSE);
     weigh_mark();
   }
 }

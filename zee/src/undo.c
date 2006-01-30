@@ -99,7 +99,7 @@ static Undo *revert_action(Undo *up)
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->size, &as);
   astr_delete(as);
-  insert_nstring(up->text, "\n", up->intercalate);
+  insert_nstring(up->text, buf.eol, up->intercalate);
 
   doing_undo = FALSE;
 

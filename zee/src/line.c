@@ -483,6 +483,9 @@ int insert_nstring(astr as, const char *eolstr, int intercalate)
   return TRUE;
 }
 
+/*
+ * Delete a string of the given length from point, returning it
+ */
 int delete_nstring(size_t size, astr *as)
 {
   weigh_mark();
@@ -498,7 +501,7 @@ int delete_nstring(size_t size, astr *as)
     if (!eolp())
       astr_cat_char(*as, following_char());
     else
-      astr_cat_char(*as, '\n');
+      astr_cat_cstr(*as, buf.eol);
 
     if (eobp()) {
       minibuf_error("End of buffer");
