@@ -49,13 +49,13 @@ bind-key "C-z" undo
 bind-key "C-x" kill-region
 bind-key "M-DEL" kill-word
 # Copy selection to clipboard.
-bind-key "C-c" copy-region
+bind-key "C-c" copy
 # Delete without modifying clipboard.
 bind-key "BS" backward-delete-char
 bind-key "M-BS" backward-kill-word
 bind-key "DEL" delete-char
 # Paste.
-bind-key "C-v" yank
+bind-key "C-v" paste
 
 # Search
 

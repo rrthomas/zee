@@ -1,4 +1,4 @@
-/* Kill ring facility functions
+/* Kill facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
@@ -31,11 +31,11 @@
 #include "main.h"
 #include "extern.h"
 
-static astr kill_ring_text;
+static astr killed_text;
 
-static void flush_kill_ring(void)
+static void flush_kill_buffer(void)
 {
-  astr_truncate(kill_ring_text, 0);
+  astr_truncate(killed_text, 0);
 }
 
 static int kill_line(void)
@@ -48,7 +48,7 @@ static int kill_line(void)
   if (!eolp()) {
     size_t len = astr_len(buf.pt.p->item) - buf.pt.o;
 
-    astr_ncat(kill_ring_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
+    astr_ncat(killed_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
     delete_nstring(len, &as);
     astr_delete(as);
 
@@ -62,7 +62,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    astr_cat_char(kill_ring_text, '\n');
+    astr_cat_cstr(killed_text, buf.eol);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -80,7 +80,7 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 +*/
 {
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring();
+    flush_kill_buffer();
 
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   if (!kill_line())
@@ -94,20 +94,19 @@ END_DEFUN
 DEFUN("kill-region", kill_region)
 /*+
 Kill between point and mark.
-The text is deleted but saved in the kill ring.
-The command C-y (yank) can retrieve it from there.
+The text is deleted but saved in the kill buffer.
+The command paste can retrieve it from there.
 If the buffer is read-only, the text will not be deleted, but it will
-be added to the kill ring anyway.  This means that
+be added to the kill buffer anyway.  This means that
 you can use the killing commands to copy text from a read-only buffer.
 If the previous command was also a kill command,
-the text killed this time appends to the text killed last time
-to make one entry in the kill ring.
+the text killed this time appends to the text killed last time.
 +*/
 {
   Region r;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring();
+    flush_kill_buffer();
 
   if (!(buf.flags & BFLAG_ANCHORED))
     ok = FUNCALL(kill_line);
@@ -118,7 +117,7 @@ to make one entry in the kill ring.
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr as = copy_text_block(r.start, r.size);
-      astr_cat_delete(kill_ring_text, as);
+      astr_cat_delete(killed_text, as);
 
       warn_if_readonly_buffer();
     } else {
@@ -127,7 +126,7 @@ to make one entry in the kill ring.
       if (buf.pt.p != r.start.p || r.start.o != buf.pt.o)
         FUNCALL(exchange_point_and_mark);
       delete_nstring(r.size, &as);
-      astr_cat_delete(kill_ring_text, as);
+      astr_cat_delete(killed_text, as);
     }
 
     thisflag |= FLAG_DONE_KILL;
@@ -136,15 +135,15 @@ to make one entry in the kill ring.
 }
 END_DEFUN
 
-DEFUN("copy-region", copy_region)
+DEFUN("copy", copy)
 /*+
-Copy the region to the kill ring.
+Copy the region to the kill buffer.
 +*/
 {
   Region r;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring();
+    flush_kill_buffer();
 
   if (warn_if_no_mark())
     ok = FALSE;
@@ -154,7 +153,7 @@ Copy the region to the kill ring.
     calculate_the_region(&r);
 
     as = copy_text_block(r.start, r.size);
-    astr_cat_delete(kill_ring_text, as);
+    astr_cat_delete(killed_text, as);
 
     thisflag |= FLAG_DONE_KILL;
     weigh_mark();
@@ -167,7 +166,7 @@ static int kill_helper(Function func)
   int ok;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring();
+    flush_kill_buffer();
 
   if (warn_if_readonly_buffer())
     ok = FALSE;
@@ -207,18 +206,18 @@ Kill characters backward until encountering the end of a word.
 }
 END_DEFUN
 
-DEFUN("yank", yank)
+DEFUN("paste", paste)
 /*+
 Reinsert the stretch of killed text most recently killed.
 Set mark at beginning, and put point at end.
 +*/
 {
-  if (astr_len(kill_ring_text) == 0) {
+  if (astr_len(killed_text) == 0) {
     minibuf_error("Kill ring is empty");
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
-    insert_nstring(kill_ring_text, buf.eol, FALSE);
+    insert_nstring(killed_text, buf.eol, FALSE);
     weigh_mark();
   }
 }
@@ -226,10 +225,10 @@ END_DEFUN
 
 void init_kill_ring(void)
 {
-  kill_ring_text = astr_new();
+  killed_text = astr_new();
 }
 
 void free_kill_ring(void)
 {
-  astr_delete(kill_ring_text);
+  astr_delete(killed_text);
 }
