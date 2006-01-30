@@ -304,28 +304,21 @@ int insert_char(int c)
   return ret;
 }
 
-static int insert_tab(void)
-{
-  if (warn_if_readonly_buffer())
-    return FALSE;
-  else {
-    int c = get_goalc();
-    int t = tab_width();
-
-    for (c = t - c % t; c > 0; c--)
-      insert_char(' ');
-
-    return TRUE;
-  }
-}
-
 DEFUN("tab-to-tab-stop", tab_to_tab_stop)
 /*+
 Insert spaces or tabs to next defined tab-stop column.
 Convert the tabulation into spaces.
 +*/
 {
-  ok = insert_tab();
+  if (warn_if_readonly_buffer())
+    ok = FALSE;
+  else {
+    int c = get_goalc();
+    int t = tab_width();
+
+    for (c = t - c % t; c > 0; c--)
+      insert_char(' ');
+  }
 }
 END_DEFUN
 
@@ -731,7 +724,7 @@ Indent line or insert a tab.
         /* If already at EOL on target line, insert a tab. */
         insert_char(' ');
     else
-      ok = insert_tab();
+      ok = FUNCALL(tab_to_tab_stop);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
   }
 }
