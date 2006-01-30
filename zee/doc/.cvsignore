@@ -5,5 +5,5 @@ mkdoc
 AUTODOC
 BANNER.EPOC
 zee.info
-dotzee.texi zee_keys.texi zee_funcs.texi zee_vars.texi
+dotzee.texi zee_funcs.texi zee_vars.texi
 zee.1
