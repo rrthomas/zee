@@ -189,6 +189,7 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
 {
   const char *p, *end = astr_cstr(as) + astr_len(as);
   Line *lp = line_new();
+  size_t eol_len = strlen(eol);
 
   for (p = astr_cstr(as), *lines = 1; p < end;) {
     const char *q;
@@ -196,7 +197,7 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
       astr_ncat(list_last(lp)->item, p, (size_t)(q - p));
       list_append(lp, astr_new());
       ++*lines;
-      p = q + 1;
+      p = q + eol_len;
     } else {                    /* End of string, or embedded NUL */
       size_t len = strlen(p);
       astr_ncat(list_last(lp)->item, p, len);
