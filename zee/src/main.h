@@ -124,7 +124,7 @@ typedef struct Region {
  *  - Flags, including the line terminator
  *  - Filename
  */
-struct Buffer {
+typedef struct Buffer {
   /* The lines of text */
   Line *lines;
 
@@ -156,7 +156,7 @@ struct Buffer {
 
   /* EOL string (up to 2 chars) for this buffer */
   char eol[3];
-};
+} Buffer;
 
 /*
  * Represents a window on the screen: a rectangular area used to
