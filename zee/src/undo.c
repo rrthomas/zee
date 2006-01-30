@@ -45,7 +45,7 @@ void free_undo(Buffer *bp)
   while (up != NULL) {
     Undo *next_up = up->next;
     if (up->type == UNDO_REPLACE_BLOCK)
-      astr_delete(up->delta.text);
+      astr_delete(up->text);
     free(up);
     up = next_up;
   }
@@ -63,9 +63,9 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
   up->unchanged = !(buf.flags & BFLAG_MODIFIED);
 
   if (type == UNDO_REPLACE_BLOCK) {
-    up->delta.text = copy_text_block(pt, arg1);
-    up->delta.size = arg2;
-    up->delta.intercalate = intercalate;
+    up->text = copy_text_block(pt, arg1);
+    up->size = arg2;
+    up->intercalate = intercalate;
   }
 
   up->next = buf.last_undop;
@@ -97,9 +97,9 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   assert(up->type == UNDO_REPLACE_BLOCK);
-  delete_nstring(up->delta.size, &as);
+  delete_nstring(up->size, &as);
   astr_delete(as);
-  insert_nstring(up->delta.text, "\n", up->delta.intercalate);
+  insert_nstring(up->text, "\n", up->intercalate);
 
   doing_undo = FALSE;
 

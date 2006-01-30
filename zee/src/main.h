@@ -74,26 +74,17 @@ enum {
 };
 
 typedef struct Undo {
-  /* Next undo delta in list */
-  struct Undo *next;
-
-  /* The type of undo delta */
-  int type;
-
-  /* Where the undo delta needs to be applied.
-     Warning! Do not use the "pt.p" field */
-  Point pt;
-
-  /* Flag indicating that reverting this undo leaves the buffer
-     in an unchanged state */
-  int unchanged;
+  struct Undo *next;            /* Next undo delta in list */
+  int type;                     /* The type of undo delta */
+  Point pt;               /* Where the undo delta needs to be applied.
+                             Warning! Do not use the "pt.p" field */
+  int unchanged; /* Flag indicating that reverting this undo leaves the buffer
+                    in an unchanged state */
 
   /* The undo delta */
-  struct {
-    astr text;                  /* String */
-    size_t size;                /* Block size for replace */
-    int intercalate;        /* TRUE means intercalate, FALSE insert */
-  } delta;
+  astr text;                  /* String */
+  size_t size;                /* Block size for replace */
+  int intercalate;        /* TRUE means intercalate, FALSE insert */
 } Undo;
 
 typedef struct {
@@ -114,46 +105,22 @@ typedef struct {
 #define BFLAG_ISEARCH   (0x0010) /* The buffer is in Isearch loop */
 #define BFLAG_ANCHORED  (0x0020) /* The mark is anchored */
 
-/* Represents a buffer: an open file.
- * Every buffer has its own:
- *  - Point and mark (i.e. cursor and selection)
- *  - List of markers
- *  - Undo history
- *  - Flags, including the line terminator
- *  - Filename
+/*
+ * Represents a buffer: an open file.
  */
 typedef struct {
-  /* The lines of text */
-  Line *lines;
-
-  /* The point */
-  Point pt;
-
-  /* The mark */
-  Marker *mark;
-
-  /* Markers (points that are updated when text is modified) */
-  Marker *markers;
-
-  /* The undo deltas recorded for this buffer */
-  Undo *next_undop;
+  Line *lines;                  /* The lines of text */
+  size_t num_lines;      /* The total number of lines in the buffer */
+  Point pt;                     /* The point */
+  Marker *mark;                 /* The mark */
+  Marker *markers; /* Markers (points that are updated when text is modified) */
+  Undo *next_undop;     /* The undo deltas recorded for this buffer */
   Undo *last_undop;
-
-  /* Buffer flags */
-  int flags;
-
-  /* Buffer-local variables */
-  list vars;
-
-  /* The total number of lines in the buffer */
-  size_t num_lines;
-
-  /* The name of the buffer and the file name */
-  char *name;
+  int flags;                    /* Buffer flags */
+  list vars;                    /* Buffer-local variables */
+  char *name;           /* The name of the buffer and the file name */
   char *filename;
-
-  /* EOL string (up to 2 chars) for this buffer */
-  char eol[3];
+  char eol[3];        /* EOL string (up to 2 chars) for this buffer */
 } Buffer;
 
 /*
