@@ -128,15 +128,12 @@ typedef struct {
  * display a buffer.
  */
 typedef struct {
-  /* The buffer line displayed in the topmost window line */
-  size_t topdelta;
+  size_t topdelta; /* The buffer line displayed in the topmost window line */
+  size_t fwidth, fheight; /* The formal width and height of the window
+                             (space used on the terminal). */
+  size_t ewidth, eheight; /* The effective width and height of the
+                             window (space available for buffer display). */
 
-  /* The formal and effective width and height of the window.
-   * The formal height is the space used on the terminal;
-   * the effective height is the space available for the buffer display.
-   */
-  size_t fwidth, fheight;
-  size_t ewidth, eheight;
 } Window;
 
 enum {
@@ -152,11 +149,9 @@ enum {
 #define COMPLETION_FILENAME             0x4
 
 typedef struct {
-  int flags;                    /* flags */
-  astr path;
-
+  int flags;                    /* Flags */
+  astr path;                    /* File path, if any */
   list completions;             /* The completions list */
-
   list matches;                 /* The matches list */
   char *match;                  /* The match buffer */
   size_t matchsize;             /* The match buffer size */
