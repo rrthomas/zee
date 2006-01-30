@@ -55,17 +55,16 @@ typedef int (*Function)(int argc, int uniarg, list *branch);
 typedef struct list_s Line;
 
 /* Point and Marker */
-typedef struct Point {
+typedef struct {
   Line *p;                      /* Line pointer */
   size_t n;                     /* Line number */
   size_t o;                     /* Offset */
 } Point;
 
-typedef struct Marker Marker;
-struct Marker {
+typedef struct Marker {
   Point pt;                     /* Point position */
-  Marker *next;          /* Used to chain all markers in the buffer */
-};
+  struct Marker *next;   /* Used to chain all markers in the buffer */
+} Marker;
 
 /* Undo delta types */
 enum {
@@ -74,10 +73,9 @@ enum {
   UNDO_END_SEQUENCE             /* End a multi operation sequence */
 };
 
-typedef struct Undo Undo;
-struct Undo {
+typedef struct Undo {
   /* Next undo delta in list */
-  Undo *next;
+  struct Undo *next;
 
   /* The type of undo delta */
   int type;
@@ -96,9 +94,9 @@ struct Undo {
     size_t size;                /* Block size for replace */
     int intercalate;        /* TRUE means intercalate, FALSE insert */
   } delta;
-};
+} Undo;
 
-typedef struct Region {
+typedef struct {
   Point start;                  /* The region start */
   Point end;                    /* The region end */
   size_t size;                  /* The region size */
@@ -124,7 +122,7 @@ typedef struct Region {
  *  - Flags, including the line terminator
  *  - Filename
  */
-typedef struct Buffer {
+typedef struct {
   /* The lines of text */
   Line *lines;
 
@@ -162,8 +160,7 @@ typedef struct Buffer {
  * Represents a window on the screen: a rectangular area used to
  * display a buffer.
  */
-typedef struct Window Window;
-struct Window {
+typedef struct {
   /* The buffer line displayed in the topmost window line */
   size_t topdelta;
 
@@ -173,7 +170,7 @@ struct Window {
    */
   size_t fwidth, fheight;
   size_t ewidth, eheight;
-};
+} Window;
 
 enum {
   COMPLETION_NOTCOMPLETING,
@@ -183,7 +180,7 @@ enum {
   COMPLETION_NONUNIQUE
 };
 
-typedef struct Completion {
+typedef struct {
   /* This flag is set when the vector is sorted */
   int fl_sorted;
   /* This flag is set when a completion window has been popped up */
@@ -200,12 +197,12 @@ typedef struct Completion {
   size_t matchsize;             /* The match buffer size */
 } Completion;
 
-typedef struct History {
+typedef struct {
   list elements;                /* Elements (strings) */
   list sel;
 } History;
 
-typedef struct Binding {
+typedef struct {
   size_t key;
   Function func;
 } Binding;
