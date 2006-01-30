@@ -381,14 +381,14 @@ Set mark after the inserted text.
   if ((ok = !warn_if_readonly_buffer())) {
     buf = get_current_dir(TRUE);
     if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf))) == NULL)
-      ok = cancel();
+      ok = FUNCALL(cancel);
     astr_delete(buf);
 
     if (ok) {
       if (astr_len(ms) == 0 || !file_insert(astr_cstr(ms)))
-        ok =  FALSE;
+        ok = FALSE;
       else
-        set_mark_command();
+        FUNCALL(set_mark);
 
       astr_delete(ms);
     }
@@ -470,7 +470,7 @@ Make buffer visit that file, and mark it not modified.
   astr ms = minibuf_read_dir("File to save in: ", fname);
 
   if (ms == NULL)
-    ok = cancel();
+    ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
@@ -493,7 +493,7 @@ Offer to the buffer, then quit.
     int ans;
 
     if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ", "")) == -1)
-      ok = cancel();
+      ok = FUNCALL(cancel);
     else if (!ans)
       ok = FALSE;
   }

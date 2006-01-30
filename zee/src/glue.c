@@ -145,27 +145,3 @@ astr shorten_string(char *s, int maxlen)
 
   return as;
 }
-
-/*
- * Jump to the specified line number and offset.
- */
-void goto_point(Point pt)
-{
-  if (buf.pt.n > pt.n)
-    do
-      FUNCALL(edit_navigate_up_line);
-    while (buf.pt.n > pt.n);
-  else if (buf.pt.n < pt.n)
-    do
-      FUNCALL(edit_navigate_down_line);
-    while (buf.pt.n < pt.n);
-
-  if (buf.pt.o > pt.o)
-    do
-      FUNCALL(edit_navigate_backward_char);
-    while (buf.pt.o > pt.o);
-  else if (buf.pt.o < pt.o)
-    do
-      FUNCALL(edit_navigate_forward_char);
-    while (buf.pt.o < pt.o);
-}

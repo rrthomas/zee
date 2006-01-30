@@ -31,7 +31,7 @@ bind-key "C-END" end-of-buffer
 # Absolute navigation. These are like navigation commands but they
 # don't become selection commands when combined with SHIFT.
 
-bind-key "C-M-g" goto-char
+bind-key "C-M-g" goto-column
 bind-key "M-g" goto-line
 
 # Open, save, close, quit etc.
@@ -65,8 +65,8 @@ bind-key "C-v" yank
 # The proposed meaning of ESC obviates the current behaviour of RET.
 bind-key "C-f" isearch-forward
 
-#bind-key "ESC" keyboard-quit
-bind-key "C-g" keyboard-quit
+#bind-key "ESC" cancel
+bind-key "C-g" cancel
 
 # Insert special characters.
 
@@ -92,7 +92,7 @@ bind-key "M-@" mark-word
 bind-key "C-j" newline
 bind-key "M-%" query-replace
 bind-key "C-l" recenter
-bind-key "C-@" set-mark-command
+bind-key "C-@" set-mark
 bind-key "M-!" shell-command
 bind-key "M-(" start-kbd-macro
 bind-key "M-i" tab-to-tab-stop

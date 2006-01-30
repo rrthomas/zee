@@ -39,7 +39,10 @@ Point make_point(size_t lineno, size_t offset)
   return pt;
 }
 
-/* Returns '-1', '0' or '1'. */
+/*
+ * Compare two points, and return `-1' for `less than', '0' for
+ * `equal' or `1' for `greater than'.
+ */
 int cmp_point(Point pt1, Point pt2)
 {
   if (pt1.n < pt2.n)
@@ -51,6 +54,9 @@ int cmp_point(Point pt1, Point pt2)
             (pt1.o > pt2.o) ? 1 : 0);
 }
 
+/*
+ * Return the distance in chars between two points.
+ */
 int point_dist(Point pt1, Point pt2)
 {
   int size = 0;
@@ -106,39 +112,5 @@ Point point_max(Buffer *bp)
   pt.p = list_prev(bp->lines);
   pt.n = buf.num_lines;
   pt.o = astr_len(list_prev(bp->lines)->item);
-  return pt;
-}
-
-Point line_beginning_position(void)
-{
-  Point pt;
-
-  /* Copy current point position without offset (beginning of
-   * line). */
-  pt = buf.pt;
-  pt.o = 0;
-
-  if (list_next(pt.p) != buf.lines) {
-      pt.p = list_next(pt.p);
-      pt.n++;
-  }
-
-  return pt;
-}
-
-Point line_end_position(void)
-{
-  Point pt;
-
-  /* Copy current point position without offset (beginning of
-   * line). */
-  pt = buf.pt;
-  pt.o = astr_len(pt.p->item);
-
-  if (list_prev(pt.p) != buf.lines) {
-    pt.p = list_prev(pt.p);
-    pt.n--;
-  }
-
   return pt;
 }

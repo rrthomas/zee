@@ -41,7 +41,7 @@ DEFUN("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  buf.pt = line_beginning_position();
+  buf.pt.o = 0;
 
   /* Change the `goalc' to the beginning of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -55,7 +55,7 @@ DEFUN("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  buf.pt = line_end_position();
+  buf.pt.o = astr_len(buf.pt.p->item);
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -107,25 +107,6 @@ static void goto_goalc(int goalc)
   buf.pt.o = i;
 }
 
-int edit_navigate_up_line(void)
-{
-  if (list_prev(buf.pt.p) != buf.lines) {
-    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
-
-    if (!(lastflag & FLAG_DONE_CPCN))
-      cur_goalc = get_goalc();
-
-    buf.pt.p = list_prev(buf.pt.p);
-    buf.pt.n--;
-
-    goto_goalc(cur_goalc);
-
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
 DEFUN("edit-navigate-up-line", edit_navigate_up_line)
 /*+
 Move cursor vertically up one line.
@@ -134,34 +115,21 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (!bobp()) {
-    if (!edit_navigate_up_line()) {
-      thisflag |= FLAG_DONE_CPCN;
-      FUNCALL(beginning_of_line);
-    }
-  } else if (lastflag & FLAG_DONE_CPCN)
-    thisflag |= FLAG_DONE_CPCN;
-}
-END_DEFUN
-
-int edit_navigate_down_line(void)
-{
-  if (list_next(buf.pt.p) != buf.lines) {
-    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  if (list_prev(buf.pt.p) == buf.lines)
+    ok = FALSE;
+  else {
+    thisflag |= FLAG_NEED_RESYNC | FLAG_DONE_CPCN;
 
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    buf.pt.p = list_next(buf.pt.p);
-    buf.pt.n++;
+    buf.pt.p = list_prev(buf.pt.p);
+    buf.pt.n--;
 
     goto_goalc(cur_goalc);
-
-    return TRUE;
   }
-
-  return FALSE;
 }
+END_DEFUN
 
 DEFUN("edit-navigate-down-line", edit_navigate_down_line)
 /*+
@@ -171,19 +139,42 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (!eobp()) {
-    if (!edit_navigate_down_line()) {
-      int old = cur_goalc;
-      thisflag |= FLAG_DONE_CPCN;
-      FUNCALL(end_of_line);
-      cur_goalc = old;
-    }
-  } else if (lastflag & FLAG_DONE_CPCN)
-    thisflag |= FLAG_DONE_CPCN;
+  if (list_next(buf.pt.p) == buf.lines)
+    ok = FALSE;
+  else {
+    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+
+    if (!(lastflag & FLAG_DONE_CPCN))
+      cur_goalc = get_goalc();
+
+    buf.pt.p = list_next(buf.pt.p);
+    buf.pt.n++;
+
+    goto_goalc(cur_goalc);
+  }
 }
 END_DEFUN
 
-DEFUN("goto-char", goto_char)
+/*
+ * Jump to the specified column.
+ */
+int goto_column(size_t to_col)
+{
+  int ok;
+
+  if (buf.pt.o > to_col)
+    do
+      ok = FUNCALL(edit_navigate_backward_char);
+    while (ok && buf.pt.o > to_col);
+  else if (buf.pt.o < to_col)
+    do
+      ok = FUNCALL(edit_navigate_forward_char);
+    while (ok && buf.pt.o < to_col);
+
+  return ok;
+}
+
+DEFUN("goto-column", goto_column)
 /*+
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
@@ -194,7 +185,7 @@ Position 1 is the beginning of the buffer.
 
   do {
     if ((ms = minibuf_read("Goto char: ", "")) == NULL) {
-      ok = cancel();
+      ok = FUNCALL(cancel);
       break;
     }
     if ((to_char = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
@@ -202,13 +193,8 @@ Position 1 is the beginning of the buffer.
     astr_delete(ms);
   } while (to_char == ULONG_MAX);
 
-  if (ok) {
-    size_t count;
-    gotobob();
-    for (count = 1; count < to_char; ++count)
-      if (!edit_navigate_forward_char())
-        break;
-  }
+  if (ok)
+    goto_column(to_char);
 }
 END_DEFUN
 
@@ -218,22 +204,28 @@ END_DEFUN
  */
 int goto_line(size_t to_line)
 {
-  int up, ok = TRUE;
-  size_t off;
-  Function f;
+  int ok = TRUE;
 
-  up = buf.pt.n > to_line;
-  if (up) {
-    off = buf.pt.n - to_line;
-    f = F_edit_navigate_up_line;
-  } else {
-    off = to_line - buf.pt.n;
-    f = F_edit_navigate_down_line;
-  }
+  if (buf.pt.n > to_line)
+    do
+      ok = FUNCALL(edit_navigate_up_line);
+    while (ok && buf.pt.n > to_line);
+  else if (buf.pt.n < to_line)
+    do
+      ok = FUNCALL(edit_navigate_down_line);
+    while (ok && buf.pt.n < to_line);
 
-  for (; off > 0 && list_prev(buf.pt.p) != buf.lines && (ok = f(0, 0, NULL)); off--)
-    ;
+  return ok;
+}
 
+/*
+ * Go to the given point.
+ */
+int goto_point(Point pt)
+{
+  int ok = goto_line(pt.n);
+  if (ok)
+    ok = goto_column(pt.o);
   return ok;
 }
 
@@ -248,7 +240,7 @@ Line 1 is the beginning of the buffer.
 
   do {
     if ((ms = minibuf_read("Goto line: ", "")) == NULL) {
-      ok = cancel();
+      ok = FUNCALL(cancel);
       break;
     }
     if ((to_line = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
@@ -263,99 +255,57 @@ Line 1 is the beginning of the buffer.
 }
 END_DEFUN
 
-/*
- * Move point to the beginning of the buffer; do not touch the mark.
- */
-void gotobob(void)
+DEFUN("beginning-of-buffer", beginning_of_buffer)
+/*+
+Move point to the beginning of the buffer.
++*/
 {
   buf.pt = point_min(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
-
-DEFUN("beginning-of-buffer", beginning_of_buffer)
-/*+
-Move point to the beginning of the buffer; leave mark at previous position.
-+*/
-{
-  set_mark_command();
-  gotobob();
-}
 END_DEFUN
 
-/*
- * Move point to the end of the buffer; do not touch the mark.
- */
-void gotoeob(void)
+DEFUN("end-of-buffer", end_of_buffer)
+/*+
+Move point to the end of the buffer.
++*/
 {
   buf.pt = point_max(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
-
-DEFUN("end-of-buffer", end_of_buffer)
-/*+
-Move point to the end of the buffer; leave mark at previous position.
-+*/
-{
-  set_mark_command();
-  gotoeob();
-}
 END_DEFUN
-
-int edit_navigate_backward_char(void)
-{
-  if (!bolp()) {
-    buf.pt.o--;
-    return TRUE;
-  } else if (!bobp()) {
-    thisflag |= FLAG_NEED_RESYNC;
-    buf.pt.p = list_prev(buf.pt.p);
-    buf.pt.n--;
-    FUNCALL(end_of_line);
-    return TRUE;
-  }
-
-  return FALSE;
-}
 
 DEFUN("edit-navigate-backward-char", edit_navigate_backward_char)
 /*+
 Move point left one character.
-On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
-  if (!edit_navigate_backward_char()) {
-    minibuf_error("Beginning of buffer");
+  if (!bolp())
+    buf.pt.o--;
+  else if (!bobp()) {
+    thisflag |= FLAG_NEED_RESYNC;
+    buf.pt.p = list_prev(buf.pt.p);
+    buf.pt.n--;
+    FUNCALL(end_of_line);
+  } else
     ok = FALSE;
-  }
 }
 END_DEFUN
-
-int edit_navigate_forward_char(void)
-{
-  if (!eolp()) {
-    buf.pt.o++;
-    return TRUE;
-  } else if (!eobp()) {
-    thisflag |= FLAG_NEED_RESYNC;
-    buf.pt.p = list_next(buf.pt.p);
-    buf.pt.n++;
-    FUNCALL(beginning_of_line);
-    return TRUE;
-  }
-
-  return FALSE;
-}
 
 DEFUN("edit-navigate-forward-char", edit_navigate_forward_char)
 /*+
 Move point right one character.
-On reaching end of buffer, stop and signal error.
 +*/
 {
-  if (!edit_navigate_forward_char()) {
-    minibuf_error("End of buffer");
+  if (!eolp())
+    buf.pt.o++;
+  else if (!eobp()) {
+    thisflag |= FLAG_NEED_RESYNC;
+    buf.pt.p = list_next(buf.pt.p);
+    buf.pt.n++;
+    FUNCALL(beginning_of_line);
+  } else
     ok = FALSE;
-  }
 }
 END_DEFUN
 

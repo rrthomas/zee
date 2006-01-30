@@ -45,7 +45,7 @@ static void unchain_marker(Marker *marker)
   if (!marker->bp)
     return;
 
-  for (m=marker->bp->markers; m; m=next) {
+  for (m = marker->bp->markers; m; m = next) {
     next = m->next;
     if (m == marker) {
       if (prev)
@@ -68,6 +68,8 @@ void free_marker(Marker *marker)
 
 void move_marker(Marker *marker, Buffer *bp, Point pt)
 {
+  assert(marker);
+
   if (bp != marker->bp) {
     /* Unchain with the previous pointed buffer. */
     unchain_marker(marker);
@@ -113,48 +115,28 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
   free_marker(pt);
 }
 
-
-/*-----------------------------------------------------------------------
-  Mark ring
-  -----------------------------------------------------------------------*/
-static list mark_ring = NULL;	/* Mark ring */
-
 /*
- * Push the current mark on to the the mark-ring
+ * Return the current mark
  */
-void push_mark(void)
+Marker *get_mark(void)
 {
-  if (!mark_ring)
-    mark_ring = list_new();
-
-  /* Save the mark */
   assert(buf.mark);
-  list_append(mark_ring, marker_new(buf.mark->bp, buf.mark->pt));
+  return marker_new(buf.mark->bp, buf.mark->pt);
 }
 
 /*
- * Pop a mark from the mark-ring and make it the current mark
+ * Set the current mark
  */
-void pop_mark(void)
+void set_mark(Marker *m)
 {
-  Marker *m = list_last(mark_ring)->item;
-
-  /* Replace the mark */
-  assert(m->bp->mark);
-  free_marker(m->bp->mark);
-
-  m->bp->mark = (m->pt.p) ? marker_new(m->bp, m->pt) : NULL;
-
-  list_betail(mark_ring);
-  free_marker(m);
+  move_marker(buf.mark, m->bp, m->pt);
 }
 
 /*
  * Set the mark to point
  */
-void set_mark(void)
+void set_mark_to_point(void)
 {
-  assert(buf.mark);
   move_marker(buf.mark, &buf, buf.pt);
 }
 
@@ -512,7 +494,7 @@ int insert_nstring(astr as, const char *eolstr, int intercalate)
     if (strncmp(s, eolstr, eollen) == 0) {
       intercalate_newline();
       if (!intercalate)
-        edit_navigate_forward_char();
+        FUNCALL(edit_navigate_forward_char);
     } else {
       astr_insert_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o, *s);
       buf.flags |= BFLAG_MODIFIED;
@@ -610,7 +592,7 @@ Join lines if the character is a newline.
 {
   weigh_mark();
 
-  if (edit_navigate_backward_char())
+  if (FUNCALL(edit_navigate_backward_char))
     FUNCALL(delete_char);
   else {
     minibuf_error("Beginning of buffer");
@@ -660,11 +642,11 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (edit_navigate_up_line() && is_blank_line());
+  while (FUNCALL(edit_navigate_up_line) && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
-    edit_navigate_forward_char();
+    FUNCALL(edit_navigate_forward_char);
 }
 
 DEFUN("indent-relative", indent_relative)
@@ -684,11 +666,11 @@ Indent line or insert a tab.
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
-        edit_navigate_forward_char();
+        FUNCALL(edit_navigate_forward_char);
 
     /* Find next non-blank char. */
     while (!eolp() && isspace(following_char()))
-      edit_navigate_forward_char();
+      FUNCALL(edit_navigate_forward_char);
 
     /* Record target column. */
     if (!eolp())

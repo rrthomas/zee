@@ -38,8 +38,6 @@
 #include "regex.h"
 #endif
 
-static History regexp_history;
-
 static const char *find_err = NULL;
 
 static char *find_substr(const char *s1, size_t s1size,
@@ -103,7 +101,7 @@ static int search_forward(Line *startp, size_t starto, const char *s)
                                          sp == astr_cstr(lp->item), TRUE, FALSE);
         if (sp2 != NULL) {
           while (buf.pt.p != lp)
-            edit_navigate_down_line();
+            FUNCALL(edit_navigate_down_line);
           buf.pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }
@@ -129,7 +127,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
                                          TRUE, s1size == astr_len(lp->item), TRUE);
         if (sp2 != NULL) {
           while (buf.pt.p != lp)
-            edit_navigate_up_line();
+            FUNCALL(edit_navigate_up_line);
           buf.pt.o = sp2 - astr_cstr(lp->item);
           return TRUE;
         }
@@ -149,8 +147,8 @@ Search forward from point for regular expression REGEXP.
 {
   astr ms;
 
-  if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
-    ok = cancel();
+  if ((ms = minibuf_read("Search: ", last_search)) == NULL)
+    ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
@@ -158,7 +156,7 @@ Search forward from point for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error("Failing regexp search: `%s'", astr_cstr(ms));
+      minibuf_error("Failing search: `%s'", astr_cstr(ms));
       ok = FALSE;
     }
   }
@@ -173,8 +171,8 @@ Search backward from point for match for regular expression REGEXP.
 {
   astr ms;
 
-  if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
-    ok = cancel();
+  if ((ms = minibuf_read("Search backward: ", last_search)) == NULL)
+    ok = FUNCALL(cancel);
   if (astr_len(ms) == 0)
     ok = FALSE;
   else {
@@ -182,7 +180,7 @@ Search backward from point for match for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error("Failing regexp search backward: `%s'", ms);
+      minibuf_error("Failing search backward: `%s'", ms);
       ok = FALSE;
     }
   }
@@ -218,7 +216,7 @@ static int isearch(int dir)
     /* Make the minibuf message. */
     astr_truncate(as, 0);
     astr_afmt(as, "%sI-search%s: %s",
-              (last ? "Regexp " : "Failing regexp "),
+              (last ? " " : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
 
@@ -240,7 +238,7 @@ static int isearch(int dir)
     if (c == KBD_CANCEL) {
       buf.pt = start;
       thisflag |= FLAG_NEED_RESYNC;
-      cancel();
+      FUNCALL(cancel);
 
       /* Restore old mark position. */
       assert(buf.mark);
@@ -267,6 +265,7 @@ static int isearch(int dir)
       if (astr_len(pattern) > 0) {
         /* Find next match. */
         cur = buf.pt;
+
         /* Save search string. */
         free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
@@ -281,7 +280,7 @@ static int isearch(int dir)
           FUNCALL(search_backward);
       else if (astr_len(pattern) > 0) {
         /* Save mark. */
-        set_mark();
+        set_mark_to_point();
         buf.mark->pt = start;
 
         /* Save search string. */
@@ -345,11 +344,6 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-void free_search_history(void)
-{
-  free_history_elements(&regexp_history);
-}
-
 static int no_upper(const char *s, size_t len)
 {
   size_t i;
@@ -370,14 +364,14 @@ Replace occurrences of a regexp with other text.
   astr find, repl;
 
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
-    ok = cancel();
+    ok = FUNCALL(cancel);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
     if ((repl = minibuf_read("Replace `%s' with: ", "", astr_cstr(find))) == NULL)
-      ok = cancel();
+      ok = FUNCALL(cancel);
     else {
       while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
         ++count;
@@ -412,14 +406,14 @@ what to do with it.
   astr find, repl;
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
-    ok = cancel();
+    ok = FUNCALL(cancel);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
     if ((repl = minibuf_read("Query replace `%s' with: ", "", astr_cstr(find))) == NULL)
-      ok = cancel();
+      ok = FUNCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
       while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
@@ -441,7 +435,7 @@ what to do with it.
 
           switch (c) {
           case KBD_CANCEL: /* C-g */
-            ok = cancel();
+            ok = FUNCALL(cancel);
             /* Fall through. */
           case 'q': /* Quit immediately. */
             goto endoffunc;

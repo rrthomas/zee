@@ -106,8 +106,8 @@ void process_key(size_t key)
   if (p == NULL)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   for (uni = 0;
-       uni < last_uniarg &&
-         (p ? p->func(0, 0, NULL) : FUNCALL_INT(self_insert_command, key));
+       uni < uniarg &&
+         (p ? p->func(0, 0, NULL) : FUNCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
@@ -180,7 +180,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
     ms = minibuf_read_completion(buf, "", cp, &functions_history);
 
     if (ms == NULL) {
-      cancel();
+      FUNCALL(cancel);
       break;
     } else if (astr_len(ms) == 0) {
       minibuf_error("No function name given");

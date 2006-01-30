@@ -59,10 +59,11 @@ static void buffer_new(void)
 void free_buffer(Buffer *bp)
 {
   line_delete(bp->lines);
-
   free_undo(bp);
 
-  /* Free markers. */
+  /* Free markers. This looks wrong, but in fact the marker links back
+     into the buffer, so free_marker can change the pointer passed to
+     it. */
   while (bp->markers)
     free_marker(bp->markers);
 

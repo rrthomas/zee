@@ -22,13 +22,9 @@
 
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc(void);
-int edit_navigate_backward_char(void);
-int edit_navigate_forward_char(void);
 int goto_line(size_t to_line);
-void gotobob(void);
-void gotoeob(void);
-int edit_navigate_down_line(void);
-int edit_navigate_up_line(void);
+int goto_column(size_t to_col);
+int goto_point(Point pt);
 
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(size_t key, Function func);
@@ -84,10 +80,6 @@ void file_open(Buffer *bp, const char *filename);
 int file_visit(const char *filename);
 void die(int exitcode);
 
-/* funcs.c ---------------------------------------------------------------- */
-int cancel(void);
-void set_mark_command(void);
-
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
 size_t xgetkey(int mode, size_t timeout);
@@ -96,7 +88,6 @@ void waitkey(size_t timeout);
 void ungetkey(size_t key);
 astr copy_text_block(Point start, size_t size);
 astr shorten_string(char *s, int maxlen);
-void goto_point(Point pt);
 char *getln(FILE *fp);
 
 /* history.c -------------------------------------------------------------- */
@@ -119,9 +110,9 @@ void free_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
 Marker *marker_new(Buffer *bp, Point pt);
 Marker *point_marker(void);
-void push_mark(void);
-void pop_mark(void);
-void set_mark(void);
+Marker *get_mark(void);
+void set_mark(Marker *m);
+void set_mark_to_point(void);
 Line *line_new(void);
 void line_delete(Line *lp);
 Line *string_to_lines(astr as, const char *eol, size_t *lines);
@@ -150,7 +141,7 @@ Macro *get_macro(const char *name);
 /* main.c ----------------------------------------------------------------- */
 extern Window win;
 extern Buffer buf;
-extern int thisflag, lastflag, last_uniarg;
+extern int thisflag, lastflag, uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);
@@ -178,11 +169,6 @@ int count_lines(Point pt1, Point pt2);
 void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);
-Point line_beginning_position(void);
-Point line_end_position(void);
-
-/* search.c --------------------------------------------------------------- */
-void free_search_history(void);
 
 /* term_display.c --------------------------------------------------------- */
 size_t term_width(void);
@@ -211,8 +197,6 @@ void term_beep(void);
 size_t term_xgetkey(int mode, size_t timeout);
 
 /* undo.c ----------------------------------------------------------------- */
-extern int undo_nosave;
-
 void free_undo(Buffer *bp);
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 

@@ -64,7 +64,7 @@ Buffer buf;
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
-int last_uniarg = 1;
+int uniarg = 1;
 
 static void loop(void)
 {
@@ -88,7 +88,7 @@ static void loop(void)
     process_key(key);
 
     if (!(thisflag & FLAG_SET_UNIARG))
-      last_uniarg = 1;
+      uniarg = 1;
   }
 }
 
@@ -281,7 +281,6 @@ int main(int argc, char **argv)
 
   /* Free all the memory allocated. */
   astr_delete(as);
-  free_search_history();
   free_macros();
   free_buffer(&buf);
   free_minibuf();

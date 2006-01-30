@@ -45,19 +45,14 @@ Stop and return to superior process.
 }
 END_DEFUN
 
-int cancel(void)
-{
-  weigh_mark();
-  minibuf_error("Quit");
-  return FALSE;
-}
-
-DEFUN("keyboard-quit", keyboard_quit)
+DEFUN("cancel", cancel)
 /*+
 Cancel current command.
 +*/
 {
-  ok = cancel();
+  weigh_mark();
+  minibuf_error("Quit");
+  ok = FALSE;
 }
 END_DEFUN
 
@@ -96,18 +91,13 @@ that value, otherwise with the current column value.
 }
 END_DEFUN
 
-void set_mark_command(void)
-{
-  set_mark();
-  minibuf_write("Mark set");
-}
-
-DEFUN("set-mark-command", set_mark_command)
+DEFUN("set-mark", set_mark)
 /*+
-Set mark at where point is.
+Set mark where point is.
 +*/
 {
-  set_mark_command();
+  set_mark_to_point();
+  minibuf_write("Mark set");
   anchor_mark();
 }
 END_DEFUN
@@ -129,9 +119,9 @@ DEFUN("mark-whole-buffer", mark_whole_buffer)
 Put point at beginning and mark at end of buffer.
 +*/
 {
-  gotoeob();
-  FUNCALL(set_mark_command);
-  gotobob();
+  FUNCALL(end_of_buffer);
+  FUNCALL(set_mark);
+  FUNCALL(beginning_of_buffer);
 }
 END_DEFUN
 
@@ -203,7 +193,7 @@ C-u following the digits or minus sign ends the argument.
     astr_truncate(as, -1); /* Remove the '-' character. */
 
     if (key == KBD_CANCEL) {
-      ok = cancel();
+      ok = FUNCALL(cancel);
       break;
     } else if (isdigit(key & 0xff)) {
       /* Digit pressed. */
@@ -224,7 +214,7 @@ C-u following the digits or minus sign ends the argument.
     }
   }
 
-  last_uniarg = arg * sgn;
+  uniarg = arg * sgn;
   thisflag |= FLAG_SET_UNIARG;
   minibuf_clear();
   astr_delete(as);
@@ -240,7 +230,7 @@ Move point to the first non-whitespace character on this line.
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
-    edit_navigate_forward_char();
+    FUNCALL(edit_navigate_forward_char);
   }
 }
 END_DEFUN
@@ -257,8 +247,6 @@ Move point forward one word.
 {
   int gotword = FALSE;
 
-  ok = FALSE;
-
   for (;;) {
     while (!eolp()) {
       int c = following_char();
@@ -270,10 +258,12 @@ Move point forward one word.
       buf.pt.o++;
     }
     if (gotword)
-      ok = TRUE;
-    buf.pt.o = astr_len(buf.pt.p->item);
-    if (!edit_navigate_down_line())
       break;
+    buf.pt.o = astr_len(buf.pt.p->item);
+    if (!FUNCALL(edit_navigate_down_line)) {
+      ok = FALSE;
+      break;
+    }
     buf.pt.o = 0;
   }
 }
@@ -286,12 +276,12 @@ Move backward until encountering the beginning of a word.
 {
   int gotword = FALSE;
 
-  ok = FALSE;
-
   for (;;) {
     if (bolp()) {
-      if (!edit_navigate_up_line())
+      if (!FUNCALL(edit_navigate_up_line)) {
+        ok = FALSE;
         break;
+      }
       buf.pt.o = astr_len(buf.pt.p->item);
     }
     while (!bolp()) {
@@ -304,18 +294,29 @@ Move backward until encountering the beginning of a word.
       buf.pt.o--;
     }
     if (gotword)
-      ok = TRUE;
+      break;
   }
 }
 END_DEFUN
 
 DEFUN("mark-word", mark_word)
 /*+
-Set mark ARG words away from point.
+Set mark to end of current word.
 +*/
 {
-  FUNCALL(set_mark_command);
+  FUNCALL(set_mark);
   if ((ok = FUNCALL(forward_word)))
+    FUNCALL(exchange_point_and_mark);
+}
+END_DEFUN
+
+DEFUN("mark-word-backward", mark_word_backward)
+/*+
+Set mark to start of current word.
++*/
+{
+  FUNCALL(set_mark);
+  if ((ok = FUNCALL(backward_word)))
     FUNCALL(exchange_point_and_mark);
 }
 END_DEFUN
@@ -325,9 +326,9 @@ DEFUN("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.
 +*/
 {
-  while (is_empty_line() && edit_navigate_up_line())
+  while (is_empty_line() && FUNCALL(edit_navigate_up_line))
     ;
-  while (!is_empty_line() && edit_navigate_up_line())
+  while (!is_empty_line() && FUNCALL(edit_navigate_up_line))
     ;
 
   FUNCALL(beginning_of_line);
@@ -339,9 +340,9 @@ DEFUN("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.
 +*/
 {
-  while (is_empty_line() && edit_navigate_down_line())
+  while (is_empty_line() && FUNCALL(edit_navigate_down_line))
     ;
-  while (!is_empty_line() && edit_navigate_down_line())
+  while (!is_empty_line() && FUNCALL(edit_navigate_down_line))
     ;
 
   if (is_empty_line())
@@ -358,7 +359,7 @@ The paragraph marked is the one that contains point or follows point.
 +*/
 {
   FUNCALL(forward_paragraph);
-  FUNCALL(set_mark_command);
+  FUNCALL(set_mark);
   FUNCALL(backward_paragraph);
 }
 END_DEFUN
@@ -381,7 +382,7 @@ Fill paragraph at or after point.
   FUNCALL(backward_paragraph);
   start = buf.pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
-    edit_navigate_down_line();
+    FUNCALL(edit_navigate_down_line);
     start++;
   }
 
@@ -518,7 +519,7 @@ current buffer, overwriting the current region.
   astr ms;
 
   if ((ms = minibuf_read("Shell command: ", "")) == NULL)
-    ok = cancel();
+    ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0 || warn_if_no_mark())
     ok = FALSE;
   else {

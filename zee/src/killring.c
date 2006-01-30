@@ -161,38 +161,48 @@ Copy the region to the kill ring.
 }
 END_DEFUN
 
-DEFUN("kill-word", kill_word)
-/*+
-Kill characters forward until encountering the end of a word.
-+*/
+static int kill_helper(Function func)
 {
+  int ok;
+
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
-    push_mark();
+    Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
-    FUNCALL(mark_word);
-    FUNCALL(kill_region);
+    ok = func(0, 0, NULL);
+    if (ok)
+      ok = FUNCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
-    pop_mark();
+    set_mark(m);
+    free_marker(m);
 
     thisflag |= FLAG_DONE_KILL;
 
-    minibuf_write("");	/* Don't write "Set mark" message.  */
+    minibuf_write("");	/* Erase "Set mark" message. */
   }
+
+  return ok;
+}
+
+DEFUN("kill-word", kill_word)
+/*+
+Kill characters forward until encountering the end of a word.
++*/
+{
+  ok = kill_helper(F_mark_word);
 }
 END_DEFUN
 
 DEFUN("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
-FIXME: At the moment this kills forwards!
 +*/
 {
-  ok = FUNCALL(kill_word);
+  ok = kill_helper(F_mark_word_backward);
 }
 END_DEFUN
 
@@ -206,7 +216,7 @@ Set mark at beginning, and put point at end.
     minibuf_error("Kill ring is empty");
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
-    set_mark_command();
+    FUNCALL(set_mark);
     insert_nstring(kill_ring_text, "\n", FALSE);
     weigh_mark();
   }

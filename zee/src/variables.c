@@ -152,7 +152,7 @@ astr minibuf_read_variable_name(char *msg)
 
     if (ms == NULL) {
       free_completion(cp);
-      cancel();
+      FUNCALL(cancel);
       return NULL;
     }
 
@@ -204,12 +204,12 @@ Set a variable to the specified value.
       if (!strcmp(fmt, "b")) {
         int i;
         if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)
-          ok = cancel();
+          ok = FUNCALL(cancel);
         else
           astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
       } else                      /* Non-boolean variable. */
         if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
-          ok = cancel();
+          ok = FUNCALL(cancel);
 
       if (ok)
         set_variable(astr_cstr(var), astr_cstr(val));
