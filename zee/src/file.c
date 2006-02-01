@@ -132,7 +132,12 @@ void file_open(const char *filename)
   thisflag |= FLAG_NEED_RESYNC;
 }
 
-static int raw_write_to_disk(Buffer *bp, const char *filename)
+/*
+ * Write the contents of buffer bp to file filename.
+ * The filename is passed separately so a name other than buf.filename
+ * can be used, e.g. in an emergency by die.
+ */
+static int buffer_write(Buffer *bp, const char *filename)
 {
   size_t eol_len;
   FILE *fp;
@@ -157,38 +162,27 @@ static int raw_write_to_disk(Buffer *bp, const char *filename)
   return fclose(fp) == 0;
 }
 
-/*
- * Write the buffer contents to a file.
- */
-static void write_file(Buffer *bp, astr ms)
-{
-  if (raw_write_to_disk(bp, astr_cstr(ms)) == FALSE) {
-    minibuf_error("%s: %s", astr_cstr(ms), strerror(errno));
-  } else {
-    Undo *up;
-
-    minibuf_write("Wrote %s", astr_cstr(ms));
-    bp->flags &= ~BFLAG_MODIFIED;
-
-    /* Set unchanged flags to FALSE except for the
-       last undo action, which is set to TRUE. */
-    up = bp->last_undop;
-    if (up)
-      up->unchanged = TRUE;
-    for (up = up->next; up; up = up->next)
-      up->unchanged = FALSE;
-  }
-}
-
 DEFUN("file-save", file_save)
 /*+
 Save buffer in visited file.
 +*/
 {
-  astr ms = astr_new();
-  astr_cpy_cstr(ms, buf.filename);
-  write_file(&buf, ms);
-  astr_delete(ms);
+  if (buffer_write(&buf, buf.filename) == FALSE) {
+    minibuf_error("%s: %s", buf.filename, strerror(errno));
+  } else {
+    Undo *up;
+
+    minibuf_write("Wrote %s", buf.filename);
+    buf.flags &= ~BFLAG_MODIFIED;
+
+    /* Set unchanged flags to FALSE except for the
+       last undo action, which is set to TRUE. */
+    up = buf.last_undop;
+    if (up)
+      up->unchanged = TRUE;
+    for (up = up->next; up; up = up->next)
+      up->unchanged = FALSE;
+  }
 }
 END_DEFUN
 
@@ -229,7 +223,7 @@ void die(int exitcode)
       astr_cpy_cstr(as, buf.filename);
     astr_cat_cstr(as, "." PACKAGE_NAME "SAVE");
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
-    raw_write_to_disk(&buf, astr_cstr(as));
+    buffer_write(&buf, astr_cstr(as));
     astr_delete(as);
     term_close();
   }
