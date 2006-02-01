@@ -99,11 +99,10 @@ typedef struct {
 /* Buffer flags or minor modes */
 
 #define BFLAG_MODIFIED  (0x0001) /* The buffer has been modified */
-#define BFLAG_NEEDNAME  (0x0002) /* On save, ask for a file name */
-#define BFLAG_READONLY  (0x0004) /* The buffer cannot be modified */
-#define BFLAG_AUTOFILL  (0x0008) /* The buffer is in Auto Fill mode */
-#define BFLAG_ISEARCH   (0x0010) /* The buffer is in Isearch loop */
-#define BFLAG_ANCHORED  (0x0020) /* The mark is anchored */
+#define BFLAG_READONLY  (0x0002) /* The buffer cannot be modified */
+#define BFLAG_AUTOFILL  (0x0004) /* The buffer is in Auto Fill mode */
+#define BFLAG_ISEARCH   (0x0008) /* The buffer is in Isearch loop */
+#define BFLAG_ANCHORED  (0x0010) /* The mark is anchored */
 
 /*
  * Represents a buffer: an open file.
@@ -118,8 +117,7 @@ typedef struct {
   Undo *last_undop;
   int flags;                    /* Buffer flags */
   list vars;                    /* Buffer-local variables */
-  char *name;           /* The name of the buffer and the file name */
-  char *filename;
+  char *filename;              /* The name of the file being edited */
   char eol[3];        /* EOL string (up to 2 chars) for this buffer */
 } Buffer;
 
@@ -146,7 +144,6 @@ enum {
 
 #define COMPLETION_SORTED               0x1
 #define COMPLETION_POPPEDUP             0x2
-#define COMPLETION_FILENAME             0x4
 
 typedef struct {
   int flags;                    /* Flags */

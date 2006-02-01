@@ -37,7 +37,7 @@
  * The allocation of the first empty line is done here to simplify
  * the code.
  */
-static void buffer_new(void)
+void buffer_new(void)
 {
   /* Allocate the lines. */
   buf.lines = line_new();
@@ -51,6 +51,9 @@ static void buffer_new(void)
 
   /* Allocate the variables list. */
   buf.vars = list_new();
+
+  if (get_variable_bool("auto-fill-mode"))
+    buf.flags ^= BFLAG_AUTOFILL;
 }
 
 /*
@@ -67,62 +70,17 @@ void free_buffer(Buffer *bp)
   while (bp->markers)
     free_marker(bp->markers);
 
-  /* Free the name and the filename. */
-  free(bp->name);
+  /* Free the filename. */
   free(bp->filename);
 }
 
 /*
- * Allocate a new buffer and insert it into the buffer list.
- */
-void create_buffer(const char *name)
-{
-  buffer_new();
-  set_buffer_name(&buf, name);
-
-  if (get_variable_bool("auto-fill-mode"))
-    buf.flags ^= BFLAG_AUTOFILL;
-}
-
-/*
- * Set a new name for the buffer.
- */
-void set_buffer_name(Buffer *bp, const char *name)
-{
-  free(bp->name);
-  bp->name = zstrdup(name);
-}
-
-/*
- * Set a new filename (and a name) for the buffer.
+ * Set a new filename for the buffer.
  */
 void set_buffer_filename(Buffer *bp, const char *filename)
 {
-  astr name = make_buffer_name(filename);
-
   free(bp->filename);
   bp->filename = zstrdup(filename);
-
-  free(bp->name);
-  bp->name = zstrdup(astr_cstr(name));
-  astr_delete(name);
-}
-
-/*
- * Create a buffer name using the file name.
- */
-astr make_buffer_name(const char *filename)
-{
-  const char *p;
-  astr name = astr_new();
-
-  if ((p = strrchr(filename, '/')) == NULL)
-    p = filename;
-  else
-    ++p;
-  astr_cpy_cstr(name, p);
-
-  return name;
 }
 
 /*
@@ -132,7 +90,7 @@ astr make_buffer_name(const char *filename)
 int warn_if_readonly_buffer(void)
 {
   if (buf.flags & BFLAG_READONLY) {
-    minibuf_error("Buffer is readonly: %s", buf.name);
+    minibuf_error("Buffer is readonly");
     return TRUE;
   } else
   return FALSE;
@@ -151,7 +109,7 @@ int warn_if_no_mark(void)
 /*
  * Calculate a region size and set the region structure.
  */
-void calculate_region(Region *rp, Point from, Point to)
+static void region_size(Region *rp, Point from, Point to)
 {
   if (cmp_point(from, to) < 0) {
     /* The point is before the mark. */
@@ -176,7 +134,7 @@ int calculate_the_region(Region *rp)
   if (!(buf.flags & BFLAG_ANCHORED))
     return FALSE;
 
-  calculate_region(rp, buf.pt, buf.mark->pt);
+  region_size(rp, buf.pt, buf.mark->pt);
   return TRUE;
 }
 

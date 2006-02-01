@@ -37,23 +37,19 @@ Function get_function(const char *name);
 const char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
-void calculate_region(Region *rp, Point from, Point to);
-void create_buffer(const char *name);
+void buffer_new(void);
 void free_buffer(Buffer *bp);
-void set_buffer_name(Buffer *bp, const char *name);
 void set_buffer_filename(Buffer *bp, const char *filename);
-astr make_buffer_name(const char *filename);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 int calculate_the_region(Region *rp);
-void set_temporary_buffer(Buffer *bp);
 size_t calculate_buffer_size(Buffer *bp);
 void anchor_mark(void);
 void weigh_mark(void);
 size_t tab_width(void);
 
 /* completion.c ----------------------------------------------------------- */
-Completion *completion_new(int fileflag);
+Completion *completion_new(void);
 void free_completion(Completion *cp);
 int completion_try(Completion *cp, astr search, int popup_when_complete);
 
@@ -70,14 +66,9 @@ void popup_scroll_up(void);
 void popup_scroll_down(void);
 
 /* file.c ----------------------------------------------------------------- */
-astr agetcwd(void);
 astr get_home_dir(void);
-int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
-astr compact_path(astr path);
-astr get_current_dir(int interactive);
 astr file_read(astr *as, const char *filename);
-void file_open(Buffer *bp, const char *filename);
-int file_visit(const char *filename);
+void file_open(const char *filename);
 void die(int exitcode);
 
 /* glue.c ----------------------------------------------------------------- */
@@ -174,7 +165,6 @@ size_t term_width(void);
 size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
-void term_full_redisplay(void);
 void term_tidy(void);
 int term_printf(const char *fmt, ...);
 

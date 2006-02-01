@@ -196,20 +196,36 @@ static void draw_window(size_t topline)
   }
 }
 
-static char *make_mode_line_flags(void)
+/*
+ * Print a string on the terminal.
+ */
+static void term_print(const char *s)
 {
-  static char s[3];
+  size_t i;
 
-  if ((buf.flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
-    s[0] = '%', s[1] = '*';
-  else if (buf.flags & BFLAG_MODIFIED)
-    s[0] = s[1] = '*';
-  else if (buf.flags & BFLAG_READONLY)
-    s[0] = s[1] = '%';
-  else
-    s[0] = s[1] = '-';
+  for (i = 0; *s != '\0'; s++)
+    if (*s != '\n')
+      term_addch(*s);
+    else {
+      term_clrtoeol();
+      term_nl();
+    }
+}
 
-  return s;
+/*
+ * printf on the terminal
+ */
+int term_printf(const char *fmt, ...)
+{
+  char *buf;
+  int res = 0;
+  va_list ap;
+  va_start(ap, fmt);
+  res = zvasprintf(&buf, fmt, ap);
+  va_end(ap);
+  term_print(buf);
+  free(buf);
+  return res;
 }
 
 /*
@@ -254,22 +270,6 @@ static void calculate_start_column(void)
   point_screen_column = col;
 }
 
-static char *make_screen_pos(char **s)
-{
-  Point pt = buf.pt;
-
-  if (buf.num_lines <= win.eheight && win.topdelta == pt.n)
-    zasprintf(s, "All");
-  else if (pt.n == win.topdelta)
-    zasprintf(s, "Top");
-  else if (pt.n + (win.eheight - win.topdelta) > buf.num_lines)
-    zasprintf(s, "Bot");
-  else
-    zasprintf(s, "%2d%%", (int)((float)pt.n / buf.num_lines * 100));
-
-  return *s;
-}
-
 static void draw_border(void)
 {
   size_t i;
@@ -282,8 +282,6 @@ static void draw_border(void)
 static void draw_status_line(size_t line)
 {
   int someflag = 0;
-  char *s;
-  Point pt = buf.pt;
 
   term_move(line, 0);
   draw_border();
@@ -291,8 +289,18 @@ static void draw_status_line(size_t line)
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  term_printf("--%2s- %-18s (", make_mode_line_flags(), buf.name);
+  term_print("--");
 
+  if ((buf.flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
+    term_print("%*");
+  else if (buf.flags & BFLAG_MODIFIED)
+    term_print("**");
+  else if (buf.flags & BFLAG_READONLY)
+    term_print("%%");
+  else
+    term_print("--");
+
+  term_print("-(");
   if (buf.flags & BFLAG_AUTOFILL) {
     term_printf("Fill");
     someflag = 1;
@@ -304,9 +312,16 @@ static void draw_status_line(size_t line)
   if (buf.flags & BFLAG_ISEARCH)
     term_printf("%sIsearch", someflag ? " " : "");
 
-  term_printf(")--L%d--C%d--%s",
-              pt.n + 1, get_goalc(), make_screen_pos(&s));
-  free(s);
+  term_printf(")--L%d--C%d--", buf.pt.n + 1, get_goalc());
+
+  if (buf.num_lines <= win.eheight && win.topdelta == buf.pt.n)
+    term_print("All");
+  else if (buf.pt.n == win.topdelta)
+    term_print("Top");
+  else if (buf.pt.n + (win.eheight - win.topdelta) > buf.num_lines)
+    term_print("Bot");
+  else
+    term_printf("%2d%%", (int)((float)buf.pt.n / buf.num_lines * 100));
 
   term_attrset(1, FONT_NORMAL);
 }
@@ -371,12 +386,6 @@ void term_display(void)
   term_move(cur_topline + win.topdelta, point_screen_column);
 }
 
-void term_full_redisplay(void)
-{
-  term_clear();
-  term_display();
-}
-
 /*
  * Tidy up the term ready to suspend or quit.
  */
@@ -386,38 +395,6 @@ void term_tidy(void)
   term_clrtoeol();
   term_attrset(1, FONT_NORMAL);
   term_refresh();
-}
-
-/*
- * Print a string on the terminal.
- */
-static void term_print(const char *s)
-{
-  size_t i;
-
-  for (i = 0; *s != '\0'; s++)
-    if (*s != '\n')
-      term_addch(*s);
-    else {
-      term_clrtoeol();
-      term_nl();
-    }
-}
-
-/*
- * printf on the terminal
- */
-int term_printf(const char *fmt, ...)
-{
-  char *buf;
-  int res = 0;
-  va_list ap;
-  va_start(ap, fmt);
-  res = zvasprintf(&buf, fmt, ap);
-  va_end(ap);
-  term_print(buf);
-  free(buf);
-  return res;
 }
 
 void resize_window(void)

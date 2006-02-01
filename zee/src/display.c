@@ -57,7 +57,8 @@ The desired position of point is always relative to the current window.
 +*/
 {
   recenter();
-  term_full_redisplay();
+  term_clear();
+  term_display();
 }
 END_DEFUN
 

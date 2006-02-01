@@ -111,7 +111,7 @@ the text killed this time appends to the text killed last time.
   if (!(buf.flags & BFLAG_ANCHORED))
     ok = FUNCALL(kill_line);
   else {
-    calculate_the_region(&r);
+    assert(calculate_the_region(&r));
 
     if (buf.flags & BFLAG_READONLY) {
       /* The buffer is read-only; save text in the kill buffer and
@@ -150,8 +150,7 @@ Copy the region to the kill buffer.
   else {
     astr as;
 
-    calculate_the_region(&r);
-
+    assert(calculate_the_region(&r));
     as = copy_text_block(r.start, r.size);
     astr_cat_delete(killed_text, as);
 

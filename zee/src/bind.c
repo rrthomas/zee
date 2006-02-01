@@ -172,7 +172,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = completion_new(FALSE);
+  cp = completion_new();
   for (i = 0; i < fentries; ++i)
     list_append(cp->completions, zstrdup(ftable[i].name));
 

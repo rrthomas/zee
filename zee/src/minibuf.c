@@ -108,55 +108,6 @@ astr minibuf_read(const char *fmt, const char *value, ...)
   return as;
 }
 
-/*
- * Read a directory from the minibuffer.
- * The returned buffer must be freed by the caller.
- */
-astr minibuf_read_dir(const char *fmt, const char *value, ...)
-{
-  va_list ap;
-  char *buf;
-  Completion *cp;
-  astr dir, fname, rbuf, as;
-
-  va_start(ap, value);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
-  rbuf = agetcwd();
-  dir = astr_new();
-  fname = astr_new();
-  expand_path(value, astr_cstr(rbuf), dir, fname);
-  astr_delete(rbuf);
-  astr_cat_delete(dir, fname);
-  rbuf = compact_path(dir);
-  astr_delete(dir);
-
-  cp = completion_new(TRUE);
-  as = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
-  free_completion(cp);
-  astr_delete(rbuf);
-  free(buf);
-
-  if (as != NULL) {
-    /* Add history element. */
-    add_history_element(&files_history, astr_cstr(as));
-
-    rbuf = agetcwd();
-    dir = astr_new();
-    fname = astr_new();
-
-    expand_path(astr_cstr(as), astr_cstr(rbuf), dir, fname);
-    astr_cpy_delete(rbuf, dir);
-    astr_cat_delete(rbuf, fname);
-
-    astr_delete(as);
-    as = rbuf;
-  }
-
-  return as;
-}
-
 static int minibuf_read_forced(const char *fmt, const char *errmsg,
                                Completion *cp, ...)
 {
@@ -209,7 +160,7 @@ int minibuf_read_yesno(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = completion_new(FALSE);
+  cp = completion_new();
   list_append(cp->completions, zstrdup("yes"));
   list_append(cp->completions, zstrdup("no"));
 
@@ -239,7 +190,7 @@ int minibuf_read_boolean(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = completion_new(FALSE);
+  cp = completion_new();
   list_append(cp->completions, zstrdup("true"));
   list_append(cp->completions, zstrdup("false"));
 

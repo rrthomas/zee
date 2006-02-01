@@ -141,7 +141,7 @@ int get_variable_bool(char *var)
 astr minibuf_read_variable_name(char *msg)
 {
   astr ms;
-  Completion *cp = completion_new(FALSE);
+  Completion *cp = completion_new();
   struct var_entry *p;
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)

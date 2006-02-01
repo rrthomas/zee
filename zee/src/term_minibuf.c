@@ -236,10 +236,6 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
       case COMPLETION_MATCHEDNONUNIQUE:
         i = cp->matchsize;
         bs = astr_new();
-        if (cp->flags & COMPLETION_FILENAME) {
-          i += astr_len(cp->path);
-          astr_cat(bs, cp->path);
-        }
         astr_ncat(bs, cp->match, cp->matchsize);
         if (astr_cmp(as, bs) != 0)
           thistab = COMPLETION_NOTCOMPLETING;

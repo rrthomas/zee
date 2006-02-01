@@ -156,6 +156,7 @@ END_DEFUN
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
    keystrokes. */
+/* FIXME: Add bind-command to make new commands. */
 void call_macro(Macro *mp)
 {
   size_t i;

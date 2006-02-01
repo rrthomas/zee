@@ -534,7 +534,7 @@ current buffer, overwriting the current region.
       Region r;
       astr cmd = astr_new(), as;
 
-      calculate_the_region(&r);
+      assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
       write(fd, astr_cstr(as), r.size);
       astr_delete(as);

@@ -131,27 +131,6 @@ struct option longopts[] = {
     { 0, 0, 0, 0 }
 };
 
-static void open_file_at(char *path, size_t lineno)
-{
-  astr cwd = get_current_dir(FALSE), dir = astr_new(), fname = astr_new();
-
-  /* Check path */
-  if (!expand_path(path, astr_cstr(cwd), dir, fname)) {
-    fprintf(stderr, PACKAGE_NAME ": %s: invalid filename or path\n", path);
-    die(1);
-  }
-  astr_delete(cwd);
-
-  /* Open file */
-  astr_cat_delete(dir, fname);
-  file_visit(astr_cstr(dir));
-  astr_delete(dir);
-
-  /* Update display */
-  goto_line(lineno);
-  resync_display();
-}
-
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
@@ -243,8 +222,13 @@ int main(int argc, char **argv)
       size_t line = 1;
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
-      else if (*argv)
-        open_file_at(*argv++, line - 1);
+      else if (*argv) {
+        file_open(*argv++);
+
+        /* Update display */
+        goto_line(line - 1);
+        resync_display();
+      }
     }
     resize_window(); /* Can't run until there is a buffer */
 

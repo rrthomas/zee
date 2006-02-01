@@ -47,19 +47,12 @@
 /*
  * Allocate a new completion structure.
  */
-Completion *completion_new(int fileflag)
+Completion *completion_new(void)
 {
-  Completion *cp;
-
-  cp = (Completion *)zmalloc(sizeof(Completion));
+  Completion *cp = (Completion *)zmalloc(sizeof(Completion));
 
   cp->completions = list_new();
   cp->matches = list_new();
-
-  if (fileflag) {
-    cp->path = astr_new();
-    cp->flags |= COMPLETION_FILENAME;
-  }
 
   return cp;
 }
@@ -75,8 +68,6 @@ void free_completion(Completion *cp)
     free(p->item);
   list_delete(cp->completions);
   list_delete(cp->matches);
-  if (cp->flags & COMPLETION_FILENAME)
-    astr_delete(cp->path);
   free(cp);
 }
 
@@ -150,75 +141,6 @@ static int hcompar(const void *p1, const void *p2)
 }
 
 /*
- * Reread directory for completions.
- */
-static int completion_reread(Completion *cp, astr as)
-{
-  astr buf, pdir, fname;
-  DIR *dir;
-  struct dirent *d;
-  struct stat st;
-  list p;
-  size_t i;
-
-  for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    free(p->item);
-  list_delete(cp->completions);
-
-  cp->completions = list_new();
-  cp->flags &= ~COMPLETION_SORTED;
-
-  buf = astr_new();
-  pdir = astr_new();
-  fname = astr_new();
-
-  for (i = 0; i < astr_len(as); i++){
-    if (*astr_char(as, (ptrdiff_t)i) == '/') {
-      if (*astr_char(as, (ptrdiff_t)(i + 1)) == '/') {
-        /* Got `//'; restart from this point. */
-        while (*astr_char(as, (ptrdiff_t)(i + 1)) == '/')
-          i++;
-        astr_truncate(buf, 0);
-        /* Final '/' remains to be copied below. */
-      }
-    }
-    astr_cat_char(buf, *astr_char(as, (ptrdiff_t)i));
-  }
-  astr_cpy_delete(as, buf);
-
-  buf = agetcwd();
-  if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
-    return FALSE;
-
-  if ((dir = opendir(astr_cstr(pdir))) == NULL)
-    return FALSE;
-
-  astr_cpy(as, fname);
-
-  while ((d = readdir(dir)) != NULL) {
-    astr_cpy(buf, pdir);
-    astr_cat_cstr(buf, d->d_name);
-    if (stat(astr_cstr(buf), &st) != -1) {
-      astr_cpy_cstr(buf, d->d_name);
-      if (S_ISDIR(st.st_mode))
-        astr_cat_cstr(buf, "/");
-    } else
-      astr_cpy_cstr(buf, d->d_name);
-    list_append(cp->completions, zstrdup(astr_cstr(buf)));
-  }
-  closedir(dir);
-
-  astr_delete(cp->path);
-  cp->path = compact_path(pdir);
-
-  astr_delete(buf);
-  astr_delete(pdir);
-  astr_delete(fname);
-
-  return TRUE;
-}
-
-/*
  * Match completions.
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
@@ -230,10 +152,6 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
 
   list_delete(cp->matches);
   cp->matches = list_new();
-
-  if (cp->flags & COMPLETION_FILENAME)
-    if (!completion_reread(cp, search))
-      return COMPLETION_NOTMATCHED;
 
   if (!cp->flags & COMPLETION_SORTED) {
     list_sort(cp->completions, hcompar);
