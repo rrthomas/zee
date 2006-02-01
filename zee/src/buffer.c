@@ -138,25 +138,6 @@ int calculate_the_region(Region *rp)
   return TRUE;
 }
 
-size_t calculate_buffer_size(Buffer *bp)
-{
-  Line *lp = list_next(bp->lines);
-  size_t size = 0;
-
-  if (lp == bp->lines)
-    return 0;
-
-  for (;;) {
-    size += astr_len(lp->item);
-    lp = list_next(lp);
-    if (lp == bp->lines)
-      break;
-    ++size;
-  }
-
-  return size;
-}
-
 void anchor_mark(void)
 {
   buf.flags |= BFLAG_ANCHORED;

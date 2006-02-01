@@ -43,7 +43,6 @@ void set_buffer_filename(Buffer *bp, const char *filename);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 int calculate_the_region(Region *rp);
-size_t calculate_buffer_size(Buffer *bp);
 void anchor_mark(void);
 void weigh_mark(void);
 size_t tab_width(void);
