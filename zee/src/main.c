@@ -143,7 +143,6 @@ int main(int argc, char **argv)
     switch (c) {
     case 'b':
       bflag = TRUE;
-      qflag = TRUE;
       break;
     case 'e':
       {
