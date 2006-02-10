@@ -133,7 +133,7 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
+  int c, bflag = FALSE, qflag = FALSE, hflag = FALSE;
   size_t line = 1;
 
   init_variables();
@@ -151,12 +151,10 @@ int main(int argc, char **argv)
         cmd_parse_init(bs);
         cmd_eval();
         cmd_parse_end();
-        eflag = TRUE;
       }
       break;
     case 'l':
       cmd_eval_file(optarg);
-      eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
       qflag = TRUE;
