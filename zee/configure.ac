@@ -28,14 +28,12 @@ dnl Checks for functions.
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf getopt_long_only)
-AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
 dnl Checks for header files.
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
