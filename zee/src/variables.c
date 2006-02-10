@@ -32,10 +32,31 @@
 #include "extern.h"
 
 
+static list root_varlist;
+
 typedef struct {
   const char *key;
   const char *value;
 } vpair;
+
+void init_variables(void)
+{
+  root_varlist = list_new();
+}
+
+void free_variables(void)
+{
+  list p;
+
+  for (p = list_first(root_varlist); p != root_varlist; p = list_next(p)) {
+    vpair *vp = (vpair *)(p->item);
+    free((char *)(vp->key));
+    free((char *)(vp->value));
+    free(vp);
+  }
+
+  list_delete(root_varlist);
+}
 
 static list variable_find(list varlist, const char *key)
 {
@@ -93,9 +114,14 @@ static struct var_entry *get_variable_default(const char *var)
 
 void set_variable(const char *var, const char *val)
 {
+  list varlist = root_varlist;
+
   /* Variables automatically become buffer-local when set if there is
      a buffer. */
-  variable_update(buf.vars, var, val);
+  if (buf.vars)
+    varlist = buf.vars;
+
+  variable_update(varlist, var, val);
 }
 
 const char *get_variable(const char *var)
@@ -133,7 +159,7 @@ int get_variable_bool(char *var)
   const char *s;
 
   if ((s = get_variable(var)) != NULL)
-    return !strcmp(s, "true");
+    return strcmp(s, "true") == 0;
 
   return FALSE;
 }

@@ -134,7 +134,10 @@ struct option longopts[] = {
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE, hflag = FALSE;
-  astr as = astr_new();
+  size_t line = 1;
+
+  init_variables();
+  init_kill_ring();
 
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
@@ -175,39 +178,30 @@ int main(int argc, char **argv)
   argc -= optind;
   argv += optind;
 
+  /* FIXME: Automatically generate relevant part of zee.texi from
+     options below. */
   if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
             "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
             "\n"
             "Run " TEXT_NAME ", the lightweight editor.\n"
             "\n"
-            "Initialization options:\n"
-            "\n"
-            "--batch                do not do interactive display; implies -q\n"
+            "--batch                do not do interactive display\n"
             "--help                 display this help message and exit\n"
             "--no-init-file, -q     do not load ~/." PACKAGE_NAME "\n"
             "--version              display version information and exit\n"
-            "\n"
-            "Action options:\n"
-            "\n"
             "FILE                   visit FILE using file-open\n"
-            "+LINE FILE             visit FILE using file-open, then go to line LINE\n"
-            "--eval EXPR            evaluate Lisp expression EXPR\n"
-            "--load, -l FILE        load file of Lisp code using the load function\n"
+            "+LINE                  set line at which to visit next FILE\n"
+            "--eval CMD             exexcute command CMD\n"
+            "--load, -l FILE        load file of commands using the load function\n"
             );
-    return 0;
   }
 
   signal_init();
 
   setlocale(LC_ALL, "");
 
-  if (astr_len(as) > 0)
-    printf("%s", astr_cstr(as));
-
   if (!bflag) {
-    term_init();
-    init_kill_ring();
     init_bindings();
 
     /* Initialise window */
@@ -219,55 +213,58 @@ int main(int argc, char **argv)
 
     /* Open file given on command line. */
     while (*argv) {
-      size_t line = 1;
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
-      else if (*argv) {
+      else if (*argv)
         file_open(*argv++);
-
-        /* Update display */
-        goto_line(line - 1);
-        resync_display();
-      }
-    }
-    resize_window(); /* Can't run until there is a buffer */
-
-    /* Write help message, but allow it to be overwritten by errors
-       from loading init files */
-    minibuf_write(about_minibuf_str);
-
-    /* Load default bindings file. */
-    cmd_eval_file(PATH_DATA "/key_bindings.el");
-
-    /* Load user init file */
-    if (!qflag) {
-      astr as = get_home_dir();
-      if (astr_len(as) > 0) {
-        astr_cat_cstr(as, "/." PACKAGE_NAME);
-        cmd_eval_file(astr_cstr(as));
-      }
-      astr_delete(as);
     }
 
+    if (buf.lines) {
+      term_init();
+      resize_window(); /* Can't run until there is a buffer */
+      goto_line(line - 1);
+      resync_display();
+
+      /* Write help message, but allow it to be overwritten by errors
+         from loading init files */
+      minibuf_write(about_minibuf_str);
+
+      /* Load default bindings file. */
+      cmd_eval_file(PATH_DATA "/key_bindings.el");
+    }
+  }
+
+  /* Load user init file */
+  if (!qflag) {
+    astr as = get_home_dir();
+    if (astr_len(as) > 0) {
+      astr_cat_cstr(as, "/." PACKAGE_NAME);
+      cmd_eval_file(astr_cstr(as));
+    }
+    astr_delete(as);
+  }
+
+  if (buf.lines) {
     /* Display help or error message. */
     term_display();
 
     /* Run the main loop. */
     loop();
 
-    /* Tidy and close the terminal. */
+    free_buffer(&buf);
+    free_minibuf();
+
     term_tidy();
     term_close();
-
-    free_bindings();
-    free_kill_ring();
   }
 
+  if (!bflag)
+    free_bindings();
+
   /* Free all the memory allocated. */
-  astr_delete(as);
   free_macros();
-  free_buffer(&buf);
-  free_minibuf();
+  free_variables();
+  free_kill_buffer();
 
   return 0;
 }

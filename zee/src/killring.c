@@ -227,7 +227,7 @@ void init_kill_ring(void)
   killed_text = astr_new();
 }
 
-void free_kill_ring(void)
+void free_kill_buffer(void)
 {
   astr_delete(killed_text);
 }

@@ -93,7 +93,7 @@ size_t strtochord(const char *buf);
 
 /* killring.c ------------------------------------------------------------- */
 void init_kill_ring(void);
-void free_kill_ring(void);
+void free_kill_buffer(void);
 
 /* line.c ----------------------------------------------------------------- */
 void free_marker(Marker *marker);
@@ -189,6 +189,8 @@ void free_undo(Buffer *bp);
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
+void init_variables(void);
+void free_variables(void);
 void set_variable(const char *var, const char *val);
 const char *get_variable(const char *var);
 int get_variable_number(char *var);

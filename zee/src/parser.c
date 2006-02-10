@@ -1,4 +1,4 @@
-/* Lisp parser
+/* Command parser
    Copyright (c) 2001 Scott "Jerry" Lawrence.
    Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.

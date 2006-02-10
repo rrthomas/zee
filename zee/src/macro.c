@@ -122,8 +122,9 @@ DEFUN("name-last-kbd-macro", name_last_kbd_macro)
 /*+
 Assign a name to the last keyboard macro defined.
 Argument SYMBOL is the name to define.
-The symbol's function definition becomes the keyboard macro string.
-Such a "function" cannot be called from Lisp, but it is a valid editor command.
+The symbol's command definition becomes the keyboard macro string.
+FIXME: Such a command cannot be called non-interactively, but it is a
+valid editor command.
 +*/
 {
   astr ms;
