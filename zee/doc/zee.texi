@@ -76,7 +76,7 @@ sequence of undo operations (limited only by the amount of free memory).
 @item Multi window.
 Zee can display multiple windows on the screen.
 @item Minibuffer completion.
-This works for @kbd{M-x} commands and for file names.
+This works for @kbd{M-x} commands.
 @item Auto fill (word wrap).
 Zee automatically breaks the lines when they become too wide (if the
 @i{Auto Fill Mode} is enabled).
@@ -102,7 +102,7 @@ The options are as follows:
 When Zee is started, it normally loads the @file{.zee} file in your
 home directory. We call this file your ``initialization file'' because
 it specifies how to initialize Zee for you. You can use the command
-line switch @samp{-q} to tell Zee not to load the initialization file.
+line switch @samp{--no-init-file} to tell Zee not to load the initialization file.
 
 @menu
 * File syntax::                 The initialization file syntax.
