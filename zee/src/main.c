@@ -122,12 +122,10 @@ static void signal_init(void)
 
 /* Options table */
 struct option longopts[] = {
-    { "batch",        0, NULL, 'b' },
-    { "eval",         1, NULL, 'e' },
-    { "help",         0, NULL, 'h' },
-    { "load",         1, NULL, 'l' },
-    { "no-init-file", 0, NULL, 'q' },
-    { "version",      0, NULL, 'v' },
+#define X(longname, doc, shortname, opt) \
+    { longname, opt, NULL, shortname },
+#include "tbl_opts.h"
+#undef X
     { 0, 0, 0, 0 }
 };
 
@@ -138,7 +136,9 @@ int main(int argc, char **argv)
 
   init_variables();
   init_kill_ring();
+  init_bindings();
 
+  /* FIXME: Do short options and parameters automatically from tbl_opts.h */
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
@@ -175,22 +175,19 @@ int main(int argc, char **argv)
   argc -= optind;
   argv += optind;
 
-  /* FIXME: Automatically generate relevant part of zee.texi from
-     options below. */
   if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
             "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
-            "\n"
             "Run " TEXT_NAME ", the lightweight editor.\n"
-            "\n"
-            "--batch                do not do interactive display\n"
-            "--help                 display this help message and exit\n"
-            "--no-init-file, -q     do not load ~/." PACKAGE_NAME "\n"
-            "--version              display version information and exit\n"
+            "\n");
+#define X(longname, doc, shortname, opt) \
+    fprintf(stderr, \
+            "--" longname ", -%c" doc, shortname);
+#include "tbl_opts.h"
+#undef X
+    fprintf(stderr,
             "FILE                   visit FILE using file-open\n"
             "+LINE                  set line at which to visit next FILE\n"
-            "--eval CMD             exexcute command CMD\n"
-            "--load, -l FILE        load file of commands using the load function\n"
             );
   }
 
@@ -199,8 +196,6 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 
   if (!bflag) {
-    init_bindings();
-
     /* Initialise window */
     win.fheight = 1;           /* fheight must be > eheight */
 
@@ -255,10 +250,8 @@ int main(int argc, char **argv)
     term_close();
   }
 
-  if (!bflag)
-    free_bindings();
-
   /* Free all the memory allocated. */
+  free_bindings();
   free_macros();
   free_variables();
   free_kill_buffer();
