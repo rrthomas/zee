@@ -21,7 +21,7 @@
 @titlepage
 @title The Zee Manual
 @subtitle for Zee version 0.5
-@subtitle January 2006
+@subtitle February 2006
 @author Reuben Thomas
 
 @page

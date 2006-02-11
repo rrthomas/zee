@@ -29,7 +29,7 @@ struct fentry {
 
 static vector *ftable;
 
-static size_t fentries = 0, fentries_max = 0;
+static size_t fentries = 0;
 
 static struct {
   char *name;

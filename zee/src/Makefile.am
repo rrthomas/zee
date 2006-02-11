@@ -48,6 +48,7 @@ zee_base_SOURCES =				\
 	point.c					\
 	search.c				\
 	tbl_keys.h				\
+	tbl_opts.h				\
 	tbl_vars.h				\
 	undo.c					\
 	variables.c				\
