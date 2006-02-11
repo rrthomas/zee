@@ -22,7 +22,7 @@
 
 #define NAME "mkdoc"
 
-static struct fentry {
+struct fentry {
   const char *name;
   astr doc;
 };
@@ -31,7 +31,7 @@ static vector *ftable;
 
 static size_t fentries = 0, fentries_max = 0;
 
-static struct ventry {
+static struct {
   char *name;
   char *fmt;
   char *defvalue;
@@ -44,6 +44,19 @@ static struct ventry {
 };
 
 #define ventries (sizeof vtable / sizeof vtable[0])
+
+static struct {
+  char *longname;
+  char *doc;
+  char shortname;
+} otable[] = {
+#define X(longname, doc, shortname, opt) \
+        { longname, doc, shortname },
+#include "tbl_opts.h"
+#undef X
+};
+
+#define oentries (sizeof otable / sizeof otable[0])
 
 static FILE *input_file;
 
@@ -185,6 +198,30 @@ static void dump_vars(void)
   fclose(fp);
 }
 
+static void dump_opts(void)
+{
+  size_t i;
+  FILE *fp = fopen("zee_opts.texi", "w");
+
+  assert(fp);
+  fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
+  fprintf(fp, "@table @samp\n");
+
+  for (i = 0; i < oentries; ++i) {
+    astr doc = astr_cat_cstr(astr_new(), otable[i].doc);
+    if (!doc || astr_len(doc) == 0) {
+      fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
+      exit(1);
+    }
+    fprintf(fp, "@item --%s, -%c\n%s\n", otable[i].longname, otable[i].shortname,
+            astr_cstr(doc));
+    astr_delete(doc);
+  }
+
+  fprintf(fp, "@end table");
+  fclose(fp);
+}
+
 static void process_file(char *filename)
 {
   if (filename != NULL && strcmp(filename, "-") != 0 &&
@@ -211,6 +248,7 @@ int main(int argc, char **argv)
   dump_help();
   dump_funcs();
   dump_vars();
+  dump_opts();
 
   vec_delete(ftable);
 

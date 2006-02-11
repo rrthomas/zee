@@ -93,24 +93,7 @@ displayed.
 
 The options are as follows:
 
-@table @samp
-@item FILE
-Edit file @file{FILE}.
-@item +NUMBER
-When editing the file the cursor will be positioned on line @samp{NUMBER}.
-@item --batch
-Run in batch mode.
-@item --eval CMD
-Evaluate command @samp{CMD}.
-@item --help
-Print the command line syntax and exit.
-@item --load FILE
-Load command file @file{FILE}.
-@item -q, --no-init-file
-Do not load ~/.zee.
-@item --version
-Print version information and exit.
-@end table
+@include zee_opts.texi
 
 @c ---------------------------------------------------------------------------
 @node Initialization file, Key names, Invoking Zee, Top
