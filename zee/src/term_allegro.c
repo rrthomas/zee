@@ -203,10 +203,7 @@ void term_init(void)
 
 void term_close(void)
 {
-  /* Free memory and finish with allegro. */
-  free(cur_scr);
-  free(new_scr);
-
+  /* Finish with allegro. */
   set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
   allegro_exit();
 }

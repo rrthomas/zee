@@ -33,25 +33,6 @@
 static int doing_undo = FALSE;
 
 /*
- * Free undo records for a buffer.
- */
-void free_undo(Buffer *bp)
-{
-  Undo *up;
-
-  assert(bp);
-
-  up = bp->last_undop;
-  while (up != NULL) {
-    Undo *next_up = up->next;
-    if (up->type == UNDO_REPLACE_BLOCK)
-      astr_delete(up->text);
-    free(up);
-    up = next_up;
-  }
-}
-
-/*
  * Save a reverse delta for doing undo.
  */
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
@@ -98,7 +79,6 @@ static Undo *revert_action(Undo *up)
 
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->size, &as);
-  astr_delete(as);
   insert_nstring(up->text, buf.eol, up->intercalate);
 
   doing_undo = FALSE;

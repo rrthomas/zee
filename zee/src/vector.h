@@ -32,7 +32,6 @@ typedef struct {
 } vector;
 
 vector *vec_new(size_t itemsize);
-void vec_delete(vector *v);
 void *vec_index(vector *v, size_t idx);
 void vec_shrink(vector *v, size_t idx, size_t items);
 vector *vec_copy(vector *v);

@@ -79,18 +79,16 @@ static void mb_suspend(void)
   FUNCALL(suspend);
 }
 
-static void mb_return(char *saved)
+static void mb_return(void)
 {
   term_move(term_height() - 1, 0);
   term_clrtoeol();
-  free(saved);
 }
 
-static void mb_cancel(char *saved)
+static void mb_cancel(void)
 {
   term_move(term_height() - 1, 0);
   term_clrtoeol();
-  free(saved);
 }
 
 static ptrdiff_t mb_bol(void)
@@ -203,8 +201,6 @@ static void mb_next_history(History *hp, astr as, ptrdiff_t *_i, char **_saved)
     else if (saved) {
       i = strlen(saved);
       astr_cpy_cstr(as, saved);
-
-      free(saved);
       saved = NULL;
     }
   }
@@ -229,7 +225,6 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
       astr_cpy(bs, as);
       thistab = completion_try(cp, bs, TRUE);
       assert(thistab != COMPLETION_NOTCOMPLETING);
-      astr_delete(bs);
       switch (thistab) {
       case COMPLETION_NONUNIQUE:
       case COMPLETION_MATCHED:
@@ -239,7 +234,7 @@ static void mb_complete(Completion *cp, int lasttab, astr as, int *_thistab, ptr
         astr_ncat(bs, cp->match, cp->matchsize);
         if (astr_cmp(as, bs) != 0)
           thistab = COMPLETION_NOTCOMPLETING;
-        astr_cpy_delete(as, bs);
+        astr_cpy(as, bs);
         break;
       case COMPLETION_NOTMATCHED:
         ding();
@@ -288,12 +283,12 @@ astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, Hi
       mb_suspend();
       break;
     case KBD_RET:
-      mb_return(saved);
+      mb_return();
       retval = as;
       ret = TRUE;
       break;
     case KBD_CANCEL:
-      mb_cancel(saved);
+      mb_cancel();
       ret = TRUE;
       break;
     case KBD_CTRL | 'a':

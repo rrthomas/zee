@@ -50,7 +50,6 @@ static int kill_line(void)
 
     astr_ncat(killed_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
     delete_nstring(len, &as);
-    astr_delete(as);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -117,7 +116,7 @@ the text killed this time appends to the text killed last time.
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr as = copy_text_block(r.start, r.size);
-      astr_cat_delete(killed_text, as);
+      astr_cat(killed_text, as);
 
       warn_if_readonly_buffer();
     } else {
@@ -126,7 +125,7 @@ the text killed this time appends to the text killed last time.
       if (buf.pt.p != r.start.p || r.start.o != buf.pt.o)
         FUNCALL(exchange_point_and_mark);
       delete_nstring(r.size, &as);
-      astr_cat_delete(killed_text, as);
+      astr_cat(killed_text, as);
     }
 
     thisflag |= FLAG_DONE_KILL;
@@ -152,7 +151,7 @@ Copy the region to the kill buffer.
 
     assert(calculate_the_region(&r));
     as = copy_text_block(r.start, r.size);
-    astr_cat_delete(killed_text, as);
+    astr_cat(killed_text, as);
 
     thisflag |= FLAG_DONE_KILL;
     weigh_mark();
@@ -177,7 +176,7 @@ static int kill_helper(Function func)
       ok = FUNCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
     set_mark(m);
-    free_marker(m);
+    remove_marker(m);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -225,9 +224,4 @@ END_DEFUN
 void init_kill_ring(void)
 {
   killed_text = astr_new();
-}
-
-void free_kill_buffer(void)
-{
-  astr_delete(killed_text);
 }

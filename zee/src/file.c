@@ -124,9 +124,6 @@ void file_open(const char *filename)
     /* Add lines to buffer */
     buf.lines = string_to_lines(as, astr_cstr(eolstr), &buf.num_lines);
     buf.pt.p = list_first(buf.lines);
-
-    astr_delete(eolstr);
-    astr_delete(as);
   }
 
   thisflag |= FLAG_NEED_RESYNC;
@@ -224,7 +221,6 @@ void die(int exitcode)
     astr_cat_cstr(as, "." PACKAGE_NAME "SAVE");
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
     buffer_write(&buf, astr_cstr(as));
-    astr_delete(as);
     term_close();
   }
   exit(exitcode);

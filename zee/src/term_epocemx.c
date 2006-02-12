@@ -145,7 +145,6 @@ void term_refresh(void)
 
   /* Display the output. */
   write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
-  astr_delete(as);
 }
 
 void term_clear(void)
@@ -260,10 +259,7 @@ void term_init(void)
 void term_close(void)
 {
   /* Free memory and finish with termcap. */
-  free(screen.array);
-  free(screen.oarray);
   free(tcap_ptr);
-  astr_delete(norm_string);
   fflush(stdout);
 }
 

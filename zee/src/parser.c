@@ -93,7 +93,6 @@ static astr gettok(void)
 
   switch ((c = getch_skipspace())) {
   case EOF:
-    astr_delete(tok);
     return NULL;
 
   case '\"':                    /* string */
@@ -144,7 +143,6 @@ void cmd_parse_init(astr as)
 
 void cmd_parse_end(void)
 {
-  astr_delete(expr);
   expr = NULL;
 }
 
@@ -176,10 +174,6 @@ void cmd_eval(void)
 
   for (l = list_first(lp); l->item; eval(&l))
     ;
-
-  for (l = list_first(lp); l != lp; l = list_next(l))
-    free(l->item);
-  list_delete(lp);
 }
 
 void cmd_eval_file(const char *file)

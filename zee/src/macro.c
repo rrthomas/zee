@@ -41,14 +41,6 @@ static Macro *macro_new(void)
   return mp;
 }
 
-static void macro_delete(Macro *mp)
-{
-  if (mp) {
-    free(mp->keys);
-    free(mp);
-  }
-}
-
 static void add_macro_key(Macro *mp, size_t key)
 {
   vec_item(mp->keys, vec_items(mp->keys), size_t) = key;
@@ -60,7 +52,6 @@ void add_cmd_to_macro(void)
   assert(cmd_mp);
   for (i = 0; i < vec_items(cmd_mp->keys); i++)
     add_macro_key(cur_mp, vec_item(cmd_mp->keys, i, size_t));
-  macro_delete(cmd_mp);
   cmd_mp = NULL;
 }
 
@@ -74,8 +65,6 @@ void add_key_to_cmd(size_t key)
 
 void cancel_kbd_macro(void)
 {
-  macro_delete(cmd_mp);
-  macro_delete(cur_mp);
   cmd_mp = cur_mp = NULL;
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
@@ -139,7 +128,6 @@ valid editor command.
   } else {
     if ((mp = get_macro(astr_cstr(ms)))) {
       /* If a macro with this name already exists, update its key list */
-      free(mp->keys);
     } else {
       /* Add a new macro to the list */
       mp = macro_new();
@@ -183,21 +171,6 @@ defining others, use M-x name-last-kbd-macro.
     call_macro(cur_mp);
 }
 END_DEFUN
-
-/*
- * Free all the macros (used at exit).
- */
-void free_macros(void)
-{
-  Macro *mp, *next;
-
-  macro_delete(cur_mp);
-
-  for (mp = head_mp; mp; mp = next) {
-    next = mp->next;
-    macro_delete(mp);
-  }
-}
 
 /*
  * Find a macro given its name.

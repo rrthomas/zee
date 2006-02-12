@@ -33,7 +33,6 @@ struct list_s {
 };
 
 list list_new(void);
-void list_delete(list l);
 size_t list_length(list l);
 void list_prepend(list l, void *i);
 void list_append(list l, void *i);

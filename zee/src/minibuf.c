@@ -31,8 +31,6 @@
 #include "main.h"
 #include "extern.h"
 
-static History files_history;
-
 /*--------------------------------------------------------------------------
  * Minibuffer wrapper functions.
  *--------------------------------------------------------------------------*/
@@ -44,11 +42,6 @@ char *minibuf_format(const char *fmt, va_list ap)
   return buf;
 }
 
-void free_minibuf(void)
-{
-  free_history_elements(&files_history);
-}
-
 static void minibuf_vwrite(const char *fmt, va_list ap)
 {
   char *buf;
@@ -56,7 +49,6 @@ static void minibuf_vwrite(const char *fmt, va_list ap)
   buf = minibuf_format(fmt, ap);
 
   term_minibuf_write(buf);
-  free(buf);
 
   /* Redisplay (and leave the cursor in the correct position). */
   term_display();
@@ -103,7 +95,6 @@ astr minibuf_read(const char *fmt, const char *value, ...)
   va_end(ap);
 
   as = term_minibuf_read(buf, value ? value : "", NULL, NULL);
-  free(buf);
 
   return as;
 }
@@ -121,10 +112,9 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
 
   for (;;) {
     as = term_minibuf_read(buf, "", cp, NULL);
-    if (as == NULL) { /* Cancelled. */
-      free(buf);
+    if (as == NULL)             /* Cancelled. */
       return -1;
-    } else {
+    else {
       list s;
       int i;
       astr bs = astr_new();
@@ -133,15 +123,11 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
       astr_cpy(bs, as);
       if (completion_try(cp, bs, FALSE) == COMPLETION_MATCHED)
         astr_cpy_cstr(as, cp->match);
-      astr_delete(bs);
 
       for (s = list_first(cp->completions), i = 0; s != cp->completions;
            s = list_next(s), i++)
-        if (!astr_cmp_cstr(as, s->item)) {
-          astr_delete(as);
-          free(buf);
+        if (!astr_cmp_cstr(as, s->item))
           return i;
-        }
 
       minibuf_error(errmsg);
       waitkey(WAITKEY_DEFAULT);
@@ -173,8 +159,6 @@ int minibuf_read_yesno(const char *fmt, ...)
     else
       retvalue = FALSE;
   }
-  free_completion(cp);
-  free(buf);
 
   return retvalue;
 }
@@ -203,8 +187,6 @@ int minibuf_read_boolean(const char *fmt, ...)
     else
       retvalue = FALSE;
   }
-  free_completion(cp);
-  free(buf);
 
   return retvalue;
 }
@@ -216,16 +198,12 @@ astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, Histo
 {
   va_list ap;
   char *buf;
-  astr as;
 
   va_start(ap, hp);
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  as = term_minibuf_read(buf, value, cp, hp);
-  free(buf);
-
-  return as;
+  return term_minibuf_read(buf, value, cp, hp);
 }
 
 /*

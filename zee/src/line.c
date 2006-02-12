@@ -38,7 +38,7 @@
  * Markers
  *--------------------------------------------------------------------------*/
 
-static void unchain_marker(Marker *marker)
+void remove_marker(Marker *marker)
 {
   Marker *m, *next, *prev = NULL;
 
@@ -54,12 +54,6 @@ static void unchain_marker(Marker *marker)
     }
     prev = m;
   }
-}
-
-void free_marker(Marker *marker)
-{
-  unchain_marker(marker);
-  free(marker);
 }
 
 Marker *marker_new(Point pt)
@@ -90,7 +84,7 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
       marker->pt.n += dir;
 
   buf.pt = m->pt;
-  free_marker(m);
+  remove_marker(m);
 }
 
 /*
@@ -127,19 +121,6 @@ Line *line_new(void)
   Line *lp = list_new();
   list_append(lp, astr_new());
   return lp;
-}
-
-/*
- * Free a Line list.
- */
-void line_delete(Line *lp)
-{
-  Line *lq;
-
-  /* Free all the lines. */
-  for (lq = list_first(lp); lq != lp; lq = list_next(lq))
-    astr_delete(lq->item);
-  list_delete(lp);
 }
 
 /*
@@ -258,10 +239,7 @@ int eolp(void)
 int insert_char(int c)
 {
   astr as = astr_cat_char(astr_new(), (char)c);
-  int ret = insert_nstring(as, "\n", FALSE);
-
-  astr_delete(as);
-  return ret;
+  return insert_nstring(as, "\n", FALSE);
 }
 
 DEFUN("tab-to-tab-stop", tab_to_tab_stop)
@@ -310,7 +288,7 @@ static int intercalate_newline(void)
 
   /* Move the text after the point into the new line. */
   as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
-  astr_cpy_delete(lp2->item, as);
+  astr_cpy(lp2->item, as);
   astr_truncate(lp1->item, (ptrdiff_t)lp1len);
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);
@@ -382,8 +360,6 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
       changed = TRUE;
     }
   }
-
-  free(newcopy);
 
   return changed;
 }
@@ -516,7 +492,7 @@ int delete_nstring(size_t size, astr *as)
       /* Move the next line of text into the current line. */
       lp2 = list_next(buf.pt.p);
       astr_cat(lp1->item, list_next(buf.pt.p)->item);
-      astr_delete(list_behead(lp1));
+      list_behead(lp1);
       --buf.num_lines;
 
       adjust_markers(lp1, lp2, lp1len, -1, 0);
@@ -560,7 +536,6 @@ Join lines if the character is a newline.
 {
   astr as;
   ok = delete_nstring(1, &as);
-  astr_delete(as);
 }
 END_DEFUN
 
@@ -657,7 +632,7 @@ Indent line or insert a tab.
       target_goalc = get_goalc();
 
     buf.pt = old_point->pt;
-    free_marker(old_point);
+    remove_marker(old_point);
 
     /* Indent. */
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
@@ -699,7 +674,7 @@ no indenting is performed.
       pos = get_goalc();
       indent = pos > 0 || (!eolp() && isspace(following_char()));
       buf.pt = old_point->pt;
-      free_marker(old_point);
+      remove_marker(old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)

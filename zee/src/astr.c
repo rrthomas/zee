@@ -69,14 +69,6 @@ char *astr_char(const astr as, ptrdiff_t pos)
   return as->text + pos;
 }
 
-void astr_delete(astr as)
-{
-  assert(as != NULL);
-  free(as->text);
-  as->text = NULL;
-  free(as);
-}
-
 astr astr_ncpy(astr as, const char *s, size_t csize)
 {
   astr_resize(as, csize);
@@ -90,13 +82,6 @@ astr astr_cpy(astr as, const astr src)
 {
   assert(src != NULL);
   return astr_ncpy(as, src->text, src->len);
-}
-
-astr astr_cpy_delete(astr as, const astr src)
-{
-  astr_cpy(as, src);
-  astr_delete(src);
-  return as;
 }
 
 astr astr_cpy_cstr(astr as, const char *s)
@@ -134,13 +119,6 @@ astr astr_cat_char(astr as, int c)
   return as;
 }
 
-astr astr_cat_delete(astr as, const astr src)
-{
-  astr_cat(as, src);
-  astr_delete(src);
-  return as;
-}
-
 astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
 {
   assert(as != NULL);
@@ -161,7 +139,7 @@ astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t cs
   tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
   astr_truncate(as, pos);
   astr_ncat(as, s, csize);
-  astr_cat_delete(as, tail);
+  astr_cat(as, tail);
 
   return as;
 }
@@ -246,7 +224,6 @@ astr astr_vafmt(astr as, const char *fmt, va_list ap)
   char *buf;
   zvasprintf(&buf, fmt, ap);
   astr_cat_cstr(as, buf);
-  free(buf);
   return as;
 }
 
@@ -298,12 +275,10 @@ int main(void)
   astr_cat_char(as2, '.');
   assert_eq(as2, "The world.");
 
-  astr_delete(as3);
   as3 = astr_substr(as1, -6, 5);
   assert_eq(as3, "world");
 
   astr_cpy_cstr(as1, "12345");
-  astr_delete(as2);
 
   astr_cpy_cstr(as1, "12345");
   astr_insert_cstr(as1, 3, "mid");
@@ -338,7 +313,6 @@ int main(void)
   assert_eq(as2, "45");
 
   astr_cpy_cstr(as1, "12345");
-  astr_delete(as2);
   as2 = astr_substr(as1, -5, 5);
   assert_eq(as2, "12345");
 
@@ -358,16 +332,11 @@ int main(void)
   astr_afmt(as1, "%s * %d = ", "5", 3);
   astr_afmt(as1, "%d", 15);
   assert_eq(as1, "5 * 3 = 15");
-  astr_delete(as1);
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);
   printf("The first line of astr.c is: \"%s\"\n", astr_cstr(as1));
   assert(fclose(fp) == 0);
-
-  astr_delete(as1);
-  astr_delete(as2);
-  astr_delete(as3);
 
   printf("astr tests successful.\n");
 

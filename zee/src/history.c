@@ -26,21 +26,6 @@
 #include "main.h"
 #include "extern.h"
 
-void free_history_elements(History *hp)
-{
-  if (hp->elements) {
-    list l;
-
-    for (l = list_first(hp->elements); l != hp->elements;
-         l = list_next(l))
-      free(l->item);
-
-    list_delete(hp->elements);
-    hp->elements = NULL;
-    hp->sel = NULL;
-  }
-}
-
 void add_history_element(History *hp, const char *string)
 {
   const char *last;

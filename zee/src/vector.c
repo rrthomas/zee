@@ -42,15 +42,6 @@ vector *vec_new(size_t itemsize)
 }
 
 /*
- * Free a vector v
- */
-void vec_delete(vector *v)
-{
-  free(v->array);
-  free(v);
-}
-
-/*
  * Resize a vector v to items elements
  */
 static void resize(vector *v, size_t items)

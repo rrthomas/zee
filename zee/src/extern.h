@@ -32,13 +32,11 @@ astr minibuf_read_function_name(const char *fmt, ...);
 const char *binding_to_function(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
-void free_bindings(void);
 Function get_function(const char *name);
 const char *get_function_name(Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void buffer_new(void);
-void free_buffer(Buffer *bp);
 void set_buffer_filename(Buffer *bp, const char *filename);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
@@ -49,7 +47,6 @@ size_t tab_width(void);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
-void free_completion(Completion *cp);
 int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* display.c -------------------------------------------------------------- */
@@ -81,7 +78,6 @@ astr shorten_string(char *s, int maxlen);
 char *getln(FILE *fp);
 
 /* history.c -------------------------------------------------------------- */
-void free_history_elements(History *hp);
 void add_history_element(History *hp, const char *string);
 void prepare_history(History *hp);
 const char *previous_history_element(History *hp);
@@ -93,17 +89,15 @@ size_t strtochord(const char *buf);
 
 /* killring.c ------------------------------------------------------------- */
 void init_kill_ring(void);
-void free_kill_buffer(void);
 
 /* line.c ----------------------------------------------------------------- */
-void free_marker(Marker *marker);
+void remove_marker(Marker *marker);
 Marker *marker_new(Point pt);
 Marker *point_marker(void);
 Marker *get_mark(void);
 void set_mark(Marker *m);
 void set_mark_to_point(void);
 Line *line_new(void);
-void line_delete(Line *lp);
 Line *string_to_lines(astr as, const char *eol, size_t *lines);
 int is_empty_line(void);
 int is_blank_line(void);
@@ -124,7 +118,6 @@ void cancel_kbd_macro(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
 void call_macro(Macro *mp);
-void free_macros(void);
 Macro *get_macro(const char *name);
 
 /* main.c ----------------------------------------------------------------- */
@@ -134,7 +127,6 @@ extern int thisflag, lastflag, uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);
-void free_minibuf(void);
 void minibuf_error(const char *fmt, ...);
 void minibuf_write(const char *fmt, ...);
 astr minibuf_read(const char *fmt, const char *value, ...);
@@ -185,12 +177,10 @@ void term_beep(void);
 size_t term_xgetkey(int mode, size_t timeout);
 
 /* undo.c ----------------------------------------------------------------- */
-void free_undo(Buffer *bp);
 void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
-void free_variables(void);
 void set_variable(const char *var, const char *val);
 const char *get_variable(const char *var);
 int get_variable_number(char *var);

@@ -37,18 +37,6 @@ list list_new(void)
   return l;
 }
 
-/* Delete a list, freeing its nodes */
-void list_delete(list l)
-{
-  list p = l, q;
-
-  do {
-    q = p;
-    p = p->next;
-    free(q);
-  } while (p != l);
-}
-
 /* Return the length of a list */
 size_t list_length(list l)
 {
@@ -101,7 +89,6 @@ void *list_behead(list l)
   i = p->item;
   l->next = l->next->next;
   l->next->prev = l;
-  free(p);
 
   return i;
 }
@@ -118,7 +105,6 @@ void *list_betail(list l)
   i = p->item;
   l->prev = l->prev->prev;
   l->prev->next = l;
-  free(p);
 
   return i;
 }
@@ -156,6 +142,4 @@ void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
 
   for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
     p->item = vec[i];
-
-  free(vec);
 }

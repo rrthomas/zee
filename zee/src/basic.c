@@ -190,7 +190,6 @@ Position 1 is the beginning of the buffer.
     }
     if ((to_char = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
       ding();
-    astr_delete(ms);
   } while (to_char == ULONG_MAX);
 
   if (ok)
@@ -245,7 +244,6 @@ Line 1 is the beginning of the buffer.
     }
     if ((to_line = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
       ding();
-    astr_delete(ms);
   } while (to_line == ULONG_MAX);
 
   if (ok) {

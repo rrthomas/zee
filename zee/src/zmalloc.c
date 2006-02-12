@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <gc/gc.h>
 
 #include "main.h"
 #include "zmalloc.h"
@@ -38,7 +39,7 @@ void *zmalloc(size_t size)
 
   assert(size > 0);
 
-  if ((ptr = calloc(size, 1)) == NULL) {
+  if ((ptr = GC_MALLOC(size)) == NULL) {
     fprintf(stderr, PACKAGE_NAME ": cannot allocate memory\n");
     die(1);
   }
@@ -55,7 +56,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 
   assert(newsize > 0);
 
-  if ((newptr = realloc(ptr, newsize)) == NULL) {
+  if ((newptr = GC_REALLOC(ptr, newsize)) == NULL) {
     fprintf(stderr, PACKAGE_NAME ": cannot reallocate memory\n");
     die(1);
   }
@@ -76,6 +77,7 @@ char *zstrdup(const char *s)
 
 /*
  * Wrapper for vasprintf.
+ * FIXME: Use GC allocation.
  */
 int zvasprintf(char **ptr, const char *fmt, va_list vargs)
 {

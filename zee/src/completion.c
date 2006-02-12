@@ -58,20 +58,6 @@ Completion *completion_new(void)
 }
 
 /*
- * Free a completion structure.
- */
-void free_completion(Completion *cp)
-{
-  list p;
-
-  for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    free(p->item);
-  list_delete(cp->completions);
-  list_delete(cp->matches);
-  free(cp);
-}
-
-/*
  * Calculate the maximum length of the completions.
  */
 static size_t calculate_max_length(list l, size_t size)
@@ -127,10 +113,9 @@ static void popup_completion(Completion *cp, int allflag, size_t num)
     as = completion_write(cp->completions, list_length(cp->completions));
   else
     as = completion_write(cp->matches, num);
-  astr_cat_delete(popup, as);
+  astr_cat(popup, as);
 
   popup_set(popup);
-  astr_delete(popup);
 
   term_display();
 }
@@ -150,7 +135,6 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   char c;
   list p;
 
-  list_delete(cp->matches);
   cp->matches = list_new();
 
   if (!cp->flags & COMPLETION_SORTED) {

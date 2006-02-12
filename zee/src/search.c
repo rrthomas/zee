@@ -80,9 +80,6 @@ static char *find_substr(const char *s1, size_t s1size,
 
   regfree(&pattern);
 
-  free(search_regs.start);
-  free(search_regs.end);
-
   return ret;
 }
 
@@ -152,7 +149,6 @@ Search forward from point for regular expression REGEXP.
   else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
@@ -160,7 +156,6 @@ Search forward from point for regular expression REGEXP.
       ok = FALSE;
     }
   }
-  astr_delete(ms);
 }
 END_DEFUN
 
@@ -176,7 +171,6 @@ Search backward from point for match for regular expression REGEXP.
   if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    free(last_search);
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
@@ -184,7 +178,6 @@ Search backward from point for match for regular expression REGEXP.
       ok = FALSE;
     }
   }
-  astr_delete(ms);
 }
 END_DEFUN
 
@@ -242,7 +235,7 @@ static int isearch(int dir)
 
       /* Restore old mark position. */
       assert(buf.mark);
-      free_marker(buf.mark);
+      remove_marker(buf.mark);
 
       if (old_mark)
         buf.mark = marker_new(old_mark->pt);
@@ -267,7 +260,6 @@ static int isearch(int dir)
         cur = buf.pt;
 
         /* Save search string. */
-        free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
       }
       else if (last_search != NULL)
@@ -284,7 +276,6 @@ static int isearch(int dir)
         buf.mark->pt = start;
 
         /* Save search string. */
-        free(last_search);
         last_search = zstrdup(astr_cstr(pattern));
 
         minibuf_write("Mark saved when search started");
@@ -309,11 +300,8 @@ static int isearch(int dir)
   /* done */
   buf.flags &= ~BFLAG_ISEARCH;
 
-  astr_delete(as);
-  astr_delete(pattern);
-
   if (old_mark)
-    free_marker(old_mark);
+    remove_marker(old_mark);
 
   return TRUE;
 }

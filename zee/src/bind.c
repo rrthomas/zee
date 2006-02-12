@@ -87,12 +87,6 @@ void init_bindings(void)
   bindings = vec_new(sizeof(Binding));
 }
 
-void free_bindings(void)
-{
-  vec_delete(bindings);
-  free_history_elements(&functions_history);
-}
-
 /* FIXME: Handling of universal arg should be done exclusively by
    universal-argument. */
 void process_key(size_t key)
@@ -184,7 +178,6 @@ astr minibuf_read_function_name(const char *fmt, ...)
       break;
     } else if (astr_len(ms) == 0) {
       minibuf_error("No function name given");
-      astr_delete(ms);
       ms = NULL;
       break;
     } else {
@@ -193,7 +186,6 @@ astr minibuf_read_function_name(const char *fmt, ...)
       /* Complete partial words if possible */
       if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
         astr_cpy_cstr(ms, cp->match);
-      astr_delete(as);
       for (p = list_first(cp->completions); p != cp->completions;
            p = list_next(p))
         if (!astr_cmp_cstr(ms, p->item)) {
@@ -211,9 +203,6 @@ astr minibuf_read_function_name(const char *fmt, ...)
     }
   }
 
-  free(buf);
-  free_completion(cp);
-
   return ms;
 }
 
@@ -228,7 +217,6 @@ Read key chord, and unbind it.
   if (argc > 0) {
     astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
     key = strtochord(astr_cstr(keystr));
-    astr_delete(keystr);
     *lp = list_next(*lp);
   } else {
     minibuf_write("Unbind key: ");
@@ -255,7 +243,6 @@ chord.
     astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
 
     key = strtochord(astr_cstr(keystr));
-    astr_delete(keystr);
     *lp = list_next(*lp);
     name = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
     *lp = list_next(*lp);
@@ -267,7 +254,6 @@ chord.
 
     as = chordtostr(key);
     name = minibuf_read_function_name("Bind key %s to command: ", astr_cstr(as));
-    astr_delete(as);
   }
 
   if (name) {
@@ -281,8 +267,6 @@ chord.
         minibuf_error("Invalid key");
     } else
       minibuf_error("No such function `%s'", astr_cstr(name));
-
-    astr_delete(name);
   }
 }
 END_DEFUN
@@ -297,7 +281,7 @@ static astr function_to_binding(Function f)
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       astr_cat_cstr(as, (n++ == 0) ? "" : ", ");
-      astr_cat_delete(as, binding);
+      astr_cat(as, binding);
     }
 
   return as;
@@ -323,8 +307,6 @@ Argument is a command definition, usually a symbol with a function definition.
       minibuf_write("%s is on %s", astr_cstr(name), astr_cstr(bindings));
     else
       minibuf_write("%s is not on any key", astr_cstr(name));
-
-    astr_delete(bindings);
   }
 }
 END_DEFUN

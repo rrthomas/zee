@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <gc/gc.h>
 
 #ifdef HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
@@ -134,6 +135,8 @@ int main(int argc, char **argv)
   int c, bflag = FALSE, qflag = FALSE, hflag = FALSE;
   size_t line = 1;
 
+  GC_INIT();
+
   init_variables();
   init_kill_ring();
   init_bindings();
@@ -233,7 +236,6 @@ int main(int argc, char **argv)
       astr_cat_cstr(as, "/." PACKAGE_NAME);
       cmd_eval_file(astr_cstr(as));
     }
-    astr_delete(as);
   }
 
   if (buf.lines) {
@@ -243,18 +245,9 @@ int main(int argc, char **argv)
     /* Run the main loop. */
     loop();
 
-    free_buffer(&buf);
-    free_minibuf();
-
     term_tidy();
     term_close();
   }
-
-  /* Free all the memory allocated. */
-  free_bindings();
-  free_macros();
-  free_variables();
-  free_kill_buffer();
 
   return 0;
 }

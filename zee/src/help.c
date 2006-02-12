@@ -68,10 +68,8 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
   doc = astr_new();
   while ((buf = astr_fgets(f)) != NULL) {
     if (reading_doc) {
-      if (*astr_char(buf, 0) == '\f') {
-        astr_delete(buf);
+      if (*astr_char(buf, 0) == '\f')
         break;
-      }
       if (isfunc || astr_len(defval) > 0) {
         astr_cat(doc, buf);
         astr_cat_cstr(doc, "\n");
@@ -79,15 +77,12 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
         astr_cpy(defval, buf);
     } else if (!astr_cmp(buf, match))
       reading_doc = 1;
-    astr_delete(buf);
   }
 
   fclose(f);
-  astr_delete(match);
 
   if (!reading_doc) {
     minibuf_error("Cannot find documentation for `%s'", name);
-    astr_delete(doc);
     return NULL;
   }
 
@@ -106,11 +101,8 @@ Display the full documentation of FUNCTION (a symbol).
       astr popup = astr_new();
       astr_afmt(popup, "Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc));
       popup_set(popup);
-      astr_delete(doc);
     } else
       ok = FALSE;
-
-    astr_delete(name);
   } else
     ok = FALSE;
 }
@@ -134,12 +126,9 @@ Display the full documentation of VARIABLE (a symbol).
                 astr_cstr(name), astr_cstr(defval),
                 get_variable(astr_cstr(name)), astr_cstr(doc));
       popup_set(popup);
-      astr_delete(doc);
     } else
       ok = FALSE;
 
-    astr_delete(defval);
-    astr_delete(name);
   } else
     ok = FALSE;
 }
@@ -163,7 +152,5 @@ Display the command invoked by a key sequence.
     ok = FALSE;
   } else
     minibuf_write("%s runs the command `%s'", astr_cstr(keyname), cmd);
-
-  astr_delete(keyname);
 }
 END_DEFUN

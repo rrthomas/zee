@@ -92,7 +92,6 @@ static void outch(int c, Font font, size_t *x)
     j = make_char_printable(&buf, (size_t)c);
     for (w = 0; w < j && *x < width; ++w)
       term_addch(buf[w]), ++(*x);
-    free(buf);
   }
 
   term_attrset(1, FONT_NORMAL);
@@ -224,7 +223,6 @@ int term_printf(const char *fmt, ...)
   res = zvasprintf(&buf, fmt, ap);
   va_end(ap);
   term_print(buf);
-  free(buf);
   return res;
 }
 
@@ -250,10 +248,8 @@ static void calculate_start_column(void)
         ++col;
       } else if (isprint(*p))
         ++col;
-      else {
+      else
         col += make_char_printable(&s, (size_t)*p);
-        free(s);
-      }
 
     lpfact = (lp - astr_cstr(pt.p->item)) / (win.ewidth / 3);
 

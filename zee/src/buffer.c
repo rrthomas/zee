@@ -57,29 +57,10 @@ void buffer_new(void)
 }
 
 /*
- * Free the buffer allocated memory.
- */
-void free_buffer(Buffer *bp)
-{
-  line_delete(bp->lines);
-  free_undo(bp);
-
-  /* Free markers. This looks wrong, but in fact the marker links back
-     into the buffer, so free_marker can change the pointer passed to
-     it. */
-  while (bp->markers)
-    free_marker(bp->markers);
-
-  /* Free the filename. */
-  free(bp->filename);
-}
-
-/*
  * Set a new filename for the buffer.
  */
 void set_buffer_filename(Buffer *bp, const char *filename)
 {
-  free(bp->filename);
   bp->filename = zstrdup(filename);
 }
 

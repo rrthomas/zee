@@ -87,7 +87,6 @@ that value, otherwise with the current column value.
 
   zasprintf(&s, "%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1));
   set_variable("fill-column", s);
-  free(s);
 }
 END_DEFUN
 
@@ -217,7 +216,6 @@ C-u following the digits or minus sign ends the argument.
   uniarg = arg * sgn;
   thisflag |= FLAG_SET_UNIARG;
   minibuf_clear();
-  astr_delete(as);
 }
 END_DEFUN
 
@@ -400,7 +398,7 @@ Fill paragraph at or after point.
   thisflag &= ~FLAG_DONE_CPCN;
 
   buf.pt = m->pt;
-  free_marker(m);
+  remove_marker(m);
 
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
@@ -492,7 +490,6 @@ FIXME: Make it work non-interactively.
   astr_cat_cstr(msg, "M-x ");
 
   name = minibuf_read_function_name(astr_cstr(msg));
-  astr_delete(msg);
   if (name == NULL)
     return FALSE;
 
@@ -502,8 +499,6 @@ FIXME: Make it work non-interactively.
     call_macro(mp);
   else
     ok = FALSE;
-
-  astr_delete(name);
 }
 END_DEFUN
 
@@ -537,7 +532,6 @@ current buffer, overwriting the current region.
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
       write(fd, astr_cstr(as), r.size);
-      astr_delete(as);
 
       close(fd);
 
@@ -550,10 +544,9 @@ current buffer, overwriting the current region.
         astr out = astr_new(), s;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
-          astr_cat_delete(out, s);
+          astr_cat(out, s);
           astr_cat_cstr(out, "\n");
         }
-        astr_delete(s);
         pclose(pipe);
         remove(tempfile);
 
@@ -569,14 +562,9 @@ current buffer, overwriting the current region.
             || r.start.o != buf.pt.o)
           FUNCALL(exchange_point_and_mark);
         delete_nstring(r.size, &s);
-        astr_delete(s);
         ok = insert_nstring(out, "\n", FALSE);
         undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
-
-        astr_delete(out);
       }
-
-      astr_delete(cmd);
     }
   }
 }

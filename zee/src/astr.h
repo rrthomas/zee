@@ -53,11 +53,6 @@ typedef struct astr_s *astr;
 astr astr_new(void);
 
 /*
- * Deallocate the previously allocated string as.
- */
-void astr_delete(astr as);
-
-/*
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_size(as) - 1] inclusive may be read.
  */
@@ -100,12 +95,6 @@ astr astr_ncat(astr as, const char *s, size_t csize);
 astr astr_cat(astr as, const astr src);
 astr astr_cat_cstr(astr as, const char *s);
 astr astr_cat_char(astr as, int c);
-
-/*
- * Perform astr_cpy or astr_cat and then free src.
- */
-astr astr_cpy_delete(astr as, const astr src);
-astr astr_cat_delete(astr as, const astr src);
 
 /*
  * Replace size characters of as, starting at pos, with the argument

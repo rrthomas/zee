@@ -44,20 +44,6 @@ void init_variables(void)
   root_varlist = list_new();
 }
 
-void free_variables(void)
-{
-  list p;
-
-  for (p = list_first(root_varlist); p != root_varlist; p = list_next(p)) {
-    vpair *vp = (vpair *)(p->item);
-    free((char *)(vp->key));
-    free((char *)(vp->value));
-    free(vp);
-  }
-
-  list_delete(root_varlist);
-}
-
 static list variable_find(list varlist, const char *key)
 {
   list p;
@@ -75,9 +61,7 @@ static void variable_update(list varlist, const char *key, const char *value)
   if (key && value) {
     list temp = variable_find(varlist, key);
 
-    if (temp && temp->item)
-      free((void *)(((vpair *)(temp->item))->value));
-    else {
+    if (temp == NULL || temp->item == NULL) {
       vpair *vp = zmalloc(sizeof(vpair));
       vp->key = zstrdup(key);
       list_prepend(varlist, vp);
@@ -177,13 +161,11 @@ astr minibuf_read_variable_name(char *msg)
     ms = minibuf_read_completion(msg, "", cp, NULL);
 
     if (ms == NULL) {
-      free_completion(cp);
       FUNCALL(cancel);
       return NULL;
     }
 
     if (astr_len(ms) == 0) {
-      free_completion(cp);
       minibuf_error("No variable name given");
       return NULL;
     } else if (get_variable(astr_cstr(ms)) == NULL) {
@@ -194,8 +176,6 @@ astr minibuf_read_variable_name(char *msg)
       break;
     }
   }
-
-  free_completion(cp);
 
   return ms;
 }
