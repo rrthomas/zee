@@ -7,9 +7,6 @@
  * The fourth column specifies whether it takes a parameter.
  */
 
-/* FIXME: Automatically generate relevant part of zee.texi from
-   options below. */
-
 X("batch", "            run non-interactively\n",
   'b', 0)
 X("eval", " CMD         execute command CMD\n",

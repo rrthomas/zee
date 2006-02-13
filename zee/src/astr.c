@@ -223,7 +223,7 @@ astr astr_afmt(astr as, const char *fmt, ...)
 {
   va_list ap;
   int len;
-  char *s;
+  char *s = NULL;
 
   va_start(ap, fmt);
   len = vsnprintf(s, 0, fmt, ap);
@@ -231,7 +231,7 @@ astr astr_afmt(astr as, const char *fmt, ...)
   s = (char *)zmalloc((size_t)len);
 
   va_start(ap, fmt);
-  assert(vsnprintf(s, len, fmt, ap) == len);
+  assert(vsnprintf(s, (size_t)len, fmt, ap) == len);
   va_end(ap);
 
   astr_cat_cstr(as, s);

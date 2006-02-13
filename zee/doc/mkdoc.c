@@ -48,9 +48,10 @@ static struct {
   char *longname;
   char *doc;
   char shortname;
+  int opt;
 } otable[] = {
 #define X(longname, doc, shortname, opt) \
-        { longname, doc, shortname },
+        { longname, doc, shortname, opt },
 #include "tbl_opts.h"
 #undef X
 };
@@ -152,6 +153,7 @@ static void dump_funcs(void)
   assert(fp2);
   fprintf(fp2,
           "/*\n"
+          " * Automatically generated file: DO NOT EDIT!\n"
           " * Table of commands (name, C function)\n"
           " */\n"
           "\n");
@@ -196,11 +198,21 @@ static void dump_vars(void)
 static void dump_opts(void)
 {
   size_t i;
-  FILE *fp = fopen("zee_opts.texi", "w");
+  FILE *fp1 = fopen("zee_opts.texi", "w");
+  FILE *fp2 = fopen("optstring.h", "w");
 
-  assert(fp);
-  fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
-  fprintf(fp, "@table @samp\n");
+  assert(fp1);
+  fprintf(fp1, "@c Automatically generated file: DO NOT EDIT!\n");
+  fprintf(fp1, "@table @samp\n");
+
+  assert(fp2);
+  fprintf(fp2,
+          "/*\n"
+          " * Automatically generated file: DO NOT EDIT!\n"
+          " * Short option string for getopt\n"
+          " */\n"
+          "\n"
+          "#define OPTSTRING \"");
 
   for (i = 0; i < oentries; ++i) {
     astr doc = astr_cat_cstr(astr_new(), otable[i].doc);
@@ -208,12 +220,15 @@ static void dump_opts(void)
       fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
       exit(1);
     }
-    fprintf(fp, "@item --%s, -%c\n%s\n", otable[i].longname, otable[i].shortname,
+    fprintf(fp1, "@item --%s, -%c\n%s\n", otable[i].longname, otable[i].shortname,
             astr_cstr(doc));
+    fprintf(fp2, "%c%s", otable[i].shortname, otable[i].opt ? ":" : "");
   }
 
-  fprintf(fp, "@end table");
-  fclose(fp);
+  fprintf(fp1, "@end table");
+  fprintf(fp2, "\"\n");
+  fclose(fp1);
+  fclose(fp2);
 }
 
 static void process_file(char *filename)

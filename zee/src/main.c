@@ -140,8 +140,8 @@ int main(int argc, char **argv)
   init_kill_ring();
   init_bindings();
 
-  /* FIXME: Do short options and parameters automatically from tbl_opts.h */
-  while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
+#include "optstring.h"
+  while ((c = getopt_long_only(argc, argv, OPTSTRING, longopts, NULL)) != -1)
     switch (c) {
     case 'b':
       bflag = TRUE;

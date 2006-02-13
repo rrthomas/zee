@@ -2,5 +2,5 @@
 Makefile
 Makefile.in
 zee
-paths.h tbl_funcs.h
+optstring.h paths.h tbl_funcs.h
 astr
