@@ -53,17 +53,17 @@ INDEX
 
     Zee was written to be as small and simple as possible. If you
     don't like it, it might be because it doesn't work the way you're
-    used to, or I may have been badly designed. If after trying it for
-    a bit you still don't like the way it works, complain!
+    used to, or it may have been badly designed. If after trying it
+    for a bit you still don't like the way it works, complain!
 
 1.6. Zee doesn't compile.
 
-    We have tested Zee under GNU/Linux only (other than the EPOC
-    port), although it should work on any POSIX-compliant OS that
-    supports termcap or Allegro. If you get Zee running under an OS
-    not listed here, please send a message to the developers telling
-    them that (you might also send any patches you have made to the
-    sources if you want them included in the next release).
+    We have tested Zee under GNU/Linux only, although it should work
+    on any POSIX-compliant OS that supports termcap or Allegro. If you
+    get Zee running under another OS, please send a message to the
+    developers (see question 1.4 for the address) telling them that
+    (you might also send any patches you have made to the sources if
+    you want them included in the next release).
 
 ------------------------------------------------------------------------------
 

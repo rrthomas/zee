@@ -9,8 +9,7 @@ dependency is a terminal library, either termcap, Allegro or epocemx.
 
 Zee is free software, licensed under the GNU GPL.
 
-See INSTALL for installation instructions (on EPOC, just install the
-SIS file).
+See INSTALL for installation instructions.
 
 Zee is hosted on SourceForge at http://zee.sourceforge.net/
 

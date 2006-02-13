@@ -60,11 +60,7 @@ if ALLEGRO
 zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
 zee_LDFLAGS = `allegro-config --libs`
 else
-if EPOCEMX
-zee_SOURCES = $(zee_base_SOURCES) term_epocemx.c
-else
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
-endif
 endif
 
 zee_LDADD = $(regex) @LIBOBJS@

@@ -95,28 +95,6 @@ fi
 AM_CONDITIONAL(ALLEGRO, test x$allegro = xtrue)
 
 dnl ==================================================================
-dnl epocemx
-dnl ==================================================================
-
-AC_MSG_CHECKING([use epocemx])
-AC_ARG_ENABLE(epocemx,
-AC_HELP_STRING([--enable-epocemx], [use epocemx interface]),
-[
-if test $enableval = yes; then
-        epocemx=true
-        AC_MSG_RESULT(yes)
-else
-        epocemx=false
-        AC_MSG_RESULT(no)
-fi
-],[
-        epocemx=false
-        AC_MSG_RESULT(no)
-])
-
-AM_CONDITIONAL(EPOCEMX, test x$epocemx = xtrue)
-
-dnl ==================================================================
 dnl gc
 dnl ==================================================================
 
@@ -171,7 +149,7 @@ AC_DEFUN([CHECK_CURSES],
 AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 ])
 
-if test x$allegro = xfalse && test x$epocemx = xfalse; then
+if test x$allegro = xfalse; then
         curses=true
         CHECK_CURSES
 fi

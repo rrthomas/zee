@@ -13,7 +13,6 @@ EXTRA_DIST =					\
 	dot$(PACKAGE_NAME).sample		\
 	lisp.txt				\
 	mkdoc.c					\
-	BANNER.EPOC				\
 	config.h
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
@@ -47,20 +46,3 @@ clean-local:
 
 distclean-local:
 	rm -f $(GENERATED_TEXI)
-
-BANNER.EPOC:
-	@echo '$(TEXT_NAME) $(VERSION)' >>BANNER.EPOC.tmp
-	@echo '© Reuben Thomas 2003-2006' >>BANNER.EPOC.tmp
-	@echo '© Alistair Turnbull 2005-2006' >>BANNER.EPOC.tmp
-	@echo '© Sandro Sigala 1998-2004' >>BANNER.EPOC.tmp
-	@echo '© David A. Capello 2004' >>BANNER.EPOC.tmp
-	@echo 'http://$(PACKAGE_NAME).sourceforge.net/' >>BANNER.EPOC.tmp
-	@echo 'All rights reserved. This software has no warranty.' >>BANNER.EPOC.tmp
-	@echo '$(TEXT_NAME) is licensed under the GNU GPL.' >>BANNER.EPOC.tmp
-	@echo 'The full license is at' >>BANNER.EPOC.tmp
-	@echo 'http://www.gnu.org/licenses/gpl.html' >>BANNER.EPOC.tmp
-	@echo 'Proceed with installation?' >>BANNER.EPOC.tmp
-	if test ! -f BANNER.EPOC -o				\
-	        ! "cmp BANNER.EPOC BANNER.EPOC.tmp -s" ; then	\
-		mv BANNER.EPOC.tmp BANNER.EPOC ;		\
-	fi
