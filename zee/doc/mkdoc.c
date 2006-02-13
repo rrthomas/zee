@@ -15,7 +15,6 @@
 
 /* #include other sources so this program can be easily built on the
    build host when cross-compiling */
-#include "vasprintf.c"
 #include "zmalloc.c"
 #include "astr.c"
 #include "vector.c"
@@ -90,7 +89,6 @@ static void fdecl(const char *name)
       s = 1;
     else if (astr_cstr(buf)[0] == '{')
       break;
-    astr_delete(buf);
   }
 
   /* Check function is not a duplicate */
@@ -120,10 +118,8 @@ static void parse(void)
       }
       sub = astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1));
       astr_cpy(buf, sub);
-      astr_delete(sub);
       fdecl(astr_cstr(buf));
     }
-    astr_delete(buf);
   }
 }
 
@@ -191,7 +187,6 @@ static void dump_vars(void)
       exit(1);
     }
     fprintf(fp, "@item %s\n%s\n", vtable[i].name, astr_cstr(doc));
-    astr_delete(doc);
   }
 
   fprintf(fp, "@end table");
@@ -215,7 +210,6 @@ static void dump_opts(void)
     }
     fprintf(fp, "@item --%s, -%c\n%s\n", otable[i].longname, otable[i].shortname,
             astr_cstr(doc));
-    astr_delete(doc);
   }
 
   fprintf(fp, "@end table");
@@ -249,8 +243,6 @@ int main(int argc, char **argv)
   dump_funcs();
   dump_vars();
   dump_opts();
-
-  vec_delete(ftable);
 
   return 0;
 }
