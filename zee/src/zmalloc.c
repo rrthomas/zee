@@ -74,34 +74,3 @@ char *zstrdup(const char *s)
 {
   return strcpy(zmalloc(strlen(s) + 1), s);
 }
-
-/*
- * Wrapper for vasprintf.
- * FIXME: Use GC allocation.
- */
-int zvasprintf(char **ptr, const char *fmt, va_list vargs)
-{
-  int retval = vasprintf(ptr, fmt, vargs);
-
-  if (retval == -1) {
-    fprintf(stderr, PACKAGE_NAME ": cannot allocate memory for asprintf\n");
-    die(1);
-  }
-
-  return retval;
-}
-
-/*
- * Wrapper for asprintf.
- */
-int zasprintf(char **ptr, const char *fmt, ...)
-{
-  va_list vargs;
-  int retval;
-
-  va_start(vargs, fmt);
-  retval = zvasprintf(ptr, fmt, vargs);
-  va_end(vargs);
-
-  return retval;
-}

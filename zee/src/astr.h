@@ -137,7 +137,6 @@ astr astr_fgets(FILE *fp);
 /*
  * Append formatted text to the argument string
  */
-astr astr_vafmt(astr as, const char *fmt, va_list ap);
 astr astr_afmt(astr as, const char *fmt, ...);
 
 

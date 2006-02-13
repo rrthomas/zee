@@ -126,14 +126,13 @@ extern Buffer buf;
 extern int thisflag, lastflag, uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */
-char *minibuf_format(const char *fmt, va_list ap);
-void minibuf_error(const char *fmt, ...);
-void minibuf_write(const char *fmt, ...);
-astr minibuf_read(const char *fmt, const char *value, ...);
-int minibuf_read_yesno(const char *fmt, ...);
-int minibuf_read_boolean(const char *fmt, ...);
-astr minibuf_read_dir(const char *fmt, const char *value, ...);
-astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
+void minibuf_error(const char *s);
+void minibuf_write(const char *s);
+astr minibuf_read(const char *s, const char *value);
+int minibuf_read_yesno(const char *s);
+int minibuf_read_boolean(const char *s);
+astr minibuf_read_dir(const char *s);
+astr minibuf_read_completion(const char *s, char *value, Completion *cp, History *hp);
 void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
@@ -157,7 +156,8 @@ size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_tidy(void);
-int term_printf(const char *fmt, ...);
+void term_nprint(size_t size, const char *s);
+void term_print(const char *s);
 
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write(const char *fmt);

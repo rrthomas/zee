@@ -55,8 +55,8 @@ static void draw_minibuf_read(const char *prompt, const char *value,
     n = pointo - pointo % (width - prompt_len - 2);
   }
 
-  term_printf("%.*s", min(width - prompt_len - margin, strlen(value) - n), value + n);
-  term_printf("%s", match);
+  term_nprint(min(width - prompt_len - margin, strlen(value) - n), value + n);
+  term_print(match);
 
   if (strlen(value + n) >= width - prompt_len - margin) {
     term_move(term_height() - 1, width - 1);

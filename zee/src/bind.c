@@ -157,13 +157,12 @@ astr minibuf_read_function_name(const char *fmt, ...)
 {
   va_list ap;
   size_t i;
-  char *buf;
-  astr ms;
+  astr as, ms;
   list p;
   Completion *cp;
 
   va_start(ap, fmt);
-  buf = minibuf_format(fmt, ap);
+  as = astr_afmt(astr_new(), fmt, ap);
   va_end(ap);
 
   cp = completion_new();
@@ -171,7 +170,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
     list_append(cp->completions, zstrdup(ftable[i].name));
 
   for (;;) {
-    ms = minibuf_read_completion(buf, "", cp, &functions_history);
+    ms = minibuf_read_completion(astr_cstr(as), "", cp, &functions_history);
 
     if (ms == NULL) {
       FUNCALL(cancel);
@@ -197,7 +196,7 @@ astr minibuf_read_function_name(const char *fmt, ...)
         minibuf_clear();        /* Remove any error message */
         break;
       } else {
-        minibuf_error("Undefined function name `%s'", astr_cstr(ms));
+        minibuf_error(astr_cstr(astr_afmt(astr_new(), "Undefined function name `%s'", astr_cstr(ms))));
         waitkey(WAITKEY_DEFAULT);
       }
     }
@@ -266,7 +265,7 @@ chord.
       else
         minibuf_error("Invalid key");
     } else
-      minibuf_error("No such function `%s'", astr_cstr(name));
+      minibuf_error(astr_cstr(astr_afmt(astr_new(), "No such function `%s'", astr_cstr(name))));
   }
 }
 END_DEFUN
@@ -304,9 +303,9 @@ Argument is a command definition, usually a symbol with a function definition.
     astr bindings = function_to_binding(f);
 
     if (astr_len(bindings) > 0)
-      minibuf_write("%s is on %s", astr_cstr(name), astr_cstr(bindings));
+      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s is on %s", astr_cstr(name), astr_cstr(bindings))));
     else
-      minibuf_write("%s is not on any key", astr_cstr(name));
+      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s is not on any key", astr_cstr(name))));
   }
 }
 END_DEFUN

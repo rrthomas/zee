@@ -19,7 +19,6 @@
    02111-1301, USA.  */
 
 #include <stdarg.h>
-#include <assert.h>
 
 #include "config.h"
 #include "main.h"

@@ -69,7 +69,7 @@ endif
 
 zee_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h vasprintf.c key_bindings.el
+EXTRA_DIST = regex.c regex.h key_bindings.el
 
 clean-local:
 	rm -f test*.stdout

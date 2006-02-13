@@ -11,7 +11,7 @@ TEXT_NAME="Zee"
 AC_SUBST(TEXT_NAME)
 AC_SUBST(VERSION)
 
-dnl Allow GNU functions to be used if present (e.g. vasprintf)
+dnl Allow GNU functions to be used if present
 AC_GNU_SOURCE
 
 dnl ==================================================================
@@ -27,7 +27,7 @@ dnl ==================================================================
 dnl Checks for functions.
 dnl ==================================================================
 
-AC_REPLACE_FUNCS(vasprintf getopt_long_only)
+AC_REPLACE_FUNCS(getopt_long_only)
 
 dnl ==================================================================
 dnl Checks for header files.

@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,14 +55,18 @@ void term_set_size(size_t cols, size_t rows)
   height = rows;
 }
 
-static int make_char_printable(char **buf, size_t c)
+static astr make_char_printable(size_t c)
 {
+  astr as = astr_new();
+
   if (c == '\0')
-    return zasprintf(buf, "^@");
+    astr_cpy_cstr(as, "^@");
   else if (c <= '\32')
-    return zasprintf(buf, "^%c", 'A' + c - 1);
+    astr_afmt(as, "^%c", 'A' + c - 1);
   else
-    return zasprintf(buf, "\\%o", c & 0xff);
+    astr_afmt(as, "\\%o", c & 0xff);
+
+  return as;
 }
 
 /* Prints a printable representation of the character c on the screen in the
@@ -75,8 +80,7 @@ static int make_char_printable(char **buf, size_t c)
  */
 static void outch(int c, Font font, size_t *x)
 {
-  size_t j, w, width = term_width();
-  char *buf;
+  size_t w, width = term_width();
 
   if (*x >= width)
     return;
@@ -89,9 +93,9 @@ static void outch(int c, Font font, size_t *x)
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
-    j = make_char_printable(&buf, (size_t)c);
-    for (w = 0; w < j && *x < width; ++w)
-      term_addch(buf[w]), ++(*x);
+    astr as = make_char_printable((size_t)c);
+    for (w = 0; w < astr_len(as) && *x < width; ++w)
+      term_addch(*astr_char(as, (ptrdiff_t)w)), ++(*x);
   }
 
   term_attrset(1, FONT_NORMAL);
@@ -198,32 +202,22 @@ static void draw_window(size_t topline)
 /*
  * Print a string on the terminal.
  */
-static void term_print(const char *s)
+void term_nprint(size_t size, const char *s)
 {
   size_t i;
 
-  for (i = 0; *s != '\0'; s++)
-    if (*s != '\n')
-      term_addch(*s);
+  for (i = 0; i < size && s[i] != '\0'; i++)
+    if (s[i] != '\n')
+      term_addch(s[i]);
     else {
       term_clrtoeol();
       term_nl();
     }
 }
 
-/*
- * printf on the terminal
- */
-int term_printf(const char *fmt, ...)
+void term_print(const char *s)
 {
-  char *buf;
-  int res = 0;
-  va_list ap;
-  va_start(ap, fmt);
-  res = zvasprintf(&buf, fmt, ap);
-  va_end(ap);
-  term_print(buf);
-  return res;
+  term_nprint(SIZE_MAX, s);
 }
 
 /*
@@ -235,7 +229,7 @@ static void calculate_start_column(void)
 {
   size_t col = 0, lastcol = 0, t = tab_width();
   int rpfact, lpfact;
-  char *s, *rp, *lp, *p;
+  char *rp, *lp, *p;
   Point pt = buf.pt;
 
   rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
@@ -248,8 +242,10 @@ static void calculate_start_column(void)
         ++col;
       } else if (isprint(*p))
         ++col;
-      else
-        col += make_char_printable(&s, (size_t)*p);
+      else {
+        astr as = make_char_printable((size_t)*p);
+        col += astr_len(as);
+      }
 
     lpfact = (lp - astr_cstr(pt.p->item)) / (win.ewidth / 3);
 
@@ -298,17 +294,22 @@ static void draw_status_line(size_t line)
 
   term_print("-(");
   if (buf.flags & BFLAG_AUTOFILL) {
-    term_printf("Fill");
+    term_print("Fill");
     someflag = 1;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
-    term_printf("%sDef", someflag ? " " : "");
+    if (someflag)
+      term_print(" ");
+    term_print("Def");
     someflag = 1;
   }
-  if (buf.flags & BFLAG_ISEARCH)
-    term_printf("%sIsearch", someflag ? " " : "");
+  if (buf.flags & BFLAG_ISEARCH) {
+    if (someflag)
+      term_print(" ");
+    term_print("Isearch");
+  }
 
-  term_printf(")--L%d--C%d--", buf.pt.n + 1, get_goalc());
+  term_print(astr_cstr(astr_afmt(astr_new(), ")--L%d--C%d--", buf.pt.n + 1, get_goalc())));
 
   if (buf.num_lines <= win.eheight && win.topdelta == buf.pt.n)
     term_print("All");
@@ -317,7 +318,8 @@ static void draw_status_line(size_t line)
   else if (buf.pt.n + (win.eheight - win.topdelta) > buf.num_lines)
     term_print("Bot");
   else
-    term_printf("%2d%%", (int)((float)buf.pt.n / buf.num_lines * 100));
+    term_print(astr_cstr(astr_afmt(astr_new(), "%2d%%",
+                                   (int)((float)buf.pt.n / buf.num_lines * 100))));
 
   term_attrset(1, FONT_NORMAL);
 }
@@ -346,12 +348,14 @@ static void draw_popup(void)
 
     /* Draw lines. */
     for (; i < popup_lines() && y < term_height() - 2;
-         i++, y++, lp = list_next(lp))
-      term_printf("%.*s\n", term_width(), astr_cstr(lp->item));
+         i++, y++, lp = list_next(lp)) {
+      term_nprint(term_width(), astr_cstr(lp->item));
+      term_print("\n");
+    }
 
     /* Draw blank lines to bottom of window. */
     for (; y < term_height() - 2; y++)
-      term_printf("\n");
+      term_print("\n");
   }
 }
 
@@ -423,7 +427,7 @@ void resize_window(void)
           ++hdelta;
           decreased = TRUE;
         } else
-          /* Can't erase windows any longer. */
+          /* FIXME: Window too small! */
           assert(0);
       }
     }

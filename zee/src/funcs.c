@@ -83,10 +83,7 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
-  char *s;
-
-  zasprintf(&s, "%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1));
-  set_variable("fill-column", s);
+  set_variable("fill-column", astr_cstr(astr_afmt(astr_new(), "%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1))));
 }
 END_DEFUN
 
@@ -127,7 +124,7 @@ END_DEFUN
 static int quoted_insert_octal(int c1)
 {
   int c2, c3;
-  minibuf_write("C-q %d-", c1 - '0');
+  minibuf_write(astr_cstr(astr_afmt(astr_new(), "C-q %d-", c1 - '0')));
   c2 = getkey();
 
   if (!isdigit(c2) || c2 - '0' >= 8) {
@@ -136,7 +133,7 @@ static int quoted_insert_octal(int c1)
     return TRUE;
   }
 
-  minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
+  minibuf_write(astr_cstr(astr_afmt(astr_new(), "C-q %d %d-", c1 - '0', c2 - '0')));
   c3 = getkey();
 
   if (!isdigit(c3) || c3 - '0' >= 8) {
@@ -186,7 +183,7 @@ C-u following the digits or minus sign ends the argument.
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
-    minibuf_write("%s", astr_cstr(as));
+    minibuf_write(astr_cstr(as));
     key = getkey();
     minibuf_clear();
     astr_truncate(as, -1); /* Remove the '-' character. */

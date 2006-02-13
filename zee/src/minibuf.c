@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,24 +30,12 @@
 #include "main.h"
 #include "extern.h"
 
-/*--------------------------------------------------------------------------
- * Minibuffer wrapper functions.
- *--------------------------------------------------------------------------*/
-
-char *minibuf_format(const char *fmt, va_list ap)
+/*
+ * Write the specified string in the minibuffer.
+ */
+void minibuf_write(const char *s)
 {
-  char *buf;
-  zvasprintf(&buf, fmt, ap);
-  return buf;
-}
-
-static void minibuf_vwrite(const char *fmt, va_list ap)
-{
-  char *buf;
-
-  buf = minibuf_format(fmt, ap);
-
-  term_minibuf_write(buf);
+  term_minibuf_write(s);
 
   /* Redisplay (and leave the cursor in the correct position). */
   term_display();
@@ -56,62 +43,28 @@ static void minibuf_vwrite(const char *fmt, va_list ap)
 }
 
 /*
- * Write the specified string in the minibuffer.
- */
-void minibuf_write(const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start(ap, fmt);
-  minibuf_vwrite(fmt, ap);
-  va_end(ap);
-}
-
-/*
  * Write the specified error string in the minibuffer and beep.
  */
-void minibuf_error(const char *fmt, ...)
+void minibuf_error(const char *s)
 {
-  va_list ap;
-
-  va_start(ap, fmt);
-  minibuf_vwrite(fmt, ap);
-  va_end(ap);
-
+  minibuf_write(s);
   ding();
 }
 
 /*
  * Read a string from the minibuffer.
  */
-astr minibuf_read(const char *fmt, const char *value, ...)
+astr minibuf_read(const char *s, const char *value)
 {
-  va_list ap;
-  char *buf;
-  astr as;
-
-  va_start(ap, value);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
-  as = term_minibuf_read(buf, value ? value : "", NULL, NULL);
-
-  return as;
+  return term_minibuf_read(s, value ? value : "", NULL, NULL);
 }
 
-static int minibuf_read_forced(const char *fmt, const char *errmsg,
-                               Completion *cp, ...)
+static int minibuf_read_forced(const char *s, const char *errmsg, Completion *cp)
 {
-  va_list ap;
-  char *buf;
   astr as;
 
-  va_start(ap, cp);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
   for (;;) {
-    as = term_minibuf_read(buf, "", cp, NULL);
+    as = term_minibuf_read(s, "", cp, NULL);
     if (as == NULL)             /* Cancelled. */
       return -1;
     else {
@@ -135,22 +88,16 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
   }
 }
 
-int minibuf_read_yesno(const char *fmt, ...)
+int minibuf_read_yesno(const char *s)
 {
-  va_list ap;
-  char *buf;
   Completion *cp;
   int retvalue;
-
-  va_start(ap, fmt);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
 
   cp = completion_new();
   list_append(cp->completions, zstrdup("yes"));
   list_append(cp->completions, zstrdup("no"));
 
-  retvalue = minibuf_read_forced(buf, "Please answer yes or no.", cp);
+  retvalue = minibuf_read_forced(s, "Please answer yes or no.", cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
@@ -163,22 +110,15 @@ int minibuf_read_yesno(const char *fmt, ...)
   return retvalue;
 }
 
-int minibuf_read_boolean(const char *fmt, ...)
+int minibuf_read_boolean(const char *s)
 {
-  va_list ap;
-  char *buf;
-  Completion *cp;
   int retvalue;
+  Completion *cp = completion_new();
 
-  va_start(ap, fmt);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
-  cp = completion_new();
   list_append(cp->completions, zstrdup("true"));
   list_append(cp->completions, zstrdup("false"));
 
-  retvalue = minibuf_read_forced(buf, "Please answer true or false.", cp);
+  retvalue = minibuf_read_forced(s, "Please answer `true' or `false'.", cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
@@ -194,16 +134,9 @@ int minibuf_read_boolean(const char *fmt, ...)
 /*
  * Read a string from the minibuffer using a completion.
  */
-astr minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...)
+astr minibuf_read_completion(const char *s, char *value, Completion *cp, History *hp)
 {
-  va_list ap;
-  char *buf;
-
-  va_start(ap, hp);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
-  return term_minibuf_read(buf, value, cp, hp);
+  return term_minibuf_read(s, value, cp, hp);
 }
 
 /*

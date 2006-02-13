@@ -219,20 +219,22 @@ astr astr_fgets(FILE *fp)
   return as;
 }
 
-astr astr_vafmt(astr as, const char *fmt, va_list ap)
-{
-  char *buf;
-  zvasprintf(&buf, fmt, ap);
-  astr_cat_cstr(as, buf);
-  return as;
-}
-
 astr astr_afmt(astr as, const char *fmt, ...)
 {
   va_list ap;
+  int len;
+  char *s;
+
   va_start(ap, fmt);
-  astr_vafmt(as, fmt, ap);
+  len = vsnprintf(s, 0, fmt, ap);
   va_end(ap);
+  s = (char *)zmalloc((size_t)len);
+
+  va_start(ap, fmt);
+  assert(vsnprintf(s, len, fmt, ap) == len);
+  va_end(ap);
+
+  astr_cat_cstr(as, s);
   return as;
 }
 

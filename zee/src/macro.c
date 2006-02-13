@@ -151,7 +151,7 @@ void call_macro(Macro *mp)
   size_t i;
 
   /* The loop termination condition is really i >= 0, but unsigned
-     types are always >= 0, and we can't easily get SIZE_T_MAX. */
+     types are always >= 0. */
   for (i = vec_items(mp->keys) - 1; i < vec_items(mp->keys); i--)
     ungetkey(vec_item(mp->keys, i, size_t));
 }

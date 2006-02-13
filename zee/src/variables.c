@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -169,7 +168,7 @@ astr minibuf_read_variable_name(char *msg)
       minibuf_error("No variable name given");
       return NULL;
     } else if (get_variable(astr_cstr(ms)) == NULL) {
-      minibuf_error("There is no variable called `%s'", astr_cstr(ms));
+      minibuf_error(astr_cstr(astr_afmt(astr_new(), "There is no variable called `%s'", astr_cstr(ms))));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -209,12 +208,12 @@ Set a variable to the specified value.
       fmt = p ? p->fmt : "";
       if (!strcmp(fmt, "b")) {
         int i;
-        if ((i = minibuf_read_boolean("Set %s to value: ", astr_cstr(var))) == -1)
+        if ((i = minibuf_read_boolean(astr_cstr(astr_afmt(astr_new(), "Set %s to value: ", astr_cstr(var))))) == -1)
           ok = FUNCALL(cancel);
         else
           astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
       } else                      /* Non-boolean variable. */
-        if ((val = minibuf_read("Set %s to value: ", "", astr_cstr(var))) == NULL)
+        if ((val = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Set %s to value: ", astr_cstr(var))), "")) == NULL)
           ok = FUNCALL(cancel);
 
       if (ok)

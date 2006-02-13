@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -54,8 +53,7 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
   int reading_doc = 0;
 
   if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-    minibuf_error("Unable to read file `%s'",
-                  PATH_DATA "/AUTODOC");
+    minibuf_error("Unable to read file `" PATH_DATA "/AUTODOC'");
     return NULL;
   }
 
@@ -82,7 +80,7 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
   fclose(f);
 
   if (!reading_doc) {
-    minibuf_error("Cannot find documentation for `%s'", name);
+    minibuf_error(astr_cstr(astr_afmt(astr_new(), "Cannot find documentation for `%s'", name)));
     return NULL;
   }
 
@@ -148,9 +146,9 @@ Display the command invoked by a key sequence.
   keyname = chordtostr(key);
 
   if ((cmd = binding_to_function(key)) == NULL) {
-    minibuf_error("%s is unbound", astr_cstr(keyname));
+    minibuf_error(astr_cstr(astr_afmt(astr_new(), "%s is unbound", astr_cstr(keyname))));
     ok = FALSE;
   } else
-    minibuf_write("%s runs the command `%s'", astr_cstr(keyname), cmd);
+    minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s runs the command `%s'", astr_cstr(keyname), cmd)));
 }
 END_DEFUN

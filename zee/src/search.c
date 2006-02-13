@@ -152,7 +152,7 @@ Search forward from point for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error("Failing search: `%s'", astr_cstr(ms));
+      minibuf_error(astr_cstr(astr_afmt(astr_new(), "Failing search: `%s'", astr_cstr(ms))));
       ok = FALSE;
     }
   }
@@ -174,7 +174,7 @@ Search backward from point for match for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error("Failing search backward: `%s'", ms);
+      minibuf_error(astr_cstr(astr_afmt(astr_new(), "Failing search backward: `%s'", ms)));
       ok = FALSE;
     }
   }
@@ -224,7 +224,7 @@ static int isearch(int dir)
       find_err = NULL;
     }
 
-    minibuf_write("%s", astr_cstr(as));
+    minibuf_write(astr_cstr(as));
 
     c = getkey();
 
@@ -358,7 +358,7 @@ Replace occurrences of a regexp with other text.
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read("Replace `%s' with: ", "", astr_cstr(find))) == NULL)
+    if ((repl = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Replace `%s' with: ", astr_cstr(find))), "")) == NULL)
       ok = FUNCALL(cancel);
     else {
       while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
@@ -377,7 +377,7 @@ Replace occurrences of a regexp with other text.
         resync_display();
       term_display();
 
-      minibuf_write("Replaced %d occurrences", count);
+      minibuf_write(astr_cstr(astr_afmt(astr_new(), "Replaced %d occurrences", count)));
     }
   }
 }
@@ -400,7 +400,7 @@ what to do with it.
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read("Query replace `%s' with: ", "", astr_cstr(find))) == NULL)
+    if ((repl = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Query replace `%s' with: ", astr_cstr(find))), "")) == NULL)
       ok = FUNCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
@@ -410,7 +410,7 @@ what to do with it.
           if (thisflag & FLAG_NEED_RESYNC)
             resync_display();
           for (;;) {
-            minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl));
+            minibuf_write(astr_cstr(astr_afmt(astr_new(), "Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl))));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
                 c == 'q' || c == '.' || c == '!')
@@ -464,7 +464,7 @@ what to do with it.
         resync_display();
       term_display();
 
-      minibuf_write("Replaced %d occurrences", count);
+      minibuf_write(astr_cstr(astr_afmt(astr_new(), "Replaced %d occurrences", count)));
     }
   }
 }

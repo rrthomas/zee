@@ -96,7 +96,7 @@ astr file_read(astr *as, const char *filename)
   if (ok == FALSE) {
     /* FIXME: Check terminal is initialised */
     if (errno != ENOENT)
-      minibuf_write("%s: %s", filename, strerror(errno));
+      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s: %s", filename, strerror(errno))));
     return NULL;
   } else
     return find_eolstr(*as);
@@ -165,11 +165,11 @@ Save buffer in visited file.
 +*/
 {
   if (buffer_write(&buf, buf.filename) == FALSE) {
-    minibuf_error("%s: %s", buf.filename, strerror(errno));
+    minibuf_error(astr_cstr(astr_afmt(astr_new(), "%s: %s", buf.filename, strerror(errno))));
   } else {
     Undo *up;
 
-    minibuf_write("Wrote %s", buf.filename);
+    minibuf_write(astr_cstr(astr_afmt(astr_new(), "Wrote %s", buf.filename)));
     buf.flags &= ~BFLAG_MODIFIED;
 
     /* Set unchanged flags to FALSE except for the
@@ -191,7 +191,7 @@ Offer to the buffer, then quit.
   if (buf.flags & BFLAG_MODIFIED) {
     int ans;
 
-    if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ", "")) == -1)
+    if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ")) == -1)
       ok = FUNCALL(cancel);
     else if (!ans)
       ok = FALSE;
