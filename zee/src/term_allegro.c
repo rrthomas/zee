@@ -163,11 +163,12 @@ void term_addch(int c)
 void term_attrset(size_t attrs, ...)
 {
   size_t i, a = 0;
-  va_list valist;
-  va_start(valist, attrs);
+  va_list ap;
+
+  va_start(ap, attrs);
   for (i = 0; i < attrs; i++)
-    a |= va_arg(valist, Font);
-  va_end(valist);
+    a |= va_arg(ap, Font);
+  va_end(ap);
   cur_color = a;
 }
 
