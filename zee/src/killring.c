@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -68,7 +67,7 @@ static int kill_line(void)
     return TRUE;
   }
 
-  minibuf_error("End of buffer");
+  minibuf_error(astr_new("End of buffer"));
 
   return FALSE;
 }
@@ -180,7 +179,7 @@ static int kill_helper(Function func)
 
     thisflag |= FLAG_DONE_KILL;
 
-    minibuf_write("");	/* Erase "Set mark" message. */
+    minibuf_clear();            /* Erase "Set mark" message. */
   }
 
   return ok;
@@ -211,7 +210,7 @@ Set mark at beginning, and put point at end.
 +*/
 {
   if (astr_len(killed_text) == 0) {
-    minibuf_error("Kill ring is empty");
+    minibuf_error(astr_new("Kill ring is empty"));
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
@@ -223,5 +222,5 @@ END_DEFUN
 
 void init_kill_ring(void)
 {
-  killed_text = astr_new();
+  killed_text = astr_new("");
 }

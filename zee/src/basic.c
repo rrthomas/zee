@@ -23,7 +23,6 @@
 #include "config.h"
 
 #include <limits.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,10 +68,9 @@ END_DEFUN
 size_t get_goalc(void)
 {
   size_t col = 0, t = tab_width(), i;
-  const char *sp = astr_cstr(buf.pt.p->item);
 
   for (i = 0; i < buf.pt.o; i++) {
-    if (sp[i] == '\t')
+    if (*astr_char(buf.pt.p->item, (ptrdiff_t)i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -87,15 +85,13 @@ static void goto_goalc(int goalc)
 {
   int col = 0, t, w;
   size_t i;
-  const char *sp;
 
   t = tab_width();
-  sp = astr_cstr(buf.pt.p->item);
 
   for (i = 0; i < astr_len(buf.pt.p->item); i++) {
     if (col == goalc)
       break;
-    else if (sp[i] == '\t') {
+    else if (*astr_char(buf.pt.p->item, (ptrdiff_t)i) == '\t') {
       for (w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;
@@ -183,7 +179,7 @@ Position 1 is the beginning of the buffer.
   astr ms;
 
   do {
-    if ((ms = minibuf_read("Goto char: ", "")) == NULL) {
+    if ((ms = minibuf_read(astr_new("Goto char: "), astr_new(""))) == NULL) {
       ok = FUNCALL(cancel);
       break;
     }
@@ -237,7 +233,7 @@ Line 1 is the beginning of the buffer.
   astr ms;
 
   do {
-    if ((ms = minibuf_read("Goto line: ", "")) == NULL) {
+    if ((ms = minibuf_read(astr_new("Goto line: "), astr_new(""))) == NULL) {
       ok = FUNCALL(cancel);
       break;
     }
@@ -314,7 +310,7 @@ Scroll text of current window downward near full screen.
   if (buf.pt.n > 0)
     ok = goto_line(buf.pt.n - win.eheight) ? TRUE : FALSE;
   else {
-    minibuf_error("Beginning of buffer");
+    minibuf_error(astr_new("Beginning of buffer"));
     ok = FALSE;
   }
 }
@@ -328,7 +324,7 @@ Scroll text of current window upward near full screen.
   if (buf.pt.n < buf.num_lines)
     ok = goto_line(buf.pt.n + win.eheight) ? TRUE : FALSE;
   else {
-    minibuf_error("End of buffer");
+    minibuf_error(astr_new("End of buffer"));
     ok = FALSE;
   }
 }

@@ -1,5 +1,7 @@
 /* Completion facility functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2006 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -21,21 +23,9 @@
 #include "config.h"
 
 #include <assert.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <dirent.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 
 #include "main.h"
 #include "extern.h"
@@ -79,7 +69,7 @@ static astr completion_write(list l, size_t size)
 {
   size_t i, j, col, max, numcols;
   list p;
-  astr as = astr_new();
+  astr as = astr_new("");
 
   max = calculate_max_length(l, size) + 5;
   numcols = (win.ewidth - 1) / max;
@@ -104,7 +94,7 @@ static astr completion_write(list l, size_t size)
  */
 static void popup_completion(Completion *cp, int allflag, size_t num)
 {
-  astr popup = astr_new(), as;
+  astr popup = astr_new(""), as;
 
   cp->flags |= COMPLETION_POPPEDUP;
   astr_cpy_cstr(popup, "Completions\n\n");

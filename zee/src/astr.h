@@ -48,9 +48,9 @@
 typedef struct astr_s *astr;
 
 /*
- * Allocate a new string with zero length.
+ * Create a new string with initial contents s.
  */
-astr astr_new(void);
+astr astr_new(const char *s);
 
 /*
  * Convert as into a C null-terminated string.
@@ -85,8 +85,12 @@ astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
  * Assign the contents of the argument string to the string as.
  */
 astr astr_ncpy(astr as, const char *s, size_t csize);
-astr astr_cpy(astr as, const astr src);
 astr astr_cpy_cstr(astr as, const char *s);
+
+/*
+ * Duplicate as.
+ */
+astr astr_dup(const astr src);
 
 /*
  * Append the contents of the argument string or character to as.
@@ -98,19 +102,9 @@ astr astr_cat_char(astr as, int c);
 
 /*
  * Replace size characters of as, starting at pos, with the argument
- * string or character.
+ * string.
  */
 astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize);
-astr astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src);
-astr astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s);
-astr astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c);
-
-/*
- * Insert the contents of the argument string or character in as.
- */
-astr astr_insert(astr as, ptrdiff_t pos, const astr src);
-astr astr_insert_cstr(astr as, ptrdiff_t pos, const char *s);
-astr astr_insert_char(astr as, ptrdiff_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
@@ -135,9 +129,9 @@ astr astr_fread(FILE *fp);
 astr astr_fgets(FILE *fp);
 
 /*
- * Append formatted text to the argument string
+ * Format text into an astr
  */
-astr astr_afmt(astr as, const char *fmt, ...);
+astr astr_afmt(const char *fmt, ...);
 
 
 /*
@@ -151,9 +145,9 @@ astr astr_afmt(astr as, const char *fmt, ...);
  * You should never directly access the struct fields.
  */
 struct astr_s {
-  char *  text;
-  size_t  len;
-  size_t  maxlen;
+  char *text;
+  size_t len;
+  size_t maxlen;
 };
 
 

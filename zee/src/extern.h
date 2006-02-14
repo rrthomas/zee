@@ -28,16 +28,14 @@ int goto_point(Point pt);
 
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(size_t key, Function func);
-astr minibuf_read_function_name(const char *fmt, ...);
-const char *binding_to_function(size_t key);
+astr minibuf_read_function_name(astr as);
+astr binding_to_function(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
-Function get_function(const char *name);
-const char *get_function_name(Function p);
+Function get_function(astr name);
 
 /* buffer.c --------------------------------------------------------------- */
 void buffer_new(void);
-void set_buffer_filename(Buffer *bp, const char *filename);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 int calculate_the_region(Region *rp);
@@ -60,11 +58,18 @@ void popup_clear(void);
 size_t popup_pos(void);
 void popup_scroll_up(void);
 void popup_scroll_down(void);
+size_t term_width(void);
+size_t term_height(void);
+void term_set_size(size_t cols, size_t rows);
+void term_display(void);
+void term_tidy(void);
+void term_nprint(size_t size, const char *s);
+void term_print(const char *s);
 
 /* file.c ----------------------------------------------------------------- */
 astr get_home_dir(void);
-astr file_read(astr *as, const char *filename);
-void file_open(const char *filename);
+astr file_read(astr *as, astr filename);
+void file_open(astr filename);
 void die(int exitcode);
 
 /* glue.c ----------------------------------------------------------------- */
@@ -74,18 +79,16 @@ size_t getkey(void);
 void waitkey(size_t timeout);
 void ungetkey(size_t key);
 astr copy_text_block(Point start, size_t size);
-astr shorten_string(char *s, int maxlen);
-char *getln(FILE *fp);
 
 /* history.c -------------------------------------------------------------- */
-void add_history_element(History *hp, const char *string);
+void add_history_element(History *hp, astr string);
 void prepare_history(History *hp);
-const char *previous_history_element(History *hp);
-const char *next_history_element(History *hp);
+astr previous_history_element(History *hp);
+astr next_history_element(History *hp);
 
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(size_t key);
-size_t strtochord(const char *buf);
+size_t strtochord(astr chord);
 
 /* killring.c ------------------------------------------------------------- */
 void init_kill_ring(void);
@@ -107,7 +110,7 @@ int bobp(void);
 int eobp(void);
 int bolp(void);
 int eolp(void);
-int line_replace_text(Line **lp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
+int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, size_t newlen, int replace_case);
 int insert_char(int c);
 void fill_break_line(void);
 int insert_nstring(astr as, const char *eolstr, int intercalate);
@@ -118,7 +121,7 @@ void cancel_kbd_macro(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
 void call_macro(Macro *mp);
-Macro *get_macro(const char *name);
+Macro *get_macro(astr name);
 
 /* main.c ----------------------------------------------------------------- */
 extern Window win;
@@ -126,20 +129,19 @@ extern Buffer buf;
 extern int thisflag, lastflag, uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */
-void minibuf_error(const char *s);
-void minibuf_write(const char *s);
-astr minibuf_read(const char *s, const char *value);
-int minibuf_read_yesno(const char *s);
-int minibuf_read_boolean(const char *s);
-astr minibuf_read_dir(const char *s);
-astr minibuf_read_completion(const char *s, char *value, Completion *cp, History *hp);
+void minibuf_write(astr as);
+void minibuf_error(astr as);
+astr minibuf_read(astr as, astr value);
+int minibuf_read_yesno(astr as);
+int minibuf_read_boolean(astr as);
+astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *hp);
 void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
 void cmd_parse_init(astr as);
 void cmd_parse_end(void);
 void cmd_eval(void);
-void cmd_eval_file(const char *file);
+void cmd_eval_file(astr file);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);
@@ -150,20 +152,7 @@ void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);
 
-/* term_display.c --------------------------------------------------------- */
-size_t term_width(void);
-size_t term_height(void);
-void term_set_size(size_t cols, size_t rows);
-void term_display(void);
-void term_tidy(void);
-void term_nprint(size_t size, const char *s);
-void term_print(const char *s);
-
-/* term_minibuf.c --------------------------------------------------------- */
-void term_minibuf_write(const char *fmt);
-astr term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-
-/* term_{allegro,epocemx,ncurses}.c --------------------------------------- */
+/* term_{allegro,ncurses}.c ----------------------------------------------- */
 void term_init(void);
 void term_close(void);
 void term_move(size_t y, size_t x);
@@ -181,11 +170,11 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
-void set_variable(const char *var, const char *val);
-const char *get_variable(const char *var);
-int get_variable_number(char *var);
-int get_variable_bool(char *var);
-astr minibuf_read_variable_name(char *msg);
+void set_variable(astr var, astr val);
+astr get_variable(astr var);
+int get_variable_number(astr var);
+int get_variable_bool(astr var);
+astr minibuf_read_variable_name(astr msg);
 
 /* External C functions for interactive commands -------------------------- */
 #define X(cmd_name, c_name) \

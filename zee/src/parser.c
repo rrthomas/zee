@@ -89,7 +89,7 @@ static astr gettok(void)
 {
   int c;
 
-  astr tok = astr_new();
+  astr tok = astr_new("");
 
   switch ((c = getch_skipspace())) {
   case EOF:
@@ -154,7 +154,7 @@ static int eval(list *node)
     return FALSE;
 
   assert((*node)->item);
-  prim = get_function((char *)((*node)->item));
+  prim = get_function(astr_new((char *)((*node)->item)));
 
   *node = list_next(*node);
 
@@ -176,7 +176,7 @@ void cmd_eval(void)
     ;
 }
 
-void cmd_eval_file(const char *file)
+void cmd_eval_file(astr file)
 {
   astr as;
 

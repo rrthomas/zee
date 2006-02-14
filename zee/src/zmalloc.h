@@ -1,6 +1,6 @@
 /* Memory allocation functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2005 Reuben Thomas.
+   Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -23,7 +23,6 @@
 #ifndef ZMALLOC_H
 
 #include <stddef.h>
-#include <stdarg.h>
 
 /* Prototype here to break dependency cycle with extern.h */
 void die(int exitcode);
@@ -31,7 +30,5 @@ void die(int exitcode);
 void *zmalloc(size_t size);
 void *zrealloc(void *ptr, size_t oldsize, size_t newsize);
 char *zstrdup(const char *s);
-int zvasprintf(char **ptr, const char *fmt, va_list vargs);
-int zasprintf(char **ptr, const char *fmt, ...);
 
 #endif

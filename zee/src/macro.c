@@ -23,7 +23,6 @@
 #include "config.h"
 
 #include <assert.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,13 +77,13 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 +*/
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
-    minibuf_error("Already defining a keyboard macro");
+    minibuf_error(astr_new("Already defining a keyboard macro"));
     ok = FALSE;
   } else {
     if (cur_mp)
       cancel_kbd_macro();
 
-    minibuf_write("Defining keyboard macro...");
+    minibuf_write(astr_new("Defining keyboard macro..."));
 
     thisflag |= FLAG_DEFINING_MACRO;
     cur_mp = macro_new();
@@ -100,7 +99,7 @@ The macro is now available for use via C-x e.
 +*/
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
-    minibuf_error("Not defining a keyboard macro");
+    minibuf_error(astr_new("Not defining a keyboard macro"));
     ok = FALSE;
   } else
     thisflag &= ~FLAG_DEFINING_MACRO;
@@ -119,14 +118,14 @@ valid editor command.
   astr ms;
   Macro *mp;
 
-  if ((ms = minibuf_read("Name for last kbd macro: ", "")) == NULL) {
-    minibuf_error("No command name given");
+  if ((ms = minibuf_read(astr_new("Name for last kbd macro: "), astr_new(""))) == NULL) {
+    minibuf_error(astr_new("No command name given"));
     ok = FALSE;
   } else if (cur_mp == NULL) {
-    minibuf_error("No keyboard macro defined");
+    minibuf_error(astr_new("No keyboard macro defined"));
     ok = FALSE;
   } else {
-    if ((mp = get_macro(astr_cstr(ms)))) {
+    if ((mp = get_macro(ms))) {
       /* If a macro with this name already exists, update its key list */
     } else {
       /* Add a new macro to the list */
@@ -165,7 +164,7 @@ defining others, use M-x name-last-kbd-macro.
 +*/
 {
   if (cur_mp == NULL) {
-    minibuf_error("No kbd macro has been defined");
+    minibuf_error(astr_new("No kbd macro has been defined"));
     ok = FALSE;
   } else
     call_macro(cur_mp);
@@ -175,12 +174,12 @@ END_DEFUN
 /*
  * Find a macro given its name.
  */
-Macro *get_macro(const char *name)
+Macro *get_macro(astr name)
 {
   Macro *mp;
   assert(name);
   for (mp = head_mp; mp; mp = mp->next)
-    if (!strcmp(mp->name, name))
+    if (!strcmp(mp->name, astr_cstr(name)))
       return mp;
   return NULL;
 }

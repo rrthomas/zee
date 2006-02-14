@@ -1,5 +1,7 @@
 /* Undo facility functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2005-2006 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -21,7 +23,6 @@
 #include "config.h"
 
 #include <assert.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -101,11 +102,11 @@ Repeat this command to undo more changes.
 
   if (warn_if_readonly_buffer());
   else if (buf.next_undop == NULL) {
-    minibuf_error("No further undo information");
+    minibuf_error(astr_new("No further undo information"));
     buf.next_undop = buf.last_undop;
   } else {
     buf.next_undop = revert_action(buf.next_undop);
-    minibuf_write("Undo!");
+    minibuf_write(astr_new("Undo!"));
     ok = TRUE;
   }
 }

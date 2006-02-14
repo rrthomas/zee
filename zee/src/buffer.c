@@ -23,7 +23,6 @@
 #include "config.h"
 
 #include <assert.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,16 +51,8 @@ void buffer_new(void)
   /* Allocate the variables list. */
   buf.vars = list_new();
 
-  if (get_variable_bool("auto-fill-mode"))
+  if (get_variable_bool(astr_new("auto-fill-mode")))
     buf.flags ^= BFLAG_AUTOFILL;
-}
-
-/*
- * Set a new filename for the buffer.
- */
-void set_buffer_filename(Buffer *bp, const char *filename)
-{
-  bp->filename = zstrdup(filename);
 }
 
 /*
@@ -71,7 +62,7 @@ void set_buffer_filename(Buffer *bp, const char *filename)
 int warn_if_readonly_buffer(void)
 {
   if (buf.flags & BFLAG_READONLY) {
-    minibuf_error("Buffer is readonly");
+    minibuf_error(astr_new("Buffer is readonly"));
     return TRUE;
   } else
   return FALSE;
@@ -81,7 +72,7 @@ int warn_if_no_mark(void)
 {
   assert(buf.mark);
   if (!(buf.flags & BFLAG_ANCHORED)) {
-    minibuf_error("The mark is not active now");
+    minibuf_error(astr_new("The mark is not active now"));
     return TRUE;
   } else
     return FALSE;
@@ -134,6 +125,6 @@ void weigh_mark(void)
  */
 size_t tab_width(void)
 {
-  size_t t = get_variable_number("tab-width");
+  size_t t = get_variable_number(astr_new("tab-width"));
   return t ? t : 8;
 }

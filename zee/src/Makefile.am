@@ -52,8 +52,6 @@ zee_base_SOURCES =				\
 	tbl_vars.h				\
 	undo.c					\
 	variables.c				\
-	term_minibuf.c				\
-	term_display.c				\
 	main.h
 
 if ALLEGRO

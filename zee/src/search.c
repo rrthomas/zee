@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -135,7 +134,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
   return FALSE;
 }
 
-static char *last_search = NULL;
+static char *last_search = "";
 
 DEFUN("search-forward", search_forward)
 /*+
@@ -144,7 +143,7 @@ Search forward from point for regular expression REGEXP.
 {
   astr ms;
 
-  if ((ms = minibuf_read("Search: ", last_search)) == NULL)
+  if ((ms = minibuf_read(astr_new("Search: "), astr_new(last_search))) == NULL)
     ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0)
     ok = FALSE;
@@ -152,7 +151,7 @@ Search forward from point for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error(astr_cstr(astr_afmt(astr_new(), "Failing search: `%s'", astr_cstr(ms))));
+      minibuf_error(astr_afmt("Failing search: `%s'", astr_cstr(ms)));
       ok = FALSE;
     }
   }
@@ -166,7 +165,7 @@ Search backward from point for match for regular expression REGEXP.
 {
   astr ms;
 
-  if ((ms = minibuf_read("Search backward: ", last_search)) == NULL)
+  if ((ms = minibuf_read(astr_new("Search backward: "), astr_new(last_search))) == NULL)
     ok = FUNCALL(cancel);
   if (astr_len(ms) == 0)
     ok = FALSE;
@@ -174,7 +173,7 @@ Search backward from point for match for regular expression REGEXP.
     last_search = zstrdup(astr_cstr(ms));
 
     if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
-      minibuf_error(astr_cstr(astr_afmt(astr_new(), "Failing search backward: `%s'", ms)));
+      minibuf_error(astr_afmt("Failing search backward: `%s'", ms));
       ok = FALSE;
     }
   }
@@ -191,8 +190,8 @@ static int isearch(int dir)
 {
   int c;
   int last = TRUE;
-  astr as = astr_new();
-  astr pattern = astr_new();
+  astr as;
+  astr pattern = astr_new("");
   Point start, cur;
   Marker *old_mark;
 
@@ -207,8 +206,7 @@ static int isearch(int dir)
 
   for (;;) {
     /* Make the minibuf message. */
-    astr_truncate(as, 0);
-    astr_afmt(as, "%sI-search%s: %s",
+    as = astr_afmt("%sI-search%s: %s",
               (last ? " " : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
@@ -220,11 +218,11 @@ static int isearch(int dir)
           (strncmp(find_err, "Invalid ", 8) == 0)) {
         find_err = "incomplete input";
       }
-      astr_afmt(as, " [%s]", find_err);
+      astr_cat(as, astr_afmt(" [%s]", find_err));
       find_err = NULL;
     }
 
-    minibuf_write(astr_cstr(as));
+    minibuf_write(as);
 
     c = getkey();
 
@@ -278,7 +276,7 @@ static int isearch(int dir)
         /* Save search string. */
         last_search = zstrdup(astr_cstr(pattern));
 
-        minibuf_write("Mark saved when search started");
+        minibuf_write(astr_new("Mark saved when search started"));
       } else
         minibuf_clear();
       break;
@@ -351,14 +349,14 @@ Replace occurrences of a regexp with other text.
   int count = 0, find_no_upper;
   astr find, repl;
 
-  if ((find = minibuf_read("Replace string: ", "")) == NULL)
+  if ((find = minibuf_read(astr_new("Replace string: "), astr_new(""))) == NULL)
     ok = FUNCALL(cancel);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Replace `%s' with: ", astr_cstr(find))), "")) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
       ok = FUNCALL(cancel);
     else {
       while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
@@ -368,7 +366,7 @@ Replace occurrences of a regexp with other text.
                              buf.pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
         if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
-                              astr_len(find), astr_cstr(repl), astr_len(repl),
+                              astr_len(find), repl, astr_len(repl),
                               find_no_upper))
           buf.flags |= BFLAG_MODIFIED;
       }
@@ -377,7 +375,7 @@ Replace occurrences of a regexp with other text.
         resync_display();
       term_display();
 
-      minibuf_write(astr_cstr(astr_afmt(astr_new(), "Replaced %d occurrences", count)));
+      minibuf_write(astr_afmt("Replaced %d occurrences", count));
     }
   }
 }
@@ -393,14 +391,14 @@ what to do with it.
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
   astr find, repl;
 
-  if ((find = minibuf_read("Query replace string: ", "")) == NULL)
+  if ((find = minibuf_read(astr_new("Query replace string: "), astr_new(""))) == NULL)
     ok = FUNCALL(cancel);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(astr_cstr(find), astr_len(find));
 
-    if ((repl = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Query replace `%s' with: ", astr_cstr(find))), "")) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
       ok = FUNCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
@@ -410,12 +408,12 @@ what to do with it.
           if (thisflag & FLAG_NEED_RESYNC)
             resync_display();
           for (;;) {
-            minibuf_write(astr_cstr(astr_afmt(astr_new(), "Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl))));
+            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl)));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
                 c == 'q' || c == '.' || c == '!')
               goto exitloop;
-            minibuf_error("Please answer y, n, !, . or q.");
+            minibuf_error(astr_new("Please answer y, n, !, . or q."));
             waitkey(WAITKEY_DEFAULT);
           }
         exitloop:
@@ -450,7 +448,7 @@ what to do with it.
                   make_point(buf.pt.n, buf.pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl), FALSE);
         if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
-                              astr_len(find), astr_cstr(repl), astr_len(repl),
+                              astr_len(find), repl, astr_len(repl),
                               find_no_upper))
           buf.flags |= BFLAG_MODIFIED;
         /* FALLTHROUGH */
@@ -464,7 +462,7 @@ what to do with it.
         resync_display();
       term_display();
 
-      minibuf_write(astr_cstr(astr_afmt(astr_new(), "Replaced %d occurrences", count)));
+      minibuf_write(astr_afmt("Replaced %d occurrences", count));
     }
   }
 }

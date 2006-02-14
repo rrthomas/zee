@@ -1,6 +1,6 @@
 /* Key chord functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2005 Reuben Thomas.
+   Copyright (c) 2004-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +53,7 @@ astr chordtostr(size_t key)
 {
   int found;
   size_t i;
-  astr as = astr_new();
+  astr as = astr_new("");
 
   if (key & KBD_CTRL)
     astr_cat_cstr(as, "C-");
@@ -73,7 +72,7 @@ astr chordtostr(size_t key)
     if (isgraph(key))
       astr_cat_char(as, (int)(key & 0xff));
     else
-      astr_afmt(as, "<%x>", key);
+      astr_cat(as, astr_afmt("<%x>", key));
   }
 
   return as;
@@ -101,18 +100,18 @@ static size_t strtokey(const char *buf, size_t *len)
 /*
  * Convert a key chord string to its key code
  */
-size_t strtochord(const char *buf)
+size_t strtochord(astr chord)
 {
   size_t key = 0, len = 0, k;
 
   do {
     size_t l;
-    k = strtokey(buf + len, &l);
+    k = strtokey(astr_char(chord, (ptrdiff_t)len), &l);
     key |= k;
     len += l;
   } while (k == KBD_CTRL || k == KBD_META);
 
-  if (len != strlen(buf))
+  if (len != astr_len(chord))
     key = KBD_NOKEY;
 
   return key;

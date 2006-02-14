@@ -25,7 +25,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -119,7 +118,7 @@ void set_mark_to_point(void)
 Line *line_new(void)
 {
   Line *lp = list_new();
-  list_append(lp, astr_new());
+  list_append(lp, astr_new(""));
   return lp;
 }
 
@@ -136,7 +135,7 @@ Line *string_to_lines(astr as, const char *eol, size_t *lines)
     const char *q;
     if ((q = strstr(p, eol)) != NULL) {
       astr_ncat(list_last(lp)->item, p, (size_t)(q - p));
-      list_append(lp, astr_new());
+      list_append(lp, astr_new(""));
       ++*lines;
       p = q + eol_len;
     } else {                    /* End of string, or embedded NUL */
@@ -238,7 +237,7 @@ int eolp(void)
  */
 int insert_char(int c)
 {
-  astr as = astr_cat_char(astr_new(), (char)c);
+  astr as = astr_cat_char(astr_new(""), (char)c);
   return insert_nstring(as, "\n", FALSE);
 }
 
@@ -282,13 +281,13 @@ static int intercalate_newline(void)
   lp1 = buf.pt.p;
 
   /* Update line linked list. */
-  list_prepend(lp1, astr_new());
+  list_prepend(lp1, astr_new(""));
   lp2 = list_next(lp1);
   ++buf.num_lines;
 
   /* Move the text after the point into the new line. */
   as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
-  astr_cpy(lp2->item, as);
+  lp2->item = astr_dup(as);
   astr_truncate(lp1->item, (ptrdiff_t)lp1len);
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);
@@ -335,23 +334,24 @@ static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
 }
 
 /*
- * Replace text in the line "lp" with "newtext". If "replace_case" is
+ * Replace text in the line lp with newtext. If replace_case is
  * TRUE then the new characters will be the same case as the old.
  * Return flag indicating whether modifications have been made.
  */
 int line_replace_text(Line **lp, size_t offset, size_t oldlen,
-                       const char *newtext, size_t newlen, int replace_case)
+                      astr newtext, size_t newlen, int replace_case)
 {
   int changed = FALSE;
-  char *newcopy = zstrdup(newtext);
+  char *newcopy = zstrdup(astr_cstr(newtext));
 
   if (oldlen > 0) {
-    if (replace_case && get_variable_bool("case-replace"))
+    if (replace_case && get_variable_bool(astr_new("case-replace")))
       recase(newcopy, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
              oldlen);
 
     if (newlen != oldlen) {
-      astr_replace_cstr((*lp)->item, (ptrdiff_t)offset, oldlen, newcopy);
+      astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen, newcopy,
+                    strlen(newcopy));
       adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
       changed = TRUE;
     } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
@@ -373,7 +373,7 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
 void fill_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
-  size_t fillcol = get_variable_number("fill-column");
+  size_t fillcol = get_variable_number(astr_new("fill-column"));
 
   /* If we're not beyond fill-column, stop now. */
   if (get_goalc() <= fillcol)
@@ -426,16 +426,16 @@ Insert a newline, and move to left margin of the new line if it's blank.
 {
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
   if (buf.flags & BFLAG_AUTOFILL &&
-      get_goalc() > (size_t)get_variable_number("fill-column"))
+      get_goalc() > (size_t)get_variable_number(astr_new("fill-column")))
     fill_break_line();
   ok = insert_char('\n');
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
 }
 END_DEFUN
 
-int insert_nstring(astr as, const char *eolstr, int intercalate)
+int insert_nstring(astr as, const char *eol, int intercalate)
 {
-  size_t i, eollen = strlen(eolstr);
+  size_t i, eol_len = strlen(eol);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -444,12 +444,12 @@ int insert_nstring(astr as, const char *eolstr, int intercalate)
 
   for (i = 0; i < astr_len(as); i++) {
     char *s = astr_char(as, (ptrdiff_t)i);
-    if (strncmp(s, eolstr, eollen) == 0) {
+    if (strncmp(s, eol, eol_len) == 0) {
       intercalate_newline();
       if (!intercalate)
         FUNCALL(edit_navigate_forward_char);
     } else {
-      astr_insert_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o, *s);
+      astr_nreplace(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 0, s, 1);
       buf.flags |= BFLAG_MODIFIED;
       if (!intercalate)
         adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, 1);
@@ -469,7 +469,7 @@ int delete_nstring(size_t size, astr *as)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  *as = astr_new();
+  *as = astr_new("");
 
   undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, 0, FALSE);
   buf.flags |= BFLAG_MODIFIED;
@@ -480,7 +480,7 @@ int delete_nstring(size_t size, astr *as)
       astr_cat_cstr(*as, buf.eol);
 
     if (eobp()) {
-      minibuf_error("End of buffer");
+      minibuf_error(astr_new("End of buffer"));
       return FALSE;
     }
 
@@ -518,7 +518,7 @@ Whichever character you type to run this command is inserted.
 
   if (intarg <= 255) {
     if (isspace(intarg) && buf.flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number("fill-column"))
+        get_goalc() > (size_t)get_variable_number(astr_new("fill-column")))
       fill_break_line();
     insert_char(intarg);
   } else {
@@ -550,7 +550,7 @@ Join lines if the character is a newline.
   if (FUNCALL(edit_navigate_backward_char))
     FUNCALL(delete_char);
   else {
-    minibuf_error("Beginning of buffer");
+    minibuf_error(astr_new("Beginning of buffer"));
     ok = FALSE;
   }
 }

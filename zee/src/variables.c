@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,8 +33,8 @@
 static list root_varlist;
 
 typedef struct {
-  const char *key;
-  const char *value;
+  astr key;
+  astr value;
 } vpair;
 
 void init_variables(void)
@@ -43,31 +42,31 @@ void init_variables(void)
   root_varlist = list_new();
 }
 
-static list variable_find(list varlist, const char *key)
+static list variable_find(list varlist, astr key)
 {
   list p;
 
   if (key != NULL)
     for (p = list_first(varlist); p != varlist; p = list_next(p))
-      if (!strcmp(key, ((vpair *)(p->item))->key))
+      if (!strcmp(astr_cstr(key), astr_cstr(((vpair *)(p->item))->key)))
         return p;
 
   return NULL;
 }
 
-static void variable_update(list varlist, const char *key, const char *value)
+static void variable_update(list varlist, astr key, astr value)
 {
   if (key && value) {
     list temp = variable_find(varlist, key);
 
     if (temp == NULL || temp->item == NULL) {
       vpair *vp = zmalloc(sizeof(vpair));
-      vp->key = zstrdup(key);
+      vp->key = key;
       list_prepend(varlist, vp);
       temp = list_first(varlist);
     }
 
-    ((vpair *)(temp->item))->value = zstrdup(value);
+    ((vpair *)(temp->item))->value = value;
   }
 }
 
@@ -75,27 +74,29 @@ static void variable_update(list varlist, const char *key, const char *value)
 /*
  * Default variables values table.
  */
-static struct var_entry {
+typedef struct {
   char *var;                    /* Variable name. */
   char *fmt;                    /* Variable format (boolean, etc.). */
   const char *val;              /* Default value. */
-} def_vars[] = {
+} var_entry;
+
+static var_entry def_vars[] = {
 #define X(var, fmt, val, doc) { var, fmt, val },
 #include "tbl_vars.h"
 #undef X
 };
 
-static struct var_entry *get_variable_default(const char *var)
+static var_entry *get_variable_default(astr var)
 {
-  struct var_entry *p;
+  var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!strcmp(p->var, var))
+    if (!strcmp(p->var, astr_cstr(var)))
       return p;
 
   return NULL;
 }
 
-void set_variable(const char *var, const char *val)
+void set_variable(astr var, astr val)
 {
   list varlist = root_varlist;
 
@@ -107,57 +108,54 @@ void set_variable(const char *var, const char *val)
   variable_update(varlist, var, val);
 }
 
-const char *get_variable(const char *var)
+astr get_variable(astr var)
 {
-  const char *s = NULL;
+  var_entry *p;
 
   /* Have to be able to run this before the first buffer is created. */
   if (buf.vars) {
     list temp = variable_find(buf.vars, var);
     if (temp && temp->item)
-      s = (char *)(temp->item);
+      return astr_new((char *)(temp->item));
   }
 
-  if (s == NULL) {
-    struct var_entry *p = get_variable_default(var);
-    if (p)
-      s = p->val;
-  }
+  if ((p = get_variable_default(var)))
+    return astr_new(p->val);
 
-  return s;
+  return NULL;
 }
 
-int get_variable_number(char *var)
+int get_variable_number(astr var)
 {
-  const char *s;
+  astr as;
 
-  if ((s = get_variable(var)))
-    return atoi(s);
+  if ((as = get_variable(var)))
+    return atoi(astr_cstr(as));
 
   return 0;
 }
 
-int get_variable_bool(char *var)
+int get_variable_bool(astr var)
 {
-  const char *s;
+  astr as;
 
-  if ((s = get_variable(var)) != NULL)
-    return strcmp(s, "true") == 0;
+  if ((as = get_variable(var)) != NULL)
+    return strcmp(astr_cstr(as), "true") == 0;
 
   return FALSE;
 }
 
-astr minibuf_read_variable_name(char *msg)
+astr minibuf_read_variable_name(astr msg)
 {
   astr ms;
   Completion *cp = completion_new();
-  struct var_entry *p;
+  var_entry *p;
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
     list_append(cp->completions, zstrdup(p->var));
 
   for (;;) {
-    ms = minibuf_read_completion(msg, "", cp, NULL);
+    ms = minibuf_read_completion(msg, astr_new(""), cp, NULL);
 
     if (ms == NULL) {
       FUNCALL(cancel);
@@ -165,10 +163,10 @@ astr minibuf_read_variable_name(char *msg)
     }
 
     if (astr_len(ms) == 0) {
-      minibuf_error("No variable name given");
+      minibuf_error(astr_new("No variable name given"));
       return NULL;
-    } else if (get_variable(astr_cstr(ms)) == NULL) {
-      minibuf_error(astr_cstr(astr_afmt(astr_new(), "There is no variable called `%s'", astr_cstr(ms))));
+    } else if (get_variable(ms) == NULL) {
+      minibuf_error(astr_afmt("There is no variable called `%s'", astr_cstr(ms)));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -198,26 +196,26 @@ Set a variable to the specified value.
         *lp = list_next(*lp);
       }
 
-      set_variable(name, newvalue);
+      set_variable(astr_new(name), astr_new(newvalue));
     }
   } else {
-    if ((var = minibuf_read_variable_name("Set variable: ")) == NULL)
+    if ((var = minibuf_read_variable_name(astr_new("Set variable: "))) == NULL)
       ok = FALSE;
     else {
-      struct var_entry *p = get_variable_default(astr_cstr(var));
+      var_entry *p = get_variable_default(var);
       fmt = p ? p->fmt : "";
       if (!strcmp(fmt, "b")) {
         int i;
-        if ((i = minibuf_read_boolean(astr_cstr(astr_afmt(astr_new(), "Set %s to value: ", astr_cstr(var))))) == -1)
+        if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
           ok = FUNCALL(cancel);
         else
           astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
-      } else                      /* Non-boolean variable. */
-        if ((val = minibuf_read(astr_cstr(astr_afmt(astr_new(), "Set %s to value: ", astr_cstr(var))), "")) == NULL)
+      } else                    /* Non-boolean variable. */
+        if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
           ok = FUNCALL(cancel);
 
       if (ok)
-        set_variable(astr_cstr(var), astr_cstr(val));
+        set_variable(var, val);
     }
   }
 }

@@ -20,7 +20,6 @@
 
 #include "config.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,7 +95,7 @@ void ungetkey(size_t key)
 astr copy_text_block(Point start, size_t size)
 {
   size_t n = buf.pt.n, i;
-  astr as = astr_new();
+  astr as = astr_new("");
   Line *lp = buf.pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the
@@ -121,25 +120,6 @@ astr copy_text_block(Point start, size_t size)
       lp = list_next(lp);
       i = 0;
     }
-  }
-
-  return as;
-}
-
-/*
- * Return a string of maximum length `maxlen' beginning with a `...'
- * sequence if a cut is need.
- */
-astr shorten_string(char *s, int maxlen)
-{
-  int len;
-  astr as = astr_new();
-
-  if ((len = strlen(s)) <= maxlen)
-    astr_cpy_cstr(as, s);
-  else {
-    astr_cpy_cstr(as, "...");
-    astr_cat_cstr(as, s + len - maxlen + 3);
   }
 
   return as;

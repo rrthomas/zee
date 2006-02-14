@@ -26,7 +26,7 @@
 #include "main.h"
 #include "extern.h"
 
-void add_history_element(History *hp, const char *string)
+void add_history_element(History *hp, astr string)
 {
   const char *last;
 
@@ -34,8 +34,8 @@ void add_history_element(History *hp, const char *string)
     hp->elements = list_new();
 
   last = list_last(hp->elements)->item;
-  if (!last || strcmp(last, string) != 0)
-    list_append(hp->elements, zstrdup(string));
+  if (!last || strcmp(last, astr_cstr(string)) != 0)
+    list_append(hp->elements, zstrdup(astr_cstr(string)));
 }
 
 void prepare_history(History *hp)
@@ -43,7 +43,7 @@ void prepare_history(History *hp)
   hp->sel = NULL;
 }
 
-const char *previous_history_element(History *hp)
+astr previous_history_element(History *hp)
 {
   const char *s = NULL;
 
@@ -64,10 +64,10 @@ const char *previous_history_element(History *hp)
     }
   }
 
-  return s;
+  return s ? astr_new(s) : NULL;
 }
 
-const char *next_history_element(History *hp)
+astr next_history_element(History *hp)
 {
   const char *s = NULL;
 
@@ -82,5 +82,5 @@ const char *next_history_element(History *hp)
       hp->sel = NULL;
   }
 
-  return s;
+  return s ? astr_new(s) : NULL;
 }

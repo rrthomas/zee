@@ -24,7 +24,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,22 +129,22 @@ static FEntry ftable[] = {
 
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
-Function get_function(const char *name)
+Function get_function(astr name)
 {
   size_t i;
   if (name)
     for (i = 0; i < fentries; i++)
-      if (strcmp(name, ftable[i].name) == 0)
+      if (strcmp(astr_cstr(name), ftable[i].name) == 0)
         return ftable[i].func;
   return NULL;
 }
 
-const char *get_function_name(Function f)
+static astr get_function_name(Function f)
 {
   size_t i;
   for (i = 0; i < fentries; i++)
     if (ftable[i].func == f)
-      return ftable[i].name;
+      return astr_new(ftable[i].name);
   return NULL;
 }
 
@@ -153,35 +152,29 @@ const char *get_function_name(Function f)
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
  */
-astr minibuf_read_function_name(const char *fmt, ...)
+astr minibuf_read_function_name(astr as)
 {
-  va_list ap;
   size_t i;
-  astr as, ms;
+  astr ms;
   list p;
   Completion *cp;
-
-  va_start(ap, fmt);
-  as = astr_afmt(astr_new(), fmt, ap);
-  va_end(ap);
 
   cp = completion_new();
   for (i = 0; i < fentries; ++i)
     list_append(cp->completions, zstrdup(ftable[i].name));
 
   for (;;) {
-    ms = minibuf_read_completion(astr_cstr(as), "", cp, &functions_history);
+    ms = minibuf_read_completion(as, astr_new(""), cp, &functions_history);
 
     if (ms == NULL) {
       FUNCALL(cancel);
       break;
     } else if (astr_len(ms) == 0) {
-      minibuf_error("No function name given");
+      minibuf_error(astr_new("No function name given"));
       ms = NULL;
       break;
     } else {
-      astr as = astr_new();
-      astr_cpy(as, ms);
+      astr as = astr_dup(ms);
       /* Complete partial words if possible */
       if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
         astr_cpy_cstr(ms, cp->match);
@@ -191,12 +184,12 @@ astr minibuf_read_function_name(const char *fmt, ...)
           astr_cpy_cstr(ms, p->item);
           break;
         }
-      if (get_function(astr_cstr(ms)) || get_macro(astr_cstr(ms))) {
-        add_history_element(&functions_history, astr_cstr(ms));
+      if (get_function(ms) || get_macro(ms)) {
+        add_history_element(&functions_history, ms);
         minibuf_clear();        /* Remove any error message */
         break;
       } else {
-        minibuf_error(astr_cstr(astr_afmt(astr_new(), "Undefined function name `%s'", astr_cstr(ms))));
+        minibuf_error(astr_afmt("Undefined function name `%s'", astr_cstr(ms)));
         waitkey(WAITKEY_DEFAULT);
       }
     }
@@ -214,11 +207,11 @@ Read key chord, and unbind it.
   size_t key = KBD_NOKEY;
 
   if (argc > 0) {
-    astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
-    key = strtochord(astr_cstr(keystr));
+    astr keystr = astr_new((char *)((*lp)->item));
+    key = strtochord(keystr);
     *lp = list_next(*lp);
   } else {
-    minibuf_write("Unbind key: ");
+    minibuf_write(astr_new("Unbind key: "));
     key = getkey();
   }
 
@@ -239,33 +232,31 @@ chord.
   ok = FALSE;
 
   if (argc > 0) {
-    astr keystr = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
-
-    key = strtochord(astr_cstr(keystr));
+    key = strtochord(astr_new((char *)((*lp)->item)));
     *lp = list_next(*lp);
-    name = astr_cpy_cstr(astr_new(), (char *)((*lp)->item));
+    name = astr_new((char *)((*lp)->item));
     *lp = list_next(*lp);
   } else {
     astr as;
 
-    minibuf_write("Bind key: ");
+    minibuf_write(astr_new("Bind key: "));
     key = getkey();
 
     as = chordtostr(key);
-    name = minibuf_read_function_name("Bind key %s to command: ", astr_cstr(as));
+    name = minibuf_read_function_name(astr_afmt("Bind key %s to command: ", astr_cstr(as)));
   }
 
   if (name) {
     Function func;
 
-    if ((func = get_function(astr_cstr(name)))) {
+    if ((func = get_function(name))) {
       ok = TRUE;
       if (key != KBD_NOKEY)
         bind_key(key, func);
       else
-        minibuf_error("Invalid key");
+        minibuf_error(astr_new("Invalid key"));
     } else
-      minibuf_error(astr_cstr(astr_afmt(astr_new(), "No such function `%s'", astr_cstr(name))));
+      minibuf_error(astr_afmt("No such function `%s'", astr_cstr(name)));
   }
 }
 END_DEFUN
@@ -273,7 +264,7 @@ END_DEFUN
 static astr function_to_binding(Function f)
 {
   size_t i, n = 0;
-  astr as = astr_new();
+  astr as = astr_new("");
 
   for (i = 0; i < vec_items(bindings); i++)
     if (vec_item(bindings, i, Binding).func == f) {
@@ -295,31 +286,31 @@ Argument is a command definition, usually a symbol with a function definition.
   astr name;
   Function f;
 
-  name = minibuf_read_function_name("Where is command: ");
+  name = minibuf_read_function_name(astr_new("Where is command: "));
 
-  if ((f = get_function(astr_cstr(name))) == NULL)
+  if ((f = get_function(name)) == NULL)
     ok = FALSE;
   else {
     astr bindings = function_to_binding(f);
 
     if (astr_len(bindings) > 0)
-      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s is on %s", astr_cstr(name), astr_cstr(bindings))));
+      minibuf_write(astr_afmt("%s is on %s", astr_cstr(name), astr_cstr(bindings)));
     else
-      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s is not on any key", astr_cstr(name))));
+      minibuf_write(astr_afmt("%s is not on any key", astr_cstr(name)));
   }
 }
 END_DEFUN
 
-const char *binding_to_function(size_t key)
+astr binding_to_function(size_t key)
 {
   Binding *p;
 
   if (key & KBD_META && isdigit(key & 255))
-    return "universal-argument";
+    return astr_new("universal-argument");
 
   if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
-      return "self-insert-command";
+      return astr_new("self-insert-command");
     else
       return NULL;
   } else

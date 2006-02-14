@@ -117,7 +117,7 @@ typedef struct {
   Undo *last_undop;
   int flags;                    /* Buffer flags */
   list vars;                    /* Buffer-local variables */
-  char *filename;              /* The name of the file being edited */
+  astr filename;               /* The name of the file being edited */
   char eol[3];        /* EOL string (up to 2 chars) for this buffer */
 } Buffer;
 

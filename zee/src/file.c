@@ -39,7 +39,7 @@
 astr get_home_dir(void)
 {
   char *s = getenv("HOME");
-  astr as = astr_new();
+  astr as = astr_new("");
 
   if (s != NULL && strlen(s) < PATH_MAX)
     as = astr_cpy_cstr(as, s);
@@ -53,7 +53,7 @@ static astr find_eolstr(astr as)
 {
   char c = '\0';
   size_t i;
-  astr eolstr = astr_new();
+  astr eolstr = astr_new("");
 
   assert(as);
 
@@ -81,12 +81,12 @@ static astr find_eolstr(astr as)
  * Read the file contents into a string.
  * Return quietly if the file doesn't exist.
  */
-astr file_read(astr *as, const char *filename)
+astr file_read(astr *as, astr filename)
 {
   int ok = TRUE;
   FILE *fp;
 
-  if ((fp = fopen(filename, "r")) == NULL)
+  if ((fp = fopen(astr_cstr(filename), "r")) == NULL)
     ok = FALSE;
   else {
     *as = astr_fread(fp);
@@ -96,7 +96,7 @@ astr file_read(astr *as, const char *filename)
   if (ok == FALSE) {
     /* FIXME: Check terminal is initialised */
     if (errno != ENOENT)
-      minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s: %s", filename, strerror(errno))));
+      minibuf_write(astr_afmt("%s: %s", astr_cstr(filename), strerror(errno)));
     return NULL;
   } else
     return find_eolstr(*as);
@@ -106,12 +106,12 @@ astr file_read(astr *as, const char *filename)
  * Read the file contents into the buffer.
  * Return quietly if the file doesn't exist.
  */
-void file_open(const char *filename)
+void file_open(astr filename)
 {
   astr as = NULL, eolstr;
 
   buffer_new();
-  buf.filename = zstrdup(filename);
+  buf.filename = astr_dup(filename);
 
   eolstr = file_read(&as, filename);
 
@@ -134,7 +134,7 @@ void file_open(const char *filename)
  * The filename is passed separately so a name other than buf.filename
  * can be used, e.g. in an emergency by die.
  */
-static int buffer_write(Buffer *bp, const char *filename)
+static int buffer_write(Buffer *bp, astr filename)
 {
   size_t eol_len;
   FILE *fp;
@@ -142,7 +142,7 @@ static int buffer_write(Buffer *bp, const char *filename)
 
   assert(bp);
 
-  if ((fp = fopen(filename, "w")) == NULL)
+  if ((fp = fopen(astr_cstr(filename), "w")) == NULL)
     return FALSE;
 
   eol_len = strlen(bp->eol);
@@ -165,11 +165,11 @@ Save buffer in visited file.
 +*/
 {
   if (buffer_write(&buf, buf.filename) == FALSE) {
-    minibuf_error(astr_cstr(astr_afmt(astr_new(), "%s: %s", buf.filename, strerror(errno))));
+    minibuf_error(astr_afmt("%s: %s", buf.filename, strerror(errno)));
   } else {
     Undo *up;
 
-    minibuf_write(astr_cstr(astr_afmt(astr_new(), "Wrote %s", buf.filename)));
+    minibuf_write(astr_afmt("Wrote %s", buf.filename));
     buf.flags &= ~BFLAG_MODIFIED;
 
     /* Set unchanged flags to FALSE except for the
@@ -191,7 +191,7 @@ Offer to the buffer, then quit.
   if (buf.flags & BFLAG_MODIFIED) {
     int ans;
 
-    if ((ans = minibuf_read_yesno("Unsaved changes; exit anyway? (yes or no) ")) == -1)
+    if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
       ok = FUNCALL(cancel);
     else if (!ans)
       ok = FALSE;
@@ -205,6 +205,8 @@ END_DEFUN
 /*
  * Function called on unexpected error or crash (SIGSEGV).
  * Attempts to save buffer if modified.
+ * FIXME: Shouldn't create astrs here, because we don't want to
+ * malloc.
  */
 void die(int exitcode)
 {
@@ -213,14 +215,14 @@ void die(int exitcode)
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf.flags & BFLAG_MODIFIED) {
-    astr as = astr_new();
+    astr as = astr_new("");
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf.filename)
-      astr_cpy_cstr(as, buf.filename);
+      as = astr_dup(buf.filename);
     astr_cat_cstr(as, "." PACKAGE_NAME "SAVE");
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
-    buffer_write(&buf, astr_cstr(as));
+    buffer_write(&buf, as);
     term_close();
   }
   exit(exitcode);

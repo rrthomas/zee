@@ -1,6 +1,6 @@
 /* Self documentation facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -24,7 +24,6 @@
 
 #include <ctype.h>
 #include <limits.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +37,7 @@ DEFUN("help-about", help_about)
 Show the version in the minibuffer.
 +*/
 {
-  minibuf_write(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+  minibuf_write(astr_new(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
 }
 END_DEFUN
 
@@ -46,33 +45,32 @@ END_DEFUN
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
  */
-static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
+static astr get_funcvar_doc(const char *name, astr *defval, int isfunc)
 {
   FILE *f;
   astr buf, match, doc;
   int reading_doc = 0;
 
   if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-    minibuf_error("Unable to read file `" PATH_DATA "/AUTODOC'");
+    minibuf_error(astr_new("Unable to read file `" PATH_DATA "/AUTODOC'"));
     return NULL;
   }
 
-  match = astr_new();
   if (isfunc)
-    astr_afmt(match, "\fF_%s", name);
+    match = astr_afmt("\fF_%s", name);
   else
-    astr_afmt(match, "\fV_%s", name);
+    match = astr_afmt("\fV_%s", name);
 
-  doc = astr_new();
+  doc = astr_new("");
   while ((buf = astr_fgets(f)) != NULL) {
     if (reading_doc) {
       if (*astr_char(buf, 0) == '\f')
         break;
-      if (isfunc || astr_len(defval) > 0) {
+      if (isfunc || astr_len(*defval) > 0) {
         astr_cat(doc, buf);
         astr_cat_cstr(doc, "\n");
       } else
-        astr_cpy(defval, buf);
+        *defval = astr_dup(buf);
     } else if (!astr_cmp(buf, match))
       reading_doc = 1;
   }
@@ -80,7 +78,7 @@ static astr get_funcvar_doc(const char *name, astr defval, int isfunc)
   fclose(f);
 
   if (!reading_doc) {
-    minibuf_error(astr_cstr(astr_afmt(astr_new(), "Cannot find documentation for `%s'", name)));
+    minibuf_error(astr_afmt("Cannot find documentation for `%s'", name));
     return NULL;
   }
 
@@ -94,12 +92,10 @@ Display the full documentation of FUNCTION (a symbol).
 {
   astr name, doc;
 
-  if ((name = minibuf_read_function_name("Describe function: "))) {
-    if ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE))) {
-      astr popup = astr_new();
-      astr_afmt(popup, "Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc));
-      popup_set(popup);
-    } else
+  if ((name = minibuf_read_function_name(astr_new("Describe function: ")))) {
+    if ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE)))
+      popup_set(astr_afmt("Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc)));
+    else
       ok = FALSE;
   } else
     ok = FALSE;
@@ -113,17 +109,16 @@ Display the full documentation of VARIABLE (a symbol).
 {
   astr name;
 
-  if ((name = minibuf_read_variable_name("Describe variable: "))) {
-    astr defval = astr_new(), doc, popup = astr_new();
+  if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
+    astr defval, doc;
 
-    if ((doc = get_funcvar_doc(astr_cstr(name), defval, FALSE))) {
-      astr_afmt(popup, "Help for variable `%s':\n\n"
-                "Default value: %s\n"
-                "Current value: %s\n\n"
-                "Documentation:\n%s",
-                astr_cstr(name), astr_cstr(defval),
-                get_variable(astr_cstr(name)), astr_cstr(doc));
-      popup_set(popup);
+    if ((doc = get_funcvar_doc(astr_cstr(name), &defval, FALSE))) {
+            popup_set(astr_afmt("Help for variable `%s':\n\n"
+                                "Default value: %s\n"
+                                "Current value: %s\n\n"
+                                "Documentation:\n%s",
+                                astr_cstr(name), astr_cstr(defval),
+                                get_variable(name), astr_cstr(doc)));
     } else
       ok = FALSE;
 
@@ -138,17 +133,16 @@ Display the command invoked by a key sequence.
 +*/
 {
   size_t key;
-  const char *cmd;
-  astr keyname;
+  astr keyname, cmd;
 
-  minibuf_write("Describe key:");
+  minibuf_write(astr_new("Describe key:"));
   key = getkey();
   keyname = chordtostr(key);
 
   if ((cmd = binding_to_function(key)) == NULL) {
-    minibuf_error(astr_cstr(astr_afmt(astr_new(), "%s is unbound", astr_cstr(keyname))));
+    minibuf_error(astr_afmt("%s is unbound", astr_cstr(keyname)));
     ok = FALSE;
   } else
-    minibuf_write(astr_cstr(astr_afmt(astr_new(), "%s runs the command `%s'", astr_cstr(keyname), cmd)));
+    minibuf_write(astr_afmt("%s runs the command `%s'", astr_cstr(keyname), astr_cstr(cmd)));
 }
 END_DEFUN

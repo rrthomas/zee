@@ -26,7 +26,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <signal.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +50,7 @@ Cancel current command.
 +*/
 {
   weigh_mark();
-  minibuf_error("Quit");
+  minibuf_error(astr_new("Quit"));
   ok = FALSE;
 }
 END_DEFUN
@@ -83,7 +82,7 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
-  set_variable("fill-column", astr_cstr(astr_afmt(astr_new(), "%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1))));
+  set_variable(astr_new("fill-column"), astr_afmt("%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1)));
 }
 END_DEFUN
 
@@ -93,7 +92,7 @@ Set mark where point is.
 +*/
 {
   set_mark_to_point();
-  minibuf_write("Mark set");
+  minibuf_write(astr_new("Mark set"));
   anchor_mark();
 }
 END_DEFUN
@@ -124,7 +123,7 @@ END_DEFUN
 static int quoted_insert_octal(int c1)
 {
   int c2, c3;
-  minibuf_write(astr_cstr(astr_afmt(astr_new(), "C-q %d-", c1 - '0')));
+  minibuf_write(astr_afmt("C-q %d-", c1 - '0'));
   c2 = getkey();
 
   if (!isdigit(c2) || c2 - '0' >= 8) {
@@ -133,7 +132,7 @@ static int quoted_insert_octal(int c1)
     return TRUE;
   }
 
-  minibuf_write(astr_cstr(astr_afmt(astr_new(), "C-q %d %d-", c1 - '0', c2 - '0')));
+  minibuf_write(astr_afmt("C-q %d %d-", c1 - '0', c2 - '0'));
   c3 = getkey();
 
   if (!isdigit(c3) || c3 - '0' >= 8) {
@@ -156,7 +155,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 {
   int c;
 
-  minibuf_write("C-q-");
+  minibuf_write(astr_new("Insert literal character: "));
   c = xgetkey(GETKEY_UNFILTERED, 0);
 
   if (isdigit(c) && c - '0' < 8)
@@ -177,13 +176,13 @@ C-u following the digits or minus sign ends the argument.
 {
   size_t key, i = 0, arg = 0, digit;
   int sgn = 1;
-  astr as = astr_new();
+  astr as = astr_new("");
 
   ok = TRUE;
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
-    minibuf_write(astr_cstr(as));
+    minibuf_write(as);
     key = getkey();
     minibuf_clear();
     astr_truncate(as, -1); /* Remove the '-' character. */
@@ -194,7 +193,7 @@ C-u following the digits or minus sign ends the argument.
     } else if (isdigit(key & 0xff)) {
       /* Digit pressed. */
       digit = (key & 0xff) - '0';
-      astr_afmt(as, " %d", digit);
+      astr_cat(as, astr_afmt(" %d", digit));
       arg = arg * 10 + digit;
       i++;
     } else if (key == (KBD_CTRL | 'u'))
@@ -389,7 +388,7 @@ Fill paragraph at or after point.
   }
 
   FUNCALL(end_of_line);
-  while (get_goalc() > (size_t)get_variable_number("fill-column") + 1)
+  while (get_goalc() > (size_t)get_variable_number(astr_new("fill-column")) + 1)
     fill_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;
@@ -480,19 +479,19 @@ Read command or macro name, then call it.
 FIXME: Make it work non-interactively.
 +*/
 {
-  astr name, msg = astr_new();
+  astr name, msg = astr_new("");
   Function func;
   Macro *mp;
 
   astr_cat_cstr(msg, "M-x ");
 
-  name = minibuf_read_function_name(astr_cstr(msg));
+  name = minibuf_read_function_name(msg);
   if (name == NULL)
     return FALSE;
 
-  if ((func = get_function(astr_cstr(name))))
+  if ((func = get_function(name)))
     ok = func(0, 0, NULL);
-  else if ((mp = get_macro(astr_cstr(name))))
+  else if ((mp = get_macro(name)))
     call_macro(mp);
   else
     ok = FALSE;
@@ -510,7 +509,7 @@ current buffer, overwriting the current region.
 {
   astr ms;
 
-  if ((ms = minibuf_read("Shell command: ", "")) == NULL)
+  if ((ms = minibuf_read(astr_new("Shell command: "), astr_new(""))) == NULL)
     ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0 || warn_if_no_mark())
     ok = FALSE;
@@ -519,12 +518,12 @@ current buffer, overwriting the current region.
     int fd = mkstemp(tempfile);
 
     if (fd == -1) {
-      minibuf_error("Cannot open temporary file");
+      minibuf_error(astr_new("Cannot open temporary file"));
       ok = FALSE;
     } else {
       FILE *pipe;
       Region r;
-      astr cmd = astr_new(), as;
+      astr cmd = astr_new(""), as;
 
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
@@ -532,13 +531,13 @@ current buffer, overwriting the current region.
 
       close(fd);
 
-      astr_afmt(cmd, "%s 2>&1 <%s", astr_cstr(ms), tempfile);
+      cmd = astr_afmt("%s 2>&1 <%s", astr_cstr(ms), tempfile);
 
       if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
-        minibuf_error("Cannot open pipe to process");
+        minibuf_error(astr_new("Cannot open pipe to process"));
         ok = FALSE;
       } else {
-        astr out = astr_new(), s;
+        astr out = astr_new(""), s;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
           astr_cat(out, s);

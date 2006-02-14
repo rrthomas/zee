@@ -27,7 +27,6 @@
 #include <ctype.h>
 #include <limits.h>
 #include <locale.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -147,15 +146,12 @@ int main(int argc, char **argv)
       bflag = TRUE;
       break;
     case 'e':
-      {
-        astr bs = astr_cpy_cstr(astr_new(), optarg);
-        cmd_parse_init(bs);
-        cmd_eval();
-        cmd_parse_end();
-      }
+      cmd_parse_init(astr_new(optarg));
+      cmd_eval();
+      cmd_parse_end();
       break;
     case 'l':
-      cmd_eval_file(optarg);
+      cmd_eval_file(astr_new(optarg));
       break;
     case 'q':
       qflag = TRUE;
@@ -203,14 +199,14 @@ int main(int argc, char **argv)
 
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
-    bind_key(strtochord("M-x"), F_execute_command);
+    bind_key(strtochord(astr_new("M-x")), F_execute_command);
 
     /* Open file given on command line. */
     while (*argv) {
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
       else if (*argv)
-        file_open(*argv++);
+        file_open(astr_new(*argv++));
     }
 
     if (buf.lines) {
@@ -221,10 +217,10 @@ int main(int argc, char **argv)
 
       /* Write help message, but allow it to be overwritten by errors
          from loading init files */
-      minibuf_write(about_minibuf_str);
+      minibuf_write(astr_new(about_minibuf_str));
 
       /* Load default bindings file. */
-      cmd_eval_file(PATH_DATA "/key_bindings.el");
+      cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
     }
   }
 
@@ -233,7 +229,7 @@ int main(int argc, char **argv)
     astr as = get_home_dir();
     if (astr_len(as) > 0) {
       astr_cat_cstr(as, "/." PACKAGE_NAME);
-      cmd_eval_file(astr_cstr(as));
+      cmd_eval_file(as);
     }
   }
 
