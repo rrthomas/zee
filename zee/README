@@ -2,15 +2,15 @@
                                  ---
 
 Zee an experimental editor and programming environment based on the
-Emacs clone Zile (zile.sourceforge.net).
+Emacs clone Zile (http://zile.sourceforge.net/).
 
 Zee is written in ISO C using POSIX APIs; its only external
-dependency is a terminal library, either termcap, Allegro or epocemx.
+dependency is a terminal library, either termcap, or Allegro.
 
 Zee is free software, licensed under the GNU GPL.
 
 See INSTALL for installation instructions.
 
-Zee is hosted on SourceForge at http://zee.sourceforge.net/
+Zee is hosted on SourceForge at http://sourceforge.net/projects/zee/
 
 Any questions, comments, or bug reports should be sent to rrt@sc3d.org.
