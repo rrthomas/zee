@@ -4,8 +4,8 @@
 Zee an experimental editor and programming environment based on the
 Emacs clone Zile (http://zile.sourceforge.net/).
 
-Zee is written in ISO C using POSIX APIs; its only external
-dependency is a terminal library, either termcap, or Allegro.
+Zee is written in POSIX C and requires the Boehm garbage collector,
+libgc, and a terminal library (either termcap or Allegro).
 
 Zee is free software, licensed under the GNU GPL.
 
