@@ -1,6 +1,6 @@
 /* Memory allocation functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2005 Reuben Thomas.
+   Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -50,27 +50,14 @@ void *zmalloc(size_t size)
 /*
  * Resize an allocated memory area.
  */
-void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
+void *zrealloc(void *ptr, size_t newsize)
 {
   void *newptr;
-
-  assert(newsize > 0);
 
   if ((newptr = GC_REALLOC(ptr, newsize)) == NULL) {
     fprintf(stderr, PACKAGE_NAME ": cannot reallocate memory\n");
     die(1);
   }
 
-  if (newsize > oldsize)
-    memset((char *)newptr + oldsize, 0, newsize - oldsize);
-
   return newptr;
-}
-
-/*
- * Duplicate a string.
- */
-char *zstrdup(const char *s)
-{
-  return strcpy(zmalloc(strlen(s) + 1), s);
 }

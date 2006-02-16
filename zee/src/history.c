@@ -34,8 +34,8 @@ void add_history_element(History *hp, astr string)
     hp->elements = list_new();
 
   last = list_last(hp->elements)->item;
-  if (!last || strcmp(last, astr_cstr(string)) != 0)
-    list_append(hp->elements, zstrdup(astr_cstr(string)));
+  if (!last || astr_cmp(last, string) != 0)
+    list_append(hp->elements, astr_dup(string));
 }
 
 void prepare_history(History *hp)
@@ -45,42 +45,41 @@ void prepare_history(History *hp)
 
 astr previous_history_element(History *hp)
 {
-  const char *s = NULL;
+  astr as = NULL;
 
   if (hp->elements) {
-    /* First time that we use `previous-history-element'. */
-    if (!hp->sel) {
+    if (!hp->sel) { /* First call for this history. */
       /* Select last element. */
       if (list_last(hp->elements) != hp->elements) {
         hp->sel = list_last(hp->elements);
-        s = hp->sel->item;
+        as = hp->sel->item;
       }
     }
     /* Is there another element? */
     else if (list_prev(hp->sel) != hp->elements) {
       /* Select it. */
       hp->sel = list_prev(hp->sel);
-      s = hp->sel->item;
+      as = hp->sel->item;
     }
   }
 
-  return s ? astr_new(s) : NULL;
+  return as ? as : NULL;
 }
 
 astr next_history_element(History *hp)
 {
-  const char *s = NULL;
+  astr as = NULL;
 
   if (hp->elements && hp->sel) {
     /* Next element. */
     if (list_next(hp->sel) != hp->elements) {
       hp->sel = list_next(hp->sel);
-      s = hp->sel->item;
+      as = hp->sel->item;
     }
     /* No more elements (back to original status). */
     else
       hp->sel = NULL;
   }
 
-  return s ? astr_new(s) : NULL;
+  return as ? as : NULL;
 }

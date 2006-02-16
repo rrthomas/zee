@@ -79,13 +79,6 @@ astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
  * Do strcmp on the contents of two strings.
  */
 #define astr_cmp(as1, as2)      (strcmp(((astr)(as1))->text, ((astr)(as2))->text))
-#define astr_cmp_cstr(as, s)    (strcmp(((astr)(as))->text, (s)))
-
-/*
- * Assign the contents of the argument string to the string as.
- */
-astr astr_ncpy(astr as, const char *s, size_t csize);
-astr astr_cpy_cstr(astr as, const char *s);
 
 /*
  * Duplicate as.

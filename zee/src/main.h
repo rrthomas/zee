@@ -76,15 +76,11 @@ enum {
 typedef struct Undo {
   struct Undo *next;            /* Next undo delta in list */
   int type;                     /* The type of undo delta */
-  Point pt;               /* Where the undo delta needs to be applied.
-                             Warning! Do not use the "pt.p" field */
+  Point pt;               /* Where the undo delta is to be applied. */
   int unchanged; /* Flag indicating that reverting this undo leaves the buffer
                     in an unchanged state */
-
-  /* The undo delta */
-  astr text;                  /* String */
-  size_t size;                /* Block size for replace */
-  int intercalate;        /* TRUE means intercalate, FALSE insert */
+  astr text;                    /* Replacement string */
+  size_t size;                  /* Block size for replace */
 } Undo;
 
 typedef struct {
@@ -105,7 +101,7 @@ typedef struct {
 #define BFLAG_ANCHORED  (0x0010) /* The mark is anchored */
 
 /*
- * Represents a buffer: an open file.
+ * Represents a buffer.
  */
 typedef struct {
   Line *lines;                  /* The lines of text */
@@ -147,16 +143,16 @@ enum {
 
 typedef struct {
   int flags;                    /* Flags */
-  astr path;                    /* File path, if any */
-  list completions;             /* The completions list */
+  list completions;             /* The completion strings */
   list matches;                 /* The matches list */
-  char *match;                  /* The match buffer */
-  size_t matchsize;             /* The match buffer size */
+  astr match;                   /* The match buffer */
+  size_t matchsize;             /* The current match length */
 } Completion;
 
 typedef struct {
   list elements;                /* Elements (strings) */
-  list sel;
+  list sel;                     /* Currently selected element (pointer
+                                   to elements) */
 } History;
 
 typedef struct {
@@ -166,7 +162,7 @@ typedef struct {
 
 typedef struct Macro {
   vector *keys;                 /* Vector of keystrokes */
-  char *name;                   /* Name of the macro */
+  astr name;                    /* Name of the macro */
   struct Macro *next;           /* Next macro in the list */
 } Macro;
 
@@ -230,8 +226,8 @@ enum {
 #endif
 
 /* Define an interactive function */
-#define DEFUN(cmd_name, c_func) \
-  int F_ ## c_func(int argc, int intarg, list *lp) \
+#define DEFUN(cmd_name) \
+  int F_ ## cmd_name(int argc, int intarg, list *lp) \
   { \
     int ok = TRUE; \
     (void)intarg; \
@@ -240,8 +236,8 @@ enum {
       intarg = 1;
 
 
-#define DEFUN_INT(cmd_name, c_func) \
-  DEFUN(cmd_name, c_func) \
+#define DEFUN_INT(cmd_name) \
+  DEFUN(cmd_name) \
   if (lp && *lp) { \
     intarg = (*lp)->item ? atoi((char *)((*lp)->item)) : 0; \
     *lp = list_next(*lp); \
@@ -252,11 +248,11 @@ enum {
   }
 
 /* Call an interactive function */
-#define FUNCALL(c_func) \
-  F_ ## c_func(0, 0, NULL)
+#define FUNCALL(cmd_name) \
+  F_ ## cmd_name(0, 0, NULL)
 
 /* Call an interactive function with an integer argument */
-#define FUNCALL_INT(c_func, arg) \
-  F_ ## c_func(1, arg, NULL)
+#define FUNCALL_INT(cmd_name, arg) \
+  F_ ## cmd_name(1, arg, NULL)
 
 #endif /* !MAIN_H */

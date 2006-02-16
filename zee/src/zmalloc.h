@@ -28,7 +28,6 @@
 void die(int exitcode);
 
 void *zmalloc(size_t size);
-void *zrealloc(void *ptr, size_t oldsize, size_t newsize);
-char *zstrdup(const char *s);
+void *zrealloc(void *ptr, size_t newsize);
 
 #endif

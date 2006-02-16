@@ -124,6 +124,8 @@ Line *line_new(void)
 
 /*
  * Read an astr into a Line list.
+ * FIXME: rewrite with astr_strstr, which should work with embedded
+ * NULs (uses strnstr, which we also need to write).
  */
 Line *string_to_lines(astr as, const char *eol, size_t *lines)
 {
@@ -237,11 +239,11 @@ int eolp(void)
  */
 int insert_char(int c)
 {
-  astr as = astr_cat_char(astr_new(""), (char)c);
+  astr as = astr_afmt("%c", c);
   return insert_nstring(as, "\n", FALSE);
 }
 
-DEFUN("tab-to-tab-stop", tab_to_tab_stop)
+DEFUN(tab_to_tab_stop)
 /*+
 Insert spaces or tabs to next defined tab-stop column.
 Convert the tabulation into spaces.
@@ -272,7 +274,7 @@ static int intercalate_newline(void)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, 1, FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, 1);
 
   /* Calculate the two line lengths. */
   lp1len = buf.pt.o;
@@ -320,17 +322,17 @@ static int check_case(const char *s, size_t len)
 /*
  * Recase str according to case of tmpl.
  */
-static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
+static void recase(astr str, const char *tmpl, size_t tmpl_len)
 {
   size_t i;
   int tmpl_case = check_case(tmpl, tmpl_len);
 
   if (tmpl_case >= 1)
-    *str = toupper(*str);
+    *astr_char(str, 0) = toupper(*astr_char(str, 0));
 
   if (tmpl_case == 2)
-    for (i = 1; i < len; i++)
-      str[i] = toupper(str[i]);
+    for (i = 1; i < astr_len(str); i++)
+      *astr_char(str, (ptrdiff_t)i) = toupper(*astr_char(str, (ptrdiff_t)i));
 }
 
 /*
@@ -339,24 +341,24 @@ static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
  * Return flag indicating whether modifications have been made.
  */
 int line_replace_text(Line **lp, size_t offset, size_t oldlen,
-                      astr newtext, size_t newlen, int replace_case)
+                      astr newtext, int replace_case)
 {
   int changed = FALSE;
-  char *newcopy = zstrdup(astr_cstr(newtext));
+  astr newcopy = astr_dup(newtext);
 
   if (oldlen > 0) {
-    if (replace_case && get_variable_bool(astr_new("case-replace")))
-      recase(newcopy, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
-             oldlen);
+    if (replace_case && get_variable_bool(astr_new("case_replace")))
+      recase(newcopy, astr_char((*lp)->item, (ptrdiff_t)offset), oldlen);
 
-    if (newlen != oldlen) {
-      astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen, newcopy,
-                    strlen(newcopy));
-      adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
+    if (astr_len(newcopy) != oldlen) {
+      astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen,
+                    astr_cstr(newcopy), astr_len(newcopy));
+      adjust_markers(*lp, *lp, offset, 0, (int)(astr_len(newcopy) - oldlen));
       changed = TRUE;
     } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
-                      newcopy, newlen) != 0) {
-      memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newcopy, newlen);
+                      astr_cstr(newcopy), astr_len(newcopy)) != 0) {
+      memcpy(astr_char((*lp)->item, (ptrdiff_t)offset),
+             astr_cstr(newcopy), astr_len(newcopy));
       changed = TRUE;
     }
   }
@@ -365,17 +367,17 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
 }
 
 /*
- * If point is greater than fill-column, then split the line at the
- * right-most space character at or before fill-column, if there is
- * one, or at the left-most at or after fill-column, if not. If the
+ * If point is greater than fill_column, then split the line at the
+ * right-most space character at or before fill_column, if there is
+ * one, or at the left-most at or after fill_column, if not. If the
  * line contains no spaces, no break is made.
  */
 void fill_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
-  size_t fillcol = get_variable_number(astr_new("fill-column"));
+  size_t fillcol = get_variable_number(astr_new("fill_column"));
 
-  /* If we're not beyond fill-column, stop now. */
+  /* If we're not beyond fill_column, stop now. */
   if (get_goalc() <= fillcol)
     return;
 
@@ -386,7 +388,7 @@ void fill_break_line(void)
     excess++;
   }
 
-  /* Find break point moving left from fill-column. */
+  /* Find break point moving left from fill_column. */
   for (i = buf.pt.o; i > 0; i--) {
     int c = *astr_char(buf.pt.p->item, (ptrdiff_t)(i - 1));
     if (isspace(c)) {
@@ -395,7 +397,7 @@ void fill_break_line(void)
     }
   }
 
-  /* If no break point moving left from fill-column, find first
+  /* If no break point moving left from fill_column, find first
      possible moving right. */
   if (break_col == 0) {
     for (i = buf.pt.o + 1; i < astr_len(buf.pt.p->item); i++) {
@@ -419,17 +421,17 @@ void fill_break_line(void)
     buf.pt.o = old_col;
 }
 
-DEFUN("newline", newline)
+DEFUN(newline)
 /*+
 Insert a newline, and move to left margin of the new line if it's blank.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   if (buf.flags & BFLAG_AUTOFILL &&
-      get_goalc() > (size_t)get_variable_number(astr_new("fill-column")))
+      get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
     fill_break_line();
   ok = insert_char('\n');
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
 END_DEFUN
 
@@ -440,7 +442,7 @@ int insert_nstring(astr as, const char *eol, int intercalate)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as), FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
     char *s = astr_char(as, (ptrdiff_t)i);
@@ -471,7 +473,7 @@ int delete_nstring(size_t size, astr *as)
 
   *as = astr_new("");
 
-  undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, 0, FALSE);
+  undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, 0);
   buf.flags |= BFLAG_MODIFIED;
   while (size--) {
     if (!eolp())
@@ -508,7 +510,7 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEFUN("self-insert-command", self_insert_command)
+DEFUN(self_insert_command)
 /*+
 Insert the character you type.
 Whichever character you type to run this command is inserted.
@@ -518,7 +520,7 @@ Whichever character you type to run this command is inserted.
 
   if (intarg <= 255) {
     if (isspace(intarg) && buf.flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number(astr_new("fill-column")))
+        get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
       fill_break_line();
     insert_char(intarg);
   } else {
@@ -528,7 +530,7 @@ Whichever character you type to run this command is inserted.
 }
 END_DEFUN
 
-DEFUN("delete-char", delete_char)
+DEFUN(delete_char)
 /*+
 Delete the following character.
 Join lines if the character is a newline.
@@ -539,7 +541,7 @@ Join lines if the character is a newline.
 }
 END_DEFUN
 
-DEFUN("backward-delete-char", backward_delete_char)
+DEFUN(backward_delete_char)
 /*+
 Delete the previous character.
 Join lines if the character is a newline.
@@ -556,12 +558,12 @@ Join lines if the character is a newline.
 }
 END_DEFUN
 
-DEFUN("delete-horizontal-space", delete_horizontal_space)
+DEFUN(delete_horizontal_space)
 /*+
 Delete all spaces and tabs around point.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
 
   while (!eolp() && isspace(following_char()))
     FUNCALL(delete_char);
@@ -569,19 +571,19 @@ Delete all spaces and tabs around point.
   while (!bolp() && isspace(preceding_char()))
     FUNCALL(backward_delete_char);
 
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
 END_DEFUN
 
-DEFUN("just-one-space", just_one_space)
+DEFUN(just_one_space)
 /*+
 Delete all spaces and tabs around point, leaving one space.
 +*/
 {
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   FUNCALL(delete_horizontal_space);
   insert_char(' ');
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
 END_DEFUN
 
@@ -604,7 +606,7 @@ static void previous_nonblank_goalc(void)
     FUNCALL(edit_navigate_forward_char);
 }
 
-DEFUN("indent-relative", indent_relative)
+DEFUN(indent_relative)
 /*+
 Indent line or insert a tab.
 +*/
@@ -635,7 +637,7 @@ Indent line or insert a tab.
     remove_marker(old_point);
 
     /* Indent. */
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
     if (target_goalc > 0)
       /* If not at EOL on target line, insert spaces up to
          target_goalc. */
@@ -644,15 +646,15 @@ Indent line or insert a tab.
         insert_char(' ');
     else
       ok = FUNCALL(tab_to_tab_stop);
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
   }
 }
 END_DEFUN
 
-DEFUN("newline-and-indent", newline_and_indent)
+DEFUN(newline_and_indent)
 /*+
 Insert a newline, then indent.
-Indentation is done using the `indent-relative' command, except
+Indentation is done using the `indent_relative' command, except
 that if there is a character in the first column of the line above,
 no indenting is performed.
 +*/
@@ -667,7 +669,7 @@ no indenting is performed.
       size_t pos;
       Marker *old_point = point_marker();
 
-      undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+      undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
 
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
@@ -680,7 +682,7 @@ no indenting is performed.
       if (indent)
         FUNCALL(indent_relative);
 
-      undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+      undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
     }
   }
 }

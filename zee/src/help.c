@@ -32,7 +32,7 @@
 #include "extern.h"
 #include "paths.h"
 
-DEFUN("help-about", help_about)
+DEFUN(help_about)
 /*+
 Show the version in the minibuffer.
 +*/
@@ -85,7 +85,7 @@ static astr get_funcvar_doc(const char *name, astr *defval, int isfunc)
   return doc;
 }
 
-DEFUN("help-command", help_command)
+DEFUN(help_command)
 /*+
 Display the full documentation of FUNCTION (a symbol).
 +*/
@@ -102,7 +102,7 @@ Display the full documentation of FUNCTION (a symbol).
 }
 END_DEFUN
 
-DEFUN("help-variable", help_variable)
+DEFUN(help_variable)
 /*+
 Display the full documentation of VARIABLE (a symbol).
 +*/
@@ -127,7 +127,7 @@ Display the full documentation of VARIABLE (a symbol).
 }
 END_DEFUN
 
-DEFUN("help-key", help_key)
+DEFUN(help_key)
 /*+
 Display the command invoked by a key sequence.
 +*/

@@ -58,7 +58,7 @@ void recenter(void)
     win.topdelta = buf.pt.n;
 }
 
-DEFUN("recenter", recenter)
+DEFUN(recenter)
 /*+
 Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.
@@ -552,4 +552,15 @@ void resize_window(void)
 
   if (hdelta != 0)
     FUNCALL(recenter);
+}
+
+/*
+ * Emit an error sound and cancel any macro definition.
+ */
+void ding(void)
+{
+  term_beep();
+
+  if (thisflag & FLAG_DEFINING_MACRO)
+    cancel_kbd_macro();
 }

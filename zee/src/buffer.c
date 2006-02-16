@@ -51,7 +51,7 @@ void buffer_new(void)
   /* Allocate the variables list. */
   buf.vars = list_new();
 
-  if (get_variable_bool(astr_new("auto-fill-mode")))
+  if (get_variable_bool(astr_new("auto_fill_mode")))
     buf.flags ^= BFLAG_AUTOFILL;
 }
 
@@ -125,6 +125,44 @@ void weigh_mark(void)
  */
 size_t tab_width(void)
 {
-  size_t t = get_variable_number(astr_new("tab-width"));
+  size_t t = get_variable_number(astr_new("tab_width"));
   return t ? t : 8;
+}
+
+/*
+ * Return a string containing `size' characters from point `start'.
+ * If the region includes any line endings, they are turned into '\n'
+ * irrespective of `buf.eol', and count as one character.
+ */
+astr copy_text_block(Point start, size_t size)
+{
+  size_t n = buf.pt.n, i;
+  astr as = astr_new("");
+  Line *lp = buf.pt.p;
+
+  /* Have to do a linear search through the buffer to find the start of the
+   * region. Doesn't matter where we start. Starting at 'buf.pt' is a good
+   * heuristic.
+   */
+  if (n > start.n)
+    do
+      lp = list_prev(lp);
+    while (--n > start.n);
+  else if (n < start.n)
+    do
+      lp = list_next(lp);
+    while (++n < start.n);
+
+  /* Copy one character at a time. */
+  for (i = start.o; astr_len(as) < size;) {
+    if (i < astr_len(lp->item))
+      astr_cat_char(as, *astr_char(lp->item, (ptrdiff_t)(i++)));
+    else {
+      astr_cat_cstr(as, "\n");
+      lp = list_next(lp);
+      i = 0;
+    }
+  }
+
+  return as;
 }

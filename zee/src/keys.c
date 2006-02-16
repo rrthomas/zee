@@ -1,4 +1,4 @@
-/* Key chord functions
+/* Keyboard functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004-2006 Reuben Thomas.
    All rights reserved.
@@ -29,6 +29,57 @@
 
 #include "main.h"
 #include "extern.h"
+
+
+/* Get keystrokes */
+
+#define MAX_KEY_BUF	16
+
+static int key_buf[MAX_KEY_BUF];
+static int *keyp = key_buf;
+
+/*
+ * Get a keystroke, waiting for up to timeout 10ths of a second if
+ * mode contains GETKEY_DELAYED, and translating it into a
+ * keycode unless mode contains GETKEY_UNFILTERED.
+ */
+size_t xgetkey(int mode, size_t timeout)
+{
+  size_t key;
+
+  if (keyp > key_buf)
+    return *--keyp;
+
+  key = term_xgetkey(mode, timeout);
+  if (thisflag & FLAG_DEFINING_MACRO)
+    add_key_to_cmd(key);
+  return key;
+}
+
+/*
+ * Wait for a keystroke indefinitely, and return the
+ * corresponding keycode.
+ */
+size_t getkey(void)
+{
+  return xgetkey(0, 0);
+}
+
+/*
+ * Wait for timeout 10ths if a second or until a key is pressed.
+ * The key is then available with [x]getkey().
+ */
+void waitkey(size_t timeout)
+{
+  ungetkey(xgetkey(GETKEY_DELAYED, timeout));
+}
+
+void ungetkey(size_t key)
+{
+  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
+    *keyp++ = key;
+}
+
 
 /* Key code and name arrays */
 

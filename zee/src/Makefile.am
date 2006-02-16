@@ -36,7 +36,6 @@ zee_base_SOURCES =				\
 	extern.h				\
 	file.c					\
 	funcs.c					\
-	glue.c					\
 	help.c					\
 	history.c				\
 	keys.c					\

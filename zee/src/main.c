@@ -153,7 +153,7 @@ int main(int argc, char **argv)
     case 'l':
       cmd_eval_file(astr_new(optarg));
       break;
-    case 'q':
+    case 'n':
       qflag = TRUE;
       break;
     case 'v':
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 #include "tbl_opts.h"
 #undef X
     fprintf(stderr,
-            "FILE                   visit FILE using file-open\n"
+            "FILE                   edit FILE\n"
             "+LINE                  set line at which to visit next FILE\n"
             );
   }

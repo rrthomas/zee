@@ -30,16 +30,12 @@
 #include "main.h"
 #include "extern.h"
 
-/*----------------------------------------------------------------------
- *                       Completion functions
- *----------------------------------------------------------------------*/
-
 /*
  * Allocate a new completion structure.
  */
 Completion *completion_new(void)
 {
-  Completion *cp = (Completion *)zmalloc(sizeof(Completion));
+  Completion *cp = zmalloc(sizeof(Completion));
 
   cp->completions = list_new();
   cp->matches = list_new();
@@ -56,7 +52,7 @@ static size_t calculate_max_length(list l, size_t size)
   list p;
 
   for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
-    if ((len = strlen(p->item)) > max)
+    if ((len = astr_len(p->item)) > max)
       max = len;
 
   return max;
@@ -69,20 +65,19 @@ static astr completion_write(list l, size_t size)
 {
   size_t i, j, col, max, numcols;
   list p;
-  astr as = astr_new("");
+  astr as = astr_new("Possible completions are:\n");
 
   max = calculate_max_length(l, size) + 5;
   numcols = (win.ewidth - 1) / max;
 
-  astr_cpy_cstr(as, "Possible completions are:\n");
   for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
-      astr_cat_char(as, '\n');
+      astr_cat_cstr(as, "\n");
     }
-    astr_cat_cstr(as, p->item);
-    for (j = max - strlen(p->item); j > 0; --j)
-      astr_cat_char(as, ' ');
+    astr_cat(as, p->item);
+    for (j = max - astr_len(p->item); j > 0; --j)
+      astr_cat_cstr(as, " ");
     ++col;
   }
 
@@ -94,25 +89,22 @@ static astr completion_write(list l, size_t size)
  */
 static void popup_completion(Completion *cp, int allflag, size_t num)
 {
-  astr popup = astr_new(""), as;
+  astr popup = astr_new("Completions\n\n");
 
   cp->flags |= COMPLETION_POPPEDUP;
-  astr_cpy_cstr(popup, "Completions\n\n");
 
   if (allflag)
-    as = completion_write(cp->completions, list_length(cp->completions));
+    astr_cat(popup, completion_write(cp->completions, list_length(cp->completions)));
   else
-    as = completion_write(cp->matches, num);
-  astr_cat(popup, as);
+    astr_cat(popup, completion_write(cp->matches, num));
 
   popup_set(popup);
-
   term_display();
 }
 
 static int hcompar(const void *p1, const void *p2)
 {
-  return strcmp(*(const char **)p1, *(const char **)p2);
+  return astr_cmp(*(const astr *)p1, *(const astr *)p2);
 }
 
 /*
@@ -141,16 +133,16 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
       popup_completion(cp, TRUE, 0);
       return COMPLETION_NONUNIQUE;
     } else {
-      cp->matchsize = strlen(cp->match);
+      cp->matchsize = astr_len(cp->match);
       return COMPLETION_MATCHED;
     }
   }
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    if (!strncmp(p->item, astr_cstr(search), ssize)) {
+    if (!strncmp(astr_cstr(p->item), astr_cstr(search), ssize)) {
       ++partmatches;
       list_append(cp->matches, p->item);
-      if (!strcmp(p->item, astr_cstr(search)))
+      if (!astr_cmp(p->item, search))
         ++fullmatches;
     }
 
@@ -158,27 +150,27 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
     return COMPLETION_NOTMATCHED;
   else if (partmatches == 1) {
     cp->match = list_first(cp->matches)->item;
-    cp->matchsize = strlen(cp->match);
+    cp->matchsize = astr_len(cp->match);
     return COMPLETION_MATCHED;
   }
 
   if (fullmatches == 1 && partmatches > 1) {
     cp->match = list_first(cp->matches)->item;
-    cp->matchsize = strlen(cp->match);
+    cp->matchsize = astr_len(cp->match);
     if (popup_when_complete)
       popup_completion(cp, FALSE, partmatches);
     return COMPLETION_MATCHEDNONUNIQUE;
   }
 
-  for (j = ssize; ; ++j) {
+  for (j = ssize; ; j++) {
     list p = list_first(cp->matches);
-    char *s = p->item;
+    astr as = p->item;
 
-    c = s[j];
+    c = *astr_char(as, (ptrdiff_t)j);
     for (i = 1; i < partmatches; ++i) {
       p = list_next(p);
-      s = p->item;
-      if (s[j] != c) {
+      as = p->item;
+      if (*astr_char(as, (ptrdiff_t)j) != c) {
         cp->match = list_first(cp->matches)->item;
         cp->matchsize = j;
         popup_completion(cp, FALSE, partmatches);

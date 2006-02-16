@@ -134,21 +134,21 @@ static int search_backward(Line *startp, size_t starto, const char *s)
   return FALSE;
 }
 
-static char *last_search = "";
+static astr last_search = NULL;
 
-DEFUN("search-forward", search_forward)
+DEFUN(search_forward)
 /*+
 Search forward from point for regular expression REGEXP.
 +*/
 {
   astr ms;
 
-  if ((ms = minibuf_read(astr_new("Search: "), astr_new(last_search))) == NULL)
+  if ((ms = minibuf_read(astr_new("Search: "), last_search ? last_search : astr_new(""))) == NULL)
     ok = FUNCALL(cancel);
   else if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    last_search = zstrdup(astr_cstr(ms));
+    last_search = astr_dup(ms);
 
     if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
       minibuf_error(astr_afmt("Failing search: `%s'", astr_cstr(ms)));
@@ -158,19 +158,19 @@ Search forward from point for regular expression REGEXP.
 }
 END_DEFUN
 
-DEFUN("search-backward", search_backward)
+DEFUN(search_backward)
 /*+
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
   astr ms;
 
-  if ((ms = minibuf_read(astr_new("Search backward: "), astr_new(last_search))) == NULL)
+  if ((ms = minibuf_read(astr_new("Search backward: "), last_search ? last_search : astr_new(""))) == NULL)
     ok = FUNCALL(cancel);
   if (astr_len(ms) == 0)
     ok = FALSE;
   else {
-    last_search = zstrdup(astr_cstr(ms));
+    last_search = astr_dup(ms);
 
     if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
       minibuf_error(astr_afmt("Failing search backward: `%s'", ms));
@@ -258,10 +258,10 @@ static int isearch(int dir)
         cur = buf.pt;
 
         /* Save search string. */
-        last_search = zstrdup(astr_cstr(pattern));
+        last_search = astr_dup(pattern);
       }
       else if (last_search != NULL)
-        astr_cpy_cstr(pattern, last_search);
+        pattern = astr_dup(last_search);
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (c == KBD_RET && astr_len(pattern) == 0)
         if (dir == ISEARCH_FORWARD)
@@ -274,7 +274,7 @@ static int isearch(int dir)
         buf.mark->pt = start;
 
         /* Save search string. */
-        last_search = zstrdup(astr_cstr(pattern));
+        last_search = astr_dup(pattern);
 
         minibuf_write(astr_new("Mark saved when search started"));
       } else
@@ -304,7 +304,7 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN("isearch-forward", isearch_forward)
+DEFUN(isearch_forward)
 /*+
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -317,7 +317,7 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-DEFUN("isearch-backward", isearch_backward)
+DEFUN(isearch_backward)
 /*+
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -341,7 +341,7 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN("replace", replace)
+DEFUN(replace)
 /*+
 Replace occurrences of a regexp with other text.
 +*/
@@ -364,10 +364,9 @@ Replace occurrences of a regexp with other text.
         undo_save(UNDO_REPLACE_BLOCK,
                   make_point(buf.pt.n,
                              buf.pt.o - astr_len(find)),
-                  astr_len(find), astr_len(repl), FALSE);
+                  astr_len(find), astr_len(repl));
         if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
-                              astr_len(find), repl, astr_len(repl),
-                              find_no_upper))
+                              astr_len(find), repl, find_no_upper))
           buf.flags |= BFLAG_MODIFIED;
       }
 
@@ -381,7 +380,7 @@ Replace occurrences of a regexp with other text.
 }
 END_DEFUN
 
-DEFUN("query-replace", query_replace)
+DEFUN(query_replace)
 /*+
 Replace occurrences of a regexp with other text.
 As each match is found, the user must type a character saying
@@ -446,10 +445,9 @@ what to do with it.
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
                   make_point(buf.pt.n, buf.pt.o - astr_len(find)),
-                  astr_len(find), astr_len(repl), FALSE);
+                  astr_len(find), astr_len(repl));
         if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
-                              astr_len(find), repl, astr_len(repl),
-                              find_no_upper))
+                              astr_len(find), repl, find_no_upper))
           buf.flags |= BFLAG_MODIFIED;
         /* FALLTHROUGH */
       nextmatch:

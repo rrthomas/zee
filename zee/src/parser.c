@@ -109,7 +109,7 @@ static astr gettok(void)
           eow = TRUE;
           break;
         default:
-          astr_cat_char(tok, (char)c);
+          astr_cat_char(tok, c);
         }
       } while (!eow);
     }
@@ -117,7 +117,7 @@ static astr gettok(void)
 
   default:                      /* word */
     do {
-      astr_cat_char(tok, (char)c);
+      astr_cat_char(tok, c);
 
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();

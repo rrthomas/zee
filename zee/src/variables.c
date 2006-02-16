@@ -48,7 +48,7 @@ static list variable_find(list varlist, astr key)
 
   if (key != NULL)
     for (p = list_first(varlist); p != varlist; p = list_next(p))
-      if (!strcmp(astr_cstr(key), astr_cstr(((vpair *)(p->item))->key)))
+      if (!astr_cmp(key, ((vpair *)(p->item))->key))
         return p;
 
   return NULL;
@@ -116,7 +116,7 @@ astr get_variable(astr var)
   if (buf.vars) {
     list temp = variable_find(buf.vars, var);
     if (temp && temp->item)
-      return astr_new((char *)(temp->item));
+      return ((vpair *)(temp->item))->value;
   }
 
   if ((p = get_variable_default(var)))
@@ -152,7 +152,7 @@ astr minibuf_read_variable_name(astr msg)
   var_entry *p;
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    list_append(cp->completions, zstrdup(p->var));
+    list_append(cp->completions, astr_new(p->var));
 
   for (;;) {
     ms = minibuf_read_completion(msg, astr_new(""), cp, NULL);
@@ -177,7 +177,7 @@ astr minibuf_read_variable_name(astr msg)
   return ms;
 }
 
-DEFUN("set-variable", set_variable)
+DEFUN(set_variable)
 /*+
 Set a variable to the specified value.
 +*/
@@ -209,7 +209,7 @@ Set a variable to the specified value.
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
           ok = FUNCALL(cancel);
         else
-          astr_cpy_cstr(val, (i == TRUE) ? "true" : "false");
+          val = astr_new((i == TRUE) ? "true" : "false");
       } else                    /* Non-boolean variable. */
         if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
           ok = FUNCALL(cancel);

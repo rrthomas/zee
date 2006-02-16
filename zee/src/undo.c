@@ -36,9 +36,9 @@ static int doing_undo = FALSE;
 /*
  * Save a reverse delta for doing undo.
  */
-void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
+void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 {
-  Undo *up = (Undo *)zmalloc(sizeof(Undo));
+  Undo *up = zmalloc(sizeof(Undo));
 
   up->type = type;
   up->pt = pt;
@@ -47,7 +47,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate)
   if (type == UNDO_REPLACE_BLOCK) {
     up->text = copy_text_block(pt, arg1);
     up->size = arg2;
-    up->intercalate = intercalate;
   }
 
   up->next = buf.last_undop;
@@ -67,11 +66,11 @@ static Undo *revert_action(Undo *up)
   doing_undo = TRUE;
 
   if (up->type == UNDO_END_SEQUENCE) {
-    undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0);
     up = up->next;
     while (up->type != UNDO_START_SEQUENCE)
       up = revert_action(up);
-    undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0);
     goto_point(up->pt);
     return up->next;
   }
@@ -80,7 +79,7 @@ static Undo *revert_action(Undo *up)
 
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->size, &as);
-  insert_nstring(up->text, buf.eol, up->intercalate);
+  insert_nstring(up->text, buf.eol, FALSE);
 
   doing_undo = FALSE;
 
@@ -92,7 +91,7 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEFUN("undo", undo)
+DEFUN(undo)
 /*+
 Undo some previous changes.
 Repeat this command to undo more changes.

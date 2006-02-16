@@ -133,7 +133,7 @@ void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
 
   assert(l != NULL && cmp != NULL);
 
-  vec = (void **)zmalloc(sizeof(void *) * len);
+  vec = zmalloc(sizeof(void *) * len);
 
   for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
     vec[i] = (void *)p->item;

@@ -30,25 +30,25 @@
 #include "main.h"
 #include "extern.h"
 
-/* Goal column to arrive at when `edit-navigate-down/up-line' functions are
-   used.  */
+/* Goal column to arrive at when `edit_navigate_down/up_line'
+   functions are used. */
 static int cur_goalc;
 
-DEFUN("beginning-of-line", beginning_of_line)
+DEFUN(beginning_of_line)
 /*+
 Move point to beginning of current line.
 +*/
 {
   buf.pt.o = 0;
 
-  /* Change the `goalc' to the beginning of line for next
-     `edit-navigate-down/up-line' calls.  */
+  /* Set goalc to the beginning of line for next
+     `edit_navigate_down/up_line' call. */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
 END_DEFUN
 
-DEFUN("end-of-line", end_of_line)
+DEFUN(end_of_line)
 /*+
 Move point to end of current line.
 +*/
@@ -102,7 +102,7 @@ static void goto_goalc(int goalc)
   buf.pt.o = i;
 }
 
-DEFUN("edit-navigate-up-line", edit_navigate_up_line)
+DEFUN(edit_navigate_up_line)
 /*+
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -126,7 +126,7 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-DEFUN("edit-navigate-down-line", edit_navigate_down_line)
+DEFUN(edit_navigate_down_line)
 /*+
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -169,10 +169,11 @@ int goto_column(size_t to_col)
   return ok;
 }
 
-DEFUN("goto-column", goto_column)
+DEFUN(goto_column)
 /*+
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
+FIXME: Make this and goto_line DEFUN_INTs and make the functions static.
 +*/
 {
   size_t to_char = 0;
@@ -223,7 +224,7 @@ int goto_point(Point pt)
   return ok;
 }
 
-DEFUN("goto-line", goto_line)
+DEFUN(goto_line)
 /*+
 Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
@@ -248,7 +249,7 @@ Line 1 is the beginning of the buffer.
 }
 END_DEFUN
 
-DEFUN("beginning-of-buffer", beginning_of_buffer)
+DEFUN(beginning_of_buffer)
 /*+
 Move point to the beginning of the buffer.
 +*/
@@ -258,7 +259,7 @@ Move point to the beginning of the buffer.
 }
 END_DEFUN
 
-DEFUN("end-of-buffer", end_of_buffer)
+DEFUN(end_of_buffer)
 /*+
 Move point to the end of the buffer.
 +*/
@@ -268,7 +269,7 @@ Move point to the end of the buffer.
 }
 END_DEFUN
 
-DEFUN("edit-navigate-backward-char", edit_navigate_backward_char)
+DEFUN(edit_navigate_backward_char)
 /*+
 Move point left one character.
 +*/
@@ -285,7 +286,7 @@ Move point left one character.
 }
 END_DEFUN
 
-DEFUN("edit-navigate-forward-char", edit_navigate_forward_char)
+DEFUN(edit_navigate_forward_char)
 /*+
 Move point right one character.
 +*/
@@ -302,7 +303,7 @@ Move point right one character.
 }
 END_DEFUN
 
-DEFUN("scroll-down", scroll_down)
+DEFUN(scroll_down)
 /*+
 Scroll text of current window downward near full screen.
 +*/
@@ -316,7 +317,7 @@ Scroll text of current window downward near full screen.
 }
 END_DEFUN
 
-DEFUN("scroll-up", scroll_up)
+DEFUN(scroll_up)
 /*+
 Scroll text of current window upward near full screen.
 +*/

@@ -1,5 +1,5 @@
 /*
- * A quick & dirty tool to produce various documentation and header files
+ * Produce various documentation and header files
  */
 
 #include "config.h"
@@ -22,12 +22,11 @@
 #define NAME "mkdoc"
 
 struct fentry {
-  const char *name;
+  astr name;
   astr doc;
 };
 
 static vector *ftable;
-
 static size_t fentries = 0;
 
 static struct {
@@ -37,11 +36,10 @@ static struct {
   char *doc;
 } vtable[] = {
 #define X(name, fmt, defvalue, doc) \
-	{ name, fmt, defvalue, doc },
+	{name, fmt, defvalue, doc},
 #include "tbl_vars.h"
 #undef X
 };
-
 #define ventries (sizeof vtable / sizeof vtable[0])
 
 static struct {
@@ -51,92 +49,59 @@ static struct {
   int opt;
 } otable[] = {
 #define X(longname, doc, shortname, opt) \
-        { longname, doc, shortname, opt },
+        {longname, doc, shortname, opt},
 #include "tbl_opts.h"
 #undef X
 };
-
 #define oentries (sizeof otable / sizeof otable[0])
 
-static FILE *input_file;
-
-static void add_func(const char *name, astr doc)
+static void fdecl(FILE *fp, astr name)
 {
+  int state = 0;
+  astr doc = astr_new(""), line;
   struct fentry func;
-  func.name = zstrdup(name);
+
+  while ((line = astr_fgets(fp)) != NULL) {
+    if (state == 1) {
+      if (strncmp(astr_cstr(line), "+*/", 3) == 0) {
+        state = 2;
+        break;
+      }
+      astr_cat(doc, line);
+      astr_cat_char(doc, '\n');
+    } else if (strncmp(astr_cstr(line), "/*+", 3) == 0)
+      state = 1;
+  }
+
+  if (strcmp(astr_cstr(doc), "") == 0) {
+    fprintf(stderr, NAME ": no docstring for %s\n", astr_cstr(name));
+    exit(1);
+  } else if (state == 1) {
+    fprintf(stderr, NAME ": unterminated docstring for %s\n", astr_cstr(name));
+    exit(1);
+  }
+
+  func.name = astr_dup(name);
   func.doc = doc;
   vec_item(ftable, fentries++, struct fentry) = func;
 }
 
-static void fdecl(const char *name)
-{
-  astr doc = astr_new();
-  astr buf;
-  size_t s = 0, i;
-
-  while ((buf = astr_fgets(input_file)) != NULL) {
-    if (s == 1) {
-      if (!strncmp(astr_cstr(buf), "+*/", 3)) {
-        if (doc == NULL || astr_cmp_cstr(doc, "\n") == 0) {
-          fprintf(stderr, NAME ": no docstring for %s\n", name);
-          exit(1);
-        }
-        break;
-      }
-      astr_cat(doc, buf);
-      astr_cat_char(doc, '\n');
-    }
-    if (!strncmp(astr_cstr(buf), "/*+", 3))
-      s = 1;
-    else if (astr_cstr(buf)[0] == '{')
-      break;
-  }
-
-  /* Check function is not a duplicate */
-  for (i = 0; i < fentries; i++)
-    if (strcmp(name, vec_item(ftable, i, struct fentry).name) == 0) {
-      fprintf(stderr, NAME ": duplicate function %s\n", name);
-      exit(1);
-    }
-
-  add_func(name, doc);
-}
-
-static void parse(void)
+static void get_funcs(FILE *fp)
 {
   astr buf;
 
-  while ((buf = astr_fgets(input_file)) != NULL) {
+  while ((buf = astr_fgets(fp)) != NULL) {
     if (!strncmp(astr_cstr(buf), "DEFUN(", 6) ||
         !strncmp(astr_cstr(buf), "DEFUN_INT(", 10)) {
-      char *p, *q;
-      astr sub;
-      p = strchr(astr_cstr(buf), '"');
-      q = strrchr(astr_cstr(buf), '"');
+      char *p = strchr(astr_cstr(buf), '(');
+      char *q = strrchr(astr_cstr(buf), ')');
       if (p == NULL || q == NULL || p == q) {
         fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
         exit(1);
       }
-      sub = astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1));
-      astr_cpy(buf, sub);
-      fdecl(astr_cstr(buf));
+      fdecl(fp, astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1)));
     }
   }
-}
-
-static void dump_help(void)
-{
-  size_t i;
-  for (i = 0; i < fentries; ++i) {
-    astr doc = vec_item(ftable, i, struct fentry).doc;
-    if (doc)
-      fprintf(stdout, "\fF_%s\n%s",
-              vec_item(ftable, i, struct fentry).name, astr_cstr(doc));
-  }
-  for (i = 0; i < ventries; ++i)
-    fprintf(stdout, "\fV_%s\n%s\n%s\n",
-            vtable[i].name, vtable[i].defvalue,
-            vtable[i].doc);
 }
 
 static void dump_funcs(void)
@@ -154,23 +119,34 @@ static void dump_funcs(void)
   fprintf(fp2,
           "/*\n"
           " * Automatically generated file: DO NOT EDIT!\n"
-          " * Table of commands (name, C function)\n"
+          " * Table of commands (name)\n"
           " */\n"
           "\n");
 
   for (i = 0; i < fentries; ++i) {
-    char *cname = zstrdup(vec_item(ftable, i, struct fentry).name), *p;
-
-    for (p = strchr(cname, '-'); p != NULL; p = strchr(p, '-'))
-      *p = '_';
-
-    fprintf(fp1, "@item %s\n%s", vec_item(ftable, i, struct fentry).name, astr_cstr(vec_item(ftable, i, struct fentry).doc));
-    fprintf(fp2, "X(\"%s\", %s)\n", vec_item(ftable, i, struct fentry).name, cname);
+    fprintf(fp1, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
+            astr_cstr(vec_item(ftable, i, struct fentry).doc));
+    fprintf(fp2, "X(%s)\n", astr_cstr(vec_item(ftable, i, struct fentry).name));
   }
 
   fprintf(fp1, "@end table");
   fclose(fp1);
   fclose(fp2);
+}
+
+static void dump_help(void)
+{
+  size_t i;
+  for (i = 0; i < fentries; ++i) {
+    astr doc = vec_item(ftable, i, struct fentry).doc;
+    if (doc)
+      fprintf(stdout, "\fF_%s\n%s",
+              astr_cstr(vec_item(ftable, i, struct fentry).name), astr_cstr(doc));
+  }
+  for (i = 0; i < ventries; ++i)
+    fprintf(stdout, "\fV_%s\n%s\n%s\n",
+            vtable[i].name, vtable[i].defvalue,
+            vtable[i].doc);
 }
 
 static void dump_vars(void)
@@ -183,7 +159,7 @@ static void dump_vars(void)
   fprintf(fp, "@table @code\n");
 
   for (i = 0; i < ventries; ++i) {
-    astr doc = astr_cat_cstr(astr_new(), vtable[i].doc);
+    astr doc = astr_new(vtable[i].doc);
     if (!doc || astr_len(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for %s\n", vtable[i].name);
       exit(1);
@@ -215,7 +191,7 @@ static void dump_opts(void)
           "#define OPTSTRING \"");
 
   for (i = 0; i < oentries; ++i) {
-    astr doc = astr_cat_cstr(astr_new(), otable[i].doc);
+    astr doc = astr_new(otable[i].doc);
     if (!doc || astr_len(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
       exit(1);
@@ -231,31 +207,25 @@ static void dump_opts(void)
   fclose(fp2);
 }
 
-static void process_file(char *filename)
-{
-  if (filename != NULL && strcmp(filename, "-") != 0 &&
-      (input_file = fopen(filename, "r")) == NULL) {
-    fprintf(stderr, NAME ":%s: %s\n",
-            filename, strerror(errno));
-    exit(1);
-  }
-
-  parse();
-
-  fclose(input_file);
-}
-
 int main(int argc, char **argv)
 {
   int i;
+  FILE *fp = NULL;
 
   ftable = vec_new(sizeof(struct fentry));
-
-  for (i = 1; i < argc; i++)
-    process_file(argv[i]);
+  for (i = 1; i < argc; i++) {
+    if (argv[i] != NULL && strcmp(argv[i], "-") != 0 &&
+        (fp = fopen(argv[i], "r")) == NULL) {
+      fprintf(stderr, NAME ":%s: %s\n",
+              argv[i], strerror(errno));
+      exit(1);
+    }
+    get_funcs(fp);
+    fclose(fp);
+  }
+  dump_funcs();
 
   dump_help();
-  dump_funcs();
   dump_vars();
   dump_opts();
 

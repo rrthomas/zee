@@ -46,7 +46,7 @@ vector *vec_new(size_t itemsize)
  */
 static void resize(vector *v, size_t items)
 {
-  v->array = zrealloc(v->array, v->size * vec_itemsize(v), items * vec_itemsize(v));
+  v->array = zrealloc(v->array, items * vec_itemsize(v));
   v->size = items;
 }
 

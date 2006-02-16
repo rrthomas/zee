@@ -38,7 +38,7 @@ astr astr_new(const char *s)
   astr as = (astr)zmalloc(sizeof *as);
   assert(s);
   as->maxlen = as->len = strlen(s);
-  as->text = zstrdup(s);
+  as->text = strcpy(zmalloc(as->len + 1), s);
   return as;
 }
 
@@ -46,9 +46,8 @@ static void astr_resize(astr as, size_t reqsize)
 {
   assert(as != NULL);
   if (reqsize > as->maxlen) {
-    size_t oldmaxlen = as->maxlen;
     as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-    as->text = (char *)zrealloc(as->text, oldmaxlen, as->maxlen + 1);
+    as->text = zrealloc(as->text, as->maxlen + 1);
   }
 }
 
@@ -68,25 +67,9 @@ char *astr_char(const astr as, ptrdiff_t pos)
   return as->text + pos;
 }
 
-astr astr_ncpy(astr as, const char *s, size_t csize)
-{
-  astr_resize(as, csize);
-  memcpy(as->text, s, csize);
-  as->len = csize;
-  as->text[csize] = '\0';
-  return as;
-}
-
-astr astr_cpy_cstr(astr as, const char *s)
-{
-  assert(s != NULL);
-  return astr_ncpy(as, s, strlen(s));
-}
-
 astr astr_dup(const astr src)
 {
-  assert(src != NULL);
-  return astr_ncpy(astr_new(""), src->text, src->len);
+  return astr_cat(astr_new(""), src);
 }
 
 astr astr_ncat(astr as, const char *s, size_t csize)
@@ -192,10 +175,10 @@ astr astr_afmt(const char *fmt, ...)
   va_start(ap, fmt);
   len = vsnprintf(s, 0, fmt, ap);
   va_end(ap);
-  s = (char *)zmalloc((size_t)len);
+  s = zmalloc((size_t)len + 1);
 
   va_start(ap, fmt);
-  assert(vsnprintf(s, (size_t)len, fmt, ap) == len);
+  assert(vsnprintf(s, (size_t)len + 1, fmt, ap) == len);
   va_end(ap);
 
   return astr_new(s);
@@ -208,8 +191,10 @@ astr astr_afmt(const char *fmt, ...)
 
 static void assert_eq(astr as, const char *s)
 {
-  if (astr_cmp_cstr(as, s))
+  if (strcmp(astr_cstr(as), s)) {
     printf("test failed: \"%s\" != \"%s\"\n", as->text, s);
+    assert(0);
+  }
 }
 
 /*
@@ -223,11 +208,10 @@ void die(int exitcode)
 int main(void)
 {
   astr as1, as2, as3;
-  int i;
   FILE *fp;
 
   as1 = astr_new("hello world");
-  astr_cat_char(as1, '!');
+  astr_cat_cstr(as1, "!");
   assert_eq(as1, "hello world!");
 
   as3 = astr_substr(as1, 6, 5);
@@ -235,26 +219,26 @@ int main(void)
 
   as2 = astr_new("The ");
   astr_cat(as2, as3);
-  astr_cat_char(as2, '.');
+  astr_cat_cstr(as2, ".");
   assert_eq(as2, "The world.");
 
   as3 = astr_substr(as1, -6, 5);
   assert_eq(as3, "world");
 
-  astr_cpy_cstr(as1, "1234567");
+  as1 = astr_new("1234567");
   astr_remove(as1, 4, 10);
   assert_eq(as1, "1234");
 
-  astr_cpy_cstr(as1, "12345");
+  as1 = astr_new("12345");
   as2 = astr_substr(as1, -2, 2);
   assert_eq(as2, "45");
 
-  astr_cpy_cstr(as1, "12345");
+  as1 = astr_new("12345");
   as2 = astr_substr(as1, -5, 5);
   assert_eq(as2, "12345");
 
-  as1 = astr_afmt(as1, "%s * %d = ", "5", 3);
-  astr_cat(as1, astr_afmt(as1, "%d", 15));
+  as1 = astr_afmt("%s * %d = ", "5", 3);
+  astr_cat(as1, astr_afmt("%d", 15));
   assert_eq(as1, "5 * 3 = 15");
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));

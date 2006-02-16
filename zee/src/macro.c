@@ -68,12 +68,12 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN("start-kbd-macro", start_kbd_macro)
+DEFUN(start_kbd_macro)
 /*+
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
 Use C-x ) to finish recording and make the macro available.
-Use M-x name-last-kbd-macro to give it a permanent name.
+Use name_last_kbd_macro to give it a permanent name.
 +*/
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
@@ -91,7 +91,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 }
 END_DEFUN
 
-DEFUN("end-kbd-macro", end_kbd_macro)
+DEFUN(end_kbd_macro)
 /*+
 Finish defining a keyboard macro.
 The definition was started by C-x (.
@@ -106,7 +106,7 @@ The macro is now available for use via C-x e.
 }
 END_DEFUN
 
-DEFUN("name-last-kbd-macro", name_last_kbd_macro)
+DEFUN(name_last_kbd_macro)
 /*+
 Assign a name to the last keyboard macro defined.
 Argument SYMBOL is the name to define.
@@ -131,7 +131,7 @@ valid editor command.
       /* Add a new macro to the list */
       mp = macro_new();
       mp->next = head_mp;
-      mp->name = zstrdup(astr_cstr(ms));
+      mp->name = astr_dup(ms);
       head_mp = mp;
     }
 
@@ -143,8 +143,8 @@ END_DEFUN
 
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
-   keystrokes. */
-/* FIXME: Add bind-command to make new commands. */
+   keystrokes. Macros should return success/failure. */
+/* FIXME: Add bind_command to make new commands. */
 void call_macro(Macro *mp)
 {
   size_t i;
@@ -155,12 +155,12 @@ void call_macro(Macro *mp)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
-DEFUN("call-last-kbd-macro", call_last_kbd_macro)
+DEFUN(call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with C-x (.
 
-To make a macro permanent so you can call it even after
-defining others, use M-x name-last-kbd-macro.
+To name a macro so you can call it after defining others, use
+name_last_kbd_macro.
 +*/
 {
   if (cur_mp == NULL) {
@@ -179,7 +179,7 @@ Macro *get_macro(astr name)
   Macro *mp;
   assert(name);
   for (mp = head_mp; mp; mp = mp->next)
-    if (!strcmp(mp->name, astr_cstr(name)))
+    if (astr_cmp(mp->name, name) == 0)
       return mp;
   return NULL;
 }

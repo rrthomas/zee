@@ -42,6 +42,7 @@ int calculate_the_region(Region *rp);
 void anchor_mark(void);
 void weigh_mark(void);
 size_t tab_width(void);
+astr copy_text_block(Point start, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
@@ -65,20 +66,13 @@ void term_display(void);
 void term_tidy(void);
 void term_nprint(size_t size, const char *s);
 void term_print(const char *s);
+void ding(void);
 
 /* file.c ----------------------------------------------------------------- */
 astr get_home_dir(void);
 astr file_read(astr *as, astr filename);
 void file_open(astr filename);
 void die(int exitcode);
-
-/* glue.c ----------------------------------------------------------------- */
-void ding(void);
-size_t xgetkey(int mode, size_t timeout);
-size_t getkey(void);
-void waitkey(size_t timeout);
-void ungetkey(size_t key);
-astr copy_text_block(Point start, size_t size);
 
 /* history.c -------------------------------------------------------------- */
 void add_history_element(History *hp, astr string);
@@ -87,6 +81,10 @@ astr previous_history_element(History *hp);
 astr next_history_element(History *hp);
 
 /* keys.c ----------------------------------------------------------------- */
+size_t xgetkey(int mode, size_t timeout);
+size_t getkey(void);
+void waitkey(size_t timeout);
+void ungetkey(size_t key);
 astr chordtostr(size_t key);
 size_t strtochord(astr chord);
 
@@ -110,7 +108,7 @@ int bobp(void);
 int eobp(void);
 int bolp(void);
 int eolp(void);
-int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, size_t newlen, int replace_case);
+int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, int replace_case);
 int insert_char(int c);
 void fill_break_line(void);
 int insert_nstring(astr as, const char *eolstr, int intercalate);
@@ -166,7 +164,7 @@ void term_beep(void);
 size_t term_xgetkey(int mode, size_t timeout);
 
 /* undo.c ----------------------------------------------------------------- */
-void undo_save(int type, Point pt, size_t arg1, size_t arg2, int intercalate);
+void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);
@@ -177,7 +175,7 @@ int get_variable_bool(astr var);
 astr minibuf_read_variable_name(astr msg);
 
 /* External C functions for interactive commands -------------------------- */
-#define X(cmd_name, c_name) \
-  int F_ ## c_name(int argc, int uniarg, list *branch);
+#define X(cmd_name) \
+  int F_ ## cmd_name(int argc, int uniarg, list *branch);
 #include "tbl_funcs.h"
 #undef X

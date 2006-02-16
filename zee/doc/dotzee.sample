@@ -1,17 +1,17 @@
 # .zee sample configuration
 
 # The default tabulation width [default: 8]
-setq tab-width 8
+set_variable tab_width 8
 
 # Standard indentation level [default: 4]
 # Default number of columns for margin-changing functions to indent.
-setq standard-indent 4
+set_variable standard_indent 4
 
 # The default fill column (in Auto Fill Mode) [default: 72]
-setq fill-column 72
+set_variable fill_column 72
 
 # Enable the Auto Fill Mode [default: false]
-setq auto-fill-mode false
+set_variable auto_fill_mode false
 
-# Preserve case in replacements by query-replace [default: true]
-setq case-replace true
+# Preserve case in replacements by query_replace [default: true]
+set-variable case_replace true

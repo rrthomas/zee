@@ -68,7 +68,7 @@ astr minibuf_read(astr as, astr value)
   return minibuf_read_completion(as, value, NULL, NULL);
 }
 
-static int minibuf_read_forced(astr prompt, const char *errmsg, Completion *cp)
+static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 {
   astr as;
 
@@ -83,14 +83,15 @@ static int minibuf_read_forced(astr prompt, const char *errmsg, Completion *cp)
 
       /* Complete partial words if possible. */
       if (completion_try(cp, bs, FALSE) == COMPLETION_MATCHED)
-        astr_cpy_cstr(as, cp->match);
+        as = astr_dup(cp->match);
 
-      for (s = list_first(cp->completions), i = 0; s != cp->completions;
+      for (s = list_first(cp->completions), i = 0;
+           s != cp->completions;
            s = list_next(s), i++)
-        if (!astr_cmp_cstr(as, s->item))
+        if (astr_cmp(as, s->item) == 0)
           return i;
 
-      minibuf_error(astr_new(errmsg));
+      minibuf_error(errmsg);
       waitkey(WAITKEY_DEFAULT);
     }
   }
@@ -102,14 +103,14 @@ int minibuf_read_yesno(astr as)
   int retvalue;
 
   cp = completion_new();
-  list_append(cp->completions, zstrdup("yes"));
-  list_append(cp->completions, zstrdup("no"));
+  list_append(cp->completions, astr_new("yes"));
+  list_append(cp->completions, astr_new("no"));
 
-  retvalue = minibuf_read_forced(as, "Please answer yes or no.", cp);
+  retvalue = minibuf_read_forced(as, astr_new("Please answer `yes' or `no'."), cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "yes"))
+    if (!strcmp(astr_cstr(list_at(cp->completions, (size_t)retvalue)), "yes"))
       retvalue = TRUE;
     else
       retvalue = FALSE;
@@ -123,14 +124,14 @@ int minibuf_read_boolean(astr as)
   int retvalue;
   Completion *cp = completion_new();
 
-  list_append(cp->completions, zstrdup("true"));
-  list_append(cp->completions, zstrdup("false"));
+  list_append(cp->completions, astr_new("true"));
+  list_append(cp->completions, astr_new("false"));
 
-  retvalue = minibuf_read_forced(as, "Please answer `true' or `false'.", cp);
+  retvalue = minibuf_read_forced(as, astr_new("Please answer `true' or `false'."), cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "true"))
+    if (!strcmp(astr_cstr(list_at(cp->completions, (size_t)retvalue)), "true"))
       retvalue = TRUE;
     else
       retvalue = FALSE;
@@ -276,15 +277,15 @@ static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
   return(thistab);
 }
 
-static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, char **_saved)
+static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
 {
   ptrdiff_t i = *_i;
-  char *saved = *_saved;
+  astr saved = *_saved;
   if (hp) {
     astr elem = previous_history_element(hp);
     if (elem) {
       if (!saved)
-        saved = zstrdup(astr_cstr(*as));
+        saved = astr_dup(*as);
 
       i = astr_len(elem);
       *as = astr_dup(elem);
@@ -294,17 +295,17 @@ static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, char **_saved)
   *_saved = saved;
 }
 
-static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, char **_saved)
+static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
 {
   ptrdiff_t i = *_i;
-  char *saved = *_saved;
+  astr saved = *_saved;
   if (hp) {
     astr elem = next_history_element(hp);
     if (elem)
       *as = astr_dup(elem);
     else if (saved) {
-      i = strlen(saved);
-      astr_cpy_cstr(*as, saved);
+      i = astr_len(saved);
+      *as = astr_dup(saved);
       saved = NULL;
     }
   }
@@ -325,22 +326,24 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
       popup_scroll_up();
       thistab = lasttab;
     } else {
-      astr bs = astr_dup(*as);
-      thistab = completion_try(cp, bs, TRUE);
+      thistab = completion_try(cp, *as, TRUE);
       assert(thistab != COMPLETION_NOTCOMPLETING);
       switch (thistab) {
       case COMPLETION_NONUNIQUE:
       case COMPLETION_MATCHED:
       case COMPLETION_MATCHEDNONUNIQUE:
-        i = cp->matchsize;
-        bs = astr_new("");
-        astr_ncat(bs, cp->match, cp->matchsize);
-        if (astr_cmp(as, bs) != 0)
-          thistab = COMPLETION_NOTCOMPLETING;
-        *as = astr_dup(bs);
-        break;
+        {
+          astr bs = astr_new("");
+          i = cp->matchsize;
+          astr_ncat(bs, astr_cstr(cp->match), cp->matchsize);
+          if (astr_cmp(as, bs) != 0)
+            thistab = COMPLETION_NOTCOMPLETING;
+          *as = bs;
+          break;
+        }
       case COMPLETION_NOTMATCHED:
         ding();
+        break;
       }
     }
   }
@@ -367,8 +370,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
   char *s[] = {"", " [No match]", " [Sole completion]", " [Complete, but not unique]", ""};
-  char *saved = NULL;
-  astr as = value, retval = NULL;
+  astr as = astr_dup(value), retval = NULL, saved;
 
   if (hp)
     prepare_history(hp);

@@ -97,13 +97,13 @@ void process_key(size_t key)
     return;
 
   if (p == NULL)
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
          (p ? p->func(0, 0, NULL) : FUNCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the function call, to cope with start-kbd-macro */
@@ -121,8 +121,8 @@ typedef struct {
 } FEntry;
 
 static FEntry ftable[] = {
-#define X(cmd_name, c_name) \
-	{cmd_name, F_ ## c_name},
+#define X(cmd_name) \
+	{# cmd_name, F_ ## cmd_name},
 #include "tbl_funcs.h"
 #undef X
 };
@@ -161,7 +161,7 @@ astr minibuf_read_function_name(astr as)
 
   cp = completion_new();
   for (i = 0; i < fentries; ++i)
-    list_append(cp->completions, zstrdup(ftable[i].name));
+    list_append(cp->completions, astr_new(ftable[i].name));
 
   for (;;) {
     ms = minibuf_read_completion(as, astr_new(""), cp, &functions_history);
@@ -177,11 +177,11 @@ astr minibuf_read_function_name(astr as)
       astr as = astr_dup(ms);
       /* Complete partial words if possible */
       if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
-        astr_cpy_cstr(ms, cp->match);
+        ms = astr_dup(cp->match);
       for (p = list_first(cp->completions); p != cp->completions;
            p = list_next(p))
-        if (!astr_cmp_cstr(ms, p->item)) {
-          astr_cpy_cstr(ms, p->item);
+        if (!astr_cmp(ms, p->item)) {
+          ms = astr_dup(p->item);
           break;
         }
       if (get_function(ms) || get_macro(ms)) {
@@ -198,7 +198,7 @@ astr minibuf_read_function_name(astr as)
   return ms;
 }
 
-DEFUN("unbind-key", unbind_key)
+DEFUN(unbind_key)
 {
 /*+
 Unbind a key.
@@ -219,7 +219,7 @@ Read key chord, and unbind it.
 }
 END_DEFUN
 
-DEFUN("bind-key", bind_key)
+DEFUN(bind_key)
 /*+
 Bind a command to a key chord.
 Read key chord and function name, and bind the function to the key
@@ -277,7 +277,7 @@ static astr function_to_binding(Function f)
   return as;
 }
 
-DEFUN("where-is", where_is)
+DEFUN(where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command definition, usually a symbol with a function definition.
@@ -306,11 +306,11 @@ astr binding_to_function(size_t key)
   Binding *p;
 
   if (key & KBD_META && isdigit(key & 255))
-    return astr_new("universal-argument");
+    return astr_new("universal_argument");
 
   if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
-      return astr_new("self-insert-command");
+      return astr_new("self_insert_command");
     else
       return NULL;
   } else

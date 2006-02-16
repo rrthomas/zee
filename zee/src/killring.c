@@ -72,7 +72,7 @@ static int kill_line(void)
   return FALSE;
 }
 
-DEFUN("kill-line", kill_line)
+DEFUN(kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 +*/
@@ -80,16 +80,16 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_buffer();
 
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   if (!kill_line())
     ok = FALSE;
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 
   weigh_mark();
 }
 END_DEFUN
 
-DEFUN("kill-region", kill_region)
+DEFUN(kill_region)
 /*+
 Kill between point and mark.
 The text is deleted but saved in the kill buffer.
@@ -114,8 +114,7 @@ the text killed this time appends to the text killed last time.
     if (buf.flags & BFLAG_READONLY) {
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
-      astr as = copy_text_block(r.start, r.size);
-      astr_cat(killed_text, as);
+      astr_cat(killed_text, copy_text_block(r.start, r.size));
 
       warn_if_readonly_buffer();
     } else {
@@ -133,7 +132,7 @@ the text killed this time appends to the text killed last time.
 }
 END_DEFUN
 
-DEFUN("copy", copy)
+DEFUN(copy)
 /*+
 Copy the region to the kill buffer.
 +*/
@@ -146,11 +145,8 @@ Copy the region to the kill buffer.
   if (warn_if_no_mark())
     ok = FALSE;
   else {
-    astr as;
-
     assert(calculate_the_region(&r));
-    as = copy_text_block(r.start, r.size);
-    astr_cat(killed_text, as);
+    astr_cat(killed_text, copy_text_block(r.start, r.size));
 
     thisflag |= FLAG_DONE_KILL;
     weigh_mark();
@@ -169,11 +165,11 @@ static int kill_helper(Function func)
     ok = FALSE;
   else {
     Marker *m = get_mark();
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
     ok = func(0, 0, NULL);
     if (ok)
       ok = FUNCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0, FALSE);
+    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
     set_mark(m);
     remove_marker(m);
 
@@ -185,7 +181,7 @@ static int kill_helper(Function func)
   return ok;
 }
 
-DEFUN("kill-word", kill_word)
+DEFUN(kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
 +*/
@@ -194,7 +190,7 @@ Kill characters forward until encountering the end of a word.
 }
 END_DEFUN
 
-DEFUN("backward-kill-word", backward_kill_word)
+DEFUN(backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
 +*/
@@ -203,7 +199,7 @@ Kill characters backward until encountering the end of a word.
 }
 END_DEFUN
 
-DEFUN("paste", paste)
+DEFUN(paste)
 /*+
 Reinsert the stretch of killed text most recently killed.
 Set mark at beginning, and put point at end.

@@ -34,15 +34,18 @@
 
 /*
  * Get HOME directory.
- * If none, return blank string.
+ * If none, or invalid, return blank string.
  */
 astr get_home_dir(void)
 {
   char *s = getenv("HOME");
-  astr as = astr_new("");
+  astr as;
 
   if (s != NULL && strlen(s) < PATH_MAX)
-    as = astr_cpy_cstr(as, s);
+    as = astr_new(s);
+  else
+    as = astr_new("");
+
   return as;
 }
 
@@ -53,11 +56,9 @@ static astr find_eolstr(astr as)
 {
   char c = '\0';
   size_t i;
-  astr eolstr = astr_new("");
+  astr eolstr = astr_new("\n");
 
   assert(as);
-
-  astr_cat_char(eolstr, '\n');
 
   for (i = 0; i < astr_len(as); i++) {
     c = *astr_char(as, (ptrdiff_t)i);
@@ -66,7 +67,7 @@ static astr find_eolstr(astr as)
   }
 
   if (c == '\n' || c == '\r') {
-    astr_ncpy(eolstr, &c, 1);
+    *astr_char(eolstr, 0) = c;
     if (i < astr_len(as) - 1) {
       char c2 = *astr_char(as, (ptrdiff_t)(i + 1));
       if ((c2 == '\n' || c2 == '\r') && c != c2)
@@ -159,7 +160,7 @@ static int buffer_write(Buffer *bp, astr filename)
   return fclose(fp) == 0;
 }
 
-DEFUN("file-save", file_save)
+DEFUN(file_save)
 /*+
 Save buffer in visited file.
 +*/
@@ -169,7 +170,7 @@ Save buffer in visited file.
   } else {
     Undo *up;
 
-    minibuf_write(astr_afmt("Wrote %s", buf.filename));
+    minibuf_write(astr_afmt("Wrote %s", astr_cstr(buf.filename)));
     buf.flags &= ~BFLAG_MODIFIED;
 
     /* Set unchanged flags to FALSE except for the
@@ -183,7 +184,7 @@ Save buffer in visited file.
 }
 END_DEFUN
 
-DEFUN("file-quit", file_quit)
+DEFUN(file_quit)
 /*+
 Offer to the buffer, then quit.
 +*/
@@ -210,7 +211,7 @@ END_DEFUN
  */
 void die(int exitcode)
 {
-  static int already_dying;
+  static int already_dying = 0;
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
