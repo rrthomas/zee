@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <gc/gc.h>
-
 #ifdef HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
 #else
