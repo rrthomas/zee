@@ -41,12 +41,9 @@ void *zmalloc(size_t size)
  */
 void *zrealloc(void *ptr, size_t newsize)
 {
-  void *newptr;
-
-  if ((newptr = GC_REALLOC(ptr, newsize)) == NULL) {
-    fprintf(stderr, PACKAGE_NAME ": cannot (re)allocate memory\n");
+  if ((ptr = GC_REALLOC(ptr, newsize)) == NULL) {
+    fprintf(stderr, PACKAGE_NAME ": out of memory\n");
     die(1);
   }
-
-  return newptr;
+  return ptr;
 }
