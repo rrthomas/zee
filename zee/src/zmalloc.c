@@ -37,7 +37,7 @@ void *zmalloc(size_t size)
 }
 
 /*
- * Resize an allocated memory area.
+ * Resize an allocated memory area, zeroing any extra bytes.
  */
 void *zrealloc(void *ptr, size_t newsize)
 {
