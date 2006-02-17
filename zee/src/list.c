@@ -23,6 +23,7 @@
 #include "main.h"
 #include "extern.h"
 
+
 /* Create an empty list, returning a pointer to the list */
 list list_new(void)
 {

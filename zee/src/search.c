@@ -36,6 +36,7 @@
 #include "regex.h"
 #endif
 
+
 static const char *find_err = NULL;
 
 static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)

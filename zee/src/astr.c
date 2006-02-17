@@ -29,6 +29,7 @@
 #include "astr.h"
 #include "main.h"
 
+
 #define ALLOCATION_CHUNK_SIZE	16
 
 astr astr_new(const char *s)

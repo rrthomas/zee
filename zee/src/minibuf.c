@@ -27,6 +27,7 @@
 #include "main.h"
 #include "extern.h"
 
+
 /* FIXME: \n's mess up the display */
 static void term_minibuf_write(astr as)
 {

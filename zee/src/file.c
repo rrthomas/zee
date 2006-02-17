@@ -30,6 +30,7 @@
 #include "main.h"
 #include "extern.h"
 
+
 /*
  * Get HOME directory.
  * If none, or invalid, return blank string.

@@ -24,6 +24,7 @@
 #include "main.h"
 #include "extern.h"
 
+
 /*
  * Allocate a new buffer structure and set the default local
  * variable values.

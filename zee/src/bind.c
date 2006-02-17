@@ -27,6 +27,7 @@
 #include "main.h"
 #include "extern.h"
 
+
 static History functions_history;
 
 /*--------------------------------------------------------------------------
