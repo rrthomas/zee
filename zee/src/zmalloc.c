@@ -33,16 +33,7 @@
  */
 void *zmalloc(size_t size)
 {
-  void *ptr;
-
-  assert(size > 0);
-
-  if ((ptr = GC_MALLOC(size)) == NULL) {
-    fprintf(stderr, PACKAGE_NAME ": cannot allocate memory\n");
-    die(1);
-  }
-
-  return ptr;
+  return zrealloc(NULL, size);
 }
 
 /*
@@ -53,7 +44,7 @@ void *zrealloc(void *ptr, size_t newsize)
   void *newptr;
 
   if ((newptr = GC_REALLOC(ptr, newsize)) == NULL) {
-    fprintf(stderr, PACKAGE_NAME ": cannot reallocate memory\n");
+    fprintf(stderr, PACKAGE_NAME ": cannot (re)allocate memory\n");
     die(1);
   }
 
