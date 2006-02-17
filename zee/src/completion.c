@@ -48,14 +48,13 @@ Completion *completion_new(void)
  */
 static size_t calculate_max_length(list l, size_t size)
 {
-  size_t len, i, max = 0;
+  size_t i, maxlen = 0;
   list p;
 
   for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
-    if ((len = astr_len(p->item)) > max)
-      max = len;
+    maxlen = max(maxlen, astr_len(p->item));
 
-  return max;
+  return maxlen;
 }
 
 /*
@@ -162,13 +161,11 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
 
   for (j = astr_len(search); ; j++) {
     list p = list_first(cp->matches);
-    astr as = p->item;
 
-    c = *astr_char(as, (ptrdiff_t)j);
+    c = *astr_char(p->item, (ptrdiff_t)j);
     for (i = 1; i < partmatches; ++i) {
       p = list_next(p);
-      as = p->item;
-      if (*astr_char(as, (ptrdiff_t)j) != c) {
+      if (*astr_char(p->item, (ptrdiff_t)j) != c) {
         cp->match = list_first(cp->matches)->item;
         cp->matchsize = j;
         popup_completion(cp, FALSE, partmatches);
