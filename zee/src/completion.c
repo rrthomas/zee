@@ -112,7 +112,7 @@ static int hcompar(const void *p1, const void *p2)
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
-  size_t i, j, ssize;
+  size_t i, j;
   size_t fullmatches = 0, partmatches = 0;
   char c;
   list p;
@@ -124,9 +124,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
     cp->flags |= COMPLETION_SORTED;
   }
 
-  ssize = astr_len(search);
-
-  if (ssize == 0) {
+  if (astr_len(search) == 0) {
     cp->match = list_first(cp->completions)->item;
     if (list_length(cp->completions) > 1) {
       cp->matchsize = 0;
@@ -139,7 +137,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   }
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    if (!strncmp(astr_cstr(p->item), astr_cstr(search), ssize)) {
+    if (!astr_cmp(p->item, search)) {
       ++partmatches;
       list_append(cp->matches, p->item);
       if (!astr_cmp(p->item, search))
@@ -162,7 +160,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
     return COMPLETION_MATCHEDNONUNIQUE;
   }
 
-  for (j = ssize; ; j++) {
+  for (j = astr_len(search); ; j++) {
     list p = list_first(cp->matches);
     astr as = p->item;
 
