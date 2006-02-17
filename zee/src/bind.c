@@ -207,7 +207,7 @@ Read key chord, and unbind it.
   size_t key = KBD_NOKEY;
 
   if (argc > 0) {
-    astr keystr = astr_new((char *)((*lp)->item));
+    astr keystr = astr_new(((*lp)->item));
     key = strtochord(keystr);
     *lp = list_next(*lp);
   } else {
@@ -232,9 +232,9 @@ chord.
   ok = FALSE;
 
   if (argc > 0) {
-    key = strtochord(astr_new((char *)((*lp)->item)));
+    key = strtochord(astr_new(((*lp)->item)));
     *lp = list_next(*lp);
-    name = astr_new((char *)((*lp)->item));
+    name = astr_new(((*lp)->item));
     *lp = list_next(*lp);
   } else {
     astr as;

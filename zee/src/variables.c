@@ -75,13 +75,14 @@ static void variable_update(list varlist, astr key, astr value)
  * Default variables values table.
  */
 typedef struct {
-  char *var;                    /* Variable name. */
-  char *fmt;                    /* Variable format (boolean, etc.). */
+  const char *var;              /* Variable name. */
+  const char *fmt;              /* Variable format (boolean, etc.). */
   const char *val;              /* Default value. */
 } var_entry;
 
 static var_entry def_vars[] = {
-#define X(var, fmt, val, doc) { var, fmt, val },
+#define X(var, fmt, val, doc) \
+    {var, fmt, val},
 #include "tbl_vars.h"
 #undef X
 };
@@ -182,29 +183,27 @@ DEFUN(set_variable)
 Set a variable to the specified value.
 +*/
 {
-  char *fmt;
   astr var, val = NULL;
 
   if (argc > 0) {
-    const char *newvalue = NULL;
+    astr newvalue = NULL;
 
     if (*lp != NULL) {
-      const char *name = (char *)((*lp)->item);
+      astr name = astr_new(((*lp)->item));
       *lp = list_next(*lp);
       if (*lp != NULL) {
-        newvalue = (char *)((*lp)->item);
+        newvalue = astr_new(((*lp)->item));
         *lp = list_next(*lp);
       }
 
-      set_variable(astr_new(name), astr_new(newvalue));
+      set_variable(name, newvalue);
     }
   } else {
     if ((var = minibuf_read_variable_name(astr_new("Set variable: "))) == NULL)
       ok = FALSE;
     else {
       var_entry *p = get_variable_default(var);
-      fmt = p ? p->fmt : "";
-      if (!strcmp(fmt, "b")) {
+      if (!strcmp(p ? p->fmt : "", "b")) {
         int i;
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
           ok = FUNCALL(cancel);

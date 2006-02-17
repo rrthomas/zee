@@ -64,8 +64,7 @@ size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_tidy(void);
-void term_nprint(size_t size, const char *s);
-void term_print(const char *s);
+void term_print(astr as);
 void ding(void);
 
 /* file.c ----------------------------------------------------------------- */
@@ -99,7 +98,7 @@ Marker *get_mark(void);
 void set_mark(Marker *m);
 void set_mark_to_point(void);
 Line *line_new(void);
-Line *string_to_lines(astr as, const char *eol, size_t *lines);
+Line *string_to_lines(astr as, astr eol, size_t *lines);
 int is_empty_line(void);
 int is_blank_line(void);
 int following_char(void);
@@ -111,7 +110,7 @@ int eolp(void);
 int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, int replace_case);
 int insert_char(int c);
 void fill_break_line(void);
-int insert_nstring(astr as, const char *eolstr, int intercalate);
+int insert_nstring(astr as, astr eolstr, int intercalate);
 int delete_nstring(size_t size, astr *as);
 
 /* macro.c ---------------------------------------------------------------- */

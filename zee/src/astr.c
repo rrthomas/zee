@@ -101,6 +101,7 @@ astr astr_cat_char(astr as, int c)
   return as;
 }
 
+/* FIXME: Make third argument a pos */
 astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
 {
   assert(as != NULL);

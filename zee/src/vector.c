@@ -23,6 +23,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "zmalloc.h"
 #include "vector.h"
@@ -59,7 +60,7 @@ void *vec_index(vector *v, size_t idx)
     resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
   if (idx >= vec_items(v))
     vec_items(v) = idx + 1;
-  return (void *)((char *)v->array + idx * vec_itemsize(v));
+  return (void *)((uint8_t *)v->array + idx * vec_itemsize(v));
 }
 
 /*
@@ -71,8 +72,8 @@ void vec_shrink(vector *v, size_t idx, size_t items)
     return;
   if (idx + items > v->size)
     items = v->size - idx;
-  memcpy((char *)v->array + idx * vec_itemsize(v),
-         (char *)v->array + (idx + items) * vec_itemsize(v),
+  memcpy((uint8_t *)v->array + idx * vec_itemsize(v),
+         (uint8_t *)v->array + (idx + items) * vec_itemsize(v),
          items * vec_itemsize(v));
   resize(v, v->size - items);
 }

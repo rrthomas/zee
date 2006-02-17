@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "main.h"
 #include "extern.h"
@@ -39,13 +40,11 @@
 
 static const char *find_err = NULL;
 
-static char *find_substr(const char *s1, size_t s1size,
-			    const char *s2, size_t s2size,
-			    int bol, int eol, int backward)
+static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
-  char *ret = NULL;
+  size_t ret = SIZE_MAX;
   int index;
 
   search_regs.num_regs = 1;
@@ -57,23 +56,23 @@ static char *find_substr(const char *s1, size_t s1size,
   pattern.buffer = NULL;
   pattern.allocated = 0;
 
-  find_err = re_compile_pattern(s2, (int)s2size, &pattern);
+  find_err = re_compile_pattern(astr_cstr(as2), (int)astr_len(as2), &pattern);
   if (!find_err) {
     pattern.not_bol = !bol;
     pattern.not_eol = !eol;
 
     if (!backward)
-      index = re_search(&pattern, s1, (int)s1size, 0, (int)s1size,
+      index = re_search(&pattern, astr_cstr(s1), (int)astr_len(s1), 0, (int)astr_len(s1),
                         &search_regs);
     else
-      index = re_search(&pattern, s1, (int)s1size, (int)s1size, -(int)s1size,
+      index = re_search(&pattern, astr_cstr(s1), (int)astr_len(s1), (int)astr_len(s1), -(int)astr_len(s1),
                         &search_regs);
 
     if (index >= 0) {
       if (!backward)
-        ret = ((char *)s1) + search_regs.end[0];
+        ret = search_regs.end[0];
       else
-        ret = ((char *)s1) + search_regs.start[0];
+        ret = search_regs.start[0];
     }
   }
 
@@ -82,23 +81,21 @@ static char *find_substr(const char *s1, size_t s1size,
   return ret;
 }
 
-static int search_forward(Line *startp, size_t starto, const char *s)
+static int search_forward(Line *startp, size_t starto, astr as)
 {
-  Line *lp;
-  const char *sp;
-  size_t s1size, ssize = strlen(s);
+  if (astr_len(as) > 0) {
+    Line *lp;
+    astr sp;
 
-  if (ssize > 0) {
-    for (lp = startp, sp = astr_char(lp->item, (ptrdiff_t)starto), s1size = astr_len(lp->item) - starto;
+    for (lp = startp, sp = astr_substr(lp->item, (ptrdiff_t)starto, astr_len(lp->item) - starto);
          lp != list_last(buf.lines);
-         lp = list_next(lp), sp = astr_cstr(lp->item), s1size = astr_len(lp->item)) {
-      if (s1size > 0) {
-        const char *sp2 = find_substr(sp, s1size, s, ssize,
-                                         sp == astr_cstr(lp->item), TRUE, FALSE);
-        if (sp2 != NULL) {
+         lp = list_next(lp), sp = lp->item) {
+      if (astr_len(sp) > 0) {
+        size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
+        if (off != SIZE_MAX) {
           while (buf.pt.p != lp)
             FUNCALL(edit_navigate_down_line);
-          buf.pt.o = sp2 - astr_cstr(lp->item);
+          buf.pt.o = off;
           return TRUE;
         }
       }
@@ -108,23 +105,22 @@ static int search_forward(Line *startp, size_t starto, const char *s)
   return FALSE;
 }
 
-static int search_backward(Line *startp, size_t starto, const char *s)
+static int search_backward(Line *startp, size_t starto, astr as)
 {
-  Line *lp;
-  size_t s1size, ssize = strlen(s);
+  if (astr_len(as) > 0) {
+    Line *lp;
+    size_t s1size;
 
-  if (ssize > 0) {
     for (lp = startp, s1size = starto;
          lp != list_first(buf.lines);
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
-      const char *sp = astr_cstr(lp->item);
+      astr sp = lp->item;
       if (s1size > 0) {
-        const char *sp2 = find_substr(sp, s1size, s, ssize,
-                                         TRUE, s1size == astr_len(lp->item), TRUE);
-        if (sp2 != NULL) {
+        size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
+        if (off != SIZE_MAX) {
           while (buf.pt.p != lp)
             FUNCALL(edit_navigate_up_line);
-          buf.pt.o = sp2 - astr_cstr(lp->item);
+          buf.pt.o = off;
           return TRUE;
         }
       }
@@ -150,7 +146,7 @@ Search forward from point for regular expression REGEXP.
   else {
     last_search = astr_dup(ms);
 
-    if (!search_forward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
+    if (!search_forward(buf.pt.p, buf.pt.o, ms)) {
       minibuf_error(astr_afmt("Failing search: `%s'", astr_cstr(ms)));
       ok = FALSE;
     }
@@ -172,7 +168,7 @@ Search backward from point for match for regular expression REGEXP.
   else {
     last_search = astr_dup(ms);
 
-    if (!search_backward(buf.pt.p, buf.pt.o, astr_cstr(ms))) {
+    if (!search_backward(buf.pt.p, buf.pt.o, ms)) {
       minibuf_error(astr_afmt("Failing search backward: `%s'", ms));
       ok = FALSE;
     }
@@ -285,9 +281,9 @@ static int isearch(int dir)
 
     if (astr_len(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)
-        last = search_forward(cur.p, cur.o, astr_cstr(pattern));
+        last = search_forward(cur.p, cur.o, pattern);
       else
-        last = search_backward(cur.p, cur.o, astr_cstr(pattern));
+        last = search_backward(cur.p, cur.o, pattern);
     } else
       last = TRUE;
 
@@ -330,12 +326,12 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-static int no_upper(const char *s, size_t len)
+static int no_upper(astr as)
 {
   size_t i;
 
-  for (i = 0; i < len; i++)
-    if (isupper(s[i]))
+  for (i = 0; i < astr_len(as); i++)
+    if (isupper(*astr_char(as, (ptrdiff_t)i)))
       return FALSE;
 
   return TRUE;
@@ -354,12 +350,12 @@ Replace occurrences of a regexp with other text.
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
-    find_no_upper = no_upper(astr_cstr(find), astr_len(find));
+    find_no_upper = no_upper(find);
 
     if ((repl = minibuf_read(astr_afmt("Replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
       ok = FUNCALL(cancel);
     else {
-      while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
+      while (search_forward(buf.pt.p, buf.pt.o, find)) {
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
                   make_point(buf.pt.n,
@@ -395,13 +391,13 @@ what to do with it.
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
-    find_no_upper = no_upper(astr_cstr(find), astr_len(find));
+    find_no_upper = no_upper(find);
 
     if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
       ok = FUNCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
-      while (search_forward(buf.pt.p, buf.pt.o, astr_cstr(find))) {
+      while (search_forward(buf.pt.p, buf.pt.o, find)) {
         if (!noask) {
           int c;
           if (thisflag & FLAG_NEED_RESYNC)

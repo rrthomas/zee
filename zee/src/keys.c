@@ -132,20 +132,20 @@ astr chordtostr(size_t key)
 /*
  * Convert a key string to its key code
  */
-static size_t strtokey(const char *buf, size_t *len)
+static size_t strtokey(astr buf, size_t *len)
 {
-  size_t i, buflen = strlen(buf);
+  size_t i;
 
   for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++) {
     size_t keylen = strlen(keyname[i]);
-    if (strncmp(buf, keyname[i], min(keylen, buflen)) == 0) {
+    if (strncmp(astr_cstr(buf), keyname[i], min(keylen, astr_len(buf))) == 0) {
       *len = keylen;
       return keycode[i];
     }
   }
 
   *len = 1;
-  return (size_t)*buf;
+  return (size_t)*astr_char(buf, 0);
 }
 
 /*
@@ -157,7 +157,7 @@ size_t strtochord(astr chord)
 
   do {
     size_t l;
-    k = strtokey(astr_char(chord, (ptrdiff_t)len), &l);
+    k = strtokey(astr_substr(chord, (ptrdiff_t)len, astr_len(chord) - len), &l);
     key |= k;
     len += l;
   } while (k == KBD_CTRL || k == KBD_META);

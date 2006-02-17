@@ -44,8 +44,9 @@ END_DEFUN
 /*
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
+ * FIXME: load it all at startup.
  */
-static astr get_funcvar_doc(const char *name, astr *defval, int isfunc)
+static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
 {
   FILE *f;
   astr buf, match, doc;
@@ -57,9 +58,9 @@ static astr get_funcvar_doc(const char *name, astr *defval, int isfunc)
   }
 
   if (isfunc)
-    match = astr_afmt("\fF_%s", name);
+    match = astr_afmt("\fF_%s", astr_cstr(name));
   else
-    match = astr_afmt("\fV_%s", name);
+    match = astr_afmt("\fV_%s", astr_cstr(name));
 
   doc = astr_new("");
   while ((buf = astr_fgets(f)) != NULL) {
@@ -78,7 +79,7 @@ static astr get_funcvar_doc(const char *name, astr *defval, int isfunc)
   fclose(f);
 
   if (!reading_doc) {
-    minibuf_error(astr_afmt("Cannot find documentation for `%s'", name));
+    minibuf_error(astr_afmt("Cannot find documentation for `%s'", astr_cstr(name)));
     return NULL;
   }
 
@@ -93,7 +94,7 @@ Display the full documentation of FUNCTION (a symbol).
   astr name, doc;
 
   if ((name = minibuf_read_function_name(astr_new("Describe function: ")))) {
-    if ((doc = get_funcvar_doc(astr_cstr(name), NULL, TRUE)))
+    if ((doc = get_funcvar_doc(name, NULL, TRUE)))
       popup_set(astr_afmt("Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc)));
     else
       ok = FALSE;
@@ -112,13 +113,13 @@ Display the full documentation of VARIABLE (a symbol).
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
     astr defval, doc;
 
-    if ((doc = get_funcvar_doc(astr_cstr(name), &defval, FALSE))) {
-            popup_set(astr_afmt("Help for variable `%s':\n\n"
-                                "Default value: %s\n"
-                                "Current value: %s\n\n"
-                                "Documentation:\n%s",
-                                astr_cstr(name), astr_cstr(defval),
-                                get_variable(name), astr_cstr(doc)));
+    if ((doc = get_funcvar_doc(name, &defval, FALSE))) {
+      popup_set(astr_afmt("Help for variable `%s':\n\n"
+                          "Default value: %s\n"
+                          "Current value: %s\n\n"
+                          "Documentation:\n%s",
+                          astr_cstr(name), astr_cstr(defval),
+                          get_variable(name), astr_cstr(doc)));
     } else
       ok = FALSE;
 

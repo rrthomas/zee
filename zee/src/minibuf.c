@@ -35,7 +35,7 @@
 static void term_minibuf_write(astr as)
 {
   term_move(term_height() - 1, 0);
-  term_nprint(min(astr_len(as), term_width()), astr_cstr(as));
+  term_print(astr_substr(as, 0, min(astr_len(as), term_width())));
   term_clrtoeol();
 }
 
@@ -153,7 +153,7 @@ void minibuf_clear(void)
  * Minibuffer key action routines
  */
 
-static void draw_minibuf_read(astr prompt, astr value, char *match, size_t pointo)
+static void draw_minibuf_read(astr prompt, astr value, astr match, size_t pointo)
 {
   size_t margin = 1, n = 0;
   size_t width = term_width();
@@ -166,8 +166,8 @@ static void draw_minibuf_read(astr prompt, astr value, char *match, size_t point
     n = pointo - pointo % (width - astr_len(prompt) - 2);
   }
 
-  term_nprint(min(width - astr_len(prompt) - margin, astr_len(value) - n),
-              astr_char(value, (ptrdiff_t)n));
+  term_print(astr_substr(value, (ptrdiff_t)n,
+                         min(width - astr_len(prompt) - margin, astr_len(value) - n)));
   term_print(match);
 
   if (astr_len(value + n) >= width - astr_len(prompt) - margin) {
@@ -376,7 +376,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
     prepare_history(hp);
 
   for (i = astr_len(as);;) {
-    draw_minibuf_read(prompt, as, s[lasttab], (size_t)i);
+    draw_minibuf_read(prompt, as, astr_new(s[lasttab]), (size_t)i);
 
     thistab = COMPLETION_NOTCOMPLETING;
 

@@ -210,7 +210,7 @@ Set mark at beginning, and put point at end.
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
-    insert_nstring(killed_text, buf.eol, FALSE);
+    insert_nstring(killed_text, astr_new(buf.eol), FALSE);
     weigh_mark();
   }
 }

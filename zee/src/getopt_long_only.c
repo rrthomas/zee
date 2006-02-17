@@ -2,7 +2,8 @@
    This file is part of Zee.
 
    Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
-   	Free Software Foundation, Inc.
+	Free Software Foundation, Inc.
+   Copyright (C) 2006 Reuben Thomas.
 
    Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
@@ -41,18 +42,13 @@
 
    As `getopt' works, it permutes the elements of ARGV so that,
    when it is done, all the options precede everything else.  Thus
-   all application programs are extended to handle flexible argument order.
-
-   GNU application programs can use a third alternative mode in which
-   they can distinguish the relative order of options and other arguments.  */
+   all application programs are extended to handle flexible argument order. */
 
 #include "getopt.h"
 
 /* For communication from `getopt' to the caller.
    When `getopt' finds an option that takes an argument,
-   the argument value is returned here.
-   Also, when `ordering' is RETURN_IN_ORDER,
-   each non-option ARGV-element is returned here.  */
+   the argument value is returned here.  */
 
 char *optarg;
 
@@ -99,51 +95,13 @@ int optopt = '?';
 
 /* Describe how to deal with options that follow non-option ARGV-elements.
 
-   If the caller did not specify anything,
-   the default is PERMUTE.
+   We permute the contents of ARGV as we scan, so that eventually all
+   the non-options are at the end. This allows options to be given in
+   any order, even with programs that were not written to expect this.
 
-   REQUIRE_ORDER means don't recognize them as options;
-   stop option processing when the first non-option is seen.
-   This is what Unix does.
-   This mode of operation is selected by using `+' as the first
-   character of the list of option characters.
-
-   PERMUTE is the default.  We permute the contents of ARGV as we scan,
-   so that eventually all the non-options are at the end.  This allows options
-   to be given in any order, even with programs that were not written to
-   expect this.
-
-   RETURN_IN_ORDER is an option available to programs that were written
-   to expect options and other ARGV-elements in any order and that care about
-   the ordering of the two.  We describe each non-option ARGV-element
-   as if it were the argument of an option with character code 1.
-   Using `-' as the first character of the list of option characters
-   selects this mode of operation.
-
-   The special argument `--' forces an end of option-scanning regardless
-   of the value of `ordering'.  In the case of RETURN_IN_ORDER, only
-   `--' can cause `getopt' to return -1 with `optind' != ARGC.  */
-
-static enum
-{
-  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
-} ordering;
+   The special argument `--' forces an end of option-scanning.  */
 
 #include <string.h>
-
-static char *
-my_index (str, chr)
-     const char *str;
-     int chr;
-{
-  while (*str)
-    {
-      if (*str == chr)
-	return (char *) str;
-      str++;
-    }
-  return 0;
-}
 
 /* Handle permutation of arguments.  */
 
@@ -165,11 +123,8 @@ static int last_nonopt;
    `first_nonopt' and `last_nonopt' are relocated so that they describe
    the new indices of the non-options in ARGV after they are moved.  */
 
-static void exchange (char **);
-
 static void
-exchange (argv)
-     char **argv;
+exchange (char **argv)
 {
   int bottom = first_nonopt;
   int middle = last_nonopt;
@@ -227,10 +182,8 @@ exchange (argv)
 
 /* Initialize the internal data when the first call is made.  */
 
-static const char *_getopt_initialize (int, char *const *, const char *);
-
 static const char *
-_getopt_initialize (argc, argv, optstring)
+_getopt_initialize (int argc, char *const *argv, const char *optstring)
      int argc;
      char *const *argv;
      const char *optstring;
@@ -242,21 +195,6 @@ _getopt_initialize (argc, argv, optstring)
   first_nonopt = last_nonopt = optind;
 
   nextchar = NULL;
-
-  /* Determine how to handle the ordering of options and nonoptions.  */
-
-  if (optstring[0] == '-')
-    {
-      ordering = RETURN_IN_ORDER;
-      ++optstring;
-    }
-  else if (optstring[0] == '+')
-    {
-      ordering = REQUIRE_ORDER;
-      ++optstring;
-    }
-  else
-    ordering = PERMUTE;
 
   return optstring;
 }
@@ -290,10 +228,6 @@ _getopt_initialize (argc, argv, optstring)
    wants an optional arg; if there is text in the current ARGV-element,
    it is returned in `optarg', otherwise `optarg' is set to zero.
 
-   If OPTSTRING starts with `-' or `+', it requests different methods of
-   handling the non-option ARGV-elements.
-   See the comments about RETURN_IN_ORDER and REQUIRE_ORDER, above.
-
    Long-named options begin with `--' instead of `-'.
    Their names may be abbreviated as long as the abbreviation is unique
    or is an exact match for some defined option.  If they have an
@@ -314,17 +248,13 @@ _getopt_initialize (argc, argv, optstring)
    It is only valid when a long-named option has been found by the most
    recent call.
 
-   If LONG_ONLY is nonzero, '-' as well as '--' can introduce
-   long-named options.  */
+   Like getopt_long, but '-' as well as '--' can indicate a long option.
+   If an option that starts with '-' (not '--') doesn't match a long option,
+   but does match a short option, it is parsed as a short option
+   instead.  */
 
 int
-_getopt_internal (argc, argv, optstring, longopts, longind, long_only)
-     int argc;
-     char *const *argv;
-     const char *optstring;
-     const struct option *longopts;
-     int *longind;
-     int long_only;
+getopt_long_only (int argc, char *const *argv, const char *optstring, const struct option *longopts, int *longind)
 {
   optarg = NULL;
 
@@ -353,23 +283,20 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
       if (first_nonopt > optind)
 	first_nonopt = optind;
 
-      if (ordering == PERMUTE)
-	{
-	  /* If we have just processed some options following some non-options,
-	     exchange them so that the options come first.  */
+      /* If we have just processed some options following some non-options,
+         exchange them so that the options come first.  */
 
-	  if (first_nonopt != last_nonopt && last_nonopt != optind)
-	    exchange ((char **) argv);
-	  else if (last_nonopt != optind)
-	    first_nonopt = optind;
+      if (first_nonopt != last_nonopt && last_nonopt != optind)
+        exchange ((char **) argv);
+      else if (last_nonopt != optind)
+        first_nonopt = optind;
 
-	  /* Skip any additional non-options
-	     and extend the range of non-options previously skipped.  */
+      /* Skip any additional non-options
+         and extend the range of non-options previously skipped.  */
 
-	  while (optind < argc && NONOPTION_P)
-	    optind++;
-	  last_nonopt = optind;
-	}
+      while (optind < argc && NONOPTION_P)
+        optind++;
+      last_nonopt = optind;
 
       /* The special ARGV-element `--' means premature end of options.
 	 Skip it like a null option,
@@ -406,8 +333,6 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
       if (NONOPTION_P)
 	{
-	  if (ordering == REQUIRE_ORDER)
-	    return -1;
 	  optarg = argv[optind++];
 	  return 1;
 	}
@@ -423,10 +348,10 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
   /* Check whether the ARGV-element is a long option.
 
-     If long_only and the ARGV-element has the form "-f", where f is
-     a valid short option, don't consider it an abbreviated form of
-     a long option that starts with f.  Otherwise there would be no
-     way to give the -f short option.
+     If the ARGV-element has the form "-f", where f is a valid short
+     option, don't consider it an abbreviated form of a long option
+     that starts with f. Otherwise there would be no way to give the
+     -f short option.
 
      On the other hand, if there's a long option "fubar" and
      the ARGV-element is "-fu", do consider that an abbreviation of
@@ -436,7 +361,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
   if (longopts != NULL
       && (argv[optind][1] == '-'
-	  || (long_only && (argv[optind][2] || !my_index (optstring, argv[optind][1])))))
+	  || (argv[optind][2] || !strchr (optstring, argv[optind][1]))))
     {
       char *nameend;
       const struct option *p;
@@ -543,12 +468,10 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	  return pfound->val;
 	}
 
-      /* Can't find it as a long option.  If this is not getopt_long_only,
-	 or the option starts with '--' or is not a valid short
-	 option, then it's an error.
+      /* Can't find it as a long option.  If the option starts with
+	 '--' or is not a valid short option, then it's an error.
 	 Otherwise interpret it as a short option.  */
-      if (!long_only || argv[optind][1] == '-'
-	  || my_index (optstring, *nextchar) == NULL)
+      if (argv[optind][1] == '-' || strchr (optstring, *nextchar) == NULL)
 	{
 	  if (opterr)
 	    {
@@ -572,7 +495,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
   {
     char c = *nextchar++;
-    char *temp = my_index (optstring, c);
+    char *temp = strchr (optstring, c);
 
     /* Increment `optind' when we start to process its last character.  */
     if (*nextchar == '\0')
@@ -675,8 +598,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		else
 		  {
 		    if (opterr)
-		      fprintf (stderr, _("\
-%s: option `-W %s' doesn't allow an argument\n"),
+		      fprintf (stderr, _("%s: option `-W %s' doesn't allow an argument\n"),
 			       argv[0], pfound->name);
 
 		    nextchar += strlen (nextchar);
@@ -758,21 +680,4 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
       }
     return c;
   }
-}
-
-
-/* Like getopt_long, but '-' as well as '--' can indicate a long option.
-   If an option that starts with '-' (not '--') doesn't match a long option,
-   but does match a short option, it is parsed as a short option
-   instead.  */
-
-int
-getopt_long_only (argc, argv, options, long_options, opt_index)
-     int argc;
-     char *const *argv;
-     const char *options;
-     const struct option *long_options;
-     int *opt_index;
-{
-  return _getopt_internal (argc, argv, options, long_options, opt_index, 1);
 }

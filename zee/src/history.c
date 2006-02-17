@@ -28,7 +28,7 @@
 
 void add_history_element(History *hp, astr string)
 {
-  const char *last;
+  astr last;
 
   if (!hp->elements)
     hp->elements = list_new();

@@ -99,7 +99,7 @@ size_t popup_lines(void)
 void popup_set(astr as)
 {
   if (as)
-    popup = string_to_lines(as, "\n", &popup_num_lines);
+    popup = string_to_lines(as, astr_new("\n"), &popup_num_lines);
   else {
     popup = NULL;
     popup_num_lines = 0;
@@ -319,22 +319,17 @@ static void draw_window(size_t topline)
 /*
  * Print a string on the terminal.
  */
-void term_nprint(size_t size, const char *s)
+void term_print(astr as)
 {
   size_t i;
 
-  for (i = 0; i < size && s[i] != '\0'; i++)
-    if (s[i] != '\n')
-      term_addch(s[i]);
+  for (i = 0; i < astr_len(as) && *astr_char(as, (ptrdiff_t)i) != '\0'; i++)
+    if (*astr_char(as, (ptrdiff_t)i) != '\n')
+      term_addch(*astr_char(as, (ptrdiff_t)i));
     else {
       term_clrtoeol();
       term_nl();
     }
-}
-
-void term_print(const char *s)
-{
-  term_nprint(SIZE_MAX, s);
 }
 
 /*
@@ -345,29 +340,26 @@ void term_print(const char *s)
 static void calculate_start_column(void)
 {
   size_t col = 0, lastcol = 0, t = tab_width();
-  int rpfact, lpfact;
-  char *rp, *lp, *p;
+  ptrdiff_t rp, lp, p, rpfact, lpfact;
   Point pt = buf.pt;
 
-  rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
+  rp = (ptrdiff_t)pt.o;
   rpfact = pt.o / (win.ewidth / 3);
 
-  for (lp = rp; lp >= astr_cstr(pt.p->item); --lp) {
+  for (lp = rp; lp >= 0; --lp) {
     for (col = 0, p = lp; p < rp; ++p)
-      if (*p == '\t') {
+      if (*astr_char(pt.p->item, p) == '\t') {
         col |= t - 1;
         ++col;
-      } else if (isprint(*p))
+      } else if (isprint(*astr_char(pt.p->item, p)))
         ++col;
-      else {
-        astr as = make_char_printable((size_t)*p);
-        col += astr_len(as);
-      }
+      else
+        col += astr_len(make_char_printable((size_t)*astr_char(pt.p->item, p)));
 
-    lpfact = (lp - astr_cstr(pt.p->item)) / (win.ewidth / 3);
+    lpfact = lp / (win.ewidth / 3);
 
     if (col >= win.ewidth - 1 || lpfact < (rpfact - 2)) {
-      point_start_column = lp + 1 - astr_cstr(pt.p->item);
+      point_start_column = lp + 1;
       point_screen_column = lastcol;
       return;
     }
@@ -398,45 +390,44 @@ static void draw_status_line(size_t line)
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  term_print("--");
+  term_print(astr_new("--"));
 
   if ((buf.flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
-    term_print("%*");
+    term_print(astr_new("%*"));
   else if (buf.flags & BFLAG_MODIFIED)
-    term_print("**");
+    term_print(astr_new("**"));
   else if (buf.flags & BFLAG_READONLY)
-    term_print("%%");
+    term_print(astr_new("%%"));
   else
-    term_print("--");
+    term_print(astr_new("--"));
 
-  term_print("-(");
+  term_print(astr_new("-("));
   if (buf.flags & BFLAG_AUTOFILL) {
-    term_print("Fill");
+    term_print(astr_new("Fill"));
     someflag = 1;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
     if (someflag)
-      term_print(" ");
-    term_print("Def");
+      term_print(astr_new(" "));
+    term_print(astr_new("Def"));
     someflag = 1;
   }
   if (buf.flags & BFLAG_ISEARCH) {
     if (someflag)
-      term_print(" ");
-    term_print("Isearch");
+      term_print(astr_new(" "));
+    term_print(astr_new("Isearch"));
   }
 
-  term_print(astr_cstr(astr_afmt(")--L%d--C%d--", buf.pt.n + 1, get_goalc())));
+  term_print(astr_afmt(")--L%d--C%d--", buf.pt.n + 1, get_goalc()));
 
   if (buf.num_lines <= win.eheight && win.topdelta == buf.pt.n)
-    term_print("All");
+    term_print(astr_new("All"));
   else if (buf.pt.n == win.topdelta)
-    term_print("Top");
+    term_print(astr_new("Top"));
   else if (buf.pt.n + (win.eheight - win.topdelta) > buf.num_lines)
-    term_print("Bot");
+    term_print(astr_new("Bot"));
   else
-    term_print(astr_cstr(astr_afmt("%2d%%",
-                                   (int)((float)buf.pt.n / buf.num_lines * 100))));
+    term_print(astr_afmt("%2d%%", (int)((float)buf.pt.n / buf.num_lines * 100)));
 
   term_attrset(1, FONT_NORMAL);
 }
@@ -466,13 +457,13 @@ static void draw_popup(void)
     /* Draw lines. */
     for (; i < popup_lines() && y < term_height() - 2;
          i++, y++, lp = list_next(lp)) {
-      term_nprint(term_width(), astr_cstr(lp->item));
-      term_print("\n");
+      term_print(astr_substr(lp->item, 0, min(term_width(), astr_len(lp->item))));
+      term_print(astr_new("\n"));
     }
 
     /* Draw blank lines to bottom of window. */
     for (; y < term_height() - 2; y++)
-      term_print("\n");
+      term_print(astr_new("\n"));
   }
 }
 

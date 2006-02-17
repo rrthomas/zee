@@ -79,7 +79,7 @@ static Undo *revert_action(Undo *up)
 
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->size, &as);
-  insert_nstring(up->text, buf.eol, FALSE);
+  insert_nstring(up->text, astr_new(buf.eol), FALSE);
 
   doing_undo = FALSE;
 

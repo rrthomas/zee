@@ -127,23 +127,22 @@ Line *line_new(void)
  * FIXME: rewrite with astr_strstr, which should work with embedded
  * NULs (uses strnstr, which we also need to write).
  */
-Line *string_to_lines(astr as, const char *eol, size_t *lines)
+Line *string_to_lines(astr as, astr eol, size_t *lines)
 {
-  const char *p, *end = astr_cstr(as) + astr_len(as);
+  ptrdiff_t p, end = astr_len(as);
   Line *lp = line_new();
-  size_t eol_len = strlen(eol);
 
-  for (p = astr_cstr(as), *lines = 1; p < end;) {
-    const char *q;
-    if ((q = strstr(p, eol)) != NULL) {
-      astr_ncat(list_last(lp)->item, p, (size_t)(q - p));
+  for (p = 0, *lines = 1; p < end;) {
+    ptrdiff_t q;
+    if ((q = (strstr(astr_char(as, p), astr_cstr(eol)) - astr_cstr(as))) >= 0) {
+      astr_cat(list_last(lp)->item, astr_substr(as, p, (size_t)(q - p)));
       list_append(lp, astr_new(""));
       ++*lines;
-      p = q + eol_len;
+      p = q + astr_len(eol);
     } else {                    /* End of string, or embedded NUL */
-      size_t len = strlen(p);
-      astr_ncat(list_last(lp)->item, p, len);
-      p += strlen(p);
+      size_t len = strlen(astr_char(as, p));
+      astr_ncat(list_last(lp)->item, astr_char(as, p), len);
+      p += len;
       if (p < end) {            /* Deal with embedded NULs */
         astr_cat_char(as, '\0');
         p++;            /* Strictly can only increment p if p < end */
@@ -240,7 +239,7 @@ int eolp(void)
 int insert_char(int c)
 {
   astr as = astr_afmt("%c", c);
-  return insert_nstring(as, "\n", FALSE);
+  return insert_nstring(as, astr_new("\n"), FALSE);
 }
 
 DEFUN(tab_to_tab_stop)
@@ -305,15 +304,15 @@ static int intercalate_newline(void)
  * Returns 2 if it is all upper case, 1 if just the first letter is,
  * and 0 otherwise.
  */
-static int check_case(const char *s, size_t len)
+static int check_case(astr as)
 {
   size_t i;
 
-  if (!isupper(*s))
+  if (!isupper(*astr_char(as, 0)))
     return 0;
 
-  for (i = 1; i < len; i++)
-    if (!isupper(s[i]))
+  for (i = 1; i < astr_len(as); i++)
+    if (!isupper(*astr_char(as, (ptrdiff_t)i)))
       return 1;
 
   return 2;
@@ -322,10 +321,10 @@ static int check_case(const char *s, size_t len)
 /*
  * Recase str according to case of tmpl.
  */
-static void recase(astr str, const char *tmpl, size_t tmpl_len)
+static void recase(astr str, astr tmpl)
 {
   size_t i;
-  int tmpl_case = check_case(tmpl, tmpl_len);
+  int tmpl_case = check_case(tmpl);
 
   if (tmpl_case >= 1)
     *astr_char(str, 0) = toupper(*astr_char(str, 0));
@@ -348,7 +347,7 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
 
   if (oldlen > 0) {
     if (replace_case && get_variable_bool(astr_new("case_replace")))
-      recase(newcopy, astr_char((*lp)->item, (ptrdiff_t)offset), oldlen);
+      recase(newcopy, astr_substr((*lp)->item, (ptrdiff_t)offset, oldlen));
 
     if (astr_len(newcopy) != oldlen) {
       astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen,
@@ -435,9 +434,9 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-int insert_nstring(astr as, const char *eol, int intercalate)
+int insert_nstring(astr as, astr eol, int intercalate)
 {
-  size_t i, eol_len = strlen(eol);
+  size_t i;
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -445,13 +444,13 @@ int insert_nstring(astr as, const char *eol, int intercalate)
   undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
-    char *s = astr_char(as, (ptrdiff_t)i);
-    if (strncmp(s, eol, eol_len) == 0) {
+    astr bs = astr_substr(as, (ptrdiff_t)i, astr_len(as) - i);
+    if (astr_cmp(bs, eol) == 0) {
       intercalate_newline();
       if (!intercalate)
         FUNCALL(edit_navigate_forward_char);
     } else {
-      astr_nreplace(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 0, s, 1);
+      astr_nreplace(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 0, astr_cstr(bs), 1);
       buf.flags |= BFLAG_MODIFIED;
       if (!intercalate)
         adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, 1);

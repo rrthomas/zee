@@ -154,7 +154,7 @@ static int eval(list *node)
     return FALSE;
 
   assert((*node)->item);
-  prim = get_function(astr_new((char *)((*node)->item)));
+  prim = get_function(astr_new(((*node)->item)));
 
   *node = list_next(*node);
 

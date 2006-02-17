@@ -558,7 +558,7 @@ current buffer, overwriting the current region.
             || r.start.o != buf.pt.o)
           FUNCALL(exchange_point_and_mark);
         delete_nstring(r.size, &s);
-        ok = insert_nstring(out, "\n", FALSE);
+        ok = insert_nstring(out, astr_new("\n"), FALSE);
         undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
       }
     }

@@ -123,7 +123,7 @@ void file_open(astr filename)
     strcpy(buf.eol, astr_cstr(eolstr));
 
     /* Add lines to buffer */
-    buf.lines = string_to_lines(as, astr_cstr(eolstr), &buf.num_lines);
+    buf.lines = string_to_lines(as, eolstr, &buf.num_lines);
     buf.pt.p = list_first(buf.lines);
   }
 
@@ -170,7 +170,7 @@ Save buffer in visited file.
   } else {
     Undo *up;
 
-    minibuf_write(astr_afmt("Wrote %s", astr_cstr(buf.filename)));
+    minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf.filename)));
     buf.flags &= ~BFLAG_MODIFIED;
 
     /* Set unchanged flags to FALSE except for the
