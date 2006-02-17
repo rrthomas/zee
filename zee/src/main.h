@@ -23,6 +23,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -114,7 +115,7 @@ typedef struct {
   int flags;                    /* Buffer flags */
   list vars;                    /* Buffer-local variables */
   astr filename;               /* The name of the file being edited */
-  char eol[3];        /* EOL string (up to 2 chars) for this buffer */
+  astr eol;           /* EOL string for this buffer */
 } Buffer;
 
 /*

@@ -21,14 +21,9 @@
    02111-1301, USA.  */
 
 #include "config.h"
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "main.h"
 #include "extern.h"
+
 
 /* This variable is set to TRUE when the undo is in execution. */
 static int doing_undo = FALSE;
@@ -79,7 +74,7 @@ static Undo *revert_action(Undo *up)
 
   assert(up->type == UNDO_REPLACE_BLOCK);
   delete_nstring(up->size, &as);
-  insert_nstring(up->text, astr_new(buf.eol), FALSE);
+  insert_nstring(up->text, buf.eol, FALSE);
 
   doing_undo = FALSE;
 

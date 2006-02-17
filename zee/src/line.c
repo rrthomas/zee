@@ -23,10 +23,7 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "main.h"
@@ -478,7 +475,7 @@ int delete_nstring(size_t size, astr *as)
     if (!eolp())
       astr_cat_char(*as, following_char());
     else
-      astr_cat_cstr(*as, buf.eol);
+      astr_cat(*as, buf.eol);
 
     if (eobp()) {
       minibuf_error(astr_new("End of buffer"));

@@ -21,12 +21,6 @@
    02111-1301, USA.  */
 
 #include "config.h"
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "main.h"
 #include "extern.h"
 
@@ -46,7 +40,7 @@ void buffer_new(void)
   buf.mark = marker_new(point_min(&buf));
 
   /* Set default EOL string. */
-  buf.eol[0] = '\n';
+  buf.eol = astr_new("\n");
 
   /* Allocate the variables list. */
   buf.vars = list_new();

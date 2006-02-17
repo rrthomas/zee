@@ -21,14 +21,10 @@
    02111-1301, USA.  */
 
 #include "config.h"
-
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-#include <gc/gc.h>
-
 #include "main.h"
 #include "zmalloc.h"
+
+#include <gc/gc.h>
 
 /*
  * Return a zeroed allocated memory area.

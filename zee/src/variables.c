@@ -22,10 +22,6 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "main.h"
 #include "extern.h"
 
@@ -91,7 +87,7 @@ static var_entry *get_variable_default(astr var)
 {
   var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!strcmp(p->var, astr_cstr(var)))
+    if (!astr_cmp(astr_new(p->var), var))
       return p;
 
   return NULL;

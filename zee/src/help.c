@@ -22,12 +22,6 @@
 
 #include "config.h"
 
-#include <ctype.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "main.h"
 #include "extern.h"
 #include "paths.h"

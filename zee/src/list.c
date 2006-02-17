@@ -19,9 +19,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-#include <stdlib.h>
-#include <assert.h>
-
 #include "list.h"
 #include "main.h"
 #include "extern.h"

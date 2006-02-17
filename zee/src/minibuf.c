@@ -22,10 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 
 #include "main.h"
@@ -110,7 +106,7 @@ int minibuf_read_yesno(astr as)
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(astr_cstr(list_at(cp->completions, (size_t)retvalue)), "yes"))
+    if (astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("yes")))
       retvalue = TRUE;
     else
       retvalue = FALSE;

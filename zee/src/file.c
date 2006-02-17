@@ -22,11 +22,9 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "main.h"
@@ -120,7 +118,7 @@ void file_open(astr filename)
     if (errno != ENOENT)
       buf.flags |= BFLAG_READONLY;
   } else {
-    strcpy(buf.eol, astr_cstr(eolstr));
+    buf.eol = eolstr;
 
     /* Add lines to buffer */
     buf.lines = string_to_lines(as, eolstr, &buf.num_lines);
@@ -137,7 +135,6 @@ void file_open(astr filename)
  */
 static int buffer_write(Buffer *bp, astr filename)
 {
-  size_t eol_len;
   FILE *fp;
   Line *lp;
 
@@ -146,12 +143,10 @@ static int buffer_write(Buffer *bp, astr filename)
   if ((fp = fopen(astr_cstr(filename), "w")) == NULL)
     return FALSE;
 
-  eol_len = strlen(bp->eol);
-
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
-        (list_next(lp) != bp->lines && fwrite(bp->eol, sizeof(char), eol_len, fp) < eol_len)) {
+        (list_next(lp) != bp->lines && fwrite(bp->eol, sizeof(char), astr_len(bp->eol), fp) < astr_len(bp->eol))) {
       fclose(fp);
       return FALSE;
     }

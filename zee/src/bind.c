@@ -22,11 +22,7 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "main.h"
 #include "extern.h"
@@ -134,7 +130,7 @@ Function get_function(astr name)
   size_t i;
   if (name)
     for (i = 0; i < fentries; i++)
-      if (strcmp(astr_cstr(name), ftable[i].name) == 0)
+      if (astr_cmp(name, astr_new(ftable[i].name)) == 0)
         return ftable[i].func;
   return NULL;
 }

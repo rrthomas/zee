@@ -26,6 +26,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 /*
  * The astr library provides dynamically allocated null-terminated C
@@ -77,6 +78,7 @@ astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of two strings.
+ * FIXME: Make this a function so we don't need to #include string.h above.
  */
 #define astr_cmp(as1, as2)      (strcmp(((astr)(as1))->text, ((astr)(as2))->text))
 

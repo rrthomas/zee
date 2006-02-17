@@ -21,14 +21,9 @@
    02111-1301, USA.  */
 
 #include "config.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
-
 #include "main.h"
 #include "extern.h"
+
 
 static astr killed_text;
 
@@ -60,7 +55,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    astr_cat_cstr(killed_text, buf.eol);
+    astr_cat(killed_text, buf.eol);
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -210,7 +205,7 @@ Set mark at beginning, and put point at end.
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
-    insert_nstring(killed_text, astr_new(buf.eol), FALSE);
+    insert_nstring(killed_text, buf.eol, FALSE);
     weigh_mark();
   }
 }
