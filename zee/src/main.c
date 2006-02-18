@@ -87,8 +87,9 @@ static void loop(void)
   }
 }
 
-/* FIXME: Make a hardwired quit keystroke */
-static char about_minibuf_str[] = "Welcome to " VERSION_STRING "!  To exit press Ctrl-q";
+/* FIXME: Add keystroke dynamically to message, and if none exists,
+   write "Press Alt-x, type `file_quit' and press RETURN". */
+static char about_minibuf_str[] = "Welcome to " VERSION_STRING "!  To exit type Ctrl-q";
 
 static void segv_sig_handler(int signo)
 {

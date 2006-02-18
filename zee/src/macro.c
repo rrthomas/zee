@@ -173,7 +173,7 @@ Macro *get_macro(astr name)
   Macro *mp;
   assert(name);
   for (mp = head_mp; mp; mp = mp->next)
-    if (astr_cmp(mp->name, name) == 0)
+    if (!astr_cmp(mp->name, name))
       return mp;
   return NULL;
 }

@@ -43,7 +43,7 @@ astr astr_new(const char *s)
 
 static void astr_resize(astr as, size_t reqsize)
 {
-  assert(as != NULL);
+  assert(as);
   if (reqsize > as->maxlen) {
     as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
     as->text = zrealloc(as->text, as->maxlen + 1);
@@ -52,7 +52,7 @@ static void astr_resize(astr as, size_t reqsize)
 
 static int astr_pos(astr as, ptrdiff_t pos)
 {
-  assert(as != NULL);
+  assert(as);
   if (pos < 0)
     pos = as->len + pos;
   assert(pos >=0 && pos <= (int)as->len);
@@ -61,7 +61,6 @@ static int astr_pos(astr as, ptrdiff_t pos)
 
 char *astr_char(const astr as, ptrdiff_t pos)
 {
-  assert(as != NULL);
   pos = astr_pos(as, pos);
   return as->text + pos;
 }
@@ -82,18 +81,19 @@ astr astr_ncat(astr as, const char *s, size_t csize)
 
 astr astr_cat(astr as, const astr src)
 {
-  assert(src != NULL);
+  assert(src);
   return astr_ncat(as, src->text, src->len);
 }
 
+/* FIXME: Remove */
 astr astr_cat_cstr(astr as, const char *s)
 {
+  assert(s);
   return astr_ncat(as, s, strlen(s));
 }
 
 astr astr_cat_char(astr as, int c)
 {
-  assert(as != NULL);
   astr_resize(as, as->len + 1);
   as->text[as->len] = (char)c;
   as->text[++as->len] = '\0';
@@ -103,17 +103,24 @@ astr astr_cat_char(astr as, int c)
 /* FIXME: Make third argument a pos */
 astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
 {
-  assert(as != NULL);
   pos = astr_pos(as, pos);
   assert(pos + size <= as->len);
   return astr_ncat(astr_new(""), astr_char(as, pos), size);
 }
 
+int astr_cmp(astr as1, astr as2)
+{
+  return strcmp(((astr)(as1))->text, ((astr)(as2))->text);
+}
+
+int astr_ncmp(astr as1, astr as2, size_t n)
+{
+  return strncmp(((astr)(as1))->text, ((astr)(as2))->text, n);
+}
+
 astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
-
-  assert(as != NULL);
 
   pos = astr_pos(as, pos);
   if (as->len - pos < size)
@@ -134,7 +141,6 @@ astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 /* Don't define in terms of astr_remove, to avoid endless recursion */
 astr astr_truncate(astr as, ptrdiff_t pos)
 {
-  assert(as != NULL);
   pos = astr_pos(as, pos);
   if ((size_t)pos < as->len) {
     as->len = pos;

@@ -68,11 +68,11 @@ void vec_shrink(vector *v, size_t idx, size_t items)
 {
   if (idx >= v->size)
     return;
-  if (idx + items > v->size)
+  if (idx + items > v->size)    /* items can't be negative */
     items = v->size - idx;
   memcpy((uint8_t *)v->array + idx * vec_itemsize(v),
          (uint8_t *)v->array + (idx + items) * vec_itemsize(v),
-         items * vec_itemsize(v));
+         (v->size - items) * vec_itemsize(v));
   resize(v, v->size - items);
 }
 

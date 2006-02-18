@@ -27,8 +27,6 @@
 
 static size_t line;
 static ptrdiff_t pos;
-/* FIXME: Use \n tokens to limit each exp to one line, and if we get
-   an error during a line, abort the rest of the line. */
 static int bol;
 static astr expr;
 
@@ -85,7 +83,6 @@ static int getch_skipspace(void) {
 static astr gettok(void)
 {
   int c;
-
   astr tok = astr_new("");
 
   switch ((c = getch_skipspace())) {
@@ -94,7 +91,7 @@ static astr gettok(void)
 
   case '\"':                    /* string */
     {
-      int eow = FALSE;
+      int eos = FALSE;
 
       do {
         switch ((c = getch())) {
@@ -103,26 +100,23 @@ static astr gettok(void)
           ungetch();
           /* FALLTHROUGH */
         case '\"':
-          eow = TRUE;
+          eos = TRUE;
           break;
         default:
           astr_cat_char(tok, c);
         }
-      } while (!eow);
+      } while (!eos);
     }
     break;
 
   default:                      /* word */
     do {
       astr_cat_char(tok, c);
-
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();
-
         astr_truncate(tok, -1);
         break;
       }
-
       c = getch();
     } while (TRUE);
   }
@@ -143,34 +137,30 @@ void cmd_parse_end(void)
   expr = NULL;
 }
 
-static int eval(list *node)
-{
-  Function prim;
-
-  if (*node == NULL)
-    return FALSE;
-
-  assert((*node)->item);
-  prim = get_function(astr_new(((*node)->item)));
-
-  *node = list_next(*node);
-
-  if (prim)
-    return prim(1, 0, node);
-
-  return FALSE;
-}
-
 void cmd_eval(void)
 {
-  astr tok;
-  list lp = list_new(), l;
+  Function func;
+  astr tok = gettok();
 
-  while ((tok = gettok()))
-    list_append(lp, (void *)astr_cstr(tok));
+  while (tok) {
+    list l = list_new();
+    astr fname;
 
-  for (l = list_first(lp); l->item; eval(&l))
-    ;
+    /* Get tokens until we run out or reach a new line */
+    while (tok && !bol) {
+      list_append(l, tok);
+      tok = gettok();
+    }
+    bol = FALSE;
+
+    /* Execute the line */
+    while ((fname = list_behead(l)) &&
+           (func = get_function(fname)) &&
+           func(list_length(l), 0, l))
+      ;
+
+    /* The first token for the next line, if any, was read above */
+  }
 }
 
 void cmd_eval_file(astr file)

@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
    Copyright (c) 2001-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -26,7 +26,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
 
 /*
  * The astr library provides dynamically allocated null-terminated C
@@ -77,10 +76,10 @@ char *astr_char(const astr as, ptrdiff_t pos);
 astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
 
 /*
- * Do strcmp on the contents of two strings.
- * FIXME: Make this a function so we don't need to #include string.h above.
+ * Do str[n]cmp on the contents of two strings.
  */
-#define astr_cmp(as1, as2)      (strcmp(((astr)(as1))->text, ((astr)(as2))->text))
+int astr_cmp(astr as1, astr as2);
+int astr_ncmp(astr as1, astr as2, size_t n);
 
 /*
  * Duplicate as.

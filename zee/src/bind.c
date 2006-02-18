@@ -34,8 +34,7 @@ static History functions_history;
  * Key binding
  *--------------------------------------------------------------------------*/
 
-/* Bindings vector */
-vector *bindings;
+vector *bindings;               /* Vector of Binding *s */
 
 static Binding *get_binding(size_t key)
 {
@@ -74,8 +73,8 @@ static void unbind_key(size_t key)
 {
   Binding *p;
 
-  if ((p = get_binding(key)) != NULL)
-    vec_shrink(bindings, vec_offset(bindings, p, Binding), 1);
+  if ((p = get_binding(key)))
+    vec_shrink(bindings, vec_offset(bindings, p), 1);
 }
 
 void init_bindings(void)
@@ -131,7 +130,7 @@ Function get_function(astr name)
   size_t i;
   if (name)
     for (i = 0; i < fentries; i++)
-      if (astr_cmp(name, astr_new(ftable[i].name)) == 0)
+      if (!astr_cmp(name, astr_new(ftable[i].name)))
         return ftable[i].func;
   return NULL;
 }
@@ -161,9 +160,7 @@ astr minibuf_read_function_name(astr as)
     list_append(cp->completions, astr_new(ftable[i].name));
 
   for (;;) {
-    ms = minibuf_read_completion(as, astr_new(""), cp, &functions_history);
-
-    if (ms == NULL) {
+    if ((ms = minibuf_read_completion(as, astr_new(""), cp, &functions_history)) == NULL) {
       FUNCALL(cancel);
       break;
     } else if (astr_len(ms) == 0) {
@@ -203,11 +200,9 @@ Read key chord, and unbind it.
 +*/
   size_t key = KBD_NOKEY;
 
-  if (argc > 0) {
-    astr keystr = astr_new(((*lp)->item));
-    key = strtochord(keystr);
-    *lp = list_next(*lp);
-  } else {
+  if (argc > 0)
+    key = strtochord(list_behead(l));
+  else {
     minibuf_write(astr_new("Unbind key: "));
     key = getkey();
   }
@@ -228,11 +223,9 @@ chord.
 
   ok = FALSE;
 
-  if (argc > 0) {
-    key = strtochord(astr_new(((*lp)->item)));
-    *lp = list_next(*lp);
-    name = astr_new(((*lp)->item));
-    *lp = list_next(*lp);
+  if (argc > 1) {
+    key = strtochord(list_behead(l));
+    name = list_behead(l);
   } else {
     astr as;
 
@@ -247,10 +240,10 @@ chord.
     Function func;
 
     if ((func = get_function(name))) {
-      ok = TRUE;
-      if (key != KBD_NOKEY)
+      if (key != KBD_NOKEY) {
         bind_key(key, func);
-      else
+        ok = TRUE;
+      } else
         minibuf_error(astr_new("Invalid key"));
     } else
       minibuf_error(astr_afmt("No such function `%s'", astr_cstr(name)));
@@ -278,6 +271,7 @@ DEFUN(where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command definition, usually a symbol with a function definition.
+FIXME: Make it work non-interactively.
 +*/
 {
   astr name;

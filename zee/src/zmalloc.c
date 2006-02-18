@@ -29,14 +29,6 @@
 
 
 /*
- * Return a zeroed allocated memory area.
- */
-void *zmalloc(size_t size)
-{
-  return zrealloc(NULL, size);
-}
-
-/*
  * Resize an allocated memory area, zeroing any extra bytes.
  */
 void *zrealloc(void *ptr, size_t newsize)

@@ -47,7 +47,7 @@
  *--------------------------------------------------------------------------*/
 
 /* The type of a user command. */
-typedef int (*Function)(int argc, int uniarg, list *branch);
+typedef int (*Function)(size_t argc, int uniarg, list l);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -228,21 +228,19 @@ enum {
 
 /* Define an interactive function */
 #define DEFUN(cmd_name) \
-  int F_ ## cmd_name(int argc, int intarg, list *lp) \
+  int F_ ## cmd_name(size_t argc, int intarg, list l) \
   { \
     int ok = TRUE; \
     (void)intarg; \
-    (void)lp; \
+    (void)l; \
     if (argc == 0) \
       intarg = 1;
 
 
 #define DEFUN_INT(cmd_name) \
   DEFUN(cmd_name) \
-  if (lp && *lp) { \
-    intarg = (*lp)->item ? atoi((char *)((*lp)->item)) : 0; \
-    *lp = list_next(*lp); \
-  }
+    if (l) \
+      intarg = l->item ? atoi((char *)(list_behead(l))) : 0;
 
 #define END_DEFUN \
     return ok; \

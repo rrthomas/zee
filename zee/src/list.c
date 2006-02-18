@@ -114,7 +114,7 @@ void *list_at(list l, size_t n)
   size_t i;
   list p;
 
-  assert(l != NULL);
+  assert(l);
 
   for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++)
     ;
@@ -129,12 +129,12 @@ void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
   void **vec;
   size_t i, len = list_length(l);
 
-  assert(l != NULL && cmp != NULL);
+  assert(l && cmp);
 
   vec = zmalloc(sizeof(void *) * len);
 
   for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
-    vec[i] = (void *)p->item;
+    vec[i] = p->item;
 
   qsort(vec, len, sizeof(void *), cmp);
 

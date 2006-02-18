@@ -255,7 +255,7 @@ static int isearch(int dir)
         /* Save search string. */
         last_search = astr_dup(pattern);
       }
-      else if (last_search != NULL)
+      else if (last_search)
         pattern = astr_dup(last_search);
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (c == KBD_RET && astr_len(pattern) == 0)

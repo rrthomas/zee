@@ -57,7 +57,7 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
     match = astr_afmt("\fV_%s", astr_cstr(name));
 
   doc = astr_new("");
-  while ((buf = astr_fgets(f)) != NULL) {
+  while ((buf = astr_fgets(f))) {
     if (reading_doc) {
       if (*astr_char(buf, 0) == '\f')
         break;

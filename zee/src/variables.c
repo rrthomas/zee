@@ -42,7 +42,7 @@ static list variable_find(list varlist, astr key)
 {
   list p;
 
-  if (key != NULL)
+  if (key)
     for (p = list_first(varlist); p != varlist; p = list_next(p))
       if (!astr_cmp(key, ((vpair *)(p->item))->key))
         return p;
@@ -136,8 +136,8 @@ int get_variable_bool(astr var)
 {
   astr as;
 
-  if ((as = get_variable(var)) != NULL)
-    return strcmp(astr_cstr(as), "true") == 0;
+  if ((as = get_variable(var)))
+    return !astr_cmp(as, astr_new("true"));
 
   return FALSE;
 }
@@ -179,39 +179,33 @@ DEFUN(set_variable)
 Set a variable to the specified value.
 +*/
 {
-  astr var, val = NULL;
+  astr var, val;
 
-  if (argc > 0) {
-    astr newvalue = NULL;
+  ok = FALSE;
 
-    if (*lp != NULL) {
-      astr name = astr_new(((*lp)->item));
-      *lp = list_next(*lp);
-      if (*lp != NULL) {
-        newvalue = astr_new(((*lp)->item));
-        *lp = list_next(*lp);
-      }
-
-      set_variable(name, newvalue);
-    }
+  if (argc > 1) {
+    var = list_behead(l);
+    val = list_behead(l);
   } else {
-    if ((var = minibuf_read_variable_name(astr_new("Set variable: "))) == NULL)
-      ok = FALSE;
-    else {
+    if ((var = minibuf_read_variable_name(astr_new("Set variable: ")))) {
       var_entry *p = get_variable_default(var);
-      if (!strcmp(p ? p->fmt : "", "b")) {
+      if (!astr_cmp(astr_new(p ? p->fmt : ""), astr_new("b"))) {
         int i;
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
-          ok = FUNCALL(cancel);
-        else
+          FUNCALL(cancel);
+        else {
           val = astr_new((i == TRUE) ? "true" : "false");
+          ok = TRUE;
+        }
       } else                    /* Non-boolean variable. */
         if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
-          ok = FUNCALL(cancel);
-
-      if (ok)
-        set_variable(var, val);
+          FUNCALL(cancel);
+        else
+          ok = TRUE;
     }
   }
+
+  if (ok)
+    set_variable(var, val);
 }
 END_DEFUN

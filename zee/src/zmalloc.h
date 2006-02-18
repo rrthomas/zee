@@ -27,7 +27,9 @@
 /* Prototype here to break dependency cycle with extern.h */
 void die(int exitcode);
 
-void *zmalloc(size_t size);
+#define zmalloc(size) \
+  zrealloc(NULL, (size))
+
 void *zrealloc(void *ptr, size_t newsize);
 
 #endif

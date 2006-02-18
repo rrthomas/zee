@@ -70,7 +70,7 @@ static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int
 {
   Marker *m = point_marker(), *marker;
 
-  for (marker = buf.markers; marker != NULL; marker = marker->next)
+  for (marker = buf.markers; marker; marker = marker->next)
     if (marker->pt.p == oldlp &&
         (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
       marker->pt.p = newlp;
@@ -442,7 +442,7 @@ int insert_nstring(astr as, astr eol, int intercalate)
 
   for (i = 0; i < astr_len(as); i++) {
     astr bs = astr_substr(as, (ptrdiff_t)i, astr_len(as) - i);
-    if (astr_cmp(bs, eol) == 0) {
+    if (!astr_cmp(bs, eol)) {
       intercalate_newline();
       if (!intercalate)
         FUNCALL(edit_navigate_forward_char);

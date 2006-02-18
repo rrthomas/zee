@@ -40,7 +40,7 @@ astr get_home_dir(void)
   char *s = getenv("HOME");
   astr as;
 
-  if (s != NULL && strlen(s) < PATH_MAX)
+  if (s && strlen(s) < PATH_MAX)
     as = astr_new(s);
   else
     as = astr_new("");
@@ -170,12 +170,14 @@ Save buffer in visited file.
     buf.flags &= ~BFLAG_MODIFIED;
 
     /* Set unchanged flags to FALSE except for the
-       last undo action, which is set to TRUE. */
+       last undo action, which is set to TRUE.
+       FIXME: Put this in a function in undo.c */
     up = buf.last_undop;
-    if (up)
+    if (up) {
       up->unchanged = TRUE;
-    for (up = up->next; up; up = up->next)
-      up->unchanged = FALSE;
+      for (up = up->next; up; up = up->next)
+        up->unchanged = FALSE;
+    }
   }
 }
 END_DEFUN

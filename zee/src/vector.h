@@ -22,6 +22,7 @@
 #define VECTOR_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 /* Unitialised vector elements are zeroed */
 typedef struct {
@@ -44,7 +45,7 @@ vector *vec_copy(vector *v);
   (v)->items
 #define vec_array(v) \
   (v)->array
-#define vec_offset(v, obj, ty) \
-  (size_t)((obj - (ty *)((v)->array)))
+#define vec_offset(v, obj) \
+  (size_t)(((uint8_t *)obj - (uint8_t *)((v)->array)) / vec_itemsize(v))
 
 #endif

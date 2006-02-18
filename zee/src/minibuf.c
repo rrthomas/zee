@@ -85,7 +85,7 @@ static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
       for (s = list_first(cp->completions), i = 0;
            s != cp->completions;
            s = list_next(s), i++)
-        if (astr_cmp(as, s->item) == 0)
+        if (!astr_cmp(as, s->item))
           return i;
 
       minibuf_error(errmsg);
@@ -107,7 +107,7 @@ int minibuf_read_yesno(astr as)
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("yes")))
+    if (!astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("yes")))
       retvalue = TRUE;
     else
       retvalue = FALSE;
@@ -128,7 +128,7 @@ int minibuf_read_boolean(astr as)
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(astr_cstr(list_at(cp->completions, (size_t)retvalue)), "true"))
+    if (!astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("true")))
       retvalue = TRUE;
     else
       retvalue = FALSE;
@@ -333,7 +333,7 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
           astr bs = astr_new("");
           i = cp->matchsize;
           astr_ncat(bs, astr_cstr(cp->match), cp->matchsize);
-          if (astr_cmp(as, bs) != 0)
+          if (astr_cmp(*as, bs) != 0)
             thistab = COMPLETION_NOTCOMPLETING;
           *as = bs;
           break;

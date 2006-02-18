@@ -131,7 +131,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   }
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    if (!astr_cmp(p->item, search)) {
+    if (!astr_ncmp(p->item, search, astr_len(search))) {
       ++partmatches;
       list_append(cp->matches, p->item);
       if (!astr_cmp(p->item, search))
