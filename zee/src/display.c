@@ -453,7 +453,7 @@ static void draw_popup(void)
     /* Draw lines. */
     for (; i < popup_lines() && y < term_height() - 2;
          i++, y++, lp = list_next(lp)) {
-      term_print(astr_substr(lp->item, 0, min(term_width(), astr_len(lp->item))));
+      term_print(astr_sub(lp->item, 0, (ptrdiff_t)min(term_width(), astr_len(lp->item))));
       term_print(astr_new("\n"));
     }
 

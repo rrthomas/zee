@@ -86,7 +86,7 @@ static int search_forward(Line *startp, size_t starto, astr as)
     Line *lp;
     astr sp;
 
-    for (lp = startp, sp = astr_substr(lp->item, (ptrdiff_t)starto, astr_len(lp->item) - starto);
+    for (lp = startp, sp = astr_sub(lp->item, (ptrdiff_t)starto, (ptrdiff_t)astr_len(lp->item));
          lp != list_last(buf.lines);
          lp = list_next(lp), sp = lp->item) {
       if (astr_len(sp) > 0) {

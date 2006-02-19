@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-#define DEBUG 1
-
 #include "config.h"
 
 #include <limits.h>
@@ -225,7 +223,7 @@ int main(int argc, char **argv)
   if (!qflag) {
     astr as = get_home_dir();
     if (astr_len(as) > 0) {
-      astr_cat_cstr(as, "/." PACKAGE_NAME);
+      astr_cat(as, astr_new("/." PACKAGE_NAME));
       cmd_eval_file(as);
     }
   }

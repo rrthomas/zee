@@ -164,20 +164,11 @@ Save buffer in visited file.
   if (buffer_write(&buf, buf.filename) == FALSE) {
     minibuf_error(astr_afmt("%s: %s", buf.filename, strerror(errno)));
   } else {
-    Undo *up;
-
     minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf.filename)));
     buf.flags &= ~BFLAG_MODIFIED;
 
-    /* Set unchanged flags to FALSE except for the
-       last undo action, which is set to TRUE.
-       FIXME: Put this in a function in undo.c */
-    up = buf.last_undop;
-    if (up) {
-      up->unchanged = TRUE;
-      for (up = up->next; up; up = up->next)
-        up->unchanged = FALSE;
-    }
+    if (buf.last_undop)
+      undo_reset_unmodified(buf.last_undop);
   }
 }
 END_DEFUN
@@ -219,7 +210,7 @@ void die(int exitcode)
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf.filename)
       as = astr_dup(buf.filename);
-    astr_cat_cstr(as, "." PACKAGE_NAME "SAVE");
+    astr_cat(as, astr_new("." PACKAGE_NAME "SAVE"));
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
     buffer_write(&buf, as);
     term_close();

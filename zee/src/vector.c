@@ -33,8 +33,8 @@
 vector *vec_new(size_t itemsize)
 {
   vector *v = zmalloc(sizeof(vector));
-  vec_itemsize(v) = itemsize;
-  vec_items(v) = 0;
+  v->itemsize = itemsize;
+  v->items = 0;
   v->size = 0;
   v->array = NULL;
   return v;
@@ -45,7 +45,7 @@ vector *vec_new(size_t itemsize)
  */
 static void resize(vector *v, size_t items)
 {
-  v->array = zrealloc(v->array, items * vec_itemsize(v));
+  v->array = zrealloc(vec_array(v), v->size * vec_itemsize(v), items * vec_itemsize(v));
   v->size = items;
 }
 
@@ -57,8 +57,8 @@ void *vec_index(vector *v, size_t idx)
   if (idx >= v->size)
     resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
   if (idx >= vec_items(v))
-    vec_items(v) = idx + 1;
-  return (void *)((uint8_t *)v->array + idx * vec_itemsize(v));
+    v->items = idx + 1;
+  return (void *)((uint8_t *)vec_array(v) + idx * vec_itemsize(v));
 }
 
 /*
@@ -66,14 +66,14 @@ void *vec_index(vector *v, size_t idx)
  */
 void vec_shrink(vector *v, size_t idx, size_t items)
 {
-  if (idx >= v->size)
+  if (idx >= vec_items(v))
     return;
-  if (idx + items > v->size)    /* items can't be negative */
-    items = v->size - idx;
-  memcpy((uint8_t *)v->array + idx * vec_itemsize(v),
-         (uint8_t *)v->array + (idx + items) * vec_itemsize(v),
-         (v->size - items) * vec_itemsize(v));
-  resize(v, v->size - items);
+  if (idx + items > vec_items(v))   /* items can't be negative */
+    items = vec_items(v) - idx;
+  memmove(vec_index(v, idx), vec_index(v, idx + items),
+          (vec_items(v) - (idx + items)) * vec_itemsize(v));
+  resize(v, vec_items(v) - items);
+  v->items -= items;
 }
 
 /*
@@ -83,6 +83,6 @@ vector *vec_copy(vector *v)
 {
   vector *w = vec_new(vec_itemsize(v));
   resize(w, vec_items(v));
-  memcpy(vec_array(w), vec_array(v), vec_items(v) * vec_itemsize(v));
+  memmove(vec_array(w), vec_array(v), vec_items(v) * vec_itemsize(v));
   return w;
 }

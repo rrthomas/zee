@@ -41,27 +41,28 @@ astr astr_new(const char *s)
   return as;
 }
 
-static void astr_resize(astr as, size_t reqsize)
+static void resize(astr as, size_t reqsize)
 {
   assert(as);
   if (reqsize > as->maxlen) {
+    size_t oldmaxlen = as->maxlen;
     as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-    as->text = zrealloc(as->text, as->maxlen + 1);
+    as->text = zrealloc(as->text, oldmaxlen + 1, as->maxlen + 1);
   }
 }
 
-static int astr_pos(astr as, ptrdiff_t pos)
+static int abspos(astr as, ptrdiff_t pos)
 {
   assert(as);
   if (pos < 0)
     pos = as->len + pos;
-  assert(pos >=0 && pos <= (int)as->len);
+  assert(pos >= 0 && pos <= (int)as->len);
   return pos;
 }
 
 char *astr_char(const astr as, ptrdiff_t pos)
 {
-  pos = astr_pos(as, pos);
+  pos = abspos(as, pos);
   return as->text + pos;
 }
 
@@ -72,7 +73,7 @@ astr astr_dup(const astr src)
 
 astr astr_ncat(astr as, const char *s, size_t csize)
 {
-  astr_resize(as, as->len + csize);
+  resize(as, as->len + csize);
   memcpy(as->text + as->len, s, csize);
   as->len += csize;
   as->text[as->len] = '\0';
@@ -85,27 +86,26 @@ astr astr_cat(astr as, const astr src)
   return astr_ncat(as, src->text, src->len);
 }
 
-/* FIXME: Remove */
-astr astr_cat_cstr(astr as, const char *s)
-{
-  assert(s);
-  return astr_ncat(as, s, strlen(s));
-}
-
 astr astr_cat_char(astr as, int c)
 {
-  astr_resize(as, as->len + 1);
+  resize(as, as->len + 1);
   as->text[as->len] = (char)c;
   as->text[++as->len] = '\0';
   return as;
 }
 
-/* FIXME: Make third argument a pos */
-astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
+astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
 {
-  pos = astr_pos(as, pos);
-  assert(pos + size <= as->len);
-  return astr_ncat(astr_new(""), astr_char(as, pos), size);
+  from = abspos(as, from);
+  to = abspos(as, to);
+
+  if (from > to) {
+    ptrdiff_t temp = from;
+    from = to;
+    to = temp;
+  }
+
+  return astr_ncat(astr_new(""), astr_char(as, from), to - from);
 }
 
 int astr_cmp(astr as1, astr as2)
@@ -122,10 +122,10 @@ astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t cs
 {
   astr tail;
 
-  pos = astr_pos(as, pos);
+  pos = abspos(as, pos);
   if (as->len - pos < size)
     size = as->len - pos;
-  tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
+  tail = astr_sub(as, pos + (ptrdiff_t)size, astr_len(as));
   astr_truncate(as, pos);
   astr_ncat(as, s, csize);
   astr_cat(as, tail);
@@ -141,7 +141,7 @@ astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 /* Don't define in terms of astr_remove, to avoid endless recursion */
 astr astr_truncate(astr as, ptrdiff_t pos)
 {
-  pos = astr_pos(as, pos);
+  pos = abspos(as, pos);
   if ((size_t)pos < as->len) {
     as->len = pos;
     as->text[pos] = '\0';
@@ -216,19 +216,15 @@ int main(void)
   astr as1, as2, as3;
   FILE *fp;
 
-  as1 = astr_new("hello world");
-  astr_cat_cstr(as1, "!");
-  assert_eq(as1, "hello world!");
-
-  as3 = astr_substr(as1, 6, 5);
+  as1 = astr_new("hello world!");
+  as3 = astr_sub(as1, 6, 11);
   assert_eq(as3, "world");
 
   as2 = astr_new("The ");
   astr_cat(as2, as3);
-  astr_cat_cstr(as2, ".");
-  assert_eq(as2, "The world.");
+  assert_eq(as2, "The world");
 
-  as3 = astr_substr(as1, -6, 5);
+  as3 = astr_sub(as1, -6, 11);
   assert_eq(as3, "world");
 
   as1 = astr_new("1234567");
@@ -236,11 +232,11 @@ int main(void)
   assert_eq(as1, "1234");
 
   as1 = astr_new("12345");
-  as2 = astr_substr(as1, -2, 2);
+  as2 = astr_sub(as1, -2, astr_len(as1));
   assert_eq(as2, "45");
 
   as1 = astr_new("12345");
-  as2 = astr_substr(as1, -5, 5);
+  as2 = astr_sub(as1, -5, astr_len(as1));
   assert_eq(as2, "12345");
 
   as1 = astr_afmt("%s * %d = ", "5", 3);

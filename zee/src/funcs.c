@@ -178,7 +178,7 @@ C-u following the digits or minus sign ends the argument.
   ok = TRUE;
 
   for (;;) {
-    astr_cat_cstr(as, "-"); /* Add the '-' character. */
+    astr_cat(as, astr_new("-")); /* Add the '-' character. */
     minibuf_write(as);
     key = getkey();
     minibuf_clear();
@@ -198,7 +198,7 @@ C-u following the digits or minus sign ends the argument.
     else if (key == '-' && i == 0) {
       if (sgn > 0) {
         sgn = -sgn;
-        astr_cat_cstr(as, " -");
+        astr_cat(as, astr_new(" -"));
       }
     } else {
       ungetkey(key);
@@ -537,7 +537,7 @@ current buffer, overwriting the current region.
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
           astr_cat(out, s);
-          astr_cat_cstr(out, "\n");
+          astr_cat(out, astr_new("\n"));
         }
         pclose(pipe);
         remove(tempfile);

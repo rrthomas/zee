@@ -132,7 +132,7 @@ Line *string_to_lines(astr as, astr eol, size_t *lines)
   for (p = 0, *lines = 1; p < end;) {
     ptrdiff_t q;
     if ((q = (strstr(astr_char(as, p), astr_cstr(eol)) - astr_cstr(as))) >= 0) {
-      astr_cat(list_last(lp)->item, astr_substr(as, p, (size_t)(q - p)));
+      astr_cat(list_last(lp)->item, astr_sub(as, p, q));
       list_append(lp, astr_new(""));
       ++*lines;
       p = q + astr_len(eol);
@@ -259,36 +259,27 @@ END_DEFUN
 
 /*
  * Insert a newline at the current position without moving the cursor.
- * Update all other cursors if they point on the splitted line.
+ * Update markers that point to the splitted line.
  */
 static int intercalate_newline(void)
 {
-  Line *lp1, *lp2;
-  size_t lp1len, lp2len;
-  astr as;
+  Line *new_lp;
 
   if (warn_if_readonly_buffer())
     return FALSE;
 
   undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, 1);
 
-  /* Calculate the two line lengths. */
-  lp1len = buf.pt.o;
-  lp2len = astr_len(buf.pt.p->item) - lp1len;
-
-  lp1 = buf.pt.p;
-
   /* Update line linked list. */
-  list_prepend(lp1, astr_new(""));
-  lp2 = list_next(lp1);
+  list_prepend(buf.pt.p, astr_new(""));
+  new_lp = list_first(buf.pt.p);
   ++buf.num_lines;
 
   /* Move the text after the point into the new line. */
-  as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
-  lp2->item = astr_dup(as);
-  astr_truncate(lp1->item, (ptrdiff_t)lp1len);
+  new_lp->item = astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o, (ptrdiff_t)astr_len(buf.pt.p->item));
+  astr_truncate(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
 
-  adjust_markers(lp2, lp1, lp1len, 1, 0);
+  adjust_markers(new_lp, buf.pt.p, buf.pt.o, 1, 0);
 
   buf.flags |= BFLAG_MODIFIED;
   thisflag |= FLAG_NEED_RESYNC;
@@ -344,7 +335,7 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
 
   if (oldlen > 0) {
     if (replace_case && get_variable_bool(astr_new("case_replace")))
-      recase(newcopy, astr_substr((*lp)->item, (ptrdiff_t)offset, oldlen));
+      recase(newcopy, astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)(offset + oldlen)));
 
     if (astr_len(newcopy) != oldlen) {
       astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen,
@@ -441,7 +432,7 @@ int insert_nstring(astr as, astr eol, int intercalate)
   undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
-    astr bs = astr_substr(as, (ptrdiff_t)i, astr_len(as) - i);
+    astr bs = astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as));
     if (!astr_cmp(bs, eol)) {
       intercalate_newline();
       if (!intercalate)

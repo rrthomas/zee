@@ -164,6 +164,7 @@ size_t term_xgetkey(int mode, size_t timeout);
 
 /* undo.c ----------------------------------------------------------------- */
 void undo_save(int type, Point pt, size_t arg1, size_t arg2);
+void undo_reset_unmodified(Undo *up);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);

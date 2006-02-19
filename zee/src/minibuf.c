@@ -32,7 +32,7 @@
 static void term_minibuf_write(astr as)
 {
   term_move(term_height() - 1, 0);
-  term_print(astr_substr(as, 0, min(astr_len(as), term_width())));
+  term_print(astr_sub(as, 0, (ptrdiff_t)min(astr_len(as), term_width())));
   term_clrtoeol();
 }
 
@@ -163,8 +163,8 @@ static void draw_minibuf_read(astr prompt, astr value, astr match, size_t pointo
     n = pointo - pointo % (width - astr_len(prompt) - 2);
   }
 
-  term_print(astr_substr(value, (ptrdiff_t)n,
-                         min(width - astr_len(prompt) - margin, astr_len(value) - n)));
+  term_print(astr_sub(value, (ptrdiff_t)n,
+                         (ptrdiff_t)min(n + width - astr_len(prompt) - margin, astr_len(value))));
   term_print(match);
 
   if (astr_len(value + n) >= width - astr_len(prompt) - margin) {

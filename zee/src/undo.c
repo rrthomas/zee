@@ -105,3 +105,15 @@ Repeat this command to undo more changes.
   }
 }
 END_DEFUN
+
+/*
+ * Set unchanged flags to FALSE except for the last undo action, which
+ * is set to TRUE.
+ */
+void undo_reset_unmodified(Undo *up)
+{
+  assert(up);
+  up->unchanged = TRUE;
+  for (up = up->next; up; up = up->next)
+    up->unchanged = FALSE;
+}

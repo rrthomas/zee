@@ -44,8 +44,19 @@
 
 /*
  * The dynamic string type.
+ *
+ * Internally, each string has three fields: a buffer that contains
+ * the C string, the buffer size and the size of the string. Each time
+ * the string is enlarged beyond the current size of the buffer it is
+ * reallocated with realloc.
+ *
+ * You should never directly access the struct fields.
  */
-typedef struct astr_s *astr;
+typedef struct {
+  char *text;
+  size_t len;
+  size_t maxlen;
+} *astr;
 
 /*
  * Create a new string with initial contents s.
@@ -73,7 +84,7 @@ char *astr_char(const astr as, ptrdiff_t pos);
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
+astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to);
 
 /*
  * Do str[n]cmp on the contents of two strings.
@@ -91,7 +102,6 @@ astr astr_dup(const astr src);
  */
 astr astr_ncat(astr as, const char *s, size_t csize);
 astr astr_cat(astr as, const astr src);
-astr astr_cat_cstr(astr as, const char *s);
 astr astr_cat_char(astr as, int c);
 
 /*
@@ -126,23 +136,6 @@ astr astr_fgets(FILE *fp);
  * Format text into an astr
  */
 astr astr_afmt(const char *fmt, ...);
-
-
-/*
- * Internal data structure
- *
- * Internally, each string has three fields: a buffer that contains
- * the C string, the buffer size and the size of the string. Each time
- * the string is enlarged beyond the current size of the buffer it is
- * reallocated with realloc.
- *
- * You should never directly access the struct fields.
- */
-struct astr_s {
-  char *text;
-  size_t len;
-  size_t maxlen;
-};
 
 
 #endif /* ASTR_H */

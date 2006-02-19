@@ -165,9 +165,10 @@ void cmd_eval(void)
 
 void cmd_eval_file(astr file)
 {
-  astr as;
+  astr as = NULL;
 
   file_read(&as, file);
+  assert(as);
   cmd_parse_init(as);
   cmd_eval();
   cmd_parse_end();

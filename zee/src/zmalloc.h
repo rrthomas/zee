@@ -1,5 +1,4 @@
 /* Memory allocation functions
-   Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
@@ -28,8 +27,8 @@
 void die(int exitcode);
 
 #define zmalloc(size) \
-  zrealloc(NULL, (size))
+  zrealloc(NULL, 0, (size))
 
-void *zrealloc(void *ptr, size_t newsize);
+void *zrealloc(void *ptr, size_t oldsize, size_t newsize);
 
 #endif

@@ -63,7 +63,7 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
         break;
       if (isfunc || astr_len(*defval) > 0) {
         astr_cat(doc, buf);
-        astr_cat_cstr(doc, "\n");
+        astr_cat(doc, astr_new("\n"));
       } else
         *defval = astr_dup(buf);
     } else if (!astr_cmp(buf, match))

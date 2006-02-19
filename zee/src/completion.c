@@ -67,11 +67,11 @@ static astr completion_write(list l, size_t size)
   for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
-      astr_cat_cstr(as, "\n");
+      astr_cat(as, astr_new("\n"));
     }
     astr_cat(as, p->item);
     for (j = max - astr_len(p->item); j > 0; --j)
-      astr_cat_cstr(as, " ");
+      astr_cat(as, astr_new(" "));
     ++col;
   }
 

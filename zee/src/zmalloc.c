@@ -1,5 +1,4 @@
 /* Memory allocation functions
-   Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
@@ -22,7 +21,12 @@
 
 #include "config.h"
 
+#ifndef DEBUG
 #include <gc/gc.h>
+#else
+#include <stdlib.h>
+#include <string.h>
+#endif
 
 #include "main.h"
 #include "zmalloc.h"
@@ -31,11 +35,25 @@
 /*
  * Resize an allocated memory area, zeroing any extra bytes.
  */
-void *zrealloc(void *ptr, size_t newsize)
+void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 {
-  if ((ptr = GC_REALLOC(ptr, newsize)) == NULL) {
+#ifndef DEBUG
+  ptr = GC_REALLOC(ptr, newsize);
+#else
+  ptr = realloc(ptr, newsize);
+#endif
+
+  if (ptr == NULL) {
     fprintf(stderr, PACKAGE_NAME ": out of memory\n");
     die(1);
   }
+
+#ifndef DEBUG
+  (void)oldsize;    /* Avoid compiler warning about unused variable */
+#else
+  if (newsize > oldsize)
+    memset((char *)ptr + oldsize, 0, newsize - oldsize);
+#endif
+
   return ptr;
 }

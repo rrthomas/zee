@@ -260,7 +260,8 @@ static astr function_to_binding(Function f)
     if (vec_item(bindings, i, Binding).func == f) {
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
-      astr_cat_cstr(as, (n++ == 0) ? "" : ", ");
+      if (n++ != 0)
+        astr_cat(as, astr_new(", "));
       astr_cat(as, binding);
     }
 

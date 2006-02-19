@@ -105,14 +105,14 @@ astr chordtostr(size_t key)
   astr as = astr_new("");
 
   if (key & KBD_CTRL)
-    astr_cat_cstr(as, "C-");
+    astr_cat(as, astr_new("C-"));
   if (key & KBD_META)
-    astr_cat_cstr(as, "M-");
+    astr_cat(as, astr_new("M-"));
   key &= ~(KBD_CTRL | KBD_META);
 
   for (found = FALSE, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
-      astr_cat_cstr(as, keyname[i]);
+      astr_cat(as, astr_new(keyname[i]));
       found = TRUE;
       break;
     }
@@ -155,7 +155,7 @@ size_t strtochord(astr chord)
 
   do {
     size_t l;
-    k = strtokey(astr_substr(chord, (ptrdiff_t)len, astr_len(chord) - len), &l);
+    k = strtokey(astr_sub(chord, (ptrdiff_t)len, (ptrdiff_t)astr_len(chord)), &l);
     key |= k;
     len += l;
   } while (k == KBD_CTRL || k == KBD_META);
