@@ -130,7 +130,7 @@ astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 
 astr astr_truncate(astr as, ptrdiff_t pos)
 {
-  return astr_remove(as, (size_t)pos, astr_len(as));
+  return astr_remove(as, pos, astr_len(as));
 }
 
 astr astr_fread(FILE *fp)
