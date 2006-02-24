@@ -99,7 +99,7 @@ static void get_funcs(FILE *fp)
         fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
         exit(1);
       }
-      fdecl(fp, astr_substr(buf, (p - astr_cstr(buf)) + 1, (size_t)(q - p - 1)));
+      fdecl(fp, astr_sub(buf, (p - astr_cstr(buf)) + 1, q - astr_cstr(buf)));
     }
   }
 }
