@@ -27,36 +27,23 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "vector.h"
+
 /*
  * The astr library provides dynamically allocated null-terminated C
  * strings.
  *
- * The string type, astr, is a pointer type.
- *
  * String positions start at zero, as with ordinary C strings.
  * Negative values are also allowed, and count from the end of the
- * string. In particular, -1 refers to the last character of the
  * string.
+ * FIXME: With this scheme it's impossible to refer to the last
+ * character with a (negative) constant.
  *
  * Where not otherwise specified, the functions return the first
  * argument string, usually named as in the function prototype.
  */
 
-/*
- * The dynamic string type.
- *
- * Internally, each string has three fields: a buffer that contains
- * the C string, the buffer size and the size of the string. Each time
- * the string is enlarged beyond the current size of the buffer it is
- * reallocated with realloc.
- *
- * You should never directly access the struct fields.
- */
-typedef struct {
-  char *text;
-  size_t len;
-  size_t maxlen;
-} *astr;
+typedef vector *astr;
 
 /*
  * Create a new string with initial contents s.
@@ -67,16 +54,15 @@ astr astr_new(const char *s);
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_size(as) - 1] inclusive may be read.
  */
-#define astr_cstr(as)           ((const char *)(((astr)(as))->text))
+#define astr_cstr(as)           ((const char *)(((astr)(as))->array))
 
 /*
  * Return the length of the argument string as.
  */
-#define astr_len(as)            ((const size_t)(((astr)(as))->len))
+#define astr_len(as)            ((const size_t)(((astr)(as))->items) - 1)
 
 /*
- * Return the address of the pos'th character of as. If pos is >= 0,
- * count from the left; if less than zero count from the right.
+ * Return the address of the pos'th character of as.
  */
 char *astr_char(const astr as, ptrdiff_t pos);
 
@@ -93,11 +79,6 @@ int astr_cmp(astr as1, astr as2);
 int astr_ncmp(astr as1, astr as2, size_t n);
 
 /*
- * Duplicate as.
- */
-astr astr_dup(const astr src);
-
-/*
  * Append the contents of the argument string or character to as.
  */
 astr astr_ncat(astr as, const char *s, size_t csize);
@@ -105,8 +86,14 @@ astr astr_cat(astr as, const astr src);
 astr astr_cat_char(astr as, int c);
 
 /*
+ * Duplicate as.
+ */
+astr astr_dup(const astr src);
+
+/*
  * Replace size characters of as, starting at pos, with the argument
  * string.
+ * FIXME: Change to astr_replace(astr as, ptrdiff_t from, ptrdiff_t to, astr bs)
  */
 astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize);
 

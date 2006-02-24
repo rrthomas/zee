@@ -355,6 +355,7 @@ The paragraph marked is the one that contains point or follows point.
 }
 END_DEFUN
 
+/* FIXME: fill_paragraph undo goes bananas. */
 DEFUN(fill_paragraph)
 /*+
 Fill paragraph at or after point.

@@ -195,28 +195,29 @@ int main(int argc, char **argv)
     /* Create a single default binding so M-x commands can still be
        issued if the default bindings file can't be loaded. */
     bind_key(strtochord(astr_new("M-x")), F_execute_command);
+  }
 
-    /* Open file given on command line. */
-    while (*argv) {
-      if (**argv == '+')
-        line = strtoul(*argv++ + 1, NULL, 10);
-      else if (*argv)
-        file_open(astr_new(*argv++));
-    }
+  /* Open file given on command line. */
+  while (*argv) {
+    if (**argv == '+')
+      line = strtoul(*argv++ + 1, NULL, 10);
+    else if (*argv)
+      file_open(astr_new(*argv++));
+  }
 
-    if (buf.lines) {
-      term_init();
-      resize_window(); /* Can't run until there is a buffer */
-      goto_line(line - 1);
-      resync_display();
+  /* FIXME: here and below, need better condition than buf.lines */
+  if (!bflag && buf.lines) {
+    term_init();
+    resize_window(); /* Can't run until there is a buffer */
+    goto_line(line - 1);
+    resync_display();
 
-      /* Write help message, but allow it to be overwritten by errors
-         from loading init files */
-      minibuf_write(astr_new(about_minibuf_str));
+    /* Write help message, but allow it to be overwritten by errors
+       from loading init files */
+    minibuf_write(astr_new(about_minibuf_str));
 
-      /* Load default bindings file. */
-      cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
-    }
+    /* Load default bindings file. */
+    cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
   }
 
   /* Load user init file */

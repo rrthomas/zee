@@ -10,7 +10,7 @@ TESTS = astr
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-astr_LDADD = zmalloc.o
+astr_LDADD = zmalloc.o vector.o
 
 bin_PROGRAMS = zee
 

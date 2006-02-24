@@ -79,7 +79,7 @@ static astr find_eolstr(astr as)
 
 /*
  * Read the file contents into a string.
- * Return quietly if the file doesn't exist.
+ * Return quietly if the file can't be read.
  */
 astr file_read(astr *as, astr filename)
 {
@@ -93,18 +93,15 @@ astr file_read(astr *as, astr filename)
     ok = fclose(fp) == 0;
   }
 
-  if (ok == FALSE) {
-    /* FIXME: Check terminal is initialised */
-    if (errno != ENOENT)
-      minibuf_write(astr_afmt("%s: %s", astr_cstr(filename), strerror(errno)));
+  if (ok == FALSE)
     return NULL;
-  } else
+  else
     return find_eolstr(*as);
 }
 
 /*
  * Read the file contents into the buffer.
- * Return quietly if the file doesn't exist.
+ * Return quietly if the file can't be read.
  */
 void file_open(astr filename)
 {
@@ -195,8 +192,6 @@ END_DEFUN
 /*
  * Function called on unexpected error or crash (SIGSEGV).
  * Attempts to save buffer if modified.
- * FIXME: Shouldn't create astrs here, because we don't want to
- * malloc.
  */
 void die(int exitcode)
 {

@@ -28,7 +28,7 @@
 typedef struct {
   size_t itemsize;        /* size of each item in bytes */
   size_t items;           /* number of items used */
-  size_t size;            /* number of items available */
+  size_t size;            /* size of array in items */
   void *array;            /* the array of contents */
 } vector;
 

@@ -104,9 +104,7 @@ void term_init(void)
   }
   screen = newterm(NULL, stdout, stdin);
   set_term(screen);
-
   term_set_size((size_t)COLS, (size_t)LINES);
-
   noecho();
   nonl();
   raw();
