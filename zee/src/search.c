@@ -131,50 +131,6 @@ static int search_backward(Line *startp, size_t starto, astr as)
 
 static astr last_search = NULL;
 
-DEFUN(search_forward)
-/*+
-Search forward from point for regular expression REGEXP.
-+*/
-{
-  astr ms;
-
-  if ((ms = minibuf_read(astr_new("Search: "), last_search ? last_search : astr_new(""))) == NULL)
-    ok = FUNCALL(cancel);
-  else if (astr_len(ms) == 0)
-    ok = FALSE;
-  else {
-    last_search = astr_dup(ms);
-
-    if (!search_forward(buf.pt.p, buf.pt.o, ms)) {
-      minibuf_error(astr_afmt("Failing search: `%s'", astr_cstr(ms)));
-      ok = FALSE;
-    }
-  }
-}
-END_DEFUN
-
-DEFUN(search_backward)
-/*+
-Search backward from point for match for regular expression REGEXP.
-+*/
-{
-  astr ms;
-
-  if ((ms = minibuf_read(astr_new("Search backward: "), last_search ? last_search : astr_new(""))) == NULL)
-    ok = FUNCALL(cancel);
-  if (astr_len(ms) == 0)
-    ok = FALSE;
-  else {
-    last_search = astr_dup(ms);
-
-    if (!search_backward(buf.pt.p, buf.pt.o, ms)) {
-      minibuf_error(astr_afmt("Failing search backward: `%s'", ms));
-      ok = FALSE;
-    }
-  }
-}
-END_DEFUN
-
 #define ISEARCH_FORWARD		1
 #define ISEARCH_BACKWARD	2
 
@@ -258,12 +214,7 @@ static int isearch(int dir)
       else if (last_search)
         pattern = astr_dup(last_search);
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
-      if (c == KBD_RET && astr_len(pattern) == 0)
-        if (dir == ISEARCH_FORWARD)
-          FUNCALL(search_forward);
-        else
-          FUNCALL(search_backward);
-      else if (astr_len(pattern) > 0) {
+      if (astr_len(pattern) > 0) {
         /* Save mark. */
         set_mark_to_point();
         buf.mark->pt = start;
