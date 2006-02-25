@@ -30,7 +30,7 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opt
 $(PACKAGE_NAME).info $(PACKAGE_NAME).dvi: $(GENERATED_TEXI)
 
 $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
-	./mkdoc$(EXEEXT_FOR_BUILD) $(AUTODOCSRCS) >AUTODOC && mv tbl_funcs.h $(top_builddir)/src/ && mv optstring.h $(top_builddir)/src/
+	./mkdoc$(EXEEXT_FOR_BUILD) $(AUTODOCSRCS) >AUTODOC && mv tbl_funcs.h $(top_builddir)/src/
 
 dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@

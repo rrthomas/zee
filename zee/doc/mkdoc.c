@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Stub to make zmalloc etc. happy */
+/* Stub to make zrealloc happy */
 #define die exit
 
 /* #include other sources so this program can be easily built on the
@@ -45,11 +45,10 @@ static struct {
 static struct {
   char *longname;
   char *doc;
-  char shortname;
   int opt;
 } otable[] = {
-#define X(longname, doc, shortname, opt) \
-        {longname, doc, shortname, opt},
+#define X(longname, doc, opt) \
+        {longname, doc, opt},
 #include "tbl_opts.h"
 #undef X
 };
@@ -91,15 +90,16 @@ static void get_funcs(FILE *fp)
   astr buf;
 
   while ((buf = astr_fgets(fp)) != NULL) {
-    if (!strncmp(astr_cstr(buf), "DEFUN(", 6) ||
-        !strncmp(astr_cstr(buf), "DEFUN_INT(", 10)) {
-      char *p = strchr(astr_cstr(buf), '(');
-      char *q = strrchr(astr_cstr(buf), ')');
+    char *s = astr_cstr(buf);
+    if (!strncmp(s, "DEFUN(", 6) ||
+        !strncmp(s, "DEFUN_INT(", 10)) {
+      char *p = strchr(s, '(');
+      char *q = strrchr(s, ')');
       if (p == NULL || q == NULL || p == q) {
         fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
         exit(1);
       }
-      fdecl(fp, astr_sub(buf, (p - astr_cstr(buf)) + 1, q - astr_cstr(buf)));
+      fdecl(fp, astr_sub(buf, (p - s) + 1, q - s));
     }
   }
 }
@@ -174,21 +174,11 @@ static void dump_vars(void)
 static void dump_opts(void)
 {
   size_t i;
-  FILE *fp1 = fopen("zee_opts.texi", "w");
-  FILE *fp2 = fopen("optstring.h", "w");
+  FILE *fp = fopen("zee_opts.texi", "w");
 
-  assert(fp1);
-  fprintf(fp1, "@c Automatically generated file: DO NOT EDIT!\n");
-  fprintf(fp1, "@table @samp\n");
-
-  assert(fp2);
-  fprintf(fp2,
-          "/*\n"
-          " * Automatically generated file: DO NOT EDIT!\n"
-          " * Short option string for getopt\n"
-          " */\n"
-          "\n"
-          "#define OPTSTRING \"");
+  assert(fp);
+  fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
+  fprintf(fp, "@table @samp\n");
 
   for (i = 0; i < oentries; ++i) {
     astr doc = astr_new(otable[i].doc);
@@ -196,15 +186,11 @@ static void dump_opts(void)
       fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
       exit(1);
     }
-    fprintf(fp1, "@item --%s, -%c\n%s\n", otable[i].longname, otable[i].shortname,
-            astr_cstr(doc));
-    fprintf(fp2, "%c%s", otable[i].shortname, otable[i].opt ? ":" : "");
+    fprintf(fp, "@item --%s\n%s\n", otable[i].longname, astr_cstr(doc));
   }
 
-  fprintf(fp1, "@end table");
-  fprintf(fp2, "\"\n");
-  fclose(fp1);
-  fclose(fp2);
+  fprintf(fp, "@end table");
+  fclose(fp);
 }
 
 int main(int argc, char **argv)
