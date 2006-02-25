@@ -116,8 +116,8 @@ static void signal_init(void)
 
 /* Options table */
 struct option longopts[] = {
-#define X(longname, doc, shortname, opt) \
-    { longname, opt, NULL, shortname },
+#define X(longname, doc, opt) \
+    {longname, opt, NULL, 0},
 #include "tbl_opts.h"
 #undef X
     { 0, 0, 0, 0 }
@@ -125,7 +125,7 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int c, bflag = FALSE, qflag = FALSE, hflag = FALSE;
+  int longopt, bflag = FALSE, qflag = FALSE, hflag = FALSE;
   size_t line = 1;
 
   GC_INIT();
@@ -134,24 +134,23 @@ int main(int argc, char **argv)
   init_kill_ring();
   init_bindings();
 
-#include "optstring.h"
-  while ((c = getopt_long_only(argc, argv, OPTSTRING, longopts, NULL)) != -1)
-    switch (c) {
-    case 'b':
+  while (getopt_long_only(argc, argv, "", longopts, &longopt) != -1)
+    switch (longopt) {
+    case 0:
       bflag = TRUE;
       break;
-    case 'e':
+    case 1:
       cmd_parse_init(astr_new(optarg));
       cmd_eval();
       cmd_parse_end();
       break;
-    case 'l':
+    case 2:
       cmd_eval_file(astr_new(optarg));
       break;
-    case 'n':
+    case 3:
       qflag = TRUE;
       break;
-    case 'v':
+    case 4:
       fprintf(stderr,
               VERSION_STRING "\n"
               COPYRIGHT_STRING "\n"
@@ -161,7 +160,7 @@ int main(int argc, char **argv)
               "For more information about these matters, see the file named COPYING.\n"
               );
       return 0;
-    case 'h':
+    case 5:
       hflag = TRUE;
       break;
     }
@@ -173,14 +172,13 @@ int main(int argc, char **argv)
             "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
             "Run " TEXT_NAME ", the lightweight editor.\n"
             "\n");
-#define X(longname, doc, shortname, opt) \
-    fprintf(stderr, \
-            "--" longname ", -%c" doc, shortname);
+#define X(longname, doc, opt) \
+    fprintf(stderr, "--" longname doc);
 #include "tbl_opts.h"
 #undef X
     fprintf(stderr,
-            "FILE                   edit FILE\n"
-            "+LINE                  set line at which to visit next FILE\n"
+            "FILE               edit FILE\n"
+            "+LINE              set line at which to visit next FILE\n"
             );
   }
 

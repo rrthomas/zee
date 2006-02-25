@@ -114,7 +114,7 @@ static astr gettok(void)
       astr_cat_char(tok, c);
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();
-        astr_truncate(tok, -1);
+        tok = astr_sub(tok, 0, (ptrdiff_t)astr_len(tok) - 1);
         break;
       }
       c = getch();

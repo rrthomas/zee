@@ -178,11 +178,9 @@ C-u following the digits or minus sign ends the argument.
   ok = TRUE;
 
   for (;;) {
-    astr_cat(as, astr_new("-")); /* Add the '-' character. */
-    minibuf_write(as);
+    minibuf_write(astr_afmt("%s-", astr_cstr(as)));
     key = getkey();
     minibuf_clear();
-    astr_truncate(as, -1); /* Remove the '-' character. */
 
     if (key == KBD_CANCEL) {
       ok = FUNCALL(cancel);
@@ -555,7 +553,7 @@ current buffer, overwriting the current region.
             || r.start.o != buf.pt.o)
           FUNCALL(exchange_point_and_mark);
         delete_nstring(r.size, &s);
-        ok = insert_nstring(out, astr_new("\n"), FALSE);
+        ok = insert_nstring(out);
         undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
       }
     }

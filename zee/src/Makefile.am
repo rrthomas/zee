@@ -65,7 +65,7 @@ zee_LDADD = $(regex) @LIBOBJS@
 EXTRA_DIST = regex.c regex.h key_bindings.el
 
 distclean-local:
-	rm -f paths.h tbl_funcs.h optstring.h
+	rm -f paths.h tbl_funcs.h
 
 help.o: paths.h
 

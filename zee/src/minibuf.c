@@ -197,16 +197,12 @@ static void mb_cancel(void)
 
 static ptrdiff_t mb_bol(void)
 {
-  ptrdiff_t i;
-  i = 0;
-  return(i);
+  return 0;
 }
 
 static ptrdiff_t mb_eol(astr as)
 {
-  ptrdiff_t i;
-  i = astr_len(as);
-  return(i);
+  return astr_len(as);
 }
 
 static ptrdiff_t mb_backward_char(ptrdiff_t i)
@@ -215,7 +211,7 @@ static ptrdiff_t mb_backward_char(ptrdiff_t i)
     --i;
   else
     ding();
-  return(i);
+  return i;
 }
 
 static ptrdiff_t mb_forward_char(ptrdiff_t i, astr as)
@@ -224,30 +220,31 @@ static ptrdiff_t mb_forward_char(ptrdiff_t i, astr as)
     ++i;
   else
     ding();
-  return(i);
+  return i;
 }
 
-static void mb_kill_line(ptrdiff_t i, astr as)
+static void mb_kill_line(ptrdiff_t i, astr *as)
 {
-  if ((size_t)i < astr_len(as))
-    astr_truncate(as, i);
+  if ((size_t)i < astr_len(*as))
+    *as = astr_sub(*as, 0, i);
   else
     ding();
 }
 
-static ptrdiff_t mb_backward_delete_char(ptrdiff_t i, astr as)
+static ptrdiff_t mb_backward_delete_char(ptrdiff_t i, astr *as)
 {
-  if (i > 0)
-    astr_remove(as, --i, 1);
-  else
+  if (i > 0) {
+    i--;
+    *as = astr_cat(astr_sub(*as, 0, i), astr_sub(*as, i + 1, (ptrdiff_t)astr_len(*as)));
+  } else
     ding();
-  return(i);
+  return i;
 }
 
-static void mb_delete_char(ptrdiff_t i, astr as)
+static void mb_delete_char(ptrdiff_t i, astr *as)
 {
   if ((size_t)i < astr_len(as))
-    astr_remove(as, i, 1);
+    *as = astr_cat(astr_sub(*as, 0, i), astr_sub(*as, i + 1, (ptrdiff_t)astr_len(*as)));
   else
     ding();
 }
@@ -260,7 +257,7 @@ static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
     popup_scroll_down();
     thistab = lasttab;
   }
-  return(thistab);
+  return thistab;
 }
 
 static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
@@ -271,7 +268,7 @@ static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
     popup_scroll_up();
     thistab = lasttab;
   }
-  return(thistab);
+  return thistab;
 }
 
 static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
@@ -330,9 +327,8 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
       case COMPLETION_MATCHED:
       case COMPLETION_MATCHEDNONUNIQUE:
         {
-          astr bs = astr_new("");
+          astr bs = astr_sub(cp->match, 0, (ptrdiff_t)cp->matchsize);
           i = cp->matchsize;
-          astr_ncat(bs, astr_cstr(cp->match), cp->matchsize);
           if (astr_cmp(*as, bs) != 0)
             thistab = COMPLETION_NOTCOMPLETING;
           *as = bs;
@@ -348,13 +344,15 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
   *_i = i;
 }
 
-static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr as)
+static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr *as)
 {
   if (c > 255 || !isprint(c))
     ding();
   else {
-    char ch = (char)c;
-    astr_nreplace(as, i++, 0, &ch, 1);
+    astr bs = astr_new("");
+    astr_cat_char(bs, c);
+    *as = astr_cat(astr_cat(astr_sub(*as, 0, i), bs), astr_sub(*as, i, (ptrdiff_t)astr_len(*as)));
+    i++;
   }
   return i;
 }
@@ -409,13 +407,13 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       i = mb_forward_char(i, as);
       break;
     case KBD_CTRL | 'k':
-      mb_kill_line(i, as);
+      mb_kill_line(i, &as);
       break;
     case KBD_BS:
-      i = mb_backward_delete_char(i, as);
+      i = mb_backward_delete_char(i, &as);
       break;
     case KBD_DEL:
-      mb_delete_char(i, as);
+      mb_delete_char(i, &as);
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
@@ -437,7 +435,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       mb_complete(cp, lasttab, &as, &thistab, &i);
       break;
     default:
-      i = mb_self_insert(c, i, as);
+      i = mb_self_insert(c, i, &as);
     }
 
     lasttab = thistab;

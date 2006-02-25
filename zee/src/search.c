@@ -237,7 +237,7 @@ static int isearch(int dir)
       break;
     } else if (c == KBD_BS) {
       if (astr_len(pattern) > 0) {
-        astr_truncate(pattern, -1);
+        pattern = astr_sub(pattern, 0, (ptrdiff_t)astr_len(pattern) - 1);
         buf.pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else

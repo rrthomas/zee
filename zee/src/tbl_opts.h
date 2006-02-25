@@ -7,18 +7,15 @@
  * The fourth column specifies whether it takes a parameter.
  */
 
-/* FIXME: Write simple getopt code that does strncmp, get rid of third
-   field below. */
-
 X("batch", "            run non-interactively\n",
-  'b', 0)
+  0)
 X("eval", " CMD         execute command CMD\n",
-  'e', 1)
+  1)
 X("help", "             display this help message and exit\n",
-  'h', 0)
+  0)
 X("load", " FILE        load file of commands using the load function\n",
-  'l', 1)
+  1)
 X("no-init-file", "     do not load ~/." PACKAGE_NAME "\n",
-  'n', 0)
+  0)
 X("version", "          display version information and exit\n",
-  'v', 0)
+  0)

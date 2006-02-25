@@ -30,14 +30,12 @@
 #include "main.h"
 
 
-/* FIXME: stop strings being NUL-terminated (except when returned by
-   astr_cstr): it causes too many damn problems. */
-
-astr astr_new(const char *s)
+static astr ncat(astr as, const char *s, size_t n)
 {
-  astr as = vec_new(sizeof(char));
-  *(char *)vec_index(as, 0) = '\0'; /* Set up NUL terminator so astr_ncat will work */
-  return astr_ncat(as, s, strlen(s));
+  size_t i, len = astr_len(as);
+  for (i = 0; i < n; i++)
+    *(char *)vec_index(as, len + i) = s[i];
+  return as;
 }
 
 static int abspos(astr as, ptrdiff_t pos)
@@ -49,31 +47,35 @@ static int abspos(astr as, ptrdiff_t pos)
   return pos;
 }
 
+astr astr_new(const char *s)
+{
+  astr as = vec_new(sizeof(char));
+  return ncat(as, s, strlen(s));
+}
+
+const char *astr_cstr(const astr as)
+{
+  char *s = zmalloc(astr_len(as) + 1);
+  memcpy(s, vec_array(as), astr_len(as));
+  return s;
+}
+
 char *astr_char(const astr as, ptrdiff_t pos)
 {
   pos = abspos(as, pos);
   return ((char *)vec_array(as)) + pos;
 }
 
-astr astr_ncat(astr as, const char *s, size_t n)
-{
-  size_t i, len = astr_len(as);
-  for (i = 0; i < n; i++)
-    *(char *)vec_index(as, len + i) = s[i];
-  *(char *)vec_index(as, len + n) = '\0';
-  return as;
-}
-
 astr astr_cat(astr as, const astr src)
 {
   assert(src);
-  return astr_ncat(as, vec_array(src), astr_len(src));
+  return ncat(as, vec_array(src), astr_len(src));
 }
 
-astr astr_cat_char(astr as, int c)
+void astr_cat_char(astr as, int c)
 {
   char ch = c;
-  return astr_ncat(as, &ch, 1);
+  ncat(as, &ch, 1);
 }
 
 astr astr_dup(const astr src)
@@ -92,45 +94,33 @@ astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
     to = temp;
   }
 
-  return astr_ncat(astr_new(""), astr_char(as, from), (size_t)(to - from));
+  return ncat(astr_new(""), astr_char(as, from), (size_t)(to - from));
 }
 
-int astr_cmp(astr as1, astr as2)
+int astr_cmp(const astr as1, const astr as2)
 {
-  return strcmp((char *)vec_array(as1), (char *)vec_array(as2));
+  return strncmp((char *)vec_array(as1), (char *)vec_array(as2),
+                 min(astr_len(as1), astr_len(as2)));
 }
 
-int astr_ncmp(astr as1, astr as2, size_t n)
+int astr_ncmp(const astr as1, const astr as2, size_t n)
 {
-  return strncmp((char *)vec_array(as1), (char *)vec_array(as2), n);
+  return strncmp((char *)vec_array(as1), (char *)vec_array(as2),
+                 min(n, min(astr_len(as1), astr_len(as2))));
 }
 
-astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
+ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
 {
-  astr tail;
+  ptrdiff_t pos;
 
-  pos = abspos(as, pos);
-  if (astr_len(as) - pos < size)
-    size = astr_len(as) - pos;
-  tail = astr_sub(as, pos + (ptrdiff_t)size, (ptrdiff_t)astr_len(as));
-  astr_truncate(as, pos);
-  astr_ncat(as, s, csize);
-  astr_cat(as, tail);
+  from = abspos(haystack, from);
 
-  return as;
-}
+  if (from + astr_len(needle) <= astr_len(haystack))
+    for (pos = 0; (size_t)pos < astr_len(haystack) - astr_len(needle); pos++)
+      if (!memcmp(astr_char(haystack, pos), vec_array(needle), astr_len(needle)))
+        return pos;
 
-/* FIXME: Make third argument a pos */
-astr astr_remove(astr as, ptrdiff_t pos, size_t size)
-{
-  pos = abspos(as, pos);
-  vec_shrink(as, (size_t)pos, size);
-  return as;
-}
-
-astr astr_truncate(astr as, ptrdiff_t pos)
-{
-  return astr_remove(as, pos, astr_len(as));
+  return -1;
 }
 
 astr astr_fread(FILE *fp)
@@ -179,17 +169,7 @@ astr astr_afmt(const char *fmt, ...)
 
 #include <stdio.h>
 
-/* as is an astr, s is a char *; defined as a macro to give useful
-   line numbers for failed assertions. */
-#define assert_eq(as, s) \
-  if (strcmp(astr_cstr(as), (s))) { \
-    printf("test failed: \"%s\" != \"%s\"\n", (char *)vec_array(as), (s)); \
-    assert(0); \
-  }
-
-/*
- * Stub to make zmalloc &c. happy.
- */
+/* Stub to make zrealloc happy */
 void die(int exitcode)
 {
   exit(exitcode);
@@ -202,48 +182,35 @@ int main(void)
 
   as1 = astr_new("hello world!");
   as3 = astr_sub(as1, 6, 11);
-  assert_eq(as3, "world");
+  assert(!astr_cmp(as3, astr_new("world")));
 
   as2 = astr_new("The ");
   astr_cat(as2, as3);
-  assert_eq(as2, "The world");
+  assert(!astr_cmp(as2, astr_new("The world")));
 
   as3 = astr_sub(as1, -6, 11);
-  assert_eq(as3, "world");
-
-  as1 = astr_new("1234567");
-  astr_remove(as1, 4, 10);
-  assert_eq(as1, "1234");
-
-  as1 = astr_new("1234567");
-  astr_remove(as1, 0, 1);
-  assert_eq(as1, "234567");
-
-  as1 = astr_new("123");
-  astr_truncate(as1, 1);
-  assert_eq(as1, "1");
+  assert(!astr_cmp(as3, astr_new("world")));
 
   as1 = astr_new("12345");
   as2 = astr_sub(as1, -2, (ptrdiff_t)astr_len(as1));
-  assert_eq(as2, "45");
+  assert(!astr_cmp(as2, astr_new("45")));
 
-  as1 = astr_new("12345");
-  as2 = astr_sub(as1, -5, (ptrdiff_t)astr_len(as1));
-  assert_eq(as2, "12345");
+  assert(!astr_cmp(astr_sub(astr_new("12345"), -5, (ptrdiff_t)astr_len(as1)),
+                   astr_new("12345")));
 
-  as1 = astr_afmt("%s * %d = ", "5", 3);
-  astr_cat(as1, astr_afmt("%d", 15));
-  assert_eq(as1, "5 * 3 = 15");
+  assert(!astr_cmp(astr_cat(astr_afmt("%s * %d = ", "5", 3), astr_afmt("%d", 15)),
+                   astr_new("5 * 3 = 15")));
+
+  assert(astr_str(astr_new("rumblebumbleapplebombleboo"), 0, astr_new("apple")) == 12);
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);
-  printf("The first line of astr.c is: \"%s\"\n", astr_cstr(as1));
-  assert_eq(as1, "/* Dynamically allocated strings");
+  assert(!astr_cmp(as1, astr_new("/* Dynamically allocated strings")));
   assert(fclose(fp) == 0);
 
-  printf("astr tests successful.\n");
+  printf("astr tests passed\n");
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 #endif /* TEST */

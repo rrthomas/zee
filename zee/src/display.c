@@ -95,7 +95,7 @@ size_t popup_lines(void)
 void popup_set(astr as)
 {
   if (as)
-    popup = string_to_lines(as, astr_new("\n"), &popup_num_lines);
+    popup = string_to_lines(as, &popup_num_lines);
   else {
     popup = NULL;
     popup_num_lines = 0;

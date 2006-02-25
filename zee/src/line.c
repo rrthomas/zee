@@ -121,29 +121,22 @@ Line *line_new(void)
 
 /*
  * Read an astr into a Line list.
- * FIXME: rewrite with astr_strstr, which should work with embedded
- * NULs (uses strnstr, which we also need to write).
  */
-Line *string_to_lines(astr as, astr eol, size_t *lines)
+Line *string_to_lines(astr as, size_t *lines)
 {
   ptrdiff_t p, end = astr_len(as);
   Line *lp = line_new();
 
   for (p = 0, *lines = 1; p < end;) {
     ptrdiff_t q;
-    if ((q = (strstr(astr_char(as, p), astr_cstr(eol)) - astr_cstr(as))) >= 0) {
+    if ((q = (astr_str(as, p, astr_new("\n")))) >= 0) {
       astr_cat(list_last(lp)->item, astr_sub(as, p, q));
       list_append(lp, astr_new(""));
       ++*lines;
-      p = q + astr_len(eol);
-    } else {                    /* End of string, or embedded NUL */
-      size_t len = strlen(astr_char(as, p));
-      astr_ncat(list_last(lp)->item, astr_char(as, p), len);
-      p += len;
-      if (p < end) {            /* Deal with embedded NULs */
-        astr_cat_char(as, '\0');
-        p++;            /* Strictly can only increment p if p < end */
-      }
+      p = q + 1;
+    } else {                    /* Rest of string */
+      astr_cat(list_last(lp)->item, astr_sub(as, p, (ptrdiff_t)astr_len(as)));
+      break;
     }
   }
 
@@ -236,7 +229,7 @@ int eolp(void)
 int insert_char(int c)
 {
   astr as = astr_afmt("%c", c);
-  return insert_nstring(as, astr_new("\n"), FALSE);
+  return insert_nstring(as);
 }
 
 DEFUN(tab_to_tab_stop)
@@ -277,7 +270,7 @@ static int intercalate_newline(void)
 
   /* Move the text after the point into the new line. */
   new_lp->item = astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o, (ptrdiff_t)astr_len(buf.pt.p->item));
-  astr_truncate(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
+  buf.pt.p->item = astr_sub(buf.pt.p->item, 0, (ptrdiff_t)buf.pt.o);
 
   adjust_markers(new_lp, buf.pt.p, buf.pt.o, 1, 0);
 
@@ -331,21 +324,20 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
                       astr newtext, int replace_case)
 {
   int changed = FALSE;
-  astr newcopy = astr_dup(newtext);
 
   if (oldlen > 0) {
     if (replace_case && get_variable_bool(astr_new("case_replace")))
-      recase(newcopy, astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)(offset + oldlen)));
+      recase(newtext, astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)(offset + oldlen)));
 
-    if (astr_len(newcopy) != oldlen) {
-      astr_nreplace((*lp)->item, (ptrdiff_t)offset, oldlen,
-                    astr_cstr(newcopy), astr_len(newcopy));
-      adjust_markers(*lp, *lp, offset, 0, (int)(astr_len(newcopy) - oldlen));
+    if (astr_len(newtext) != oldlen) {
+      (*lp)->item = astr_cat(astr_cat(astr_sub((*lp)->item, 0, (ptrdiff_t)offset), newtext),
+                             astr_sub((*lp)->item, (ptrdiff_t)(offset + oldlen), (ptrdiff_t)astr_len((*lp)->item)));
+      adjust_markers(*lp, *lp, offset, 0, (int)(astr_len(newtext) - oldlen));
       changed = TRUE;
     } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
-                      astr_cstr(newcopy), astr_len(newcopy)) != 0) {
+                      astr_cstr(newtext), astr_len(newtext)) != 0) {
       memcpy(astr_char((*lp)->item, (ptrdiff_t)offset),
-             astr_cstr(newcopy), astr_len(newcopy));
+             astr_cstr(newtext), astr_len(newtext));
       changed = TRUE;
     }
   }
@@ -422,7 +414,7 @@ Insert a newline, and move to left margin of the new line if it's blank.
 }
 END_DEFUN
 
-int insert_nstring(astr as, astr eol, int intercalate)
+int insert_nstring(astr as)
 {
   size_t i;
 
@@ -432,16 +424,15 @@ int insert_nstring(astr as, astr eol, int intercalate)
   undo_save(UNDO_REPLACE_BLOCK, buf.pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
-    astr bs = astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as));
-    if (!astr_cmp(bs, eol)) {
+    if (!astr_cmp(astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as)), astr_new("\n"))) {
       intercalate_newline();
-      if (!intercalate)
-        FUNCALL(edit_navigate_forward_char);
+      FUNCALL(edit_navigate_forward_char);
     } else {
-      astr_nreplace(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 0, astr_cstr(bs), 1);
+      buf.pt.p->item = astr_cat(astr_cat(astr_sub(buf.pt.p->item, 0, (ptrdiff_t)buf.pt.o),
+                                         astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)i + 1)),
+                                astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o, (ptrdiff_t)astr_len(buf.pt.p->item)));
       buf.flags |= BFLAG_MODIFIED;
-      if (!intercalate)
-        adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, 1);
+      adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, 1);
     }
   }
 
@@ -466,7 +457,7 @@ int delete_nstring(size_t size, astr *as)
     if (!eolp())
       astr_cat_char(*as, following_char());
     else
-      astr_cat(*as, buf.eol);
+      astr_cat_char(*as, '\n');
 
     if (eobp()) {
       minibuf_error(astr_new("End of buffer"));
@@ -489,7 +480,9 @@ int delete_nstring(size_t size, astr *as)
       thisflag |= FLAG_NEED_RESYNC;
     } else {
       /* Move the text one position backward after the point. */
-      astr_remove(buf.pt.p->item, (ptrdiff_t)buf.pt.o, 1);
+      buf.pt.p->item = astr_cat(astr_sub(buf.pt.p->item, 0, (ptrdiff_t)buf.pt.o),
+                                astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o + 1,
+                                         (ptrdiff_t)astr_len(buf.pt.p->item)));
       adjust_markers(buf.pt.p, buf.pt.p, buf.pt.o, 0, -1);
     }
   }

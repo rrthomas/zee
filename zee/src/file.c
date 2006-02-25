@@ -49,35 +49,6 @@ astr get_home_dir(void)
 }
 
 /*
- * Find EOL string of a file's contents.
- */
-static astr find_eolstr(astr as)
-{
-  char c = '\0';
-  size_t i;
-  astr eolstr = astr_new("\n");
-
-  assert(as);
-
-  for (i = 0; i < astr_len(as); i++) {
-    c = *astr_char(as, (ptrdiff_t)i);
-    if (c == '\n' || c == '\r')
-      break;
-  }
-
-  if (c == '\n' || c == '\r') {
-    *astr_char(eolstr, 0) = c;
-    if (i < astr_len(as) - 1) {
-      char c2 = *astr_char(as, (ptrdiff_t)(i + 1));
-      if ((c2 == '\n' || c2 == '\r') && c != c2)
-        astr_cat_char(eolstr, c2);
-    }
-  }
-
-  return eolstr;
-}
-
-/*
  * Read the file contents into a string.
  * Return quietly if the file can't be read.
  */
@@ -96,7 +67,7 @@ astr file_read(astr *as, astr filename)
   if (ok == FALSE)
     return NULL;
   else
-    return find_eolstr(*as);
+    return astr_new("\n");
 }
 
 /*
@@ -105,21 +76,17 @@ astr file_read(astr *as, astr filename)
  */
 void file_open(astr filename)
 {
-  astr as = NULL, eolstr;
+  astr as = NULL;
 
   buffer_new();
   buf.filename = astr_dup(filename);
 
-  eolstr = file_read(&as, filename);
-
-  if (eolstr == NULL) {
+  if (file_read(&as, filename) == NULL) {
     if (errno != ENOENT)
       buf.flags |= BFLAG_READONLY;
   } else {
-    buf.eol = eolstr;
-
     /* Add lines to buffer */
-    buf.lines = string_to_lines(as, eolstr, &buf.num_lines);
+    buf.lines = string_to_lines(as, &buf.num_lines);
     buf.pt.p = list_first(buf.lines);
   }
 
@@ -144,7 +111,7 @@ static int buffer_write(Buffer *bp, astr filename)
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
-        (list_next(lp) != bp->lines && fwrite(bp->eol, sizeof(char), astr_len(bp->eol), fp) < astr_len(bp->eol))) {
+        (list_next(lp) != bp->lines && putc('\n', fp) != EOF)) {
       fclose(fp);
       return FALSE;
     }

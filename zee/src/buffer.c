@@ -40,9 +40,6 @@ void buffer_new(void)
   /* Set the initial mark (needs limit marker to be set up). */
   buf.mark = marker_new(point_min(&buf));
 
-  /* Set default EOL string. */
-  buf.eol = astr_new("\n");
-
   /* Allocate the variables list. */
   buf.vars = list_new();
 
@@ -126,8 +123,6 @@ size_t tab_width(void)
 
 /*
  * Return a string containing `size' characters from point `start'.
- * If the region includes any line endings, they are turned into '\n'
- * irrespective of `buf.eol', and count as one character.
  */
 astr copy_text_block(Point start, size_t size)
 {

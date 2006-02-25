@@ -29,7 +29,7 @@ static astr killed_text;
 
 static void flush_kill_buffer(void)
 {
-  astr_truncate(killed_text, 0);
+  killed_text = astr_new("");
 }
 
 static int kill_line(void)
@@ -42,7 +42,7 @@ static int kill_line(void)
   if (!eolp()) {
     size_t len = astr_len(buf.pt.p->item) - buf.pt.o;
 
-    astr_ncat(killed_text, astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o), (size_t)len);
+    astr_cat(killed_text, astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o, (ptrdiff_t)astr_len(buf.pt.p->item)));
     delete_nstring(len, &as);
 
     thisflag |= FLAG_DONE_KILL;
@@ -55,7 +55,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    astr_cat(killed_text, buf.eol);
+    astr_cat_char(killed_text, '\n');
 
     thisflag |= FLAG_DONE_KILL;
 
@@ -205,7 +205,7 @@ Set mark at beginning, and put point at end.
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
     FUNCALL(set_mark);
-    insert_nstring(killed_text, buf.eol, FALSE);
+    insert_nstring(killed_text);
     weigh_mark();
   }
 }

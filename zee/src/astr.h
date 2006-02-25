@@ -36,11 +36,6 @@
  * String positions start at zero, as with ordinary C strings.
  * Negative values are also allowed, and count from the end of the
  * string.
- * FIXME: With this scheme it's impossible to refer to the last
- * character with a (negative) constant.
- *
- * Where not otherwise specified, the functions return the first
- * argument string, usually named as in the function prototype.
  */
 
 typedef vector *astr;
@@ -52,14 +47,14 @@ astr astr_new(const char *s);
 
 /*
  * Convert as into a C null-terminated string.
- * as[0] to as[astr_size(as) - 1] inclusive may be read.
+ * as[0] to as[astr_len(as) - 1] inclusive may be read.
  */
-#define astr_cstr(as)           ((const char *)(((astr)(as))->array))
+const char *astr_cstr(const astr as);
 
 /*
  * Return the length of the argument string as.
  */
-#define astr_len(as)            ((const size_t)(((astr)(as))->items) - 1)
+#define astr_len(as)            ((const size_t)(((astr)(as))->items))
 
 /*
  * Return the address of the pos'th character of as.
@@ -75,37 +70,24 @@ astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to);
 /*
  * Do str[n]cmp on the contents of two strings.
  */
-int astr_cmp(astr as1, astr as2);
-int astr_ncmp(astr as1, astr as2, size_t n);
+int astr_cmp(const astr as1, const astr as2);
+int astr_ncmp(const astr as1, const astr as2, size_t n);
+
+/*
+ * Find first occurrence of needle in haystack up to n characters
+ */
+ptrdiff_t astr_str(const astr haystack, ptrdiff_t pos, const astr needle);
 
 /*
  * Append the contents of the argument string or character to as.
  */
-astr astr_ncat(astr as, const char *s, size_t csize);
 astr astr_cat(astr as, const astr src);
-astr astr_cat_char(astr as, int c);
+void astr_cat_char(astr as, int c);
 
 /*
  * Duplicate as.
  */
 astr astr_dup(const astr src);
-
-/*
- * Replace size characters of as, starting at pos, with the argument
- * string.
- * FIXME: Change to astr_replace(astr as, ptrdiff_t from, ptrdiff_t to, astr bs)
- */
-astr astr_nreplace(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize);
-
-/*
- * Remove size chars from as at position pos.
- */
-astr astr_remove(astr as, ptrdiff_t pos, size_t size);
-
-/*
- * Truncate as to given position.
- */
-astr astr_truncate(astr as, ptrdiff_t pos);
 
 /*
  * Read a file into an astr.

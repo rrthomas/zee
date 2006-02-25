@@ -115,7 +115,6 @@ typedef struct {
   int flags;                    /* Buffer flags */
   list vars;                    /* Buffer-local variables */
   astr filename;               /* The name of the file being edited */
-  astr eol;           /* EOL string for this buffer */
 } Buffer;
 
 /*
