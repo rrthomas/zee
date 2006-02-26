@@ -36,12 +36,12 @@ Show the version in the minibuffer.
 END_DEFUN
 
 /*
- * Fetch the documentation of a function or variable from the
- * AUTODOC automatically generated file.
+ * Fetch the documentation of a function or variable from the AUTODOC
+ * automatically generated file.
  * FIXME: load it all at startup.
  *
  * name - name of function or variable to find, without its F_ or V_ prefix.
- * defval - return value: default value if !isfunc, otherwise empty string.
+ * defval - unused if isfunc, otherwise return value: default value of variable.
  * isfunc - true for function, false for variable.
  */
 static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
@@ -63,7 +63,9 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
   /* FIXME: following loop is completely mad! -- should be two loops. */
 
   doc = astr_new("");
-  *defval = astr_new("");
+  if (!isfunc)
+    *defval = astr_new("");
+  
   while ((buf = astr_fgets(f))) {
     if (reading_doc) {
       if (astr_len(buf) > 0 && *astr_char(buf, 0) == '\f')
