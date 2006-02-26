@@ -116,7 +116,7 @@ ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
   from = abspos(haystack, from);
 
   if (from + astr_len(needle) <= astr_len(haystack))
-    for (pos = 0; (size_t)pos < astr_len(haystack) - astr_len(needle); pos++)
+    for (pos = from; (size_t)pos < astr_len(haystack)-astr_len(needle); pos++)
       if (!memcmp(astr_char(haystack, pos), vec_array(needle), astr_len(needle)))
         return pos;
 

@@ -225,7 +225,30 @@ enum {
 #endif
 #endif
 
-/* Define an interactive function */
+/* Define an interactive function.
+ *
+ * FIXME: remove intarg and argc.
+ *
+ * DEFUN(foo) expands to the beginning of a function definition. The prototype
+ * will be:
+ *
+ *   int F_foo(size_t argc, int intarg, list l);
+ *
+ * To call such a function with an argument list "a1, a2, ..., an", pass "n" as
+ * the value of "argc", a dummy value for "intarg" and pass the arguments (which
+ * should all be astrs) in the list "l". Normally such functions will be called
+ * by the UI code, not by the C code.
+ *
+ * It is common for functions to take just a single integer argument. "intarg"
+ * is an optimisation to avoid having to convert the integer to a string and
+ * wrap it up in a list. *Instead* of passing a list, you can simply pass the
+ * integer as "intarg" and pass "NULL" for the list.
+ *
+ * The macro "FUNCALL" can be used to call zero-argument functions. The macro
+ * "DEFUN_INT" can be used to define functions taking a single integer argument.
+ * The macro "FUNCALL_INT" can be used to call functions taking a single integer
+ * argument.
+ */
 #define DEFUN(cmd_name) \
   int F_ ## cmd_name(size_t argc, int intarg, list l) \
   { \
