@@ -37,6 +37,10 @@
  */
 void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 {
+  /* Behaviour in this case is unspecified for malloc and GC_REALLOC */
+  if (ptr == NULL && newsize == 0)
+    return NULL;
+
 #ifndef DEBUG
   ptr = GC_REALLOC(ptr, newsize);
 #else
