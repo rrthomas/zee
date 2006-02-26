@@ -111,7 +111,7 @@ static int buffer_write(Buffer *bp, astr filename)
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
-        (list_next(lp) != bp->lines && putc('\n', fp) != EOF)) {
+        (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {
       fclose(fp);
       return FALSE;
     }
