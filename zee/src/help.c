@@ -46,11 +46,11 @@ END_DEFUN
  */
 static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
 {
-  FILE *f;
+  FILE *fp;
   astr buf, match, doc;
   int reading_doc = 0;
 
-  if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
+  if ((fp = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
     minibuf_error(astr_new("Unable to read file `" PATH_DATA "/AUTODOC'"));
     return NULL;
   }
@@ -61,12 +61,12 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
     match = astr_afmt("\fV_%s", astr_cstr(name));
 
   /* FIXME: following loop is completely mad! -- should be two loops. */
-
   doc = astr_new("");
   if (!isfunc)
     *defval = astr_new("");
-  
-  while ((buf = astr_fgets(f))) {
+  /* Test eof prevents reading last (blank) line of AUTODOC as an
+     extra line of documentation */
+  while ((buf = astr_fgets(fp)) && !feof(fp)) {
     if (reading_doc) {
       if (astr_len(buf) > 0 && *astr_char(buf, 0) == '\f')
         break;
@@ -79,7 +79,7 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
       reading_doc = 1;
   }
 
-  fclose(f);
+  fclose(fp);
 
   if (!reading_doc) {
     minibuf_error(astr_afmt("Cannot find documentation for `%s'", astr_cstr(name)));
