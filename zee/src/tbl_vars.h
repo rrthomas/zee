@@ -14,8 +14,6 @@ If enabled, the Auto Fill Mode is automatically enabled.")
 X("case_replace",			"b", "true", "\
 Non-nil means `query-replace' should preserve case in replacements.")
 X("fill_column",			"", "72", "\
-Column beyond which automatic line-wrapping should happen.\n\
-Automatically becomes buffer-local when set in any fashion.")
+Column beyond which automatic line-wrapping should happen.")
 X("tab_width",				"", "8", "\
-Distance between tab stops (for display of tab characters), in columns.\n\
-Automatically becomes buffer-local when set in any fashion.")
+Distance between tab stops (for display of tab characters), in columns.")
