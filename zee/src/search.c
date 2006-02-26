@@ -39,6 +39,7 @@
 
 static const char *find_err = NULL;
 
+/* FIXME: Use PCRE instead */
 static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
 {
   struct re_pattern_buffer pattern;
