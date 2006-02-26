@@ -86,3 +86,24 @@ vector *vec_copy(vector *v)
   memmove(vec_array(w), vec_array(v), vec_items(v) * vec_itemsize(v));
   return w;
 }
+
+
+#ifdef TEST
+
+#include <stdio.h>
+
+/* Stub to make zrealloc happy */
+void die(int exitcode)
+{
+  exit(exitcode);
+}
+
+int main(void)
+{
+
+  printf("vector tests passed\n");
+
+  return EXIT_SUCCESS;
+}
+
+#endif /* TEST */
