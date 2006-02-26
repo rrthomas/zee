@@ -59,7 +59,7 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
     match = astr_afmt("\fF_%s", astr_cstr(name));
   else
     match = astr_afmt("\fV_%s", astr_cstr(name));
-  
+
   /* FIXME: following loop is completely mad! -- should be two loops. */
 
   doc = astr_new("");
@@ -111,22 +111,20 @@ Display the full documentation of VARIABLE (a symbol).
 {
   astr name;
 
+  ok = FALSE;
+
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
     astr defval, doc;
-    
-    doc = get_funcvar_doc(name, &defval, FALSE);
-    if (doc) {
+    if ((doc = get_funcvar_doc(name, &defval, FALSE))) {
       popup_set(astr_afmt("Help for variable `%s':\n\n"
                           "Default value: %s\n"
                           "Current value: %s\n\n"
                           "Documentation:\n%s",
                           astr_cstr(name), astr_cstr(defval),
                           astr_cstr(get_variable(name)), astr_cstr(doc)));
-    } else
-      ok = FALSE;
-
-  } else
-    ok = FALSE;
+      ok = TRUE;
+    }
+  }
 }
 END_DEFUN
 
