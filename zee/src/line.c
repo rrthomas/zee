@@ -124,7 +124,7 @@ Line *line_new(void)
  */
 Line *string_to_lines(astr as, size_t *lines)
 {
-  ptrdiff_t p, q, end = astr_len(as);
+  ptrdiff_t p, q, end = (ptrdiff_t)astr_len(as);
   Line *lp = line_new();
 
   for (p = 0, *lines = 1;
@@ -136,7 +136,7 @@ Line *string_to_lines(astr as, size_t *lines)
   }
 
   /* Add the rest of the string, if any */
-  astr_cat(list_last(lp)->item, astr_sub(as, p, (ptrdiff_t)astr_len(as)));
+  astr_cat(list_last(lp)->item, astr_sub(as, p, end));
 
   return lp;
 }
