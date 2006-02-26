@@ -29,7 +29,7 @@
 #include "astr.h"
 #include "main.h"
 
-
+/* Copies n characters from s onto the end of as, growing as as necessary. */
 static astr ncat(astr as, const char *s, size_t n)
 {
   size_t i, len = astr_len(as);
@@ -38,6 +38,7 @@ static astr ncat(astr as, const char *s, size_t n)
   return as;
 }
 
+/* Converts a possibly negative pos into a definitely non-negative pos. */
 static int abspos(astr as, ptrdiff_t pos)
 {
   assert(as);
@@ -218,6 +219,9 @@ int main(void)
   as1 = astr_fgets(fp);
   assert(!astr_cmp(as1, astr_new("/* Dynamically allocated strings")));
   assert(fclose(fp) == 0);
+  
+  as1 = astr_cat(astr_new(""), astr_new("x"));
+  assert(as1->size >= astr_len(as1));
 
   printf("astr tests passed\n");
 

@@ -39,6 +39,10 @@ END_DEFUN
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
  * FIXME: load it all at startup.
+ *
+ * name - name of function or variable to find, without its F_ or V_ prefix.
+ * defval - return value: default value if !isfunc, otherwise empty string.
+ * isfunc - true for function, false for variable.
  */
 static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
 {
@@ -55,8 +59,11 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
     match = astr_afmt("\fF_%s", astr_cstr(name));
   else
     match = astr_afmt("\fV_%s", astr_cstr(name));
+  
+  /* FIXME: following loop is completely mad! -- should be two loops. */
 
   doc = astr_new("");
+  *defval = astr_new("");
   while ((buf = astr_fgets(f))) {
     if (reading_doc) {
       if (*astr_char(buf, 0) == '\f')
@@ -106,14 +113,19 @@ Display the full documentation of VARIABLE (a symbol).
 
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
     astr defval, doc;
-
-    if ((doc = get_funcvar_doc(name, &defval, FALSE))) {
+    
+    astr hv, dv, cv, docv;
+    doc = get_funcvar_doc(name, &defval, FALSE);
+    if (doc) {
+      hv = astr_cstr(name);
+      dv = astr_cstr(defval);
+      cv = get_variable(name);
+      docv = astr_cstr(doc);
       popup_set(astr_afmt("Help for variable `%s':\n\n"
                           "Default value: %s\n"
                           "Current value: %s\n\n"
                           "Documentation:\n%s",
-                          astr_cstr(name), astr_cstr(defval),
-                          get_variable(name), astr_cstr(doc)));
+                          hv, dv, cv, docv));
     } else
       ok = FALSE;
 
