@@ -99,8 +99,13 @@ astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
 
 int astr_cmp(const astr as1, const astr as2)
 {
-  return strncmp((char *)vec_array(as1), (char *)vec_array(as2),
-                 min(astr_len(as1), astr_len(as2)));
+  int ret = strncmp((char *)vec_array(as1), (char *)vec_array(as2),
+                    min(astr_len(as1), astr_len(as2)));
+
+  if (ret == 0 && astr_len(as1) != astr_len(as2))
+    ret = astr_len(as1) < astr_len(as2) ? -1 : 1;
+
+  return ret;
 }
 
 int astr_ncmp(const astr as1, const astr as2, size_t n)
@@ -200,6 +205,10 @@ int main(void)
 
   assert(!astr_cmp(astr_cat(astr_afmt("%s * %d = ", "5", 3), astr_afmt("%d", 15)),
                    astr_new("5 * 3 = 15")));
+
+  assert(astr_cmp(astr_new("a"), astr_new("abc")) == -1);
+
+  assert(astr_cmp(astr_new("abc"), astr_new("a")) == 1);
 
   assert(astr_str(astr_new("rumblebumbleapplebombleboo"), 0, astr_new("apple")) == 12);
 
