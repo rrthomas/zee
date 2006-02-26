@@ -124,21 +124,19 @@ Line *line_new(void)
  */
 Line *string_to_lines(astr as, size_t *lines)
 {
-  ptrdiff_t p, end = astr_len(as);
+  ptrdiff_t p, q, end = astr_len(as);
   Line *lp = line_new();
 
-  for (p = 0, *lines = 1; p < end;) {
-    ptrdiff_t q;
-    if ((q = (astr_str(as, p, astr_new("\n")))) >= 0) {
-      astr_cat(list_last(lp)->item, astr_sub(as, p, q));
-      list_append(lp, astr_new(""));
-      ++*lines;
-      p = q + 1;
-    } else {                    /* Rest of string */
-      astr_cat(list_last(lp)->item, astr_sub(as, p, (ptrdiff_t)astr_len(as)));
-      break;
-    }
+  for (p = 0, *lines = 1;
+       p < end && (q = (astr_str(as, p, astr_new("\n")))) >= 0;
+       p = q + 1) {
+    astr_cat(list_last(lp)->item, astr_sub(as, p, q));
+    list_append(lp, astr_new(""));
+    ++*lines;
   }
+
+  /* Add the rest of the string, if any */
+  astr_cat(list_last(lp)->item, astr_sub(as, p, (ptrdiff_t)astr_len(as)));
 
   return lp;
 }
