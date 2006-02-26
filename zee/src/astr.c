@@ -122,7 +122,7 @@ ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
   from = abspos(haystack, from);
 
   if (from + astr_len(needle) <= astr_len(haystack))
-    for (pos = from; (size_t)pos < astr_len(haystack) - astr_len(needle); pos++)
+    for (pos = from; (size_t)pos <= astr_len(haystack) - astr_len(needle); pos++)
       if (!memcmp(astr_char(haystack, pos), vec_array(needle), astr_len(needle)))
         return pos;
 
@@ -213,13 +213,15 @@ int main(void)
 
   assert(astr_str(astr_new("rumblebumbleapplebombleboo"), 0, astr_new("apple")) == 12);
 
+  assert(astr_str(astr_new("rumblebumbleapple"), 0, astr_new("apple")) == 12);
+
   assert(astr_str(astr_new("appleabumbleapplebombleboo"), 6, astr_new("apple")) == 12);
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);
   assert(!astr_cmp(as1, astr_new("/* Dynamically allocated strings")));
   assert(fclose(fp) == 0);
-  
+
   as1 = astr_cat(astr_new(""), astr_new("x"));
   assert(as1->size >= astr_len(as1));
 
