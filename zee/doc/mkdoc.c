@@ -90,7 +90,7 @@ static void get_funcs(FILE *fp)
   astr buf;
 
   while ((buf = astr_fgets(fp)) != NULL) {
-    char *s = astr_cstr(buf);
+    const char *s = astr_cstr(buf);
     if (!strncmp(s, "DEFUN(", 6) ||
         !strncmp(s, "DEFUN_INT(", 10)) {
       char *p = strchr(s, '(');

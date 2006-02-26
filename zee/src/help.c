@@ -66,7 +66,7 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
   *defval = astr_new("");
   while ((buf = astr_fgets(f))) {
     if (reading_doc) {
-      if (*astr_char(buf, 0) == '\f')
+      if (astr_len(buf) > 0 && *astr_char(buf, 0) == '\f')
         break;
       if (isfunc || astr_len(*defval) > 0) {
         astr_cat(doc, buf);
@@ -114,18 +114,14 @@ Display the full documentation of VARIABLE (a symbol).
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
     astr defval, doc;
     
-    astr hv, dv, cv, docv;
     doc = get_funcvar_doc(name, &defval, FALSE);
     if (doc) {
-      hv = astr_cstr(name);
-      dv = astr_cstr(defval);
-      cv = get_variable(name);
-      docv = astr_cstr(doc);
       popup_set(astr_afmt("Help for variable `%s':\n\n"
                           "Default value: %s\n"
                           "Current value: %s\n\n"
                           "Documentation:\n%s",
-                          hv, dv, cv, docv));
+                          astr_cstr(name), astr_cstr(defval),
+                          astr_cstr(get_variable(name)), astr_cstr(doc)));
     } else
       ok = FALSE;
 

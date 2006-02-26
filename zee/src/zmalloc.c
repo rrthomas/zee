@@ -25,20 +25,26 @@
 #include <gc/gc.h>
 #else
 #include <stdlib.h>
-#include <string.h>
 #endif
+
+#include <string.h>
 
 #include "main.h"
 #include "zmalloc.h"
 
 
 /*
- * Resize an allocated memory area, zeroing any extra bytes.
+ * Resize an allocated memory area. Bytes that are no longer needed are zeroed
+ * before being freed. Bytes that are newly needed are zeroed after being
+ * allocated.
  */
 void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 {
+  if (newsize < oldsize)
+    memset((char *)ptr + newsize, 0, oldsize - newsize);
+
   /* Behaviour in this case is unspecified for malloc and GC_REALLOC */
-  if (ptr == NULL && newsize == 0)
+  if (newsize == 0)
     return NULL;
 
 #ifndef DEBUG
@@ -52,9 +58,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
     die(1);
   }
 
-#ifndef DEBUG
-  (void)oldsize;    /* Avoid compiler warning about unused variable */
-#else
+#ifdef DEBUG /* Not needed after GCREALLOC. */
   if (newsize > oldsize)
     memset((char *)ptr + oldsize, 0, newsize - oldsize);
 #endif
