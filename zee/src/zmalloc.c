@@ -58,7 +58,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
     die(1);
   }
 
-#ifdef DEBUG /* Not needed after GCREALLOC. */
+#ifdef DEBUG /* GC_REALLOC does this anyway */
   if (newsize > oldsize)
     memset((char *)ptr + oldsize, 0, newsize - oldsize);
 #endif
