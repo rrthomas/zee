@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Unitialised vector elements are zeroed. */
+/* Uninitialised vector elements are zeroed */
 typedef struct {
   size_t itemsize;        /* size of each item in bytes */
   size_t items;           /* number of items used */
