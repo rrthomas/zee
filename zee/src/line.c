@@ -455,7 +455,7 @@ int delete_nstring(size_t size, astr *as)
     if (!eolp())
       astr_cat_char(*as, following_char());
     else
-      astr_cat_char(*as, '\n');
+      astr_cat(*as, astr_new("\n"));
 
     if (eobp()) {
       minibuf_error(astr_new("End of buffer"));
@@ -549,18 +549,6 @@ Delete all spaces and tabs around point.
   while (!bolp() && isspace(preceding_char()))
     FUNCALL(backward_delete_char);
 
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
-}
-END_DEFUN
-
-DEFUN(just_one_space)
-/*+
-Delete all spaces and tabs around point, leaving one space.
-+*/
-{
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
-  FUNCALL(delete_horizontal_space);
-  insert_char(' ');
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
 END_DEFUN
