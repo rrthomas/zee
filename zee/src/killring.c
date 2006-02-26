@@ -55,7 +55,7 @@ static int kill_line(void)
     if (!FUNCALL(delete_char))
       return FALSE;
 
-    astr_cat_char(killed_text, '\n');
+    astr_cat(killed_text, astr_new("\n"));
 
     thisflag |= FLAG_DONE_KILL;
 
