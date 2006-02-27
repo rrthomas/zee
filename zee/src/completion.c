@@ -39,7 +39,7 @@ Completion *completion_new(void)
 }
 
 /*
- * Calculate the maximum length of the completions.
+ * Calculate the maximum length of the first 'size' astrs in 'l'.
  */
 static size_t calculate_max_length(list l, size_t size)
 {
@@ -53,7 +53,8 @@ static size_t calculate_max_length(list l, size_t size)
 }
 
 /*
- * Write the list of completions in a set of columns.
+ * Write the first 'size' astrs in 'l' in a set of columns. The width of the
+ * columns is chosen to be big enough for the longest astr, plus 5.
  */
 static astr completion_write(list l, size_t size)
 {
@@ -62,17 +63,19 @@ static astr completion_write(list l, size_t size)
   astr as = astr_new("Possible completions are:\n");
 
   max = calculate_max_length(l, size) + 5;
-  numcols = (win.ewidth - 1) / max;
+  numcols = (win.ewidth + 5 - 1) / max;
 
-  for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
+  col = 0;
+  for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
       astr_cat(as, astr_new("\n"));
     }
     astr_cat(as, p->item);
-    for (j = max - astr_len(p->item); j > 0; --j)
-      astr_cat(as, astr_new(" "));
     ++col;
+    if (col < numcols)
+      for (j = max - astr_len(p->item); j > 0; --j)
+        astr_cat(as, astr_new(" "));
   }
 
   return as;
@@ -80,6 +83,11 @@ static astr completion_write(list l, size_t size)
 
 /*
  * Popup the completion window.
+ * cp - the completions to show.
+ * allflag - true to show completions, false to show matches.
+ * Suggestion: always show matches.
+ * num - ignored if allflag, otherwise the number of matches to show.
+ * Question: It looks like 'num' is always 'list_length(cp->matches)'. Remove?
  */
 static void popup_completion(Completion *cp, int allflag, size_t num)
 {
@@ -103,27 +111,36 @@ static int hcompar(const void *p1, const void *p2)
 
 /*
  * Match completions.
+ * cp - the completions.
+ * search - the prefix to search for.
+ * popup_when_complete - if true, and there is more than one match,
+ *   call popup_completion().
+ * Returns:
+ * COMPLETION_NOTMATCHED if 'search' is not a prefix of any completion.
+ * COMPLETION_MATCHED if 'search' is a prefix of exactly one completion.
+ * COMPLETION_NONUNIQUE if 'search' is a prefix of more than one completion but
+ * not equal to any completion.
+ * COMPLETION_MATCHEDNONUNIQUE if 'search' is a prefix of more than one
+ * completion and equal to one of them.
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
-  size_t i, j;
-  size_t fullmatches = 0, partmatches = 0;
+  size_t j;
+  size_t fullmatches = 0;
   char c;
   list p;
 
   cp->matches = list_new();
-
-  if (!cp->flags & COMPLETION_SORTED) {
-    list_sort(cp->completions, hcompar);
-    cp->flags |= COMPLETION_SORTED;
-  }
+  list_sort(cp->completions, hcompar);
 
   if (astr_len(search) == 0) {
-    cp->match = list_first(cp->completions)->item;
+    /* Question: Why is this a special case? */
+    cp->match = list_first(cp->completions)->item; /* FIXME: Fails if cp->completions is an empty list. */
+
     if (list_length(cp->completions) > 1) {
-      cp->matchsize = 0;
-      popup_completion(cp, TRUE, 0);
-      return COMPLETION_NONUNIQUE;
+      cp->matchsize = 0; /* FIXME: Wrong if all completions have a common prefix. */
+      popup_completion(cp, TRUE, 0); /* FIXME: popup_when_complete ignored. */
+      return COMPLETION_NONUNIQUE; /* FIXME: Broken if one of the completions is the empty string. */
     } else {
       cp->matchsize = astr_len(cp->match);
       return COMPLETION_MATCHED;
@@ -132,38 +149,35 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
     if (!astr_ncmp(p->item, search, astr_len(search))) {
-      ++partmatches;
       list_append(cp->matches, p->item);
       if (!astr_cmp(p->item, search))
         ++fullmatches;
     }
 
-  if (partmatches == 0)
+  if (list_empty(cp->matches))
     return COMPLETION_NOTMATCHED;
-  else if (partmatches == 1) {
-    cp->match = list_first(cp->matches)->item;
-    cp->matchsize = astr_len(cp->match);
-    return COMPLETION_MATCHED;
-  }
 
-  if (fullmatches == 1 && partmatches > 1) {
-    cp->match = list_first(cp->matches)->item;
-    cp->matchsize = astr_len(cp->match);
+  cp->match = list_first(cp->matches)->item;
+  cp->matchsize = astr_len(cp->match);
+
+  if (list_length(cp->matches) == 1)
+    return COMPLETION_MATCHED;
+
+  if (fullmatches == 1 && list_length(cp->matches) > 1) {
     if (popup_when_complete)
-      popup_completion(cp, FALSE, partmatches);
+      popup_completion(cp, FALSE, list_length(cp->matches));
     return COMPLETION_MATCHEDNONUNIQUE;
   }
 
-  for (j = astr_len(search); ; j++) {
-    list p = list_first(cp->matches);
 
-    c = *astr_char(p->item, (ptrdiff_t)j);
-    for (i = 1; i < partmatches; ++i) {
-      p = list_next(p);
+  for (j = astr_len(search); ; j++) {
+    cp->matchsize = j;
+    c = *astr_char(cp->match, (ptrdiff_t)j); /* FIXME: Broken if first match is a prefix of all other matches. */
+    for (p = list_first(cp->matches); p != cp->matches; p = list_next(p)) {
+      /* FIXME: Broken if p->item is a prefix of all other matches. */
       if (*astr_char(p->item, (ptrdiff_t)j) != c) {
-        cp->match = list_first(cp->matches)->item;
-        cp->matchsize = j;
-        popup_completion(cp, FALSE, partmatches);
+        /* FIXME: Ignores popup_when_complete. */
+        popup_completion(cp, FALSE, list_length(cp->matches));
         return COMPLETION_NONUNIQUE;
       }
     }

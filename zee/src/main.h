@@ -130,6 +130,7 @@ typedef struct {
 
 } Window;
 
+/* Return type of completion_try(). */
 enum {
   COMPLETION_NOTCOMPLETING,
   COMPLETION_NOTMATCHED,
@@ -138,9 +139,12 @@ enum {
   COMPLETION_NONUNIQUE
 };
 
-#define COMPLETION_SORTED               0x1
-#define COMPLETION_POPPEDUP             0x2
+#define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */
 
+/*
+ * Suggestion: since 'match' has a length, let's truncate it to 'matchsize'
+ * characters and do away with 'matchsize'.
+ */
 typedef struct {
   int flags;                    /* Flags */
   list completions;             /* The completion strings */
