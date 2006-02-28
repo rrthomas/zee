@@ -48,7 +48,7 @@ size_t list_length(list l)
 }
 
 /* Add an item to the head of a list */
-void list_prepend(list l, void *i)
+list list_prepend(list l, void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -56,10 +56,12 @@ void list_prepend(list l, void *i)
   n->prev = l;
   n->item = i;
   l->next = l->next->prev = n;
+
+  return l;
 }
 
 /* Add an item to the tail of a list */
-void list_append(list l, void *i)
+list list_append(list l, void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -67,6 +69,8 @@ void list_append(list l, void *i)
   n->prev = l->prev;
   n->item = i;
   l->prev = l->prev->next = n;
+
+  return l;
 }
 
 /* Return the first item of a list, or NULL if the list is empty */

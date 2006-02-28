@@ -46,9 +46,6 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-/* The type of a user command. */
-typedef int (*Function)(size_t argc, int uniarg, list l);
-
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
  * each line is implicit.
@@ -159,11 +156,6 @@ typedef struct {
                                    to elements) */
 } History;
 
-typedef struct {
-  size_t key;
-  Function func;
-} Binding;
-
 typedef struct Macro {
   vector *keys;                 /* Vector of keystrokes */
   astr name;                    /* Name of the macro */
@@ -229,55 +221,52 @@ enum {
 #endif
 #endif
 
-/* Define an interactive function.
+/* Define an interactive command.
  *
- * FIXME: remove intarg and argc.
+ * DEFUN(command) expands to the beginning of a command definition.
+ * The prototype is Function (see below).
  *
- * DEFUN(foo) expands to the beginning of a function definition. The prototype
- * will be:
+ * To call such a function with an argument list a1, a2, ..., an, pass
+ * the arguments (which should all be astrs) in a list.
  *
- *   int F_foo(size_t argc, int intarg, list l);
- *
- * To call such a function with an argument list "a1, a2, ..., an", pass "n" as
- * the value of "argc", a dummy value for "intarg" and pass the arguments (which
- * should all be astrs) in the list "l". Normally such functions will be called
- * by the UI code, not by the C code.
- *
- * It is common for functions to take just a single integer argument. "intarg"
- * is an optimisation to avoid having to convert the integer to a string and
- * wrap it up in a list. *Instead* of passing a list, you can simply pass the
- * integer as "intarg" and pass "NULL" for the list.
- *
- * The macro "FUNCALL" can be used to call zero-argument functions. The macro
- * "DEFUN_INT" can be used to define functions taking a single integer argument.
- * The macro "FUNCALL_INT" can be used to call functions taking a single integer
- * argument.
+ * The macro `FUNCALL' can be used to call zero-argument functions.
+ * The macro `DEFUN_INT' can be used to define functions taking a
+ * single integer argument.
+ * The macro `FUNCALL_INT' can be used to call functions taking a
+ * single integer argument.
  */
+
+/* The type of a user command. */
+typedef int (*Function)(list l);
+
+typedef struct {
+  size_t key;
+  Function func;
+} Binding;
+
 #define DEFUN(name, doc) \
-  int F_ ## name(size_t argc, int intarg, list l) \
+  int F_ ## name(list l) \
   { \
     int ok = TRUE; \
-    (void)intarg; \
-    (void)l; \
-    if (argc == 0) \
-      intarg = 1;
+    size_t argc = l ? list_length(l) : 0;
 
 
 #define DEFUN_INT(name, doc) \
   DEFUN(name, doc) \
-    if (l) \
-      intarg = l->item ? atoi((char *)(list_behead(l))) : 0;
+    int intarg = l ? (list_empty(l) ? 0 : atoi(astr_cstr(list_behead(l)))) : 0;
 
 #define END_DEFUN \
+    (void)argc; \
+    (void)l; \
     return ok; \
   }
 
 /* Call an interactive function */
 #define FUNCALL(name) \
-  F_ ## name(0, 0, NULL)
+  F_ ## name(NULL)
 
 /* Call an interactive function with an integer argument */
 #define FUNCALL_INT(name, arg) \
-  F_ ## name(1, arg, NULL)
+  F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
 #endif /* !MAIN_H */

@@ -34,8 +34,8 @@ struct list_s {
 
 list list_new(void);
 size_t list_length(list l);
-void list_prepend(list l, void *i);
-void list_append(list l, void *i);
+list list_prepend(list l, void *i);
+list list_append(list l, void *i);
 void *list_head(list l);
 void *list_behead(list l);
 void *list_betail(list l);

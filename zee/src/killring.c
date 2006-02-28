@@ -161,7 +161,7 @@ static int kill_helper(Function func)
   else {
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
-    ok = func(0, 0, NULL);
+    ok = func(NULL);
     if (ok)
       ok = FUNCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);

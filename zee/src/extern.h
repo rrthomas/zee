@@ -176,6 +176,6 @@ astr minibuf_read_variable_name(astr msg);
 
 /* External C functions for interactive commands -------------------------- */
 #define X(cmd_name, doc) \
-  int F_ ## cmd_name(size_t argc, int intarg, list l);
+  int F_ ## cmd_name(list l);
 #include "tbl_funcs.h"
 #undef X

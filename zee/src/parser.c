@@ -156,7 +156,7 @@ void cmd_eval(void)
     /* Execute the line */
     while ((fname = list_behead(l)) &&
            (func = get_function(fname)) &&
-           func(list_length(l), 0, l))
+           func(l))
       ;
 
     /* The first token for the next line, if any, was read above */

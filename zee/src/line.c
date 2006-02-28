@@ -488,7 +488,7 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEFUN(self_insert_command,
+DEFUN_INT(self_insert_command,
 "\
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
