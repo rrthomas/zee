@@ -241,7 +241,7 @@ typedef int (*Command)(list l);
 
 typedef struct {
   size_t key;
-  Command func;
+  Command cmd;
 } Binding;
 
 #define DEF(name, doc) \

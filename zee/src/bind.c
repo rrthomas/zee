@@ -47,26 +47,26 @@ static Binding *get_binding(size_t key)
   return NULL;
 }
 
-static void add_binding(size_t key, Command func)
+static void add_binding(size_t key, Command cmd)
 {
   Binding b;
 
   b.key = key;
-  b.func = func;
+  b.cmd = cmd;
 
   vec_item(bindings, vec_items(bindings), Binding) = b;
 }
 
-void bind_key(size_t key, Command func)
+void bind_key(size_t key, Command cmd)
 {
   Binding *p;
 
   assert(key != KBD_NOKEY);
 
   if ((p = get_binding(key)) == NULL)
-    add_binding(key, func);
+    add_binding(key, cmd);
   else
-    p->func = func;
+    p->cmd = cmd;
 }
 
 static void unbind_key(size_t key)
@@ -96,7 +96,7 @@ void process_key(size_t key)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
-         (p ? p->func(NULL) : CMDCALL_INT(self_insert_command, (int)key));
+         (p ? p->cmd(NULL) : CMDCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
@@ -237,11 +237,11 @@ chord.\
   }
 
   if (name) {
-    Command func;
+    Command cmd;
 
-    if ((func = get_command(name))) {
+    if ((cmd = get_command(name))) {
       if (key != KBD_NOKEY) {
-        bind_key(key, func);
+        bind_key(key, cmd);
         ok = TRUE;
       } else
         minibuf_error(astr_new("Invalid key"));
@@ -257,7 +257,7 @@ static astr command_to_binding(Command f)
   astr as = astr_new("");
 
   for (i = 0; i < vec_items(bindings); i++)
-    if (vec_item(bindings, i, Binding).func == f) {
+    if (vec_item(bindings, i, Binding).cmd == f) {
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       if (n++ != 0)
@@ -305,5 +305,5 @@ astr binding_to_command(size_t key)
     else
       return NULL;
   } else
-    return get_command_name(p->func);
+    return get_command_name(p->cmd);
 }

@@ -478,12 +478,12 @@ FIXME: Make it work non-interactively.\
 ")
 {
   astr name;
-  Command func;
+  Command cmd;
   Macro *mp;
 
   if ((name = minibuf_read_command_name(astr_new("Execute command: ")))) {
-    if ((func = get_command(name)))
-      ok = func(NULL);
+    if ((cmd = get_command(name)))
+      ok = cmd(NULL);
     else if ((mp = get_macro(name)))
       call_macro(mp);
     else
