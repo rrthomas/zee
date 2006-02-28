@@ -26,7 +26,7 @@ mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
 
 $(PACKAGE_NAME).info $(PACKAGE_NAME).dvi: $(GENERATED_TEXI)
 
-$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) && mv tbl_funcs.h $(top_builddir)/src/
 
 dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
