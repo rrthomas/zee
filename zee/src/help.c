@@ -35,76 +35,50 @@ Show the version in the minibuffer.\
 }
 END_DEFUN
 
-/*
- * Fetch the documentation of a function or variable from the AUTODOC
- * automatically generated file.
- * FIXME: load it all at startup.
- *
- * name - name of function or variable to find, without its F_ or V_ prefix.
- * defval - unused if isfunc, otherwise return value: default value of variable.
- * isfunc - true for function, false for variable.
- */
-static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
-{
-  FILE *fp;
-  astr buf, match, doc;
-  int reading_doc = 0;
-
-  if ((fp = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-    minibuf_error(astr_new("Unable to read file `" PATH_DATA "/AUTODOC'"));
-    return NULL;
-  }
-
-  if (isfunc)
-    match = astr_afmt("\fF_%s", astr_cstr(name));
-  else
-    match = astr_afmt("\fV_%s", astr_cstr(name));
-
-  /* FIXME: following loop is completely mad! -- should be two loops. */
-  doc = astr_new("");
-  if (!isfunc)
-    *defval = astr_new("");
-  /* Test eof prevents reading last (blank) line of AUTODOC as an
-     extra line of documentation */
-  while ((buf = astr_fgets(fp)) && !feof(fp)) {
-    if (reading_doc) {
-      if (astr_len(buf) > 0 && *astr_char(buf, 0) == '\f')
-        break;
-      if (isfunc || astr_len(*defval) > 0) {
-        astr_cat(doc, buf);
-        astr_cat(doc, astr_new("\n"));
-      } else
-        *defval = astr_dup(buf);
-    } else if (!astr_cmp(buf, match))
-      reading_doc = 1;
-  }
-
-  fclose(fp);
-
-  if (!reading_doc) {
-    minibuf_error(astr_afmt("Cannot find documentation for `%s'", astr_cstr(name)));
-    return NULL;
-  }
-
-  return doc;
-}
+struct {
+  const char *name;
+  const char *doc;
+} ftable [] = {
+#define X(name, doc) \
+	{# name, doc},
+#include "tbl_funcs.h"
+#undef X
+};
+#define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
 DEFUN(help_command,
 "\
 Display the full documentation of FUNCTION (a symbol).\
 ")
 {
-  astr name, doc;
+  astr name;
+
+  ok = FALSE;
 
   if ((name = minibuf_read_function_name(astr_new("Describe function: ")))) {
-    if ((doc = get_funcvar_doc(name, NULL, TRUE)))
-      popup_set(astr_afmt("Help for command `%s':\n\n%s", astr_cstr(name), astr_cstr(doc)));
-    else
-      ok = FALSE;
-  } else
-    ok = FALSE;
+    size_t i;
+    for (i = 0; i < fentries; i++)
+      if (!astr_cmp(astr_new(ftable[i].name), name)) {
+        popup_set(astr_afmt("Help for command `%s':\n\n%s", ftable[i].name, ftable[i].doc));
+        ok = TRUE;
+        break;
+      }
+  }
 }
 END_DEFUN
+
+static struct {
+  const char *name;
+  const char *fmt;
+  const char *defval;
+  const char *doc;
+} vtable[] = {
+#define X(name, fmt, defvalue, doc) \
+	{name, fmt, defvalue, doc},
+#include "tbl_vars.h"
+#undef X
+};
+#define ventries (sizeof(vtable) / sizeof(vtable[0]))
 
 DEFUN(help_variable,
 "\
@@ -116,16 +90,17 @@ Display the full documentation of VARIABLE (a symbol).\
   ok = FALSE;
 
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
-    astr defval, doc;
-    if ((doc = get_funcvar_doc(name, &defval, FALSE))) {
-      popup_set(astr_afmt("Help for variable `%s':\n\n"
-                          "Default value: %s\n"
-                          "Current value: %s\n\n"
-                          "Documentation:\n%s",
-                          astr_cstr(name), astr_cstr(defval),
-                          astr_cstr(get_variable(name)), astr_cstr(doc)));
-      ok = TRUE;
-    }
+    size_t i;
+    for (i = 0; i < ventries; i++)
+      if (!astr_cmp(astr_new(vtable[i].name), name)) {
+        popup_set(astr_afmt("Help for variable `%s':\n\n"
+                            "Default value: %s\n"
+                            "Current value: %s\n\n"
+                            "Documentation:\n%s",
+                            vtable[i].name, vtable[i].defval,
+                            astr_cstr(get_variable(name)), vtable[i].doc));
+        ok = TRUE;
+      }
   }
 }
 END_DEFUN

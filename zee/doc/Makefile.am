@@ -4,7 +4,6 @@ info_TEXINFOS = zee.texi
 
 zeedir = $(datadir)/$(PACKAGE_NAME)
 zee_DATA =					\
-	AUTODOC					\
 	FAQ					\
 	dot$(PACKAGE_NAME).sample
 
@@ -15,7 +14,7 @@ EXTRA_DIST =					\
 	mkdoc.c					\
 	config.h
 
-AUTODOCSRCS = $(top_srcdir)/src/*.c
+DOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
 GENERATED_TEXI = dot$(PACKAGE_NAME).texi $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi
@@ -29,8 +28,8 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opt
 
 $(PACKAGE_NAME).info $(PACKAGE_NAME).dvi: $(GENERATED_TEXI)
 
-$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi AUTODOC: $(AUTODOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
-	./mkdoc$(EXEEXT_FOR_BUILD) $(AUTODOCSRCS) >AUTODOC && mv tbl_funcs.h $(top_builddir)/src/
+$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) && mv tbl_funcs.h $(top_builddir)/src/
 
 dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
@@ -39,10 +38,8 @@ dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
 	expand $? >>$@
 	@echo "@end example" >>$@
 
-all-local: AUTODOC
-
 clean-local:
-	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC *.o
+	rm -f mkdoc$(EXEEXT_FOR_BUILD) *.o
 
 distclean-local:
 	rm -f $(GENERATED_TEXI)

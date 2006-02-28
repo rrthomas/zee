@@ -32,11 +32,11 @@ static size_t fentries = 0;
 static struct {
   char *name;
   char *fmt;
-  char *defvalue;
+  char *defval;
   char *doc;
 } vtable[] = {
-#define X(name, fmt, defvalue, doc) \
-	{name, fmt, defvalue, doc},
+#define X(name, fmt, defval, doc) \
+	{name, fmt, defval, doc},
 #include "tbl_vars.h"
 #undef X
 };
@@ -135,21 +135,6 @@ static void dump_funcs(void)
   fclose(fp2);
 }
 
-static void dump_help(void)
-{
-  size_t i;
-  for (i = 0; i < fentries; ++i) {
-    astr doc = vec_item(ftable, i, struct fentry).doc;
-    if (doc)
-      fprintf(stdout, "\fF_%s\n%s",
-              astr_cstr(vec_item(ftable, i, struct fentry).name), astr_cstr(doc));
-  }
-  for (i = 0; i < ventries; ++i)
-    fprintf(stdout, "\fV_%s\n%s\n%s\n",
-            vtable[i].name, vtable[i].defvalue,
-            vtable[i].doc);
-}
-
 static void dump_vars(void)
 {
   size_t i;
@@ -212,7 +197,6 @@ int main(int argc, char **argv)
   }
   dump_funcs();
 
-  dump_help();
   dump_vars();
   dump_opts();
 
