@@ -10,7 +10,6 @@ zee_DATA =					\
 EXTRA_DIST =					\
 	FAQ					\
 	dot$(PACKAGE_NAME).sample		\
-	lisp.txt				\
 	mkdoc.c					\
 	config.h
 
