@@ -60,14 +60,6 @@ fi
 AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
 
 dnl ==================================================================
-dnl Turn on additional compiler warnings
-dnl ==================================================================
-
-if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
-fi
-
-dnl ==================================================================
 dnl Debugging
 dnl ==================================================================
 
@@ -76,6 +68,7 @@ AC_ARG_ENABLE(debug,
 AC_HELP_STRING([--enable-debug], [include debugging code]),
 [
 if test $enableval = yes; then
+        CFLAGS="-g -ggdb"
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(DEBUG, 1, [Define this to include debugging code.])
 else
@@ -84,6 +77,14 @@ fi
 ], [
 AC_MSG_RESULT(no)
 ])
+
+dnl ==================================================================
+dnl Turn on additional compiler warnings
+dnl ==================================================================
+
+if test "$GCC" = "yes"; then
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
+fi
 
 dnl ==================================================================
 dnl Allegro
