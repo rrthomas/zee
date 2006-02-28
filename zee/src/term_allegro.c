@@ -160,6 +160,13 @@ void term_addch(int c)
   cur_x++;
 }
 
+void term_nl(void)
+{
+  cur_x = 0;
+  if (cur_y < term_height())
+    cur_y++;
+}
+
 void term_attrset(size_t attrs, ...)
 {
   size_t i, a = 0;
@@ -296,9 +303,9 @@ size_t term_xgetkey(int mode, size_t timeout)
   if (mode & GETKEY_UNFILTERED)
     return hooked_readkey(mode, timeout) & 0xff;
   else {
-    size_t key = translate_key(mode, hooked_readkey(mode, timeout));
+    size_t key = translate_key(hooked_readkey(mode, timeout));
     while (key == KBD_META) {
-      key = translate_key(0, hooked_readkey(0));
+      key = translate_key(hooked_readkey(0, 0));
       key |= KBD_META;
     }
     return key;
