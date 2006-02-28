@@ -24,7 +24,6 @@
 
 #include "main.h"
 #include "extern.h"
-#include "paths.h"
 
 DEFUN(help_about,
 "\

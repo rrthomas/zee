@@ -75,7 +75,6 @@ help.o: paths.h
 paths.h:
 	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
 	@echo "" >>paths.h.tmp
-	@echo '#define PATH_PREFIX "$(prefix)"' >>paths.h.tmp
 	@echo '#define PATH_DATA "$(pkgdatadir)"' >>paths.h.tmp
 	if test ! -f paths.h -o				\
 	        ! "cmp paths.h paths.h.tmp -s" ; then	\
