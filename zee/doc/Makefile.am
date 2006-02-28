@@ -10,8 +10,7 @@ zee_DATA =					\
 EXTRA_DIST =					\
 	FAQ					\
 	dot$(PACKAGE_NAME).sample		\
-	mkdoc.c					\
-	config.h
+	mkdoc.c
 
 DOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
@@ -21,7 +20,7 @@ GENERATED_TEXI = dot$(PACKAGE_NAME).texi $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NA
 mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LIBS) $(LDFLAGS) -o $@ mkdoc.o
 
-mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
+mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
         $(top_srcdir)/src/zmalloc.c $(top_srcdir)/src/astr.c
 	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
 

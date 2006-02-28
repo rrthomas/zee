@@ -2,8 +2,6 @@
  * Produce various documentation and header files
  */
 
-#include "config.h"
-
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
