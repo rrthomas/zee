@@ -174,10 +174,10 @@ astr minibuf_read_variable_name(astr msg)
   return ms;
 }
 
-DEFUN(set_variable)
-/*+
-Set a variable to the specified value.
-+*/
+DEFUN(set_variable,
+"\
+Set a variable to the specified value.\
+")
 {
   astr var, val;
 

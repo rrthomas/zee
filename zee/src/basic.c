@@ -31,10 +31,10 @@
    functions are used. */
 static int cur_goalc;
 
-DEFUN(beginning_of_line)
-/*+
-Move point to beginning of current line.
-+*/
+DEFUN(beginning_of_line,
+"\
+Move point to beginning of current line.\
+")
 {
   buf.pt.o = 0;
 
@@ -45,10 +45,10 @@ Move point to beginning of current line.
 }
 END_DEFUN
 
-DEFUN(end_of_line)
-/*+
-Move point to end of current line.
-+*/
+DEFUN(end_of_line,
+"\
+Move point to end of current line.\
+")
 {
   buf.pt.o = astr_len(buf.pt.p->item);
 
@@ -99,13 +99,13 @@ static void goto_goalc(int goalc)
   buf.pt.o = i;
 }
 
-DEFUN(edit_navigate_up_line)
-/*+
-Move cursor vertically up one line.
-If there is no character in the target line exactly over the current column,
-the cursor is positioned after the character in that line which spans this
-column, or at the end of the line if it is not long enough.
-+*/
+DEFUN(edit_navigate_up_line,
+"\
+Move cursor vertically up one line.\n\
+If there is no character in the target line exactly over the current column,\n\
+the cursor is positioned after the character in that line which spans this\n\
+column, or at the end of the line if it is not long enough.\
+")
 {
   if (list_prev(buf.pt.p) == buf.lines)
     ok = FALSE;
@@ -123,13 +123,13 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-DEFUN(edit_navigate_down_line)
-/*+
-Move cursor vertically down one line.
-If there is no character in the target line exactly under the current column,
-the cursor is positioned after the character in that line which spans this
-column, or at the end of the line if it is not long enough.
-+*/
+DEFUN(edit_navigate_down_line,
+"\
+Move cursor vertically down one line.\n\
+If there is no character in the target line exactly under the current column,\n\
+the cursor is positioned after the character in that line which spans this\n\
+column, or at the end of the line if it is not long enough.\
+")
 {
   if (list_next(buf.pt.p) == buf.lines)
     ok = FALSE;
@@ -166,12 +166,12 @@ int goto_column(size_t to_col)
   return ok;
 }
 
-DEFUN(goto_column)
-/*+
-Read a number N and move the cursor to character number N.
-Position 1 is the beginning of the buffer.
-FIXME: Make this and goto_line DEFUN_INTs and make the functions static.
-+*/
+DEFUN(goto_column,
+"\
+Read a number N and move the cursor to character number N.\n\
+Position 1 is the beginning of the buffer.\n\
+FIXME: Make this and goto_line DEFUN_INTs and make the functions static.\
+")
 {
   size_t to_char = 0;
   astr ms;
@@ -221,11 +221,11 @@ int goto_point(Point pt)
   return ok;
 }
 
-DEFUN(goto_line)
-/*+
-Move cursor to the beginning of the specified line.
-Line 1 is the beginning of the buffer.
-+*/
+DEFUN(goto_line,
+"\
+Move cursor to the beginning of the specified line.\n\
+Line 1 is the beginning of the buffer.\
+")
 {
   size_t to_line = 0;
   astr ms;
@@ -246,30 +246,30 @@ Line 1 is the beginning of the buffer.
 }
 END_DEFUN
 
-DEFUN(beginning_of_buffer)
-/*+
-Move point to the beginning of the buffer.
-+*/
+DEFUN(beginning_of_buffer,
+"\
+Move point to the beginning of the buffer.\
+")
 {
   buf.pt = point_min(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
-DEFUN(end_of_buffer)
-/*+
-Move point to the end of the buffer.
-+*/
+DEFUN(end_of_buffer,
+"\
+Move point to the end of the buffer.\
+")
 {
   buf.pt = point_max(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
-DEFUN(edit_navigate_backward_char)
-/*+
-Move point left one character.
-+*/
+DEFUN(edit_navigate_backward_char,
+"\
+Move point left one character.\
+")
 {
   if (!bolp())
     buf.pt.o--;
@@ -283,10 +283,10 @@ Move point left one character.
 }
 END_DEFUN
 
-DEFUN(edit_navigate_forward_char)
-/*+
-Move point right one character.
-+*/
+DEFUN(edit_navigate_forward_char,
+"\
+Move point right one character.\
+")
 {
   if (!eolp())
     buf.pt.o++;
@@ -300,10 +300,10 @@ Move point right one character.
 }
 END_DEFUN
 
-DEFUN(scroll_down)
-/*+
-Scroll text of current window downward near full screen.
-+*/
+DEFUN(scroll_down,
+"\
+Scroll text of current window downward near full screen.\
+")
 {
   if (buf.pt.n > 0)
     ok = goto_line(buf.pt.n - win.eheight) ? TRUE : FALSE;
@@ -314,10 +314,10 @@ Scroll text of current window downward near full screen.
 }
 END_DEFUN
 
-DEFUN(scroll_up)
-/*+
-Scroll text of current window upward near full screen.
-+*/
+DEFUN(scroll_up,
+"\
+Scroll text of current window upward near full screen.\
+")
 {
   if (buf.pt.n < buf.num_lines)
     ok = goto_line(buf.pt.n + win.eheight) ? TRUE : FALSE;

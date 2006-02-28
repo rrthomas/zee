@@ -230,11 +230,11 @@ int insert_char(int c)
   return insert_nstring(as);
 }
 
-DEFUN(tab_to_tab_stop)
-/*+
-Insert spaces or tabs to next defined tab-stop column.
-Convert the tabulation into spaces.
-+*/
+DEFUN(tab_to_tab_stop,
+"\
+Insert spaces or tabs to next defined tab-stop column.\n\
+Convert the tabulation into spaces.\
+")
 {
   if (warn_if_readonly_buffer())
     ok = FALSE;
@@ -398,10 +398,10 @@ void fill_break_line(void)
     buf.pt.o = old_col;
 }
 
-DEFUN(newline)
-/*+
-Insert a newline, and move to left margin of the new line if it's blank.
-+*/
+DEFUN(newline,
+"\
+Insert a newline, and move to left margin of the new line if it's blank.\
+")
 {
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   if (buf.flags & BFLAG_AUTOFILL &&
@@ -488,11 +488,11 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEFUN(self_insert_command)
-/*+
-Insert the character you type.
-Whichever character you type to run this command is inserted.
-+*/
+DEFUN(self_insert_command,
+"\
+Insert the character you type.\n\
+Whichever character you type to run this command is inserted.\
+")
 {
   weigh_mark();
 
@@ -508,22 +508,22 @@ Whichever character you type to run this command is inserted.
 }
 END_DEFUN
 
-DEFUN(delete_char)
-/*+
-Delete the following character.
-Join lines if the character is a newline.
-+*/
+DEFUN(delete_char,
+"\
+Delete the following character.\n\
+Join lines if the character is a newline.\
+")
 {
   astr as;
   ok = delete_nstring(1, &as);
 }
 END_DEFUN
 
-DEFUN(backward_delete_char)
-/*+
-Delete the previous character.
-Join lines if the character is a newline.
-+*/
+DEFUN(backward_delete_char,
+"\
+Delete the previous character.\n\
+Join lines if the character is a newline.\
+")
 {
   weigh_mark();
 
@@ -536,10 +536,10 @@ Join lines if the character is a newline.
 }
 END_DEFUN
 
-DEFUN(delete_horizontal_space)
-/*+
-Delete all spaces and tabs around point.
-+*/
+DEFUN(delete_horizontal_space,
+"\
+Delete all spaces and tabs around point.\
+")
 {
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
 
@@ -572,10 +572,10 @@ static void previous_nonblank_goalc(void)
     FUNCALL(edit_navigate_forward_char);
 }
 
-DEFUN(indent_relative)
-/*+
-Indent line or insert a tab.
-+*/
+DEFUN(indent_relative,
+"\
+Indent line or insert a tab.\
+")
 {
   if (warn_if_readonly_buffer())
     ok = FALSE;
@@ -617,13 +617,13 @@ Indent line or insert a tab.
 }
 END_DEFUN
 
-DEFUN(newline_and_indent)
-/*+
-Insert a newline, then indent.
-Indentation is done using the `indent_relative' command, except
-that if there is a character in the first column of the line above,
-no indenting is performed.
-+*/
+DEFUN(newline_and_indent,
+"\
+Insert a newline, then indent.\n\
+Indentation is done using the `indent_relative' command, except\n\
+that if there is a character in the first column of the line above,\n\
+no indenting is performed.\
+")
 {
   if (warn_if_readonly_buffer())
     ok = FALSE;

@@ -251,27 +251,27 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN(isearch_forward)
-/*+
-Do incremental search forward for regular expression.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type C-s to search again forward, C-r to search again backward.
-C-g when search is successful aborts and moves point to starting point.
-+*/
+DEFUN(isearch_forward,
+"\
+Do incremental search forward for regular expression.\n\
+As you type characters, they add to the search string and are found.\n\
+Type return to exit, leaving point at location found.\n\
+Type C-s to search again forward, C-r to search again backward.\n\
+C-g when search is successful aborts and moves point to starting point.\
+")
 {
   ok = isearch(ISEARCH_FORWARD);
 }
 END_DEFUN
 
-DEFUN(isearch_backward)
-/*+
-Do incremental search backward for regular expression.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type C-r to search again backward, C-s to search again forward.
-C-g when search is successful aborts and moves point to starting point.
-+*/
+DEFUN(isearch_backward,
+"\
+Do incremental search backward for regular expression.\n\
+As you type characters, they add to the search string and are found.\n\
+Type return to exit, leaving point at location found.\n\
+Type C-r to search again backward, C-s to search again forward.\n\
+C-g when search is successful aborts and moves point to starting point.\
+")
 {
   ok = isearch(ISEARCH_BACKWARD);
 }
@@ -288,51 +288,12 @@ static int no_upper(astr as)
   return TRUE;
 }
 
-DEFUN(replace)
-/*+
-Replace occurrences of a regexp with other text.
-+*/
-{
-  int count = 0, find_no_upper;
-  astr find, repl;
-
-  if ((find = minibuf_read(astr_new("Replace string: "), astr_new(""))) == NULL)
-    ok = FUNCALL(cancel);
-  else if (astr_len(find) == 0)
-    ok = FALSE;
-  else {
-    find_no_upper = no_upper(find);
-
-    if ((repl = minibuf_read(astr_afmt("Replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
-      ok = FUNCALL(cancel);
-    else {
-      while (search_forward(buf.pt.p, buf.pt.o, find)) {
-        ++count;
-        undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(buf.pt.n,
-                             buf.pt.o - astr_len(find)),
-                  astr_len(find), astr_len(repl));
-        if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
-                              astr_len(find), repl, find_no_upper))
-          buf.flags |= BFLAG_MODIFIED;
-      }
-
-      if (thisflag & FLAG_NEED_RESYNC)
-        resync_display();
-      term_display();
-
-      minibuf_write(astr_afmt("Replaced %d occurrences", count));
-    }
-  }
-}
-END_DEFUN
-
-DEFUN(query_replace)
-/*+
-Replace occurrences of a regexp with other text.
-As each match is found, the user must type a character saying
-what to do with it.
-+*/
+DEFUN(query_replace,
+"\
+Replace occurrences of a regexp with other text.\n\
+As each match is found, the user must type a character saying\n\
+what to do with it.\
+")
 {
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
   astr find, repl;

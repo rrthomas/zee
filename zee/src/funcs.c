@@ -31,19 +31,19 @@
 #include "extern.h"
 
 
-DEFUN(suspend)
-/*+
-Stop and return to superior process.
-+*/
+DEFUN(suspend,
+"\
+Stop and return to superior process.\
+")
 {
   raise(SIGTSTP);
 }
 END_DEFUN
 
-DEFUN(cancel)
-/*+
-Cancel current command.
-+*/
+DEFUN(cancel,
+"\
+Cancel current command.\
+")
 {
   weigh_mark();
   minibuf_error(astr_new("Quit"));
@@ -51,42 +51,42 @@ Cancel current command.
 }
 END_DEFUN
 
-DEFUN(edit_toggle_read_only)
-/*+
-Change whether this buffer is visiting its file read-only.
-+*/
+DEFUN(edit_toggle_read_only,
+"\
+Change whether this buffer is visiting its file read-only.\
+")
 {
   buf.flags ^= BFLAG_READONLY;
 }
 END_DEFUN
 
-DEFUN(auto_fill_mode)
-/*+
-Toggle Auto Fill mode.
-In Auto Fill mode, inserting a space at a column beyond `fill_column'
-automatically breaks the line at a previous space.
-+*/
+DEFUN(auto_fill_mode,
+"\
+Toggle Auto Fill mode.\n\
+In Auto Fill mode, inserting a space at a column beyond `fill_column'\n\
+automatically breaks the line at a previous space.\
+")
 {
   buf.flags ^= BFLAG_AUTOFILL;
 }
 END_DEFUN
 
-DEFUN_INT(set_fill_column)
-/*+
-Set the fill column.
-If an argument value is passed, set `fill_column' to that value,
-otherwise with the current column value.
-+*/
+DEFUN_INT(set_fill_column,
+"\
+Set the fill column.\n\
+If an argument value is passed, set `fill_column' to that value,\n\
+otherwise with the current column value.\
+")
 {
   set_variable(astr_new("fill_column"),
                astr_afmt("%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1)));
 }
 END_DEFUN
 
-DEFUN(set_mark)
-/*+
-Set mark where point is.
-+*/
+DEFUN(set_mark,
+"\
+Set mark where point is.\
+")
 {
   set_mark_to_point();
   minibuf_write(astr_new("Mark set"));
@@ -94,10 +94,10 @@ Set mark where point is.
 }
 END_DEFUN
 
-DEFUN(exchange_point_and_mark)
-/*+
-Put the mark where point is now, and point where the mark is now.
-+*/
+DEFUN(exchange_point_and_mark,
+"\
+Put the mark where point is now, and point where the mark is now.\
+")
 {
   assert(buf.mark);
   swap_point(&buf.pt, &buf.mark->pt);
@@ -106,10 +106,10 @@ Put the mark where point is now, and point where the mark is now.
 }
 END_DEFUN
 
-DEFUN(mark_whole_buffer)
-/*+
-Put point at beginning and mark at end of buffer.
-+*/
+DEFUN(mark_whole_buffer,
+"\
+Put point at beginning and mark at end of buffer.\
+")
 {
   FUNCALL(end_of_buffer);
   FUNCALL(set_mark);
@@ -143,12 +143,12 @@ static int quoted_insert_octal(int c1)
   return TRUE;
 }
 
-DEFUN(quoted_insert)
-/*+
-Read next input character and insert it.
-This is useful for inserting control characters.
-You may also type up to 3 octal digits, to insert a character with that code.
-+*/
+DEFUN(quoted_insert,
+"\
+Read next input character and insert it.\n\
+This is useful for inserting control characters.\n\
+You may also type up to 3 octal digits, to insert a character with that code.\
+")
 {
   int c;
 
@@ -164,12 +164,12 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
-DEFUN(universal_argument)
-/*+
-Begin a numeric argument for the following command.
-Digits or minus sign following C-u make up the numeric argument.
-C-u following the digits or minus sign ends the argument.
-+*/
+DEFUN(universal_argument,
+"\
+Begin a numeric argument for the following command.\n\
+Digits or minus sign following C-u make up the numeric argument.\n\
+C-u following the digits or minus sign ends the argument.\
+")
 {
   size_t key, i = 0, arg = 0, digit;
   int sgn = 1;
@@ -210,10 +210,10 @@ C-u following the digits or minus sign ends the argument.
 }
 END_DEFUN
 
-DEFUN(back_to_indentation)
-/*+
-Move point to the first non-whitespace character on this line.
-+*/
+DEFUN(back_to_indentation,
+"\
+Move point to the first non-whitespace character on this line.\
+")
 {
   buf.pt.o = 0;
   while (!eolp()) {
@@ -229,10 +229,10 @@ END_DEFUN
 			  Move through words
 ***********************************************************************/
 
-DEFUN(forward_word)
-/*+
-Move point forward one word.
-+*/
+DEFUN(forward_word,
+"\
+Move point forward one word.\
+")
 {
   int gotword = FALSE;
 
@@ -258,10 +258,10 @@ Move point forward one word.
 }
 END_DEFUN
 
-DEFUN(backward_word)
-/*+
-Move backward until encountering the beginning of a word.
-+*/
+DEFUN(backward_word,
+"\
+Move backward until encountering the beginning of a word.\
+")
 {
   int gotword = FALSE;
 
@@ -288,10 +288,10 @@ Move backward until encountering the beginning of a word.
 }
 END_DEFUN
 
-DEFUN(mark_word)
-/*+
-Set mark to end of current word.
-+*/
+DEFUN(mark_word,
+"\
+Set mark to end of current word.\
+")
 {
   FUNCALL(set_mark);
   if ((ok = FUNCALL(forward_word)))
@@ -299,10 +299,10 @@ Set mark to end of current word.
 }
 END_DEFUN
 
-DEFUN(mark_word_backward)
-/*+
-Set mark to start of current word.
-+*/
+DEFUN(mark_word_backward,
+"\
+Set mark to start of current word.\
+")
 {
   FUNCALL(set_mark);
   if ((ok = FUNCALL(backward_word)))
@@ -310,10 +310,10 @@ Set mark to start of current word.
 }
 END_DEFUN
 
-DEFUN(backward_paragraph)
-/*+
-Move backward to start of paragraph.
-+*/
+DEFUN(backward_paragraph,
+"\
+Move backward to start of paragraph.\
+")
 {
   while (is_empty_line() && FUNCALL(edit_navigate_up_line))
     ;
@@ -324,10 +324,10 @@ Move backward to start of paragraph.
 }
 END_DEFUN
 
-DEFUN(forward_paragraph)
-/*+
-Move forward to end of paragraph.
-+*/
+DEFUN(forward_paragraph,
+"\
+Move forward to end of paragraph.\
+")
 {
   while (is_empty_line() && FUNCALL(edit_navigate_down_line))
     ;
@@ -341,11 +341,11 @@ Move forward to end of paragraph.
 }
 END_DEFUN
 
-DEFUN(mark_paragraph)
-/*+
-Put point at beginning of this paragraph, mark at end.
-The paragraph marked is the one that contains point or follows point.
-+*/
+DEFUN(mark_paragraph,
+"\
+Put point at beginning of this paragraph, mark at end.\n\
+The paragraph marked is the one that contains point or follows point.\
+")
 {
   FUNCALL(forward_paragraph);
   FUNCALL(set_mark);
@@ -354,10 +354,10 @@ The paragraph marked is the one that contains point or follows point.
 END_DEFUN
 
 /* FIXME: fill_paragraph undo goes bananas. */
-DEFUN(fill_paragraph)
-/*+
-Fill paragraph at or after point.
-+*/
+DEFUN(fill_paragraph,
+"\
+Fill paragraph at or after point.\
+")
 {
   int i, start, end;
   Marker *m = point_marker();
@@ -444,38 +444,38 @@ static int setcase_word(int rcase)
   return TRUE;
 }
 
-DEFUN(downcase_word)
-/*+
-Convert following word to lower case, moving over.
-+*/
+DEFUN(downcase_word,
+"\
+Convert following word to lower case, moving over.\
+")
 {
   ok = setcase_word(LOWERCASE);
 }
 END_DEFUN
 
-DEFUN(upcase_word)
-/*+
-Convert following word to upper case, moving over.
-+*/
+DEFUN(upcase_word,
+"\
+Convert following word to upper case, moving over.\
+")
 {
   ok = setcase_word(UPPERCASE);
 }
 END_DEFUN
 
-DEFUN(capitalize_word)
-/*+
-Capitalize the following word, moving over.
-+*/
+DEFUN(capitalize_word,
+"\
+Capitalize the following word, moving over.\
+")
 {
   ok = setcase_word(CAPITALIZE);
 }
 END_DEFUN
 
-DEFUN(execute_command)
-/*+
-Read command or macro name, then call it.
-FIXME: Make it work non-interactively.
-+*/
+DEFUN(execute_command,
+"\
+Read command or macro name, then call it.\n\
+FIXME: Make it work non-interactively.\
+")
 {
   astr name;
   Function func;
@@ -493,14 +493,15 @@ FIXME: Make it work non-interactively.
 }
 END_DEFUN
 
-DEFUN(shell_command)
-/*+
-Reads a line of text using the minibuffer and creates an inferior shell
-to execute the line as a command; passes the contents of the region as
-input to the shell command.
-If the shell command produces any output, it is inserted into the
-current buffer, overwriting the current region.
-+*/
+DEFUN(shell_command,
+"\
+Reads a line of text using the minibuffer and creates an inferior shell\n\
+to execute the line as a command; passes the contents of the region as\n\
+input to the shell command.\n\
+If the shell command produces any output, it is inserted into the\n\
+current buffer, overwriting the current region.\n\
+FIXME: Use better-shell.c\
+")
 {
   astr ms;
 

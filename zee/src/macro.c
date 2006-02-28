@@ -62,13 +62,13 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN(start_kbd_macro)
-/*+
-Record subsequent keyboard input, defining a keyboard macro.
-The commands are recorded even as they are executed.
-Use C-x ) to finish recording and make the macro available.
-Use name_last_kbd_macro to give it a permanent name.
-+*/
+DEFUN(start_kbd_macro,
+"\
+Record subsequent keyboard input, defining a keyboard macro.\n\
+The commands are recorded even as they are executed.\n\
+Use C-x ) to finish recording and make the macro available.\n\
+Use name_last_kbd_macro to give it a permanent name.\
+")
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
     minibuf_error(astr_new("Already defining a keyboard macro"));
@@ -85,12 +85,13 @@ Use name_last_kbd_macro to give it a permanent name.
 }
 END_DEFUN
 
-DEFUN(end_kbd_macro)
-/*+
-Finish defining a keyboard macro.
-The definition was started by C-x (.
-The macro is now available for use via C-x e.
-+*/
+DEFUN(end_kbd_macro,
+"\
+Finish defining a keyboard macro.\n\
+The definition was started by C-x (.\n\
+The macro is now available for use via C-x e.\n\
+FIXME: Replace keystrokes here and elsewhere with command names.\
+")
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
     minibuf_error(astr_new("Not defining a keyboard macro"));
@@ -100,14 +101,14 @@ The macro is now available for use via C-x e.
 }
 END_DEFUN
 
-DEFUN(name_last_kbd_macro)
-/*+
-Assign a name to the last keyboard macro defined.
-Argument SYMBOL is the name to define.
-The symbol's command definition becomes the keyboard macro string.
-FIXME: Such a command cannot be called non-interactively, but it is a
-valid editor command.
-+*/
+DEFUN(name_last_kbd_macro,
+"\
+Assign a name to the last keyboard macro defined.\n\
+Argument SYMBOL is the name to define.\n\
+The symbol's command definition becomes the keyboard macro string.\n\
+FIXME: Such a command cannot be called non-interactively, but it is a\n\
+valid editor command.\
+")
 {
   astr ms;
   Macro *mp;
@@ -149,13 +150,13 @@ void call_macro(Macro *mp)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
-DEFUN(call_last_kbd_macro)
-/*+
-Call the last keyboard macro that you defined with C-x (.
-
-To name a macro so you can call it after defining others, use
-name_last_kbd_macro.
-+*/
+DEFUN(call_last_kbd_macro,
+"\
+Call the last keyboard macro that you defined with C-x (.\n\
+\n\
+To name a macro so you can call it after defining others, use\n\
+name_last_kbd_macro.\
+")
 {
   if (cur_mp == NULL) {
     minibuf_error(astr_new("No kbd macro has been defined"));

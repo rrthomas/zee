@@ -67,10 +67,10 @@ static int kill_line(void)
   return FALSE;
 }
 
-DEFUN(kill_line)
-/*+
-Kill the rest of the current line; if no nonblanks there, kill thru newline.
-+*/
+DEFUN(kill_line,
+"\
+Kill the rest of the current line; if no nonblanks there, kill thru newline.\
+")
 {
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_buffer();
@@ -84,17 +84,17 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 }
 END_DEFUN
 
-DEFUN(kill_region)
-/*+
-Kill between point and mark.
-The text is deleted but saved in the kill buffer.
-The command paste can retrieve it from there.
-If the buffer is read-only, the text will not be deleted, but it will
-be added to the kill buffer anyway.  This means that
-you can use the killing commands to copy text from a read-only buffer.
-If the previous command was also a kill command,
-the text killed this time appends to the text killed last time.
-+*/
+DEFUN(kill_region,
+"\
+Kill between point and mark.\n\
+The text is deleted but saved in the kill buffer.\n\
+The command paste can retrieve it from there.\n\
+If the buffer is read-only, the text will not be deleted, but it will\n\
+be added to the kill buffer anyway.  This means that\n\
+you can use the killing commands to copy text from a read-only buffer.\n\
+If the previous command was also a kill command,\n\
+the text killed this time appends to the text killed last time.\
+")
 {
   Region r;
 
@@ -127,10 +127,10 @@ the text killed this time appends to the text killed last time.
 }
 END_DEFUN
 
-DEFUN(copy)
-/*+
-Copy the region to the kill buffer.
-+*/
+DEFUN(copy,
+"\
+Copy the region to the kill buffer.\
+")
 {
   Region r;
 
@@ -176,29 +176,29 @@ static int kill_helper(Function func)
   return ok;
 }
 
-DEFUN(kill_word)
-/*+
-Kill characters forward until encountering the end of a word.
-+*/
+DEFUN(kill_word,
+"\
+Kill characters forward until encountering the end of a word.\
+")
 {
   ok = kill_helper(F_mark_word);
 }
 END_DEFUN
 
-DEFUN(backward_kill_word)
-/*+
-Kill characters backward until encountering the end of a word.
-+*/
+DEFUN(backward_kill_word,
+"\
+Kill characters backward until encountering the end of a word.\
+")
 {
   ok = kill_helper(F_mark_word_backward);
 }
 END_DEFUN
 
-DEFUN(paste)
-/*+
-Reinsert the stretch of killed text most recently killed.
-Set mark at beginning, and put point at end.
-+*/
+DEFUN(paste,
+"\
+Reinsert the stretch of killed text most recently killed.\n\
+Set mark at beginning, and put point at end.\
+")
 {
   if (astr_len(killed_text) == 0) {
     minibuf_error(astr_new("Kill ring is empty"));

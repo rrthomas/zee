@@ -62,13 +62,13 @@ static void fdecl(FILE *fp, astr name)
 
   while ((line = astr_fgets(fp)) != NULL) {
     if (state == 1) {
-      if (strncmp(astr_cstr(line), "+*/", 3) == 0) {
+      if (strncmp(astr_cstr(line), "\")", 3) == 0) {
         state = 2;
         break;
       }
       astr_cat(doc, line);
       astr_cat_char(doc, '\n');
-    } else if (strncmp(astr_cstr(line), "/*+", 3) == 0)
+    } else if (strncmp(astr_cstr(line), "\"\\", 3) == 0)
       state = 1;
   }
 
@@ -94,7 +94,7 @@ static void get_funcs(FILE *fp)
     if (!strncmp(s, "DEFUN(", 6) ||
         !strncmp(s, "DEFUN_INT(", 10)) {
       char *p = strchr(s, '(');
-      char *q = strrchr(s, ')');
+      char *q = strrchr(s, ',');
       if (p == NULL || q == NULL || p == q) {
         fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
         exit(1);
@@ -119,14 +119,15 @@ static void dump_funcs(void)
   fprintf(fp2,
           "/*\n"
           " * Automatically generated file: DO NOT EDIT!\n"
-          " * Table of commands (name)\n"
+          " * Table of commands (name, doc)\n"
           " */\n"
           "\n");
 
   for (i = 0; i < fentries; ++i) {
     fprintf(fp1, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
             astr_cstr(vec_item(ftable, i, struct fentry).doc));
-    fprintf(fp2, "X(%s)\n", astr_cstr(vec_item(ftable, i, struct fentry).name));
+    fprintf(fp2, "X(%s,\n\"\\\n%s\")\n", astr_cstr(vec_item(ftable, i, struct fentry).name),
+            astr_cstr(vec_item(ftable, i, struct fentry).doc));
   }
 
   fprintf(fp1, "@end table");

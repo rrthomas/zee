@@ -26,10 +26,10 @@
 #include "extern.h"
 #include "paths.h"
 
-DEFUN(help_about)
-/*+
-Show the version in the minibuffer.
-+*/
+DEFUN(help_about,
+"\
+Show the version in the minibuffer.\
+")
 {
   minibuf_write(astr_new(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
 }
@@ -89,10 +89,10 @@ static astr get_funcvar_doc(astr name, astr *defval, int isfunc)
   return doc;
 }
 
-DEFUN(help_command)
-/*+
-Display the full documentation of FUNCTION (a symbol).
-+*/
+DEFUN(help_command,
+"\
+Display the full documentation of FUNCTION (a symbol).\
+")
 {
   astr name, doc;
 
@@ -106,10 +106,10 @@ Display the full documentation of FUNCTION (a symbol).
 }
 END_DEFUN
 
-DEFUN(help_variable)
-/*+
-Display the full documentation of VARIABLE (a symbol).
-+*/
+DEFUN(help_variable,
+"\
+Display the full documentation of VARIABLE (a symbol).\
+")
 {
   astr name;
 
@@ -130,10 +130,10 @@ Display the full documentation of VARIABLE (a symbol).
 }
 END_DEFUN
 
-DEFUN(help_key)
-/*+
-Display the command invoked by a key sequence.
-+*/
+DEFUN(help_key,
+"\
+Display the command invoked by a key sequence.\
+")
 {
   size_t key;
   astr keyname, cmd;

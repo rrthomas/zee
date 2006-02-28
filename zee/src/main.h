@@ -253,8 +253,8 @@ enum {
  * The macro "FUNCALL_INT" can be used to call functions taking a single integer
  * argument.
  */
-#define DEFUN(cmd_name) \
-  int F_ ## cmd_name(size_t argc, int intarg, list l) \
+#define DEFUN(name, doc) \
+  int F_ ## name(size_t argc, int intarg, list l) \
   { \
     int ok = TRUE; \
     (void)intarg; \
@@ -263,8 +263,8 @@ enum {
       intarg = 1;
 
 
-#define DEFUN_INT(cmd_name) \
-  DEFUN(cmd_name) \
+#define DEFUN_INT(name, doc) \
+  DEFUN(name, doc) \
     if (l) \
       intarg = l->item ? atoi((char *)(list_behead(l))) : 0;
 
@@ -273,11 +273,11 @@ enum {
   }
 
 /* Call an interactive function */
-#define FUNCALL(cmd_name) \
-  F_ ## cmd_name(0, 0, NULL)
+#define FUNCALL(name) \
+  F_ ## name(0, 0, NULL)
 
 /* Call an interactive function with an integer argument */
-#define FUNCALL_INT(cmd_name, arg) \
-  F_ ## cmd_name(1, arg, NULL)
+#define FUNCALL_INT(name, arg) \
+  F_ ## name(1, arg, NULL)
 
 #endif /* !MAIN_H */

@@ -120,10 +120,10 @@ static int buffer_write(Buffer *bp, astr filename)
   return fclose(fp) == 0;
 }
 
-DEFUN(file_save)
-/*+
-Save buffer in visited file.
-+*/
+DEFUN(file_save,
+"\
+Save buffer in visited file.\
+")
 {
   if (buffer_write(&buf, buf.filename) == FALSE) {
     minibuf_error(astr_afmt("%s: %s", buf.filename, strerror(errno)));
@@ -137,10 +137,10 @@ Save buffer in visited file.
 }
 END_DEFUN
 
-DEFUN(file_quit)
-/*+
-Offer to the buffer, then quit.
-+*/
+DEFUN(file_quit,
+"\
+Offer to save the buffer if there are unsaved changes, then quit.\
+")
 {
   if (buf.flags & BFLAG_MODIFIED) {
     int ans;

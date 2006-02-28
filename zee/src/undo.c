@@ -86,11 +86,11 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEFUN(undo)
-/*+
-Undo some previous changes.
-Repeat this command to undo more changes.
-+*/
+DEFUN(undo,
+"\
+Undo some previous changes.\n\
+Repeat this command to undo more changes.\
+")
 {
   ok = FALSE;
 

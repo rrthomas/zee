@@ -117,7 +117,7 @@ typedef struct {
 } FEntry;
 
 static FEntry ftable[] = {
-#define X(cmd_name) \
+#define X(cmd_name, doc) \
 	{# cmd_name, F_ ## cmd_name},
 #include "tbl_funcs.h"
 #undef X
@@ -192,12 +192,12 @@ astr minibuf_read_function_name(astr as)
   return ms;
 }
 
-DEFUN(unbind_key)
+DEFUN(unbind_key,
+"\
+Unbind a key.\n\
+Read key chord, and unbind it.\
+")
 {
-/*+
-Unbind a key.
-Read key chord, and unbind it.
-+*/
   size_t key = KBD_NOKEY;
 
   if (argc > 0)
@@ -211,12 +211,12 @@ Read key chord, and unbind it.
 }
 END_DEFUN
 
-DEFUN(bind_key)
-/*+
-Bind a command to a key chord.
-Read key chord and function name, and bind the function to the key
-chord.
-+*/
+DEFUN(bind_key,
+"\
+Bind a command to a key chord.\n\
+Read key chord and function name, and bind the function to the key\n\
+chord.\
+")
 {
   size_t key = KBD_NOKEY;
   astr name = NULL;
@@ -268,12 +268,12 @@ static astr function_to_binding(Function f)
   return as;
 }
 
-DEFUN(where_is)
-/*+
-Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command definition, usually a symbol with a function definition.
-FIXME: Make it work non-interactively.
-+*/
+DEFUN(where_is,
+"\
+Print message listing key sequences that invoke the command DEFINITION.\n\
+Argument is a command definition, usually a symbol with a function definition.\n\
+FIXME: Make it work non-interactively.\
+")
 {
   astr name;
   Function f;
