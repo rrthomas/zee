@@ -2,7 +2,5 @@
 Makefile
 Makefile.in
 mkdoc
-AUTODOC
 zee.info
 dotzee.texi zee_funcs.texi zee_vars.texi zee_opts.texi
-zee.1
