@@ -68,7 +68,10 @@ AC_ARG_ENABLE(debug,
 AC_HELP_STRING([--enable-debug], [include debugging code]),
 [
 if test $enableval = yes; then
-        CFLAGS="-g -ggdb"
+        CFLAGS="-g"
+        if test "$GCC" = "yes"; then
+          CFLAGS="$CFLAGS -ggdb"
+        fi
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(DEBUG, 1, [Define this to include debugging code.])
 else
