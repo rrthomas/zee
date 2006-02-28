@@ -305,7 +305,7 @@ size_t term_xgetkey(int mode, size_t timeout)
   else {
     size_t key = translate_key(hooked_readkey(mode, timeout));
     while (key == KBD_META) {
-      key = translate_key(hooked_readkey(0, 0));
+      key = translate_key(hooked_readkey(mode, 0));
       key |= KBD_META;
     }
     return key;
