@@ -27,31 +27,6 @@ struct fentry {
 static vector *ftable;
 static size_t fentries = 0;
 
-static struct {
-  char *name;
-  char *fmt;
-  char *defval;
-  char *doc;
-} vtable[] = {
-#define X(name, fmt, defval, doc) \
-	{name, fmt, defval, doc},
-#include "tbl_vars.h"
-#undef X
-};
-#define ventries (sizeof vtable / sizeof vtable[0])
-
-static struct {
-  char *longname;
-  char *doc;
-  int opt;
-} otable[] = {
-#define X(longname, doc, opt) \
-        {longname, doc, opt},
-#include "tbl_opts.h"
-#undef X
-};
-#define oentries (sizeof otable / sizeof otable[0])
-
 static void fdecl(FILE *fp, astr name)
 {
   int state = 0;
@@ -105,16 +80,14 @@ static void get_funcs(FILE *fp)
 static void dump_funcs(void)
 {
   size_t i;
-  FILE *fp1 = fopen("zee_funcs.texi", "w");
-  FILE *fp2 = fopen("tbl_funcs.h", "w");
+  FILE *fp = fopen("zee_funcs.texi", "w");
 
-  assert(fp1);
-  fprintf(fp1,
+  assert(fp);
+  fprintf(fp,
           "@c Automatically generated file: DO NOT EDIT!\n"
           "@table @code\n");
 
-  assert(fp2);
-  fprintf(fp2,
+  fprintf(stdout,
           "/*\n"
           " * Automatically generated file: DO NOT EDIT!\n"
           " * Table of commands (name, doc)\n"
@@ -122,16 +95,28 @@ static void dump_funcs(void)
           "\n");
 
   for (i = 0; i < fentries; ++i) {
-    fprintf(fp1, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
+    fprintf(fp, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
             astr_cstr(vec_item(ftable, i, struct fentry).doc));
-    fprintf(fp2, "X(%s,\n\"\\\n%s\")\n", astr_cstr(vec_item(ftable, i, struct fentry).name),
+    fprintf(stdout, "X(%s,\n\"\\\n%s\")\n", astr_cstr(vec_item(ftable, i, struct fentry).name),
             astr_cstr(vec_item(ftable, i, struct fentry).doc));
   }
 
-  fprintf(fp1, "@end table");
-  fclose(fp1);
-  fclose(fp2);
+  fprintf(fp, "@end table");
+  fclose(fp);
 }
+
+static struct {
+  char *name;
+  char *fmt;
+  char *defval;
+  char *doc;
+} vtable[] = {
+#define X(name, fmt, defval, doc) \
+	{name, fmt, defval, doc},
+#include "tbl_vars.h"
+#undef X
+};
+#define ventries (sizeof vtable / sizeof vtable[0])
 
 static void dump_vars(void)
 {
@@ -154,6 +139,18 @@ static void dump_vars(void)
   fprintf(fp, "@end table");
   fclose(fp);
 }
+
+static struct {
+  char *longname;
+  char *doc;
+  int opt;
+} otable[] = {
+#define X(longname, doc, opt) \
+        {longname, doc, opt},
+#include "tbl_opts.h"
+#undef X
+};
+#define oentries (sizeof otable / sizeof otable[0])
 
 static void dump_opts(void)
 {
