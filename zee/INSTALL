@@ -1,10 +1,5 @@
                Zee build and installation instructions
-               ----------------------------------------
-
-Special note for Cygwin users: If you are trying compiling Zee with
-cygwin, please read question 3.3 of the FAQ (found in the `etc'
-subdirectory).
-
+               ---------------------------------------
 
 To build zee:
 
@@ -49,8 +44,8 @@ Options
 
 If you are debugging the editor, you can enable the debugging code:
 
-  --enable-debug          include debugging code and assertions
+	./configure --enable-debug
 
 For other configure options, run
 
-	 ./configure --help
+	./configure --help
