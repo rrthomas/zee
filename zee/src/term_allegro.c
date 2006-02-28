@@ -21,6 +21,9 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+/* FIXME: Currently running the allegro backend causes 100% CPU usage;
+   seemingly identical code in term_allegro.c works fine in Zile. */
+
 #include "config.h"
 
 #include <stdio.h>
