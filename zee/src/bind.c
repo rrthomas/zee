@@ -96,7 +96,7 @@ void process_key(size_t key)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
-         (p ? p->cmd(NULL) : CMDCALL_INT(self_insert_command, (int)key));
+         (p ? p->cmd(list_new()) : CMDCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
@@ -200,7 +200,7 @@ Read key chord, and unbind it.\
 {
   size_t key = KBD_NOKEY;
 
-  if (argc > 0)
+  if (list_length(l) > 0)
     key = strtochord(list_behead(l));
   else {
     minibuf_write(astr_new("Unbind key: "));
@@ -223,7 +223,7 @@ chord.\
 
   ok = FALSE;
 
-  if (argc > 1) {
+  if (list_length(l) > 1) {
     key = strtochord(list_behead(l));
     name = list_behead(l);
   } else {

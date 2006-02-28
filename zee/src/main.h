@@ -247,23 +247,22 @@ typedef struct {
 #define DEF(name, doc) \
   int F_ ## name(list l) \
   { \
-    int ok = TRUE; \
-    size_t argc = l ? list_length(l) : 0;
+    int ok = TRUE, intarg; \
+    assert(l); \
+    (void)intarg;
 
 
 #define DEF_INT(name, doc) \
   DEF(name, doc) \
-    int intarg = l ? (list_empty(l) ? 0 : atoi(astr_cstr(list_behead(l)))) : 0;
+    intarg = list_empty(l) ? 0 : atoi(astr_cstr(list_behead(l)));
 
 #define END_DEF \
-    (void)argc; \
-    (void)l; \
     return ok; \
   }
 
 /* Call an interactive command */
 #define CMDCALL(name) \
-  F_ ## name(NULL)
+  F_ ## name(list_new())
 
 /* Call an interactive command with an integer argument */
 #define CMDCALL_INT(name, arg) \

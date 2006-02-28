@@ -184,7 +184,7 @@ Set a variable to the specified value.\
 
   ok = FALSE;
 
-  if (argc > 1) {
+  if (list_length(l) > 1) {
     var = list_behead(l);
     val = list_behead(l);
   } else {

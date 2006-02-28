@@ -79,7 +79,7 @@ otherwise with the current column value.\
 ")
 {
   set_variable(astr_new("fill_column"),
-               astr_afmt("%d", (argc > 0) ? intarg : (int)(buf.pt.o + 1)));
+               astr_afmt("%d", list_empty(l) ?(int)(buf.pt.o + 1) : intarg));
 }
 END_DEF
 
@@ -483,7 +483,7 @@ FIXME: Make it work non-interactively.\
 
   if ((name = minibuf_read_command_name(astr_new("Execute command: ")))) {
     if ((cmd = get_command(name)))
-      ok = cmd(NULL);
+      ok = cmd(list_new());
     else if ((mp = get_macro(name)))
       call_macro(mp);
     else
