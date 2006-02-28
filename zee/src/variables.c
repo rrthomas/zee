@@ -174,6 +174,7 @@ astr minibuf_read_variable_name(astr msg)
   return ms;
 }
 
+/* FIXME: Doesn't work in .zee */
 DEFUN(set_variable,
 "\
 Set a variable to the specified value.\
