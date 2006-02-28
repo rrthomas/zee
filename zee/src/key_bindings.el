@@ -81,8 +81,6 @@ bind_key "TAB" indent_relative
 bind_key "M-m" back_to_indentation
 bind_key "M-e" call_last_kbd_macro
 bind_key "M-c" capitalize_word
-bind_key "M-\" delete_horizontal_space
-bind_key "M- " just_one_space
 bind_key "M-l" downcase_word
 bind_key "M-)" end_kbd_macro
 bind_key "M-q" fill_paragraph
