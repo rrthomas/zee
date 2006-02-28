@@ -52,7 +52,7 @@ static int kill_line(void)
   }
 
   if (list_next(buf.pt.p) != buf.lines) {
-    if (!FUNCALL(delete_char))
+    if (!CMDCALL(delete_char))
       return FALSE;
 
     astr_cat(killed_text, astr_new("\n"));
@@ -67,7 +67,7 @@ static int kill_line(void)
   return FALSE;
 }
 
-DEFUN(kill_line,
+DEF(kill_line,
 "\
 Kill the rest of the current line; if no nonblanks there, kill thru newline.\
 ")
@@ -82,9 +82,9 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.\
 
   weigh_mark();
 }
-END_DEFUN
+END_DEF
 
-DEFUN(kill_region,
+DEF(kill_region,
 "\
 Kill between point and mark.\n\
 The text is deleted but saved in the kill buffer.\n\
@@ -102,7 +102,7 @@ the text killed this time appends to the text killed last time.\
     flush_kill_buffer();
 
   if (!(buf.flags & BFLAG_ANCHORED))
-    ok = FUNCALL(kill_line);
+    ok = CMDCALL(kill_line);
   else {
     assert(calculate_the_region(&r));
 
@@ -116,7 +116,7 @@ the text killed this time appends to the text killed last time.\
       astr as;
 
       if (buf.pt.p != r.start.p || r.start.o != buf.pt.o)
-        FUNCALL(exchange_point_and_mark);
+        CMDCALL(exchange_point_and_mark);
       delete_nstring(r.size, &as);
       astr_cat(killed_text, as);
     }
@@ -125,9 +125,9 @@ the text killed this time appends to the text killed last time.\
     weigh_mark();
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(copy,
+DEF(copy,
 "\
 Copy the region to the kill buffer.\
 ")
@@ -147,9 +147,9 @@ Copy the region to the kill buffer.\
     weigh_mark();
   }
 }
-END_DEFUN
+END_DEF
 
-static int kill_helper(Function func)
+static int kill_helper(Command func)
 {
   int ok;
 
@@ -163,7 +163,7 @@ static int kill_helper(Function func)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
     ok = func(NULL);
     if (ok)
-      ok = FUNCALL(kill_region);
+      ok = CMDCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
     set_mark(m);
     remove_marker(m);
@@ -176,25 +176,25 @@ static int kill_helper(Function func)
   return ok;
 }
 
-DEFUN(kill_word,
+DEF(kill_word,
 "\
 Kill characters forward until encountering the end of a word.\
 ")
 {
   ok = kill_helper(F_mark_word);
 }
-END_DEFUN
+END_DEF
 
-DEFUN(backward_kill_word,
+DEF(backward_kill_word,
 "\
 Kill characters backward until encountering the end of a word.\
 ")
 {
   ok = kill_helper(F_mark_word_backward);
 }
-END_DEFUN
+END_DEF
 
-DEFUN(paste,
+DEF(paste,
 "\
 Reinsert the stretch of killed text most recently killed.\n\
 Set mark at beginning, and put point at end.\
@@ -204,12 +204,12 @@ Set mark at beginning, and put point at end.\
     minibuf_error(astr_new("Kill ring is empty"));
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
-    FUNCALL(set_mark);
+    CMDCALL(set_mark);
     insert_nstring(killed_text);
     weigh_mark();
   }
 }
-END_DEFUN
+END_DEF
 
 void init_kill_ring(void)
 {

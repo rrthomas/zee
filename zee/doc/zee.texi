@@ -45,7 +45,7 @@ Zee is a customizable, self-documenting real-time display editor.
 * Invoking Zee::               Command line options that you can give to Zee.
 * Initialization file::         The ``.zee'' initialization file.
 * Key names::                   How the keys are named.
-* Functions::                   The list of functions.
+* Commands::                    The list of commands.
 * Variables::                   The list of variables.
 * Bug reports::                 How to report a bug.
 @end menu
@@ -68,7 +68,7 @@ or quick editing sessions.
 @item 8-bit clean.
 Zee can operate with binary files.
 @item Looks familiar.
-Most Zee key sequences and function names are identical to standard CUA
+Most Zee key sequences and command names are identical to standard CUA
 ones (as used in Microsoft Windows, Mac OS and other common GUIs).
 @item Multi buffer editing with multi level undo.
 Zee can open an infinite number of files and can record an infinite
@@ -126,7 +126,7 @@ This is the initialization file that comes with the Zee sources.
 @include dotzee.texi
 
 @c ---------------------------------------------------------------------------
-@node Key names, Functions, Initialization file, Top
+@node Key names, Commands, Initialization file, Top
 @chapter Key names
 
 This table contains the names of the keys that are used in Zee.
@@ -158,21 +158,21 @@ The combination @kbd{C-x} means hold the @key{CTRL} key down while
 typing @kbd{x}.
 
 @c ---------------------------------------------------------------------------
-@node Functions, Variables, Key names, Top
-@chapter Functions
+@node Commands, Variables, Key names, Top
+@chapter Commands
 
-This table contains the full list of available functions that can be
-called with the @kbd{M-x} key (please note that most functions have a
+This table contains the full list of available commands that can be
+called with the @kbd{M-x} key (please note that most commands have a
 key binding anyway).
 
 @include zee_funcs.texi
 
 @c ---------------------------------------------------------------------------
-@node Variables, Bug reports, Functions, Top
+@node Variables, Bug reports, Commands, Top
 @chapter Variables
 
 This table contains the full list of available variables, that can be
-modified at run-time with the @samp{set-variable} function or set at start-up
+modified at run-time with the @samp{set-variable} command or set at start-up
 in the @file{.zee} initialization file.
 
 Please note that some variables may be not available depending

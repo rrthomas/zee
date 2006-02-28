@@ -64,12 +64,12 @@ static void get_funcs(FILE *fp)
 
   while ((buf = astr_fgets(fp)) != NULL) {
     const char *s = astr_cstr(buf);
-    if (!strncmp(s, "DEFUN(", 6) ||
-        !strncmp(s, "DEFUN_INT(", 10)) {
+    if (!strncmp(s, "DEF(", 4) ||
+        !strncmp(s, "DEF_INT(", 8)) {
       char *p = strchr(s, '(');
       char *q = strrchr(s, ',');
       if (p == NULL || q == NULL || p == q) {
-        fprintf(stderr, NAME ": invalid DEFUN() syntax\n");
+        fprintf(stderr, NAME ": invalid DEF[_INT]() syntax\n");
         exit(1);
       }
       fdecl(fp, astr_sub(buf, (p - s) + 1, q - s));

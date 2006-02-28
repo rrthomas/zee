@@ -54,7 +54,7 @@ void recenter(void)
     win.topdelta = buf.pt.n;
 }
 
-DEFUN(recenter,
+DEF(recenter,
 "\
 Center point in window and redisplay screen.\n\
 The desired position of point is always relative to the current window.\
@@ -64,7 +64,7 @@ The desired position of point is always relative to the current window.\
   term_clear();
   term_display();
 }
-END_DEFUN
+END_DEF
 
 
 /* Contents of popup window. */
@@ -538,7 +538,7 @@ void resize_window(void)
   }
 
   if (hdelta != 0)
-    FUNCALL(recenter);
+    CMDCALL(recenter);
 }
 
 /*

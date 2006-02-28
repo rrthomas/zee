@@ -27,12 +27,12 @@ int goto_column(size_t to_col);
 int goto_point(Point pt);
 
 /* bind.c ----------------------------------------------------------------- */
-void bind_key(size_t key, Function func);
-astr minibuf_read_function_name(astr as);
-astr binding_to_function(size_t key);
+void bind_key(size_t key, Command func);
+astr minibuf_read_command_name(astr as);
+astr binding_to_command(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
-Function get_function(astr name);
+Command get_command(astr name);
 
 /* buffer.c --------------------------------------------------------------- */
 void buffer_new(void);

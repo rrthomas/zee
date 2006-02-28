@@ -86,7 +86,7 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEFUN(undo,
+DEF(undo,
 "\
 Undo some previous changes.\n\
 Repeat this command to undo more changes.\
@@ -104,7 +104,7 @@ Repeat this command to undo more changes.\
     ok = TRUE;
   }
 }
-END_DEFUN
+END_DEF
 
 /*
  * Set unchanged flags to FALSE except for the last undo action, which

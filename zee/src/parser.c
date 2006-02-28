@@ -139,7 +139,7 @@ void cmd_parse_end(void)
 
 void cmd_eval(void)
 {
-  Function func;
+  Command func;
   astr tok = gettok();
 
   while (tok) {
@@ -155,7 +155,7 @@ void cmd_eval(void)
 
     /* Execute the line */
     while ((fname = list_behead(l)) &&
-           (func = get_function(fname)) &&
+           (func = get_command(fname)) &&
            func(l))
       ;
 

@@ -28,7 +28,7 @@
 #include "extern.h"
 
 
-static History functions_history;
+static History commands_history;
 
 /*--------------------------------------------------------------------------
  * Key binding
@@ -47,7 +47,7 @@ static Binding *get_binding(size_t key)
   return NULL;
 }
 
-static void add_binding(size_t key, Function func)
+static void add_binding(size_t key, Command func)
 {
   Binding b;
 
@@ -57,7 +57,7 @@ static void add_binding(size_t key, Function func)
   vec_item(bindings, vec_items(bindings), Binding) = b;
 }
 
-void bind_key(size_t key, Function func)
+void bind_key(size_t key, Command func)
 {
   Binding *p;
 
@@ -96,24 +96,24 @@ void process_key(size_t key)
     undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
-         (p ? p->func(NULL) : FUNCALL_INT(self_insert_command, (int)key));
+         (p ? p->func(NULL) : CMDCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 
   /* Only add keystrokes if we're already in macro defining mode
-     before the function call, to cope with start-kbd-macro */
+     before the command call, to cope with start-kbd-macro */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro();
 }
 
 /*--------------------------------------------------------------------------
- * Function name to C function mapping
+ * Command name to C function mapping
  *--------------------------------------------------------------------------*/
 
 typedef struct {
-  const char *name;             /* The function name */
-  Function func;                /* The function pointer */
+  const char *name;             /* The command name */
+  Command cmd;                  /* The function pointer */
 } FEntry;
 
 static FEntry ftable[] = {
@@ -125,30 +125,30 @@ static FEntry ftable[] = {
 
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
-Function get_function(astr name)
+Command get_command(astr name)
 {
   size_t i;
   if (name)
     for (i = 0; i < fentries; i++)
       if (!astr_cmp(name, astr_new(ftable[i].name)))
-        return ftable[i].func;
+        return ftable[i].cmd;
   return NULL;
 }
 
-static astr get_function_name(Function f)
+static astr get_command_name(Command f)
 {
   size_t i;
   for (i = 0; i < fentries; i++)
-    if (ftable[i].func == f)
+    if (ftable[i].cmd == f)
       return astr_new(ftable[i].name);
   return NULL;
 }
 
 /*
- * Read a function name from the minibuffer.
+ * Read a command name from the minibuffer.
  * The returned buffer must be freed by the caller.
  */
-astr minibuf_read_function_name(astr as)
+astr minibuf_read_command_name(astr as)
 {
   size_t i;
   astr ms;
@@ -160,11 +160,11 @@ astr minibuf_read_function_name(astr as)
     list_append(cp->completions, astr_new(ftable[i].name));
 
   for (;;) {
-    if ((ms = minibuf_read_completion(as, astr_new(""), cp, &functions_history)) == NULL) {
-      FUNCALL(cancel);
+    if ((ms = minibuf_read_completion(as, astr_new(""), cp, &commands_history)) == NULL) {
+      CMDCALL(cancel);
       break;
     } else if (astr_len(ms) == 0) {
-      minibuf_error(astr_new("No function name given"));
+      minibuf_error(astr_new("No command name given"));
       ms = NULL;
       break;
     } else {
@@ -178,12 +178,12 @@ astr minibuf_read_function_name(astr as)
           ms = astr_dup(p->item);
           break;
         }
-      if (get_function(ms) || get_macro(ms)) {
-        add_history_element(&functions_history, ms);
+      if (get_command(ms) || get_macro(ms)) {
+        add_history_element(&commands_history, ms);
         minibuf_clear();        /* Remove any error message */
         break;
       } else {
-        minibuf_error(astr_afmt("Undefined function name `%s'", astr_cstr(ms)));
+        minibuf_error(astr_afmt("Undefined command `%s'", astr_cstr(ms)));
         waitkey(WAITKEY_DEFAULT);
       }
     }
@@ -192,7 +192,7 @@ astr minibuf_read_function_name(astr as)
   return ms;
 }
 
-DEFUN(unbind_key,
+DEF(unbind_key,
 "\
 Unbind a key.\n\
 Read key chord, and unbind it.\
@@ -209,12 +209,12 @@ Read key chord, and unbind it.\
 
   unbind_key(key);
 }
-END_DEFUN
+END_DEF
 
-DEFUN(bind_key,
+DEF(bind_key,
 "\
 Bind a command to a key chord.\n\
-Read key chord and function name, and bind the function to the key\n\
+Read key chord and command name, and bind the command to the key\n\
 chord.\
 ")
 {
@@ -233,25 +233,25 @@ chord.\
     key = getkey();
 
     as = chordtostr(key);
-    name = minibuf_read_function_name(astr_afmt("Bind key %s to command: ", astr_cstr(as)));
+    name = minibuf_read_command_name(astr_afmt("Bind key %s to command: ", astr_cstr(as)));
   }
 
   if (name) {
-    Function func;
+    Command func;
 
-    if ((func = get_function(name))) {
+    if ((func = get_command(name))) {
       if (key != KBD_NOKEY) {
         bind_key(key, func);
         ok = TRUE;
       } else
         minibuf_error(astr_new("Invalid key"));
     } else
-      minibuf_error(astr_afmt("No such function `%s'", astr_cstr(name)));
+      minibuf_error(astr_afmt("No such command `%s'", astr_cstr(name)));
   }
 }
-END_DEFUN
+END_DEF
 
-static astr function_to_binding(Function f)
+static astr command_to_binding(Command f)
 {
   size_t i, n = 0;
   astr as = astr_new("");
@@ -268,22 +268,21 @@ static astr function_to_binding(Function f)
   return as;
 }
 
-DEFUN(where_is,
+DEF(where_is,
 "\
-Print message listing key sequences that invoke the command DEFINITION.\n\
-Argument is a command definition, usually a symbol with a function definition.\n\
+Show key sequences that invoke the command COMMAND.\n\
 FIXME: Make it work non-interactively.\
 ")
 {
   astr name;
-  Function f;
+  Command f;
 
-  name = minibuf_read_function_name(astr_new("Where is command: "));
+  name = minibuf_read_command_name(astr_new("Where is command: "));
 
-  if ((f = get_function(name)) == NULL)
+  if ((f = get_command(name)) == NULL)
     ok = FALSE;
   else {
-    astr bindings = function_to_binding(f);
+    astr bindings = command_to_binding(f);
 
     if (astr_len(bindings) > 0)
       minibuf_write(astr_afmt("%s is on %s", astr_cstr(name), astr_cstr(bindings)));
@@ -291,9 +290,9 @@ FIXME: Make it work non-interactively.\
       minibuf_write(astr_afmt("%s is not on any key", astr_cstr(name)));
   }
 }
-END_DEFUN
+END_DEF
 
-astr binding_to_function(size_t key)
+astr binding_to_command(size_t key)
 {
   Binding *p;
 
@@ -306,5 +305,5 @@ astr binding_to_function(size_t key)
     else
       return NULL;
   } else
-    return get_function_name(p->func);
+    return get_command_name(p->func);
 }

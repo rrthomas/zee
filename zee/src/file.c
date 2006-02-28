@@ -120,7 +120,7 @@ static int buffer_write(Buffer *bp, astr filename)
   return fclose(fp) == 0;
 }
 
-DEFUN(file_save,
+DEF(file_save,
 "\
 Save buffer in visited file.\
 ")
@@ -135,9 +135,9 @@ Save buffer in visited file.\
       undo_reset_unmodified(buf.last_undop);
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(file_quit,
+DEF(file_quit,
 "\
 Offer to save the buffer if there are unsaved changes, then quit.\
 ")
@@ -146,7 +146,7 @@ Offer to save the buffer if there are unsaved changes, then quit.\
     int ans;
 
     if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
-      ok = FUNCALL(cancel);
+      ok = CMDCALL(cancel);
     else if (!ans)
       ok = FALSE;
   }
@@ -154,7 +154,7 @@ Offer to save the buffer if there are unsaved changes, then quit.\
   if (ok)
     thisflag |= FLAG_QUIT;
 }
-END_DEFUN
+END_DEF
 
 /*
  * Function called on unexpected error or crash (SIGSEGV).

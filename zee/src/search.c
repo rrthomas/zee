@@ -94,7 +94,7 @@ static int search_forward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
         if (off != SIZE_MAX) {
           while (buf.pt.p != lp)
-            FUNCALL(edit_navigate_down_line);
+            CMDCALL(edit_navigate_down_line);
           buf.pt.o = off;
           return TRUE;
         }
@@ -119,7 +119,7 @@ static int search_backward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
         if (off != SIZE_MAX) {
           while (buf.pt.p != lp)
-            FUNCALL(edit_navigate_up_line);
+            CMDCALL(edit_navigate_up_line);
           buf.pt.o = off;
           return TRUE;
         }
@@ -181,7 +181,7 @@ static int isearch(int dir)
     if (c == KBD_CANCEL) {
       buf.pt = start;
       thisflag |= FLAG_NEED_RESYNC;
-      FUNCALL(cancel);
+      CMDCALL(cancel);
 
       /* Restore old mark position. */
       assert(buf.mark);
@@ -251,7 +251,7 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN(isearch_forward,
+DEF(isearch_forward,
 "\
 Do incremental search forward for regular expression.\n\
 As you type characters, they add to the search string and are found.\n\
@@ -262,9 +262,9 @@ C-g when search is successful aborts and moves point to starting point.\
 {
   ok = isearch(ISEARCH_FORWARD);
 }
-END_DEFUN
+END_DEF
 
-DEFUN(isearch_backward,
+DEF(isearch_backward,
 "\
 Do incremental search backward for regular expression.\n\
 As you type characters, they add to the search string and are found.\n\
@@ -275,7 +275,7 @@ C-g when search is successful aborts and moves point to starting point.\
 {
   ok = isearch(ISEARCH_BACKWARD);
 }
-END_DEFUN
+END_DEF
 
 static int no_upper(astr as)
 {
@@ -288,7 +288,7 @@ static int no_upper(astr as)
   return TRUE;
 }
 
-DEFUN(query_replace,
+DEF(query_replace,
 "\
 Replace occurrences of a regexp with other text.\n\
 As each match is found, the user must type a character saying\n\
@@ -299,14 +299,14 @@ what to do with it.\
   astr find, repl;
 
   if ((find = minibuf_read(astr_new("Query replace string: "), astr_new(""))) == NULL)
-    ok = FUNCALL(cancel);
+    ok = CMDCALL(cancel);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(find);
 
     if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
-      ok = FUNCALL(cancel);
+      ok = CMDCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
       while (search_forward(buf.pt.p, buf.pt.o, find)) {
@@ -328,7 +328,7 @@ what to do with it.\
 
           switch (c) {
           case KBD_CANCEL: /* C-g */
-            ok = FUNCALL(cancel);
+            ok = CMDCALL(cancel);
             /* Fall through. */
           case 'q': /* Quit immediately. */
             goto endoffunc;
@@ -372,4 +372,4 @@ what to do with it.\
     }
   }
 }
-END_DEFUN
+END_DEF

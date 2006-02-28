@@ -62,7 +62,7 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN(start_kbd_macro,
+DEF(start_kbd_macro,
 "\
 Record subsequent keyboard input, defining a keyboard macro.\n\
 The commands are recorded even as they are executed.\n\
@@ -83,9 +83,9 @@ Use name_last_kbd_macro to give it a permanent name.\
     cur_mp = macro_new();
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(end_kbd_macro,
+DEF(end_kbd_macro,
 "\
 Finish defining a keyboard macro.\n\
 The definition was started by C-x (.\n\
@@ -99,9 +99,9 @@ FIXME: Replace keystrokes here and elsewhere with command names.\
   } else
     thisflag &= ~FLAG_DEFINING_MACRO;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(name_last_kbd_macro,
+DEF(name_last_kbd_macro,
 "\
 Assign a name to the last keyboard macro defined.\n\
 Argument SYMBOL is the name to define.\n\
@@ -134,7 +134,7 @@ valid editor command.\
     mp->keys = vec_copy(cur_mp->keys);
   }
 }
-END_DEFUN
+END_DEF
 
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
@@ -150,7 +150,7 @@ void call_macro(Macro *mp)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
-DEFUN(call_last_kbd_macro,
+DEF(call_last_kbd_macro,
 "\
 Call the last keyboard macro that you defined with C-x (.\n\
 \n\
@@ -164,7 +164,7 @@ name_last_kbd_macro.\
   } else
     call_macro(cur_mp);
 }
-END_DEFUN
+END_DEF
 
 /*
  * Find a macro given its name.

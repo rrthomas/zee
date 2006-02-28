@@ -13,7 +13,7 @@ X("eval", " CMD         execute command CMD\n",
   1)
 X("help", "             display this help message and exit\n",
   0)
-X("load", " FILE        load file of commands using the load function\n",
+X("load", " FILE        load file of commands\n",
   1)
 X("no-init-file", "     do not load ~/." PACKAGE_NAME "\n",
   0)

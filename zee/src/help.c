@@ -25,14 +25,14 @@
 #include "main.h"
 #include "extern.h"
 
-DEFUN(help_about,
+DEF(help_about,
 "\
 Show the version in the minibuffer.\
 ")
 {
   minibuf_write(astr_new(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
 }
-END_DEFUN
+END_DEF
 
 struct {
   const char *name;
@@ -45,16 +45,16 @@ struct {
 };
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
-DEFUN(help_command,
+DEF(help_command,
 "\
-Display the full documentation of FUNCTION (a symbol).\
+Display the full documentation of COMMAND.\
 ")
 {
   astr name;
 
   ok = FALSE;
 
-  if ((name = minibuf_read_function_name(astr_new("Describe function: ")))) {
+  if ((name = minibuf_read_command_name(astr_new("Describe command: ")))) {
     size_t i;
     for (i = 0; i < fentries; i++)
       if (!astr_cmp(astr_new(ftable[i].name), name)) {
@@ -64,7 +64,7 @@ Display the full documentation of FUNCTION (a symbol).\
       }
   }
 }
-END_DEFUN
+END_DEF
 
 static struct {
   const char *name;
@@ -79,7 +79,7 @@ static struct {
 };
 #define ventries (sizeof(vtable) / sizeof(vtable[0]))
 
-DEFUN(help_variable,
+DEF(help_variable,
 "\
 Display the full documentation of VARIABLE (a symbol).\
 ")
@@ -102,9 +102,9 @@ Display the full documentation of VARIABLE (a symbol).\
       }
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(help_key,
+DEF(help_key,
 "\
 Display the command invoked by a key sequence.\
 ")
@@ -116,10 +116,10 @@ Display the command invoked by a key sequence.\
   key = getkey();
   keyname = chordtostr(key);
 
-  if ((cmd = binding_to_function(key)) == NULL) {
+  if ((cmd = binding_to_command(key)) == NULL) {
     minibuf_error(astr_afmt("%s is unbound", astr_cstr(keyname)));
     ok = FALSE;
   } else
     minibuf_write(astr_afmt("%s runs the command `%s'", astr_cstr(keyname), astr_cstr(cmd)));
 }
-END_DEFUN
+END_DEF

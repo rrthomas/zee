@@ -223,50 +223,50 @@ enum {
 
 /* Define an interactive command.
  *
- * DEFUN(command) expands to the beginning of a command definition.
- * The prototype is Function (see below).
+ * DEF(command) expands to the beginning of a command definition.
+ * The prototype is Command (see below).
  *
- * To call such a function with an argument list a1, a2, ..., an, pass
+ * To call such a command with an argument list a1, a2, ..., an, pass
  * the arguments (which should all be astrs) in a list.
  *
- * The macro `FUNCALL' can be used to call zero-argument functions.
- * The macro `DEFUN_INT' can be used to define functions taking a
+ * The macro `CMDCALL' can be used to call zero-argument commands.
+ * The macro `DEF_INT' can be used to define commands taking a
  * single integer argument.
- * The macro `FUNCALL_INT' can be used to call functions taking a
+ * The macro `CMDCALL_INT' can be used to call commands taking a
  * single integer argument.
  */
 
 /* The type of a user command. */
-typedef int (*Function)(list l);
+typedef int (*Command)(list l);
 
 typedef struct {
   size_t key;
-  Function func;
+  Command func;
 } Binding;
 
-#define DEFUN(name, doc) \
+#define DEF(name, doc) \
   int F_ ## name(list l) \
   { \
     int ok = TRUE; \
     size_t argc = l ? list_length(l) : 0;
 
 
-#define DEFUN_INT(name, doc) \
-  DEFUN(name, doc) \
+#define DEF_INT(name, doc) \
+  DEF(name, doc) \
     int intarg = l ? (list_empty(l) ? 0 : atoi(astr_cstr(list_behead(l)))) : 0;
 
-#define END_DEFUN \
+#define END_DEF \
     (void)argc; \
     (void)l; \
     return ok; \
   }
 
-/* Call an interactive function */
-#define FUNCALL(name) \
+/* Call an interactive command */
+#define CMDCALL(name) \
   F_ ## name(NULL)
 
-/* Call an interactive function with an integer argument */
-#define FUNCALL_INT(name, arg) \
+/* Call an interactive command with an integer argument */
+#define CMDCALL_INT(name, arg) \
   F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
 #endif /* !MAIN_H */

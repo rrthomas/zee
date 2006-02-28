@@ -180,7 +180,7 @@ static void draw_minibuf_read(astr prompt, astr value, astr match, size_t pointo
 
 static void mb_suspend(void)
 {
-  FUNCALL(suspend);
+  CMDCALL(suspend);
 }
 
 static void mb_return(void)

@@ -28,10 +28,10 @@
 #include "extern.h"
 
 /* Goal column to arrive at when `edit_navigate_down/up_line'
-   functions are used. */
+   commands are used. */
 static int cur_goalc;
 
-DEFUN(beginning_of_line,
+DEF(beginning_of_line,
 "\
 Move point to beginning of current line.\
 ")
@@ -43,9 +43,9 @@ Move point to beginning of current line.\
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(end_of_line,
+DEF(end_of_line,
 "\
 Move point to end of current line.\
 ")
@@ -57,7 +57,7 @@ Move point to end of current line.\
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 }
-END_DEFUN
+END_DEF
 
 /*
  * Get the goal column.  Take care of expanding tabulations.
@@ -99,7 +99,7 @@ static void goto_goalc(int goalc)
   buf.pt.o = i;
 }
 
-DEFUN(edit_navigate_up_line,
+DEF(edit_navigate_up_line,
 "\
 Move cursor vertically up one line.\n\
 If there is no character in the target line exactly over the current column,\n\
@@ -121,9 +121,9 @@ column, or at the end of the line if it is not long enough.\
     goto_goalc(cur_goalc);
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(edit_navigate_down_line,
+DEF(edit_navigate_down_line,
 "\
 Move cursor vertically down one line.\n\
 If there is no character in the target line exactly under the current column,\n\
@@ -145,7 +145,7 @@ column, or at the end of the line if it is not long enough.\
     goto_goalc(cur_goalc);
   }
 }
-END_DEFUN
+END_DEF
 
 /*
  * Jump to the specified column.
@@ -156,21 +156,21 @@ int goto_column(size_t to_col)
 
   if (buf.pt.o > to_col)
     do
-      ok = FUNCALL(edit_navigate_backward_char);
+      ok = CMDCALL(edit_navigate_backward_char);
     while (ok && buf.pt.o > to_col);
   else if (buf.pt.o < to_col)
     do
-      ok = FUNCALL(edit_navigate_forward_char);
+      ok = CMDCALL(edit_navigate_forward_char);
     while (ok && buf.pt.o < to_col);
 
   return ok;
 }
 
-DEFUN(goto_column,
+DEF(goto_column,
 "\
 Read a number N and move the cursor to character number N.\n\
 Position 1 is the beginning of the buffer.\n\
-FIXME: Make this and goto_line DEFUN_INTs and make the functions static.\
+FIXME: Make this and goto_line DEF_INTs and make the functions static.\
 ")
 {
   size_t to_char = 0;
@@ -178,7 +178,7 @@ FIXME: Make this and goto_line DEFUN_INTs and make the functions static.\
 
   do {
     if ((ms = minibuf_read(astr_new("Goto char: "), astr_new(""))) == NULL) {
-      ok = FUNCALL(cancel);
+      ok = CMDCALL(cancel);
       break;
     }
     if ((to_char = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
@@ -188,7 +188,7 @@ FIXME: Make this and goto_line DEFUN_INTs and make the functions static.\
   if (ok)
     goto_column(to_char);
 }
-END_DEFUN
+END_DEF
 
 /*
  * Go to the line `to_line', counting from 0.  Point will end up in
@@ -200,11 +200,11 @@ int goto_line(size_t to_line)
 
   if (buf.pt.n > to_line)
     do
-      ok = FUNCALL(edit_navigate_up_line);
+      ok = CMDCALL(edit_navigate_up_line);
     while (ok && buf.pt.n > to_line);
   else if (buf.pt.n < to_line)
     do
-      ok = FUNCALL(edit_navigate_down_line);
+      ok = CMDCALL(edit_navigate_down_line);
     while (ok && buf.pt.n < to_line);
 
   return ok;
@@ -221,7 +221,7 @@ int goto_point(Point pt)
   return ok;
 }
 
-DEFUN(goto_line,
+DEF(goto_line,
 "\
 Move cursor to the beginning of the specified line.\n\
 Line 1 is the beginning of the buffer.\
@@ -232,7 +232,7 @@ Line 1 is the beginning of the buffer.\
 
   do {
     if ((ms = minibuf_read(astr_new("Goto line: "), astr_new(""))) == NULL) {
-      ok = FUNCALL(cancel);
+      ok = CMDCALL(cancel);
       break;
     }
     if ((to_line = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
@@ -244,9 +244,9 @@ Line 1 is the beginning of the buffer.\
     buf.pt.o = 0;
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(beginning_of_buffer,
+DEF(beginning_of_buffer,
 "\
 Move point to the beginning of the buffer.\
 ")
@@ -254,9 +254,9 @@ Move point to the beginning of the buffer.\
   buf.pt = point_min(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(end_of_buffer,
+DEF(end_of_buffer,
 "\
 Move point to the end of the buffer.\
 ")
@@ -264,9 +264,9 @@ Move point to the end of the buffer.\
   buf.pt = point_max(&buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(edit_navigate_backward_char,
+DEF(edit_navigate_backward_char,
 "\
 Move point left one character.\
 ")
@@ -277,13 +277,13 @@ Move point left one character.\
     thisflag |= FLAG_NEED_RESYNC;
     buf.pt.p = list_prev(buf.pt.p);
     buf.pt.n--;
-    FUNCALL(end_of_line);
+    CMDCALL(end_of_line);
   } else
     ok = FALSE;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(edit_navigate_forward_char,
+DEF(edit_navigate_forward_char,
 "\
 Move point right one character.\
 ")
@@ -294,13 +294,13 @@ Move point right one character.\
     thisflag |= FLAG_NEED_RESYNC;
     buf.pt.p = list_next(buf.pt.p);
     buf.pt.n++;
-    FUNCALL(beginning_of_line);
+    CMDCALL(beginning_of_line);
   } else
     ok = FALSE;
 }
-END_DEFUN
+END_DEF
 
-DEFUN(scroll_down,
+DEF(scroll_down,
 "\
 Scroll text of current window downward near full screen.\
 ")
@@ -312,9 +312,9 @@ Scroll text of current window downward near full screen.\
     ok = FALSE;
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(scroll_up,
+DEF(scroll_up,
 "\
 Scroll text of current window upward near full screen.\
 ")
@@ -326,4 +326,4 @@ Scroll text of current window upward near full screen.\
     ok = FALSE;
   }
 }
-END_DEFUN
+END_DEF

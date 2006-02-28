@@ -230,7 +230,7 @@ int insert_char(int c)
   return insert_nstring(as);
 }
 
-DEFUN(tab_to_tab_stop,
+DEF(tab_to_tab_stop,
 "\
 Insert spaces or tabs to next defined tab-stop column.\n\
 Convert the tabulation into spaces.\
@@ -246,7 +246,7 @@ Convert the tabulation into spaces.\
       insert_char(' ');
   }
 }
-END_DEFUN
+END_DEF
 
 /*
  * Insert a newline at the current position without moving the cursor.
@@ -390,7 +390,7 @@ void fill_break_line(void)
     /* Break line. */
     size_t last_col = buf.pt.o - break_col;
     buf.pt.o = break_col;
-    FUNCALL(delete_horizontal_space);
+    CMDCALL(delete_horizontal_space);
     insert_char('\n');
     buf.pt.o = last_col + excess;
   } else
@@ -398,7 +398,7 @@ void fill_break_line(void)
     buf.pt.o = old_col;
 }
 
-DEFUN(newline,
+DEF(newline,
 "\
 Insert a newline, and move to left margin of the new line if it's blank.\
 ")
@@ -410,7 +410,7 @@ Insert a newline, and move to left margin of the new line if it's blank.\
   ok = insert_char('\n');
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
-END_DEFUN
+END_DEF
 
 int insert_nstring(astr as)
 {
@@ -424,7 +424,7 @@ int insert_nstring(astr as)
   for (i = 0; i < astr_len(as); i++) {
     if (!astr_cmp(astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as)), astr_new("\n"))) {
       intercalate_newline();
-      FUNCALL(edit_navigate_forward_char);
+      CMDCALL(edit_navigate_forward_char);
     } else {
       buf.pt.p->item = astr_cat(astr_cat(astr_sub(buf.pt.p->item, 0, (ptrdiff_t)buf.pt.o),
                                          astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)i + 1)),
@@ -488,7 +488,7 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEFUN_INT(self_insert_command,
+DEF_INT(self_insert_command,
 "\
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
@@ -506,9 +506,9 @@ Whichever character you type to run this command is inserted.\
     ok = FALSE;
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(delete_char,
+DEF(delete_char,
 "\
 Delete the following character.\n\
 Join lines if the character is a newline.\
@@ -517,9 +517,9 @@ Join lines if the character is a newline.\
   astr as;
   ok = delete_nstring(1, &as);
 }
-END_DEFUN
+END_DEF
 
-DEFUN(backward_delete_char,
+DEF(backward_delete_char,
 "\
 Delete the previous character.\n\
 Join lines if the character is a newline.\
@@ -527,16 +527,16 @@ Join lines if the character is a newline.\
 {
   weigh_mark();
 
-  if (FUNCALL(edit_navigate_backward_char))
-    FUNCALL(delete_char);
+  if (CMDCALL(edit_navigate_backward_char))
+    CMDCALL(delete_char);
   else {
     minibuf_error(astr_new("Beginning of buffer"));
     ok = FALSE;
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(delete_horizontal_space,
+DEF(delete_horizontal_space,
 "\
 Delete all spaces and tabs around point.\
 ")
@@ -544,14 +544,14 @@ Delete all spaces and tabs around point.\
   undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
 
   while (!eolp() && isspace(following_char()))
-    FUNCALL(delete_char);
+    CMDCALL(delete_char);
 
   while (!bolp() && isspace(preceding_char()))
-    FUNCALL(backward_delete_char);
+    CMDCALL(backward_delete_char);
 
   undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
 }
-END_DEFUN
+END_DEF
 
 /*---------------------------------------------------------------------
 			 Indentation command
@@ -565,14 +565,14 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (FUNCALL(edit_navigate_up_line) && is_blank_line());
+  while (CMDCALL(edit_navigate_up_line) && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
-    FUNCALL(edit_navigate_forward_char);
+    CMDCALL(edit_navigate_forward_char);
 }
 
-DEFUN(indent_relative,
+DEF(indent_relative,
 "\
 Indent line or insert a tab.\
 ")
@@ -589,11 +589,11 @@ Indent line or insert a tab.\
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
-        FUNCALL(edit_navigate_forward_char);
+        CMDCALL(edit_navigate_forward_char);
 
     /* Find next non-blank char. */
     while (!eolp() && isspace(following_char()))
-      FUNCALL(edit_navigate_forward_char);
+      CMDCALL(edit_navigate_forward_char);
 
     /* Record target column. */
     if (!eolp())
@@ -611,13 +611,13 @@ Indent line or insert a tab.\
         /* If already at EOL on target line, insert a tab. */
         insert_char(' ');
     else
-      ok = FUNCALL(tab_to_tab_stop);
+      ok = CMDCALL(tab_to_tab_stop);
     undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
   }
 }
-END_DEFUN
+END_DEF
 
-DEFUN(newline_and_indent,
+DEF(newline_and_indent,
 "\
 Insert a newline, then indent.\n\
 Indentation is done using the `indent_relative' command, except\n\
@@ -646,10 +646,10 @@ no indenting is performed.\
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)
-        FUNCALL(indent_relative);
+        CMDCALL(indent_relative);
 
       undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
     }
   }
 }
-END_DEFUN
+END_DEF
