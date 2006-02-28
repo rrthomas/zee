@@ -58,8 +58,8 @@ INDEX
 
 1.6. Zee doesn't compile.
 
-    We have tested Zee under GNU/Linux only, although it should work
-    on any POSIX-compliant OS that supports termcap or Allegro. If you
+    We have only tested Zee on GNU/Linux, although it should work on
+    any POSIX-compliant OS that supports termcap or Allegro. If you
     get Zee running under another OS, please send a message to the
     developers (see question 1.4 for the address) telling them that
     (you might also send any patches you have made to the sources if
@@ -75,7 +75,7 @@ INDEX
 
 2.2. How do I return to the shell without leaving Zee?
 
-    Type `M-x suspend'.
+    Type `M-x suspend RETURN'.
 
 2.3. How do I undo the previous command?
 
