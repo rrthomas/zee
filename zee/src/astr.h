@@ -68,7 +68,8 @@ char *astr_char(const astr as, ptrdiff_t pos);
 astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to);
 
 /*
- * Do str[n]cmp on the contents of two strings.
+ * Compare two strings (for astr_ncmp, stop after at most n
+ * characters).
  */
 int astr_cmp(const astr as1, const astr as2);
 int astr_ncmp(const astr as1, const astr as2, size_t n);
