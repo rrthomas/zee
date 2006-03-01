@@ -111,8 +111,10 @@ int astr_cmp(const astr as1, const astr as2)
 
 int astr_ncmp(const astr as1, const astr as2, size_t n)
 {
-  return strncmp((char *)vec_array(as1), (char *)vec_array(as2),
-                 min(n, min(astr_len(as1), astr_len(as2))));
+  if (astr_len(as1) < n || astr_len(as2) < n)
+    return astr_cmp(as1, as2);
+  else
+    return strncmp((char *)vec_array(as1), (char *)vec_array(as2), n);
 }
 
 ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
