@@ -3,6 +3,6 @@
 
 aclocal
 autoheader
-automake -a --foreign --add-missing
+automake --foreign --add-missing
 autoconf
 rm -f config.cache
