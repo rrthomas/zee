@@ -75,7 +75,8 @@ int astr_cmp(const astr as1, const astr as2);
 int astr_ncmp(const astr as1, const astr as2, size_t n);
 
 /*
- * Find first occurrence of needle in haystack starting at position pos
+ * Find first occurrence of needle in haystack starting at position
+ * pos; return -1 if no occurrence.
  */
 ptrdiff_t astr_str(const astr haystack, ptrdiff_t pos, const astr needle);
 
