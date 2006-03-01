@@ -27,7 +27,7 @@ Point make_point(size_t lineno, size_t offset)
 {
   Point pt;
 
-  pt.p = list_next(buf.lines);
+  pt.p = list_next(buf->lines);
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0) {
@@ -108,7 +108,7 @@ Point point_max(Buffer *bp)
 {
   Point pt;
   pt.p = list_prev(bp->lines);
-  pt.n = buf.num_lines;
+  pt.n = buf->num_lines;
   pt.o = astr_len(list_prev(bp->lines)->item);
   return pt;
 }

@@ -99,8 +99,8 @@ void set_variable(astr var, astr val)
 
   /* Variables automatically become buffer-local when set if there is
      a buffer. */
-  if (buf.vars)
-    varlist = buf.vars;
+  if (buf->vars)
+    varlist = buf->vars;
 
   variable_update(varlist, var, val);
 }
@@ -110,8 +110,8 @@ astr get_variable(astr var)
   var_entry *p;
 
   /* Have to be able to run this before the first buffer is created. */
-  if (buf.vars) {
-    list temp = variable_find(buf.vars, var);
+  if (buf->vars) {
+    list temp = variable_find(buf->vars, var);
     if (temp && temp->item)
       return ((vpair *)(temp->item))->value;
   }

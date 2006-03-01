@@ -88,14 +88,14 @@ static int search_forward(Line *startp, size_t starto, astr as)
     astr sp;
 
     for (lp = startp, sp = astr_sub(lp->item, (ptrdiff_t)starto, (ptrdiff_t)astr_len(lp->item));
-         lp != list_last(buf.lines);
+         lp != list_last(buf->lines);
          lp = list_next(lp), sp = lp->item) {
       if (astr_len(sp) > 0) {
         size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
         if (off != SIZE_MAX) {
-          while (buf.pt.p != lp)
+          while (buf->pt.p != lp)
             CMDCALL(edit_navigate_down_line);
-          buf.pt.o = off;
+          buf->pt.o = off;
           return TRUE;
         }
       }
@@ -112,15 +112,15 @@ static int search_backward(Line *startp, size_t starto, astr as)
     size_t s1size;
 
     for (lp = startp, s1size = starto;
-         lp != list_first(buf.lines);
+         lp != list_first(buf->lines);
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
       astr sp = lp->item;
       if (s1size > 0) {
         size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
         if (off != SIZE_MAX) {
-          while (buf.pt.p != lp)
+          while (buf->pt.p != lp)
             CMDCALL(edit_navigate_up_line);
-          buf.pt.o = off;
+          buf->pt.o = off;
           return TRUE;
         }
       }
@@ -147,14 +147,14 @@ static int isearch(int dir)
   Point start, cur;
   Marker *old_mark;
 
-  assert(buf.mark);
-  old_mark = marker_new(buf.mark->pt);
+  assert(buf->mark);
+  old_mark = marker_new(buf->mark->pt);
 
-  start = buf.pt;
-  cur = buf.pt;
+  start = buf->pt;
+  cur = buf->pt;
 
   /* I-search mode. */
-  buf.flags |= BFLAG_ISEARCH;
+  buf->flags |= BFLAG_ISEARCH;
 
   for (;;) {
     /* Make the minibuf message. */
@@ -179,23 +179,23 @@ static int isearch(int dir)
     c = getkey();
 
     if (c == KBD_CANCEL) {
-      buf.pt = start;
+      buf->pt = start;
       thisflag |= FLAG_NEED_RESYNC;
       CMDCALL(cancel);
 
       /* Restore old mark position. */
-      assert(buf.mark);
-      remove_marker(buf.mark);
+      assert(buf->mark);
+      remove_marker(buf->mark);
 
       if (old_mark)
-        buf.mark = marker_new(old_mark->pt);
+        buf->mark = marker_new(old_mark->pt);
       else
-        buf.mark = old_mark;
+        buf->mark = old_mark;
       break;
     } else if (c == KBD_BS) {
       if (astr_len(pattern) > 0) {
         pattern = astr_sub(pattern, 0, (ptrdiff_t)astr_len(pattern) - 1);
-        buf.pt = start;
+        buf->pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
@@ -207,7 +207,7 @@ static int isearch(int dir)
         dir = ISEARCH_FORWARD;
       if (astr_len(pattern) > 0) {
         /* Find next match. */
-        cur = buf.pt;
+        cur = buf->pt;
 
         /* Save search string. */
         last_search = astr_dup(pattern);
@@ -218,7 +218,7 @@ static int isearch(int dir)
       if (astr_len(pattern) > 0) {
         /* Save mark. */
         set_mark_to_point();
-        buf.mark->pt = start;
+        buf->mark->pt = start;
 
         /* Save search string. */
         last_search = astr_dup(pattern);
@@ -243,7 +243,7 @@ static int isearch(int dir)
   }
 
   /* done */
-  buf.flags &= ~BFLAG_ISEARCH;
+  buf->flags &= ~BFLAG_ISEARCH;
 
   if (old_mark)
     remove_marker(old_mark);
@@ -309,7 +309,7 @@ what to do with it.\
       ok = CMDCALL(cancel);
     if (ok) {
       /* Spaghetti code follows... :-( */
-      while (search_forward(buf.pt.p, buf.pt.o, find)) {
+      while (search_forward(buf->pt.p, buf->pt.o, find)) {
         if (!noask) {
           int c;
           if (thisflag & FLAG_NEED_RESYNC)
@@ -352,11 +352,11 @@ what to do with it.\
       replblock:
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(buf.pt.n, buf.pt.o - astr_len(find)),
+                  make_point(buf->pt.n, buf->pt.o - astr_len(find)),
                   astr_len(find), astr_len(repl));
-        if (line_replace_text(&buf.pt.p, buf.pt.o - astr_len(find),
+        if (line_replace_text(&buf->pt.p, buf->pt.o - astr_len(find),
                               astr_len(find), repl, find_no_upper))
-          buf.flags |= BFLAG_MODIFIED;
+          buf->flags |= BFLAG_MODIFIED;
         /* FALLTHROUGH */
       nextmatch:
         if (exitloop)

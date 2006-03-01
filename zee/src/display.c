@@ -32,26 +32,26 @@
 void resync_display(void)
 {
   static size_t lastpointn = 0;
-  int delta = buf.pt.n - lastpointn;
+  int delta = buf->pt.n - lastpointn;
 
   if (delta) {
     if ((delta > 0 && win.topdelta + delta < win.eheight) ||
         (delta < 0 && win.topdelta >= (size_t)(-delta)))
       win.topdelta += delta;
-    else if (buf.pt.n > win.eheight / 2)
+    else if (buf->pt.n > win.eheight / 2)
       win.topdelta = win.eheight / 2;
     else
-      win.topdelta = buf.pt.n;
+      win.topdelta = buf->pt.n;
   }
-  lastpointn = buf.pt.n;
+  lastpointn = buf->pt.n;
 }
 
 void recenter(void)
 {
-  if (buf.pt.n > win.eheight / 2)
+  if (buf->pt.n > win.eheight / 2)
     win.topdelta = win.eheight / 2;
   else
-    win.topdelta = buf.pt.n;
+    win.topdelta = buf->pt.n;
 }
 
 DEF(recenter,
@@ -235,14 +235,14 @@ static int in_region(size_t lineno, size_t x, Region *r)
  */
 static void calculate_highlight_region(Region *r)
 {
-  assert(buf.mark);
-  r->start = buf.pt;
-  if (buf.flags & BFLAG_ANCHORED) {
-    r->end = buf.mark->pt;
+  assert(buf->mark);
+  r->start = buf->pt;
+  if (buf->flags & BFLAG_ANCHORED) {
+    r->end = buf->mark->pt;
     if (cmp_point(r->end, r->start) < 0)
       swap_point(&r->end, &r->start);
   } else
-    r->end = buf.pt;
+    r->end = buf->pt;
 }
 
 /*
@@ -281,11 +281,11 @@ static void draw_window(size_t topline)
 {
   size_t i, startcol, lineno;
   Line *lp;
-  Point pt = buf.pt;
+  Point pt = buf->pt;
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
-       i > 0 && list_prev(lp) != buf.lines; lp = list_prev(lp), --i, --lineno);
+       i > 0 && list_prev(lp) != buf->lines; lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width();
 
@@ -296,7 +296,7 @@ static void draw_window(size_t topline)
     term_clrtoeol();
 
     /* If at the end of the buffer, don't write any text. */
-    if (lp == buf.lines)
+    if (lp == buf->lines)
       continue;
 
     startcol = point_start_column;
@@ -337,7 +337,7 @@ static void calculate_start_column(void)
 {
   size_t col = 0, lastcol = 0, t = tab_width();
   ptrdiff_t rp, lp, p, rpfact, lpfact;
-  Point pt = buf.pt;
+  Point pt = buf->pt;
 
   rp = (ptrdiff_t)pt.o;
   rpfact = pt.o / (win.ewidth / 3);
@@ -388,17 +388,17 @@ static void draw_status_line(size_t line)
   term_move(line, 0);
   term_print(astr_new("--"));
 
-  if ((buf.flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
+  if ((buf->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
     term_print(astr_new("%*"));
-  else if (buf.flags & BFLAG_MODIFIED)
+  else if (buf->flags & BFLAG_MODIFIED)
     term_print(astr_new("**"));
-  else if (buf.flags & BFLAG_READONLY)
+  else if (buf->flags & BFLAG_READONLY)
     term_print(astr_new("%%"));
   else
     term_print(astr_new("--"));
 
   term_print(astr_new("-("));
-  if (buf.flags & BFLAG_AUTOFILL) {
+  if (buf->flags & BFLAG_AUTOFILL) {
     term_print(astr_new("Fill"));
     someflag = 1;
   }
@@ -408,22 +408,22 @@ static void draw_status_line(size_t line)
     term_print(astr_new("Def"));
     someflag = 1;
   }
-  if (buf.flags & BFLAG_ISEARCH) {
+  if (buf->flags & BFLAG_ISEARCH) {
     if (someflag)
       term_print(astr_new(" "));
     term_print(astr_new("Isearch"));
   }
 
-  term_print(astr_afmt(")--L%d--C%d--", buf.pt.n + 1, get_goalc()));
+  term_print(astr_afmt(")--L%d--C%d--", buf->pt.n + 1, get_goalc()));
 
-  if (buf.num_lines <= win.eheight && win.topdelta == buf.pt.n)
+  if (buf->num_lines <= win.eheight && win.topdelta == buf->pt.n)
     term_print(astr_new("All"));
-  else if (buf.pt.n == win.topdelta)
+  else if (buf->pt.n == win.topdelta)
     term_print(astr_new("Top"));
-  else if (buf.pt.n + (win.eheight - win.topdelta) > buf.num_lines)
+  else if (buf->pt.n + (win.eheight - win.topdelta) > buf->num_lines)
     term_print(astr_new("Bot"));
   else
-    term_print(astr_afmt("%2d%%", (int)((float)buf.pt.n / buf.num_lines * 100)));
+    term_print(astr_afmt("%2d%%", (int)((float)buf->pt.n / buf->num_lines * 100)));
 
   term_attrset(1, FONT_NORMAL);
 }

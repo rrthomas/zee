@@ -93,13 +93,13 @@ void process_key(size_t key)
     return;
 
   if (p == NULL)
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
          (p ? p->cmd(list_new()) : CMDCALL_INT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the command call, to cope with start-kbd-macro */
@@ -251,7 +251,7 @@ chord.\
 }
 END_DEF
 
-static astr command_to_binding(Command f)
+astr command_to_binding(Command f)
 {
   size_t i, n = 0;
   astr as = astr_new("");

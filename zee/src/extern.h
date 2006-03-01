@@ -29,6 +29,7 @@ int goto_point(Point pt);
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(size_t key, Command func);
 astr minibuf_read_command_name(astr as);
+astr command_to_binding(Command f);
 astr binding_to_command(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
@@ -122,7 +123,7 @@ Macro *get_macro(astr name);
 
 /* main.c ----------------------------------------------------------------- */
 extern Window win;
-extern Buffer buf;
+extern Buffer *buf;
 extern int thisflag, lastflag, uniarg;
 
 /* minibuf.c -------------------------------------------------------------- */

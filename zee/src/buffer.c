@@ -33,18 +33,20 @@
  */
 void buffer_new(void)
 {
+  buf = zmalloc(sizeof(Buffer));
+
   /* Allocate the lines. */
-  buf.lines = line_new();
-  buf.pt.p = list_first(buf.lines);
+  buf->lines = line_new();
+  buf->pt.p = list_first(buf->lines);
 
   /* Set the initial mark (needs limit marker to be set up). */
-  buf.mark = marker_new(point_min(&buf));
+  buf->mark = marker_new(point_min(buf));
 
   /* Allocate the variables list. */
-  buf.vars = list_new();
+  buf->vars = list_new();
 
   if (get_variable_bool(astr_new("auto_fill_mode")))
-    buf.flags ^= BFLAG_AUTOFILL;
+    buf->flags ^= BFLAG_AUTOFILL;
 }
 
 /*
@@ -53,7 +55,7 @@ void buffer_new(void)
  */
 int warn_if_readonly_buffer(void)
 {
-  if (buf.flags & BFLAG_READONLY) {
+  if (buf->flags & BFLAG_READONLY) {
     minibuf_error(astr_new("Buffer is readonly"));
     return TRUE;
   } else
@@ -62,8 +64,8 @@ int warn_if_readonly_buffer(void)
 
 int warn_if_no_mark(void)
 {
-  assert(buf.mark);
-  if (!(buf.flags & BFLAG_ANCHORED)) {
+  assert(buf->mark);
+  if (!(buf->flags & BFLAG_ANCHORED)) {
     minibuf_error(astr_new("The mark is not active now"));
     return TRUE;
   } else
@@ -95,21 +97,21 @@ static void region_size(Region *rp, Point from, Point to)
  */
 int calculate_the_region(Region *rp)
 {
-  if (!(buf.flags & BFLAG_ANCHORED))
+  if (!(buf->flags & BFLAG_ANCHORED))
     return FALSE;
 
-  region_size(rp, buf.pt, buf.mark->pt);
+  region_size(rp, buf->pt, buf->mark->pt);
   return TRUE;
 }
 
 void anchor_mark(void)
 {
-  buf.flags |= BFLAG_ANCHORED;
+  buf->flags |= BFLAG_ANCHORED;
 }
 
 void weigh_mark(void)
 {
-  buf.flags &= ~BFLAG_ANCHORED;
+  buf->flags &= ~BFLAG_ANCHORED;
 }
 
 /*
@@ -126,12 +128,12 @@ size_t tab_width(void)
  */
 astr copy_text_block(Point start, size_t size)
 {
-  size_t n = buf.pt.n, i;
+  size_t n = buf->pt.n, i;
   astr as = astr_new("");
-  Line *lp = buf.pt.p;
+  Line *lp = buf->pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the
-   * region. Doesn't matter where we start. Starting at 'buf.pt' is a good
+   * region. Doesn't matter where we start. Starting at 'buf->pt' is a good
    * heuristic.
    */
   if (n > start.n)

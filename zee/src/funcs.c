@@ -56,7 +56,7 @@ DEF(edit_toggle_read_only,
 Change whether this buffer is visiting its file read-only.\
 ")
 {
-  buf.flags ^= BFLAG_READONLY;
+  buf->flags ^= BFLAG_READONLY;
 }
 END_DEF
 
@@ -67,7 +67,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill_column'\n\
 automatically breaks the line at a previous space.\
 ")
 {
-  buf.flags ^= BFLAG_AUTOFILL;
+  buf->flags ^= BFLAG_AUTOFILL;
 }
 END_DEF
 
@@ -80,7 +80,7 @@ otherwise with the current column value.\
 INT(col))
 {
   set_variable(astr_new("fill_column"),
-               astr_afmt("%d", list_empty(l) ? (int)(buf.pt.o + 1) : col));
+               astr_afmt("%d", list_empty(l) ? (int)(buf->pt.o + 1) : col));
 }
 END_DEF
 
@@ -100,8 +100,8 @@ DEF(exchange_point_and_mark,
 Put the mark where point is now, and point where the mark is now.\
 ")
 {
-  assert(buf.mark);
-  swap_point(&buf.pt, &buf.mark->pt);
+  assert(buf->mark);
+  swap_point(&buf->pt, &buf->mark->pt);
   anchor_mark();
   thisflag |= FLAG_NEED_RESYNC;
 }
@@ -216,7 +216,7 @@ DEF(back_to_indentation,
 Move point to the first non-whitespace character on this line.\
 ")
 {
-  buf.pt.o = 0;
+  buf->pt.o = 0;
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
@@ -245,16 +245,16 @@ Move point forward one word.\
           break;
       } else
         gotword = TRUE;
-      buf.pt.o++;
+      buf->pt.o++;
     }
     if (gotword)
       break;
-    buf.pt.o = astr_len(buf.pt.p->item);
+    buf->pt.o = astr_len(buf->pt.p->item);
     if (!CMDCALL(edit_navigate_down_line)) {
       ok = FALSE;
       break;
     }
-    buf.pt.o = 0;
+    buf->pt.o = 0;
   }
 }
 END_DEF
@@ -272,7 +272,7 @@ Move backward until encountering the beginning of a word.\
         ok = FALSE;
         break;
       }
-      buf.pt.o = astr_len(buf.pt.p->item);
+      buf->pt.o = astr_len(buf->pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -281,7 +281,7 @@ Move backward until encountering the beginning of a word.\
           break;
       } else
         gotword = TRUE;
-      buf.pt.o--;
+      buf->pt.o--;
     }
     if (gotword)
       break;
@@ -363,15 +363,15 @@ Fill paragraph at or after point.\
   int i, start, end;
   Marker *m = point_marker();
 
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
   CMDCALL(forward_paragraph);
-  end = buf.pt.n;
+  end = buf->pt.n;
   if (is_empty_line())
     end--;
 
   CMDCALL(backward_paragraph);
-  start = buf.pt.n;
+  start = buf->pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
     CMDCALL(edit_navigate_down_line);
     start++;
@@ -390,10 +390,10 @@ Fill paragraph at or after point.\
 
   thisflag &= ~FLAG_DONE_CPCN;
 
-  buf.pt = m->pt;
+  buf->pt = m->pt;
   remove_marker(m);
 
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
 }
 END_DEF
 
@@ -413,19 +413,19 @@ static int setcase_word(int rcase)
       return FALSE;
   }
 
-  i = buf.pt.o;
-  while (i < astr_len(buf.pt.p->item)) {
-    if (!isalnum(*astr_char(buf.pt.p->item, (ptrdiff_t)i)))
+  i = buf->pt.o;
+  while (i < astr_len(buf->pt.p->item)) {
+    if (!isalnum(*astr_char(buf->pt.p->item, (ptrdiff_t)i)))
       break;
     ++i;
   }
-  if ((size = i - buf.pt.o) > 0)
-    undo_save(UNDO_REPLACE_BLOCK, buf.pt, size, size);
+  if ((size = i - buf->pt.o) > 0)
+    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, size);
 
   for (firstchar = TRUE;
-       buf.pt.o < i;
-       buf.pt.o++, firstchar = FALSE) {
-    char c = *astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o);
+       buf->pt.o < i;
+       buf->pt.o++, firstchar = FALSE) {
+    char c = *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
 
     if (isalpha(c)) {
       if (rcase == UPPERCASE)
@@ -435,12 +435,12 @@ static int setcase_word(int rcase)
       else if (rcase == CAPITALIZE)
         c = firstchar ? toupper(c) : tolower(c);
 
-      *astr_char(buf.pt.p->item, (ptrdiff_t)buf.pt.o) = c;
+      *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o) = c;
     } else if (!isdigit(c))
       break;
   }
 
-  buf.flags |= BFLAG_MODIFIED;
+  buf->flags |= BFLAG_MODIFIED;
 
   return TRUE;
 }
@@ -549,14 +549,14 @@ FIXME: Use better-shell.c\
         raise(SIGWINCH);
 #endif
 
-        undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
+        undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
         calculate_the_region(&r);
-        if (buf.pt.p != r.start.p
-            || r.start.o != buf.pt.o)
+        if (buf->pt.p != r.start.p
+            || r.start.o != buf->pt.o)
           CMDCALL(exchange_point_and_mark);
         delete_nstring(r.size, &s);
         ok = insert_nstring(out);
-        undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
+        undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
       }
     }
   }

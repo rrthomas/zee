@@ -59,6 +59,8 @@ typedef struct {
   size_t o;                     /* Offset */
 } Point;
 
+/* A Marker points to a position in a buffer, and is updated when
+   the buffer is modified */
 typedef struct Marker {
   Point pt;                     /* Point position */
   struct Marker *next;   /* Used to chain all markers in the buffer */
@@ -106,7 +108,7 @@ typedef struct {
   size_t num_lines;      /* The total number of lines in the buffer */
   Point pt;                     /* The point */
   Marker *mark;                 /* The mark */
-  Marker *markers; /* Markers (points that are updated when text is modified) */
+  Marker *markers;              /* Markers */
   Undo *next_undop;     /* The undo deltas recorded for this buffer */
   Undo *last_undop;
   int flags;                    /* Buffer flags */
@@ -127,13 +129,11 @@ typedef struct {
 
 } Window;
 
-/* Return type of completion_try(). */
+/* Return type of completion_try. */
 enum {
   COMPLETION_NOTCOMPLETING,
   COMPLETION_NOTMATCHED,
-  COMPLETION_MATCHED,
-  COMPLETION_MATCHEDNONUNIQUE,
-  COMPLETION_NONUNIQUE
+  COMPLETION_MATCHED
 };
 
 #define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */

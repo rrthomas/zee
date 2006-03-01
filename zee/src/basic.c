@@ -36,7 +36,7 @@ DEF(beginning_of_line,
 Move point to beginning of current line.\
 ")
 {
-  buf.pt.o = 0;
+  buf->pt.o = 0;
 
   /* Set goalc to the beginning of line for next
      `edit_navigate_down/up_line' call. */
@@ -50,7 +50,7 @@ DEF(end_of_line,
 Move point to end of current line.\
 ")
 {
-  buf.pt.o = astr_len(buf.pt.p->item);
+  buf->pt.o = astr_len(buf->pt.p->item);
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-down/up-line' calls.  */
@@ -66,8 +66,8 @@ size_t get_goalc(void)
 {
   size_t col = 0, t = tab_width(), i;
 
-  for (i = 0; i < buf.pt.o; i++) {
-    if (*astr_char(buf.pt.p->item, (ptrdiff_t)i) == '\t')
+  for (i = 0; i < buf->pt.o; i++) {
+    if (*astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -85,10 +85,10 @@ static void goto_goalc(int goalc)
 
   t = tab_width();
 
-  for (i = 0; i < astr_len(buf.pt.p->item); i++) {
+  for (i = 0; i < astr_len(buf->pt.p->item); i++) {
     if (col == goalc)
       break;
-    else if (*astr_char(buf.pt.p->item, (ptrdiff_t)i) == '\t') {
+    else if (*astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t') {
       for (w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;
@@ -96,7 +96,7 @@ static void goto_goalc(int goalc)
       ++col;
   }
 
-  buf.pt.o = i;
+  buf->pt.o = i;
 }
 
 DEF(edit_navigate_up_line,
@@ -107,7 +107,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (list_prev(buf.pt.p) == buf.lines)
+  if (list_prev(buf->pt.p) == buf->lines)
     ok = FALSE;
   else {
     thisflag |= FLAG_NEED_RESYNC | FLAG_DONE_CPCN;
@@ -115,8 +115,8 @@ column, or at the end of the line if it is not long enough.\
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    buf.pt.p = list_prev(buf.pt.p);
-    buf.pt.n--;
+    buf->pt.p = list_prev(buf->pt.p);
+    buf->pt.n--;
 
     goto_goalc(cur_goalc);
   }
@@ -131,7 +131,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (list_next(buf.pt.p) == buf.lines)
+  if (list_next(buf->pt.p) == buf->lines)
     ok = FALSE;
   else {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
@@ -139,8 +139,8 @@ column, or at the end of the line if it is not long enough.\
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    buf.pt.p = list_next(buf.pt.p);
-    buf.pt.n++;
+    buf->pt.p = list_next(buf->pt.p);
+    buf->pt.n++;
 
     goto_goalc(cur_goalc);
   }
@@ -154,14 +154,14 @@ int goto_column(size_t to_col)
 {
   int ok = TRUE;
 
-  if (buf.pt.o > to_col)
+  if (buf->pt.o > to_col)
     do
       ok = CMDCALL(edit_navigate_backward_char);
-    while (ok && buf.pt.o > to_col);
-  else if (buf.pt.o < to_col)
+    while (ok && buf->pt.o > to_col);
+  else if (buf->pt.o < to_col)
     do
       ok = CMDCALL(edit_navigate_forward_char);
-    while (ok && buf.pt.o < to_col);
+    while (ok && buf->pt.o < to_col);
 
   return ok;
 }
@@ -198,14 +198,14 @@ int goto_line(size_t to_line)
 {
   int ok = TRUE;
 
-  if (buf.pt.n > to_line)
+  if (buf->pt.n > to_line)
     do
       ok = CMDCALL(edit_navigate_up_line);
-    while (ok && buf.pt.n > to_line);
-  else if (buf.pt.n < to_line)
+    while (ok && buf->pt.n > to_line);
+  else if (buf->pt.n < to_line)
     do
       ok = CMDCALL(edit_navigate_down_line);
-    while (ok && buf.pt.n < to_line);
+    while (ok && buf->pt.n < to_line);
 
   return ok;
 }
@@ -241,7 +241,7 @@ Line 1 is the beginning of the buffer.\
 
   if (ok) {
     goto_line(to_line - 1);
-    buf.pt.o = 0;
+    buf->pt.o = 0;
   }
 }
 END_DEF
@@ -251,7 +251,7 @@ DEF(beginning_of_buffer,
 Move point to the beginning of the buffer.\
 ")
 {
-  buf.pt = point_min(&buf);
+  buf->pt = point_min(buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 END_DEF
@@ -261,7 +261,7 @@ DEF(end_of_buffer,
 Move point to the end of the buffer.\
 ")
 {
-  buf.pt = point_max(&buf);
+  buf->pt = point_max(buf);
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 END_DEF
@@ -272,11 +272,11 @@ Move point left one character.\
 ")
 {
   if (!bolp())
-    buf.pt.o--;
+    buf->pt.o--;
   else if (!bobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    buf.pt.p = list_prev(buf.pt.p);
-    buf.pt.n--;
+    buf->pt.p = list_prev(buf->pt.p);
+    buf->pt.n--;
     CMDCALL(end_of_line);
   } else
     ok = FALSE;
@@ -289,11 +289,11 @@ Move point right one character.\
 ")
 {
   if (!eolp())
-    buf.pt.o++;
+    buf->pt.o++;
   else if (!eobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    buf.pt.p = list_next(buf.pt.p);
-    buf.pt.n++;
+    buf->pt.p = list_next(buf->pt.p);
+    buf->pt.n++;
     CMDCALL(beginning_of_line);
   } else
     ok = FALSE;
@@ -305,8 +305,8 @@ DEF(scroll_down,
 Scroll text of current window downward near full screen.\
 ")
 {
-  if (buf.pt.n > 0)
-    ok = goto_line(buf.pt.n - win.eheight) ? TRUE : FALSE;
+  if (buf->pt.n > 0)
+    ok = goto_line(buf->pt.n - win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error(astr_new("Beginning of buffer"));
     ok = FALSE;
@@ -319,8 +319,8 @@ DEF(scroll_up,
 Scroll text of current window upward near full screen.\
 ")
 {
-  if (buf.pt.n < buf.num_lines)
-    ok = goto_line(buf.pt.n + win.eheight) ? TRUE : FALSE;
+  if (buf->pt.n < buf->num_lines)
+    ok = goto_line(buf->pt.n + win.eheight) ? TRUE : FALSE;
   else {
     minibuf_error(astr_new("End of buffer"));
     ok = FALSE;

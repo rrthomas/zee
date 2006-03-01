@@ -40,9 +40,9 @@ static int kill_line(void)
     return FALSE;
 
   if (!eolp()) {
-    size_t len = astr_len(buf.pt.p->item) - buf.pt.o;
+    size_t len = astr_len(buf->pt.p->item) - buf->pt.o;
 
-    astr_cat(killed_text, astr_sub(buf.pt.p->item, (ptrdiff_t)buf.pt.o, (ptrdiff_t)astr_len(buf.pt.p->item)));
+    astr_cat(killed_text, astr_sub(buf->pt.p->item, (ptrdiff_t)buf->pt.o, (ptrdiff_t)astr_len(buf->pt.p->item)));
     delete_nstring(len, &as);
 
     thisflag |= FLAG_DONE_KILL;
@@ -51,7 +51,7 @@ static int kill_line(void)
       return TRUE;
   }
 
-  if (list_next(buf.pt.p) != buf.lines) {
+  if (list_next(buf->pt.p) != buf->lines) {
     if (!CMDCALL(delete_char))
       return FALSE;
 
@@ -75,10 +75,10 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.\
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_buffer();
 
-  undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
   if (!kill_line())
     ok = FALSE;
-  undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
+  undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
 
   weigh_mark();
 }
@@ -101,12 +101,12 @@ the text killed this time appends to the text killed last time.\
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_buffer();
 
-  if (!(buf.flags & BFLAG_ANCHORED))
+  if (!(buf->flags & BFLAG_ANCHORED))
     ok = CMDCALL(kill_line);
   else {
     assert(calculate_the_region(&r));
 
-    if (buf.flags & BFLAG_READONLY) {
+    if (buf->flags & BFLAG_READONLY) {
       /* The buffer is read-only; save text in the kill buffer and
          complain. */
       astr_cat(killed_text, copy_text_block(r.start, r.size));
@@ -115,7 +115,7 @@ the text killed this time appends to the text killed last time.\
     } else {
       astr as;
 
-      if (buf.pt.p != r.start.p || r.start.o != buf.pt.o)
+      if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(exchange_point_and_mark);
       delete_nstring(r.size, &as);
       astr_cat(killed_text, as);
@@ -160,11 +160,11 @@ static int kill_helper(Command func)
     ok = FALSE;
   else {
     Marker *m = get_mark();
-    undo_save(UNDO_START_SEQUENCE, buf.pt, 0, 0);
+    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     ok = func(NULL);
     if (ok)
       ok = CMDCALL(kill_region);
-    undo_save(UNDO_END_SEQUENCE, buf.pt, 0, 0);
+    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     set_mark(m);
     remove_marker(m);
 

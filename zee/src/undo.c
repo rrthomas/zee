@@ -37,18 +37,18 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 
   up->type = type;
   up->pt = pt;
-  up->unchanged = !(buf.flags & BFLAG_MODIFIED);
+  up->unchanged = !(buf->flags & BFLAG_MODIFIED);
 
   if (type == UNDO_REPLACE_BLOCK) {
     up->text = copy_text_block(pt, arg1);
     up->size = arg2;
   }
 
-  up->next = buf.last_undop;
-  buf.last_undop = up;
+  up->next = buf->last_undop;
+  buf->last_undop = up;
 
   if (!doing_undo)
-    buf.next_undop = up;
+    buf->next_undop = up;
 }
 
 /*
@@ -81,7 +81,7 @@ static Undo *revert_action(Undo *up)
   /* If reverting this undo action leaves the buffer unchanged,
      unset the modified flag. */
   if (up->unchanged)
-    buf.flags &= ~BFLAG_MODIFIED;
+    buf->flags &= ~BFLAG_MODIFIED;
 
   return up->next;
 }
@@ -95,11 +95,11 @@ Repeat this command to undo more changes.\
   ok = FALSE;
 
   if (warn_if_readonly_buffer());
-  else if (buf.next_undop == NULL) {
+  else if (buf->next_undop == NULL) {
     minibuf_error(astr_new("No further undo information"));
-    buf.next_undop = buf.last_undop;
+    buf->next_undop = buf->last_undop;
   } else {
-    buf.next_undop = revert_action(buf.next_undop);
+    buf->next_undop = revert_action(buf->next_undop);
     minibuf_write(astr_new("Undo!"));
     ok = TRUE;
   }

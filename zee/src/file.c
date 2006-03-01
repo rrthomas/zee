@@ -71,7 +71,7 @@ astr file_read(astr *as, astr filename)
 }
 
 /*
- * Read the file contents into the buffer.
+ * Read the file contents into a buffer.
  * Return quietly if the file can't be read.
  */
 void file_open(astr filename)
@@ -79,15 +79,15 @@ void file_open(astr filename)
   astr as = NULL;
 
   buffer_new();
-  buf.filename = astr_dup(filename);
+  buf->filename = astr_dup(filename);
 
   if (file_read(&as, filename) == NULL) {
     if (errno != ENOENT)
-      buf.flags |= BFLAG_READONLY;
+      buf->flags |= BFLAG_READONLY;
   } else {
     /* Add lines to buffer */
-    buf.lines = string_to_lines(as, &buf.num_lines);
-    buf.pt.p = list_first(buf.lines);
+    buf->lines = string_to_lines(as, &buf->num_lines);
+    buf->pt.p = list_first(buf->lines);
   }
 
   thisflag |= FLAG_NEED_RESYNC;
@@ -95,7 +95,7 @@ void file_open(astr filename)
 
 /*
  * Write the contents of buffer bp to file filename.
- * The filename is passed separately so a name other than buf.filename
+ * The filename is passed separately so a name other than buf->filename
  * can be used, e.g. in an emergency by die.
  */
 static int buffer_write(Buffer *bp, astr filename)
@@ -125,14 +125,14 @@ DEF(file_save,
 Save buffer in visited file.\
 ")
 {
-  if (buffer_write(&buf, buf.filename) == FALSE) {
-    minibuf_error(astr_afmt("%s: %s", buf.filename, strerror(errno)));
+  if (buffer_write(buf, buf->filename) == FALSE) {
+    minibuf_error(astr_afmt("%s: %s", buf->filename, strerror(errno)));
   } else {
-    minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf.filename)));
-    buf.flags &= ~BFLAG_MODIFIED;
+    minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf->filename)));
+    buf->flags &= ~BFLAG_MODIFIED;
 
-    if (buf.last_undop)
-      undo_reset_unmodified(buf.last_undop);
+    if (buf->last_undop)
+      undo_reset_unmodified(buf->last_undop);
   }
 }
 END_DEF
@@ -142,7 +142,7 @@ DEF(file_quit,
 Offer to save the buffer if there are unsaved changes, then quit.\
 ")
 {
-  if (buf.flags & BFLAG_MODIFIED) {
+  if (buf->flags & BFLAG_MODIFIED) {
     int ans;
 
     if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
@@ -166,15 +166,15 @@ void die(int exitcode)
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
-  else if (buf.flags & BFLAG_MODIFIED) {
+  else if (buf->flags & BFLAG_MODIFIED) {
     astr as = astr_new("");
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
-    if (buf.filename)
-      as = astr_dup(buf.filename);
+    if (buf->filename)
+      as = astr_dup(buf->filename);
     astr_cat(as, astr_new("." PACKAGE_NAME "SAVE"));
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
-    buffer_write(&buf, as);
+    buffer_write(buf, as);
     term_close();
   }
   exit(exitcode);

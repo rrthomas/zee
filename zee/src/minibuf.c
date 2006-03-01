@@ -323,9 +323,10 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
       thistab = completion_try(cp, *as, TRUE);
       assert(thistab != COMPLETION_NOTCOMPLETING);
       switch (thistab) {
-      case COMPLETION_NONUNIQUE:
-      case COMPLETION_MATCHED:
-      case COMPLETION_MATCHEDNONUNIQUE:
+      case COMPLETION_NOTMATCHED:
+        ding();
+        break;
+      default:
         {
           astr bs = astr_sub(cp->match, 0, (ptrdiff_t)cp->matchsize);
           i = cp->matchsize;
@@ -334,9 +335,6 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
           *as = bs;
           break;
         }
-      case COMPLETION_NOTMATCHED:
-        ding();
-        break;
       }
     }
   }

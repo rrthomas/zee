@@ -52,7 +52,7 @@
 /* The window. */
 Window win;
 /* The buffer. */
-Buffer buf;
+Buffer *buf = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
@@ -176,65 +176,66 @@ int main(int argc, char **argv)
             "FILE               edit FILE\n"
             "+LINE              set line at which to visit next FILE\n"
             );
-  }
+  } else {
+    signal_init();
+    setlocale(LC_ALL, "");
 
-  signal_init();
+    if (!bflag) {
+      /* Initialise window */
+      win.fheight = 1;           /* fheight must be > eheight */
 
-  setlocale(LC_ALL, "");
-
-  if (!bflag) {
-    /* Initialise window */
-    win.fheight = 1;           /* fheight must be > eheight */
-
-    /* Create a single default binding so M-x commands can still be
-       issued if the default bindings file can't be loaded. */
-    bind_key(strtochord(astr_new("M-x")), F_execute_command);
-  }
-
-  /* Open file given on command line. */
-  while (*argv) {
-    if (**argv == '+')
-      line = strtoul(*argv++ + 1, NULL, 10);
-    else if (*argv)
-      file_open(astr_new(*argv++));
-  }
-
-  /* FIXME: here and below, need better condition than buf.lines */
-  if (!bflag && buf.lines) {
-    term_init();
-    resize_window(); /* Can't run until there is a buffer */
-    goto_line(line - 1);
-    resync_display();
-
-    /* Load default bindings file. */
-    cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
-  }
-
-  /* Load user init file */
-  if (!qflag) {
-    astr as = get_home_dir();
-    if (astr_len(as) > 0) {
-      astr_cat(as, astr_new("/." PACKAGE_NAME));
-      cmd_eval_file(as);
+      /* Create a single default binding so M-x commands can still be
+         issued if the default bindings file can't be loaded. */
+      bind_key(strtochord(astr_new("M-x")), F_execute_command);
     }
-  }
 
-  if (buf.lines) {
-    /* FIXME: allow help message to be overwritten by errors from
-       loading init files */
-    astr quitstr = command_to_binding(F_file_quit);
-    if (!astr_cmp(quitstr, astr_new("")))
-      quitstr = astr_new("Alt-x, type `file_quit' and press RETURN");
-    minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
+    /* Open file given on command line. */
+    while (*argv) {
+      if (**argv == '+')
+        line = strtoul(*argv++ + 1, NULL, 10);
+      else if (*argv) {
+        file_open(astr_new(*argv++));
+        break;
+      }
+    }
 
-    /* Display help or error message. */
-    term_display();
+    if (!bflag) {
+      term_init();
+      resize_window(); /* Can't run until there is a buffer */
+      goto_line(line - 1);
+      resync_display();
 
-    /* Run the main loop. */
-    loop();
+      /* Load default bindings file. */
+      cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
+    }
 
-    term_tidy();
-    term_close();
+    /* Load user init file */
+    if (!qflag) {
+      astr as = get_home_dir();
+      if (astr_len(as) > 0) {
+        astr_cat(as, astr_new("/." PACKAGE_NAME));
+        cmd_eval_file(as);
+      }
+    }
+
+    if (!bflag) {
+      /* FIXME: allow help message to be overwritten by errors from
+         loading init files */
+      astr quitstr = command_to_binding(F_file_quit);
+      if (!astr_cmp(quitstr, astr_new("")))
+        quitstr = astr_new("Alt-x, type `file_quit' and press RETURN");
+      minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
+
+      /* Display help or error message. */
+      term_display();
+
+      /* Run the main loop if there is a buffer. */
+      if (buf)
+        loop();
+
+      term_tidy();
+      term_close();
+    }
   }
 
   return 0;
