@@ -31,11 +31,11 @@ static void fdecl(FILE *fp, astr name)
 {
   int state = 0;
   astr doc = astr_new(""), line;
-  struct fentry func;
 
   while ((line = astr_fgets(fp)) != NULL) {
     if (state == 1) {
-      if (strncmp(astr_cstr(line), "\")", 3) == 0) {
+      if (strncmp(astr_cstr(line), "\")", 3) == 0
+          || strncmp(astr_cstr(line), "\",", 3) == 0) {
         state = 2;
         break;
       }
@@ -45,7 +45,7 @@ static void fdecl(FILE *fp, astr name)
       state = 1;
   }
 
-  if (strcmp(astr_cstr(doc), "") == 0) {
+  if (astr_len(doc) == 0) {
     fprintf(stderr, NAME ": no docstring for %s\n", astr_cstr(name));
     exit(1);
   } else if (state == 1) {
@@ -53,9 +53,7 @@ static void fdecl(FILE *fp, astr name)
     exit(1);
   }
 
-  func.name = astr_dup(name);
-  func.doc = doc;
-  vec_item(ftable, fentries++, struct fentry) = func;
+  vec_item(ftable, fentries++, struct fentry) = (struct fentry){astr_dup(name), doc};
 }
 
 static void get_funcs(FILE *fp)
@@ -65,11 +63,11 @@ static void get_funcs(FILE *fp)
   while ((buf = astr_fgets(fp)) != NULL) {
     const char *s = astr_cstr(buf);
     if (!strncmp(s, "DEF(", 4) ||
-        !strncmp(s, "DEF_INT(", 8)) {
+        !strncmp(s, "DEF_ARG(", 8)) {
       char *p = strchr(s, '(');
       char *q = strrchr(s, ',');
       if (p == NULL || q == NULL || p == q) {
-        fprintf(stderr, NAME ": invalid DEF[_INT]() syntax\n");
+        fprintf(stderr, NAME ": invalid DEF[_ARG]() syntax\n");
         exit(1);
       }
       fdecl(fp, astr_sub(buf, (p - s) + 1, q - s));
@@ -79,7 +77,6 @@ static void get_funcs(FILE *fp)
 
 static void dump_funcs(void)
 {
-  size_t i;
   FILE *fp = fopen("zee_funcs.texi", "w");
 
   assert(fp);
@@ -94,7 +91,7 @@ static void dump_funcs(void)
           " */\n"
           "\n");
 
-  for (i = 0; i < fentries; ++i) {
+  for (size_t i = 0; i < fentries; ++i) {
     fprintf(fp, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
             astr_cstr(vec_item(ftable, i, struct fentry).doc));
     fprintf(stdout, "X(%s,\n\"\\\n%s\")\n", astr_cstr(vec_item(ftable, i, struct fentry).name),
@@ -120,14 +117,13 @@ static struct {
 
 static void dump_vars(void)
 {
-  size_t i;
   FILE *fp = fopen("zee_vars.texi", "w");
 
   assert(fp);
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
   fprintf(fp, "@table @code\n");
 
-  for (i = 0; i < ventries; ++i) {
+  for (size_t i = 0; i < ventries; ++i) {
     astr doc = astr_new(vtable[i].doc);
     if (!doc || astr_len(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for %s\n", vtable[i].name);
@@ -154,14 +150,13 @@ static struct {
 
 static void dump_opts(void)
 {
-  size_t i;
   FILE *fp = fopen("zee_opts.texi", "w");
 
   assert(fp);
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
   fprintf(fp, "@table @samp\n");
 
-  for (i = 0; i < oentries; ++i) {
+  for (size_t i = 0; i < oentries; ++i) {
     astr doc = astr_new(otable[i].doc);
     if (!doc || astr_len(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
@@ -176,11 +171,10 @@ static void dump_opts(void)
 
 int main(int argc, char **argv)
 {
-  int i;
   FILE *fp = NULL;
 
   ftable = vec_new(sizeof(struct fentry));
-  for (i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     if (argv[i] != NULL && strcmp(argv[i], "-") != 0 &&
         (fp = fopen(argv[i], "r")) == NULL) {
       fprintf(stderr, NAME ":%s: %s\n",
