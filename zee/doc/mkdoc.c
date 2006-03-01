@@ -34,14 +34,14 @@ static void fdecl(FILE *fp, astr name)
 
   while ((line = astr_fgets(fp)) != NULL) {
     if (state == 1) {
-      if (strncmp(astr_cstr(line), "\")", 3) == 0
-          || strncmp(astr_cstr(line), "\",", 3) == 0) {
+      if (astr_ncmp(line, astr_new("\")"), 3) == 0
+          || astr_ncmp(line, astr_new("\","), 3) == 0) {
         state = 2;
         break;
       }
       astr_cat(doc, line);
       astr_cat_char(doc, '\n');
-    } else if (strncmp(astr_cstr(line), "\"\\", 3) == 0)
+    } else if (astr_ncmp(line, astr_new("\"\\"), 3) == 0)
       state = 1;
   }
 
@@ -61,13 +61,13 @@ static void get_funcs(FILE *fp)
   astr buf;
 
   while ((buf = astr_fgets(fp)) != NULL) {
-    const char *s = astr_cstr(buf);
-    if (!strncmp(s, "DEF(", 4) ||
-        !strncmp(s, "DEF_ARG(", 8)) {
+    if (!astr_ncmp(buf, astr_new("DEF("), 4) ||
+        !astr_ncmp(buf, astr_new("DEF_ARG("), 8)) {
+      const char *s = astr_cstr(buf);
       char *p = strchr(s, '(');
       char *q = strrchr(s, ',');
       if (p == NULL || q == NULL || p == q) {
-        fprintf(stderr, NAME ": invalid DEF[_ARG]() syntax\n");
+        fprintf(stderr, NAME ": invalid DEF[_ARG]() syntax `%s'\n", s);
         exit(1);
       }
       fdecl(fp, astr_sub(buf, (p - s) + 1, q - s));
@@ -175,8 +175,7 @@ int main(int argc, char **argv)
 
   ftable = vec_new(sizeof(struct fentry));
   for (int i = 1; i < argc; i++) {
-    if (argv[i] != NULL && strcmp(argv[i], "-") != 0 &&
-        (fp = fopen(argv[i], "r")) == NULL) {
+    if (argv[i] && (fp = fopen(argv[i], "r")) == NULL) {
       fprintf(stderr, NAME ":%s: %s\n",
               argv[i], strerror(errno));
       exit(1);
