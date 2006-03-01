@@ -46,21 +46,18 @@ void resync_display(void)
   lastpointn = buf->pt.n;
 }
 
-void recenter(void)
-{
-  if (buf->pt.n > win.eheight / 2)
-    win.topdelta = win.eheight / 2;
-  else
-    win.topdelta = buf->pt.n;
-}
-
 DEF(recenter,
 "\
 Center point in window and redisplay screen.\n\
 The desired position of point is always relative to the current window.\
 ")
 {
-  recenter();
+  if (buf) {
+    if (buf->pt.n > win.eheight / 2)
+      win.topdelta = win.eheight / 2;
+    else
+      win.topdelta = buf->pt.n;
+  }
   term_clear();
   term_display();
 }
@@ -474,7 +471,8 @@ void term_display(void)
   cur_topline = topline = 0;
   calculate_start_column();
   cur_topline = topline;
-  draw_window(topline);
+  if (buf)
+    draw_window(topline);
 
   /* Draw the status line only if there is available space after the
      buffer text space. */

@@ -166,7 +166,7 @@ void die(int exitcode)
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
-  else if (buf->flags & BFLAG_MODIFIED) {
+  else if (buf && buf->flags & BFLAG_MODIFIED) {
     astr as = astr_new("");
     already_dying = TRUE;
     fprintf(stderr, "Trying to save modified buffer...\r\n");

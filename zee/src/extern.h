@@ -52,7 +52,6 @@ int completion_try(Completion *cp, astr search, int popup_when_complete);
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
 void resize_window(void);
-void recenter(void);
 Line *popup_get(void);
 size_t popup_lines(void);
 void popup_set(astr as);

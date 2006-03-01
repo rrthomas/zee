@@ -59,7 +59,7 @@ int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int uniarg = 1;
 
-static void loop(void)
+static void run(void)
 {
   for (;
        !(thisflag & FLAG_QUIT);
@@ -202,8 +202,10 @@ int main(int argc, char **argv)
     if (!bflag) {
       term_init();
       resize_window(); /* Can't run until there is a buffer */
-      goto_line(line - 1);
-      resync_display();
+      if (buf) {
+        goto_line(line - 1);
+        resync_display();
+      }
 
       /* Load default bindings file. */
       cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
@@ -224,14 +226,10 @@ int main(int argc, char **argv)
       astr quitstr = command_to_binding(F_file_quit);
       if (!astr_cmp(quitstr, astr_new("")))
         quitstr = astr_new("Alt-x, type `file_quit' and press RETURN");
-      minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
-
-      /* Display help or error message. */
-      term_display();
-
-      /* Run the main loop if there is a buffer. */
-      if (buf)
-        loop();
+      if (buf) {
+        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
+        run();
+      }
 
       term_tidy();
       term_close();
