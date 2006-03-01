@@ -223,15 +223,17 @@ enum {
 
 /* Define an interactive command.
  *
- * DEF(command) expands to the beginning of a command definition.
- * The prototype is Command (see below).
+ * DEF(command, doc) declares a command.
+ * DEF_ARG(command, doc, arg1, ..., argn) declares a command that
+ * takes arguments.
+ * INT(arg) declares an integer argument.
+ *
+ * The C prototype for commands is Command (see below).
  *
  * To call such a command with an argument list a1, a2, ..., an, pass
  * the arguments (which should all be astrs) in a list.
  *
  * The macro `CMDCALL' can be used to call zero-argument commands.
- * The macro `DEF_INT' can be used to define commands taking a
- * single integer argument.
  * The macro `CMDCALL_INT' can be used to call commands taking a
  * single integer argument.
  */
@@ -247,14 +249,24 @@ typedef struct {
 #define DEF(name, doc) \
   int F_ ## name(list l) \
   { \
-    int ok = TRUE, intarg; \
-    assert(l); \
-    (void)intarg;
+    int ok = TRUE; \
+    assert(l);
 
+#define INT(name) \
+    int name = 0; \
+    { \
+      astr as; \
+      if (!list_empty(l)) \
+        as = list_behead(l); \
+      else \
+        as = minibuf_read(astr_new("Enter number: "), astr_new("")); \
+      if (as) \
+        name = atoi(astr_cstr(as)); \
+    }
 
-#define DEF_INT(name, doc) \
+#define DEF_ARG(name, doc, ...) \
   DEF(name, doc) \
-    intarg = list_empty(l) ? 0 : atoi(astr_cstr(list_behead(l)));
+  __VA_ARGS__
 
 #define END_DEF \
     return ok; \

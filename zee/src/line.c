@@ -488,19 +488,20 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEF_INT(self_insert_command,
+DEF_ARG(self_insert_command,
 "\
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
-")
+",
+INT(c))
 {
   weigh_mark();
 
-  if (intarg <= 255) {
-    if (isspace(intarg) && buf.flags & BFLAG_AUTOFILL &&
+  if (c <= 255) {
+    if (isspace(c) && buf.flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
       fill_break_line();
-    insert_char(intarg);
+    insert_char(c);
   } else {
     ding();
     ok = FALSE;

@@ -82,11 +82,11 @@ AC_MSG_RESULT(no)
 ])
 
 dnl ==================================================================
-dnl Turn on additional compiler warnings
+dnl Extra stuff for GCC: add more compiler warnings, and set C99 mode
 dnl ==================================================================
 
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
+  CFLAGS="$CFLAGS -std=c99 -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
 fi
 
 dnl ==================================================================

@@ -71,15 +71,16 @@ automatically breaks the line at a previous space.\
 }
 END_DEF
 
-DEF_INT(set_fill_column,
+DEF_ARG(set_fill_column,
 "\
 Set the fill column.\n\
 If an argument value is passed, set `fill_column' to that value,\n\
 otherwise with the current column value.\
-")
+",
+INT(col))
 {
   set_variable(astr_new("fill_column"),
-               astr_afmt("%d", list_empty(l) ?(int)(buf.pt.o + 1) : intarg));
+               astr_afmt("%d", list_empty(l) ? (int)(buf.pt.o + 1) : col));
 }
 END_DEF
 
