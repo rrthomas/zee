@@ -85,10 +85,6 @@ static void loop(void)
   }
 }
 
-/* FIXME: Add keystroke dynamically to message, and if none exists,
-   write "Press Alt-x, type `file_quit' and press RETURN". */
-static char about_minibuf_str[] = "Welcome to " VERSION_STRING "!  To exit type Ctrl-q";
-
 static void segv_sig_handler(int signo)
 {
   (void)signo;
@@ -210,10 +206,6 @@ int main(int argc, char **argv)
     goto_line(line - 1);
     resync_display();
 
-    /* Write help message, but allow it to be overwritten by errors
-       from loading init files */
-    minibuf_write(astr_new(about_minibuf_str));
-
     /* Load default bindings file. */
     cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
   }
@@ -228,6 +220,13 @@ int main(int argc, char **argv)
   }
 
   if (buf.lines) {
+    /* FIXME: allow help message to be overwritten by errors from
+       loading init files */
+    astr quitstr = command_to_binding(F_file_quit);
+    if (!astr_cmp(quitstr, astr_new("")))
+      quitstr = astr_new("Alt-x, type `file_quit' and press RETURN");
+    minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
+
     /* Display help or error message. */
     term_display();
 
