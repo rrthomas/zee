@@ -77,10 +77,10 @@ Set the fill column.\n\
 If an argument value is passed, set `fill_column' to that value,\n\
 otherwise with the current column value.\
 ",
-INT(col))
+UINT(col, "Enter new fill column: "))
 {
   set_variable(astr_new("fill_column"),
-               astr_afmt("%d", list_empty(l) ? (int)(buf->pt.o + 1) : col));
+               astr_afmt("%lu", list_empty(l) ? buf->pt.o + 1 : col));
 }
 END_DEF
 

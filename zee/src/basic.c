@@ -147,48 +147,35 @@ column, or at the end of the line if it is not long enough.\
 }
 END_DEF
 
-/*
- * Jump to the specified column.
- */
-int goto_column(size_t to_col)
-{
-  int ok = TRUE;
-
-  if (buf->pt.o > to_col)
-    do
-      ok = CMDCALL(edit_navigate_backward_char);
-    while (ok && buf->pt.o > to_col);
-  else if (buf->pt.o < to_col)
-    do
-      ok = CMDCALL(edit_navigate_forward_char);
-    while (ok && buf->pt.o < to_col);
-
-  return ok;
-}
-
-DEF(goto_column,
+DEF_ARG(goto_column,
 "\
-Read a number N and move the cursor to character number N.\n\
-Position 1 is the beginning of the buffer.\n\
-FIXME: Make this and goto_line DEF_INTs and make the functions static.\
-")
+Read a number N and move the cursor to column number N.\n\
+",
+UINT(to_col, "Goto column: "))
 {
-  size_t to_char = 0;
-  astr ms;
-
-  do {
-    if ((ms = minibuf_read(astr_new("Goto char: "), astr_new(""))) == NULL) {
-      ok = CMDCALL(cancel);
-      break;
-    }
-    if ((to_char = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
-      ding();
-  } while (to_char == ULONG_MAX);
-
-  if (ok)
-    goto_column(to_char);
+  if (ok) {
+    if (buf->pt.o > to_col)
+      do
+        ok = CMDCALL(edit_navigate_backward_char);
+      while (ok && buf->pt.o > to_col);
+    else if (buf->pt.o < to_col)
+      do
+        ok = CMDCALL(edit_navigate_forward_char);
+      while (ok && buf->pt.o < to_col);
+  }
 }
 END_DEF
+
+/*
+ * Go to the given point.
+ */
+int goto_point(Point pt)
+{
+  int ok = goto_line(pt.n);
+  if (ok)
+    ok = CMDCALL_INT(goto_column, pt.o);
+  return ok;
+}
 
 /*
  * Go to the line `to_line', counting from 0.  Point will end up in
@@ -210,35 +197,13 @@ int goto_line(size_t to_line)
   return ok;
 }
 
-/*
- * Go to the given point.
- */
-int goto_point(Point pt)
-{
-  int ok = goto_line(pt.n);
-  if (ok)
-    ok = goto_column(pt.o);
-  return ok;
-}
-
-DEF(goto_line,
+DEF_ARG(goto_line,
 "\
 Move cursor to the beginning of the specified line.\n\
 Line 1 is the beginning of the buffer.\
-")
+",
+UINT(to_line, "Goto line: "))
 {
-  size_t to_line = 0;
-  astr ms;
-
-  do {
-    if ((ms = minibuf_read(astr_new("Goto line: "), astr_new(""))) == NULL) {
-      ok = CMDCALL(cancel);
-      break;
-    }
-    if ((to_line = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX)
-      ding();
-  } while (to_line == ULONG_MAX);
-
   if (ok) {
     goto_line(to_line - 1);
     buf->pt.o = 0;

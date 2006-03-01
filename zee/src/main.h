@@ -252,16 +252,22 @@ typedef struct {
     int ok = TRUE; \
     assert(l);
 
-#define INT(name) \
-    int name = 0; \
+#define UINT(name, prompt) \
+    size_t name = 0; \
     { \
-      astr as; \
-      if (!list_empty(l)) \
-        as = list_behead(l); \
-      else \
-        as = minibuf_read(astr_new("Enter number: "), astr_new("")); \
-      if (as) \
-        name = atoi(astr_cstr(as)); \
+      if (!list_empty(l)) { \
+        astr as = list_behead(l); \
+        if ((name = strtoul(astr_cstr(as), NULL, 10) == ULONG_MAX)) \
+          ok = FALSE; \
+      } else do { \
+        astr ms; \
+        if ((ms = minibuf_read(astr_new("Goto line: "), astr_new(""))) == NULL) { \
+          ok = CMDCALL(cancel); \
+          break; \
+        } \
+        if ((name = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX) \
+          ding(); \
+      } while (name == ULONG_MAX); \
     }
 
 #define DEF_ARG(name, doc, ...) \

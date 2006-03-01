@@ -493,7 +493,7 @@ DEF_ARG(self_insert_command,
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
 ",
-INT(c))
+UINT(c, "Insert character: "))
 {
   weigh_mark();
 
@@ -501,7 +501,7 @@ INT(c))
     if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
         get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
       fill_break_line();
-    insert_char(c);
+    insert_char((int)c);
   } else {
     ding();
     ok = FALSE;

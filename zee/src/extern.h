@@ -23,7 +23,6 @@
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc(void);
 int goto_line(size_t to_line);
-int goto_column(size_t to_col);
 int goto_point(Point pt);
 
 /* bind.c ----------------------------------------------------------------- */
