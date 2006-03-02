@@ -85,11 +85,11 @@ static void popup_completion(Completion *cp)
  * Returns the length of the longest string that is a prefix of
  * both as and bs.
  */
-static int common_prefix_length(astr as, astr bs) {
+static size_t common_prefix_length(astr as, astr bs) {
   size_t len = min(astr_len(as), astr_len(bs));
-  for (size_t i = 0; i<len; i++)
+  for (ptrdiff_t i = 0; i<len; i++)
     if (*astr_char(as, i) != *astr_char(bs, i))
-      return i;
+      return (size_t)i;
   return len;
 }
 

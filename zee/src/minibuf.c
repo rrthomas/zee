@@ -81,21 +81,16 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
     as = minibuf_read_completion(prompt, astr_new(""), cp, NULL);
     if (as == NULL)             /* Cancelled. */
       return NULL;
-    else {
-      list s;
-      int i;
 
-      /* Complete partial words if possible. */
-      if (completion_try(cp, as) == COMPLETION_MATCHED)
-        as = astr_dup(cp->match);
-
-      for (s = list_first(cp->completions); s != cp->completions; s = list_next(s))
-        if (!astr_cmp(as, s->item))
-          return as;
-
-      minibuf_error(errmsg);
-      waitkey(WAITKEY_DEFAULT);
+    /* Complete partial words if possible. */
+    if (completion_try(cp, as) == COMPLETION_MATCHED) {
+      as = astr_dup(cp->match);
+      if (astr_len(as) == astr_len(list_first(cp->matches)->item))
+        return as;
     }
+
+    minibuf_error(errmsg);
+    waitkey(WAITKEY_DEFAULT);
   }
 }
 
