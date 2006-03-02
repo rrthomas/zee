@@ -271,6 +271,7 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
       popup_scroll_down();
     } else {
       tab = completion_try(cp, *as);
+      completion_popup(cp);
       assert(tab != COMPLETION_NOTCOMPLETING);
       if (tab) {
         if (astr_cmp(*as, cp->match) != 0)
@@ -379,10 +380,9 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       break;
   }
 
-  if (cp && cp->flags & COMPLETION_POPPEDUP) {
-    popup_clear();
-    term_refresh();
-  }
+  popup_clear();
+  term_display();
+  term_refresh();
 
   return retval;
 }

@@ -71,10 +71,10 @@ static astr completion_write(list l)
 }
 
 /*
- * Popup the completion window
+ * Popup the completion window, showing cp->matches
  * cp - the completions to show
  */
-static void popup_completion(Completion *cp)
+void completion_popup(Completion *cp)
 {
   cp->flags |= COMPLETION_POPPEDUP;
   popup_set(astr_cat(astr_new("Completions\n\n"), completion_write(cp->matches)));
@@ -100,11 +100,14 @@ static int hcompar(const void *p1, const void *p2)
 
 /*
  * Match completions
- * cp - the completions (the list gets sorted)
+ * cp - the completions (the list gets sorted, and cp->matches and cp->match
+ *   get filled in.)
  * search - the prefix to search for (not modified)
  * Returns COMPLETION_NOTMATCHED (== FALSE) if `search' is not a prefix of any
  * completion, and COMPLETION_MATCHED (== TRUE) otherwise. Never returns
  * COMPLETION_NOTMATCHING.
+ *
+ * To see the completions in a popup, the caller should call "
  *
  * To determine if the match was exact, first check for COMPLETION_MATCHED,
  * then check whether
@@ -133,6 +136,5 @@ int completion_try(Completion *cp, astr search)
     prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
   cp->match = astr_sub(cp->match, 0, (ptrdiff_t)prefix_len);
 
-  popup_completion(cp); /* FIXME: Incorrectly leaves popup on screen. Move to callers and handle case-by-case. */
   return COMPLETION_MATCHED;
 }
