@@ -366,9 +366,9 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       if (c > 255 || !isprint(c))
         ding();
       else {
-        *as = astr_cat(
-          astr_cat_char(astr_sub(*as, 0, i), c),
-          astr_sub(*as, i, (ptrdiff_t)astr_len(*as))
+        as = astr_cat(
+          astr_cat_char(astr_sub(as, 0, i), c),
+          astr_sub(as, i, (ptrdiff_t)astr_len(as))
         );
         i++;
       }

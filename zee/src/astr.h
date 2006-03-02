@@ -84,7 +84,7 @@ ptrdiff_t astr_str(const astr haystack, ptrdiff_t pos, const astr needle);
  * Append the contents of the argument string or character to as.
  */
 astr astr_cat(astr as, const astr src);
-void astr_cat_char(astr as, int c);
+astr astr_cat_char(astr as, int c);
 
 /*
  * Duplicate as.
