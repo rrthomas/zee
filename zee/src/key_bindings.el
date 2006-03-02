@@ -94,5 +94,5 @@ bind_key "C-@" set_mark
 bind_key "M-!" shell_command
 bind_key "M-(" start_kbd_macro
 bind_key "M-i" tab_to_tab_stop
-bind_key "C-u" universal_argument
+bind_key "C-u" repeat
 bind_key "M-u" upcase_word
