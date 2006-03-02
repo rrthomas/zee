@@ -52,22 +52,13 @@ astr get_home_dir(void)
  * Read the file contents into a string.
  * Return quietly if the file can't be read.
  */
-astr file_read(astr *as, astr filename)
+astr file_read(astr filename)
 {
-  int ok = TRUE;
   FILE *fp;
-
   if ((fp = fopen(astr_cstr(filename), "r")) == NULL)
-    ok = FALSE;
-  else {
-    *as = astr_fread(fp);
-    ok = fclose(fp) == 0;
-  }
-
-  if (ok == FALSE)
     return NULL;
   else
-    return astr_new("\n");
+    return astr_fread(fp);
 }
 
 /*
@@ -76,12 +67,12 @@ astr file_read(astr *as, astr filename)
  */
 void file_open(astr filename)
 {
-  astr as = NULL;
+  astr as;
 
   buffer_new();
   buf->filename = astr_dup(filename);
 
-  if (file_read(&as, filename) == NULL) {
+  if ((as = file_read(filename)) == NULL) {
     if (errno != ENOENT)
       buf->flags |= BFLAG_READONLY;
   } else {

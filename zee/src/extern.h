@@ -68,7 +68,7 @@ void ding(void);
 
 /* file.c ----------------------------------------------------------------- */
 astr get_home_dir(void);
-astr file_read(astr *as, astr filename);
+astr file_read(astr filename);
 void file_open(astr filename);
 void die(int exitcode);
 
@@ -134,10 +134,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
 void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
-void cmd_parse_init(astr as);
-void cmd_parse_end(void);
-void cmd_eval(void);
-void cmd_eval_file(astr file);
+void cmd_eval(astr as);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);

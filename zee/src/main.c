@@ -116,7 +116,7 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int longopt, bflag = FALSE, qflag = FALSE, hflag = FALSE;
+  int longopt, bflag = FALSE, hflag = FALSE, nflag = FALSE;
   size_t line = 1;
 
   GC_INIT();
@@ -131,15 +131,13 @@ int main(int argc, char **argv)
       bflag = TRUE;
       break;
     case 1:
-      cmd_parse_init(astr_new(optarg));
-      cmd_eval();
-      cmd_parse_end();
+      cmd_eval(astr_new(optarg));
       break;
     case 2:
-      cmd_eval_file(astr_new(optarg));
+      cmd_eval(file_read(astr_new(optarg)));
       break;
     case 3:
-      qflag = TRUE;
+      nflag = TRUE;
       break;
     case 4:
       fprintf(stderr,
@@ -203,15 +201,15 @@ int main(int argc, char **argv)
       }
 
       /* Load default bindings file. */
-      cmd_eval_file(astr_new(PATH_DATA "/key_bindings.el"));
+      cmd_eval(file_read(astr_new(PATH_DATA "/key_bindings.el")));
     }
 
     /* Load user init file */
-    if (!qflag) {
+    if (!nflag) {
       astr as = get_home_dir();
       if (astr_len(as) > 0) {
         astr_cat(as, astr_new("/." PACKAGE_NAME));
-        cmd_eval_file(as);
+        cmd_eval(file_read(as));
       }
     }
 

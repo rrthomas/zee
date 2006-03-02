@@ -124,25 +124,19 @@ static astr gettok(void)
   return tok;
 }
 
-void cmd_parse_init(astr as)
+/*
+ * Execute a string as commands
+ */
+void cmd_eval(astr as)
 {
   pos = 0;
   assert((expr = as));
   line = 0;
   bol = TRUE;
-}
 
-void cmd_parse_end(void)
-{
-  expr = NULL;
-}
-
-void cmd_eval(void)
-{
-  Command cmd;
   astr tok = gettok();
-
   while (tok) {
+    Command cmd;
     list l = list_new();
     astr fname;
 
@@ -161,15 +155,5 @@ void cmd_eval(void)
 
     /* The first token for the next line, if any, was read above */
   }
-}
-
-void cmd_eval_file(astr file)
-{
-  astr as = NULL;
-
-  file_read(&as, file);
-  assert(as);
-  cmd_parse_init(as);
-  cmd_eval();
-  cmd_parse_end();
+  expr = NULL;
 }
