@@ -100,10 +100,15 @@ static int hcompar(const void *p1, const void *p2)
 
 /*
  * Match completions
- * cp - the completions
+ * cp - the completions (the list gets sorted)
  * search - the prefix to search for (not modified)
  * Returns COMPLETION_NOTMATCHED if `search' is not a prefix of any
  * completion, and COMPLETION_MATCHED otherwise.
+ *
+ * To determine if the match was exact, first check for COMPLETION_MATCHED,
+ * then check whether
+ *   astr_length(cp->match) == astr_length(list_first(cp->matches)->item)
+ * This works because the exact match is first in sorted order.
  */
 int completion_try(Completion *cp, astr search)
 {
@@ -127,6 +132,6 @@ int completion_try(Completion *cp, astr search)
     prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
   cp->match = astr_sub(cp->match, 0, (ptrdiff_t)prefix_len);
 
-  popup_completion(cp);
+  popup_completion(cp); /* FIXME: Incorrectly leaves popup on screen. Move to callers and handle case-by-case. */
   return COMPLETION_MATCHED;
 }

@@ -292,37 +292,27 @@ static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
   *_saved = saved;
 }
 
-static ptrdiff_t mb_complete(Completion *cp, int lasttab, astr *as, int thistab, ptrdiff_t *i)
+static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
 {
   if (cp == NULL)
     ding();
   else {
-    if (lasttab != COMPLETION_NOTCOMPLETING &&
-        lasttab != COMPLETION_NOTMATCHED &&
-        cp->flags & COMPLETION_POPPEDUP) {
+    if (tab == COMPLETION_MATCHED && cp->flags & COMPLETION_POPPEDUP) {
       popup_scroll_up();
-      thistab = lasttab;
     } else {
-      thistab = completion_try(cp, *as);
-      assert(thistab != COMPLETION_NOTCOMPLETING);
-      switch (thistab) {
-      case COMPLETION_NOTMATCHED:
+      tab = completion_try(cp, *as);
+      assert(tab != COMPLETION_NOTCOMPLETING);
+      if (tab == COMPLETION_MATCHED) {
+        if (astr_cmp(*as, cp->match) != 0)
+          tab = COMPLETION_NOTCOMPLETING;
+        *as = cp->match;
+        *i = astr_len(*as);
+      } else
         ding();
-        break;
-      default:
-        {
-          astr bs = astr_dup(cp->match);
-          *i = astr_len(cp->match);
-          if (astr_cmp(*as, bs) != 0)
-            thistab = COMPLETION_NOTCOMPLETING;
-          *as = bs;
-          break;
-        }
-      }
     }
   }
 
-  return thistab;
+  return tab;
 }
 
 static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr *as)
@@ -413,7 +403,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       mb_next_history(hp, &as, &i, &saved);
       break;
     case KBD_TAB:
-      thistab = mb_complete(cp, lasttab, &as, thistab, &i);
+      thistab = mb_complete(cp, lasttab, &as, &i);
       break;
     default:
       i = mb_self_insert(c, i, &as);

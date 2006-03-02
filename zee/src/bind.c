@@ -137,7 +137,7 @@ static astr get_command_name(Command f)
 /*
  * Read a command name from the minibuffer.
  */
-astr minibuf_read_command_name(astr as)
+astr minibuf_read_command_name(astr prompt)
 {
   astr ms;
   Completion *cp = completion_new();
@@ -146,32 +146,34 @@ astr minibuf_read_command_name(astr as)
     list_append(cp->completions, astr_new(ftable[i].name));
 
   for (;;) {
-    if ((ms = minibuf_read_completion(as, astr_new(""), cp, &commands_history)) == NULL) {
+    ms = minibuf_read_completion(prompt, astr_new(""), cp, &commands_history);
+
+    if (ms == NULL) {
       CMDCALL(cancel);
-      break;
-    } else if (astr_len(ms) == 0) {
+      return NULL;
+    }
+
+    if (astr_len(ms) == 0) {
       minibuf_error(astr_new("No command name given"));
-      ms = NULL;
+      return NULL;
+    }
+
+    /* Complete partial words if possible */
+    if (completion_try(cp, ms) == COMPLETION_MATCHED)
+      ms = astr_dup(cp->match);
+    for (list p = list_first(cp->completions); p != cp->completions;
+         p = list_next(p))
+      if (!astr_cmp(ms, p->item)) {
+        ms = astr_dup(p->item); /* FIXME: Eh? No-op? */
+        break;
+      }
+    if (get_command(ms) || get_macro(ms)) {
+      add_history_element(&commands_history, ms);
+      minibuf_clear();        /* Remove any error message */
       break;
     } else {
-      astr as = astr_dup(ms);
-      /* Complete partial words if possible */
-      if (completion_try(cp, as) == COMPLETION_MATCHED)
-        ms = astr_dup(cp->match);
-      for (list p = list_first(cp->completions); p != cp->completions;
-           p = list_next(p))
-        if (!astr_cmp(ms, p->item)) {
-          ms = astr_dup(p->item);
-          break;
-        }
-      if (get_command(ms) || get_macro(ms)) {
-        add_history_element(&commands_history, ms);
-        minibuf_clear();        /* Remove any error message */
-        break;
-      } else {
-        minibuf_error(astr_afmt("Undefined command `%s'", astr_cstr(ms)));
-        waitkey(WAITKEY_DEFAULT);
-      }
+      minibuf_error(astr_afmt("Undefined command `%s'", astr_cstr(ms)));
+      waitkey(WAITKEY_DEFAULT);
     }
   }
 
