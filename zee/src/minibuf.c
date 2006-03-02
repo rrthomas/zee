@@ -79,7 +79,7 @@ static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
       astr bs = astr_dup(as);
 
       /* Complete partial words if possible. */
-      if (completion_try(cp, bs, FALSE) == COMPLETION_MATCHED)
+      if (completion_try(cp, bs) == COMPLETION_MATCHED)
         as = astr_dup(cp->match);
 
       for (s = list_first(cp->completions), i = 0;
@@ -307,10 +307,8 @@ static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
   *_saved = saved;
 }
 
-static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, ptrdiff_t *_i)
+static ptrdiff_t mb_complete(Completion *cp, int lasttab, astr *as, int thistab, ptrdiff_t *i)
 {
-  int thistab = *_thistab;
-  ptrdiff_t i = *_i;
   if (cp == NULL)
     ding();
   else {
@@ -320,7 +318,7 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
       popup_scroll_up();
       thistab = lasttab;
     } else {
-      thistab = completion_try(cp, *as, TRUE);
+      thistab = completion_try(cp, *as);
       assert(thistab != COMPLETION_NOTCOMPLETING);
       switch (thistab) {
       case COMPLETION_NOTMATCHED:
@@ -328,8 +326,8 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
         break;
       default:
         {
-          astr bs = astr_sub(cp->match, 0, (ptrdiff_t)cp->matchsize);
-          i = cp->matchsize;
+          astr bs = astr_dup(cp->match);
+          *i = astr_len(cp->match);
           if (astr_cmp(*as, bs) != 0)
             thistab = COMPLETION_NOTCOMPLETING;
           *as = bs;
@@ -338,8 +336,8 @@ static void mb_complete(Completion *cp, int lasttab, astr *as, int *_thistab, pt
       }
     }
   }
-  *_thistab = thistab;
-  *_i = i;
+
+  return thistab;
 }
 
 static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr *as)
@@ -362,7 +360,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
 {
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
-  char *s[] = {"", " [No match]", " [Sole completion]", " [Complete, but not unique]", ""};
+  char *s[] = {"", " [No match]", ""};
   astr as = astr_dup(value), retval = NULL, saved;
 
   if (hp)
@@ -430,7 +428,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       mb_next_history(hp, &as, &i, &saved);
       break;
     case KBD_TAB:
-      mb_complete(cp, lasttab, &as, &thistab, &i);
+      thistab = mb_complete(cp, lasttab, &as, thistab, &i);
       break;
     default:
       i = mb_self_insert(c, i, &as);

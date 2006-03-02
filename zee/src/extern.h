@@ -46,7 +46,7 @@ astr copy_text_block(Point start, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
-int completion_try(Completion *cp, astr search, int popup_when_complete);
+int completion_try(Completion *cp, astr search);
 
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);

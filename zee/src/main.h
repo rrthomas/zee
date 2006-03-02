@@ -138,16 +138,11 @@ enum {
 
 #define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */
 
-/*
- * Suggestion: since 'match' has a length, let's truncate it to 'matchsize'
- * characters and do away with 'matchsize'.
- */
 typedef struct {
   int flags;                    /* Flags */
   list completions;             /* The completion strings */
   list matches;                 /* The matches list */
-  astr match;                   /* The match buffer */
-  size_t matchsize;             /* The current match length */
+  astr match;                   /* The current matched string */
 } Completion;
 
 typedef struct {

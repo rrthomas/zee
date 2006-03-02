@@ -111,18 +111,15 @@ void process_key(size_t key)
  * Command name to C function mapping
  *--------------------------------------------------------------------------*/
 
-typedef struct {
+static struct {
   const char *name;             /* The command name */
   Command cmd;                  /* The function pointer */
-} FEntry;
-
-static FEntry ftable[] = {
+} ftable[] = {
 #define X(cmd_name, doc) \
 	{# cmd_name, F_ ## cmd_name},
 #include "tbl_funcs.h"
 #undef X
 };
-
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
 Command get_command(astr name)
@@ -146,17 +143,13 @@ static astr get_command_name(Command f)
 
 /*
  * Read a command name from the minibuffer.
- * The returned buffer must be freed by the caller.
  */
 astr minibuf_read_command_name(astr as)
 {
-  size_t i;
   astr ms;
-  list p;
-  Completion *cp;
+  Completion *cp = completion_new();
 
-  cp = completion_new();
-  for (i = 0; i < fentries; ++i)
+  for (size_t i = 0; i < fentries; ++i)
     list_append(cp->completions, astr_new(ftable[i].name));
 
   for (;;) {
@@ -170,9 +163,9 @@ astr minibuf_read_command_name(astr as)
     } else {
       astr as = astr_dup(ms);
       /* Complete partial words if possible */
-      if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
+      if (completion_try(cp, as) == COMPLETION_MATCHED)
         ms = astr_dup(cp->match);
-      for (p = list_first(cp->completions); p != cp->completions;
+      for (list p = list_first(cp->completions); p != cp->completions;
            p = list_next(p))
         if (!astr_cmp(ms, p->item)) {
           ms = astr_dup(p->item);

@@ -81,8 +81,8 @@ static astr completion_write(list l)
 }
 
 /*
- * Popup the completion window.
- * cp - the completions to show.
+ * Popup the completion window
+ * cp - the completions to show
  */
 static void popup_completion(Completion *cp)
 {
@@ -97,16 +97,13 @@ static int hcompar(const void *p1, const void *p2)
 }
 
 /*
- * Match completions.
- * cp - the completions.
- * search - the prefix to search for.
- * popup_when_complete - if true, and there is more than one match,
- *   call popup_completion().
- * Returns:
- * COMPLETION_NOTMATCHED if `search' is not a prefix of any completion.
- * COMPLETION_MATCHED if `search' is a prefix of some completion.
+ * Match completions
+ * cp - the completions
+ * search - the prefix to search for
+ * Returns COMPLETION_NOTMATCHED if `search' is not a prefix of any
+ * completion, and COMPLETION_MATCHED otherwise.
  */
-int completion_try(Completion *cp, astr search, int popup_when_complete)
+int completion_try(Completion *cp, astr search)
 {
   size_t fullmatches = 0;
   cp->matches = list_new();
@@ -122,31 +119,18 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   if (list_empty(cp->matches))
     return COMPLETION_NOTMATCHED;
 
+  size_t i;
   cp->match = list_first(cp->matches)->item;
-  cp->matchsize = astr_len(cp->match);
-
-  if (list_length(cp->matches) == 1)
-    return COMPLETION_MATCHED;
-
-  if (fullmatches == 1 && list_length(cp->matches) > 1) {
-    if (popup_when_complete)
-      popup_completion(cp);
-    return COMPLETION_MATCHED;
-  }
-
-  for (size_t i = astr_len(search); ; i++) {
+  for (i = astr_len(search); i < astr_len(cp->match); i++) {
     char c = *astr_char(cp->match, (ptrdiff_t)i); /* FIXME: Broken if first match is a prefix of all other matches. */
-    cp->matchsize = i;
     for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p)) {
       /* FIXME: Broken if p->item is a prefix of all other matches. */
-      if (*astr_char(p->item, (ptrdiff_t)i) != c) {
-        /* FIXME: Ignores popup_when_complete. */
-        popup_completion(cp);
-        return COMPLETION_MATCHED;
-      }
+      if (*astr_char(p->item, (ptrdiff_t)i) != c)
+        break;
     }
   }
 
-  assert(0);
-  return COMPLETION_NOTMATCHED;
+  cp->match = astr_sub(cp->match, 0, (ptrdiff_t)i);
+  popup_completion(cp);
+  return COMPLETION_MATCHED;
 }
