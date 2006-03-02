@@ -68,32 +68,30 @@ astr minibuf_read(astr as, astr value)
 /*
  * Repeatedly prompts until the user gives one of the answers in
  * cp->completions.
- * Returns the index into cp->completions of the chosen option. Note that
- * cp->completions gets sorted so this index may not be what you expect.
+ * Returns NULL if cancelled, otherwise returns the index into cp->completions
+ * of the chosen option. Note that cp->completions gets sorted so this index
+ * may not be what you expect.
  * FIXME: This is crazy. Return the astr.
  */
-static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
+static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 {
   astr as;
 
   for (;;) {
     as = minibuf_read_completion(prompt, astr_new(""), cp, NULL);
     if (as == NULL)             /* Cancelled. */
-      return -1;
+      return NULL;
     else {
       list s;
       int i;
-      astr bs = astr_dup(as);
 
       /* Complete partial words if possible. */
-      if (completion_try(cp, bs) == COMPLETION_MATCHED)
+      if (completion_try(cp, as) == COMPLETION_MATCHED)
         as = astr_dup(cp->match);
 
-      for (s = list_first(cp->completions), i = 0;
-           s != cp->completions;
-           s = list_next(s), i++)
+      for (s = list_first(cp->completions); s != cp->completions; s = list_next(s))
         if (!astr_cmp(as, s->item))
-          return i;
+          return as;
 
       minibuf_error(errmsg);
       waitkey(WAITKEY_DEFAULT);
@@ -103,54 +101,30 @@ static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 
 /*
  * Forces the user to answer "yes" or "no".
- * Returns TRUE for "yes" and FALSE for "no".
+ * Returns -1 for cancelled, otherwise TRUE for "yes" and FALSE for "no".
  * Suggestion: inline? Probably not.
  */
 int minibuf_read_yesno(astr prompt)
 {
-  Completion *cp;
-  int retvalue;
-
-  cp = completion_new();
+  Completion *cp = completion_new();
   list_append(cp->completions, astr_new("yes"));
   list_append(cp->completions, astr_new("no"));
-
-  retvalue = minibuf_read_forced(prompt, astr_new("Please answer `yes' or `no'."), cp);
-  if (retvalue != -1) {
-    /* The completions may be sorted by the minibuf completion
-       routines. */
-    if (!astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("yes")))
-      retvalue = TRUE;
-    else
-      retvalue = FALSE;
-  }
-
-  return retvalue;
+  astr reply = minibuf_read_forced(prompt, astr_new("Please answer `yes' or `no'."), cp);
+  return reply==NULL ? -1 : !astr_cmp(astr_new("yes"), reply);
 }
 
 /*
  * Forces the user to answer "true" or "false".
+ * Returns -1 for cancelled, otherwise TRUE for "true" and FALSE for "false".
  * Suggestion: inline? Probably not.
  */
 int minibuf_read_boolean(astr prompt)
 {
-  int retvalue;
   Completion *cp = completion_new();
-
   list_append(cp->completions, astr_new("true"));
   list_append(cp->completions, astr_new("false"));
-
-  retvalue = minibuf_read_forced(prompt, astr_new("Please answer `true' or `false'."), cp);
-  if (retvalue != -1) {
-    /* The completions may be sorted by the minibuf completion
-       routines. */
-    if (!astr_cmp(list_at(cp->completions, (size_t)retvalue), astr_new("true")))
-      retvalue = TRUE;
-    else
-      retvalue = FALSE;
-  }
-
-  return retvalue;
+  astr reply = minibuf_read_forced(prompt, astr_new("Please answer `true' or `false'."), cp);
+  return reply==NULL ? -1 : !astr_cmp(astr_new("true"), reply);
 }
 
 /*

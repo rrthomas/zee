@@ -101,7 +101,7 @@ static int hcompar(const void *p1, const void *p2)
 /*
  * Match completions
  * cp - the completions
- * search - the prefix to search for
+ * search - the prefix to search for (not modified)
  * Returns COMPLETION_NOTMATCHED if `search' is not a prefix of any
  * completion, and COMPLETION_MATCHED otherwise.
  */
