@@ -93,18 +93,6 @@ static var_entry *get_variable_default(astr var)
   return NULL;
 }
 
-void set_variable(astr var, astr val)
-{
-  list varlist = root_varlist;
-
-  /* Variables automatically become buffer-local when set if there is
-     a buffer. */
-  if (buf->vars)
-    varlist = buf->vars;
-
-  variable_update(varlist, var, val);
-}
-
 astr get_variable(astr var)
 {
   var_entry *p;
@@ -142,6 +130,18 @@ int get_variable_bool(astr var)
   return FALSE;
 }
 
+void set_variable(astr var, astr val)
+{
+  list varlist = root_varlist;
+
+  /* Variables automatically become buffer-local when set if there is
+     a buffer. */
+  if (buf->vars)
+    varlist = buf->vars;
+
+  variable_update(varlist, var, val);
+}
+
 astr minibuf_read_variable_name(astr msg)
 {
   astr ms;
@@ -174,7 +174,6 @@ astr minibuf_read_variable_name(astr msg)
   return ms;
 }
 
-/* FIXME: Doesn't work in .zee */
 DEF(set_variable,
 "\
 Set a variable to the specified value.\
@@ -187,6 +186,7 @@ Set a variable to the specified value.\
   if (list_length(l) > 1) {
     var = list_behead(l);
     val = list_behead(l);
+    ok = TRUE;
   } else {
     if ((var = minibuf_read_variable_name(astr_new("Set variable: ")))) {
       var_entry *p = get_variable_default(var);
