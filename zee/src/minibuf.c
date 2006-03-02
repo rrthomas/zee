@@ -132,31 +132,38 @@ void minibuf_clear(void)
  * Minibuffer key action routines
  */
 
-static void draw_minibuf_read(astr prompt, astr value, astr match, size_t pointo)
+/*
+ * Draws the string "<prompt><value>" in the minibuffer and leaves the
+ * cursor at offset "pointto" within "<value>". If the string is too long
+ * to fit on the terminal, various schemes are used to make it fit. First,
+ * a scrolling window is used to show just part of the value. Second,
+ * characters are chopped off the left of the prompt. If the terminal is
+ * narrower than four charaters we give up and corrupt the display a bit.
+ */
+static void draw_minibuf_read(astr prompt, astr value, size_t pointo)
 {
-  size_t margin = 1, n = 0;
-  size_t width = term_width();
-
-  term_minibuf_write(prompt);
-
-  if (astr_len(prompt) + pointo + 1 >= width) {
-    margin++;
-    term_addch('$');
-    n = pointo - pointo % (width - astr_len(prompt) - 2);
+  astr as = astr_dup(prompt);
+  size_t step = max(3, term_width() - astr_len(as) - 2);
+  size_t scroll_pos = 0;
+  if (pointo > step + 1) {
+    astr_cat_char(as, '$');
+    scroll_pos = pointo - (pointo - (step + 1)) % step;
   }
+  size_t cursor_pos = astr_len(as) + pointo - scroll_pos;
 
-  term_print(astr_sub(value, (ptrdiff_t)n,
-                         (ptrdiff_t)min(n + width - astr_len(prompt) - margin, astr_len(value))));
-  term_print(match);
-
-  if (astr_len(value + n) >= width - astr_len(prompt) - margin) {
-    term_move(term_height() - 1, width - 1);
-    term_addch('$');
+  if (astr_len(value) > scroll_pos + step) {
+    astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)(scroll_pos + step)));
+    astr_cat_char(as, '$');
+  } else
+    astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)astr_len(value)));
+  
+  if (astr_len(as) > term_width()) {
+    size_t to_lose = astr_len(as) - term_width();
+    as = astr_sub(as, (ptrdiff_t)to_lose, (ptrdiff_t)term_width());
+    cursor_pos -= to_lose;
   }
-
-  term_move(term_height() - 1, astr_len(prompt) + margin - 1 +
-            pointo % (width - astr_len(prompt) - margin));
-
+  term_minibuf_write(as);
+  term_move(term_height() - 1, cursor_pos);
   term_refresh();
 }
 
@@ -293,14 +300,13 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
 {
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
-  char *s[] = {" [No match]", "", ""};
   astr as = astr_dup(value), retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);
 
   for (i = astr_len(as);;) {
-    draw_minibuf_read(prompt, as, astr_new(s[lasttab]), (size_t)i);
+    draw_minibuf_read(prompt, as, (size_t)i);
 
     thistab = COMPLETION_NOTCOMPLETING;
 

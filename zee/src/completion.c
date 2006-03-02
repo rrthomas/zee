@@ -53,7 +53,7 @@ static astr completion_write(list l)
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t i = 0, col = 0;
-  astr as = astr_new("Possible completions are:\n");
+  astr as = astr_new("");
   for (list p = list_first(l);
        p != l && i < list_length(l);
        p = list_next(p), i++) {
@@ -71,13 +71,29 @@ static astr completion_write(list l)
 }
 
 /*
- * Popup the completion window, showing cp->matches
- * cp - the completions to show
+ * Pop up the completion window, showing cp->matches. If there are no
+ * completions, the popup just says "No completions". If there is exactly
+ * one completion the popup says "Sole completion: %s".
  */
 void completion_popup(Completion *cp)
 {
+  assert(cp);
+  assert(cp->matches);
   cp->flags |= COMPLETION_POPPEDUP;
-  popup_set(astr_cat(astr_new("Completions\n\n"), completion_write(cp->matches)));
+  astr as = astr_new("Completions\n\n");
+  switch (list_length(cp->matches)) {
+    case 0:
+      astr_cat(as, astr_new("No completions"));
+      break;
+    case 1:
+      astr_cat(as, astr_new("Sole completion: "));
+      astr_cat(as, list_first(cp->matches)->item);
+      break;
+    default:
+      astr_cat(as, astr_new("Possible completions are:\n"));
+      astr_cat(as, completion_write(cp->matches));
+  }
+  popup_set(as);
   term_display();
 }
 
