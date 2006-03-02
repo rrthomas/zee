@@ -77,7 +77,7 @@ Set the fill column.\n\
 If an argument value is passed, set `fill_column' to that value,\n\
 otherwise with the current column value.\
 ",
-UINT(col, "Enter new fill column: "))
+UINT(col, "New fill column: "))
 {
   set_variable(astr_new("fill_column"),
                astr_afmt("%lu", list_empty(l) ? buf->pt.o + 1 : col));
@@ -171,9 +171,15 @@ Repeat a command a given number of times.\n\
 FIXME: Make it work as advertised: get the command,\n\
 and perform it as a single undo action.\
 ",
-UINT(reps, "Enter repeat count: "))
+UINT(reps, "Repeat count: ")
+COMMAND(cmd_name, "Command: "))
 {
-  minibuf_clear();
+  if (ok) {
+    Command cmd = get_command(cmd_name);
+    if (cmd)
+      for (size_t i = 0; i < reps; i++)
+        cmd(l);
+  }
 }
 END_DEF
 

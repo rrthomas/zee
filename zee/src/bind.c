@@ -100,40 +100,6 @@ void process_key(size_t key)
     add_cmd_to_macro();
 }
 
-/*--------------------------------------------------------------------------
- * Command name to C function mapping
- *--------------------------------------------------------------------------*/
-
-static struct {
-  const char *name;             /* The command name */
-  Command cmd;                  /* The function pointer */
-} ftable[] = {
-#define X(cmd_name, doc) \
-	{# cmd_name, F_ ## cmd_name},
-#include "tbl_funcs.h"
-#undef X
-};
-#define fentries (sizeof(ftable) / sizeof(ftable[0]))
-
-Command get_command(astr name)
-{
-  size_t i;
-  if (name)
-    for (i = 0; i < fentries; i++)
-      if (!astr_cmp(name, astr_new(ftable[i].name)))
-        return ftable[i].cmd;
-  return NULL;
-}
-
-static astr get_command_name(Command f)
-{
-  size_t i;
-  for (i = 0; i < fentries; i++)
-    if (ftable[i].cmd == f)
-      return astr_new(ftable[i].name);
-  return NULL;
-}
-
 /*
  * Read a command name from the minibuffer.
  */
@@ -141,9 +107,7 @@ astr minibuf_read_command_name(astr prompt)
 {
   astr ms;
   Completion *cp = completion_new();
-
-  for (size_t i = 0; i < fentries; ++i)
-    list_append(cp->completions, astr_new(ftable[i].name));
+  cp->completions = command_list();
 
   for (;;) {
     ms = minibuf_read_completion(prompt, astr_new(""), cp, &commands_history);
@@ -239,13 +203,13 @@ chord.\
 }
 END_DEF
 
-astr command_to_binding(Command f)
+astr command_to_binding(Command cmd)
 {
   size_t i, n = 0;
   astr as = astr_new("");
 
   for (i = 0; i < vec_items(bindings); i++)
-    if (vec_item(bindings, i, Binding).cmd == f) {
+    if (vec_item(bindings, i, Binding).cmd == cmd) {
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       if (n++ != 0)

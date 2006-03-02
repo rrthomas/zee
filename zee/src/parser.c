@@ -157,3 +157,45 @@ void cmd_eval(astr as)
   }
   expr = NULL;
 }
+
+/*--------------------------------------------------------------------------
+ * Command name to C function mapping
+ *--------------------------------------------------------------------------*/
+
+static struct {
+  const char *name;             /* The command name */
+  Command cmd;                  /* The function pointer */
+} ftable[] = {
+#define X(cmd_name, doc) \
+	{# cmd_name, F_ ## cmd_name},
+#include "tbl_funcs.h"
+#undef X
+};
+#define fentries (sizeof(ftable) / sizeof(ftable[0]))
+
+Command get_command(astr name)
+{
+  size_t i;
+  if (name)
+    for (i = 0; i < fentries; i++)
+      if (!astr_cmp(name, astr_new(ftable[i].name)))
+        return ftable[i].cmd;
+  return NULL;
+}
+
+astr get_command_name(Command cmd)
+{
+  size_t i;
+  for (i = 0; i < fentries; i++)
+    if (ftable[i].cmd == cmd)
+      return astr_new(ftable[i].name);
+  return NULL;
+}
+
+list command_list(void)
+{
+  list l = list_new();
+  for (size_t i = 0; i < fentries; ++i)
+    list_append(l, astr_new(ftable[i].name));
+  return l;
+}

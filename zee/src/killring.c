@@ -149,7 +149,7 @@ Copy the region to the kill buffer.\
 }
 END_DEF
 
-static int kill_helper(Command func)
+static int kill_helper(Command cmd)
 {
   int ok;
 
@@ -161,7 +161,7 @@ static int kill_helper(Command func)
   else {
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-    ok = func(NULL);
+    ok = cmd(NULL);
     if (ok)
       ok = CMDCALL(kill_region);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);

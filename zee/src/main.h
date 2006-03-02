@@ -131,8 +131,8 @@ typedef struct {
 /* Return type of completion_try. */
 enum {
   COMPLETION_NOTCOMPLETING,
-  COMPLETION_NOTMATCHED	= FALSE,
-  COMPLETION_MATCHED		= TRUE
+  COMPLETION_NOTMATCHED	=	FALSE,
+  COMPLETION_MATCHED =		TRUE
 };
 
 #define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */
@@ -243,31 +243,43 @@ typedef struct {
     int ok = TRUE; \
     assert(l);
 
-#define UINT(name, prompt) \
-    size_t name = 0; \
-    { \
-      if (!list_empty(l)) { \
-        astr as = list_behead(l); \
-        if ((name = strtoul(astr_cstr(as), NULL, 10)) == ULONG_MAX) \
-          ok = FALSE; \
-      } else do { \
-        astr ms; \
-        if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \
-          ok = CMDCALL(cancel); \
-          break; \
-        } \
-        if ((name = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX) \
-          ding(); \
-      } while (name == ULONG_MAX); \
-    }
-
-#define DEF_ARG(name, doc, ...) \
+#define DEF_ARG(name, doc, args) \
   DEF(name, doc) \
-  __VA_ARGS__
+  args
 
 #define END_DEF \
     return ok; \
   }
+
+#define STR(name, prompt) \
+    astr name = NULL; \
+    if (!list_empty(l)) \
+      name = list_behead(l); \
+    else if ((name = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) \
+      ok = CMDCALL(cancel);
+
+#define COMMAND(name, prompt) \
+    astr name = NULL; \
+    if (!list_empty(l)) \
+      name = list_behead(l); \
+    else if ((name = minibuf_read_command_name(astr_new(prompt))) == NULL) \
+      ok = CMDCALL(cancel);
+
+#define UINT(name, prompt) \
+    size_t name = 0; \
+    if (!list_empty(l)) { \
+      astr as = list_behead(l); \
+      if ((name = strtoul(astr_cstr(as), NULL, 10)) == ULONG_MAX) \
+        ok = FALSE; \
+    } else do { \
+      astr ms; \
+      if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \
+        ok = CMDCALL(cancel); \
+        break; \
+      } \
+      if ((name = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX) \
+        ding(); \
+    } while (name == ULONG_MAX);
 
 /* Call an interactive command */
 #define CMDCALL(name) \

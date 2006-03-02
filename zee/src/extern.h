@@ -32,7 +32,6 @@ astr command_to_binding(Command f);
 astr binding_to_command(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
-Command get_command(astr name);
 
 /* buffer.c --------------------------------------------------------------- */
 void buffer_new(void);
@@ -135,6 +134,9 @@ void minibuf_clear(void);
 
 /* parser.c --------------------------------------------------------------- */
 void cmd_eval(astr as);
+Command get_command(astr name);
+astr get_command_name(Command cmd);
+list command_list(void);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);
