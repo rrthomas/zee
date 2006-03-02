@@ -56,8 +56,6 @@ Buffer *buf = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
-/* The universal argument repeat count. */
-int uniarg = 1;
 
 static void run(void)
 {
@@ -79,9 +77,6 @@ static void run(void)
     popup_clear();
     minibuf_clear();
     process_key(key);
-
-    if (!(thisflag & FLAG_SET_UNIARG))
-      uniarg = 1;
   }
 }
 

@@ -165,20 +165,19 @@ You may also type up to 3 octal digits, to insert a character with that code.\
 }
 END_DEF
 
-DEF(universal_argument,
+DEF(repeat,
 "\
-Begin a numeric argument for the following command.\n\
-Digits or minus sign following C-u make up the numeric argument.\n\
-C-u following the digits or minus sign ends the argument.\
+Repeat a command a given number of times.\n\
+FIXME: Make it work as advertised!\
 ")
 {
-  size_t key, i = 0, arg = 0, digit;
+  size_t key, i = 0, arg = 0, digit, uniarg;
   int sgn = 1;
-  astr as = astr_new("");
 
   ok = TRUE;
 
   for (;;) {
+    astr as = astr_new("");
     minibuf_write(astr_afmt("%s-", astr_cstr(as)));
     key = getkey();
     minibuf_clear();
@@ -206,7 +205,6 @@ C-u following the digits or minus sign ends the argument.\
   }
 
   uniarg = arg * sgn;
-  thisflag |= FLAG_SET_UNIARG;
   minibuf_clear();
 }
 END_DEF

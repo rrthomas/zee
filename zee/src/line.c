@@ -496,6 +496,8 @@ Whichever character you type to run this command is inserted.\
 UINT(c, "Insert character: "))
 {
   if (ok) {
+    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
+
     weigh_mark();
 
     if (c <= 255) {
@@ -507,6 +509,8 @@ UINT(c, "Insert character: "))
       ding();
       ok = FALSE;
     }
+
+    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
 }
 END_DEF

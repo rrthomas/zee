@@ -197,10 +197,8 @@ enum {
 #define FLAG_NEED_RESYNC                0x0004
 /* Quit the editor as soon as possible */
 #define FLAG_QUIT                       0x0008
-/* The last command modified the universal argument variable `uniarg' */
-#define FLAG_SET_UNIARG                 0x0010
 /* We are defining a macro */
-#define FLAG_DEFINING_MACRO             0x0020
+#define FLAG_DEFINING_MACRO             0x0010
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

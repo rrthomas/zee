@@ -66,7 +66,7 @@ DEF(start_kbd_macro,
 "\
 Record subsequent keyboard input, defining a keyboard macro.\n\
 The commands are recorded even as they are executed.\n\
-Use C-x ) to finish recording and make the macro available.\n\
+Use end_kbd_macro to finish recording and make the macro available.\n\
 Use name_last_kbd_macro to give it a permanent name.\
 ")
 {
@@ -87,10 +87,7 @@ END_DEF
 
 DEF(end_kbd_macro,
 "\
-Finish defining a keyboard macro.\n\
-The definition was started by C-x (.\n\
-The macro is now available for use via C-x e.\n\
-FIXME: Replace keystrokes here and elsewhere with command names.\
+Finish defining a keyboard macro.\
 ")
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
@@ -152,8 +149,7 @@ void call_macro(Macro *mp)
 
 DEF(call_last_kbd_macro,
 "\
-Call the last keyboard macro that you defined with C-x (.\n\
-\n\
+Call the last keyboard macro that you defined.\n\
 To name a macro so you can call it after defining others, use\n\
 name_last_kbd_macro.\
 ")

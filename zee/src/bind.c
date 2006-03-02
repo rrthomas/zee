@@ -82,24 +82,17 @@ void init_bindings(void)
   bindings = vec_new(sizeof(Binding));
 }
 
-/* FIXME: Handling of universal arg should be done exclusively by
-   universal-argument. */
 void process_key(size_t key)
 {
-  int uni;
   Binding *p = get_binding(key);
 
   if (key == KBD_NOKEY)
     return;
 
-  if (p == NULL)
-    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-  for (uni = 0;
-       uni < uniarg &&
-         (p ? p->cmd(list_new()) : CMDCALL_UINT(self_insert_command, (int)key));
-       uni++);
-  if (p == NULL)
-    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+  if (p)
+    p->cmd(list_new());
+  else
+    CMDCALL_UINT(self_insert_command, (int)key);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the command call, to cope with start-kbd-macro */
