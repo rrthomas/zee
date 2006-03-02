@@ -134,34 +134,40 @@ void minibuf_clear(void)
 
 /*
  * Draws the string "<prompt><value>" in the minibuffer and leaves the
- * cursor at offset "pointto" within "<value>". If the string is too long
+ * cursor at offset "offset" within "<value>". If the string is too long
  * to fit on the terminal, various schemes are used to make it fit. First,
  * a scrolling window is used to show just part of the value. Second,
  * characters are chopped off the left of the prompt. If the terminal is
  * narrower than four charaters we give up and corrupt the display a bit.
  */
-static void draw_minibuf_read(astr prompt, astr value, size_t pointo)
+static void draw_minibuf_read(astr prompt, astr value, size_t offset)
 {
-  astr as = astr_dup(prompt);
-  size_t step = max(3, term_width() - astr_len(as) - 2);
-  size_t scroll_pos = 0;
-  if (pointo > step + 1) {
-    astr_cat_char(as, '$');
-    scroll_pos = pointo - (pointo - (step + 1)) % step;
-  }
-  size_t cursor_pos = astr_len(as) + pointo - scroll_pos;
-
-  if (astr_len(value) > scroll_pos + step) {
-    astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)(scroll_pos + step)));
-    astr_cat_char(as, '$');
-  } else
-    astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)astr_len(value)));
+  astr as = astr_dup(prompt); /* Text to print. */
+  size_t visible_width = max(3, term_width() - astr_len(prompt) - 2);
+  visible_width--; /********************/
+  size_t scroll_pos =
+    offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
+  if (scroll_pos > 0)
+    as = astr_cat_char(as, '$');
   
+  size_t cursor_pos = astr_len(as) + (offset - scroll_pos);
+    /* Cursor position within 'as'. */
+
+  as = astr_cat(as, astr_sub(
+    value,
+    (ptrdiff_t)scroll_pos,
+    (ptrdiff_t)min(astr_len(value), scroll_pos + visible_width)
+  ));
+  if (astr_len(value) > scroll_pos + visible_width)
+    as = astr_cat_char(as, '$');
+  
+  /* Handle terminals not wide enough to show "<prompt>$xxx$". */
   if (astr_len(as) > term_width()) {
     size_t to_lose = astr_len(as) - term_width();
-    as = astr_sub(as, (ptrdiff_t)to_lose, (ptrdiff_t)term_width());
+    as = astr_sub(as, (ptrdiff_t)to_lose, (ptrdiff_t)astr_len(as));
     cursor_pos -= to_lose;
   }
+  
   term_minibuf_write(as);
   term_move(term_height() - 1, cursor_pos);
   term_refresh();

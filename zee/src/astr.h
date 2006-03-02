@@ -62,8 +62,8 @@ const char *astr_cstr(const astr as);
 char *astr_char(const astr as, ptrdiff_t pos);
 
 /*
- * Return a new astr consisting of size characters from string as
- * starting from position pos.
+ * Return a new astr consisting of size characters from string as.
+ * Note that the second argument is a position, not a length.
  */
 astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to);
 

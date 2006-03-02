@@ -89,6 +89,7 @@ astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
   from = abspos(as, from);
   to = abspos(as, to);
 
+  /* FIXME: Can we get rid of this code? */
   if (from > to) {
     ptrdiff_t temp = from;
     from = to;
