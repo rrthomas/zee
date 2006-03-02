@@ -495,16 +495,18 @@ Whichever character you type to run this command is inserted.\
 ",
 UINT(c, "Insert character: "))
 {
-  weigh_mark();
+  if (ok) {
+    weigh_mark();
 
-  if (c <= 255) {
-    if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
-      fill_break_line();
-    insert_char((int)c);
-  } else {
-    ding();
-    ok = FALSE;
+    if (c <= 255) {
+      if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
+          get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
+        fill_break_line();
+      insert_char((int)c);
+    } else {
+      ding();
+      ok = FALSE;
+    }
   }
 }
 END_DEF

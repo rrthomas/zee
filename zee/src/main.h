@@ -252,11 +252,11 @@ typedef struct {
     { \
       if (!list_empty(l)) { \
         astr as = list_behead(l); \
-        if ((name = strtoul(astr_cstr(as), NULL, 10) == ULONG_MAX)) \
+        if ((name = strtoul(astr_cstr(as), NULL, 10)) == ULONG_MAX) \
           ok = FALSE; \
       } else do { \
         astr ms; \
-        if ((ms = minibuf_read(astr_new("Goto line: "), astr_new(""))) == NULL) { \
+        if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \
           ok = CMDCALL(cancel); \
           break; \
         } \
@@ -278,7 +278,7 @@ typedef struct {
   F_ ## name(list_new())
 
 /* Call an interactive command with an integer argument */
-#define CMDCALL_INT(name, arg) \
+#define CMDCALL_UINT(name, arg) \
   F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
 #endif /* !MAIN_H */

@@ -173,7 +173,7 @@ int goto_point(Point pt)
 {
   int ok = goto_line(pt.n);
   if (ok)
-    ok = CMDCALL_INT(goto_column, pt.o);
+    ok = CMDCALL_UINT(goto_column, pt.o);
   return ok;
 }
 

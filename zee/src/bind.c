@@ -96,7 +96,7 @@ void process_key(size_t key)
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
   for (uni = 0;
        uni < uniarg &&
-         (p ? p->cmd(list_new()) : CMDCALL_INT(self_insert_command, (int)key));
+         (p ? p->cmd(list_new()) : CMDCALL_UINT(self_insert_command, (int)key));
        uni++);
   if (p == NULL)
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
