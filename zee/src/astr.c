@@ -73,10 +73,10 @@ astr astr_cat(astr as, const astr src)
   return ncat(as, vec_array(src), astr_len(src));
 }
 
-void astr_cat_char(astr as, int c)
+astr astr_cat_char(astr as, int c)
 {
   char ch = c;
-  ncat(as, &ch, 1);
+  return ncat(as, &ch, 1);
 }
 
 astr astr_dup(const astr src)

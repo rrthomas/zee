@@ -160,33 +160,6 @@ static void draw_minibuf_read(astr prompt, astr value, astr match, size_t pointo
   term_refresh();
 }
 
-static void mb_suspend(void)
-{
-  CMDCALL(suspend);
-}
-
-static void mb_return(void)
-{
-  term_move(term_height() - 1, 0);
-  term_clrtoeol();
-}
-
-static void mb_cancel(void)
-{
-  term_move(term_height() - 1, 0);
-  term_clrtoeol();
-}
-
-static ptrdiff_t mb_bol(void)
-{
-  return 0;
-}
-
-static ptrdiff_t mb_eol(astr as)
-{
-  return astr_len(as);
-}
-
 static ptrdiff_t mb_backward_char(ptrdiff_t i)
 {
   if (i > 0)
@@ -312,19 +285,6 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
   return tab;
 }
 
-static ptrdiff_t mb_self_insert(int c, ptrdiff_t i, astr *as)
-{
-  if (c > 255 || !isprint(c))
-    ding();
-  else {
-    astr bs = astr_new("");
-    astr_cat_char(bs, c);
-    *as = astr_cat(astr_cat(astr_sub(*as, 0, i), bs), astr_sub(*as, i, (ptrdiff_t)astr_len(*as)));
-    i++;
-  }
-  return i;
-}
-
 /*
  * Read a string from the minibuffer using a completion.
  */
@@ -347,24 +307,24 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
     case KBD_NOKEY:
       break;
     case KBD_CTRL | 'z':
-      mb_suspend();
+      CMDCALL(suspend);
       break;
     case KBD_RET:
-      mb_return();
+      term_minibuf_write(astr_new(""));
       retval = as;
       ret = TRUE;
       break;
     case KBD_CANCEL:
-      mb_cancel();
+      term_minibuf_write(astr_new(""));
       ret = TRUE;
       break;
     case KBD_CTRL | 'a':
     case KBD_HOME:
-      i = mb_bol();
+      i = 0;
       break;
     case KBD_CTRL | 'e':
     case KBD_END:
-      i = mb_eol(as);
+      i = astr_len(as);
       break;
     case KBD_CTRL | 'b':
     case KBD_LEFT:
@@ -403,7 +363,15 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       thistab = mb_complete(cp, lasttab, &as, &i);
       break;
     default:
-      i = mb_self_insert(c, i, &as);
+      if (c > 255 || !isprint(c))
+        ding();
+      else {
+        *as = astr_cat(
+          astr_cat_char(astr_sub(*as, 0, i), c),
+          astr_sub(*as, i, (ptrdiff_t)astr_len(*as))
+        );
+        i++;
+      }
     }
 
     lasttab = thistab;
