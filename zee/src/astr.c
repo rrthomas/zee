@@ -84,10 +84,6 @@ astr astr_dup(const astr src)
   return astr_cat(astr_new(""), src);
 }
 
-/*
- * Return a substring of 'as'. Both 'from' and 'to' are measured from the
- * beginning of the string.
- */
 astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
 {
   from = abspos(as, from);
@@ -158,9 +154,6 @@ astr astr_fgets(FILE *fp)
   return as;
 }
 
-/*
- * printf into an astr. Remember to pass astr arguments through astr_cstr.
- */
 astr astr_afmt(const char *fmt, ...)
 {
   va_list ap;
