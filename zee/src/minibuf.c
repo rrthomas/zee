@@ -68,10 +68,7 @@ astr minibuf_read(astr as, astr value)
 /*
  * Repeatedly prompts until the user gives one of the answers in
  * cp->completions.
- * Returns NULL if cancelled, otherwise returns the index into cp->completions
- * of the chosen option. Note that cp->completions gets sorted so this index
- * may not be what you expect.
- * FIXME: This is crazy. Return the astr.
+ * Returns NULL if cancelled, otherwise returns the chosen option.
  */
 static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 {
