@@ -57,8 +57,11 @@ astr file_read(astr filename)
   FILE *fp;
   if ((fp = fopen(astr_cstr(filename), "r")) == NULL)
     return NULL;
-  else
-    return astr_fread(fp);
+  else {
+    astr as = astr_fread(fp);
+    fclose(fp);
+    return as;
+  }
 }
 
 /*
