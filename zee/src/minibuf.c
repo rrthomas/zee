@@ -144,7 +144,7 @@ static void draw_minibuf_read(astr prompt, astr value, size_t offset)
 {
   astr as = astr_dup(prompt); /* Text to print. */
   size_t visible_width = max(3, term_width() - astr_len(prompt) - 2);
-  visible_width--; /********************/
+  visible_width--; /* A hack to avoid using the b.r. corner of the screen. */
   size_t scroll_pos =
     offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
   if (scroll_pos > 0)
@@ -285,10 +285,9 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
     } else {
       tab = completion_try(cp, *as);
       completion_popup(cp);
-      assert(tab != COMPLETION_NOTCOMPLETING);
       if (tab) {
         if (astr_cmp(*as, cp->match) != 0)
-          tab = COMPLETION_NOTCOMPLETING;
+          tab = COMPLETION_NOTMATCHED;
         *as = cp->match;
         *i = astr_len(*as);
       } else
@@ -304,7 +303,7 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
  */
 astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *hp)
 {
-  int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
+  int c, thistab, lasttab = COMPLETION_NOTMATCHED, ret = FALSE;
   ptrdiff_t i;
   astr as = astr_dup(value), retval = NULL, saved = NULL;
 
@@ -314,7 +313,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
   for (i = astr_len(as);;) {
     draw_minibuf_read(prompt, as, (size_t)i);
 
-    thistab = COMPLETION_NOTCOMPLETING;
+    thistab = COMPLETION_NOTMATCHED;
 
     switch (c = getkey()) {
     case KBD_NOKEY:

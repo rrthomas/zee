@@ -130,7 +130,6 @@ typedef struct {
 
 /* Return type of completion_try. */
 enum {
-  COMPLETION_NOTCOMPLETING	= 2,
   COMPLETION_NOTMATCHED 	= FALSE,
   COMPLETION_MATCHED 		= TRUE
 };
