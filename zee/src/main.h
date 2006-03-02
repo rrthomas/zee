@@ -112,7 +112,6 @@ typedef struct {
   Undo *next_undop;     /* The undo deltas recorded for this buffer */
   Undo *last_undop;
   int flags;                    /* Buffer flags */
-  list vars;                    /* Buffer-local variables */
   astr filename;               /* The name of the file being edited */
 } Buffer;
 
@@ -132,8 +131,8 @@ typedef struct {
 /* Return type of completion_try. */
 enum {
   COMPLETION_NOTCOMPLETING,
-  COMPLETION_NOTMATCHED 	= FALSE,
-  COMPLETION_MATCHED 		= TRUE
+  COMPLETION_NOTMATCHED	= FALSE,
+  COMPLETION_MATCHED		= TRUE
 };
 
 #define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */

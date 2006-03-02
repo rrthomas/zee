@@ -26,7 +26,7 @@
 #include "extern.h"
 
 
-static list root_varlist;
+static list varlist;
 
 typedef struct {
   astr key;
@@ -35,10 +35,10 @@ typedef struct {
 
 void init_variables(void)
 {
-  root_varlist = list_new();
+  varlist = list_new();
 }
 
-static list variable_find(list varlist, astr key)
+static list variable_find(astr key)
 {
   list p;
 
@@ -50,10 +50,10 @@ static list variable_find(list varlist, astr key)
   return NULL;
 }
 
-static void variable_update(list varlist, astr key, astr value)
+void set_variable(astr key, astr value)
 {
   if (key && value) {
-    list temp = variable_find(varlist, key);
+    list temp = variable_find(key);
 
     if (temp == NULL || temp->item == NULL) {
       vpair *vp = zmalloc(sizeof(vpair));
@@ -97,12 +97,9 @@ astr get_variable(astr var)
 {
   var_entry *p;
 
-  /* Have to be able to run this before the first buffer is created. */
-  if (buf->vars) {
-    list temp = variable_find(buf->vars, var);
-    if (temp && temp->item)
-      return ((vpair *)(temp->item))->value;
-  }
+  list temp = variable_find(var);
+  if (temp && temp->item)
+    return ((vpair *)(temp->item))->value;
 
   if ((p = get_variable_default(var)))
     return astr_new(p->val);
@@ -128,18 +125,6 @@ int get_variable_bool(astr var)
     return !astr_cmp(as, astr_new("true"));
 
   return FALSE;
-}
-
-void set_variable(astr var, astr val)
-{
-  list varlist = root_varlist;
-
-  /* Variables automatically become buffer-local when set if there is
-     a buffer. */
-  if (buf->vars)
-    varlist = buf->vars;
-
-  variable_update(varlist, var, val);
 }
 
 astr minibuf_read_variable_name(astr msg)
