@@ -39,19 +39,6 @@ Completion *completion_new(void)
 }
 
 /*
- * Calculate the maximum length of the astrs in `l'.
- */
-static size_t calculate_max_length(list l)
-{
-  size_t maxlen = 0;
-
-  for (list p = list_first(l); p != l; p = list_next(p))
-    maxlen = max(maxlen, astr_len(p->item));
-
-  return maxlen;
-}
-
-/*
  * Write the astrs in `l' in a set of columns. The width of the
  * columns is chosen to be big enough for the longest astr, with a
  * COLUMN_GAP-character gap between each column.
@@ -59,11 +46,14 @@ static size_t calculate_max_length(list l)
 #define COLUMN_GAP 5
 static astr completion_write(list l)
 {
-  astr as = astr_new("Possible completions are:\n");
-  size_t maxlen = calculate_max_length(l) + COLUMN_GAP;
+  size_t maxlen = 0;
+  for (list p = list_first(l); p != l; p = list_next(p))
+    maxlen = max(maxlen, astr_len(p->item));
+  maxlen += COLUMN_GAP;
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t i = 0, col = 0;
+  astr as = astr_new("Possible completions are:\n");
   for (list p = list_first(l);
        p != l && i < list_length(l);
        p = list_next(p), i++) {
@@ -89,6 +79,18 @@ static void popup_completion(Completion *cp)
   cp->flags |= COMPLETION_POPPEDUP;
   popup_set(astr_cat(astr_new("Completions\n\n"), completion_write(cp->matches)));
   term_display();
+}
+
+/*
+ * Returns the length of the longest string that is a prefix of
+ * both as and bs.
+ */
+static int common_prefix_length(astr as, astr bs) {
+  size_t len = min(astr_len(as), astr_len(bs));
+  for (size_t i = 0; i<len; i++)
+    if (*astr_char(as, i) != *astr_char(bs, i))
+      return i;
+  return len;
 }
 
 static int hcompar(const void *p1, const void *p2)
@@ -119,18 +121,12 @@ int completion_try(Completion *cp, astr search)
   if (list_empty(cp->matches))
     return COMPLETION_NOTMATCHED;
 
-  size_t i;
   cp->match = list_first(cp->matches)->item;
-  for (i = astr_len(search); i < astr_len(cp->match); i++) {
-    char c = *astr_char(cp->match, (ptrdiff_t)i); /* FIXME: Broken if first match is a prefix of all other matches. */
-    for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p)) {
-      /* FIXME: Broken if p->item is a prefix of all other matches. */
-      if (*astr_char(p->item, (ptrdiff_t)i) != c)
-        break;
-    }
-  }
+  size_t prefix_len = astr_len(cp->match);
+  for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p))
+    prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
+  cp->match = astr_sub(cp->match, 0, (ptrdiff_t)prefix_len);
 
-  cp->match = astr_sub(cp->match, 0, (ptrdiff_t)i);
   popup_completion(cp);
   return COMPLETION_MATCHED;
 }

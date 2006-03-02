@@ -214,23 +214,6 @@ enum {
 #endif
 #endif
 
-/* Define an interactive command.
- *
- * DEF(command, doc) declares a command.
- * DEF_ARG(command, doc, arg1, ..., argn) declares a command that
- * takes arguments.
- * INT(arg) declares an integer argument.
- *
- * The C prototype for commands is Command (see below).
- *
- * To call such a command with an argument list a1, a2, ..., an, pass
- * the arguments (which should all be astrs) in a list.
- *
- * The macro `CMDCALL' can be used to call zero-argument commands.
- * The macro `CMDCALL_INT' can be used to call commands taking a
- * single integer argument.
- */
-
 /* The type of a user command. */
 typedef int (*Command)(list l);
 
@@ -239,6 +222,22 @@ typedef struct {
   Command cmd;
 } Binding;
 
+/* Define an interactive command.
+ *
+ * DEF(command, doc) declares a command.
+ * DEF_ARG(command, doc, arg1, ..., argn) declares a command that
+ * takes arguments.
+ * INT(arg) declares an integer argument.
+ *
+ * The C prototype for commands is Command (see above).
+ *
+ * To call such a command with an argument list a1, a2, ..., an, pass
+ * the arguments (which should all be astrs) in a list.
+ *
+ * The macro `CMDCALL' can be used to call zero-argument commands.
+ * The macro `CMDCALL_INT' can be used to call commands taking a
+ * single integer argument.
+ */
 #define DEF(name, doc) \
   int F_ ## name(list l) \
   { \
