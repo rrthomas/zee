@@ -165,46 +165,14 @@ You may also type up to 3 octal digits, to insert a character with that code.\
 }
 END_DEF
 
-DEF(repeat,
+DEF_ARG(repeat,
 "\
 Repeat a command a given number of times.\n\
-FIXME: Make it work as advertised!\
-")
+FIXME: Make it work as advertised: get the command,\n\
+and perform it as a single undo action.\
+",
+UINT(reps, "Enter repeat count: "))
 {
-  size_t key, i = 0, arg = 0, digit, uniarg;
-  int sgn = 1;
-
-  ok = TRUE;
-
-  for (;;) {
-    astr as = astr_new("");
-    minibuf_write(astr_afmt("%s-", astr_cstr(as)));
-    key = getkey();
-    minibuf_clear();
-
-    if (key == KBD_CANCEL) {
-      ok = CMDCALL(cancel);
-      break;
-    } else if (isdigit(key & 0xff)) {
-      /* Digit pressed. */
-      digit = (key & 0xff) - '0';
-      astr_cat(as, astr_afmt(" %d", digit));
-      arg = arg * 10 + digit;
-      i++;
-    } else if (key == (KBD_CTRL | 'u'))
-      break;
-    else if (key == '-' && i == 0) {
-      if (sgn > 0) {
-        sgn = -sgn;
-        astr_cat(as, astr_new(" -"));
-      }
-    } else {
-      ungetkey(key);
-      break;
-    }
-  }
-
-  uniarg = arg * sgn;
   minibuf_clear();
 }
 END_DEF
