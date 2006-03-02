@@ -65,6 +65,13 @@ astr minibuf_read(astr as, astr value)
   return minibuf_read_completion(as, value, NULL, NULL);
 }
 
+/*
+ * Repeatedly prompts until the user gives one of the answers in
+ * cp->completions.
+ * Returns the index into cp->completions of the chosen option. Note that
+ * cp->completions gets sorted so this index may not be what you expect.
+ * FIXME: This is crazy. Return the astr.
+ */
 static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 {
   astr as;
@@ -94,7 +101,12 @@ static int minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
   }
 }
 
-int minibuf_read_yesno(astr as)
+/*
+ * Forces the user to answer "yes" or "no".
+ * Returns TRUE for "yes" and FALSE for "no".
+ * Suggestion: inline? Probably not.
+ */
+int minibuf_read_yesno(astr prompt)
 {
   Completion *cp;
   int retvalue;
@@ -103,7 +115,7 @@ int minibuf_read_yesno(astr as)
   list_append(cp->completions, astr_new("yes"));
   list_append(cp->completions, astr_new("no"));
 
-  retvalue = minibuf_read_forced(as, astr_new("Please answer `yes' or `no'."), cp);
+  retvalue = minibuf_read_forced(prompt, astr_new("Please answer `yes' or `no'."), cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
@@ -116,7 +128,11 @@ int minibuf_read_yesno(astr as)
   return retvalue;
 }
 
-int minibuf_read_boolean(astr as)
+/*
+ * Forces the user to answer "true" or "false".
+ * Suggestion: inline? Probably not.
+ */
+int minibuf_read_boolean(astr prompt)
 {
   int retvalue;
   Completion *cp = completion_new();
@@ -124,7 +140,7 @@ int minibuf_read_boolean(astr as)
   list_append(cp->completions, astr_new("true"));
   list_append(cp->completions, astr_new("false"));
 
-  retvalue = minibuf_read_forced(as, astr_new("Please answer `true' or `false'."), cp);
+  retvalue = minibuf_read_forced(prompt, astr_new("Please answer `true' or `false'."), cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
