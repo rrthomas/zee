@@ -118,7 +118,6 @@ size_t popup_pos(void)
 
 /*
  * Scroll the popup text up.
- * FIXME: Bad choice of name. This behaviour is appropriate for PageDown.
  */
 void popup_scroll_up(void)
 {
@@ -132,7 +131,6 @@ void popup_scroll_up(void)
 
 /*
  * Scroll the popup text down.
- * FIXME: Bad choice of name. This behaviour is appropriate for PageUp.
  */
 void popup_scroll_down(void)
 {
