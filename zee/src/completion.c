@@ -87,8 +87,8 @@ static void popup_completion(Completion *cp)
  */
 static size_t common_prefix_length(astr as, astr bs) {
   size_t len = min(astr_len(as), astr_len(bs));
-  for (ptrdiff_t i = 0; i<len; i++)
-    if (*astr_char(as, i) != *astr_char(bs, i))
+  for (size_t i = 0; i < len; i++)
+    if (*astr_char(as, (ptrdiff_t)i) != *astr_char(bs, (ptrdiff_t)i))
       return (size_t)i;
   return len;
 }
