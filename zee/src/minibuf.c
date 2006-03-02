@@ -231,23 +231,23 @@ static void mb_delete_char(ptrdiff_t i, astr *as)
     ding();
 }
 
-static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
-{
-  if (cp == NULL)
-    ding();
-  else if (cp->flags & COMPLETION_POPPEDUP) {
-    popup_scroll_down();
-    thistab = lasttab;
-  }
-  return thistab;
-}
-
 static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
 {
   if (cp == NULL)
     ding();
   else if (cp->flags & COMPLETION_POPPEDUP) {
     popup_scroll_up();
+    thistab = lasttab;
+  }
+  return thistab;
+}
+
+static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
+{
+  if (cp == NULL)
+    ding();
+  else if (cp->flags & COMPLETION_POPPEDUP) {
+    popup_scroll_down();
     thistab = lasttab;
   }
   return thistab;
@@ -295,7 +295,7 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
     ding();
   else {
     if (tab == COMPLETION_MATCHED && cp->flags & COMPLETION_POPPEDUP) {
-      popup_scroll_up();
+      popup_scroll_down();
     } else {
       tab = completion_try(cp, *as);
       assert(tab != COMPLETION_NOTCOMPLETING);
@@ -385,11 +385,11 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
-      thistab = mb_scroll_down(cp, thistab, lasttab);
+      thistab = mb_scroll_up(cp, thistab, lasttab);
       break;
     case KBD_CTRL | 'v':
     case KBD_PGDN:
-      thistab = mb_scroll_up(cp, thistab, lasttab);
+      thistab = mb_scroll_down(cp, thistab, lasttab);
       break;
     case KBD_UP:
     case KBD_META | 'p':

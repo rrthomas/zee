@@ -119,7 +119,7 @@ size_t popup_pos(void)
 /*
  * Scroll the popup text up.
  */
-void popup_scroll_up(void)
+void popup_scroll_down(void)
 {
   if (popup_pos_line + term_height() - 3 < popup_num_lines)
     popup_pos_line += term_height() - 3;
@@ -132,7 +132,7 @@ void popup_scroll_up(void)
 /*
  * Scroll the popup text down.
  */
-void popup_scroll_down(void)
+void popup_scroll_up(void)
 {
   if (popup_pos_line >= (term_height() - 3))
     popup_pos_line -= term_height() - 3;
