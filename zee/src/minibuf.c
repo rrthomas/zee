@@ -332,7 +332,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
 {
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
-  char *s[] = {"", " [No match]", ""};
+  char *s[] = {" [No match]", "", ""};
   astr as = astr_dup(value), retval = NULL, saved = NULL;
 
   if (hp)
