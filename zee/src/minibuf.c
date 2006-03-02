@@ -83,7 +83,7 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
       return NULL;
 
     /* Complete partial words if possible. */
-    if (completion_try(cp, as) == COMPLETION_MATCHED) {
+    if (completion_try(cp, as)) {
       as = astr_dup(cp->match);
       if (astr_len(as) == astr_len(list_first(cp->matches)->item))
         return as;
@@ -302,7 +302,7 @@ static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
     } else {
       tab = completion_try(cp, *as);
       assert(tab != COMPLETION_NOTCOMPLETING);
-      if (tab == COMPLETION_MATCHED) {
+      if (tab) {
         if (astr_cmp(*as, cp->match) != 0)
           tab = COMPLETION_NOTCOMPLETING;
         *as = cp->match;
@@ -336,7 +336,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
   int c, thistab, lasttab = COMPLETION_NOTCOMPLETING, ret = FALSE;
   ptrdiff_t i;
   char *s[] = {"", " [No match]", ""};
-  astr as = astr_dup(value), retval = NULL, saved;
+  astr as = astr_dup(value), retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);

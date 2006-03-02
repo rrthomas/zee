@@ -132,8 +132,8 @@ typedef struct {
 /* Return type of completion_try. */
 enum {
   COMPLETION_NOTCOMPLETING,
-  COMPLETION_NOTMATCHED,
-  COMPLETION_MATCHED
+  COMPLETION_NOTMATCHED 	= FALSE,
+  COMPLETION_MATCHED 		= TRUE
 };
 
 #define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */
