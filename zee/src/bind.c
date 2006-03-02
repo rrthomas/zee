@@ -161,12 +161,12 @@ astr minibuf_read_command_name(astr prompt)
     /* Complete partial words if possible */
     if (completion_try(cp, ms) == COMPLETION_MATCHED)
       ms = astr_dup(cp->match);
-    for (list p = list_first(cp->completions); p != cp->completions;
+
+    for (list p = list_first(cp->completions);
+         p != cp->completions && astr_cmp(ms, p->item);
          p = list_next(p))
-      if (!astr_cmp(ms, p->item)) {
-        ms = astr_dup(p->item); /* FIXME: Eh? No-op? */
-        break;
-      }
+      ;
+
     if (get_command(ms) || get_macro(ms)) {
       add_history_element(&commands_history, ms);
       minibuf_clear();        /* Remove any error message */
