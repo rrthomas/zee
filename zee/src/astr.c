@@ -88,13 +88,6 @@ astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
 {
   from = abspos(as, from);
   to = abspos(as, to);
-
-  if (from > to) {
-    ptrdiff_t temp = from;
-    from = to;
-    to = temp;
-  }
-
   return ncat(astr_new(""), astr_char(as, from), (size_t)(to - from));
 }
 
