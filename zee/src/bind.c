@@ -215,26 +215,21 @@ astr command_to_binding(Command cmd)
   return as;
 }
 
-DEF(key_find,
+DEF_ARG(key_find,
 "\
 Show key sequences that invoke the command COMMAND.\n\
-FIXME: Make it work non-interactively.\
-")
+",
+COMMAND(name, "Where is command: "))
 {
-  astr name;
-  Command f;
-
-  name = minibuf_read_command_name(astr_new("Where is command: "));
-
-  if ((f = get_command(name)) == NULL)
-    ok = FALSE;
-  else {
-    astr bindings = command_to_binding(f);
-
-    if (astr_len(bindings) > 0)
-      minibuf_write(astr_afmt("%s is on %s", astr_cstr(name), astr_cstr(bindings)));
-    else
-      minibuf_write(astr_afmt("%s is not on any key", astr_cstr(name)));
+  if (ok) {
+    Command cmd = get_command(name);
+    if (cmd) {
+      astr bindings = command_to_binding(cmd);
+      if (astr_len(bindings) > 0)
+        minibuf_write(astr_afmt("%s is on %s", astr_cstr(name), astr_cstr(bindings)));
+      else
+        minibuf_write(astr_afmt("%s is not on any key", astr_cstr(name)));
+    }
   }
 }
 END_DEF
