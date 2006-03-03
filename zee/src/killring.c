@@ -189,7 +189,15 @@ Kill characters forward until encountering the end of a word.\
 }
 END_DEF
 
-/* FIXME: Broken! Inserts ^J characters. */
+DEF(backward_kill_word,
+"\
+Kill characters backward until encountering the end of a word.\
+")
+{
+  ok = kill_helper(F_edit_select_word_backward);
+}
+END_DEF
+
 DEF(edit_paste,
 "\
 Reinsert the stretch of killed text most recently killed.\n\

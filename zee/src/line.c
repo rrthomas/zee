@@ -425,7 +425,7 @@ int insert_nstring(astr as)
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
-    if (!astr_cmp(astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as)), astr_new("\n"))) {
+    if (*astr_char(as, (ptrdiff_t)i) == '\n') {
       intercalate_newline();
       CMDCALL(edit_navigate_next_character);
     } else {

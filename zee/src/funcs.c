@@ -268,13 +268,23 @@ Select the current word.\
 ")
 {
   if (!eolp() && isalnum(following_char()))
-    ok &= CMDCALL(edit_navigate_next_word);
-  if (ok)
-    ok &= CMDCALL(edit_select_on);
-  if (ok)
-    ok &= CMDCALL(edit_navigate_previous_word);
-  if (ok)
-    ok &= CMDCALL(edit_select_other_end);
+    ok = CMDCALL(edit_navigate_next_word) &&
+      CMDCALL(edit_select_on) &&
+      CMDCALL(edit_navigate_previous_word) &&
+      CMDCALL(edit_select_other_end);
+}
+END_DEF
+
+DEF(edit_select_word_backward,
+"\
+Select the previous word.\
+")
+{
+  if (!bolp() && isalnum(preceding_char()))
+    ok = CMDCALL(edit_navigate_previous_word) &&
+      CMDCALL(edit_select_on) &&
+      CMDCALL(edit_navigate_next_word) &&
+      CMDCALL(edit_select_other_end);
 }
 END_DEF
 

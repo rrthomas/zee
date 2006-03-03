@@ -55,6 +55,7 @@ key_bind "M-DEL" edit_kill_word
 key_bind "C-c" edit_copy
 # Delete without modifying clipboard.
 key_bind "BS" edit_delete_previous_character
+bind_key "M-BS" edit_kill_word_backward
 key_bind "DEL" edit_delete_next_character
 # Paste.
 key_bind "C-v" edit_paste
