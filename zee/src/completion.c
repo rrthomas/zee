@@ -79,7 +79,6 @@ void completion_popup(Completion *cp)
 {
   assert(cp);
   assert(cp->matches);
-  cp->flags |= COMPLETION_POPPEDUP;
   astr as = astr_new("Completions\n\n");
   switch (list_length(cp->matches)) {
     case 0:
@@ -116,16 +115,15 @@ static int hcompar(const void *p1, const void *p2)
 
 /*
  * Match completions
- * cp - the completions (the list gets sorted, and cp->matches and cp->match
- *   get filled in.)
- * search - the prefix to search for (not modified)
- * Returns COMPLETION_NOTMATCHED (== FALSE) if `search' is not a prefix of any
- * completion, and COMPLETION_MATCHED (== TRUE) otherwise. Never returns
- * COMPLETION_NOTMATCHING.
+ * cp - the completions (the list gets sorted, and if the return value is
+ *   TRUE cp->matches and cp->match get filled in.)
+ * search - the prefix to search for (not modified).
+ * Returns FALSE if `search' is not a prefix of any completion, and TRUE
+ * otherwise.
  *
  * To see the completions in a popup, the caller should call "
  *
- * To determine if the match was exact, first check for COMPLETION_MATCHED,
+ * To determine if the match was exact, first check for a TRUE result,
  * then check whether
  *   astr_length(cp->match) == astr_length(list_first(cp->matches)->item)
  * This works because the exact match is first in sorted order.
@@ -144,7 +142,7 @@ int completion_try(Completion *cp, astr search)
     }
 
   if (list_empty(cp->matches))
-    return COMPLETION_NOTMATCHED;
+    return FALSE;
 
   cp->match = list_first(cp->matches)->item;
   size_t prefix_len = astr_len(cp->match);
@@ -152,5 +150,5 @@ int completion_try(Completion *cp, astr search)
     prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
   cp->match = astr_sub(cp->match, 0, (ptrdiff_t)prefix_len);
 
-  return COMPLETION_MATCHED;
+  return TRUE;
 }

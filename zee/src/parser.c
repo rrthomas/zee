@@ -129,8 +129,9 @@ static astr gettok(void)
  */
 void cmd_eval(astr as)
 {
+  assert(as);
   pos = 0;
-  assert((expr = as));
+  expr = as;
   line = 0;
   bol = TRUE;
 

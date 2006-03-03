@@ -123,7 +123,7 @@ astr minibuf_read_command_name(astr prompt)
     }
 
     /* Complete partial words if possible */
-    if (completion_try(cp, ms) == COMPLETION_MATCHED)
+    if (completion_try(cp, ms))
       ms = astr_dup(cp->match);
 
     if (get_command(ms) || get_macro(ms)) {

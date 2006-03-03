@@ -217,28 +217,6 @@ static void mb_delete_char(ptrdiff_t i, astr *as)
     ding();
 }
 
-static int mb_scroll_up(Completion *cp, int thistab, int lasttab)
-{
-  if (cp == NULL)
-    ding();
-  else if (cp->flags & COMPLETION_POPPEDUP) {
-    popup_scroll_up();
-    thistab = lasttab;
-  }
-  return thistab;
-}
-
-static int mb_scroll_down(Completion *cp, int thistab, int lasttab)
-{
-  if (cp == NULL)
-    ding();
-  else if (cp->flags & COMPLETION_POPPEDUP) {
-    popup_scroll_down();
-    thistab = lasttab;
-  }
-  return thistab;
-}
-
 static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
 {
   ptrdiff_t i = *_i;
@@ -275,45 +253,28 @@ static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
   *_saved = saved;
 }
 
-static ptrdiff_t mb_complete(Completion *cp, int tab, astr *as, ptrdiff_t *i)
-{
-  if (cp == NULL)
-    ding();
-  else {
-    if (tab == COMPLETION_MATCHED && cp->flags & COMPLETION_POPPEDUP) {
-      popup_scroll_down();
-    } else {
-      tab = completion_try(cp, *as);
-      completion_popup(cp);
-      if (tab) {
-        if (astr_cmp(*as, cp->match) != 0)
-          tab = COMPLETION_NOTMATCHED;
-        *as = cp->match;
-        *i = astr_len(*as);
-      } else
-        ding();
-    }
-  }
-
-  return tab;
-}
-
 /*
  * Read a string from the minibuffer using a completion.
  */
 astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *hp)
 {
-  int c, thistab, lasttab = COMPLETION_NOTMATCHED, ret = FALSE;
+  int c, ret = FALSE;
   ptrdiff_t i;
   astr as = astr_dup(value), retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);
 
-  for (i = astr_len(as);;) {
-    draw_minibuf_read(prompt, as, (size_t)i);
+  astr oldAs = NULL;
 
-    thistab = COMPLETION_NOTMATCHED;
+  for (i = astr_len(as);;) {
+    if (cp != NULL && (!oldAs || astr_cmp(oldAs, as))) {
+      /* Using completions and 'as' has changed, so display new completions. */
+      completion_try(cp, as);
+      completion_popup(cp);
+      oldAs = astr_dup(as);
+    }
+    draw_minibuf_read(prompt, as, (size_t)i);
 
     switch (c = getkey()) {
     case KBD_NOKEY:
@@ -357,11 +318,17 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
-      thistab = mb_scroll_up(cp, thistab, lasttab);
+      if (cp == NULL)
+        ding();
+      else
+        popup_scroll_up();
       break;
     case KBD_CTRL | 'v':
     case KBD_PGDN:
-      thistab = mb_scroll_down(cp, thistab, lasttab);
+      if (cp == NULL)
+        ding();
+      else
+        popup_scroll_down();
       break;
     case KBD_UP:
     case KBD_META | 'p':
@@ -372,7 +339,15 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       mb_next_history(hp, &as, &i, &saved);
       break;
     case KBD_TAB:
-      thistab = mb_complete(cp, lasttab, &as, &i);
+      if (cp == NULL || list_empty(cp->matches))
+        ding();
+      else {
+        if (astr_cmp(as, cp->match) != 0) {
+          as = cp->match;
+          i = astr_len(as);
+        } else
+          popup_scroll_down();
+      }
       break;
     default:
       if (c > 255 || !isprint(c))
@@ -386,7 +361,6 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       }
     }
 
-    lasttab = thistab;
     if (ret)
       break;
   }

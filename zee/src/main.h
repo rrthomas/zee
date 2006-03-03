@@ -128,16 +128,7 @@ typedef struct {
 
 } Window;
 
-/* Return type of completion_try. */
-enum {
-  COMPLETION_NOTMATCHED 	= FALSE,
-  COMPLETION_MATCHED 		= TRUE
-};
-
-#define COMPLETION_POPPEDUP             0x2 /* Can I renumber this to 0x1? */
-
 typedef struct {
-  int flags;                    /* Flags */
   list completions;             /* The completion strings */
   list matches;                 /* The matches list */
   astr match;                   /* The current matched string */
