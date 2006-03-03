@@ -189,7 +189,7 @@ Kill characters forward until encountering the end of a word.\
 }
 END_DEF
 
-DEF(backward_kill_word,
+DEF(edit_kill_word_backward,
 "\
 Kill characters backward until encountering the end of a word.\
 ")
