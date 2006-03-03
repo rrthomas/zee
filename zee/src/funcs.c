@@ -168,18 +168,19 @@ END_DEF
 
 DEF_ARG(edit_repeat,
 "\
-Repeat a command a given number of times.\n\
-FIXME: Make it work as advertised: get the command,\n\
-and perform it as a single undo action.\
+Repeat a command a given number of times.\
 ",
 UINT(reps, "Repeat count: ")
-COMMAND(cmd_name, "Command: "))
+COMMAND(name, "Command: "))
 {
   if (ok) {
-    Command cmd = get_command(cmd_name);
-    if (cmd)
+    Command cmd = get_command(name);
+    if (cmd) {
+      undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
       for (size_t i = 0; i < reps; i++)
         cmd(l);
+      undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+    }
   }
 }
 END_DEF
