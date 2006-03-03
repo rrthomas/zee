@@ -108,17 +108,6 @@ When selecting text, move the cursor to the other end of the selection.\
 }
 END_DEF
 
-DEF(edit_select_all,
-"\
-Select the whole file.\
-")
-{
-  CMDCALL(edit_navigate_end_file);
-  CMDCALL(edit_select_on);
-  CMDCALL(edit_navigate_start_file);
-}
-END_DEF
-
 static int quoted_insert_octal(int c1)
 {
   int c2, c3;

@@ -24,7 +24,6 @@ key_bind "C-HOME" edit_navigate_start_file
 key_bind "C-END" edit_navigate_end_file
 
 # Selection.
-# select_all
 # select_other_end
 key_bind "M-h" edit_select_paragraph
 key_bind "C-@" edit_select_on

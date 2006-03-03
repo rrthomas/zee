@@ -27,62 +27,41 @@
 
 static astr killed_text;
 
-static void flush_kill_buffer(void)
+static void clear_kill_buffer(void)
 {
   killed_text = astr_new("");
 }
 
-static int kill_line(void)
+DEF(edit_kill_line,
+"\
+Delete the current line.\
+")
 {
   astr as;
 
-  if (warn_if_readonly_buffer())
-    return FALSE;
-
-  if (!eolp()) {
-    size_t len = astr_len(buf->pt.p->item) - buf->pt.o;
-
-    astr_cat(killed_text, astr_sub(buf->pt.p->item, (ptrdiff_t)buf->pt.o, (ptrdiff_t)astr_len(buf->pt.p->item)));
-    delete_nstring(len, &as);
-
-    thisflag |= FLAG_DONE_KILL;
-
-    if (!bolp())
-      return TRUE;
-  }
-
-  if (list_next(buf->pt.p) != buf->lines) {
-    if (!CMDCALL(edit_delete_next_character))
-      return FALSE;
-
-    astr_cat(killed_text, astr_new("\n"));
-
-    thisflag |= FLAG_DONE_KILL;
-
-    return TRUE;
-  }
-
-  minibuf_error(astr_new("End of buffer"));
-
-  return FALSE;
-}
-
-/*
- * FIXME: Make it kill the whole line. The old behaviour is then
- * "edit_insert_newline; edit_kill_line; edit_backward_char".
- */
-DEF(edit_kill_line,
-"\
-Kill the rest of the current line; if no nonblanks there, kill thru newline.\
-")
-{
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_buffer();
+    clear_kill_buffer();
 
-  undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-  if (!kill_line())
+  if (warn_if_readonly_buffer())
     ok = FALSE;
-  undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+  else {
+    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
+
+    if (!eolp()) {
+      CMDCALL(edit_navigate_start_line);
+      astr_cat(killed_text, astr_sub(buf->pt.p->item, 0, (ptrdiff_t)astr_len(buf->pt.p->item)));
+      delete_nstring(astr_len(buf->pt.p->item), &as);
+      thisflag |= FLAG_DONE_KILL;
+    }
+
+    if (list_next(buf->pt.p) != buf->lines) {
+      astr_cat(killed_text, astr_new("\n"));
+      assert(CMDCALL(edit_delete_next_character));
+      thisflag |= FLAG_DONE_KILL;
+    }
+
+    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+  }
 
   weigh_mark();
 }
@@ -103,7 +82,7 @@ the text killed this time appends to the text killed last time.\
   Region r;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_buffer();
+    clear_kill_buffer();
 
   if (!(buf->flags & BFLAG_ANCHORED))
     ok = CMDCALL(edit_kill_line);
@@ -139,7 +118,7 @@ Copy the region to the kill buffer.\
   Region r;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_buffer();
+    clear_kill_buffer();
 
   if (warn_if_no_mark())
     ok = FALSE;
@@ -158,7 +137,7 @@ static int kill_helper(Command cmd)
   int ok;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_buffer();
+    clear_kill_buffer();
 
   if (warn_if_readonly_buffer())
     ok = FALSE;
