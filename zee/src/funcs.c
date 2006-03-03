@@ -442,23 +442,10 @@ END_DEF
 
 DEF(execute_command,
 "\
-Read command or macro name, then call it.\n\
-FIXME: Make it work non-interactively.\
+Read command or macro name, then call it.\
 ")
 {
-  astr name;
-  Command cmd;
-  Macro *mp;
-
-  if ((name = minibuf_read_command_name(astr_new("Execute command: ")))) {
-    if ((cmd = get_command(name)))
-      ok = cmd(list_new());
-    else if ((mp = get_macro(name)))
-      call_macro(mp);
-    else
-      ok = FALSE;
-  } else
-    ok = FALSE;
+  CMDCALL_UINT(edit_repeat, 1);
 }
 END_DEF
 
