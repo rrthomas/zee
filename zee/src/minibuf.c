@@ -144,14 +144,15 @@ static void draw_minibuf_read(astr prompt, astr value, size_t offset)
 {
   astr as = astr_dup(prompt); /* Text to print. */
   size_t visible_width = max(3, term_width() - astr_len(prompt) - 2);
-  visible_width--; /* A hack to avoid using the b.r. corner of the screen. */
+  visible_width--; /* Avoid the b.r. corner of the screen for broken
+                      terminals and terminal emulators. */
   size_t scroll_pos =
     offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
   if (scroll_pos > 0)
     as = astr_cat_char(as, '$');
-  
+
+  /* Cursor position within `as'. */
   size_t cursor_pos = astr_len(as) + (offset - scroll_pos);
-    /* Cursor position within 'as'. */
 
   as = astr_cat(as, astr_sub(
     value,
@@ -160,14 +161,14 @@ static void draw_minibuf_read(astr prompt, astr value, size_t offset)
   ));
   if (astr_len(value) > scroll_pos + visible_width)
     as = astr_cat_char(as, '$');
-  
+
   /* Handle terminals not wide enough to show "<prompt>$xxx$". */
   if (astr_len(as) > term_width()) {
     size_t to_lose = astr_len(as) - term_width();
     as = astr_sub(as, (ptrdiff_t)to_lose, (ptrdiff_t)astr_len(as));
     cursor_pos -= to_lose;
   }
-  
+
   term_minibuf_write(as);
   term_move(term_height() - 1, cursor_pos);
   term_refresh();
