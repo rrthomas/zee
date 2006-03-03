@@ -118,6 +118,7 @@ int main(int argc, char **argv)
 {
   int longopt, bflag = FALSE, hflag = FALSE, nflag = FALSE;
   size_t line = 1;
+  astr as;
 
   GC_INIT();
 
@@ -134,7 +135,8 @@ int main(int argc, char **argv)
       cmd_eval(astr_new(optarg));
       break;
     case 2:
-      cmd_eval(file_read(astr_new(optarg)));
+      if ((as = file_read(astr_new(optarg))))
+        cmd_eval(as);
       break;
     case 3:
       nflag = TRUE;
@@ -201,15 +203,17 @@ int main(int argc, char **argv)
       }
 
       /* Load default bindings file. */
-      cmd_eval(file_read(astr_new(PATH_DATA "/key_bindings.el")));
+      if ((as = file_read(astr_new(PATH_DATA "/key_bindings.el"))))
+        cmd_eval(as);
     }
 
     /* Load user init file */
     if (!nflag) {
-      astr as = get_home_dir();
-      if (astr_len(as) > 0) {
-        astr_cat(as, astr_new("/." PACKAGE_NAME));
-        cmd_eval(file_read(as));
+      astr home = get_home_dir();
+      if (astr_len(home) > 0) {
+        astr_cat(home, astr_new("/." PACKAGE_NAME));
+        if ((as = file_read(home)))
+          cmd_eval(as);
       }
     }
 
