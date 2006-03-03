@@ -94,7 +94,7 @@ static int search_forward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
-            CMDCALL(edit_navigate_down_line);
+            CMDCALL(edit_navigate_next_line);
           buf->pt.o = off;
           return TRUE;
         }
@@ -119,7 +119,7 @@ static int search_backward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
-            CMDCALL(edit_navigate_up_line);
+            CMDCALL(edit_navigate_previous_line);
           buf->pt.o = off;
           return TRUE;
         }
@@ -181,7 +181,7 @@ static int isearch(int dir)
     if (c == KBD_CANCEL) {
       buf->pt = start;
       thisflag |= FLAG_NEED_RESYNC;
-      CMDCALL(cancel);
+      CMDCALL(edit_select_off);
 
       /* Restore old mark position. */
       assert(buf->mark);
@@ -251,7 +251,8 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEF(isearch_forward,
+/* FIXME: If there is a selection, use it to initialise the search pattern. */
+DEF(edit_find,
 "\
 Do incremental search forward for regular expression.\n\
 As you type characters, they add to the search string and are found.\n\
@@ -264,7 +265,8 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
-DEF(isearch_backward,
+/* FIXME: What shall we do with this? */
+DEF(edit_find_backward,
 "\
 Do incremental search backward for regular expression.\n\
 As you type characters, they add to the search string and are found.\n\
@@ -277,6 +279,8 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
+/* FIXME: Add "edit_navigate_next_match" and "edit_navigate_previous_match". */
+
 static int no_upper(astr as)
 {
   size_t i;
@@ -288,7 +292,7 @@ static int no_upper(astr as)
   return TRUE;
 }
 
-DEF(query_replace,
+DEF(edit_find_and_replace,
 "\
 Replace occurrences of a regexp with other text.\n\
 As each match is found, the user must type a character saying\n\
@@ -299,16 +303,17 @@ what to do with it.\
   astr find, repl;
 
   if ((find = minibuf_read(astr_new("Query replace string: "), astr_new(""))) == NULL)
-    ok = CMDCALL(cancel);
+    ok = CMDCALL(edit_select_off);
   else if (astr_len(find) == 0)
     ok = FALSE;
   else {
     find_no_upper = no_upper(find);
 
     if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
-      ok = CMDCALL(cancel);
+      ok = CMDCALL(edit_select_off);
     if (ok) {
       /* Spaghetti code follows... :-( */
+      /* FIXME: Can we use minibuf_read_forced? */
       while (search_forward(buf->pt.p, buf->pt.o, find)) {
         if (!noask) {
           int c;
@@ -328,7 +333,7 @@ what to do with it.\
 
           switch (c) {
           case KBD_CANCEL: /* C-g */
-            ok = CMDCALL(cancel);
+            ok = CMDCALL(edit_select_off);
             /* Fall through. */
           case 'q': /* Quit immediately. */
             goto endoffunc;

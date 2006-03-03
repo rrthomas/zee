@@ -62,12 +62,12 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEF(start_kbd_macro,
+DEF(macro_record,
 "\
 Record subsequent keyboard input, defining a keyboard macro.\n\
 The commands are recorded even as they are executed.\n\
-Use end_kbd_macro to finish recording and make the macro available.\n\
-Use name_last_kbd_macro to give it a permanent name.\
+Use macro_stop to finish recording and make the macro available.\n\
+Use macro_name to give it a permanent name.\
 ")
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
@@ -85,7 +85,7 @@ Use name_last_kbd_macro to give it a permanent name.\
 }
 END_DEF
 
-DEF(end_kbd_macro,
+DEF(macro_stop,
 "\
 Finish defining a keyboard macro.\
 ")
@@ -98,7 +98,7 @@ Finish defining a keyboard macro.\
 }
 END_DEF
 
-DEF(name_last_kbd_macro,
+DEF(macro_name,
 "\
 Assign a name to the last keyboard macro defined.\n\
 Argument SYMBOL is the name to define.\n\
@@ -147,11 +147,11 @@ void call_macro(Macro *mp)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
-DEF(call_last_kbd_macro,
+DEF(macro_play,
 "\
-Call the last keyboard macro that you defined.\n\
+Play back the last keyboard macro that you defined.\n\
 To name a macro so you can call it after defining others, use\n\
-name_last_kbd_macro.\
+macro_name.\
 ")
 {
   if (cur_mp == NULL) {

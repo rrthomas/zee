@@ -9,11 +9,11 @@
  * The fourth column specifies the variable documentation.
  */
 
-X("auto_fill_mode",			"b", "false", "\
-If enabled, the Auto Fill Mode is automatically enabled.")
+X("wrap_mode",			"b", "false", "\
+If enabled, the Wrap Mode is automatically enabled.")
 X("case_replace",			"b", "true", "\
-Non-nil means `query-replace' should preserve case in replacements.")
-X("fill_column",			"", "72", "\
+Non-nil means `edit_find_and_replace' should preserve case in replacements.")
+X("wrap_column",			"", "72", "\
 Column beyond which automatic line-wrapping should happen.")
 X("tab_width",				"", "8", "\
 Distance between tab stops (for display of tab characters), in columns.")

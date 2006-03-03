@@ -230,7 +230,7 @@ int insert_char(int c)
   return insert_nstring(as);
 }
 
-DEF(tab_to_tab_stop,
+DEF(edit_insert_tab,
 "\
 Insert spaces or tabs to next defined tab-stop column.\n\
 Convert the tabulation into spaces.\
@@ -344,28 +344,28 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
 }
 
 /*
- * If point is greater than fill_column, then split the line at the
- * right-most space character at or before fill_column, if there is
- * one, or at the left-most at or after fill_column, if not. If the
+ * If point is greater than wrap_column, then split the line at the
+ * right-most space character at or before wrap_column, if there is
+ * one, or at the left-most at or after wrap_column, if not. If the
  * line contains no spaces, no break is made.
  */
-void fill_break_line(void)
+void wrap_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
-  size_t fillcol = get_variable_number(astr_new("fill_column"));
+  size_t wrapcol = get_variable_number(astr_new("wrap_column"));
 
-  /* If we're not beyond fill_column, stop now. */
-  if (get_goalc() <= fillcol)
+  /* If we're not beyond wrap_column, stop now. */
+  if (get_goalc() <= wrapcol)
     return;
 
-  /* Move cursor back to fill column */
+  /* Move cursor back to wrap_column */
   old_col = buf->pt.o;
-  while (get_goalc() > fillcol + 1) {
+  while (get_goalc() > wrapcol + 1) {
     buf->pt.o--;
     excess++;
   }
 
-  /* Find break point moving left from fill_column. */
+  /* Find break point moving left from wrap_column. */
   for (i = buf->pt.o; i > 0; i--) {
     int c = *astr_char(buf->pt.p->item, (ptrdiff_t)(i - 1));
     if (isspace(c)) {
@@ -374,7 +374,7 @@ void fill_break_line(void)
     }
   }
 
-  /* If no break point moving left from fill_column, find first
+  /* If no break point moving left from wrap_column, find first
      possible moving right. */
   if (break_col == 0) {
     for (i = buf->pt.o + 1; i < astr_len(buf->pt.p->item); i++) {
@@ -398,15 +398,18 @@ void fill_break_line(void)
     buf->pt.o = old_col;
 }
 
-DEF(newline,
+/* FIXME: There's stuff connected with wrap_column in here. That doesn't
+ * match the documentation of preferences_toggle_wrap_mode nor the
+ * documentation of this command. */
+DEF(edit_insert_newline,
 "\
 Insert a newline, and move to left margin of the new line if it's blank.\
 ")
 {
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
   if (buf->flags & BFLAG_AUTOFILL &&
-      get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
-    fill_break_line();
+      get_goalc() > (size_t)get_variable_number(astr_new("wrap_column")))
+    wrap_break_line();
   ok = insert_char('\n');
   undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
 }
@@ -424,7 +427,7 @@ int insert_nstring(astr as)
   for (i = 0; i < astr_len(as); i++) {
     if (!astr_cmp(astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)astr_len(as)), astr_new("\n"))) {
       intercalate_newline();
-      CMDCALL(edit_navigate_forward_char);
+      CMDCALL(edit_navigate_next_character);
     } else {
       buf->pt.p->item = astr_cat(astr_cat(astr_sub(buf->pt.p->item, 0, (ptrdiff_t)buf->pt.o),
                                          astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)i + 1)),
@@ -488,7 +491,7 @@ int delete_nstring(size_t size, astr *as)
   return TRUE;
 }
 
-DEF_ARG(self_insert_command,
+DEF_ARG(edit_insert_character,
 "\
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
@@ -502,8 +505,8 @@ UINT(c, "Insert character: "))
 
     if (c <= 255) {
       if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
-          get_goalc() > (size_t)get_variable_number(astr_new("fill_column")))
-        fill_break_line();
+          get_goalc() > (size_t)get_variable_number(astr_new("wrap_column")))
+        wrap_break_line();
       insert_char((int)c);
     } else {
       ding();
@@ -515,7 +518,7 @@ UINT(c, "Insert character: "))
 }
 END_DEF
 
-DEF(delete_char,
+DEF(edit_delete_next_character,
 "\
 Delete the following character.\n\
 Join lines if the character is a newline.\
@@ -526,7 +529,7 @@ Join lines if the character is a newline.\
 }
 END_DEF
 
-DEF(backward_delete_char,
+DEF(edit_delete_previous_character,
 "\
 Delete the previous character.\n\
 Join lines if the character is a newline.\
@@ -534,8 +537,8 @@ Join lines if the character is a newline.\
 {
   weigh_mark();
 
-  if (CMDCALL(edit_navigate_backward_char))
-    CMDCALL(delete_char);
+  if (CMDCALL(edit_navigate_previous_character))
+    CMDCALL(edit_delete_next_character);
   else {
     minibuf_error(astr_new("Beginning of buffer"));
     ok = FALSE;
@@ -551,10 +554,10 @@ Delete all spaces and tabs around point.\
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
   while (!eolp() && isspace(following_char()))
-    CMDCALL(delete_char);
+    CMDCALL(edit_delete_next_character);
 
   while (!bolp() && isspace(preceding_char()))
-    CMDCALL(backward_delete_char);
+    CMDCALL(edit_delete_previous_character);
 
   undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
 }
@@ -572,11 +575,11 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (CMDCALL(edit_navigate_up_line) && is_blank_line());
+  while (CMDCALL(edit_navigate_previous_line) && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
-    CMDCALL(edit_navigate_forward_char);
+    CMDCALL(edit_navigate_next_character);
 }
 
 DEF(indent_relative,
@@ -596,11 +599,11 @@ Indent line or insert a tab.\
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
-        CMDCALL(edit_navigate_forward_char);
+        CMDCALL(edit_navigate_next_character);
 
     /* Find next non-blank char. */
     while (!eolp() && isspace(following_char()))
-      CMDCALL(edit_navigate_forward_char);
+      CMDCALL(edit_navigate_next_character);
 
     /* Record target column. */
     if (!eolp())
@@ -616,15 +619,15 @@ Indent line or insert a tab.\
          target_goalc. */
       while (get_goalc() < target_goalc)
         /* If already at EOL on target line, insert a tab. */
-        insert_char(' ');
+        insert_char(' '); /* FIXME: That's not a tab. */
     else
-      ok = CMDCALL(tab_to_tab_stop);
+      ok = CMDCALL(edit_insert_tab);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
 }
 END_DEF
 
-DEF(newline_and_indent,
+DEF(edit_insert_newline_and_indent,
 "\
 Insert a newline, then indent.\n\
 Indentation is done using the `indent_relative' command, except\n\

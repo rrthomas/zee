@@ -140,7 +140,7 @@ Offer to save the buffer if there are unsaved changes, then quit.\
     int ans;
 
     if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
-      ok = CMDCALL(cancel);
+      ok = CMDCALL(edit_select_off);
     else if (!ans)
       ok = FALSE;
   }

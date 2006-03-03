@@ -92,7 +92,7 @@ void process_key(size_t key)
   if (p)
     p->cmd(list_new());
   else
-    CMDCALL_UINT(self_insert_command, (int)key);
+    CMDCALL_UINT(edit_insert_character, (int)key);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the command call, to cope with start-kbd-macro */
@@ -113,7 +113,7 @@ astr minibuf_read_command_name(astr prompt)
     ms = minibuf_read_completion(prompt, astr_new(""), cp, &commands_history);
 
     if (ms == NULL) {
-      CMDCALL(cancel);
+      CMDCALL(edit_select_off);
       return NULL;
     }
 
@@ -139,7 +139,7 @@ astr minibuf_read_command_name(astr prompt)
   return ms;
 }
 
-DEF(unbind_key,
+DEF(key_unbind,
 "\
 Unbind a key.\n\
 Read key chord, and unbind it.\
@@ -158,7 +158,7 @@ Read key chord, and unbind it.\
 }
 END_DEF
 
-DEF(bind_key,
+DEF(key_bind,
 "\
 Bind a command to a key chord.\n\
 Read key chord and command name, and bind the command to the key\n\
@@ -215,7 +215,7 @@ astr command_to_binding(Command cmd)
   return as;
 }
 
-DEF(where_is,
+DEF(key_find,
 "\
 Show key sequences that invoke the command COMMAND.\n\
 FIXME: Make it work non-interactively.\

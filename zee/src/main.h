@@ -246,14 +246,14 @@ typedef struct {
     if (!list_empty(l)) \
       name = list_behead(l); \
     else if ((name = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) \
-      ok = CMDCALL(cancel);
+      ok = CMDCALL(edit_select_off);
 
 #define COMMAND(name, prompt) \
     astr name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
     else if ((name = minibuf_read_command_name(astr_new(prompt))) == NULL) \
-      ok = CMDCALL(cancel);
+      ok = CMDCALL(edit_select_off);
 
 #define UINT(name, prompt) \
     size_t name = 0; \
@@ -264,7 +264,7 @@ typedef struct {
     } else do { \
       astr ms; \
       if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \
-        ok = CMDCALL(cancel); \
+        ok = CMDCALL(edit_select_off); \
         break; \
       } \
       if ((name = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX) \

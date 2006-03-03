@@ -8,10 +8,10 @@ set_variable tab_width 8
 set_variable standard_indent 4
 
 # The default fill column (in Auto Fill Mode) [default: 72]
-set_variable fill_column 72
+set_variable wrap_column 72
 
 # Enable the Auto Fill Mode [default: false]
-set_variable auto_fill_mode false
+set_variable wrap_mode false
 
 # Preserve case in replacements by query_replace [default: true]
 set-variable case_replace true

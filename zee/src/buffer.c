@@ -42,7 +42,7 @@ void buffer_new(void)
   /* Set the initial mark (needs limit marker to be set up). */
   buf->mark = marker_new(point_min(buf));
 
-  if (get_variable_bool(astr_new("auto_fill_mode")))
+  if (get_variable_bool(astr_new("wrap_mode")))
     buf->flags ^= BFLAG_AUTOFILL;
 }
 

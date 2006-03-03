@@ -281,7 +281,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
     case KBD_NOKEY:
       break;
     case KBD_CTRL | 'z':
-      CMDCALL(suspend);
+      CMDCALL(file_suspend);
       break;
     case KBD_RET:
       term_minibuf_write(astr_new(""));

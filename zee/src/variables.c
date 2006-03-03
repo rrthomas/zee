@@ -140,7 +140,7 @@ astr minibuf_read_variable_name(astr msg)
     ms = minibuf_read_completion(msg, astr_new(""), cp, NULL);
 
     if (ms == NULL) {
-      CMDCALL(cancel);
+      CMDCALL(edit_select_off);
       return NULL;
     }
 
@@ -159,7 +159,7 @@ astr minibuf_read_variable_name(astr msg)
   return ms;
 }
 
-DEF(set_variable,
+DEF(preferences_set_variable,
 "\
 Set a variable to the specified value.\
 ")
@@ -178,14 +178,14 @@ Set a variable to the specified value.\
       if (!astr_cmp(astr_new(p ? p->fmt : ""), astr_new("b"))) {
         int i;
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
-          CMDCALL(cancel);
+          CMDCALL(edit_select_off);
         else {
           val = astr_new((i == TRUE) ? "true" : "false");
           ok = TRUE;
         }
       } else                    /* Non-boolean variable. */
         if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
-          CMDCALL(cancel);
+          CMDCALL(edit_select_off);
         else
           ok = TRUE;
     }

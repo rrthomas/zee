@@ -108,7 +108,7 @@ int bolp(void);
 int eolp(void);
 int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, int replace_case);
 int insert_char(int c);
-void fill_break_line(void);
+void wrap_break_line(void);
 int insert_nstring(astr as);
 int delete_nstring(size_t size, astr *as);
 

@@ -86,7 +86,7 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEF(undo,
+DEF(edit_undo,
 "\
 Undo some previous changes.\n\
 Repeat this command to undo more changes.\

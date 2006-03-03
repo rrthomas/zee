@@ -52,7 +52,7 @@ static int kill_line(void)
   }
 
   if (list_next(buf->pt.p) != buf->lines) {
-    if (!CMDCALL(delete_char))
+    if (!CMDCALL(edit_delete_next_character))
       return FALSE;
 
     astr_cat(killed_text, astr_new("\n"));
@@ -67,7 +67,11 @@ static int kill_line(void)
   return FALSE;
 }
 
-DEF(kill_line,
+/*
+ * FIXME: Make it kill the whole line. The old behaviour is then
+ * "edit_insert_newline; edit_kill_line; edit_backward_char".
+ */
+DEF(edit_kill_line,
 "\
 Kill the rest of the current line; if no nonblanks there, kill thru newline.\
 ")
@@ -84,7 +88,7 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.\
 }
 END_DEF
 
-DEF(kill_region,
+DEF(edit_kill_selection,
 "\
 Kill between point and mark.\n\
 The text is deleted but saved in the kill buffer.\n\
@@ -102,7 +106,7 @@ the text killed this time appends to the text killed last time.\
     flush_kill_buffer();
 
   if (!(buf->flags & BFLAG_ANCHORED))
-    ok = CMDCALL(kill_line);
+    ok = CMDCALL(edit_kill_line);
   else {
     assert(calculate_the_region(&r));
 
@@ -116,7 +120,7 @@ the text killed this time appends to the text killed last time.\
       astr as;
 
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
-        CMDCALL(exchange_point_and_mark);
+        CMDCALL(edit_select_other_end);
       delete_nstring(r.size, &as);
       astr_cat(killed_text, as);
     }
@@ -127,7 +131,7 @@ the text killed this time appends to the text killed last time.\
 }
 END_DEF
 
-DEF(copy,
+DEF(edit_copy,
 "\
 Copy the region to the kill buffer.\
 ")
@@ -163,7 +167,7 @@ static int kill_helper(Command cmd)
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     ok = cmd(NULL);
     if (ok)
-      ok = CMDCALL(kill_region);
+      ok = CMDCALL(edit_kill_selection);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     set_mark(m);
     remove_marker(m);
@@ -176,35 +180,27 @@ static int kill_helper(Command cmd)
   return ok;
 }
 
-DEF(kill_word,
+DEF(edit_kill_word,
 "\
 Kill characters forward until encountering the end of a word.\
 ")
 {
-  ok = kill_helper(F_mark_word);
+  ok = kill_helper(F_edit_select_word);
 }
 END_DEF
 
-DEF(backward_kill_word,
-"\
-Kill characters backward until encountering the end of a word.\
-")
-{
-  ok = kill_helper(F_mark_word_backward);
-}
-END_DEF
-
-DEF(paste,
+/* FIXME: Broken! Inserts ^J characters. */
+DEF(edit_paste,
 "\
 Reinsert the stretch of killed text most recently killed.\n\
 Set mark at beginning, and put point at end.\
 ")
 {
   if (astr_len(killed_text) == 0) {
-    minibuf_error(astr_new("Kill ring is empty"));
+    minibuf_error(astr_new("Clipboard is empty"));
     ok = FALSE;
   } else if (!warn_if_readonly_buffer()) {
-    CMDCALL(set_mark);
+    CMDCALL(edit_select_on);
     insert_nstring(killed_text);
     weigh_mark();
   }

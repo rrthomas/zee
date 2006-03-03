@@ -31,7 +31,7 @@
 #include "extern.h"
 
 
-DEF(suspend,
+DEF(file_suspend,
 "\
 Stop and return to superior process.\
 ")
@@ -40,53 +40,43 @@ Stop and return to superior process.\
 }
 END_DEF
 
-DEF(cancel,
+DEF(preferences_toggle_read_only,
 "\
-Cancel current command.\
-")
-{
-  weigh_mark();
-  minibuf_error(astr_new("Quit"));
-  ok = FALSE;
-}
-END_DEF
-
-DEF(edit_toggle_read_only,
-"\
-Change whether this buffer is visiting its file read-only.\
+Change whether this file can be modified.\
 ")
 {
   buf->flags ^= BFLAG_READONLY;
 }
 END_DEF
 
-DEF(auto_fill_mode,
+DEF(preferences_toggle_wrap_mode,
 "\
-Toggle Auto Fill mode.\n\
-In Auto Fill mode, inserting a space at a column beyond `fill_column'\n\
-automatically breaks the line at a previous space.\
+Toggle Wrap mode.\n\
+In Wrap mode, inserting a space at a column beyond `wrap_column'\n\
+automatically breaks the line at a previous space. Otherwise you\n\
+have to do this explicitly using the \"wrap_paragraph\" command.\
 ")
 {
   buf->flags ^= BFLAG_AUTOFILL;
 }
 END_DEF
 
-DEF_ARG(set_fill_column,
+DEF_ARG(set_wrap_column,
 "\
-Set the fill column.\n\
-If an argument value is passed, set `fill_column' to that value,\n\
+Set the wrap column.\n\
+If an argument value is passed, set `wrap_column' to that value,\n\
 otherwise with the current column value.\
 ",
-UINT(col, "New fill column: "))
+UINT(col, "New wrap column: "))
 {
-  set_variable(astr_new("fill_column"),
+  set_variable(astr_new("wrap_column"),
                astr_afmt("%lu", list_empty(l) ? buf->pt.o + 1 : col));
 }
 END_DEF
 
-DEF(set_mark,
+DEF(edit_select_on,
 "\
-Set mark where point is.\
+Start selecting text.\
 ")
 {
   set_mark_to_point();
@@ -95,9 +85,20 @@ Set mark where point is.\
 }
 END_DEF
 
-DEF(exchange_point_and_mark,
+DEF(edit_select_off,
 "\
-Put the mark where point is now, and point where the mark is now.\
+Stop selecting text.\
+")
+{
+  weigh_mark();
+  minibuf_write(astr_new(""));
+  ok = FALSE;
+}
+END_DEF
+
+DEF(edit_select_other_end,
+"\
+When selecting text, move the cursor to the other end of the selection.\
 ")
 {
   assert(buf->mark);
@@ -107,14 +108,14 @@ Put the mark where point is now, and point where the mark is now.\
 }
 END_DEF
 
-DEF(mark_whole_buffer,
+DEF(edit_select_all,
 "\
-Put point at beginning and mark at end of buffer.\
+Select the whole file.\
 ")
 {
-  CMDCALL(end_of_buffer);
-  CMDCALL(set_mark);
-  CMDCALL(beginning_of_buffer);
+  CMDCALL(edit_navigate_end_file);
+  CMDCALL(edit_select_on);
+  CMDCALL(edit_navigate_start_file);
 }
 END_DEF
 
@@ -144,7 +145,7 @@ static int quoted_insert_octal(int c1)
   return TRUE;
 }
 
-DEF(quoted_insert,
+DEF(edit_insert_quoted,
 "\
 Read next input character and insert it.\n\
 This is useful for inserting control characters.\n\
@@ -165,7 +166,7 @@ You may also type up to 3 octal digits, to insert a character with that code.\
 }
 END_DEF
 
-DEF_ARG(repeat,
+DEF_ARG(edit_repeat,
 "\
 Repeat a command a given number of times.\n\
 FIXME: Make it work as advertised: get the command,\n\
@@ -183,16 +184,16 @@ COMMAND(cmd_name, "Command: "))
 }
 END_DEF
 
-DEF(back_to_indentation,
+DEF(edit_navigate_start_line_text,
 "\
-Move point to the first non-whitespace character on this line.\
+Move the cursor to the first non-whitespace character on this line.\
 ")
 {
   buf->pt.o = 0;
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
-    CMDCALL(edit_navigate_forward_char);
+    CMDCALL(edit_navigate_next_character);
   }
 }
 END_DEF
@@ -202,9 +203,9 @@ END_DEF
 			  Move through words
 ***********************************************************************/
 
-DEF(forward_word,
+DEF(edit_navigate_next_word,
 "\
-Move point forward one word.\
+Move the cursor forward one word.\
 ")
 {
   int gotword = FALSE;
@@ -222,7 +223,7 @@ Move point forward one word.\
     if (gotword)
       break;
     buf->pt.o = astr_len(buf->pt.p->item);
-    if (!CMDCALL(edit_navigate_down_line)) {
+    if (!CMDCALL(edit_navigate_next_line)) {
       ok = FALSE;
       break;
     }
@@ -231,16 +232,16 @@ Move point forward one word.\
 }
 END_DEF
 
-DEF(backward_word,
+DEF(edit_navigate_previous_word,
 "\
-Move backward until encountering the beginning of a word.\
+Move the cursor backwards one word.\
 ")
 {
   int gotword = FALSE;
 
   for (;;) {
     if (bolp()) {
-      if (!CMDCALL(edit_navigate_up_line)) {
+      if (!CMDCALL(edit_navigate_previous_line)) {
         ok = FALSE;
         break;
       }
@@ -261,75 +262,70 @@ Move backward until encountering the beginning of a word.\
 }
 END_DEF
 
-DEF(mark_word,
+DEF(edit_select_word,
 "\
-Set mark to end of current word.\
+Select the current word.\
 ")
 {
-  CMDCALL(set_mark);
-  if ((ok = CMDCALL(forward_word)))
-    CMDCALL(exchange_point_and_mark);
+  if (!eolp() && isalnum(following_char()))
+    ok &= CMDCALL(edit_navigate_next_word);
+  if (ok)
+    ok &= CMDCALL(edit_select_on);
+  if (ok)
+    ok &= CMDCALL(edit_navigate_previous_word);
+  if (ok)
+    ok &= CMDCALL(edit_select_other_end);
 }
 END_DEF
 
-DEF(mark_word_backward,
+DEF(edit_navigate_previous_paragraph,
 "\
-Set mark to start of current word.\
+Move the cursor backward to the start of the paragraph.\
 ")
 {
-  CMDCALL(set_mark);
-  if ((ok = CMDCALL(backward_word)))
-    CMDCALL(exchange_point_and_mark);
+  while (is_empty_line() && CMDCALL(edit_navigate_previous_line))
+    ;
+  while (!is_empty_line() && CMDCALL(edit_navigate_previous_line))
+    ;
+
+  CMDCALL(edit_navigate_start_line);
 }
 END_DEF
 
-DEF(backward_paragraph,
+DEF(edit_navigate_next_paragraph,
 "\
-Move backward to start of paragraph.\
+Move the cursor forward to the end of the paragraph.\
 ")
 {
-  while (is_empty_line() && CMDCALL(edit_navigate_up_line))
+  while (is_empty_line() && CMDCALL(edit_navigate_next_line))
     ;
-  while (!is_empty_line() && CMDCALL(edit_navigate_up_line))
-    ;
-
-  CMDCALL(beginning_of_line);
-}
-END_DEF
-
-DEF(forward_paragraph,
-"\
-Move forward to end of paragraph.\
-")
-{
-  while (is_empty_line() && CMDCALL(edit_navigate_down_line))
-    ;
-  while (!is_empty_line() && CMDCALL(edit_navigate_down_line))
+  while (!is_empty_line() && CMDCALL(edit_navigate_next_line))
     ;
 
   if (is_empty_line())
-    CMDCALL(beginning_of_line);
+    CMDCALL(edit_navigate_start_line);
   else
-    CMDCALL(end_of_line);
+    CMDCALL(edit_navigate_end_line);
 }
 END_DEF
 
-DEF(mark_paragraph,
+DEF(edit_select_paragraph,
 "\
-Put point at beginning of this paragraph, mark at end.\n\
-The paragraph marked is the one that contains point or follows point.\
+Select the current paragraph.\
 ")
 {
-  CMDCALL(forward_paragraph);
-  CMDCALL(set_mark);
-  CMDCALL(backward_paragraph);
+  CMDCALL(edit_navigate_next_paragraph);
+  CMDCALL(edit_select_on);
+  CMDCALL(edit_navigate_previous_paragraph);
+  CMDCALL(edit_select_other_end);
 }
 END_DEF
 
-/* FIXME: fill_paragraph undo goes bananas. */
-DEF(fill_paragraph,
+/* FIXME: wrap_paragraph undo goes bananas. */
+DEF(edit_wrap_paragraph,
 "\
-Fill paragraph at or after point.\
+Wrap the paragraph at or after the cursor. The wrap column can\n\
+be set using set_wrap_column.\
 ")
 {
   int i, start, end;
@@ -337,28 +333,28 @@ Fill paragraph at or after point.\
 
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
-  CMDCALL(forward_paragraph);
+  CMDCALL(edit_navigate_next_paragraph);
   end = buf->pt.n;
   if (is_empty_line())
     end--;
 
-  CMDCALL(backward_paragraph);
+  CMDCALL(edit_navigate_previous_paragraph);
   start = buf->pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
-    CMDCALL(edit_navigate_down_line);
+    CMDCALL(edit_navigate_next_line);
     start++;
   }
 
   for (i = start; i < end; i++) {
-    CMDCALL(end_of_line);
-    CMDCALL(delete_char);
+    CMDCALL(edit_navigate_end_line);
+    CMDCALL(edit_delete_next_character);
     CMDCALL(delete_horizontal_space);
     insert_char(' ');
   }
 
-  CMDCALL(end_of_line);
-  while (get_goalc() > (size_t)get_variable_number(astr_new("fill_column")) + 1)
-    fill_break_line();
+  CMDCALL(edit_navigate_end_line);
+  while (get_goalc() > (size_t)get_variable_number(astr_new("wrap_column")) + 1)
+    wrap_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;
 
@@ -379,9 +375,9 @@ static int setcase_word(int rcase)
   int firstchar;
 
   if (!isalnum(following_char())) {
-    if (!CMDCALL(forward_word))
+    if (!CMDCALL(edit_navigate_next_word))
       return FALSE;
-    if (!CMDCALL(backward_word))
+    if (!CMDCALL(edit_navigate_previous_word))
       return FALSE;
   }
 
@@ -417,27 +413,27 @@ static int setcase_word(int rcase)
   return TRUE;
 }
 
-DEF(downcase_word,
+DEF(edit_case_lower,
 "\
-Convert following word to lower case, moving over.\
+Convert the following word to lower case, moving over it.\
 ")
 {
   ok = setcase_word(LOWERCASE);
 }
 END_DEF
 
-DEF(upcase_word,
+DEF(edit_case_upper,
 "\
-Convert following word to upper case, moving over.\
+Convert the following word to upper case, moving over it.\
 ")
 {
   ok = setcase_word(UPPERCASE);
 }
 END_DEF
 
-DEF(capitalize_word,
+DEF(edit_case_capitalize,
 "\
-Capitalize the following word, moving over.\
+Capitalize the following word, moving over it.\
 ")
 {
   ok = setcase_word(CAPITALIZE);
@@ -466,20 +462,20 @@ FIXME: Make it work non-interactively.\
 }
 END_DEF
 
-DEF(shell_command,
+DEF(edit_shell_command,
 "\
 Reads a line of text using the minibuffer and creates an inferior shell\n\
-to execute the line as a command; passes the contents of the region as\n\
-input to the shell command.\n\
+to execute the line as a command; passes the selection as input to the\n\
+shell command.\n\
 If the shell command produces any output, it is inserted into the\n\
-current buffer, overwriting the current region.\n\
+file, replacing the selection.\n\
 FIXME: Use better-shell.c\
 ")
 {
   astr ms;
 
   if ((ms = minibuf_read(astr_new("Shell command: "), astr_new(""))) == NULL)
-    ok = CMDCALL(cancel);
+    ok = CMDCALL(edit_select_off);
   else if (astr_len(ms) == 0 || warn_if_no_mark())
     ok = FALSE;
   else {
@@ -525,7 +521,7 @@ FIXME: Use better-shell.c\
         calculate_the_region(&r);
         if (buf->pt.p != r.start.p
             || r.start.o != buf->pt.o)
-          CMDCALL(exchange_point_and_mark);
+          CMDCALL(edit_select_other_end);
         delete_nstring(r.size, &s);
         ok = insert_nstring(out);
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);

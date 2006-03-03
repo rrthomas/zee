@@ -5,57 +5,59 @@
 # currently not true.
 
 # Character/line
-bind_key "LEFT" edit_navigate_backward_char
-bind_key "RIGHT" edit_navigate_forward_char
-bind_key "DOWN" edit_navigate_down_line
-bind_key "UP" edit_navigate_up_line
+key_bind "LEFT" edit_navigate_previous_character
+key_bind "RIGHT" edit_navigate_next_character
+key_bind "UP" edit_navigate_previous_line
+key_bind "DOWN" edit_navigate_next_line
 # Word/paragraph
-bind_key "C-LEFT" backward_word
-bind_key "C-RIGHT" forward_word
-bind_key "M-{" backward_paragraph
-bind_key "M-}" forward_paragraph
+key_bind "C-LEFT" edit_navigate_previous_word
+key_bind "C-RIGHT" edit_navigate_next_word
+key_bind "M-{" edit_navigate_previous_paragraph # FIXME Doesn't work!
+key_bind "M-}" edit_navigate_next_paragraph # FIXME Doesn't work!
 # Line/page
-bind_key "HOME" beginning_of_line
-bind_key "END" end_of_line
-bind_key "PGUP" scroll_down
-bind_key "PGDN" scroll_up
+key_bind "HOME" edit_navigate_start_line
+key_bind "END" edit_navigate_end_line
+key_bind "PGUP" edit_navigate_previous_page
+key_bind "PGDN" edit_navigate_next_page
 # Whole buffer
-bind_key "C-HOME" beginning_of_buffer
-bind_key "C-END" end_of_buffer
+key_bind "C-HOME" edit_navigate_start_file
+key_bind "C-END" edit_navigate_end_file
 
-# Selection. The goal is that any navigation command can be combined with
-# SHIFT to form a selection command.
+# Selection.
+# select_all
+# select_other_end
+key_bind "M-h" edit_select_paragraph
+key_bind "C-@" edit_select_on
+key_bind "C-g" edit_select_off
+key_bind "M-@" edit_select_word
 
-# FIXME: Not done yet.
+# Absolute navigation.
 
-# Absolute navigation. These are like navigation commands but they
-# don't become selection commands when combined with SHIFT.
-
-bind_key "C-M-g" goto_column
-bind_key "M-g" goto_line
+key_bind "C-M-g" edit_goto_column
+key_bind "M-g" edit_goto_line
 
 # Open, save, close, quit etc.
 # Save
-bind_key "C-s" file_save
+key_bind "C-s" file_save
 # Quit
-bind_key "C-q" file_quit
+key_bind "C-q" file_quit
 
 # Undo, cut, copy, paste, delete etc.
 
 # Undo
-bind_key "C-_" undo
-bind_key "C-z" undo
+key_bind "C-_" edit_undo
+key_bind "C-z" edit_undo
 # Cut selection to clipboard.
-bind_key "C-x" kill_region
-bind_key "M-DEL" kill_word
+# Following is approximate! We don't have a proper "edit_cut" command yet.
+key_bind "C-x" edit_kill_selection
+key_bind "M-DEL" edit_kill_word
 # Copy selection to clipboard.
-bind_key "C-c" copy
+key_bind "C-c" edit_copy
 # Delete without modifying clipboard.
-bind_key "BS" backward_delete_char
-bind_key "M-BS" backward_kill_word
-bind_key "DEL" delete_char
+key_bind "BS" edit_delete_previous_character
+key_bind "DEL" edit_delete_next_character
 # Paste.
-bind_key "C-v" paste
+key_bind "C-v" edit_paste
 
 # Search
 
@@ -63,36 +65,31 @@ bind_key "C-v" paste
 # Having it hard-wired is obviously broken, but something neutral like RET
 # would be better.
 # The proposed meaning of ESC obviates the current behaviour of RET.
-bind_key "C-f" isearch_forward
-
-#bind_key "ESC" cancel
-bind_key "C-g" cancel
+key_bind "C-f" edit_find
+key_bind "C-S-f" edit_find_backwards
+key_bind "C-r" edit_find_and_replace
 
 # Insert special characters.
 
-bind_key "C-RET" newline
-bind_key "RET" newline_and_indent
-bind_key "TAB" indent_relative
-# quoted_insert needs a new shortcut? Was C-q.
+key_bind "C-RET" edit_insert_newline
+key_bind "RET" edit_insert_newline_and_indent
+key_bind "TAB" indent_relative # FIXME: edit_insert_tab?
+# edit_quoted_insert needs a new shortcut? Was C-q.
 
 # Rare commands.
 # SUGGESTION: remove these from the default keymap?
 
-bind_key "M-m" back_to_indentation
-bind_key "M-e" call_last_kbd_macro
-bind_key "M-c" capitalize_word
-bind_key "M-l" downcase_word
-bind_key "M-)" end_kbd_macro
-bind_key "M-q" fill_paragraph
-bind_key "C-r" isearch_backward
-bind_key "M-h" mark_paragraph
-bind_key "M-@" mark_word
-bind_key "C-j" newline
-bind_key "M-%" query_replace
-bind_key "C-l" recenter
-bind_key "C-@" set_mark
-bind_key "M-!" shell_command
-bind_key "M-(" start_kbd_macro
-bind_key "M-i" tab_to_tab_stop
-bind_key "C-u" repeat
-bind_key "M-u" upcase_word
+key_bind "M-m" edit_navigate_start_line_text
+key_bind "M-e" macro_play
+key_bind "M-c" edit_case_capitalize
+key_bind "M-l" edit_case_lower
+key_bind "M-)" macro_stop
+key_bind "M-q" edit_wrap_paragraph
+key_bind "C-j" edit_insert_newline
+key_bind "M-%" edit_find_and_replace
+key_bind "C-l" recenter
+key_bind "M-!" edit_shell_command
+key_bind "M-(" macro_record
+key_bind "M-i" edit_insert_tab
+key_bind "C-u" edit_repeat
+key_bind "M-u" edit_case_upper
