@@ -222,9 +222,10 @@ int main(int argc, char **argv)
          loading init files */
       astr quitstr = command_to_binding(F_file_quit);
       if (!astr_cmp(quitstr, astr_new("")))
-        quitstr = astr_new("Alt-x, type `file_quit' and press RETURN");
+        quitstr = astr_new("Alt-x, `file_quit', RETURN");
       if (buf) {
-        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "!  To exit press %s", astr_cstr(quitstr)));
+        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %s to quit", astr_cstr(quitstr)));
+        quitstr = astr_new("");
         run();
       }
 
