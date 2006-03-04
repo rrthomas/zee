@@ -89,23 +89,19 @@ the text killed this time appends to the text killed last time.\
   else {
     assert(calculate_the_region(&r));
 
-    if (buf->flags & BFLAG_READONLY) {
-      /* The buffer is read-only; save text in the kill buffer and
-         complain. */
-      astr_cat(killed_text, copy_text_block(r.start, r.size));
-
+    if (buf->flags & BFLAG_READONLY)
       warn_if_readonly_buffer();
-    } else {
+    else {
       astr as;
 
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
       delete_nstring(r.size, &as);
       astr_cat(killed_text, as);
-    }
 
-    thisflag |= FLAG_DONE_KILL;
-    buf->flags &= ~BFLAG_ANCHORED;
+      thisflag |= FLAG_DONE_KILL;
+      buf->flags &= ~BFLAG_ANCHORED;
+    }
   }
 }
 END_DEF
