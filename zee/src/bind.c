@@ -215,25 +215,6 @@ astr command_to_binding(Command cmd)
   return as;
 }
 
-DEF_ARG(key_find,
-"\
-Show key sequences that invoke the command COMMAND.\n\
-",
-COMMAND(name, "Where is command: "))
-{
-  if (ok) {
-    Command cmd = get_command(name);
-    if (cmd) {
-      astr bindings = command_to_binding(cmd);
-      if (astr_len(bindings) > 0)
-        minibuf_write(astr_afmt("%s is on %s", astr_cstr(name), astr_cstr(bindings)));
-      else
-        minibuf_write(astr_afmt("%s is not on any key", astr_cstr(name)));
-    }
-  }
-}
-END_DEF
-
 astr binding_to_command(size_t key)
 {
   Binding *p;

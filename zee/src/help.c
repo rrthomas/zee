@@ -58,7 +58,11 @@ Display the full documentation of COMMAND.\
     size_t i;
     for (i = 0; i < fentries; i++)
       if (!astr_cmp(astr_new(ftable[i].name), name)) {
-        popup_set(astr_afmt("Help for command `%s':\n\n%s", ftable[i].name, ftable[i].doc));
+        astr bindings = command_to_binding(get_command(name)), where = astr_new("");
+        if (astr_len(bindings) > 0)
+          where = astr_afmt("\n\nBound to: %s", astr_cstr(bindings));
+        popup_set(astr_afmt("Help for command `%s':\n\n%s%s",
+                            ftable[i].name, ftable[i].doc, astr_cstr(where)));
         ok = TRUE;
         break;
       }
