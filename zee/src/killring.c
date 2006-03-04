@@ -81,18 +81,17 @@ the text killed this time appends to the text killed last time.\
 {
   Region r;
 
-  if (!(lastflag & FLAG_DONE_KILL))
-    clear_kill_buffer();
-
-  if (!(buf->flags & BFLAG_ANCHORED))
-    ok = CMDCALL(edit_kill_line);
+  if (buf->flags & BFLAG_READONLY)
+    warn_if_readonly_buffer();
   else {
-    assert(calculate_the_region(&r));
+    if (!(lastflag & FLAG_DONE_KILL))
+      clear_kill_buffer();
 
-    if (buf->flags & BFLAG_READONLY)
-      warn_if_readonly_buffer();
+    if (!(buf->flags & BFLAG_ANCHORED))
+      ok = CMDCALL(edit_kill_line);
     else {
       astr as;
+      assert(calculate_the_region(&r));
 
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
