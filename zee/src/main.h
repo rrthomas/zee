@@ -272,6 +272,9 @@ typedef struct {
     } while (name == ULONG_MAX);
 
 /* Call an interactive command */
+/* FIXME: These macros don't work properly within command definitions,
+   as they create a new argument list. This breaks e.g. a non-interactive
+   use of execute_command. */
 #define CMDCALL(name) \
   F_ ## name(list_new())
 
