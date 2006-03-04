@@ -101,16 +101,6 @@ int calculate_the_region(Region *rp)
   return TRUE;
 }
 
-void anchor_mark(void)
-{
-  buf->flags |= BFLAG_ANCHORED;
-}
-
-void weigh_mark(void)
-{
-  buf->flags &= ~BFLAG_ANCHORED;
-}
-
 /*
  * Return a safe tab width for the given buffer.
  */

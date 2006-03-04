@@ -81,7 +81,7 @@ Start selecting text.\
 {
   set_mark_to_point();
   minibuf_write(astr_new("Mark set"));
-  anchor_mark();
+  buf->flags |= BFLAG_ANCHORED;
 }
 END_DEF
 
@@ -90,7 +90,7 @@ DEF(edit_select_off,
 Stop selecting text.\
 ")
 {
-  weigh_mark();
+  buf->flags &= ~BFLAG_ANCHORED;
   minibuf_write(astr_new(""));
   ok = FALSE;
 }
@@ -103,7 +103,7 @@ When selecting text, move the cursor to the other end of the selection.\
 {
   assert(buf->mark);
   swap_point(&buf->pt, &buf->mark->pt);
-  anchor_mark();
+  buf->flags |= BFLAG_ANCHORED;
   thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEF

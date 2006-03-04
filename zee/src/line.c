@@ -442,7 +442,7 @@ int insert_nstring(astr as)
  */
 int delete_nstring(size_t size, astr *as)
 {
-  weigh_mark();
+  buf->flags &= ~BFLAG_ANCHORED;
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -498,7 +498,7 @@ UINT(c, "Insert character: "))
   if (ok) {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
 
     if (c <= 255) {
       if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
@@ -532,7 +532,7 @@ Delete the previous character.\n\
 Join lines if the character is a newline.\
 ")
 {
-  weigh_mark();
+  buf->flags &= ~BFLAG_ANCHORED;
 
   if (CMDCALL(move_previous_character))
     CMDCALL(edit_delete_next_character);
@@ -590,7 +590,7 @@ Indent line or insert a tab.\
     size_t cur_goalc = get_goalc(), target_goalc = 0;
     Marker *old_point = point_marker();
 
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
     previous_nonblank_goalc();
 
     /* Now find the next blank char. */
@@ -635,7 +635,7 @@ no indenting is performed.\
   if (warn_if_readonly_buffer())
     ok = FALSE;
   else {
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
 
     if ((ok = insert_char('\n'))) {
       int indent;

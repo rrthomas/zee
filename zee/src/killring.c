@@ -63,7 +63,7 @@ Delete the current line.\
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
 
-  weigh_mark();
+  buf->flags &= ~BFLAG_ANCHORED;
 }
 END_DEF
 
@@ -105,7 +105,7 @@ the text killed this time appends to the text killed last time.\
     }
 
     thisflag |= FLAG_DONE_KILL;
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
   }
 }
 END_DEF
@@ -127,7 +127,7 @@ Copy the region to the kill buffer.\
     astr_cat(killed_text, copy_text_block(r.start, r.size));
 
     thisflag |= FLAG_DONE_KILL;
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
   }
 }
 END_DEF
@@ -189,7 +189,7 @@ Set mark at beginning, and put point at end.\
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
     insert_nstring(killed_text);
-    weigh_mark();
+    buf->flags &= ~BFLAG_ANCHORED;
   }
 }
 END_DEF
