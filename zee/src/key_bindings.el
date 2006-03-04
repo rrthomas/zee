@@ -5,23 +5,23 @@
 # currently not true.
 
 # Character/line
-key_bind "LEFT" edit_navigate_previous_character
-key_bind "RIGHT" edit_navigate_next_character
-key_bind "UP" edit_navigate_previous_line
-key_bind "DOWN" edit_navigate_next_line
+key_bind "LEFT" move_previous_character
+key_bind "RIGHT" move_next_character
+key_bind "UP" move_previous_line
+key_bind "DOWN" move_next_line
 # Word/paragraph
-key_bind "C-LEFT" edit_navigate_previous_word
-key_bind "C-RIGHT" edit_navigate_next_word
-key_bind "M-{" edit_navigate_previous_paragraph # FIXME Doesn't work!
-key_bind "M-}" edit_navigate_next_paragraph # FIXME Doesn't work!
+key_bind "C-LEFT" move_previous_word
+key_bind "C-RIGHT" move_next_word
+key_bind "M-{" move_previous_paragraph # FIXME Doesn't work!
+key_bind "M-}" move_next_paragraph # FIXME Doesn't work!
 # Line/page
-key_bind "HOME" edit_navigate_start_line
-key_bind "END" edit_navigate_end_line
-key_bind "PGUP" edit_navigate_previous_page
-key_bind "PGDN" edit_navigate_next_page
+key_bind "HOME" move_start_line
+key_bind "END" move_end_line
+key_bind "PGUP" move_previous_page
+key_bind "PGDN" move_next_page
 # Whole buffer
-key_bind "C-HOME" edit_navigate_start_file
-key_bind "C-END" edit_navigate_end_file
+key_bind "C-HOME" move_start_file
+key_bind "C-END" move_end_file
 
 # Selection.
 # select_other_end
@@ -79,7 +79,7 @@ key_bind "TAB" indent_relative # FIXME: edit_insert_tab?
 # Rare commands.
 # SUGGESTION: remove these from the default keymap?
 
-key_bind "M-m" edit_navigate_start_line_text
+key_bind "M-m" move_start_line_text
 key_bind "M-e" macro_play
 key_bind "M-c" edit_case_capitalize
 key_bind "M-l" edit_case_lower

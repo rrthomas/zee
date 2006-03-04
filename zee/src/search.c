@@ -94,7 +94,7 @@ static int search_forward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
-            CMDCALL(edit_navigate_next_line);
+            CMDCALL(move_next_line);
           buf->pt.o = off;
           return TRUE;
         }
@@ -119,7 +119,7 @@ static int search_backward(Line *startp, size_t starto, astr as)
         size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
-            CMDCALL(edit_navigate_previous_line);
+            CMDCALL(move_previous_line);
           buf->pt.o = off;
           return TRUE;
         }

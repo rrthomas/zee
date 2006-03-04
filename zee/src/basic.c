@@ -27,11 +27,11 @@
 #include "main.h"
 #include "extern.h"
 
-/* Goal column to arrive at when `edit_navigate_down/up_line'
+/* Goal column to arrive at when `move_down/up_line'
    commands are used. */
 static int cur_goalc;
 
-DEF(edit_navigate_start_line,
+DEF(move_start_line,
 "\
 Move the cursor to the beginning of the line.\
 ")
@@ -39,13 +39,13 @@ Move the cursor to the beginning of the line.\
   buf->pt.o = 0;
 
   /* Set goalc to the beginning of line for next
-     `edit_navigate_next/previous_line' call. */
+     `move_next/previous_line' call. */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
 END_DEF
 
-DEF(edit_navigate_end_line,
+DEF(move_end_line,
 "\
 Move the cursor to the end of the line.\
 ")
@@ -99,7 +99,7 @@ static void goto_goalc(int goalc)
   buf->pt.o = i;
 }
 
-DEF(edit_navigate_previous_line,
+DEF(move_previous_line,
 "\
 Move cursor vertically up one line.\n\
 If there is no character in the target line exactly over the current column,\n\
@@ -123,7 +123,7 @@ column, or at the end of the line if it is not long enough.\
 }
 END_DEF
 
-DEF(edit_navigate_next_line,
+DEF(move_next_line,
 "\
 Move cursor vertically down one line.\n\
 If there is no character in the target line exactly under the current column,\n\
@@ -156,11 +156,11 @@ UINT(to_col, "Goto column: "))
   if (ok) {
     if (buf->pt.o > to_col)
       do
-        ok = CMDCALL(edit_navigate_previous_character);
+        ok = CMDCALL(move_previous_character);
       while (ok && buf->pt.o > to_col);
     else if (buf->pt.o < to_col)
       do
-        ok = CMDCALL(edit_navigate_next_character);
+        ok = CMDCALL(move_next_character);
       while (ok && buf->pt.o < to_col);
   }
 }
@@ -187,11 +187,11 @@ int goto_line(size_t to_line)
 
   if (buf->pt.n > to_line)
     do
-      ok = CMDCALL(edit_navigate_previous_line);
+      ok = CMDCALL(move_previous_line);
     while (ok && buf->pt.n > to_line);
   else if (buf->pt.n < to_line)
     do
-      ok = CMDCALL(edit_navigate_next_line);
+      ok = CMDCALL(move_next_line);
     while (ok && buf->pt.n < to_line);
 
   return ok;
@@ -211,7 +211,7 @@ UINT(to_line, "Goto line: "))
 }
 END_DEF
 
-DEF(edit_navigate_start_file,
+DEF(move_start_file,
 "\
 Move the cursor to the beginning of the file.\
 ")
@@ -221,7 +221,7 @@ Move the cursor to the beginning of the file.\
 }
 END_DEF
 
-DEF(edit_navigate_end_file,
+DEF(move_end_file,
 "\
 Move the cursor to the end of the file.\
 ")
@@ -231,7 +231,7 @@ Move the cursor to the end of the file.\
 }
 END_DEF
 
-DEF(edit_navigate_previous_character,
+DEF(move_previous_character,
 "\
 Move the cursor left one character.\
 ")
@@ -242,13 +242,13 @@ Move the cursor left one character.\
     thisflag |= FLAG_NEED_RESYNC;
     buf->pt.p = list_prev(buf->pt.p);
     buf->pt.n--;
-    CMDCALL(edit_navigate_end_line);
+    CMDCALL(move_end_line);
   } else
     ok = FALSE;
 }
 END_DEF
 
-DEF(edit_navigate_next_character,
+DEF(move_next_character,
 "\
 Move the cursor right one character.\
 ")
@@ -259,13 +259,13 @@ Move the cursor right one character.\
     thisflag |= FLAG_NEED_RESYNC;
     buf->pt.p = list_next(buf->pt.p);
     buf->pt.n++;
-    CMDCALL(edit_navigate_start_line);
+    CMDCALL(move_start_line);
   } else
     ok = FALSE;
 }
 END_DEF
 
-DEF(edit_navigate_previous_page,
+DEF(move_previous_page,
 "\
 Scroll text of current window downward near full screen.\
 ")
@@ -279,7 +279,7 @@ Scroll text of current window downward near full screen.\
 }
 END_DEF
 
-DEF(edit_navigate_next_page,
+DEF(move_next_page,
 "\
 Scroll text of current window upward near full screen.\
 ")

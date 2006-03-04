@@ -48,7 +48,7 @@ Delete the current line.\
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
     if (!eolp()) {
-      CMDCALL(edit_navigate_start_line);
+      CMDCALL(move_start_line);
       astr_cat(killed_text, astr_sub(buf->pt.p->item, 0, (ptrdiff_t)astr_len(buf->pt.p->item)));
       delete_nstring(astr_len(buf->pt.p->item), &as);
       thisflag |= FLAG_DONE_KILL;

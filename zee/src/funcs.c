@@ -174,7 +174,7 @@ COMMAND(name, "Command: "))
 }
 END_DEF
 
-DEF(edit_navigate_start_line_text,
+DEF(move_start_line_text,
 "\
 Move the cursor to the first non-whitespace character on this line.\
 ")
@@ -183,7 +183,7 @@ Move the cursor to the first non-whitespace character on this line.\
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
-    CMDCALL(edit_navigate_next_character);
+    CMDCALL(move_next_character);
   }
 }
 END_DEF
@@ -193,7 +193,7 @@ END_DEF
 			  Move through words
 ***********************************************************************/
 
-DEF(edit_navigate_next_word,
+DEF(move_next_word,
 "\
 Move the cursor forward one word.\
 ")
@@ -213,7 +213,7 @@ Move the cursor forward one word.\
     if (gotword)
       break;
     buf->pt.o = astr_len(buf->pt.p->item);
-    if (!CMDCALL(edit_navigate_next_line)) {
+    if (!CMDCALL(move_next_line)) {
       ok = FALSE;
       break;
     }
@@ -222,7 +222,7 @@ Move the cursor forward one word.\
 }
 END_DEF
 
-DEF(edit_navigate_previous_word,
+DEF(move_previous_word,
 "\
 Move the cursor backwards one word.\
 ")
@@ -231,7 +231,7 @@ Move the cursor backwards one word.\
 
   for (;;) {
     if (bolp()) {
-      if (!CMDCALL(edit_navigate_previous_line)) {
+      if (!CMDCALL(move_previous_line)) {
         ok = FALSE;
         break;
       }
@@ -258,9 +258,9 @@ Select the current word.\
 ")
 {
   if (!eolp() && isalnum(following_char()))
-    ok = CMDCALL(edit_navigate_next_word) &&
+    ok = CMDCALL(move_next_word) &&
       CMDCALL(edit_select_on) &&
-      CMDCALL(edit_navigate_previous_word) &&
+      CMDCALL(move_previous_word) &&
       CMDCALL(edit_select_other_end);
 }
 END_DEF
@@ -271,41 +271,41 @@ Select the previous word.\
 ")
 {
   if (!bolp() && isalnum(preceding_char()))
-    ok = CMDCALL(edit_navigate_previous_word) &&
+    ok = CMDCALL(move_previous_word) &&
       CMDCALL(edit_select_on) &&
-      CMDCALL(edit_navigate_next_word) &&
+      CMDCALL(move_next_word) &&
       CMDCALL(edit_select_other_end);
 }
 END_DEF
 
-DEF(edit_navigate_previous_paragraph,
+DEF(move_previous_paragraph,
 "\
 Move the cursor backward to the start of the paragraph.\
 ")
 {
-  while (is_empty_line() && CMDCALL(edit_navigate_previous_line))
+  while (is_empty_line() && CMDCALL(move_previous_line))
     ;
-  while (!is_empty_line() && CMDCALL(edit_navigate_previous_line))
+  while (!is_empty_line() && CMDCALL(move_previous_line))
     ;
 
-  CMDCALL(edit_navigate_start_line);
+  CMDCALL(move_start_line);
 }
 END_DEF
 
-DEF(edit_navigate_next_paragraph,
+DEF(move_next_paragraph,
 "\
 Move the cursor forward to the end of the paragraph.\
 ")
 {
-  while (is_empty_line() && CMDCALL(edit_navigate_next_line))
+  while (is_empty_line() && CMDCALL(move_next_line))
     ;
-  while (!is_empty_line() && CMDCALL(edit_navigate_next_line))
+  while (!is_empty_line() && CMDCALL(move_next_line))
     ;
 
   if (is_empty_line())
-    CMDCALL(edit_navigate_start_line);
+    CMDCALL(move_start_line);
   else
-    CMDCALL(edit_navigate_end_line);
+    CMDCALL(move_end_line);
 }
 END_DEF
 
@@ -314,9 +314,9 @@ DEF(edit_select_paragraph,
 Select the current paragraph.\
 ")
 {
-  CMDCALL(edit_navigate_next_paragraph);
+  CMDCALL(move_next_paragraph);
   CMDCALL(edit_select_on);
-  CMDCALL(edit_navigate_previous_paragraph);
+  CMDCALL(move_previous_paragraph);
   CMDCALL(edit_select_other_end);
 }
 END_DEF
@@ -333,26 +333,26 @@ be set using set_wrap_column.\
 
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
-  CMDCALL(edit_navigate_next_paragraph);
+  CMDCALL(move_next_paragraph);
   end = buf->pt.n;
   if (is_empty_line())
     end--;
 
-  CMDCALL(edit_navigate_previous_paragraph);
+  CMDCALL(move_previous_paragraph);
   start = buf->pt.n;
   if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
-    CMDCALL(edit_navigate_next_line);
+    CMDCALL(move_next_line);
     start++;
   }
 
   for (i = start; i < end; i++) {
-    CMDCALL(edit_navigate_end_line);
+    CMDCALL(move_end_line);
     CMDCALL(edit_delete_next_character);
     CMDCALL(delete_horizontal_space);
     insert_char(' ');
   }
 
-  CMDCALL(edit_navigate_end_line);
+  CMDCALL(move_end_line);
   while (get_goalc() > (size_t)get_variable_number(astr_new("wrap_column")) + 1)
     wrap_break_line();
 
@@ -375,9 +375,9 @@ static int setcase_word(int rcase)
   int firstchar;
 
   if (!isalnum(following_char())) {
-    if (!CMDCALL(edit_navigate_next_word))
+    if (!CMDCALL(move_next_word))
       return FALSE;
-    if (!CMDCALL(edit_navigate_previous_word))
+    if (!CMDCALL(move_previous_word))
       return FALSE;
   }
 

@@ -424,7 +424,7 @@ int insert_nstring(astr as)
   for (i = 0; i < astr_len(as); i++) {
     if (*astr_char(as, (ptrdiff_t)i) == '\n') {
       intercalate_newline();
-      CMDCALL(edit_navigate_next_character);
+      CMDCALL(move_next_character);
     } else {
       buf->pt.p->item = astr_cat(astr_cat(astr_sub(buf->pt.p->item, 0, (ptrdiff_t)buf->pt.o),
                                          astr_sub(as, (ptrdiff_t)i, (ptrdiff_t)i + 1)),
@@ -534,7 +534,7 @@ Join lines if the character is a newline.\
 {
   weigh_mark();
 
-  if (CMDCALL(edit_navigate_previous_character))
+  if (CMDCALL(move_previous_character))
     CMDCALL(edit_delete_next_character);
   else {
     minibuf_error(astr_new("Beginning of buffer"));
@@ -572,11 +572,11 @@ static void previous_nonblank_goalc(void)
   size_t cur_goalc = get_goalc();
 
   /* Find previous non-blank line. */
-  while (CMDCALL(edit_navigate_previous_line) && is_blank_line());
+  while (CMDCALL(move_previous_line) && is_blank_line());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp() && get_goalc() < cur_goalc)
-    CMDCALL(edit_navigate_next_character);
+    CMDCALL(move_next_character);
 }
 
 DEF(indent_relative,
@@ -596,11 +596,11 @@ Indent line or insert a tab.\
     /* Now find the next blank char. */
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
-        CMDCALL(edit_navigate_next_character);
+        CMDCALL(move_next_character);
 
     /* Find next non-blank char. */
     while (!eolp() && isspace(following_char()))
-      CMDCALL(edit_navigate_next_character);
+      CMDCALL(move_next_character);
 
     /* Record target column. */
     if (!eolp())
