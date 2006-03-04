@@ -96,6 +96,18 @@ Stop selecting text.\
 }
 END_DEF
 
+DEF(edit_select_toggle,
+"\
+Toggle selection mode.\
+")
+{
+  if (buf->flags & BFLAG_ANCHORED)
+    CMDCALL(edit_select_off);
+  else
+    CMDCALL(edit_select_on);
+}
+END_DEF
+
 DEF(edit_select_other_end,
 "\
 When selecting text, move the cursor to the other end of the selection.\
