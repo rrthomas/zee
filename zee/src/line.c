@@ -398,12 +398,9 @@ void wrap_break_line(void)
     buf->pt.o = old_col;
 }
 
-/* FIXME: There's stuff connected with wrap_column in here. That doesn't
- * match the documentation of preferences_toggle_wrap_mode nor the
- * documentation of this command. */
 DEF(edit_insert_newline,
 "\
-Insert a newline, and move to left margin of the new line if it's blank.\
+Insert a newline, wrapping if in Wrap mode.\
 ")
 {
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
