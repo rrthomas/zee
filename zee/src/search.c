@@ -251,7 +251,6 @@ static int isearch(int dir)
   return TRUE;
 }
 
-/* FIXME: If there is a selection, use it to initialise the search pattern. */
 DEF(edit_find,
 "\
 Do incremental search forward for regular expression.\n\
