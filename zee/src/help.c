@@ -47,7 +47,7 @@ struct {
 
 DEF(help_command,
 "\
-Display the full documentation of COMMAND.\
+Display the help for the given command.\
 ")
 {
   astr name;
