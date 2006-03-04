@@ -52,9 +52,9 @@ END_DEF
 DEF(preferences_toggle_wrap_mode,
 "\
 Toggle Wrap mode.\n\
-In Wrap mode, inserting a space at a column beyond `wrap_column'\n\
-automatically breaks the line at a previous space. Otherwise you\n\
-have to do this explicitly using the \"wrap_paragraph\" command.\
+In Wrap mode, inserting a space or newline at a column beyond\n\
+`wrap_column' automatically breaks the line at a previous space.\n\
+Paragraphs can also be wrapped using the `wrap_paragraph'.\
 ")
 {
   buf->flags ^= BFLAG_AUTOFILL;
