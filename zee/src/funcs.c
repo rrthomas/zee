@@ -456,7 +456,6 @@ to execute the line as a command; passes the selection as input to the\n\
 shell command.\n\
 If the shell command produces any output, it is inserted into the\n\
 file, replacing the selection.\n\
-FIXME: Use better-shell.c\
 ")
 {
   astr ms;
