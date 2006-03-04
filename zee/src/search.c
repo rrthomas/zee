@@ -265,7 +265,6 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
-/* FIXME: What shall we do with this? */
 DEF(edit_find_backward,
 "\
 Do incremental search backward for regular expression.\n\
@@ -278,8 +277,6 @@ C-g when search is successful aborts and moves point to starting point.\
   ok = isearch(ISEARCH_BACKWARD);
 }
 END_DEF
-
-/* FIXME: Add "edit_navigate_next_match" and "edit_navigate_previous_match". */
 
 static int no_upper(astr as)
 {
