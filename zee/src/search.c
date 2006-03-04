@@ -308,14 +308,13 @@ what to do with it.\
     if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
       ok = CMDCALL(edit_select_off);
     if (ok) {
-      /* Spaghetti code follows... :-( */
-      /* FIXME: Can we use minibuf_read_forced? */
       while (search_forward(buf->pt.p, buf->pt.o, find)) {
         if (!noask) {
           int c;
           if (thisflag & FLAG_NEED_RESYNC)
             resync_display();
           for (;;) {
+            /* FIXME: Can we use minibuf_read_forced? */
             minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl)));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
