@@ -618,9 +618,9 @@ Indent line or insert a tab.\
       /* If not at EOL on target line, insert spaces up to
          target_goalc. */
       while (get_goalc() < target_goalc)
-        /* If already at EOL on target line, insert a tab. */
-        insert_char(' '); /* FIXME: That's not a tab. */
+        insert_char(' ');
     else
+      /* If already at EOL on target line, insert a tab. */
       ok = CMDCALL(edit_insert_tab);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
