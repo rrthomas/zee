@@ -159,7 +159,7 @@ static int isearch(int dir)
   for (;;) {
     /* Make the minibuf message. */
     as = astr_afmt("%sI-search%s: %s",
-              (last ? " " : "Failing "),
+              (last ? "" : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
 
