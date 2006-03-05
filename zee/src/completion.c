@@ -190,9 +190,9 @@ void completion_remove_suffix(Completion *cp)
   astr previous = p->item;
   for (p = list_next(p); p != cp->matches; p = list_next(p)) {
     size_t length = last_occurrence(previous, common_prefix_length(previous, p->item), '_');
-    if (length > astr_len(cp->match)) {
+    if (length > astr_len(cp->match))
       previous = astr_sub(previous, 0, (ptrdiff_t)length);
-    } else {
+    else {
       list_append(ans, previous);
       previous = p->item;
     }
@@ -209,8 +209,7 @@ size_t completion_remove_prefix(Completion *cp, astr search)
 {
   size_t pos = last_occurrence(search, astr_len(search), '_');
   if (pos > 0)
-    for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p)) {
-      p->item = astr_sub(p->item, (ptrdiff_t)pos, astr_len(p->item));
-    }
+    for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p))
+      p->item = astr_sub(p->item, (ptrdiff_t)pos, (ptrdiff_t)astr_len(p->item));
   return pos;
 }
