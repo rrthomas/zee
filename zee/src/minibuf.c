@@ -82,7 +82,7 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
     /* Complete partial words if possible. */
     if (completion_try(cp, as)) {
       as = astr_dup(cp->match);
-      if (astr_len(as) == astr_len(list_first(cp->matches)->item))
+      if (list_length(cp->matches) == 1)
         return as;
     }
 
@@ -272,6 +272,8 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
     if (cp != NULL && (!oldAs || astr_cmp(oldAs, as))) {
       /* Using completions and 'as' has changed, so display new completions. */
       completion_try(cp, as);
+      completion_remove_suffix(cp);
+      completion_remove_prefix(cp, as);
       completion_popup(cp);
       oldAs = astr_dup(as);
     }

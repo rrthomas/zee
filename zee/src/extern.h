@@ -43,8 +43,11 @@ astr copy_text_block(Point start, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
-int completion_try(Completion *cp, astr search);
 void completion_popup(Completion *cp);
+int completion_try(Completion *cp, astr search);
+int completion_is_exact(Completion *cp, astr search);
+void completion_remove_suffix(Completion *cp);
+size_t completion_remove_prefix(Completion *cp, astr search);
 
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
