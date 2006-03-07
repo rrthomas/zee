@@ -91,6 +91,7 @@ vector *vec_copy(vector *v)
 #ifdef TEST
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Stub to make zrealloc happy */
 void die(int exitcode)
