@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "extern.h"
@@ -168,7 +169,7 @@ chord.\
   size_t key = KBD_NOKEY;
   astr name = NULL;
 
-  ok = FALSE;
+  ok = false;
 
   if (list_length(l) > 1) {
     key = strtochord(list_behead(l));
@@ -189,7 +190,7 @@ chord.\
     if ((cmd = get_command(name))) {
       if (key != KBD_NOKEY) {
         bind_key(key, cmd);
-        ok = TRUE;
+        ok = true;
       } else
         minibuf_error(astr_new("Invalid key"));
     } else

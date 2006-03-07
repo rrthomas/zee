@@ -24,6 +24,7 @@
 
 #include <limits.h>
 #include <locale.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -117,7 +118,8 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int longopt, bflag = FALSE, hflag = FALSE, nflag = FALSE;
+  int longopt;
+  bool bflag = false, hflag = false, nflag = false;
   size_t line = 1;
   astr as;
 
@@ -130,7 +132,7 @@ int main(int argc, char **argv)
   while (getopt_long_only(argc, argv, "", longopts, &longopt) != -1)
     switch (longopt) {
     case 0:
-      bflag = TRUE;
+      bflag = true;
       break;
     case 1:
       cmd_eval(astr_new(optarg));
@@ -140,7 +142,7 @@ int main(int argc, char **argv)
         cmd_eval(as);
       break;
     case 3:
-      nflag = TRUE;
+      nflag = true;
       break;
     case 4:
       fprintf(stderr,
@@ -153,7 +155,7 @@ int main(int argc, char **argv)
               );
       return 0;
     case 5:
-      hflag = TRUE;
+      hflag = true;
       break;
     }
   argc -= optind;

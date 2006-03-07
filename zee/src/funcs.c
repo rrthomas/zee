@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <signal.h>
@@ -93,7 +94,7 @@ Stop selecting text.\
 {
   buf->flags &= ~BFLAG_ANCHORED;
   minibuf_write(astr_new(""));
-  ok = FALSE;
+  ok = false;
 }
 END_DEF
 
@@ -130,7 +131,7 @@ static int quoted_insert_octal(int c1)
   if (!isdigit(c2) || c2 - '0' >= 8) {
     insert_char(c1 - '0');
     insert_char(c2);
-    return TRUE;
+    return true;
   }
 
   minibuf_write(astr_afmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
@@ -139,12 +140,12 @@ static int quoted_insert_octal(int c1)
   if (!isdigit(c3) || c3 - '0' >= 8) {
     insert_char((c1 - '0') * 8 + (c2 - '0'));
     insert_char(c3);
-    return TRUE;
+    return true;
   }
 
   insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
 
-  return TRUE;
+  return true;
 }
 
 DEF(edit_insert_quoted,
@@ -211,7 +212,7 @@ DEF(move_next_word,
 Move the cursor forward one word.\
 ")
 {
-  int gotword = FALSE;
+  bool gotword = false;
 
   for (;;) {
     while (!eolp()) {
@@ -220,14 +221,14 @@ Move the cursor forward one word.\
         if (gotword)
           break;
       } else
-        gotword = TRUE;
+        gotword = true;
       buf->pt.o++;
     }
     if (gotword)
       break;
     buf->pt.o = astr_len(buf->pt.p->item);
     if (!CMDCALL(move_next_line)) {
-      ok = FALSE;
+      ok = false;
       break;
     }
     buf->pt.o = 0;
@@ -240,12 +241,12 @@ DEF(move_previous_word,
 Move the cursor backwards one word.\
 ")
 {
-  int gotword = FALSE;
+  bool gotword = false;
 
   for (;;) {
     if (bolp()) {
       if (!CMDCALL(move_previous_line)) {
-        ok = FALSE;
+        ok = false;
         break;
       }
       buf->pt.o = astr_len(buf->pt.p->item);
@@ -256,7 +257,7 @@ Move the cursor backwards one word.\
         if (gotword)
           break;
       } else
-        gotword = TRUE;
+        gotword = true;
       buf->pt.o--;
     }
     if (gotword)
@@ -389,9 +390,9 @@ static int setcase_word(int rcase)
 
   if (!isalnum(following_char())) {
     if (!CMDCALL(move_next_word))
-      return FALSE;
+      return false;
     if (!CMDCALL(move_previous_word))
-      return FALSE;
+      return false;
   }
 
   i = buf->pt.o;
@@ -403,9 +404,9 @@ static int setcase_word(int rcase)
   if ((size = i - buf->pt.o) > 0)
     undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, size);
 
-  for (firstchar = TRUE;
+  for (firstchar = true;
        buf->pt.o < i;
-       buf->pt.o++, firstchar = FALSE) {
+       buf->pt.o++, firstchar = false) {
     char c = *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
 
     if (isalpha(c)) {
@@ -423,7 +424,7 @@ static int setcase_word(int rcase)
 
   buf->flags |= BFLAG_MODIFIED;
 
-  return TRUE;
+  return true;
 }
 
 DEF(edit_case_lower,
@@ -476,14 +477,14 @@ file, replacing the selection.\n\
   if ((ms = minibuf_read(astr_new("Shell command: "), astr_new(""))) == NULL)
     ok = CMDCALL(edit_select_off);
   else if (astr_len(ms) == 0 || warn_if_no_mark())
-    ok = FALSE;
+    ok = false;
   else {
     char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
     int fd = mkstemp(tempfile);
 
     if (fd == -1) {
       minibuf_error(astr_new("Cannot open temporary file"));
-      ok = FALSE;
+      ok = false;
     } else {
       FILE *pipe;
       Region r;
@@ -499,7 +500,7 @@ file, replacing the selection.\n\
 
       if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
         minibuf_error(astr_new("Cannot open pipe to process"));
-        ok = FALSE;
+        ok = false;
       } else {
         astr out = astr_new(""), s;
 

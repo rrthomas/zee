@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "nonstd.h"
@@ -195,7 +196,7 @@ enum {
 #endif
 
 /* The type of a user command. */
-typedef int (*Command)(list l);
+typedef bool (*Command)(list l);
 
 typedef struct {
   size_t key;
@@ -219,9 +220,9 @@ typedef struct {
  * single integer argument.
  */
 #define DEF(name, doc) \
-  int F_ ## name(list l) \
+  bool F_ ## name(list l) \
   { \
-    int ok = TRUE; \
+    bool ok = true; \
     assert(l);
 
 #define DEF_ARG(name, doc, args) \
@@ -251,7 +252,7 @@ typedef struct {
     if (!list_empty(l)) { \
       astr as = list_behead(l); \
       if ((name = strtoul(astr_cstr(as), NULL, 10)) == ULONG_MAX) \
-        ok = FALSE; \
+        ok = false; \
     } else do { \
       astr ms; \
       if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \

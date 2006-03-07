@@ -35,17 +35,17 @@ void init_bindings(void);
 
 /* buffer.c --------------------------------------------------------------- */
 void buffer_new(void);
-int warn_if_readonly_buffer(void);
-int warn_if_no_mark(void);
-int calculate_the_region(Region *rp);
+bool warn_if_readonly_buffer(void);
+bool warn_if_no_mark(void);
+bool calculate_the_region(Region *rp);
 size_t tab_width(void);
 astr copy_text_block(Point start, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
 void completion_popup(Completion *cp);
-int completion_try(Completion *cp, astr search);
-int completion_is_exact(Completion *cp, astr search);
+bool completion_try(Completion *cp, astr search);
+bool completion_is_exact(Completion *cp, astr search);
 void completion_remove_suffix(Completion *cp);
 size_t completion_remove_prefix(Completion *cp, astr search);
 
@@ -99,19 +99,19 @@ void set_mark(Marker *m);
 void set_mark_to_point(void);
 Line *line_new(void);
 Line *string_to_lines(astr as, size_t *lines);
-int is_empty_line(void);
-int is_blank_line(void);
+bool is_empty_line(void);
+bool is_blank_line(void);
 int following_char(void);
 int preceding_char(void);
-int bobp(void);
-int eobp(void);
-int bolp(void);
-int eolp(void);
-int line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, int replace_case);
-int insert_char(int c);
+bool bobp(void);
+bool eobp(void);
+bool bolp(void);
+bool eolp(void);
+bool line_replace_text(Line **lp, size_t offset, size_t oldlen, astr newtext, bool replace_case);
+bool insert_char(int c);
 void wrap_break_line(void);
-int insert_nstring(astr as);
-int delete_nstring(size_t size, astr *as);
+bool insert_nstring(astr as);
+bool delete_nstring(size_t size, astr *as);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
@@ -171,11 +171,11 @@ void init_variables(void);
 void set_variable(astr var, astr val);
 astr get_variable(astr var);
 int get_variable_number(astr var);
-int get_variable_bool(astr var);
+bool get_variable_bool(astr var);
 astr minibuf_read_variable_name(astr msg);
 
 /* External C functions for interactive commands -------------------------- */
 #define X(cmd_name, doc) \
-  int F_ ## cmd_name(list l);
+  bool F_ ## cmd_name(list l);
 #include "tbl_funcs.h"
 #undef X

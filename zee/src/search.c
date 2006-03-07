@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -91,18 +92,18 @@ static int search_forward(Line *startp, size_t starto, astr as)
          lp != list_last(buf->lines);
          lp = list_next(lp), sp = lp->item) {
       if (astr_len(sp) > 0) {
-        size_t off = find_substr(sp, as, sp == lp->item, TRUE, FALSE);
+        size_t off = find_substr(sp, as, sp == lp->item, true, false);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
             CMDCALL(move_next_line);
           buf->pt.o = off;
-          return TRUE;
+          return true;
         }
       }
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 static int search_backward(Line *startp, size_t starto, astr as)
@@ -116,18 +117,18 @@ static int search_backward(Line *startp, size_t starto, astr as)
          lp = list_prev(lp), s1size = astr_len(lp->item)) {
       astr sp = lp->item;
       if (s1size > 0) {
-        size_t off = find_substr(sp, as, TRUE, s1size == astr_len(lp->item), TRUE);
+        size_t off = find_substr(sp, as, true, s1size == astr_len(lp->item), true);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
             CMDCALL(move_previous_line);
           buf->pt.o = off;
-          return TRUE;
+          return true;
         }
       }
     }
   }
 
-  return FALSE;
+  return false;
 }
 
 static astr last_search = NULL;
@@ -141,7 +142,7 @@ static astr last_search = NULL;
 static int isearch(int dir)
 {
   int c;
-  int last = TRUE;
+  int last = true;
   astr as;
   astr pattern = astr_new("");
   Point start, cur;
@@ -236,7 +237,7 @@ static int isearch(int dir)
       else
         last = search_backward(cur.p, cur.o, pattern);
     } else
-      last = TRUE;
+      last = true;
 
     if (thisflag & FLAG_NEED_RESYNC)
       resync_display();
@@ -248,7 +249,7 @@ static int isearch(int dir)
   if (old_mark)
     remove_marker(old_mark);
 
-  return TRUE;
+  return true;
 }
 
 DEF(edit_find,
@@ -277,15 +278,15 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
-static int no_upper(astr as)
+static bool no_upper(astr as)
 {
   size_t i;
 
   for (i = 0; i < astr_len(as); i++)
     if (isupper(*astr_char(as, (ptrdiff_t)i)))
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 
 DEF(edit_find_and_replace,
@@ -295,13 +296,14 @@ As each match is found, the user must type a character saying\n\
 what to do with it.\
 ")
 {
-  int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
+  int count = 0;
+  bool noask = false, exitloop = false, find_no_upper;
   astr find, repl;
 
   if ((find = minibuf_read(astr_new("Query replace string: "), astr_new(""))) == NULL)
     ok = CMDCALL(edit_select_off);
   else if (astr_len(find) == 0)
-    ok = FALSE;
+    ok = false;
   else {
     find_no_upper = no_upper(find);
 
@@ -333,10 +335,10 @@ what to do with it.\
           case 'q': /* Quit immediately. */
             goto endoffunc;
           case '.': /* Replace and quit. */
-            exitloop = TRUE;
+            exitloop = true;
             goto replblock;
           case '!': /* Replace all without asking. */
-            noask = TRUE;
+            noask = true;
             goto replblock;
           case ' ': /* Replace. */
           case 'y':

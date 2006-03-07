@@ -20,13 +20,15 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
 
 
-/* This variable is set to TRUE when the undo is in execution. */
-static int doing_undo = FALSE;
+/* This variable is set to true when the undo is in execution. */
+static bool doing_undo = false;
 
 /*
  * Save a reverse delta for doing undo.
@@ -58,7 +60,7 @@ static Undo *revert_action(Undo *up)
 {
   astr as;
 
-  doing_undo = TRUE;
+  doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE) {
     undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0);
@@ -76,7 +78,7 @@ static Undo *revert_action(Undo *up)
   delete_nstring(up->size, &as);
   insert_nstring(up->text);
 
-  doing_undo = FALSE;
+  doing_undo = false;
 
   /* If reverting this undo action leaves the buffer unchanged,
      unset the modified flag. */
@@ -92,7 +94,7 @@ Undo some previous changes.\n\
 Repeat this command to undo more changes.\
 ")
 {
-  ok = FALSE;
+  ok = false;
 
   if (warn_if_readonly_buffer());
   else if (buf->next_undop == NULL) {
@@ -101,19 +103,19 @@ Repeat this command to undo more changes.\
   } else {
     buf->next_undop = revert_action(buf->next_undop);
     minibuf_write(astr_new("Undo!"));
-    ok = TRUE;
+    ok = true;
   }
 }
 END_DEF
 
 /*
- * Set unchanged flags to FALSE except for the last undo action, which
- * is set to TRUE.
+ * Set unchanged flags to false except for the last undo action, which
+ * is set to true.
  */
 void undo_reset_unmodified(Undo *up)
 {
   assert(up);
-  up->unchanged = TRUE;
+  up->unchanged = true;
   for (up = up->next; up; up = up->next)
-    up->unchanged = FALSE;
+    up->unchanged = false;
 }

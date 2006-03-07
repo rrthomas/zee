@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -100,7 +101,7 @@ static const char *keyname[] = {
  */
 astr chordtostr(size_t key)
 {
-  int found;
+  bool found;
   size_t i;
   astr as = astr_new("");
 
@@ -110,14 +111,14 @@ astr chordtostr(size_t key)
     astr_cat(as, astr_new("M-"));
   key &= ~(KBD_CTRL | KBD_META);
 
-  for (found = FALSE, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
+  for (found = false, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
       astr_cat(as, astr_new(keyname[i]));
-      found = TRUE;
+      found = true;
       break;
     }
 
-  if (found == FALSE) {
+  if (found == false) {
     if (isgraph(key))
       astr_cat_char(as, (int)(key & 0xff));
     else

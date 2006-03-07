@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
@@ -72,7 +74,7 @@ Use macro_name to give it a permanent name.\
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
     minibuf_error(astr_new("Already defining a keyboard macro"));
-    ok = FALSE;
+    ok = false;
   } else {
     if (cur_mp)
       cancel_kbd_macro();
@@ -92,7 +94,7 @@ Finish defining a keyboard macro.\
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
     minibuf_error(astr_new("Not defining a keyboard macro"));
-    ok = FALSE;
+    ok = false;
   } else
     thisflag &= ~FLAG_DEFINING_MACRO;
 }
@@ -112,10 +114,10 @@ valid editor command.\
 
   if ((ms = minibuf_read(astr_new("Name for last kbd macro: "), astr_new(""))) == NULL) {
     minibuf_error(astr_new("No command name given"));
-    ok = FALSE;
+    ok = false;
   } else if (cur_mp == NULL) {
     minibuf_error(astr_new("No keyboard macro defined"));
-    ok = FALSE;
+    ok = false;
   } else {
     if ((mp = get_macro(ms))) {
       /* If a macro with this name already exists, update its key list */
@@ -156,7 +158,7 @@ macro_name.\
 {
   if (cur_mp == NULL) {
     minibuf_error(astr_new("No kbd macro has been defined"));
-    ok = FALSE;
+    ok = false;
   } else
     call_macro(cur_mp);
 }

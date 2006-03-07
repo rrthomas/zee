@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "extern.h"
@@ -93,7 +94,7 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 
 /*
  * Forces the user to answer "yes" or "no".
- * Returns -1 for cancelled, otherwise TRUE for "yes" and FALSE for "no".
+ * Returns -1 for cancelled, otherwise true for "yes" and false for "no".
  * Suggestion: inline? Probably not.
  */
 int minibuf_read_yesno(astr prompt)
@@ -107,7 +108,7 @@ int minibuf_read_yesno(astr prompt)
 
 /*
  * Forces the user to answer "true" or "false".
- * Returns -1 for cancelled, otherwise TRUE for "true" and FALSE for "false".
+ * Returns -1 for cancelled, otherwise true for "true" and false for "false".
  * Suggestion: inline? Probably not.
  */
 int minibuf_read_boolean(astr prompt)
@@ -259,7 +260,8 @@ static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
  */
 astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *hp)
 {
-  int c, ret = FALSE;
+  int c;
+  bool ret = false;
   ptrdiff_t i;
   astr as = astr_dup(value), retval = NULL, saved = NULL;
 
@@ -288,11 +290,11 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
     case KBD_RET:
       term_minibuf_write(astr_new(""));
       retval = as;
-      ret = TRUE;
+      ret = true;
       break;
     case KBD_CANCEL:
       term_minibuf_write(astr_new(""));
-      ret = TRUE;
+      ret = true;
       break;
     case KBD_CTRL | 'a':
     case KBD_HOME:

@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>
@@ -62,7 +63,7 @@ static void _get_color(int c, int *_fg, int *_bg)
   if (_bg) *_bg = bg;
 }
 
-static int cursor_state = FALSE;
+static bool cursor_state = false;
 static volatile int blink_state = 0;
 
 static volatile int cur_time = 0;
@@ -292,15 +293,15 @@ static int hooked_readkey(int mode, size_t timeout)
   int ret;
   term_refresh();
 
-  cursor_state = TRUE;
+  cursor_state = true;
   if (timeout > 0)
     while (!keypressed() && (!(mode & GETKEY_DELAYED) ||
                              cur_time - beg_time < timeout))
       rest(10);
 
   ret = readkey();
-  draw_cursor(FALSE);
-  cursor_state = FALSE;
+  draw_cursor(false);
+  cursor_state = false;
 
   return ret;
 }

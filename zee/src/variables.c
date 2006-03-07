@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "main.h"
@@ -119,14 +120,14 @@ int get_variable_number(astr var)
   return 0;
 }
 
-int get_variable_bool(astr var)
+bool get_variable_bool(astr var)
 {
   astr as;
 
   if ((as = get_variable(var)))
     return !astr_cmp(as, astr_new("true"));
 
-  return FALSE;
+  return false;
 }
 
 astr minibuf_read_variable_name(astr msg)
@@ -168,12 +169,12 @@ Set a variable to the specified value.\
 {
   astr var, val;
 
-  ok = FALSE;
+  ok = false;
 
   if (list_length(l) > 1) {
     var = list_behead(l);
     val = list_behead(l);
-    ok = TRUE;
+    ok = true;
   } else {
     if ((var = minibuf_read_variable_name(astr_new("Set variable: ")))) {
       var_entry *p = get_variable_default(var);
@@ -182,14 +183,14 @@ Set a variable to the specified value.\
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
           CMDCALL(edit_select_off);
         else {
-          val = astr_new((i == TRUE) ? "true" : "false");
-          ok = TRUE;
+          val = astr_new((i == true) ? "true" : "false");
+          ok = true;
         }
       } else                    /* Non-boolean variable. */
         if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
           CMDCALL(edit_select_off);
         else
-          ok = TRUE;
+          ok = true;
     }
   }
 

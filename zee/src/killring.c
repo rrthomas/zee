@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
@@ -43,7 +45,7 @@ Delete the current line.\
     clear_kill_buffer();
 
   if (warn_if_readonly_buffer())
-    ok = FALSE;
+    ok = false;
   else {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
@@ -116,7 +118,7 @@ Copy the region to the kill buffer.\
     clear_kill_buffer();
 
   if (warn_if_no_mark())
-    ok = FALSE;
+    ok = false;
   else {
     assert(calculate_the_region(&r));
     astr_cat(killed_text, copy_text_block(r.start, r.size));
@@ -127,15 +129,15 @@ Copy the region to the kill buffer.\
 }
 END_DEF
 
-static int kill_helper(Command cmd)
+static bool kill_helper(Command cmd)
 {
-  int ok;
+  bool ok;
 
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();
 
   if (warn_if_readonly_buffer())
-    ok = FALSE;
+    ok = false;
   else {
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
@@ -180,7 +182,7 @@ Set mark at beginning, and put point at end.\
 {
   if (astr_len(killed_text) == 0) {
     minibuf_error(astr_new("Clipboard is empty"));
-    ok = FALSE;
+    ok = false;
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
     insert_nstring(killed_text);

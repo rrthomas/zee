@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,8 +93,9 @@ void file_open(astr filename)
  * Write the contents of buffer bp to file filename.
  * The filename is passed separately so a name other than buf->filename
  * can be used, e.g. in an emergency by die.
+ * Returns true on success, false on failure.
  */
-static int buffer_write(Buffer *bp, astr filename)
+static bool buffer_write(Buffer *bp, astr filename)
 {
   FILE *fp;
   Line *lp;
@@ -101,14 +103,14 @@ static int buffer_write(Buffer *bp, astr filename)
   assert(bp);
 
   if ((fp = fopen(astr_cstr(filename), "w")) == NULL)
-    return FALSE;
+    return false;
 
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
         (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {
       fclose(fp);
-      return FALSE;
+      return false;
     }
   }
 
@@ -120,7 +122,7 @@ DEF(file_save,
 Save buffer in visited file.\
 ")
 {
-  if (buffer_write(buf, buf->filename) == FALSE) {
+  if (buffer_write(buf, buf->filename) == false) {
     minibuf_error(astr_afmt("%s: %s", buf->filename, strerror(errno)));
   } else {
     minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf->filename)));
@@ -143,7 +145,7 @@ Offer to save the buffer if there are unsaved changes, then quit.\
     if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
       ok = CMDCALL(edit_select_off);
     else if (!ans)
-      ok = FALSE;
+      ok = false;
   }
 
   if (ok)
@@ -157,13 +159,13 @@ END_DEF
  */
 void die(int exitcode)
 {
-  static int already_dying = 0;
+  static bool already_dying = 0;
 
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf && buf->flags & BFLAG_MODIFIED) {
     astr as = astr_new("");
-    already_dying = TRUE;
+    already_dying = true;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)
       as = astr_dup(buf->filename);

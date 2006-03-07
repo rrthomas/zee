@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>
 
@@ -215,7 +216,7 @@ static void outch(int c, Font font, size_t *x)
  * Tests whether the specified line and offset is within the specified Region.
  * The offset is measured in characters, not in character positions.
  */
-static int in_region(size_t lineno, size_t x, Region *r)
+static bool in_region(size_t lineno, size_t x, Region *r)
 {
   Point pt;
 
@@ -519,15 +520,15 @@ void resize_window(void)
       --hdelta;
     }
   } else { /* Decrease window height. */
-    int decreased = TRUE;
+    int decreased = true;
     while (decreased) {
-      decreased = FALSE;
+      decreased = false;
       while (hdelta < 0) {
         if (win.fheight > 2) {
           --win.fheight;
           --win.eheight;
           ++hdelta;
-          decreased = TRUE;
+          decreased = true;
         } else
           /* FIXME: Window too small! */
           assert(0);

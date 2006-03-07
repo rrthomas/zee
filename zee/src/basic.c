@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <limits.h>
 
 #include "main.h"
@@ -108,7 +109,7 @@ column, or at the end of the line if it is not long enough.\
 ")
 {
   if (list_prev(buf->pt.p) == buf->lines)
-    ok = FALSE;
+    ok = false;
   else {
     thisflag |= FLAG_NEED_RESYNC | FLAG_DONE_CPCN;
 
@@ -132,7 +133,7 @@ column, or at the end of the line if it is not long enough.\
 ")
 {
   if (list_next(buf->pt.p) == buf->lines)
-    ok = FALSE;
+    ok = false;
   else {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
@@ -183,7 +184,7 @@ int goto_point(Point pt)
  */
 int goto_line(size_t to_line)
 {
-  int ok = TRUE;
+  int ok = true;
 
   if (buf->pt.n > to_line)
     do
@@ -244,7 +245,7 @@ Move the cursor left one character.\
     buf->pt.n--;
     CMDCALL(move_end_line);
   } else
-    ok = FALSE;
+    ok = false;
 }
 END_DEF
 
@@ -261,7 +262,7 @@ Move the cursor right one character.\
     buf->pt.n++;
     CMDCALL(move_start_line);
   } else
-    ok = FALSE;
+    ok = false;
 }
 END_DEF
 
@@ -271,10 +272,10 @@ Scroll text of current window downward near full screen.\
 ")
 {
   if (buf->pt.n > 0)
-    ok = goto_line(buf->pt.n - win.eheight) ? TRUE : FALSE;
+    ok = goto_line(buf->pt.n - win.eheight) ? true : false;
   else {
     minibuf_error(astr_new("Beginning of buffer"));
-    ok = FALSE;
+    ok = false;
   }
 }
 END_DEF
@@ -285,10 +286,10 @@ Scroll text of current window upward near full screen.\
 ")
 {
   if (buf->pt.n < buf->num_lines)
-    ok = goto_line(buf->pt.n + win.eheight) ? TRUE : FALSE;
+    ok = goto_line(buf->pt.n + win.eheight) ? true : false;
   else {
     minibuf_error(astr_new("End of buffer"));
-    ok = FALSE;
+    ok = false;
   }
 }
 END_DEF

@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
@@ -118,18 +120,18 @@ static int hcompar(const void *p1, const void *p2)
  * Match completions
  * cp - the completions
  * search - the prefix to search for (not modified).
- * Returns FALSE if `search' is not a prefix of any completion, and TRUE
+ * Returns false if `search' is not a prefix of any completion, and true
  * otherwise. The effect on cp is as follows:
  * cp->completions - not modified.
  * cp->matches - replaced with the list of matching completions, sorted.
  * cp->match - replaced with the longest common prefix of the matches, if the
- * function returns TRUE, otherwise not modified.
+ * function returns true, otherwise not modified.
  *
  * To see the completions in a popup, you should call completion_popup
  * after this method. You may want to call completion_remove_suffix and/or
  * completion_remove_prefix in between to keep the list manageable.
  */
-int completion_try(Completion *cp, astr search)
+bool completion_try(Completion *cp, astr search)
 {
   size_t fullmatches = 0;
 
@@ -143,7 +145,7 @@ int completion_try(Completion *cp, astr search)
   list_sort(cp->matches, hcompar);
 
   if (list_empty(cp->matches))
-    return FALSE;
+    return false;
 
   cp->match = list_first(cp->matches)->item;
   size_t prefix_len = astr_len(cp->match);
@@ -151,14 +153,14 @@ int completion_try(Completion *cp, astr search)
     prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
   cp->match = astr_sub(cp->match, 0, (ptrdiff_t)prefix_len);
 
-  return TRUE;
+  return true;
 }
 
 /*
  * Tests whether there was an exact match.
  * Not currently used, but it's worth remembering how to do it.
  */
-int completion_is_exact(Completion *cp, astr search)
+bool completion_is_exact(Completion *cp, astr search)
 {
   return
     !list_empty(cp->matches) &&

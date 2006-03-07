@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "main.h"
@@ -144,7 +145,7 @@ Line *string_to_lines(astr as, size_t *lines)
 /*
  * Return a flag indicating whether the current line is empty
  */
-int is_empty_line(void)
+bool is_empty_line(void)
 {
   return astr_len(buf->pt.p->item) == 0;
 }
@@ -152,14 +153,14 @@ int is_empty_line(void)
 /*
  * Return a flag indicating whether the current line is blank
  */
-int is_blank_line(void)
+bool is_blank_line(void)
 {
   size_t c;
 
   for (c = 0; c < astr_len(buf->pt.p->item); c++)
     if (!isspace(*astr_char(buf->pt.p->item, (ptrdiff_t)c)))
-      return FALSE;
-  return TRUE;
+      return false;
+  return true;
 }
 
 /*
@@ -191,7 +192,7 @@ int preceding_char(void)
 /*
  * Return flag indicating whether point is at the beginning of the buffer
  */
-int bobp(void)
+bool bobp(void)
 {
   return (bolp() && list_prev(buf->pt.p) == buf->lines);
 }
@@ -199,7 +200,7 @@ int bobp(void)
 /*
  * Return a flag indicating whether point is at the end of the buffer
  */
-int eobp(void)
+bool eobp(void)
 {
   return (eolp() && list_next(buf->pt.p) == buf->lines);
 }
@@ -207,7 +208,7 @@ int eobp(void)
 /*
  * Return a flag indicating whether point is at the beginning of a line
  */
-int bolp(void)
+bool bolp(void)
 {
   return buf->pt.o == 0;
 }
@@ -215,7 +216,7 @@ int bolp(void)
 /*
  * Return a flag indicating whether point is at the end of a line
  */
-int eolp(void)
+bool eolp(void)
 {
   return buf->pt.o == astr_len(buf->pt.p->item);
 }
@@ -224,7 +225,7 @@ int eolp(void)
  * Insert the character `c' at the current point position
  * into the current buffer.
  */
-int insert_char(int c)
+bool insert_char(int c)
 {
   astr as = astr_afmt("%c", c);
   return insert_nstring(as);
@@ -237,7 +238,7 @@ Convert the tabulation into spaces.\
 ")
 {
   if (warn_if_readonly_buffer())
-    ok = FALSE;
+    ok = false;
   else {
     int c = get_goalc();
     int t = tab_width();
@@ -252,12 +253,12 @@ END_DEF
  * Insert a newline at the current position without moving the cursor.
  * Update markers that point to the splitted line.
  */
-static int intercalate_newline(void)
+static bool intercalate_newline(void)
 {
   Line *new_lp;
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    return false;
 
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, 1);
 
@@ -275,7 +276,7 @@ static int intercalate_newline(void)
   buf->flags |= BFLAG_MODIFIED;
   thisflag |= FLAG_NEED_RESYNC;
 
-  return TRUE;
+  return true;
 }
 
 /*
@@ -315,13 +316,13 @@ static void recase(astr str, astr tmpl)
 
 /*
  * Replace text in the line lp with newtext. If replace_case is
- * TRUE then the new characters will be the same case as the old.
+ * true then the new characters will be the same case as the old.
  * Return flag indicating whether modifications have been made.
  */
-int line_replace_text(Line **lp, size_t offset, size_t oldlen,
-                      astr newtext, int replace_case)
+bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
+                      astr newtext, bool replace_case)
 {
-  int changed = FALSE;
+  bool changed = false;
 
   if (oldlen > 0) {
     if (replace_case && get_variable_bool(astr_new("case_replace")))
@@ -331,12 +332,12 @@ int line_replace_text(Line **lp, size_t offset, size_t oldlen,
       (*lp)->item = astr_cat(astr_cat(astr_sub((*lp)->item, 0, (ptrdiff_t)offset), newtext),
                              astr_sub((*lp)->item, (ptrdiff_t)(offset + oldlen), (ptrdiff_t)astr_len((*lp)->item)));
       adjust_markers(*lp, *lp, offset, 0, (int)(astr_len(newtext) - oldlen));
-      changed = TRUE;
+      changed = true;
     } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
                       astr_cstr(newtext), astr_len(newtext)) != 0) {
       memcpy(astr_char((*lp)->item, (ptrdiff_t)offset),
              astr_cstr(newtext), astr_len(newtext));
-      changed = TRUE;
+      changed = true;
     }
   }
 
@@ -412,12 +413,12 @@ Insert a newline, wrapping if in Wrap mode.\
 }
 END_DEF
 
-int insert_nstring(astr as)
+bool insert_nstring(astr as)
 {
   size_t i;
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    return false;
 
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, astr_len(as));
 
@@ -434,18 +435,18 @@ int insert_nstring(astr as)
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 /*
  * Delete a string of the given length from point, returning it
  */
-int delete_nstring(size_t size, astr *as)
+bool delete_nstring(size_t size, astr *as)
 {
   buf->flags &= ~BFLAG_ANCHORED;
 
   if (warn_if_readonly_buffer())
-    return FALSE;
+    return false;
 
   *as = astr_new("");
 
@@ -459,7 +460,7 @@ int delete_nstring(size_t size, astr *as)
 
     if (eobp()) {
       minibuf_error(astr_new("End of buffer"));
-      return FALSE;
+      return false;
     }
 
     if (eolp()) {
@@ -485,7 +486,7 @@ int delete_nstring(size_t size, astr *as)
     }
   }
 
-  return TRUE;
+  return true;
 }
 
 DEF_ARG(edit_insert_character,
@@ -507,7 +508,7 @@ UINT(c, "Insert character: "))
       insert_char((int)c);
     } else {
       ding();
-      ok = FALSE;
+      ok = false;
     }
 
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
@@ -538,7 +539,7 @@ Join lines if the character is a newline.\
     CMDCALL(edit_delete_next_character);
   else {
     minibuf_error(astr_new("Beginning of buffer"));
-    ok = FALSE;
+    ok = false;
   }
 }
 END_DEF
@@ -585,7 +586,7 @@ Indent line or insert a tab.\
 ")
 {
   if (warn_if_readonly_buffer())
-    ok = FALSE;
+    ok = false;
   else {
     size_t cur_goalc = get_goalc(), target_goalc = 0;
     Marker *old_point = point_marker();
@@ -633,7 +634,7 @@ no indenting is performed.\
 ")
 {
   if (warn_if_readonly_buffer())
-    ok = FALSE;
+    ok = false;
   else {
     buf->flags &= ~BFLAG_ANCHORED;
 

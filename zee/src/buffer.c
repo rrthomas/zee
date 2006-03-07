@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
@@ -47,26 +49,26 @@ void buffer_new(void)
 }
 
 /*
- * Print an error message into the echo area and return TRUE
- * if the current buffer is readonly; otherwise return FALSE.
+ * Print an error message into the echo area and return true
+ * if the current buffer is readonly; otherwise return false.
  */
-int warn_if_readonly_buffer(void)
+bool warn_if_readonly_buffer(void)
 {
   if (buf->flags & BFLAG_READONLY) {
     minibuf_error(astr_new("Buffer is readonly"));
-    return TRUE;
+    return true;
   } else
-  return FALSE;
+  return false;
 }
 
-int warn_if_no_mark(void)
+bool warn_if_no_mark(void)
 {
   assert(buf->mark);
   if (!(buf->flags & BFLAG_ANCHORED)) {
     minibuf_error(astr_new("The mark is not active now"));
-    return TRUE;
+    return true;
   } else
-    return FALSE;
+    return false;
 }
 
 /*
@@ -92,13 +94,13 @@ static void region_size(Region *rp, Point from, Point to)
  * Calculate the region size between point and mark and set the region
  * structure.
  */
-int calculate_the_region(Region *rp)
+bool calculate_the_region(Region *rp)
 {
   if (!(buf->flags & BFLAG_ANCHORED))
-    return FALSE;
+    return false;
 
   region_size(rp, buf->pt, buf->mark->pt);
-  return TRUE;
+  return true;
 }
 
 /*

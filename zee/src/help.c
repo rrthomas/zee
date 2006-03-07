@@ -20,10 +20,13 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 
 #include "main.h"
 #include "extern.h"
+
 
 DEF(help_about,
 "\
@@ -52,7 +55,7 @@ Display the help for the given command.\
 {
   astr name;
 
-  ok = FALSE;
+  ok = false;
 
   if ((name = minibuf_read_command_name(astr_new("Describe command: ")))) {
     size_t i;
@@ -63,7 +66,7 @@ Display the help for the given command.\
           where = astr_afmt("\n\nBound to: %s", astr_cstr(bindings));
         popup_set(astr_afmt("Help for command `%s':\n\n%s%s",
                             ftable[i].name, ftable[i].doc, astr_cstr(where)));
-        ok = TRUE;
+        ok = true;
         break;
       }
   }
@@ -90,7 +93,7 @@ Display the full documentation of VARIABLE (a symbol).\
 {
   astr name;
 
-  ok = FALSE;
+  ok = false;
 
   if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
     size_t i;
@@ -102,7 +105,7 @@ Display the full documentation of VARIABLE (a symbol).\
                             "Documentation:\n%s",
                             vtable[i].name, vtable[i].defval,
                             astr_cstr(get_variable(name)), vtable[i].doc));
-        ok = TRUE;
+        ok = true;
       }
   }
 }
@@ -122,7 +125,7 @@ Display the command invoked by a key sequence.\
 
   if ((cmd = binding_to_command(key)) == NULL) {
     minibuf_error(astr_afmt("%s is unbound", astr_cstr(keyname)));
-    ok = FALSE;
+    ok = false;
   } else
     minibuf_write(astr_afmt("%s runs the command `%s'", astr_cstr(keyname), astr_cstr(cmd)));
 }

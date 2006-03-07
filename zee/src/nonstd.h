@@ -22,11 +22,6 @@
 
 #ifndef NONSTD_H
 
-#undef TRUE
-#define TRUE                            1
-#undef FALSE
-#define FALSE                           0
-
 #undef min
 #define min(a, b)                       ((a) < (b) ? (a) : (b))
 #undef max

@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <stdbool.h>
+
 #include "config.h"
 #include "main.h"
 #include "extern.h"
@@ -27,7 +29,7 @@
 
 static size_t line;
 static ptrdiff_t pos;
-static int bol;
+static bool bol;
 static astr expr;
 
 static int getch(void)
@@ -63,7 +65,7 @@ static int getch_skipspace(void) {
       /* FALLTHROUGH */
 
     case '\n':
-      bol = TRUE;
+      bol = true;
       line++;
       break;
 
@@ -77,7 +79,7 @@ static int getch_skipspace(void) {
     default:
       return c;
     }
-  } while (TRUE);
+  } while (true);
 }
 
 static astr gettok(void)
@@ -91,7 +93,7 @@ static astr gettok(void)
 
   case '\"':                    /* string */
     {
-      int eos = FALSE;
+      bool eos = false;
 
       do {
         switch ((c = getch())) {
@@ -100,7 +102,7 @@ static astr gettok(void)
           ungetch();
           /* FALLTHROUGH */
         case '\"':
-          eos = TRUE;
+          eos = true;
           break;
         default:
           astr_cat_char(tok, c);
@@ -118,7 +120,7 @@ static astr gettok(void)
         break;
       }
       c = getch();
-    } while (TRUE);
+    } while (true);
   }
 
   return tok;
@@ -133,7 +135,7 @@ void cmd_eval(astr as)
   pos = 0;
   expr = as;
   line = 0;
-  bol = TRUE;
+  bol = true;
 
   astr tok = gettok();
   while (tok) {
@@ -146,7 +148,7 @@ void cmd_eval(astr as)
       list_append(l, tok);
       tok = gettok();
     }
-    bol = FALSE;
+    bol = false;
 
     /* Execute the line */
     while ((fname = list_behead(l)) &&

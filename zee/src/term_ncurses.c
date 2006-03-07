@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -37,7 +38,7 @@
 
 typedef SCREEN Screen;
 Screen *screen;
-int xterm;
+bool xterm;
 
 void term_move(size_t y, size_t x)
 {
@@ -100,7 +101,7 @@ void term_init(void)
   char *term = getenv("TERM");
 
   if (term && strcmp(term, "xterm") == 0) {
-    xterm = TRUE;
+    xterm = true;
     printf("\033[?1036h");      /* Make Meta send ESC */
   }
   screen = newterm(NULL, stdout, stdin);
@@ -109,8 +110,8 @@ void term_init(void)
   noecho();
   nonl();
   raw();
-  intrflush(stdscr, FALSE);
-  keypad(stdscr, TRUE);
+  intrflush(stdscr, false);
+  keypad(stdscr, true);
 }
 
 void term_close(void)
