@@ -19,9 +19,11 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <assert.h>
+#include <stdlib.h>
+
 #include "list.h"
-#include "main.h"
-#include "extern.h"
+#include "zmalloc.h"
 
 
 /* Create an empty list, returning a pointer to the list */
