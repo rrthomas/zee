@@ -13,7 +13,7 @@ EXTRA_DIST =					\
 	mkdoc.c
 
 DOCSRCS = $(top_srcdir)/src/*.c
-AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
+AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
 
 GENERATED_TEXI = dot$(PACKAGE_NAME).texi $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi
 
