@@ -112,7 +112,7 @@ struct option longopts[] = {
     {longname, opt, NULL, 0},
 #include "tbl_opts.h"
 #undef X
-    { 0, 0, 0, 0 }
+    {0, 0, 0, 0}
 };
 
 int main(int argc, char **argv)
