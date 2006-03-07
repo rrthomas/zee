@@ -22,12 +22,13 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <string.h>
 
+#include "nonstd.h"
 #include "zmalloc.h"
 #include "astr.h"
-#include "main.h"
 
 /* Copies n characters from s onto the end of as, growing as as necessary. */
 static astr ncat(astr as, const char *s, size_t n)

@@ -27,20 +27,11 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include "nonstd.h"
 #include "zmalloc.h"
 #include "vector.h"
 #include "list.h"
 #include "astr.h"
-
-#undef TRUE
-#define TRUE                            1
-#undef FALSE
-#define FALSE                           0
-
-#undef min
-#define min(a, b)                       ((a) < (b) ? (a) : (b))
-#undef max
-#define max(a, b)                       ((a) > (b) ? (a) : (b))
 
 /*--------------------------------------------------------------------------
  * Main editor structures.
