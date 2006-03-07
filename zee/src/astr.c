@@ -222,8 +222,6 @@ int main(void)
   as1 = astr_cat(astr_new(""), astr_new("x"));
   assert(as1->size >= astr_len(as1));
 
-  printf("astr tests passed\n");
-
   return EXIT_SUCCESS;
 }
 
