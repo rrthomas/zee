@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include <stdlib.h>
 #include <ctype.h>
 #include <signal.h>
 #include <unistd.h>
