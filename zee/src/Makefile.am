@@ -6,14 +6,17 @@ else
 regex = regex.o
 endif
 
-TESTS = astr vector
-check_PROGRAMS = astr vector
+TESTS = vector astr rblist
+check_PROGRAMS = vector astr rblist
+
+vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+vector_LDADD = zmalloc.o
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 astr_LDADD = zmalloc.o vector.o
 
-vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-vector_LDADD = zmalloc.o
+rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+rblist_LDADD = zmalloc.o
 
 bin_PROGRAMS = zee
 

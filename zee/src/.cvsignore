@@ -3,4 +3,4 @@ Makefile
 Makefile.in
 zee
 paths.h tbl_funcs.h
-astr vector
+vector astr rblist

@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <limits.h>
 #include <string.h>
 
 #include "zmalloc.h"
@@ -53,8 +54,6 @@ extern rblist rblist_concat(rblist left, rblist right);
 /* For debugging: incremented every time random_choice is called. */
 static size_t choice_counter = 0;
 
-#define SIZE_T_MAX (1 + (float)(size_t)-1)
-
 /*
  * Returns true with probability p/(p+q).
  * Assumes (p+q) is representable as a size_t.
@@ -65,7 +64,7 @@ static inline bool random_choice(size_t p, size_t q)
 
   choice_counter++;
   seed = (2 * seed - 1) * seed + 1; /* Maximal period mod any power of two. */
-  return (p + q) * (float)seed < p * SIZE_T_MAX;
+  return (p + q) * (float)seed < p * SIZE_MAX;
 }
 
 /*
@@ -127,16 +126,16 @@ rblist rblist_singleton(char c)
 
 rblist rblist_concat(rblist left, rblist right)
 {
-  size_t length = left->length + right->length;
-  if (length < RBLIST_MINIMUM_NODE_LENGTH) {
-    struct leaf *ans = zmalloc(sizeof(struct leaf) + sizeof(char) * length);
-    ans->length = length;
+  size_t total_length = left->length + right->length;
+  if (total_length < RBLIST_MINIMUM_NODE_LENGTH) {
+    struct leaf *ans = zmalloc(sizeof(struct leaf) + sizeof(char) * total_length);
+    ans->length = total_length;
     memcpy((char *)&left->leaf.data[0], &ans->data[0], left->length);
     memcpy((char *)&right->leaf.data[0], &ans->data[left->length], right->length);
     return (rblist)ans;
   } else {
     struct node *ans = zmalloc(sizeof(struct node));
-    ans->length = length;
+    ans->length = total_length;
     if (random_choice(left->length, right->length)) {
       ans->left = left->node.left;
       ans->right = rblist_concat(left->node.right, right);
@@ -147,3 +146,25 @@ rblist rblist_concat(rblist left, rblist right)
     return (rblist)ans;
   }
 }
+
+
+#ifdef TEST
+
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Stub to make zrealloc happy */
+void die(int exitcode)
+{
+  exit(exitcode);
+}
+
+int main(void)
+{
+
+  printf("rblist tests passed\n");
+
+  return EXIT_SUCCESS;
+}
+
+#endif /* TEST */
