@@ -22,6 +22,7 @@ zee_DATA =					\
 	key_bindings.el
 
 zee_base_SOURCES =				\
+	nonstd.h				\
 	vector.c				\
 	vector.h				\
 	list.c					\
