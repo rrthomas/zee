@@ -67,18 +67,6 @@ static volatile int blink_state = 0;
 
 static volatile int cur_time = 0;
 
-static void control_blink_state(void)
-{
-  blink_state ^= 1;
-}
-END_OF_STATIC_FUNCTION(control_blink_state)
-
-static void inc_cur_time(void)
-{
-  cur_time++;
-}
-END_OF_STATIC_FUNCTION(inc_cur_time)
-
 static void draw_cursor(int state)
 {
   if (cursor_state && cur_x < term_width() && cur_y < term_height()) {
@@ -97,6 +85,20 @@ static void draw_cursor(int state)
     }
   }
 }
+END_OF_STATIC_FUNCTION(draw_cursor)
+
+static void control_blink_state(void)
+{
+  blink_state ^= 1;
+  draw_cursor(blink_state);
+}
+END_OF_STATIC_FUNCTION(control_blink_state)
+
+static void inc_cur_time(void)
+{
+  cur_time++;
+}
+END_OF_STATIC_FUNCTION(inc_cur_time)
 
 void term_move(size_t y, size_t x)
 {
@@ -197,7 +199,8 @@ void term_init(void)
 
   LOCK_VARIABLE(blink_state);
   LOCK_FUNCTION(control_blink_state);
-  install_int(control_blink_state, 150);
+  LOCK_FUNCTION(draw_cursor);
+  install_int(control_blink_state, 300);
 
   LOCK_VARIABLE(cur_time);
   LOCK_FUNCTION(inc_cur_time);
@@ -282,22 +285,24 @@ static int translate_key(int c)
   return KBD_NOKEY;
 }
 
-/* FIXME: If timeout is 0 wait in readkey, and repaint cursor using
-   timer. */
+/* FIXME: . */
 static int hooked_readkey(int mode, size_t timeout)
 {
   size_t beg_time = cur_time;
+  int ret;
   term_refresh();
 
   cursor_state = TRUE;
-  while (!keypressed() && (!(mode & GETKEY_DELAYED) ||
-                           cur_time - beg_time < timeout))
-    draw_cursor(blink_state);
+  if (timeout > 0)
+    while (!keypressed() && (!(mode & GETKEY_DELAYED) ||
+                             cur_time - beg_time < timeout))
+      rest(10);
 
+  ret = readkey();
   draw_cursor(FALSE);
   cursor_state = FALSE;
 
-  return readkey();
+  return ret;
 }
 
 size_t term_xgetkey(int mode, size_t timeout)
