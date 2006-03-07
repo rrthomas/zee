@@ -30,7 +30,7 @@
 /* Start of section to move into a header file. */
 
 /*
- * Tuning parameter which controls memroy/CPU compromise.
+ * Tuning parameter which controls memory/CPU compromise.
  * rblists shorter than this will be implemented using a primitive array.
  * Increase to use less memory and more CPU.
  */
@@ -62,10 +62,10 @@ static size_t choice_counter = 0;
 static inline bool random_choice(size_t p, size_t q)
 {
   static size_t seed = 483568341; /* Arbitrary. */
-  
+
   choice_counter++;
   seed = (2 * seed - 1) * seed + 1; /* Maximal period mod any power of two. */
-  return ((p + q) * (float)seed) < (p * SIZE_T_MAX);
+  return (p + q) * (float)seed < p * SIZE_T_MAX;
 }
 
 /*
@@ -131,8 +131,8 @@ rblist rblist_concat(rblist left, rblist right)
   if (length < RBLIST_MINIMUM_NODE_LENGTH) {
     struct leaf *ans = zmalloc(sizeof(struct leaf) + sizeof(char) * length);
     ans->length = length;
-    memcpy(&left->leaf.data[0], &ans->data[0], left->length);
-    memcpy(&right->leaf.data[0], &ans->data[left->length], right->length);
+    memcpy((char *)&left->leaf.data[0], &ans->data[0], left->length);
+    memcpy((char *)&right->leaf.data[0], &ans->data[left->length], right->length);
     return (rblist)ans;
   } else {
     struct node *ans = zmalloc(sizeof(struct node));
