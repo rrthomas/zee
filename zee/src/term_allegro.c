@@ -21,9 +21,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/* FIXME: Currently running the allegro backend causes 100% CPU usage;
-   seemingly identical code in term_allegro.c works fine in Zile. */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -90,11 +87,11 @@ static void draw_cursor(int state)
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
-      int fg, bg, c = new_scr[cur_y*term_width()+cur_x];
+      int fg, bg, c = new_scr[cur_y * term_width() + cur_x];
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
-        (font, ((c&0xff) < ' ') ? ' ' : (c&0xff),
+        (font, ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
          fg, bg, screen,
          (int)(cur_x * FW), (int)(cur_y * FH));
     }
@@ -285,6 +282,8 @@ static int translate_key(int c)
   return KBD_NOKEY;
 }
 
+/* FIXME: If timeout is 0 wait in readkey, and repaint cursor using
+   timer. */
 static int hooked_readkey(int mode, size_t timeout)
 {
   size_t beg_time = cur_time;
