@@ -95,10 +95,33 @@ struct node {
   rblist right;
 };
 
+/* This is the opaque public type. */
 union rblist {
   size_t length;
   struct leaf leaf;
   struct node node;
+};
+
+/*
+ * In ML this data structure would be leaf * int * rblist list. The leaf
+ * is the current struct leaf. The int is the current position within
+ * that struct leaf. The rblist list is a linked list of rblists to
+ * iterate over after that.
+ *
+ * In C, we have to define a struct for the links in the linked list. The
+ * list is terminated by a NULL next pointer.
+ */
+
+struct link {
+  rblist item;
+  const struct link *next;
+};
+
+/* This is the opaque public type. */
+struct rblist_iterator {
+  const struct leaf *leaf;
+  size_t pos;
+  const struct link *next;
 };
 
 /*****************************/
@@ -145,6 +168,25 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
     *left = rbl->node.left;
     *right = rbl->node.right;
   }
+}
+
+/*
+ * Constructs an iterator that iterates over 'rbl' and then over all the
+ * rblists in 'next'.
+ */
+static rblist_iterator make_iterator(rblist rbl, const struct link *next)
+{
+  while (!is_leaf(rbl)) {
+    struct link *link = zmalloc(sizeof(struct link));
+    link->item = rbl->node.right;
+    link->next = next;
+    next = link;
+  }
+  rblist_iterator ret = zmalloc(sizeof(struct rblist_iterator));
+  ret->leaf = &rbl->leaf;
+  ret->pos = 0;
+  ret->next = next;
+  return ret;
 }
 
 /***************************/
@@ -275,6 +317,24 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
   *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
 }
 
+rblist_iterator rblist_iterate(rblist rbl)
+{
+  return make_iterator(rbl, NULL);
+}
+
+char rblist_iterator_value(rblist_iterator it)
+{
+  return it->leaf->data[it->pos];
+}
+
+rblist_iterator rblist_iterator_next(rblist_iterator it)
+{
+  if (++it->pos < it->leaf->length)
+    return it;
+  if (!it->next) return NULL;
+  return make_iterator(it->next->item, it->next->next);
+}
+
 /* char *rblist_to_string(rblist rbl) */
 /* { */
 /*   char *s = zmalloc(rbl->length + 1); */
@@ -318,6 +378,7 @@ int main(void)
 /*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
 
   const char *s1 = "Hello, I'm longer than 32 characters! Whooooppeee!!! Yes, really, really long. You won't believe how incredibly enormously long I am!";
+  /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
   rbl1 = rblist_from_array(s1, strlen(s1));
 #ifdef DEBUG
@@ -326,7 +387,10 @@ int main(void)
 /*   assert(!strcmp(rblist_to_string(rbl1), s1)); */
   for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
     rblist_split(rbl1, i, &rbl2, &rbl3);
+    assert(rblist_length(rbl2) == i);
+    assert(rblist_length(rbl3) == 19 * 7 - i);
     rbl4 = rblist_concat(rbl2, rbl3);
+    assert(rblist_length(rbl4) == 19 * 7);
 #ifdef DEBUG
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
 #endif
@@ -339,6 +403,7 @@ int main(void)
   random_counter = 0;
   for (size_t i = 0; i < TEST_SIZE; i++)
     rbl1 = rblist_concat(rbl1, rbl2);
+  assert(rblist_length(rbl1) == TEST_SIZE);
 #ifdef DEBUG
   printf("Making a list of length %d by appending one element at a time required\n"
          "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
