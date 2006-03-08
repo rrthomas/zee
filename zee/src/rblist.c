@@ -1,5 +1,6 @@
 /* Randomly balanced lists.
    Copyright (c) 2006 Alistair Turnbull.
+   Copyright (c) 2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -26,30 +27,8 @@
 #include <string.h>
 
 #include "zmalloc.h"
+#include "rblist.h"
 
-
-/* Start of section to move into a header file. */
-
-/*
- * Tuning parameter which controls memory/CPU compromise.
- * rblists shorter than this will be implemented using a primitive array.
- * Increase to use less memory and more CPU.
- */
-#define RBLIST_MINIMUM_NODE_LENGTH 64
-
-/* The type of lists. Instances are immutable. */
-typedef const union rblist *rblist;
-
-/* The empty list. */
-extern rblist rblist_empty;
-
-/* Make a list of length 1. */
-extern rblist rblist_singleton(char c);
-
-/* Concatenate two lists (non-destructive). */
-extern rblist rblist_concat(rblist left, rblist right);
-
-/* End of section to move into a header file. */
 
 /* For debugging: incremented every time random_choice is called. */
 static size_t choice_counter = 0;
@@ -118,39 +97,53 @@ rblist rblist_empty = (rblist)&empty;
 
 rblist rblist_singleton(char c)
 {
-  struct leaf *ans = zmalloc(sizeof(struct leaf) + sizeof(char));
-  ans->length = 1;
-  ans->data[0] = c;
-  return (rblist)ans;
+  struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char));
+  ret->length = 1;
+  ret->data[0] = c;
+  return (rblist)ret;
 }
 
 rblist rblist_concat(rblist left, rblist right)
 {
   size_t total_length = left->length + right->length;
   if (total_length < RBLIST_MINIMUM_NODE_LENGTH) {
-    struct leaf *ans = zmalloc(sizeof(struct leaf) + sizeof(char) * total_length);
-    ans->length = total_length;
-    memcpy((char *)&left->leaf.data[0], &ans->data[0], left->length);
-    memcpy((char *)&right->leaf.data[0], &ans->data[left->length], right->length);
-    return (rblist)ans;
+    struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * total_length);
+    ret->length = total_length;
+    memcpy((char *)&left->leaf.data[0], &ret->data[0], left->length);
+    memcpy((char *)&right->leaf.data[0], &ret->data[left->length], right->length);
+    return (rblist)ret;
   } else {
-    struct node *ans = zmalloc(sizeof(struct node));
-    ans->length = total_length;
+    struct node *ret = zmalloc(sizeof(struct node));
+    ret->length = total_length;
     if (random_choice(left->length, right->length)) {
-      ans->left = left->node.left;
-      ans->right = rblist_concat(left->node.right, right);
+      ret->left = left->node.left;
+      ret->right = rblist_concat(left->node.right, right);
     } else {
-      ans->left = rblist_concat(left, right->node.left);
-      ans->right = right->node.right;
+      ret->left = rblist_concat(left, right->node.left);
+      ret->right = right->node.right;
     }
-    return (rblist)ans;
+    return (rblist)ret;
   }
 }
 
+rblist rblist_from_string(const char *s)
+{
+  rblist ret;
+  for (; *s; s++)
+    ret = rblist_concat(ret, rblist_singleton(*s));
+  return ret;
+}
+
+/* char *rblist_to_string(rblist rbl) */
+/* { */
+/*   char *s = zmalloc(rbl->length + 1); */
+/*   for (size_t i = 0; i < rbl->length; i++) */
+/*     *s++ = ret = rblist_index(rbl, i); */
+/* } */
 
 #ifdef TEST
 
-#include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 
 /* Stub to make zrealloc happy */
@@ -161,8 +154,15 @@ void die(int exitcode)
 
 int main(void)
 {
+  rblist rbl1, rbl2, rbl3;
 
-  printf("rblist tests passed\n");
+  rbl1 = rblist_singleton('a');
+  rbl2 = rblist_singleton('b');
+  rbl3 = rblist_concat(rbl1, rbl2);
+/*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
+
+  rbl1 = rbl_from_string("hello");
+/*   assert(!strcmp(rblist_to_string(rbl1), "hello")); */
 
   return EXIT_SUCCESS;
 }
