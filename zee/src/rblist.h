@@ -28,7 +28,7 @@
  * is opaque. You may assume the structure is immutable (const). No
  * operation in this library ever modifies an rblist in place.
  *
- * Takes memory O(n) where 'n' is the length of the list. Typically about
+ * Takes memory O(n) where `n' is the length of the list. Typically about
  * twice as much memory will be used as would be used for an ordinary
  * C array.
  */
@@ -38,7 +38,7 @@ typedef const union rblist *rblist;
  * The type of list iterators (i.e. the type of the state of a loop
  * through a list). This is a pointer type, and NULL is means that the
  * loop is finished. The structure it points to is opaque and gets
- * modified in-place by 'rblist_next()'.
+ * modified in-place by `rblist_next'.
  *
  * An rblist_iterator can be thought of a bit like a pointer into the
  * list (but that's not what it is). rblist_iterator_value dereferences
@@ -47,7 +47,7 @@ typedef const union rblist *rblist;
  * next element. The most concise way to use these functions is using the
  * FOREACH macro.
  *
- * Takes memory O(log(n)) where 'n' is the length of the list.
+ * Takes memory O(log(n)) where `n' is the length of the list.
  */
 typedef struct rblist_iterator *rblist_iterator;
 
@@ -58,7 +58,7 @@ typedef struct rblist_iterator *rblist_iterator;
  * Make an rblist from an array. This can be achieved using
  * rblist_singleton and rblist_concat, but this method is more efficient.
  *
- * Takes time O(n) where 'n' is the length of the list.
+ * Takes time O(n) where `n' is the length of the list.
  */
 rblist rblist_from_array(const char *s, size_t length);
 
@@ -78,7 +78,7 @@ rblist rblist_singleton(char c);
 /*
  * Concatenate two lists. The originals are not modified.
  *
- * Takes time O(log(n)) where 'n' is the length of the result.
+ * Takes time O(log(n)) where `n' is the length of the result.
  */
 rblist rblist_concat(rblist left, rblist right);
 
@@ -96,19 +96,19 @@ size_t rblist_length(rblist rbl);
  * Break an rblist into two at the specified position, and store the two
  * halves are stored in *left and *right. The original is not modified.
  *
- * Takes time O(log(n)) where 'n' is the length of the list.
+ * Takes time O(log(n)) where `n' is the length of the list.
  */
 void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right);
 
 /*
  * Constructs an iterator over the specified rblist.
  *
- * Takes time O(log(n)) where 'n' is the length of the list.
+ * Takes time O(log(n)) where `n' is the length of the list.
  */
 rblist_iterator rblist_iterate(rblist rbl);
 
 /*
- * Returns thelist element currently addressed by 'it'.
+ * Returns thelist element currently addressed by `it'.
  *
  * Takes time O(1).
  */
@@ -126,15 +126,18 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
 /************************/
 /* Derived destructors. */
 
-#define RBLIST_FOR(_loop_var, rbl, body) \
-  for ( \
-    rblist_iterator _it_##_loop_var = rblist_iterate(rbl); \
-    _it_##_loop_var; \
-    _it_##_loop_var = rblist_iterator_next(_it_##_loop_var) \
-  ) { \
-    char _loop_var = rblist_iterator_value(_it_##_loop_var); \
-    body \
-  }
+/*
+ * Return the portion of `rbl' from `from' to `to'
+ */
+rblist rblist_sub(rblist rbl, size_t from, size_t to);
+
+#define RBLIST_FOR(c, rbl) \
+  for (rblist_iterator _it_##c = rblist_iterate(rbl); \
+       _it_##c; \
+       _it_##c = rblist_iterator_next(_it_##c)) { \
+    char c = rblist_iterator_value(_it_##c);
+
+#define END_RBLIST_FOR }
 
 /* Returns one element of an rblist. */
 char rblist_get(rblist rbl, size_t index);

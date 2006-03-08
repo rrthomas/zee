@@ -203,7 +203,8 @@ static rblist_iterator make_iterator(rblist rbl, const struct link *next)
  */
 rblist rblist_from_array(const char *s, size_t length)
 {
-  if (length == 0) return rblist_empty;
+  if (length == 0)
+    return rblist_empty;
   if (length < MINIMUM_NODE_LENGTH)
     return leaf_from_array(s, length);
   struct node *ret = zmalloc(sizeof(struct node));
@@ -241,9 +242,10 @@ rblist rblist_concat(rblist left, rblist right)
   #define rlen (right->length)
   #define mid (left->length)
   size_t new_len = llen + rlen;
+
   if (new_len == 0)
     return rblist_empty;
-  if (new_len < MINIMUM_NODE_LENGTH) {
+  else if (new_len < MINIMUM_NODE_LENGTH) {
     struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
     ret->length = new_len;
     memcpy(&ret->data[0], &left->leaf.data[0], llen);
@@ -316,6 +318,18 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
   }
   *left = leaf_from_array(&rbl->leaf.data[0], pos);
   *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
+}
+
+/**************************/
+/* Derived destructors. */
+
+rblist rblist_sub(rblist rbl, size_t from, size_t to)
+{
+  assert(to >= from);
+  rblist left, right;
+  rblist_split(rbl, from, &left, &right);
+  rblist_split(right, to - from, &left, &right);
+  return left;
 }
 
 rblist_iterator rblist_iterate(rblist rbl)
@@ -412,16 +426,17 @@ int main(void)
          "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
   printf("%s\n", rbl_structure(rbl1));
 #endif
-  
+
   rbl1 = rblist_from_array(s1, strlen(s1));
   size_t j = 0;
-  RBLIST_FOR(i, rbl1,
+  RBLIST_FOR(i, rbl1) {
 #ifdef DEBUG
     printf("Element %d is '%c'\n", j, i);
-#endif    
+#endif
     assert(i == s1[j]);
     j++;
-  )
+  }
+  END_RBLIST_FOR
   assert(j == strlen(s1));
 
   return EXIT_SUCCESS;
