@@ -42,8 +42,15 @@ static inline bool random_choice(size_t p, size_t q)
 
   choice_counter++;
   seed = (2 * seed - 1) * seed + 1; /* Maximal period mod any power of two. */
-  return (p + q) * (float)seed < p * ((float)SIZE_MAX + 1.0);
+  return (p + q) * (float)seed < p * ((float)SIZE_MAX + 1.0f);
 }
+
+/*
+ * Tuning parameter which controls memory/CPU compromise.
+ * rblists shorter than this will be implemented using a primitive array.
+ * Increase to use less memory and more CPU.
+ */
+#define RBLIST_MINIMUM_NODE_LENGTH 32
 
 /*
  * In ML, this data structure would be defined as follows:
@@ -104,16 +111,16 @@ rblist rblist_singleton(char c)
 
 rblist rblist_concat(rblist left, rblist right)
 {
-  size_t total_length = left->length + right->length;
-  if (total_length < RBLIST_MINIMUM_NODE_LENGTH) {
-    struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * total_length);
-    ret->length = total_length;
-    memcpy((char *)&left->leaf.data[0], &ret->data[0], left->length);
-    memcpy((char *)&right->leaf.data[0], &ret->data[left->length], right->length);
+  size_t new_length = left->length + right->length;
+  if (new_length < RBLIST_MINIMUM_NODE_LENGTH) {
+    struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_length);
+    ret->length = new_length;
+    memcpy(&ret->data[0], &left->leaf.data[0], left->length);
+    memcpy(&ret->data[left->length], &right->leaf.data[0], right->length);
     return (rblist)ret;
   } else {
     struct node *ret = zmalloc(sizeof(struct node));
-    ret->length = total_length;
+    ret->length = new_length;
     if (random_choice(left->length, right->length)) {
       ret->left = left->node.left;
       ret->right = rblist_concat(left->node.right, right);
@@ -125,9 +132,9 @@ rblist rblist_concat(rblist left, rblist right)
   }
 }
 
-rblist rblist_from_string(const char *s)
+rblist rblist_from_array(const char *s)
 {
-  rblist ret;
+  rblist ret = rblist_empty;
   for (; *s; s++)
     ret = rblist_concat(ret, rblist_singleton(*s));
   return ret;
@@ -160,8 +167,9 @@ int main(void)
   rbl3 = rblist_concat(rbl1, rbl2);
 /*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
 
-  rbl1 = rbl_from_string("hello");
-/*   assert(!strcmp(rblist_to_string(rbl1), "hello")); */
+  const char *s1 = "Hello, I'm longer than 32 characters! Whoooppeee!!!";
+  rbl1 = rblist_from_array(s1);
+/*   assert(!strcmp(rblist_to_string(rbl1), s1)); */
 
   return EXIT_SUCCESS;
 }

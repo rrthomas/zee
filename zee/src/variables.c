@@ -181,7 +181,7 @@ Set a variable to the specified value.\
       if (!astr_cmp(astr_new(p ? p->fmt : ""), astr_new("b"))) {
         int i;
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
-          CMDCALL(edit_select_off);
+          CMDCALL(edit_select_off); /* FIXME: val for set_variable() below... */
         else {
           val = astr_new((i == true) ? "true" : "false");
           ok = true;

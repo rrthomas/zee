@@ -23,13 +23,6 @@
 #ifndef RBLIST_H
 #define RBLIST_H
 
-/*
- * Tuning parameter which controls memory/CPU compromise.
- * rblists shorter than this will be implemented using a primitive array.
- * Increase to use less memory and more CPU.
- */
-#define RBLIST_MINIMUM_NODE_LENGTH 64
-
 /* The type of lists. Instances are immutable. */
 typedef const union rblist *rblist;
 
@@ -43,9 +36,9 @@ rblist rblist_singleton(char c);
 rblist rblist_concat(rblist left, rblist right);
 
 /* Make an rblist from a string. */
-rblist rblist_from_string(const char *s);
+rblist rblist_from_array(const char *s);
 
 /* Make a string from an rblist. */
-rblist rblist_get(rblist rbl);
+char rblist_get(rblist rbl, size_t index);
 
 #endif
