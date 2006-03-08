@@ -16,7 +16,7 @@ astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 astr_LDADD = zmalloc.o vector.o
 
 rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-rblist_LDADD = zmalloc.o
+rblist_LDADD = zmalloc.o vector.o astr.o
 
 bin_PROGRAMS = zee
 

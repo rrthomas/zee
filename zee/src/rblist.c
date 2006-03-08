@@ -198,7 +198,8 @@ rblist rblist_concat(rblist left, rblist right)
   #define rlen (right->length)
   #define mid (left->length)
   size_t new_len = llen + rlen;
-  if (new_len == 0) return rblist_empty;
+  if (new_len == 0)
+    return rblist_empty;
   if (new_len < MINIMUM_NODE_LENGTH) {
     struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
     ret->length = new_len;
@@ -246,6 +247,7 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
     *right = rblist_empty;
     return;
   }
+
   while (!is_leaf(rbl)) {
     size_t mid = rbl->node.left->length;
     if (pos < mid) {
@@ -286,22 +288,21 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "astr.h"
+
 /* Stub to make zrealloc happy */
 void die(int exitcode)
 {
   exit(exitcode);
 }
 
-static void print_structure(rblist rbl) {
+static const char *rbl_structure(rblist rbl)
+{
   if (is_leaf(rbl))
-    printf("%d", rbl->length);
-  else {
-    printf("(");
-    print_structure(rbl->node.left);
-    printf(",");
-    print_structure(rbl->node.right);
-    printf(")");
-  }
+    return astr_cstr(astr_afmt("%d", rbl->length));
+  else
+    return astr_cstr(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
+                               rbl_structure(rbl->node.right)));
 }
 
 int main(void)
@@ -313,33 +314,33 @@ int main(void)
   rbl3 = rblist_concat(rbl1, rbl2);
 /*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
 
-  const char *s1 = "Hello, I'm longer than 32 characters! Whoooppeee!!! Yes, really, really long. You won't believe how incredibly ginormously long I am!";
+  const char *s1 = "Hello, I'm longer than 32 characters! Whooooppeee!!! Yes, really, really long. You won't believe how incredibly enormously long I am!";
   assert(strlen(s1) == 19 * 7);
   rbl1 = rblist_from_array(s1, strlen(s1));
-  print_structure(rbl1); printf("\n");
+#ifdef DEBUG
+  printf("%s\n", rbl_structure(rbl1));
+#endif
 /*   assert(!strcmp(rblist_to_string(rbl1), s1)); */
   for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
     rblist_split(rbl1, i, &rbl2, &rbl3);
-    print_structure(rbl2); printf(" plus ");
-    print_structure(rbl3); printf(" makes ");
     rbl4 = rblist_concat(rbl2, rbl3);
-    print_structure(rbl4); printf("\n");
-/*     assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4))); */
+#ifdef DEBUG
+    printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
+#endif
+/*   assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4))); */
   }
-  
+
   rbl1 = rblist_empty;
   rbl2 = rblist_singleton('x');
   #define TEST_SIZE 1000
   random_counter = 0;
-  for (size_t i=0; i<TEST_SIZE; i++)
+  for (size_t i = 0; i < TEST_SIZE; i++)
     rbl1 = rblist_concat(rbl1, rbl2);
-  printf(
-    "Making a list of length %d by appending one element at a time required\n"
-    "%d random numbers. Resulting structure is:\n",
-    TEST_SIZE,
-    random_counter
-  );
-  print_structure(rbl1); printf("\n");
+#ifdef DEBUG
+  printf("Making a list of length %d by appending one element at a time required\n"
+         "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
+  printf("%s\n", rbl_structure(rbl1));
+#endif
 
   return EXIT_SUCCESS;
 }
