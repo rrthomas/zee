@@ -23,7 +23,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <limits.h>
 #include <string.h>
 
 #include "zmalloc.h"
@@ -43,7 +42,7 @@ static inline bool random_choice(size_t p, size_t q)
 
   choice_counter++;
   seed = (2 * seed - 1) * seed + 1; /* Maximal period mod any power of two. */
-  return (p + q) * (float)seed < p * SIZE_MAX;
+  return (p + q) * (float)seed < p * ((float)SIZE_MAX + 1.0);
 }
 
 /*
