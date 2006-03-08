@@ -296,6 +296,9 @@ void die(int exitcode)
   exit(exitcode);
 }
 
+/* Print the lengths of a list into a string.
+   Return a char * because that's always what we want for diagnostic
+   messages below. */
 static const char *rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
