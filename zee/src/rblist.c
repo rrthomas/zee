@@ -234,11 +234,24 @@ rblist rblist_concat(rblist left, rblist right)
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Stub to make zrealloc happy */
 void die(int exitcode)
 {
   exit(exitcode);
+}
+
+static void print_structure(rblist rbl) {
+  if (is_leaf(rbl))
+    printf("%d", rbl->length);
+  else {
+    printf("(");
+    print_structure(rbl->node.left);
+    printf(",");
+    print_structure(rbl->node.right);
+    printf(")");
+  }
 }
 
 int main(void)
@@ -253,6 +266,21 @@ int main(void)
   const char *s1 = "Hello, I'm longer than 32 characters! Whoooppeee!!!";
   rbl1 = rblist_from_array(s1, strlen(s1));
 /*   assert(!strcmp(rblist_to_string(rbl1), s1)); */
+  
+  rbl1 = rblist_empty;
+  rbl2 = rblist_singleton('x');
+  #define TEST_SIZE 5000
+  random_counter = 0;
+  for (size_t i=0; i<TEST_SIZE; i++)
+    rbl1 = rblist_concat(rbl1, rbl2);
+  printf(
+    "Making a list of length %d by appending one element at a time required\n"
+    "%d random numbers. Resulting structure is:\n",
+    TEST_SIZE,
+    random_counter
+  );
+  print_structure(rbl1);
+  printf("\n");
 
   return EXIT_SUCCESS;
 }
