@@ -126,13 +126,13 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
 /************************/
 /* Derived destructors. */
 
-#define FOREACH(_loop_var, rbl, body) \
+#define RBLIST_FOR(_loop_var, rbl, body) \
   for ( \
-    _it##_loop_var = rblist_iterate(list); \
-    _it##_loop_var; \
-    _it##_loop_var = rblist_iterator_next(_it##_loop_var) \
+    rblist_iterator _it_##_loop_var = rblist_iterate(rbl); \
+    _it_##_loop_var; \
+    _it_##_loop_var = rblist_iterator_next(_it_##_loop_var) \
   ) { \
-    char _loop_var = rblist_iterator_value(_it##_loop_var); \
+    char _loop_var = rblist_iterator_value(_it_##_loop_var); \
     body \
   }
 

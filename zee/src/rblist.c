@@ -181,6 +181,7 @@ static rblist_iterator make_iterator(rblist rbl, const struct link *next)
     link->item = rbl->node.right;
     link->next = next;
     next = link;
+    rbl = rbl->node.left;
   }
   rblist_iterator ret = zmalloc(sizeof(struct rblist_iterator));
   ret->leaf = &rbl->leaf;
@@ -344,6 +345,8 @@ rblist_iterator rblist_iterator_next(rblist_iterator it)
 
 #ifdef TEST
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -409,6 +412,17 @@ int main(void)
          "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
   printf("%s\n", rbl_structure(rbl1));
 #endif
+  
+  rbl1 = rblist_from_array(s1, strlen(s1));
+  size_t j = 0;
+  RBLIST_FOR(i, rbl1,
+#ifdef DEBUG
+    printf("Element %d is '%c'\n", j, i);
+#endif    
+    assert(i == s1[j]);
+    j++;
+  )
+  assert(j == strlen(s1));
 
   return EXIT_SUCCESS;
 }
