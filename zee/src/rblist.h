@@ -34,6 +34,24 @@
  */
 typedef const union rblist *rblist;
 
+/*
+ * The type of list iterators (i.e. the type of the state of a loop
+ * through a list). This is a pointer type, and NULL is means that the
+ * loop is finished. The structure it points to is opaque and gets
+ * modified in-place by 'rblist_next()'.
+ *
+ * An rblist_iterator can be thought of a bit like a pointer into the
+ * list (but that's not what it is). rblist_iterator_value dereferences
+ * an rblist_iterator to obtain an element of the list.
+ * rblist_iterator_next increments an rblist_iterator to move on to the
+ * next element. The most concise way to use these functions is using the
+ * FOREACH macro.
+ *
+ * Takes memory O(log(n)) where 'n' is the length of the list.
+ */
+typedef struct rblist_iterator *rblist_iterator;
+
+/***************************/
 /* Primitive constructors. */
 
 /*
@@ -58,15 +76,67 @@ const rblist rblist_empty;
 rblist rblist_singleton(char c);
 
 /*
- * Concatenate two lists (non-destructively).
+ * Concatenate two lists. The originals are not modified.
  *
  * Takes time O(log(n)) where 'n' is the length of the result.
  */
 rblist rblist_concat(rblist left, rblist right);
 
-/* End of primitive constructors. */
+/**************************/
+/* Primitive destructors. */
 
-/* Make a string from an rblist. */
+/*
+ * Read the length of an rblist.
+ *
+ * Take time O(1).
+ */
+size_t rblist_length(rblist rbl);
+
+/*
+ * Break an rblist into two at the specified position, and store the two
+ * halves are stored in *left and *right. The original is not modified.
+ *
+ * Takes time O(log(n)) where 'n' is the length of the list.
+ */
+void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right);
+
+/*
+ * Constructs an iterator over the specified rblist.
+ *
+ * Takes time O(log(n)) where 'n' is the length of the list.
+ */
+rblist_iterator rblist_iterate(rblist rbl);
+
+/*
+ * Returns thelist element currently addressed by 'it'.
+ *
+ * Takes time O(1).
+ */
+char rblist_iterator_value(rblist_iterator it);
+
+/*
+ * Advances the rblist_iterator one place down its list and returns the
+ * result. The original is destroyed and should be discarded. Retuens
+ * NULL at the end of the list.
+ *
+ * Takes time O(1) on average.
+ */
+rblist_iterator rblist_iterator_next(rblist_iterator it);
+
+/************************/
+/* Derived destructors. */
+
+#define FOREACH(_loop_var, rbl, body) \
+  for ( \
+    _it##_loop_var = rblist_iterate(list); \
+    _it##_loop_var; \
+    _it##_loop_var = rblist_iterator_next(_it##_loop_var) \
+  ) { \
+    char _loop_var = rblist_iterator_value(_it##_loop_var); \
+    body \
+  }
+
+/* Returns one element of an rblist. */
 char rblist_get(rblist rbl, size_t index);
 
 #endif

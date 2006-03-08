@@ -101,6 +101,7 @@ union rblist {
   struct node node;
 };
 
+/*****************************/
 /* Static utility functions. */
 
 /* The struct leaf to which rblist_empty points. */
@@ -146,7 +147,8 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
   }
 }
 
-/* Start of constructor functions. */
+/***************************/
+/* Primitive constructors. */
 
 /*
  * This operation is unique in picking the entire node/leaf structure
@@ -196,6 +198,7 @@ rblist rblist_concat(rblist left, rblist right)
   #define rlen (right->length)
   #define mid (left->length)
   size_t new_len = llen + rlen;
+  if (new_len == 0) return rblist_empty;
   if (new_len < MINIMUM_NODE_LENGTH) {
     struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
     ret->length = new_len;
@@ -221,6 +224,53 @@ rblist rblist_concat(rblist left, rblist right)
   #undef llen
   #undef rlen
   #undef mid
+}
+
+/**************************/
+/* Primitive destructors. */
+
+size_t rblist_length(rblist rbl)
+{
+  return rbl->length;
+}
+
+void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
+{
+  if (pos == 0) {
+    *left = rblist_empty;
+    *right = rbl;
+    return;
+  }
+  if (pos == rbl->length) {
+    *left = rbl;
+    *right = rblist_empty;
+    return;
+  }
+  while (!is_leaf(rbl)) {
+    size_t mid = rbl->node.left->length;
+    if (pos < mid) {
+      struct node *node = zmalloc(sizeof(struct node));
+      *right = (rblist)node;
+      node->length = rbl->length - pos;
+      right = &node->left;
+      node->right = rbl->node.right;
+      rbl = rbl->node.left;
+    } else if (pos > mid) {
+      struct node *node = zmalloc(sizeof(struct node));
+      *left = (rblist)node;
+      node->length = pos;
+      node->left = rbl->node.left;
+      left = &node->right;
+      rbl = rbl->node.right;
+      pos -= mid;
+    } else {
+      *left = rbl->node.left;
+      *right = rbl->node.right;
+      return;
+    }
+  }
+  *left = leaf_from_array(&rbl->leaf.data[0], pos);
+  *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
 }
 
 /* char *rblist_to_string(rblist rbl) */
@@ -256,20 +306,30 @@ static void print_structure(rblist rbl) {
 
 int main(void)
 {
-  rblist rbl1, rbl2, rbl3;
+  rblist rbl1, rbl2, rbl3, rbl4;
 
   rbl1 = rblist_singleton('a');
   rbl2 = rblist_singleton('b');
   rbl3 = rblist_concat(rbl1, rbl2);
 /*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
 
-  const char *s1 = "Hello, I'm longer than 32 characters! Whoooppeee!!!";
+  const char *s1 = "Hello, I'm longer than 32 characters! Whoooppeee!!! Yes, really, really long. You won't believe how incredibly ginormously long I am!";
+  assert(strlen(s1) == 19 * 7);
   rbl1 = rblist_from_array(s1, strlen(s1));
+  print_structure(rbl1); printf("\n");
 /*   assert(!strcmp(rblist_to_string(rbl1), s1)); */
+  for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
+    rblist_split(rbl1, i, &rbl2, &rbl3);
+    print_structure(rbl2); printf(" plus ");
+    print_structure(rbl3); printf(" makes ");
+    rbl4 = rblist_concat(rbl2, rbl3);
+    print_structure(rbl4); printf("\n");
+/*     assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4))); */
+  }
   
   rbl1 = rblist_empty;
   rbl2 = rblist_singleton('x');
-  #define TEST_SIZE 5000
+  #define TEST_SIZE 1000
   random_counter = 0;
   for (size_t i=0; i<TEST_SIZE; i++)
     rbl1 = rblist_concat(rbl1, rbl2);
@@ -279,8 +339,7 @@ int main(void)
     TEST_SIZE,
     random_counter
   );
-  print_structure(rbl1);
-  printf("\n");
+  print_structure(rbl1); printf("\n");
 
   return EXIT_SUCCESS;
 }
