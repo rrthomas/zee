@@ -171,6 +171,57 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
 }
 
 /*
+ * Used internally by recursive_split.
+ *
+ * Makes a struct leaf or struct node as appropriate to represent the
+ * concatenation of `left' and `right'. In the node case, `left' and
+ * `right' become the children.
+ */
+static rblist make_rblist(rblist left, rblist right)
+{
+  size_t new_len = left->length + right->length;
+  if (new_len < MINIMUM_NODE_LENGTH) {
+    struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
+    ret->length = new_len;
+    memcpy(&ret->data[0], &left->leaf.data[0], left->length);
+    memcpy(&ret->data[left->length], &right->leaf.data[0], right->length);
+    return (rblist)ret;
+  } else {
+    struct node *ret = zmalloc(sizeof(struct node));
+    ret->length = new_len;
+    ret->left = left;
+    ret->right = right;
+    return (rblist)ret;
+  }
+}
+
+/* The recursive part of rblist_split. */
+static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
+{
+  /* FIXME: Rewrite using a while loop instead of recursion? Not easy
+   * because of the `if' in make_rblist. */
+
+  if (is_leaf(rbl)) {
+    *left = leaf_from_array(&rbl->leaf.data[0], pos);
+    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
+    return;
+  }
+  size_t mid = rbl->node.left->length;
+  if (pos < mid) {
+    rblist left_right;
+    rblist_split(rbl->node.left, pos, left, &left_right);
+    *right = make_rblist(left_right, rbl->node.right);
+  } else if (pos > mid) {
+    rblist right_left;
+    rblist_split(rbl->node.right, pos - mid, &right_left, right);
+    *left = make_rblist(rbl->node.left, right_left);
+  } else {
+    *left = rbl->node.left;
+    *right = rbl->node.right;
+  }
+}
+
+/*
  * Constructs an iterator that iterates over 'rbl' and then over all the
  * rblists in 'next'.
  */
@@ -287,44 +338,16 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
   if (pos <= 0) {
     *left = rblist_empty;
     *right = rbl;
-    return;
-  }
-  if (pos >= rbl->length) {
+  } else if (pos >= rbl->length) {
     *left = rbl;
     *right = rblist_empty;
-    return;
-  }
-
-  while (!is_leaf(rbl)) {
-    size_t mid = rbl->node.left->length;
-    if (pos < mid) {
-      struct node *node = zmalloc(sizeof(struct node));
-      *right = (rblist)node;
-      node->length = rbl->length - pos; /* FIXME: < MINIMUM_NODE_LENGTH? */
-      right = &node->left;
-      node->right = rbl->node.right;
-      rbl = rbl->node.left;
-    } else if (pos > mid) {
-      struct node *node = zmalloc(sizeof(struct node));
-      *left = (rblist)node;
-      node->length = pos; /* FIXME: < MINIMUM_NODE_LENGTH? */
-      node->left = rbl->node.left;
-      left = &node->right;
-      rbl = rbl->node.right;
-      pos -= mid;
-    } else {
-      *left = rbl->node.left;
-      *right = rbl->node.right;
-      return;
-    }
-  }
-  *left = leaf_from_array(&rbl->leaf.data[0], pos);
-  *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
+  } else
+    recursive_split(rbl, pos, left, right);
 }
 
 rblist_iterator rblist_iterate(rblist rbl)
 {
-  return make_iterator(rbl, NULL);
+  return rbl->length ? make_iterator(rbl, NULL) : NULL;
 }
 
 char rblist_iterator_value(rblist_iterator it)
@@ -336,8 +359,7 @@ rblist_iterator rblist_iterator_next(rblist_iterator it)
 {
   if (++it->pos < it->leaf->length)
     return it;
-  if (!it->next) return NULL;
-  return make_iterator(it->next->item, it->next->next);
+  return it->next ? make_iterator(it->next->item, it->next->next) : NULL;
 }
 
 /************************/
@@ -346,10 +368,8 @@ rblist_iterator rblist_iterator_next(rblist_iterator it)
 char *rblist_copy_into(rblist rbl, char *s)
 {
   RBLIST_FOR(c, rbl)
-    printf("%c ", c);
     *(s++) = c;
   RBLIST_END
-  printf("\n");
   return s;
 }
 
@@ -412,15 +432,39 @@ int main(void)
 {
   rblist rbl1, rbl2, rbl3, rbl4;
 
-  rbl1 = rblist_singleton('a');
-  rbl2 = rblist_singleton('b');
-  rbl3 = rblist_concat(rbl1, rbl2);
-/*   assert(!strcmp(rblist_to_string(rbl3), "ab")); */
-
   const char *s1 = "Hello, I'm longer than 32 characters! Whooooppeee!!! Yes, really, really long. You won't believe how incredibly enormously long I am!";
   /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
   
+  size_t j;
+
+  /* Test length, for, to_string, concat for very short strings. */
+
+  rbl1 = rblist_empty;
+  assert(rblist_length(rbl1) == 0);
+  RBLIST_FOR(c, rbl1)
+    assert(0);
+  RBLIST_END
+  assert(!strcmp(rblist_to_string(rbl1), ""));
+  
+  rbl1 = rblist_singleton('a');
+  assert(rblist_length(rbl1) == 1);
+  j=0;
+  RBLIST_FOR(c, rbl1)
+    assert(j++ < 1);
+  RBLIST_END
+  assert(!strcmp(rblist_to_string(rbl1), "a"));
+  
+  rbl1 = rblist_concat(rblist_singleton('a'), rblist_singleton('b'));
+  assert(rblist_length(rbl1) == 2);
+  j=0;
+  RBLIST_FOR(c, rbl1)
+    assert(j++ < 2);
+  RBLIST_END
+  assert(!strcmp(rblist_to_string(rbl1), "ab"));
+
+  /* Test computational complexity, and test concat for long strings. */
+
   rbl1 = rblist_empty;
   rbl2 = rblist_singleton('x');
   #define TEST_SIZE 1000
@@ -434,8 +478,10 @@ int main(void)
   printf("%s\n", rbl_structure(rbl1));
 #endif
 
+  /* Test from_array, length and for for long strings. */
+
   rbl1 = rblist_from_array(s1, strlen(s1));
-  size_t j = 0;
+  j = 0;
   RBLIST_FOR(i, rbl1) {
 #ifdef DEBUG
     printf("Element %d is '%c'\n", j, i);
@@ -445,6 +491,8 @@ int main(void)
   }
   RBLIST_END
   assert(j == strlen(s1));
+
+  /* Test split and stress concat some more. */
 
   rbl1 = rblist_from_array(s1, strlen(s1));
 #ifdef DEBUG
@@ -458,8 +506,8 @@ int main(void)
     rbl4 = rblist_concat(rbl2, rbl3);
     assert(rblist_length(rbl4) == 19 * 7);
 #ifdef DEBUG
+    printf("rbl2 = %s\nrbl3 = %s\n", rblist_to_string(rbl2), rblist_to_string(rbl3));
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
-    printf("%s\n", rblist_to_string(rbl2));
 #endif
     assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4)));
   }
