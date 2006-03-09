@@ -325,6 +325,14 @@ rblist rblist_concat(rblist left, rblist right)
   #undef mid
 }
 
+/*************************/
+/* Derived constructors. */
+
+rblist rblist_from_string(const char *s)
+{
+  return rblist_from_array(s, strlen(s));
+}
+
 /**************************/
 /* Primitive destructors. */
 
@@ -400,6 +408,23 @@ char rblist_get(rblist rbl, size_t pos)
   assert(0); /* pos > rblist_length(rbl). */
 }
 
+/*
+ * Compares the lists `left' and `right' lexographically. Returns a
+ * negative number for less, 0 for equal and a positive number for more.
+ */
+int rblist_compare(rblist left, rblist right)
+{
+  rblist_iterator it_left = rblist_iterate(left);
+  rblist_iterator it_right = rblist_iterate(right);
+  while (it_left && it_right) {
+    if (rblist_iterator_value(it_left) != rblist_iterator_value(it_right))
+      return  rblist_iterator_value(it_left) - rblist_iterator_value(it_right);
+    it_left = rblist_iterator_next(it_left);
+    it_right = rblist_iterator_next(it_right);
+  }
+  return it_left ? 1 : it_right ? -1 : 0;
+}
+
 #ifdef TEST
 
 #include "config.h"
@@ -436,30 +461,33 @@ int main(void)
   /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
   
-  size_t j;
+  size_t count;
 
   /* Test length, for, to_string, concat for very short strings. */
 
   rbl1 = rblist_empty;
   assert(rblist_length(rbl1) == 0);
   RBLIST_FOR(c, rbl1)
+    (void)c;
     assert(0);
   RBLIST_END
   assert(!strcmp(rblist_to_string(rbl1), ""));
   
   rbl1 = rblist_singleton('a');
   assert(rblist_length(rbl1) == 1);
-  j=0;
+  count = 0;
   RBLIST_FOR(c, rbl1)
-    assert(j++ < 1);
+    (void)c;
+    assert(count++ < 1);
   RBLIST_END
   assert(!strcmp(rblist_to_string(rbl1), "a"));
   
   rbl1 = rblist_concat(rblist_singleton('a'), rblist_singleton('b'));
   assert(rblist_length(rbl1) == 2);
-  j=0;
+  count = 0;
   RBLIST_FOR(c, rbl1)
-    assert(j++ < 2);
+    (void)c;
+    assert(count++ < 2);
   RBLIST_END
   assert(!strcmp(rblist_to_string(rbl1), "ab"));
 
@@ -481,16 +509,16 @@ int main(void)
   /* Test from_array, length and for for long strings. */
 
   rbl1 = rblist_from_array(s1, strlen(s1));
-  j = 0;
+  count = 0;
   RBLIST_FOR(i, rbl1) {
 #ifdef DEBUG
-    printf("Element %d is '%c'\n", j, i);
+    printf("Element %d is '%c'\n", count, i);
 #endif
-    assert(i == s1[j]);
-    j++;
+    assert(i == s1[count]);
+    count++;
   }
   RBLIST_END
-  assert(j == strlen(s1));
+  assert(count == strlen(s1));
 
   /* Test split and stress concat some more. */
 
@@ -510,6 +538,21 @@ int main(void)
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
 #endif
     assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4)));
+  }
+  
+  /* Test compare. */
+  
+  char *t[] = {"", "a", "b", "aa", "ab", "ba", "bb", NULL};
+  for (int i = 0; t[i]; i++) for (int j = 0; t[j]; j++) {
+    rbl1 = rblist_from_string(t[i]);
+    rbl2 = rblist_from_string(t[j]);
+    int cmp1 = rblist_compare(rbl1, rbl2);
+    int cmp2 = strcmp(t[i], t[j]);
+#ifdef DEBUG
+    printf("rblist_compare(\"%s\", \"%s\") returns %d\n", t[i], t[j], cmp1);
+#endif
+    assert((cmp1 < 0) == (cmp2 < 0));
+    assert((cmp1 > 0) == (cmp2 > 0));
   }
 
   return EXIT_SUCCESS;

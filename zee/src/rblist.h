@@ -82,6 +82,16 @@ rblist rblist_singleton(char c);
  */
 rblist rblist_concat(rblist left, rblist right);
 
+/*************************/
+/* Derived constructors. */
+
+/*
+ * Makes an rblist from a 0-terminated string.
+ *
+ * Uses rblist_from_array, so takes time O(n).
+ */
+rblist rblist_from_string(const char *s);
+
 /**************************/
 /* Primitive destructors. */
 
@@ -189,5 +199,13 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to);
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 char rblist_get(rblist rbl, size_t pos);
+
+/*
+ * Compares the lists `left' and `right' lexographically. Returns a
+ * negative number for less, 0 for equal and a positive number for more.
+ *
+ * Takes time O(n) where `n' is the length of the common prefix.
+ */
+int rblist_compare(rblist left, rblist right);
 
 #endif
