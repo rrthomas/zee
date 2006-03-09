@@ -95,6 +95,7 @@ size_t rblist_length(rblist rbl);
 /*
  * Break an rblist into two at the specified position, and store the two
  * halves are stored in *left and *right. The original is not modified.
+ * `pos' is clipped to the range from 0 to rblist_length(rbl) before use.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
@@ -127,9 +128,16 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
 /* Derived destructors. */
 
 /*
- * Return the portion of `rbl' from `from' to `to'
+ * Syntactic sugar for looping through the elements of an rblist. The
+ * recommended usage is as follows:
+ *
+ *   RBLIST_FOR(my_variable, my_rblist)
+ *     ... Do something with my_variable ...
+ *   RBLIST_END
+ *
+ * This expands to an ordinary C for loop with 'my_variable' as the loop
+ * variable. "break", "continue" and so on all work exactly as expected.
  */
-rblist rblist_sub(rblist rbl, size_t from, size_t to);
 
 #define RBLIST_FOR(c, rbl) \
   for (rblist_iterator _it_##c = rblist_iterate(rbl); \
@@ -137,9 +145,49 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to);
        _it_##c = rblist_iterator_next(_it_##c)) { \
     char c = rblist_iterator_value(_it_##c);
 
-#define END_RBLIST_FOR }
+#define RBLIST_END }
 
-/* Returns one element of an rblist. */
-char rblist_get(rblist rbl, size_t index);
+/*
+ * Copies the elements of `rbl' into contiguous memory locations starting
+ * at `s'. Returns the next unused location.
+ *
+ * Takes time O(n) where `n' is the length of the list.
+ */
+char *rblist_copy_into(rblist rbl, char *s);
+
+/*
+ * Returns the elements of `rbl' in a freshly allocated array with a 0
+ * terminator (i.e. as a C string).
+ *
+ * Takes time O(n) where `n' is the length of the list.
+ *
+ * FIXME: Does not generify nicely because of the terminator. Remove?
+ */
+char *rblist_to_string(rblist rbl);
+
+/*
+ * Returns the portion of `rbl' from `from' to `to'. If `from' is negative
+ * it is clipped to zero. If `to' is too big it is clipped to the length
+ * of `rbl'. If from > to the result is rblist_empty.
+ *
+ * To break a list into pieces, it is more efficient to use rblist_split
+ * instead of this function. This function uses rblist_split internally
+ * and then discards some of the pieces.
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+rblist rblist_sub(rblist rbl, size_t from, size_t to);
+
+/*
+ * Returns the specified element of the specified rblist. `pos' must be
+ * in the range from 0 to rblist_length(rbl) - 1.
+ *
+ * This is a slow way of extracting elements from a list, and should be
+ * used only when accesses are scattered randomly throughout the list.
+ * For sequential access, use rblist_iterate.
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+char rblist_get(rblist rbl, size_t pos);
 
 #endif
