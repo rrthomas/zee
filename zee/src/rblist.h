@@ -103,6 +103,13 @@ rblist rblist_from_string(const char *s);
 size_t rblist_length(rblist rbl);
 
 /*
+ * Count the newline characters in an rblist.
+ *
+ * Take time O(1).
+ */
+size_t rblist_nl_count(rblist rbl);
+
+/*
  * Break an rblist into two at the specified position, and store the two
  * halves are stored in *left and *right. The original is not modified.
  * `pos' is clipped to the range from 0 to rblist_length(rbl) before use.

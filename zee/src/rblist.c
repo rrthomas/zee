@@ -60,17 +60,19 @@ static inline size_t random_one_to_n(size_t n)
  * In ML, this data structure would be defined as follows:
  *
  *   datatype rblist =
- *     | leaf of int * char array
- *     | node of int * rblist * rblist;
+ *     | leaf of int * int * char array
+ *     | node of int * int * rblist * rblist;
  *
  * "leaf" represents a primitive array, and "node" represents the
- * concatenation of two shorter lists. In both cases, the int field
- * is the length of the list.
+ * concatenation of two shorter lists. In both cases, the first int field
+ * is the length of the list and the second is the number of newline
+ * characters it contains.
  *
  * In C, we can distinguish "leaf" from "node" by comparing the length
  * with MINIMUM_NODE_LENGTH. We can therefore use an untagged
- * union. To allow us to access the length without first knowing whether
- * it is a leaf or a node, we include it as a third member of the union.
+ * union. To allow us to access the length and newline count without first
+ * knowing whether it is a leaf or a node, we include a third member
+ * of the union.
  *
  * The subtle thing about randomly balanced lists is that they are not
  * completely deterministic; the arrangement of leafs and nodes is chosen
@@ -86,18 +88,23 @@ static inline size_t random_one_to_n(size_t n)
 
 struct leaf {
   size_t length;
+  size_t nl_count;
   char data[];
 };
 
 struct node {
   size_t length;
+  size_t nl_count;
   rblist left;
   rblist right;
 };
 
 /* This is the opaque public type. */
 union rblist {
-  size_t length;
+  struct {
+    size_t length;
+    size_t nl_count;
+  } stats;
   struct leaf leaf;
   struct node node;
 };
@@ -128,7 +135,7 @@ struct rblist_iterator {
 /* Static utility functions. */
 
 /* The struct leaf to which rblist_empty points. */
-static const struct leaf empty = {0};
+static const struct leaf empty = {0, 0};
 
 /* Allocates and initialises a struct leaf. */
 static inline rblist leaf_from_array(const char *s, size_t length)
@@ -136,6 +143,10 @@ static inline rblist leaf_from_array(const char *s, size_t length)
   assert(length < MINIMUM_NODE_LENGTH);
   struct leaf *ret = zmalloc(sizeof(struct leaf) + length * sizeof(char));
   ret->length = length;
+  ret->nl_count = 0;
+  for (size_t i=0; i<length; i++)
+    if (s[i] == '\n')
+      ret->nl_count++;
   memcpy(&ret->data[0], s, length);
   return (rblist)ret;
 }
@@ -143,7 +154,7 @@ static inline rblist leaf_from_array(const char *s, size_t length)
 /* Tests whether an rblist is a leaf or a node. */
 static inline bool is_leaf(rblist rbl)
 {
-  return rbl->length < MINIMUM_NODE_LENGTH;
+  return rbl->stats.length < MINIMUM_NODE_LENGTH;
 }
 
 /*
@@ -163,7 +174,7 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
 {
   if (is_leaf(rbl)) {
     *left = leaf_from_array(&rbl->leaf.data[0], pos);
-    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
+    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->leaf.length - pos);
   } else {
     *left = rbl->node.left;
     *right = rbl->node.right;
@@ -179,16 +190,18 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
  */
 static rblist make_rblist(rblist left, rblist right)
 {
-  size_t new_len = left->length + right->length;
+  size_t new_len = left->stats.length + right->stats.length;
   if (new_len < MINIMUM_NODE_LENGTH) {
     struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
     ret->length = new_len;
-    memcpy(&ret->data[0], &left->leaf.data[0], left->length);
-    memcpy(&ret->data[left->length], &right->leaf.data[0], right->length);
+    ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
+    memcpy(&ret->data[0], &left->leaf.data[0], left->leaf.length);
+    memcpy(&ret->data[left->leaf.length], &right->leaf.data[0], right->leaf.length);
     return (rblist)ret;
   } else {
     struct node *ret = zmalloc(sizeof(struct node));
     ret->length = new_len;
+    ret->nl_count = left->stats.nl_count + right->stats.nl_count;
     ret->left = left;
     ret->right = right;
     return (rblist)ret;
@@ -203,10 +216,10 @@ static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 
   if (is_leaf(rbl)) {
     *left = leaf_from_array(&rbl->leaf.data[0], pos);
-    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->length - pos);
+    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->leaf.length - pos);
     return;
   }
-  size_t mid = rbl->node.left->length;
+  size_t mid = rbl->node.left->stats.length;
   if (pos < mid) {
     rblist left_right;
     rblist_split(rbl->node.left, pos, left, &left_right);
@@ -263,6 +276,7 @@ rblist rblist_from_array(const char *s, size_t length)
   size_t pos = random_one_to_n(length - 1);
   ret->left = rblist_from_array(&s[0], pos);
   ret->right = rblist_from_array(&s[pos], length - pos);
+  ret->nl_count = ret->left->stats.nl_count + ret->right->stats.nl_count;
   return (rblist)ret;
 }
 
@@ -290,9 +304,9 @@ rblist rblist_concat(rblist left, rblist right)
 {
   /* FIXME: Rewrite using a while loop instead of recursion. */
 
-  #define llen (left->length)
-  #define rlen (right->length)
-  #define mid (left->length)
+  #define llen (left->stats.length)
+  #define rlen (right->stats.length)
+  #define mid (left->stats.length)
   size_t new_len = llen + rlen;
 
   if (new_len == 0)
@@ -300,12 +314,14 @@ rblist rblist_concat(rblist left, rblist right)
   else if (new_len < MINIMUM_NODE_LENGTH) {
     struct leaf *ret = zmalloc(sizeof(struct leaf) + sizeof(char) * new_len);
     ret->length = new_len;
+    ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
     memcpy(&ret->data[0], &left->leaf.data[0], llen);
     memcpy(&ret->data[mid], &right->leaf.data[0], rlen);
     return (rblist)ret;
   } else {
     struct node *ret = zmalloc(sizeof(struct node));
     ret->length = new_len;
+    ret->nl_count = left->stats.nl_count + right->stats.nl_count;
     size_t pos = random_one_to_n(new_len - 1);
     if (pos < mid) {
       random_split(left, pos, &ret->left, &left);
@@ -338,7 +354,12 @@ rblist rblist_from_string(const char *s)
 
 size_t rblist_length(rblist rbl)
 {
-  return rbl->length;
+  return rbl->stats.length;
+}
+
+size_t rblist_nl_count(rblist rbl)
+{
+  return rbl->stats.nl_count;
 }
 
 void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
@@ -346,7 +367,7 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
   if (pos <= 0) {
     *left = rblist_empty;
     *right = rbl;
-  } else if (pos >= rbl->length) {
+  } else if (pos >= rbl->stats.length) {
     *left = rbl;
     *right = rblist_empty;
   } else
@@ -355,7 +376,7 @@ void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 
 rblist_iterator rblist_iterate(rblist rbl)
 {
-  return rbl->length ? make_iterator(rbl, NULL) : NULL;
+  return rbl->stats.length ? make_iterator(rbl, NULL) : NULL;
 }
 
 char rblist_iterator_value(rblist_iterator it)
@@ -383,7 +404,7 @@ char *rblist_copy_into(rblist rbl, char *s)
 
 char *rblist_to_string(rblist rbl)
 {
-  char *s = zmalloc(rbl->length + 1);
+  char *s = zmalloc(rblist_length(rbl) + 1);
   *rblist_copy_into(rbl, s) = 0;
   return s;
 }
@@ -408,10 +429,6 @@ char rblist_get(rblist rbl, size_t pos)
   assert(0); /* pos > rblist_length(rbl). */
 }
 
-/*
- * Compares the lists `left' and `right' lexographically. Returns a
- * negative number for less, 0 for equal and a positive number for more.
- */
 int rblist_compare(rblist left, rblist right)
 {
   rblist_iterator it_left = rblist_iterate(left);
@@ -447,7 +464,7 @@ void die(int exitcode)
 static const char *rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return astr_cstr(astr_afmt("%d", rbl->length));
+    return astr_cstr(astr_afmt("%d", rbl->leaf.length));
   else
     return astr_cstr(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
                                rbl_structure(rbl->node.right)));
