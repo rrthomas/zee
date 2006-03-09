@@ -391,6 +391,58 @@ rblist_iterator rblist_iterator_next(rblist_iterator it)
   return it->next ? make_iterator(it->next->item, it->next->next) : NULL;
 }
 
+size_t rblist_pos_to_line(rblist rbl, size_t pos)
+{
+  assert(pos <= rbl->stats.length);
+
+  size_t ret = 0;
+  while (!is_leaf(rbl)) {
+    size_t mid = rbl->node.left->stats.length;
+    if (pos <= mid)
+      rbl = rbl->node.left;
+    else {
+      ret += rbl->node.left->stats.nl_count;
+      pos -= mid;
+      rbl = rbl->node.right;
+    }
+  }
+  size_t i = 0;
+  while (i < pos)
+    if (rbl->leaf.data[i++] == '\n')
+      ret++;
+  return ret;
+}
+
+size_t rblist_line_to_start_pos(rblist rbl, size_t line)
+{
+  assert(line <= rbl->stats.nl_count);
+
+  size_t ret = 0;
+  while (!is_leaf(rbl)) {
+    size_t mid = rbl->node.left->stats.nl_count;
+    if (line <= mid) {
+      rbl = rbl->node.left;
+    } else {
+      ret += rbl->node.left->stats.length;
+      line -= mid;
+      rbl = rbl->node.right;
+    }
+  }
+  size_t i = 0;
+  while (line)
+    if (rbl->leaf.data[i++] == '\n')
+      --line;
+  return ret + i;
+}
+
+size_t rblist_line_to_end_pos(rblist rbl, size_t line)
+{
+  if (line == rbl->stats.nl_count)
+    return rbl->stats.length; /* EOF */
+  else
+    return rblist_line_to_start_pos(rbl, line + 1) - 1;
+}
+
 /************************/
 /* Derived destructors. */
 
@@ -420,13 +472,15 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to)
 /* FIXME: Write a garbage-free version? */
 char rblist_get(rblist rbl, size_t pos)
 {
+  assert(pos < rblist_length(rbl));
+
   rblist dummy;
   rblist_split(rbl, pos, &dummy, &rbl);
   RBLIST_FOR(c, rbl)
     return c;
   RBLIST_END
 
-  assert(0); /* pos > rblist_length(rbl). */
+  assert(0); /* Unreachable. */
 }
 
 int rblist_compare(rblist left, rblist right)
@@ -470,6 +524,44 @@ static const char *rbl_structure(rblist rbl)
                                rbl_structure(rbl->node.right)));
 }
 
+/*
+ * Checks all invariants that are supposed to hold for `rbl'. Also, checks
+ * that its length is `length' and that its elements match those in `s'.
+ * `s' can be NULL, in which case the elements are not checked.
+ *
+ * Also, tests line_to_start_pos, pos_to_line and pos_to_line_end.
+ */
+static void test(rblist rbl, const char *s, size_t length)
+{
+  assert(rblist_length(rbl) == length);
+
+  size_t nl_count = rblist_nl_count(rbl);
+  size_t pos = 0, line = 0;
+  size_t nl_pos[rblist_nl_count(rbl)];
+
+  RBLIST_FOR(c, rbl)
+    if (s)
+      assert(c == s[pos]);
+    assert(rblist_pos_to_line(rbl, pos) == line);
+    if (c=='\n')
+      nl_pos[line++] = pos;
+    pos++;
+  RBLIST_END;
+  
+  assert(pos == length);
+  assert(line == nl_count);
+  
+  for (pos = 0; pos <= length; pos++) {
+    assert(rblist_line_to_start_pos(rbl, line) == (line ? nl_pos[line - 1] + 1 : 0));
+    assert(rblist_line_to_end_pos(rbl, line) == (line < nl_count ? nl_pos[line] : length));
+    if (pos < length && rblist_get(rbl, pos) == '\n')
+      line++;
+  }
+  
+  if (s)
+    assert(!memcmp(rblist_to_string(rbl), s, length));
+}
+
 int main(void)
 {
   rblist rbl1, rbl2, rbl3, rbl4;
@@ -480,33 +572,12 @@ int main(void)
   
   size_t count;
 
-  /* Test length, for, to_string, concat for very short strings. */
+  /* Test loads of things for empty, short and long strings. */
 
-  rbl1 = rblist_empty;
-  assert(rblist_length(rbl1) == 0);
-  RBLIST_FOR(c, rbl1)
-    (void)c;
-    assert(0);
-  RBLIST_END
-  assert(!strcmp(rblist_to_string(rbl1), ""));
-  
-  rbl1 = rblist_singleton('a');
-  assert(rblist_length(rbl1) == 1);
-  count = 0;
-  RBLIST_FOR(c, rbl1)
-    (void)c;
-    assert(count++ < 1);
-  RBLIST_END
-  assert(!strcmp(rblist_to_string(rbl1), "a"));
-  
-  rbl1 = rblist_concat(rblist_singleton('a'), rblist_singleton('b'));
-  assert(rblist_length(rbl1) == 2);
-  count = 0;
-  RBLIST_FOR(c, rbl1)
-    (void)c;
-    assert(count++ < 2);
-  RBLIST_END
-  assert(!strcmp(rblist_to_string(rbl1), "ab"));
+  test(rblist_empty, "", 0);
+  test(rblist_singleton('a'), "a", 1);
+  test(rblist_concat(rblist_singleton('a'), rblist_singleton('b')), "ab", 2);
+  test(rblist_from_array(s1, strlen(s1)), s1, strlen(s1));
 
   /* Test computational complexity, and test concat for long strings. */
 
@@ -523,38 +594,24 @@ int main(void)
   printf("%s\n", rbl_structure(rbl1));
 #endif
 
-  /* Test from_array, length and for for long strings. */
-
-  rbl1 = rblist_from_array(s1, strlen(s1));
-  count = 0;
-  RBLIST_FOR(i, rbl1) {
-#ifdef DEBUG
-    printf("Element %d is '%c'\n", count, i);
-#endif
-    assert(i == s1[count]);
-    count++;
-  }
-  RBLIST_END
-  assert(count == strlen(s1));
-
-  /* Test split and stress concat some more. */
+  /* Test split and stress concat some more. Break 's1' at positions
+   * 0, 19, 19*2, ..., 19*7 and for each position check that we can
+   * put it back together again. */
 
   rbl1 = rblist_from_array(s1, strlen(s1));
 #ifdef DEBUG
   printf("%s\n", rbl_structure(rbl1));
 #endif
-  assert(!strcmp(rblist_to_string(rbl1), s1));
   for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
     rblist_split(rbl1, i, &rbl2, &rbl3);
-    assert(rblist_length(rbl2) == i);
-    assert(rblist_length(rbl3) == 19 * 7 - i);
+    test(rbl2, &s1[0], i);
+    test(rbl3, &s1[i], 19 * 7 - i);
     rbl4 = rblist_concat(rbl2, rbl3);
-    assert(rblist_length(rbl4) == 19 * 7);
+    test(rbl4, s1, 19 * 7);
 #ifdef DEBUG
     printf("rbl2 = %s\nrbl3 = %s\n", rblist_to_string(rbl2), rblist_to_string(rbl3));
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
 #endif
-    assert(!strcmp(rblist_to_string(rbl1), rblist_to_string(rbl4)));
   }
   
   /* Test compare. */

@@ -98,7 +98,7 @@ rblist rblist_from_string(const char *s);
 /*
  * Read the length of an rblist.
  *
- * Take time O(1).
+ * Takes time O(1).
  */
 size_t rblist_length(rblist rbl);
 
@@ -140,6 +140,39 @@ char rblist_iterator_value(rblist_iterator it);
  * Takes time O(1) on average.
  */
 rblist_iterator rblist_iterator_next(rblist_iterator it);
+
+/*
+ * Converts a character position into a line number. More precisely,
+ * Returns the number of newline characters before the specified position.
+ * Requires 0 <= pos <= rblist_length(rbl).
+ *
+ * Equivalent to, but faster than, rblist_nl_count(rblist_sub(rbl, 0, pos));
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+size_t rblist_pos_to_line(rblist rbl, size_t pos);
+
+/*
+ * Converts a line number to the character position of the start of that line.
+ * More precisely, returns the smallest `pos' such that:
+ * Requires 0 <= line <= rblist_nl_count(rbl).
+ *
+ *   rblist_pos_to_line(rbl, pos) == line.
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+size_t rblist_line_to_start_pos(rblist rbl, size_t line);
+
+/*
+ * Converts a line number to the character position of the end of that line.
+ * More precisely, returns the largest `pos' such that:
+ * Requires 0 <= line <= rblist_nl_count(rbl).
+ *
+ *   rblist_pos_to_line(rbl, pos) == line.
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 
 /************************/
 /* Derived destructors. */
