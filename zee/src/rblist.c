@@ -524,16 +524,40 @@ static const char *rbl_structure(rblist rbl)
                                rbl_structure(rbl->node.right)));
 }
 
+/* Checks all structural invariants that are supposed to hold for 'rbl'. */
+static void assert_invariants(rblist rbl) {
+  if (is_leaf(rbl)) {
+    assert((rbl->leaf.length == 0) == (rbl == rblist_empty));
+    size_t nl_count = 0;
+    for (size_t i = 0; i < rbl->leaf.length; i++)
+      if (rbl->leaf.data[i] == '\n')
+        nl_count++;
+    assert(nl_count == rbl->leaf.nl_count);
+  } else {
+    assert_invariants(rbl->node.left);
+    assert_invariants(rbl->node.right);
+    assert(rbl->node.length == rbl->node.left->stats.length + rbl->node.right->stats.length);
+    assert(rbl->node.nl_count == rbl->node.left->stats.nl_count + rbl->node.right->stats.nl_count);
+  }
+}
+
 /*
- * Checks all invariants that are supposed to hold for `rbl'. Also, checks
- * that its length is `length' and that its elements match those in `s'.
- * `s' can be NULL, in which case the elements are not checked.
- *
- * Also, tests line_to_start_pos, pos_to_line and pos_to_line_end.
+ * Passes `rbl' to assert_invariants. Checks that its length is `length'.
+ * If `s' is not NULL, checks that the elements returned by an iterator
+ * over 'rbl' match the corresponding elements of `s', and also that
+ * rblist_to_string works. Checks that the numbers of elements and
+ * newline characters returned by the iterator match respectively the
+ * length and nl_count of `rbl'. Checks that the characters returned by
+ * the iterator match those returned by rblist_get. Checks that
+ * rblist_pos_to_line returns the correct value for all character
+ * positions. Finally, checks that rblist_line_to_start_pos and
+ * rblist_line_to_end_pos return the correct values for all line numbers.
  */
 static void test(rblist rbl, const char *s, size_t length)
 {
   assert(rblist_length(rbl) == length);
+  if (s)
+    assert(!memcmp(rblist_to_string(rbl), s, length));
 
   size_t nl_count = rblist_nl_count(rbl);
   size_t pos = 0, line = 0;
@@ -542,6 +566,7 @@ static void test(rblist rbl, const char *s, size_t length)
   RBLIST_FOR(c, rbl)
     if (s)
       assert(c == s[pos]);
+    assert(rblist_get(rbl, pos) == c);
     assert(rblist_pos_to_line(rbl, pos) == line);
     if (c=='\n')
       nl_pos[line++] = pos;
@@ -551,22 +576,17 @@ static void test(rblist rbl, const char *s, size_t length)
   assert(pos == length);
   assert(line == nl_count);
   
-  for (pos = 0; pos <= length; pos++) {
+  for (line = 0; line <= nl_count; line++) {
     assert(rblist_line_to_start_pos(rbl, line) == (line ? nl_pos[line - 1] + 1 : 0));
     assert(rblist_line_to_end_pos(rbl, line) == (line < nl_count ? nl_pos[line] : length));
-    if (pos < length && rblist_get(rbl, pos) == '\n')
-      line++;
   }
-  
-  if (s)
-    assert(!memcmp(rblist_to_string(rbl), s, length));
 }
 
 int main(void)
 {
   rblist rbl1, rbl2, rbl3, rbl4;
 
-  const char *s1 = "Hello, I'm longer than 32 characters! Whooooppeee!!! Yes, really, really long. You won't believe how incredibly enormously long I am!";
+  const char *s1 = "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
   /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
   
