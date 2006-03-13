@@ -391,6 +391,30 @@ rblist_iterator rblist_iterator_next(rblist_iterator it)
   return it->next ? make_iterator(it->next->item, it->next->next) : NULL;
 }
 
+/*
+ * This doesn't need to be primitive, but it's short and efficient
+ * so why not?
+ */
+char rblist_get(rblist rbl, size_t pos)
+{
+  assert(pos < rblist_length(rbl));
+
+  while (!is_leaf(rbl)) {
+    size_t mid = rbl->node.left->stats.length;
+    if (pos < mid)
+      rbl = rbl->node.left;
+    else {
+      rbl = rbl->node.right;
+      pos -= mid;
+    }
+  }
+  return rbl->leaf.data[pos];
+}
+
+/*
+ * This doesn't need to be primitive, but it's short and efficient
+ * so why not?
+ */
 size_t rblist_pos_to_line(rblist rbl, size_t pos)
 {
   assert(pos <= rbl->stats.length);
@@ -467,20 +491,6 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to)
   rblist_split(rbl, to, &rbl, &dummy);
   rblist_split(rbl, from, &dummy, &rbl);
   return rbl;
-}
-
-/* FIXME: Write a garbage-free version? */
-char rblist_get(rblist rbl, size_t pos)
-{
-  assert(pos < rblist_length(rbl));
-
-  rblist dummy;
-  rblist_split(rbl, pos, &dummy, &rbl);
-  RBLIST_FOR(c, rbl)
-    return c;
-  RBLIST_END
-
-  assert(0); /* Unreachable. */
 }
 
 int rblist_compare(rblist left, rblist right)

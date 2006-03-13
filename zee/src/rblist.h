@@ -142,6 +142,18 @@ char rblist_iterator_value(rblist_iterator it);
 rblist_iterator rblist_iterator_next(rblist_iterator it);
 
 /*
+ * Returns the specified element of the specified rblist. `pos' must be
+ * in the range from 0 to rblist_length(rbl) - 1.
+ *
+ * This is a slow way of extracting elements from a list, and should be
+ * used only when accesses are scattered randomly throughout the list.
+ * For sequential access, use rblist_iterate.
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+char rblist_get(rblist rbl, size_t pos);
+
+/*
  * Converts a character position into a line number. More precisely,
  * Returns the number of newline characters before the specified position.
  * Requires 0 <= pos <= rblist_length(rbl).
@@ -227,18 +239,6 @@ char *rblist_to_string(rblist rbl);
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 rblist rblist_sub(rblist rbl, size_t from, size_t to);
-
-/*
- * Returns the specified element of the specified rblist. `pos' must be
- * in the range from 0 to rblist_length(rbl) - 1.
- *
- * This is a slow way of extracting elements from a list, and should be
- * used only when accesses are scattered randomly throughout the list.
- * For sequential access, use rblist_iterate.
- *
- * Takes time O(log(n)) where `n' is the length of the list.
- */
-char rblist_get(rblist rbl, size_t pos);
 
 /*
  * Compares the lists `left' and `right' lexographically. Returns a
