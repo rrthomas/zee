@@ -139,7 +139,7 @@ char rblist_iterator_value(rblist_iterator it);
  * the result. The original is destroyed and should be discarded.
  * Returns NULL at the end of the list.
  *
- * Takes time O(1) on average.
+ * Takes time O(1) amortized.
  */
 rblist_iterator rblist_iterator_next(rblist_iterator it);
 
@@ -256,7 +256,7 @@ int rblist_compare(rblist left, rblist right);
  * Compares prefixes of the lists `left' and `right' lexographically.
  * 'n' is the length of the prefixes to compare. Equivalent to:
  *
- *   rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n));
+ *   rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n))
  */
 int rblist_ncompare(rblist left, rblist right, size_t n);
 
