@@ -24,13 +24,13 @@
 #define RBLIST_H
 
 /*
- * The type of lists. This is a pointer type. The structure it points to
- * is opaque. You may assume the structure is immutable (const). No
+ * The type of lists. This is a pointer type. The structure it points
+ * to is opaque. You may assume the structure is immutable (const). No
  * operation in this library ever modifies an rblist in place.
  *
- * Takes memory O(n) where `n' is the length of the list. Typically about
- * twice as much memory will be used as would be used for an ordinary
- * C array.
+ * Takes memory O(n) where `n' is the length of the list. Typically
+ * about twice as much memory will be used as would be used for an
+ * array.
  */
 typedef const union rblist *rblist;
 
@@ -41,11 +41,11 @@ typedef const union rblist *rblist;
  * modified in-place by `rblist_next'.
  *
  * An rblist_iterator can be thought of a bit like a pointer into the
- * list (but that's not what it is). rblist_iterator_value dereferences
- * an rblist_iterator to obtain an element of the list.
- * rblist_iterator_next increments an rblist_iterator to move on to the
- * next element. The most concise way to use these functions is using the
- * FOREACH macro.
+ * list (but that's not what it is). rblist_iterator_value
+ * dereferences an rblist_iterator to obtain an element of the list.
+ * rblist_iterator_next increments an rblist_iterator to move on to
+ * the next element. The most concise way to use these functions is
+ * using the FOREACH macro.
  *
  * Takes memory O(log(n)) where `n' is the length of the list.
  */
@@ -56,7 +56,8 @@ typedef struct rblist_iterator *rblist_iterator;
 
 /*
  * Make an rblist from an array. This can be achieved using
- * rblist_singleton and rblist_concat, but this method is more efficient.
+ * rblist_singleton and rblist_concat, but this method is more
+ * efficient.
  *
  * Takes time O(n) where `n' is the length of the list.
  */
@@ -110,9 +111,10 @@ size_t rblist_length(rblist rbl);
 size_t rblist_nl_count(rblist rbl);
 
 /*
- * Break an rblist into two at the specified position, and store the two
- * halves are stored in *left and *right. The original is not modified.
- * `pos' is clipped to the range from 0 to rblist_length(rbl) before use.
+ * Break an rblist into two at the specified position, and store the
+ * two halves are stored in *left and *right. The original is not
+ * modified. `pos' is clipped to the range from 0 to
+ * rblist_length(rbl) before use.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
@@ -133,9 +135,9 @@ rblist_iterator rblist_iterate(rblist rbl);
 char rblist_iterator_value(rblist_iterator it);
 
 /*
- * Advances the rblist_iterator one place down its list and returns the
- * result. The original is destroyed and should be discarded. Retuens
- * NULL at the end of the list.
+ * Advances the rblist_iterator one place down its list and returns
+ * the result. The original is destroyed and should be discarded.
+ * Returns NULL at the end of the list.
  *
  * Takes time O(1) on average.
  */
@@ -145,9 +147,9 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
  * Returns the specified element of the specified rblist. `pos' must be
  * in the range from 0 to rblist_length(rbl) - 1.
  *
- * This is a slow way of extracting elements from a list, and should be
- * used only when accesses are scattered randomly throughout the list.
- * For sequential access, use rblist_iterate.
+ * This is a slow way of extracting elements from a list, and should
+ * be used only when accesses are scattered randomly throughout the
+ * list. For sequential access, use rblist_iterate.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
@@ -155,8 +157,8 @@ char rblist_get(rblist rbl, size_t pos);
 
 /*
  * Converts a character position into a line number. More precisely,
- * Returns the number of newline characters before the specified position.
- * Requires 0 <= pos <= rblist_length(rbl).
+ * Returns the number of newline characters before the specified
+ * position. Requires 0 <= pos <= rblist_length(rbl).
  *
  * Equivalent to, but faster than, rblist_nl_count(rblist_sub(rbl, 0, pos));
  *
@@ -165,22 +167,24 @@ char rblist_get(rblist rbl, size_t pos);
 size_t rblist_pos_to_line(rblist rbl, size_t pos);
 
 /*
- * Converts a line number to the character position of the start of that line.
- * More precisely, returns the smallest `pos' such that:
- * Requires 0 <= line <= rblist_nl_count(rbl).
+ * Converts a line number to the character position of the start of
+ * that line. More precisely, returns the smallest `pos' such that:
  *
  *   rblist_pos_to_line(rbl, pos) == line.
+ *
+ * Requires 0 <= line <= rblist_nl_count(rbl).
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 size_t rblist_line_to_start_pos(rblist rbl, size_t line);
 
 /*
- * Converts a line number to the character position of the end of that line.
- * More precisely, returns the largest `pos' such that:
- * Requires 0 <= line <= rblist_nl_count(rbl).
+ * Converts a line number to the character position of the end of that
+ * line. More precisely, returns the largest `pos' such that:
  *
  *   rblist_pos_to_line(rbl, pos) == line.
+ *
+ * Requires 0 <= line <= rblist_nl_count(rbl).
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
@@ -190,15 +194,15 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 /* Derived destructors. */
 
 /*
- * Syntactic sugar for looping through the elements of an rblist. The
- * recommended usage is as follows:
+ * Syntactic sugar for looping through the elements of an rblist. It
+ * should be used thus:
  *
- *   RBLIST_FOR(my_variable, my_rblist)
- *     ... Do something with my_variable ...
+ *   RBLIST_FOR(my_i, my_rblist)
+ *     ... Do something with my_i ...
  *   RBLIST_END
  *
- * This expands to an ordinary C for loop with 'my_variable' as the loop
- * variable. "break", "continue" and so on all work exactly as expected.
+ * This expands to a for loop with 'my_i' as the loop
+ * variable.
  */
 
 #define RBLIST_FOR(c, rbl) \
@@ -210,8 +214,8 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 #define RBLIST_END }
 
 /*
- * Copies the elements of `rbl' into contiguous memory locations starting
- * at `s'. Returns the next unused location.
+ * Copies the elements of `rbl' into contiguous memory locations
+ * starting at `s'. Returns the next unused location.
  *
  * Takes time O(n) where `n' is the length of the list.
  */
@@ -228,21 +232,22 @@ char *rblist_copy_into(rblist rbl, char *s);
 char *rblist_to_string(rblist rbl);
 
 /*
- * Returns the portion of `rbl' from `from' to `to'. If `from' is negative
- * it is clipped to zero. If `to' is too big it is clipped to the length
- * of `rbl'. If from > to the result is rblist_empty.
+ * Returns the portion of `rbl' from `from' to `to'. If `from' is
+ * negative it is clipped to zero. If `to' is too big it is clipped to
+ * the length of `rbl'. If from > to the result is rblist_empty.
  *
- * To break a list into pieces, it is more efficient to use rblist_split
- * instead of this function. This function uses rblist_split internally
- * and then discards some of the pieces.
+ * To break a list into pieces, it is more efficient to use
+ * rblist_split instead of this function. This function uses
+ * rblist_split internally and then discards some of the pieces.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 rblist rblist_sub(rblist rbl, size_t from, size_t to);
 
 /*
- * Compares the lists `left' and `right' lexographically. Returns a
- * negative number for less, 0 for equal and a positive number for more.
+ * Compares the lists `left' and `right' lexicographically. Returns a
+ * negative number for less, 0 for equal and a positive number for
+ * more.
  *
  * Takes time O(n) where `n' is the length of the common prefix.
  */
