@@ -45,7 +45,7 @@ typedef const union rblist *rblist;
  * dereferences an rblist_iterator to obtain an element of the list.
  * rblist_iterator_next increments an rblist_iterator to move on to
  * the next element. The most concise way to use these functions is
- * using the FOREACH macro.
+ * using the RBLIST_FOR macro.
  *
  * Takes memory O(log(n)) where `n' is the length of the list.
  */
@@ -112,9 +112,9 @@ size_t rblist_nl_count(rblist rbl);
 
 /*
  * Break an rblist into two at the specified position, and store the
- * two halves are stored in *left and *right. The original is not
- * modified. `pos' is clipped to the range from 0 to
- * rblist_length(rbl) before use.
+ * two halves in *left and *right. The original is not modified.
+ * `pos' is clipped to the range from 0 to rblist_length(rbl) before
+ * use.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
@@ -201,8 +201,7 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
  *     ... Do something with my_i ...
  *   RBLIST_END
  *
- * This expands to a for loop with 'my_i' as the loop
- * variable.
+ * This expands to a for loop with 'my_i' as the loop variable.
  */
 
 #define RBLIST_FOR(c, rbl) \
@@ -232,9 +231,9 @@ char *rblist_copy_into(rblist rbl, char *s);
 char *rblist_to_string(rblist rbl);
 
 /*
- * Returns the portion of `rbl' from `from' to `to'. If `from' is
- * negative it is clipped to zero. If `to' is too big it is clipped to
- * the length of `rbl'. If from > to the result is rblist_empty.
+ * Returns the portion of `rbl' from `from' to `to'. If `to' is too
+ * big it is clipped to the length of `rbl'. If from > to the result 
+ * is rblist_empty.
  *
  * To break a list into pieces, it is more efficient to use
  * rblist_split instead of this function. This function uses
@@ -252,5 +251,13 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to);
  * Takes time O(n) where `n' is the length of the common prefix.
  */
 int rblist_compare(rblist left, rblist right);
+
+/*
+ * Compares prefixes of the lists `left' and `right' lexographically.
+ * 'n' is the length of the prefixes to compare. Equivalent to:
+ *
+ *   rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n));
+ */
+int rblist_ncompare(rblist left, rblist right, size_t n);
 
 #endif

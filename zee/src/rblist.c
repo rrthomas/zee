@@ -506,6 +506,11 @@ int rblist_compare(rblist left, rblist right)
   return it_left ? 1 : it_right ? -1 : 0;
 }
 
+int rblist_ncompare(rblist left, rblist right, size_t n)
+{
+  return rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n));
+}
+
 #ifdef TEST
 
 #include "config.h"
