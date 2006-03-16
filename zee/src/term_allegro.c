@@ -286,7 +286,6 @@ static int translate_key(int c)
   return KBD_NOKEY;
 }
 
-/* FIXME: . */
 static int hooked_readkey(int mode, size_t timeout)
 {
   size_t beg_time = cur_time;
