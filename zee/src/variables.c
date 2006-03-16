@@ -47,7 +47,7 @@ static list variable_find(astr key)
 
   if (key)
     for (p = list_first(varlist); p != varlist; p = list_next(p))
-      if (!astr_cmp(key, ((vpair *)(p->item))->key))
+      if (!rblist_compare(key, ((vpair *)(p->item))->key))
         return p;
 
   return NULL;
@@ -90,7 +90,7 @@ static var_entry *get_variable_default(astr var)
 {
   var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!astr_cmp(astr_new(p->var), var))
+    if (!rblist_compare(rblist_from_string(p->var), var))
       return p;
 
   return NULL;
@@ -105,7 +105,7 @@ astr get_variable(astr var)
     return ((vpair *)(temp->item))->value;
 
   if ((p = get_variable_default(var)))
-    return astr_new(p->val);
+    return rblist_from_string(p->val);
 
   return NULL;
 }
@@ -115,7 +115,7 @@ int get_variable_number(astr var)
   astr as;
 
   if ((as = get_variable(var)))
-    return atoi(astr_cstr(as));
+    return atoi(rblist_to_string(as));
 
   return 0;
 }
@@ -125,7 +125,7 @@ bool get_variable_bool(astr var)
   astr as;
 
   if ((as = get_variable(var)))
-    return !astr_cmp(as, astr_new("true"));
+    return !rblist_compare(as, rblist_from_string("true"));
 
   return false;
 }
@@ -137,21 +137,21 @@ astr minibuf_read_variable_name(astr msg)
   var_entry *p;
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    list_append(cp->completions, astr_new(p->var));
+    list_append(cp->completions, rblist_from_string(p->var));
 
   for (;;) {
-    ms = minibuf_read_completion(msg, astr_new(""), cp, NULL);
+    ms = minibuf_read_completion(msg, rblist_from_string(""), cp, NULL);
 
     if (ms == NULL) {
       CMDCALL(edit_select_off);
       return NULL;
     }
 
-    if (astr_len(ms) == 0) {
-      minibuf_error(astr_new("No variable name given"));
+    if (rblist_length(ms) == 0) {
+      minibuf_error(rblist_from_string("No variable name given"));
       return NULL;
     } else if (get_variable(ms) == NULL) {
-      minibuf_error(astr_afmt("There is no variable called `%s'", astr_cstr(ms)));
+      minibuf_error(astr_afmt("There is no variable called `%s'", rblist_to_string(ms)));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -176,18 +176,18 @@ Set a variable to the specified value.\
     val = list_behead(l);
     ok = true;
   } else {
-    if ((var = minibuf_read_variable_name(astr_new("Set variable: ")))) {
+    if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: ")))) {
       var_entry *p = get_variable_default(var);
-      if (!astr_cmp(astr_new(p ? p->fmt : ""), astr_new("b"))) {
+      if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
         int i;
-        if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_cstr(var)))) == -1)
+        if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", rblist_to_string(var)))) == -1)
           CMDCALL(edit_select_off); /* FIXME: val for set_variable() below... */
         else {
-          val = astr_new((i == true) ? "true" : "false");
+          val = rblist_from_string((i == true) ? "true" : "false");
           ok = true;
         }
       } else                    /* Non-boolean variable. */
-        if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_cstr(var)), astr_new(""))) == NULL)
+        if ((val = minibuf_read(astr_afmt("Set %s to value: ", rblist_to_string(var)), rblist_from_string(""))) == NULL)
           CMDCALL(edit_select_off);
         else
           ok = true;

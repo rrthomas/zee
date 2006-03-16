@@ -31,8 +31,8 @@ void add_history_element(History *hp, astr string)
     hp->elements = list_new();
 
   last = list_last(hp->elements)->item;
-  if (!last || astr_cmp(last, string) != 0)
-    list_append(hp->elements, astr_dup(string));
+  if (!last || rblist_compare(last, string) != 0)
+    list_append(hp->elements, string);
 }
 
 void prepare_history(History *hp)

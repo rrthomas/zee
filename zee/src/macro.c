@@ -73,13 +73,13 @@ Use macro_name to give it a permanent name.\
 ")
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
-    minibuf_error(astr_new("Already defining a keyboard macro"));
+    minibuf_error(rblist_from_string("Already defining a keyboard macro"));
     ok = false;
   } else {
     if (cur_mp)
       cancel_kbd_macro();
 
-    minibuf_write(astr_new("Defining keyboard macro..."));
+    minibuf_write(rblist_from_string("Defining keyboard macro..."));
 
     thisflag |= FLAG_DEFINING_MACRO;
     cur_mp = macro_new();
@@ -93,7 +93,7 @@ Finish defining a keyboard macro.\
 ")
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
-    minibuf_error(astr_new("Not defining a keyboard macro"));
+    minibuf_error(rblist_from_string("Not defining a keyboard macro"));
     ok = false;
   } else
     thisflag &= ~FLAG_DEFINING_MACRO;
@@ -112,11 +112,11 @@ valid editor command.\
   astr ms;
   Macro *mp;
 
-  if ((ms = minibuf_read(astr_new("Name for last kbd macro: "), astr_new(""))) == NULL) {
-    minibuf_error(astr_new("No command name given"));
+  if ((ms = minibuf_read(rblist_from_string("Name for last kbd macro: "), rblist_from_string(""))) == NULL) {
+    minibuf_error(rblist_from_string("No command name given"));
     ok = false;
   } else if (cur_mp == NULL) {
-    minibuf_error(astr_new("No keyboard macro defined"));
+    minibuf_error(rblist_from_string("No keyboard macro defined"));
     ok = false;
   } else {
     if ((mp = get_macro(ms))) {
@@ -125,7 +125,7 @@ valid editor command.\
       /* Add a new macro to the list */
       mp = macro_new();
       mp->next = head_mp;
-      mp->name = astr_dup(ms);
+      mp->name = ms;
       head_mp = mp;
     }
 
@@ -157,7 +157,7 @@ macro_name.\
 ")
 {
   if (cur_mp == NULL) {
-    minibuf_error(astr_new("No kbd macro has been defined"));
+    minibuf_error(rblist_from_string("No kbd macro has been defined"));
     ok = false;
   } else
     call_macro(cur_mp);
@@ -172,7 +172,7 @@ Macro *get_macro(astr name)
   Macro *mp;
   assert(name);
   for (mp = head_mp; mp; mp = mp->next)
-    if (!astr_cmp(mp->name, name))
+    if (!rblist_compare(mp->name, name))
       return mp;
   return NULL;
 }

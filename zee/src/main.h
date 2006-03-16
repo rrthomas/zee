@@ -237,29 +237,29 @@ typedef struct {
     astr name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
-    else if ((name = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) \
+    else if ((name = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
 #define COMMAND(name, prompt) \
     astr name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
-    else if ((name = minibuf_read_command_name(astr_new(prompt))) == NULL) \
+    else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
 #define UINT(name, prompt) \
     size_t name = 0; \
     if (!list_empty(l)) { \
       astr as = list_behead(l); \
-      if ((name = strtoul(astr_cstr(as), NULL, 10)) == ULONG_MAX) \
+      if ((name = strtoul(rblist_to_string(as), NULL, 10)) == ULONG_MAX) \
         ok = false; \
     } else do { \
       astr ms; \
-      if ((ms = minibuf_read(astr_new(prompt), astr_new(""))) == NULL) { \
+      if ((ms = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) { \
         ok = CMDCALL(edit_select_off); \
         break; \
       } \
-      if ((name = strtoul(astr_cstr(ms), NULL, 10)) == ULONG_MAX) \
+      if ((name = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
         ding(); \
     } while (name == ULONG_MAX);
 

@@ -34,62 +34,15 @@
  * strings.
  *
  * String positions start at zero, as with ordinary C strings.
- * Negative values are also allowed, and count from the end of the
- * string.
  */
 
 typedef rblist astr;
 
 /*
- * Create a new string with initial contents s.
- */
-astr astr_new(const char *s);
-
-/*
- * Convert as into a C null-terminated string.
- * as[0] to as[astr_len(as) - 1] inclusive may be read.
- */
-const char *astr_cstr(const astr as);
-
-/*
- * Return the length of the argument string as.
- */
-size_t astr_len(astr as);
-
-/*
- * Return the pos'th character of as.
- */
-char astr_char(const astr as, ptrdiff_t pos);
-
-/*
- * Return a new astr consisting of size characters from string as.
- * Note that the second argument is a position, not a length.
- */
-astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to);
-
-/*
- * Compare two strings (for astr_ncmp, stop after at most n
- * characters).
- */
-int astr_cmp(const astr as1, const astr as2);
-int astr_ncmp(const astr as1, const astr as2, size_t n);
-
-/*
  * Find first occurrence of needle in haystack starting at position
  * pos; return -1 if no occurrence.
  */
-ptrdiff_t astr_str(const astr haystack, ptrdiff_t pos, const astr needle);
-
-/*
- * Append the contents of the argument string or character to as.
- */
-astr astr_cat(astr as, const astr src);
-astr astr_cat_char(astr as, int c);
-
-/*
- * Duplicate as.
- */
-astr astr_dup(const astr src);
+size_t astr_str(const astr haystack, size_t pos, const astr needle);
 
 /*
  * Read a file into an astr.

@@ -112,28 +112,28 @@ astr minibuf_read_command_name(astr prompt)
   cp->completions = command_list();
 
   for (;;) {
-    ms = minibuf_read_completion(prompt, astr_new(""), cp, &commands_history);
+    ms = minibuf_read_completion(prompt, rblist_from_string(""), cp, &commands_history);
 
     if (ms == NULL) {
       CMDCALL(edit_select_off);
       return NULL;
     }
 
-    if (astr_len(ms) == 0) {
-      minibuf_error(astr_new("No command name given"));
+    if (rblist_length(ms) == 0) {
+      minibuf_error(rblist_from_string("No command name given"));
       return NULL;
     }
 
     /* Complete partial words if possible */
     if (completion_try(cp, ms))
-      ms = astr_dup(cp->match);
+      ms = cp->match;
 
     if (get_command(ms) || get_macro(ms)) {
       add_history_element(&commands_history, ms);
       minibuf_clear();        /* Remove any error message */
       break;
     } else {
-      minibuf_error(astr_afmt("Undefined command `%s'", astr_cstr(ms)));
+      minibuf_error(astr_afmt("Undefined command `%s'", rblist_to_string(ms)));
       waitkey(WAITKEY_DEFAULT);
     }
   }
@@ -152,7 +152,7 @@ Read key chord, and unbind it.\
   if (list_length(l) > 0)
     key = strtochord(list_behead(l));
   else {
-    minibuf_write(astr_new("Unbind key: "));
+    minibuf_write(rblist_from_string("Unbind key: "));
     key = getkey();
   }
 
@@ -178,11 +178,11 @@ chord.\
   } else {
     astr as;
 
-    minibuf_write(astr_new("Bind key: "));
+    minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
 
     as = chordtostr(key);
-    name = minibuf_read_command_name(astr_afmt("Bind key %s to command: ", astr_cstr(as)));
+    name = minibuf_read_command_name(astr_afmt("Bind key %s to command: ", rblist_to_string(as)));
   }
 
   if (name) {
@@ -193,9 +193,9 @@ chord.\
         bind_key(key, cmd);
         ok = true;
       } else
-        minibuf_error(astr_new("Invalid key"));
+        minibuf_error(rblist_from_string("Invalid key"));
     } else
-      minibuf_error(astr_afmt("No such command `%s'", astr_cstr(name)));
+      minibuf_error(astr_afmt("No such command `%s'", rblist_to_string(name)));
   }
 }
 END_DEF
@@ -203,15 +203,15 @@ END_DEF
 astr command_to_binding(Command cmd)
 {
   size_t i, n = 0;
-  astr as = astr_new("");
+  astr as = rblist_from_string("");
 
   for (i = 0; i < vec_items(bindings); i++)
     if (vec_item(bindings, i, Binding).cmd == cmd) {
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       if (n++ != 0)
-        as = astr_cat(as, astr_new(", "));
-      as = astr_cat(as, binding);
+        as = rblist_concat(as, rblist_from_string(", "));
+      as = rblist_concat(as, binding);
     }
 
   return as;
@@ -222,11 +222,11 @@ astr binding_to_command(size_t key)
   Binding *p;
 
   if (key & KBD_META && isdigit(key & 255))
-    return astr_new("universal_argument");
+    return rblist_from_string("universal_argument");
 
   if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
-      return astr_new("self_insert_command");
+      return rblist_from_string("self_insert_command");
     else
       return NULL;
   } else

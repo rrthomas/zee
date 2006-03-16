@@ -64,13 +64,13 @@ int point_dist(Point pt1, Point pt2)
     swap_point(&pt1, &pt2);
 
   for (lp = pt1.p; ; lp = list_next(lp)) {
-    size += astr_len(lp->item);
+    size += rblist_length(lp->item);
 
     if (lp == pt1.p)
       size -= pt1.o;
 
     if (lp == pt2.p) {
-      size -= astr_len(lp->item) - pt2.o;
+      size -= rblist_length(lp->item) - pt2.o;
       break;
     }
     else
@@ -109,6 +109,6 @@ Point point_max(Buffer *bp)
   Point pt;
   pt.p = list_prev(bp->lines);
   pt.n = buf->num_lines;
-  pt.o = astr_len(list_prev(bp->lines)->item);
+  pt.o = rblist_length(list_prev(bp->lines)->item);
   return pt;
 }

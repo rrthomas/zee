@@ -135,10 +135,10 @@ int main(int argc, char **argv)
       bflag = true;
       break;
     case 1:
-      cmd_eval(astr_new(optarg));
+      cmd_eval(rblist_from_string(optarg));
       break;
     case 2:
-      if ((as = file_read(astr_new(optarg))))
+      if ((as = file_read(rblist_from_string(optarg))))
         cmd_eval(as);
       break;
     case 3:
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 
       /* Create a single default binding so M-x commands can still be
          issued if the default bindings file can't be loaded. */
-      bind_key(strtochord(astr_new("M-x")), F_execute_command);
+      bind_key(strtochord(rblist_from_string("M-x")), F_execute_command);
     }
 
     /* Open file given on command line. */
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
       else if (*argv) {
-        file_open(astr_new(*argv++));
+        file_open(rblist_from_string(*argv++));
         break;
       }
     }
@@ -206,15 +206,15 @@ int main(int argc, char **argv)
       }
 
       /* Load default bindings file. */
-      if ((as = file_read(astr_new(PATH_DATA "/key_bindings.el"))))
+      if ((as = file_read(rblist_from_string(PATH_DATA "/key_bindings.el"))))
         cmd_eval(as);
     }
 
     /* Load user init file */
     if (!nflag) {
       astr home = get_home_dir();
-      if (astr_len(home) > 0) {
-        home = astr_cat(home, astr_new("/." PACKAGE_NAME));
+      if (rblist_length(home) > 0) {
+        home = rblist_concat(home, rblist_from_string("/." PACKAGE_NAME));
         if ((as = file_read(home)))
           cmd_eval(as);
       }
@@ -224,11 +224,11 @@ int main(int argc, char **argv)
       /* FIXME: allow help message to be overwritten by errors from
          loading init files */
       astr quitstr = command_to_binding(F_file_quit);
-      if (!astr_cmp(quitstr, astr_new("")))
-        quitstr = astr_new("Alt-x, `file_quit', RETURN");
+      if (!rblist_compare(quitstr, rblist_from_string("")))
+        quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
       if (buf) {
-        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %s to quit", astr_cstr(quitstr)));
-        quitstr = astr_new("");
+        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %s to quit", rblist_to_string(quitstr)));
+        quitstr = rblist_from_string("");
         run();
       }
 

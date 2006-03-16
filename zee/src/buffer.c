@@ -44,7 +44,7 @@ void buffer_new(void)
   /* Set the initial mark (needs limit marker to be set up). */
   buf->mark = marker_new(point_min(buf));
 
-  if (get_variable_bool(astr_new("wrap_mode")))
+  if (get_variable_bool(rblist_from_string("wrap_mode")))
     buf->flags ^= BFLAG_AUTOFILL;
 }
 
@@ -55,7 +55,7 @@ void buffer_new(void)
 bool warn_if_readonly_buffer(void)
 {
   if (buf->flags & BFLAG_READONLY) {
-    minibuf_error(astr_new("Buffer is readonly"));
+    minibuf_error(rblist_from_string("Buffer is readonly"));
     return true;
   } else
   return false;
@@ -65,7 +65,7 @@ bool warn_if_no_mark(void)
 {
   assert(buf->mark);
   if (!(buf->flags & BFLAG_ANCHORED)) {
-    minibuf_error(astr_new("The mark is not active now"));
+    minibuf_error(rblist_from_string("The mark is not active now"));
     return true;
   } else
     return false;
@@ -108,7 +108,7 @@ bool calculate_the_region(Region *rp)
  */
 size_t tab_width(void)
 {
-  size_t t = get_variable_number(astr_new("tab_width"));
+  size_t t = get_variable_number(rblist_from_string("tab_width"));
   return t ? t : 8;
 }
 
@@ -118,7 +118,7 @@ size_t tab_width(void)
 astr copy_text_block(Point start, size_t size)
 {
   size_t n = buf->pt.n, i;
-  astr as = astr_new("");
+  astr as = rblist_from_string("");
   Line *lp = buf->pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the
@@ -135,11 +135,11 @@ astr copy_text_block(Point start, size_t size)
     while (++n < start.n);
 
   /* Copy one character at a time. */
-  for (i = start.o; astr_len(as) < size;) {
-    if (i < astr_len(lp->item))
-      as = astr_cat_char(as, astr_char(lp->item, (ptrdiff_t)(i++)));
+  for (i = start.o; rblist_length(as) < size;) {
+    if (i < rblist_length(lp->item))
+      as = rblist_concat_char(as, rblist_get(lp->item, (i++)));
     else {
-      as = astr_cat(as, astr_new("\n"));
+      as = rblist_concat(as, rblist_from_string("\n"));
       lp = list_next(lp);
       i = 0;
     }

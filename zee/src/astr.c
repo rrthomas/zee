@@ -24,6 +24,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "nonstd.h"
@@ -31,75 +32,25 @@
 #include "astr.h"
 
 
-astr astr_new(const char *s)
+size_t astr_str(astr haystack, size_t from, astr needle)
 {
-  return rblist_from_string(s);
-}
+  size_t pos;
 
-size_t astr_len(const astr as)
-{
-  return rblist_length(as);
-}
-
-char astr_char(const astr as, ptrdiff_t pos)
-{
-  return rblist_get(as, (size_t)pos);
-}
-
-const char *astr_cstr(const astr as)
-{
-  return rblist_to_string(as);
-}
-
-astr astr_cat(astr as, const astr src)
-{
-  return rblist_concat(as, src);
-}
-
-astr astr_cat_char(astr as, int c)
-{
-  return rblist_concat(as, rblist_singleton(c));
-}
-
-astr astr_dup(const astr src)
-{
-  return src;
-}
-
-astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
-{
-  return rblist_sub(as, (size_t)from, (size_t)to);
-}
-
-int astr_cmp(const astr as1, const astr as2)
-{
-  return rblist_compare(as1, as2);
-}
-
-int astr_ncmp(const astr as1, const astr as2, size_t n)
-{
-  return rblist_ncompare(as1, as2, n);
-}
-
-ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
-{
-  ptrdiff_t pos;
-
-  if (from + astr_len(needle) <= astr_len(haystack))
-    for (pos = from; (size_t)pos <= astr_len(haystack) - astr_len(needle); pos++)
-      if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + astr_len(needle)), needle))
+  if (from + rblist_length(needle) <= rblist_length(haystack))
+    for (pos = from; (size_t)pos <= rblist_length(haystack) - rblist_length(needle); pos++)
+      if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + rblist_length(needle)), needle))
         return pos;
 
-  return -1;
+  return SIZE_MAX;
 }
 
 astr astr_fread(FILE *fp)
 {
   int c;
-  astr as = astr_new("");
+  astr as = rblist_from_string("");
 
   while ((c = getc(fp)) != EOF)
-    as = astr_cat_char(as, c);
+    as = rblist_concat_char(as, c);
   return as;
 }
 
@@ -110,9 +61,9 @@ astr astr_fgets(FILE *fp)
 
   if (feof(fp))
     return NULL;
-  as = astr_new("");
+  as = rblist_from_string("");
   while ((c = getc(fp)) != EOF && c != '\n')
-    as = astr_cat_char(as, c);
+    as = rblist_concat_char(as, c);
   return as;
 }
 
@@ -131,7 +82,7 @@ astr astr_afmt(const char *fmt, ...)
   assert(vsnprintf(s, (size_t)len + 1, fmt, ap) == len);
   va_end(ap);
 
-  return astr_new(s);
+  return rblist_from_string(s);
 }
 
 
@@ -151,40 +102,40 @@ int main(void)
   astr as1, as2, as3;
   FILE *fp;
 
-  as1 = astr_new("hello world!");
-  as3 = astr_sub(as1, 6, 11);
-  assert(!astr_cmp(as3, astr_new("world")));
+  as1 = rblist_from_string("hello world!");
+  as3 = rblist_sub(as1, 6, 11);
+  assert(!rblist_compare(as3, rblist_from_string("world")));
 
-  as2 = astr_new("The ");
-  as2 = astr_cat(as2, as3);
-  assert(!astr_cmp(as2, astr_new("The world")));
+  as2 = rblist_from_string("The ");
+  as2 = rblist_concat(as2, as3);
+  assert(!rblist_compare(as2, rblist_from_string("The world")));
 
-  as3 = astr_sub(as1, 6, 11);
-  assert(!astr_cmp(as3, astr_new("world")));
+  as3 = rblist_sub(as1, 6, 11);
+  assert(!rblist_compare(as3, rblist_from_string("world")));
 
-  as1 = astr_new("12345");
-  as2 = astr_sub(as1, 3, (ptrdiff_t)astr_len(as1));
-  assert(!astr_cmp(as2, astr_new("45")));
+  as1 = rblist_from_string("12345");
+  as2 = rblist_sub(as1, 3, rblist_length(as1));
+  assert(!rblist_compare(as2, rblist_from_string("45")));
 
-  assert(!astr_cmp(astr_sub(astr_new("12345"), 0, (ptrdiff_t)astr_len(as1)),
-                   astr_new("12345")));
+  assert(!rblist_compare(rblist_sub(rblist_from_string("12345"), 0, rblist_length(as1)),
+                   rblist_from_string("12345")));
 
-  assert(!astr_cmp(astr_cat(astr_afmt("%s * %d = ", "5", 3), astr_afmt("%d", 15)),
-                   astr_new("5 * 3 = 15")));
+  assert(!rblist_compare(rblist_concat(astr_afmt("%s * %d = ", "5", 3), astr_afmt("%d", 15)),
+                   rblist_from_string("5 * 3 = 15")));
 
-  assert(astr_cmp(astr_new("a"), astr_new("abc")) == -1);
+  assert(rblist_compare(rblist_from_string("a"), rblist_from_string("abc")) == -1);
 
-  assert(astr_cmp(astr_new("abc"), astr_new("a")) == 1);
+  assert(rblist_compare(rblist_from_string("abc"), rblist_from_string("a")) == 1);
 
-  assert(astr_str(astr_new("rumblebumbleapplebombleboo"), 0, astr_new("apple")) == 12);
+  assert(astr_str(rblist_from_string("rumblebumbleapplebombleboo"), 0, rblist_from_string("apple")) == 12);
 
-  assert(astr_str(astr_new("rumblebumbleapple"), 0, astr_new("apple")) == 12);
+  assert(astr_str(rblist_from_string("rumblebumbleapple"), 0, rblist_from_string("apple")) == 12);
 
-  assert(astr_str(astr_new("appleabumbleapplebombleboo"), 6, astr_new("apple")) == 12);
+  assert(astr_str(rblist_from_string("appleabumbleapplebombleboo"), 6, rblist_from_string("apple")) == 12);
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);
-  assert(!astr_cmp(as1, astr_new("/* Dynamically allocated strings")));
+  assert(!rblist_compare(as1, rblist_from_string("/* Dynamically allocated strings")));
   assert(fclose(fp) == 0);
 
   return EXIT_SUCCESS;

@@ -57,16 +57,16 @@ static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
   pattern.buffer = NULL;
   pattern.allocated = 0;
 
-  find_err = re_compile_pattern(astr_cstr(as2), (int)astr_len(as2), &pattern);
+  find_err = re_compile_pattern(rblist_to_string(as2), (int)rblist_length(as2), &pattern);
   if (!find_err) {
     pattern.not_bol = !bol;
     pattern.not_eol = !eol;
 
     if (!backward)
-      index = re_search(&pattern, astr_cstr(s1), (int)astr_len(s1), 0, (int)astr_len(s1),
+      index = re_search(&pattern, rblist_to_string(s1), (int)rblist_length(s1), 0, (int)rblist_length(s1),
                         &search_regs);
     else
-      index = re_search(&pattern, astr_cstr(s1), (int)astr_len(s1), (int)astr_len(s1), -(int)astr_len(s1),
+      index = re_search(&pattern, rblist_to_string(s1), (int)rblist_length(s1), (int)rblist_length(s1), -(int)rblist_length(s1),
                         &search_regs);
 
     if (index >= 0) {
@@ -84,14 +84,14 @@ static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
 
 static int search_forward(Line *startp, size_t starto, astr as)
 {
-  if (astr_len(as) > 0) {
+  if (rblist_length(as) > 0) {
     Line *lp;
     astr sp;
 
-    for (lp = startp, sp = astr_sub(lp->item, (ptrdiff_t)starto, (ptrdiff_t)astr_len(lp->item));
+    for (lp = startp, sp = rblist_sub(lp->item, starto, rblist_length(lp->item));
          lp != list_last(buf->lines);
          lp = list_next(lp), sp = lp->item) {
-      if (astr_len(sp) > 0) {
+      if (rblist_length(sp) > 0) {
         size_t off = find_substr(sp, as, sp == lp->item, true, false);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
@@ -108,16 +108,16 @@ static int search_forward(Line *startp, size_t starto, astr as)
 
 static int search_backward(Line *startp, size_t starto, astr as)
 {
-  if (astr_len(as) > 0) {
+  if (rblist_length(as) > 0) {
     Line *lp;
     size_t s1size;
 
     for (lp = startp, s1size = starto;
          lp != list_first(buf->lines);
-         lp = list_prev(lp), s1size = astr_len(lp->item)) {
+         lp = list_prev(lp), s1size = rblist_length(lp->item)) {
       astr sp = lp->item;
       if (s1size > 0) {
-        size_t off = find_substr(sp, as, true, s1size == astr_len(lp->item), true);
+        size_t off = find_substr(sp, as, true, s1size == rblist_length(lp->item), true);
         if (off != SIZE_MAX) {
           while (buf->pt.p != lp)
             CMDCALL(move_previous_line);
@@ -144,7 +144,7 @@ static int isearch(int dir)
   int c;
   int last = true;
   astr as;
-  astr pattern = astr_new("");
+  astr pattern = rblist_from_string("");
   Point start, cur;
   Marker *old_mark;
 
@@ -162,7 +162,7 @@ static int isearch(int dir)
     as = astr_afmt("%sI-search%s: %s",
               (last ? "" : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
-              astr_cstr(pattern));
+              rblist_to_string(pattern));
 
     /* Regex error. */
     if (find_err) {
@@ -171,7 +171,7 @@ static int isearch(int dir)
           (strncmp(find_err, "Invalid ", 8) == 0)) {
         find_err = "incomplete input";
       }
-      as = astr_cat(as, astr_afmt(" [%s]", find_err));
+      as = rblist_concat(as, astr_afmt(" [%s]", find_err));
       find_err = NULL;
     }
 
@@ -194,8 +194,8 @@ static int isearch(int dir)
         buf->mark = old_mark;
       break;
     } else if (c == KBD_BS) {
-      if (astr_len(pattern) > 0) {
-        pattern = astr_sub(pattern, 0, (ptrdiff_t)astr_len(pattern) - 1);
+      if (rblist_length(pattern) > 0) {
+        pattern = rblist_sub(pattern, 0, rblist_length(pattern) - 1);
         buf->pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else
@@ -206,32 +206,32 @@ static int isearch(int dir)
         dir = ISEARCH_BACKWARD;
       else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
         dir = ISEARCH_FORWARD;
-      if (astr_len(pattern) > 0) {
+      if (rblist_length(pattern) > 0) {
         /* Find next match. */
         cur = buf->pt;
 
         /* Save search string. */
-        last_search = astr_dup(pattern);
+        last_search = pattern;
       }
       else if (last_search)
-        pattern = astr_dup(last_search);
+        pattern = last_search;
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
-      if (astr_len(pattern) > 0) {
+      if (rblist_length(pattern) > 0) {
         /* Save mark. */
         set_mark_to_point();
         buf->mark->pt = start;
 
         /* Save search string. */
-        last_search = astr_dup(pattern);
+        last_search = pattern;
 
-        minibuf_write(astr_new("Mark saved when search started"));
+        minibuf_write(rblist_from_string("Mark saved when search started"));
       } else
         minibuf_clear();
       break;
     } else
-      pattern = astr_cat_char(pattern, c);
+      pattern = rblist_concat_char(pattern, c);
 
-    if (astr_len(pattern) > 0) {
+    if (rblist_length(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)
         last = search_forward(cur.p, cur.o, pattern);
       else
@@ -282,8 +282,8 @@ static bool no_upper(astr as)
 {
   size_t i;
 
-  for (i = 0; i < astr_len(as); i++)
-    if (isupper(astr_char(as, (ptrdiff_t)i)))
+  for (i = 0; i < rblist_length(as); i++)
+    if (isupper(rblist_get(as, i)))
       return false;
 
   return true;
@@ -300,14 +300,14 @@ what to do with it.\
   bool noask = false, exitloop = false, find_no_upper;
   astr find, repl;
 
-  if ((find = minibuf_read(astr_new("Query replace string: "), astr_new(""))) == NULL)
+  if ((find = minibuf_read(rblist_from_string("Query replace string: "), rblist_from_string(""))) == NULL)
     ok = CMDCALL(edit_select_off);
-  else if (astr_len(find) == 0)
+  else if (rblist_length(find) == 0)
     ok = false;
   else {
     find_no_upper = no_upper(find);
 
-    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_cstr(find)), astr_new(""))) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", rblist_to_string(find)), rblist_from_string(""))) == NULL)
       ok = CMDCALL(edit_select_off);
     if (ok) {
       while (search_forward(buf->pt.p, buf->pt.o, find)) {
@@ -317,12 +317,12 @@ what to do with it.\
             resync_display();
           for (;;) {
             /* FIXME: Can we use minibuf_read_forced? */
-            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr(find), astr_cstr(repl)));
+            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", rblist_to_string(find), rblist_to_string(repl)));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
                 c == 'q' || c == '.' || c == '!')
               goto exitloop;
-            minibuf_error(astr_new("Please answer y, n, !, . or q."));
+            minibuf_error(rblist_from_string("Please answer y, n, !, . or q."));
             waitkey(WAITKEY_DEFAULT);
           }
         exitloop:
@@ -354,10 +354,10 @@ what to do with it.\
       replblock:
         ++count;
         undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(buf->pt.n, buf->pt.o - astr_len(find)),
-                  astr_len(find), astr_len(repl));
-        if (line_replace_text(&buf->pt.p, buf->pt.o - astr_len(find),
-                              astr_len(find), repl, find_no_upper))
+                  make_point(buf->pt.n, buf->pt.o - rblist_length(find)),
+                  rblist_length(find), rblist_length(repl));
+        if (line_replace_text(&buf->pt.p, buf->pt.o - rblist_length(find),
+                              rblist_length(find), repl, find_no_upper))
           buf->flags |= BFLAG_MODIFIED;
         /* FALLTHROUGH */
       nextmatch:

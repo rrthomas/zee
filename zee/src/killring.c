@@ -31,7 +31,7 @@ static astr killed_text;
 
 static void clear_kill_buffer(void)
 {
-  killed_text = astr_new("");
+  killed_text = rblist_from_string("");
 }
 
 DEF(edit_kill_line,
@@ -51,15 +51,15 @@ Delete the current line.\
 
     if (!eolp()) {
       CMDCALL(move_start_line);
-      killed_text = astr_cat(killed_text,
-                             astr_sub(buf->pt.p->item, 0,
-                                      (ptrdiff_t)astr_len(buf->pt.p->item)));
-      delete_nstring(astr_len(buf->pt.p->item), &as);
+      killed_text = rblist_concat(killed_text,
+                             rblist_sub(buf->pt.p->item, 0,
+                                      rblist_length(buf->pt.p->item)));
+      delete_nstring(rblist_length(buf->pt.p->item), &as);
       thisflag |= FLAG_DONE_KILL;
     }
 
     if (list_next(buf->pt.p) != buf->lines) {
-      killed_text = astr_cat(killed_text, astr_new("\n"));
+      killed_text = rblist_concat(killed_text, rblist_from_string("\n"));
       assert(CMDCALL(edit_delete_next_character));
       thisflag |= FLAG_DONE_KILL;
     }
@@ -100,7 +100,7 @@ the text killed this time appends to the text killed last time.\
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
       delete_nstring(r.size, &as);
-      killed_text = astr_cat(killed_text, as);
+      killed_text = rblist_concat(killed_text, as);
 
       thisflag |= FLAG_DONE_KILL;
       buf->flags &= ~BFLAG_ANCHORED;
@@ -123,7 +123,7 @@ Copy the region to the kill buffer.\
     ok = false;
   else {
     assert(calculate_the_region(&r));
-    killed_text = astr_cat(killed_text, copy_text_block(r.start, r.size));
+    killed_text = rblist_concat(killed_text, copy_text_block(r.start, r.size));
 
     thisflag |= FLAG_DONE_KILL;
     buf->flags &= ~BFLAG_ANCHORED;
@@ -182,8 +182,8 @@ Reinsert the stretch of killed text most recently killed.\n\
 Set mark at beginning, and put point at end.\
 ")
 {
-  if (astr_len(killed_text) == 0) {
-    minibuf_error(astr_new("Clipboard is empty"));
+  if (rblist_length(killed_text) == 0) {
+    minibuf_error(rblist_from_string("Clipboard is empty"));
     ok = false;
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
@@ -195,5 +195,5 @@ END_DEF
 
 void init_kill_ring(void)
 {
-  killed_text = astr_new("");
+  killed_text = rblist_from_string("");
 }

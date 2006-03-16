@@ -87,6 +87,11 @@ rblist rblist_concat(rblist left, rblist right);
 /* Derived constructors. */
 
 /*
+ * Append the contents of the argument string or character to rbl.
+ */
+rblist rblist_concat_char(rblist rbl, char c);
+
+/*
  * Makes an rblist from a 0-terminated string.
  *
  * Uses rblist_from_array, so takes time O(n).

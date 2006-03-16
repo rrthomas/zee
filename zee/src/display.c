@@ -173,7 +173,7 @@ void term_set_size(size_t cols, size_t rows)
 static astr make_char_printable(size_t c)
 {
   if (c == '\0')
-    return astr_new("^@");
+    return rblist_from_string("^@");
   else if (c <= '\32')
     return astr_afmt("^%c", 'A' + c - 1);
   else
@@ -205,8 +205,8 @@ static void outch(int c, Font font, size_t *x)
     term_addch(c), ++(*x);
   else {
     astr as = make_char_printable((size_t)c);
-    for (w = 0; w < astr_len(as) && *x < width; ++w)
-      term_addch(astr_char(as, (ptrdiff_t)w)), ++(*x);
+    for (w = 0; w < rblist_length(as) && *x < width; ++w)
+      term_addch(rblist_get(as, w)), ++(*x);
   }
 
   term_attrset(1, FONT_NORMAL);
@@ -260,11 +260,11 @@ static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
   calculate_highlight_region(&r);
 
   term_move(line, 0);
-  for (x = 0, i = startcol; i < astr_len(lp->item) && x < win.ewidth; i++) {
+  for (x = 0, i = startcol; i < rblist_length(lp->item) && x < win.ewidth; i++) {
     if (in_region(lineno, i, &r))
-      outch(astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
+      outch(rblist_get(lp->item, i), FONT_REVERSE, &x);
     else
-      outch(astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
+      outch(rblist_get(lp->item, i), FONT_NORMAL, &x);
   }
 
   if (x >= term_width()) {
@@ -317,9 +317,9 @@ void term_print(astr as)
 {
   size_t i;
 
-  for (i = 0; i < astr_len(as) && astr_char(as, (ptrdiff_t)i) != '\0'; i++)
-    if (astr_char(as, (ptrdiff_t)i) != '\n')
-      term_addch(astr_char(as, (ptrdiff_t)i));
+  for (i = 0; i < rblist_length(as) && rblist_get(as, i) != '\0'; i++)
+    if (rblist_get(as, i) != '\n')
+      term_addch(rblist_get(as, i));
     else {
       term_clrtoeol();
       term_nl();
@@ -334,21 +334,21 @@ void term_print(astr as)
 static void calculate_start_column(void)
 {
   size_t col = 0, lastcol = 0, t = tab_width();
-  ptrdiff_t rp, lp, p, rpfact, lpfact;
+  size_t rp, lp, p, rpfact, lpfact;
   Point pt = buf->pt;
 
-  rp = (ptrdiff_t)pt.o;
+  rp = pt.o;
   rpfact = pt.o / (win.ewidth / 3);
 
-  for (lp = rp; lp >= 0; --lp) {
+  for (lp = rp; ; lp--) {
     for (col = 0, p = lp; p < rp; ++p)
-      if (astr_char(pt.p->item, p) == '\t') {
+      if (rblist_get(pt.p->item, p) == '\t') {
         col |= t - 1;
         ++col;
-      } else if (isprint(astr_char(pt.p->item, p)))
+      } else if (isprint(rblist_get(pt.p->item, p)))
         ++col;
       else
-        col += astr_len(make_char_printable((size_t)astr_char(pt.p->item, p)));
+        col += rblist_length(make_char_printable((size_t)rblist_get(pt.p->item, p)));
 
     lpfact = lp / (win.ewidth / 3);
 
@@ -359,6 +359,9 @@ static void calculate_start_column(void)
     }
 
     lastcol = col;
+
+    if (lp == 0)
+      break;
   }
 
   point_start_column = 0;
@@ -384,42 +387,42 @@ static void draw_status_line(size_t line)
   term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
-  term_print(astr_new("--"));
+  term_print(rblist_from_string("--"));
 
   if ((buf->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) == (BFLAG_MODIFIED | BFLAG_READONLY))
-    term_print(astr_new("%*"));
+    term_print(rblist_from_string("%*"));
   else if (buf->flags & BFLAG_MODIFIED)
-    term_print(astr_new("**"));
+    term_print(rblist_from_string("**"));
   else if (buf->flags & BFLAG_READONLY)
-    term_print(astr_new("%%"));
+    term_print(rblist_from_string("%%"));
   else
-    term_print(astr_new("--"));
+    term_print(rblist_from_string("--"));
 
-  term_print(astr_new("-("));
+  term_print(rblist_from_string("-("));
   if (buf->flags & BFLAG_AUTOFILL) {
-    term_print(astr_new("Fill"));
+    term_print(rblist_from_string("Fill"));
     someflag = 1;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
     if (someflag)
-      term_print(astr_new(" "));
-    term_print(astr_new("Def"));
+      term_print(rblist_from_string(" "));
+    term_print(rblist_from_string("Def"));
     someflag = 1;
   }
   if (buf->flags & BFLAG_ISEARCH) {
     if (someflag)
-      term_print(astr_new(" "));
-    term_print(astr_new("Isearch"));
+      term_print(rblist_from_string(" "));
+    term_print(rblist_from_string("Isearch"));
   }
 
   term_print(astr_afmt(")--L%d--C%d--", buf->pt.n + 1, get_goalc()));
 
   if (buf->num_lines <= win.eheight && win.topdelta == buf->pt.n)
-    term_print(astr_new("All"));
+    term_print(rblist_from_string("All"));
   else if (buf->pt.n == win.topdelta)
-    term_print(astr_new("Top"));
+    term_print(rblist_from_string("Top"));
   else if (buf->pt.n + (win.eheight - win.topdelta) > buf->num_lines)
-    term_print(astr_new("Bot"));
+    term_print(rblist_from_string("Bot"));
   else
     term_print(astr_afmt("%2d%%", (int)((float)buf->pt.n / buf->num_lines * 100)));
 
@@ -451,13 +454,13 @@ static void draw_popup(void)
     /* Draw lines. */
     for (; i < popup_lines() && y < term_height() - 2;
          i++, y++, lp = list_next(lp)) {
-      term_print(astr_sub(lp->item, 0, (ptrdiff_t)min(term_width(), astr_len(lp->item))));
-      term_print(astr_new("\n"));
+      term_print(rblist_sub(lp->item, 0, min(term_width(), rblist_length(lp->item))));
+      term_print(rblist_from_string("\n"));
     }
 
     /* Draw blank lines to bottom of window. */
     for (; y < term_height() - 2; y++)
-      term_print(astr_new("\n"));
+      term_print(rblist_from_string("\n"));
   }
 }
 

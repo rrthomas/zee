@@ -43,9 +43,9 @@ astr get_home_dir(void)
   astr as;
 
   if (s && strlen(s) < PATH_MAX)
-    as = astr_new(s);
+    as = rblist_from_string(s);
   else
-    as = astr_new("");
+    as = rblist_from_string("");
 
   return as;
 }
@@ -57,7 +57,7 @@ astr get_home_dir(void)
 astr file_read(astr filename)
 {
   FILE *fp;
-  if ((fp = fopen(astr_cstr(filename), "r")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
     return NULL;
   else {
     astr as = astr_fread(fp);
@@ -75,7 +75,7 @@ void file_open(astr filename)
   astr as;
 
   buffer_new();
-  buf->filename = astr_dup(filename);
+  buf->filename = filename;
 
   if ((as = file_read(filename)) == NULL) {
     if (errno != ENOENT)
@@ -102,12 +102,12 @@ static bool buffer_write(Buffer *bp, astr filename)
 
   assert(bp);
 
-  if ((fp = fopen(astr_cstr(filename), "w")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "w")) == NULL)
     return false;
 
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
-    if (fwrite(astr_cstr(lp->item), sizeof(char), astr_len(lp->item), fp) < astr_len(lp->item) ||
+    if (fwrite(rblist_to_string(lp->item), sizeof(char), rblist_length(lp->item), fp) < rblist_length(lp->item) ||
         (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {
       fclose(fp);
       return false;
@@ -125,7 +125,7 @@ Save buffer in visited file.\
   if (buffer_write(buf, buf->filename) == false) {
     minibuf_error(astr_afmt("%s: %s", buf->filename, strerror(errno)));
   } else {
-    minibuf_write(astr_afmt("Wrote `%s'", astr_cstr(buf->filename)));
+    minibuf_write(astr_afmt("Wrote `%s'", rblist_to_string(buf->filename)));
     buf->flags &= ~BFLAG_MODIFIED;
 
     if (buf->last_undop)
@@ -142,7 +142,7 @@ Offer to save the buffer if there are unsaved changes, then quit.\
   if (buf->flags & BFLAG_MODIFIED) {
     int ans;
 
-    if ((ans = minibuf_read_yesno(astr_new("Unsaved changes; exit anyway? (yes or no) "))) == -1)
+    if ((ans = minibuf_read_yesno(rblist_from_string("Unsaved changes; exit anyway? (yes or no) "))) == -1)
       ok = CMDCALL(edit_select_off);
     else if (!ans)
       ok = false;
@@ -164,13 +164,13 @@ void die(int exitcode)
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf && buf->flags & BFLAG_MODIFIED) {
-    astr as = astr_new("");
+    astr as = rblist_from_string("");
     already_dying = true;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)
-      as = astr_dup(buf->filename);
-    as = astr_cat(as, astr_new("." PACKAGE_NAME "SAVE"));
-    fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
+      as = buf->filename;
+    as = rblist_concat(as, rblist_from_string("." PACKAGE_NAME "SAVE"));
+    fprintf(stderr, "Saving %s...\r\n", rblist_to_string(as));
     buffer_write(buf, as);
     term_close();
   }

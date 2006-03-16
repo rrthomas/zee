@@ -344,6 +344,11 @@ rblist rblist_concat(rblist left, rblist right)
 /*************************/
 /* Derived constructors. */
 
+rblist rblist_concat_char(rblist rbl, char c)
+{
+  return rblist_concat(rbl, rblist_singleton(c));
+}
+
 rblist rblist_from_string(const char *s)
 {
   return rblist_from_array(s, strlen(s));
@@ -537,9 +542,9 @@ void die(int exitcode)
 static const char *rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return astr_cstr(astr_afmt("%d", rbl->leaf.length));
+    return rblist_to_string(astr_afmt("%d", rbl->leaf.length));
   else
-    return astr_cstr(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
+    return rblist_to_string(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
                                rbl_structure(rbl->node.right)));
 }
 

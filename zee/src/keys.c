@@ -103,26 +103,26 @@ astr chordtostr(size_t key)
 {
   bool found;
   size_t i;
-  astr as = astr_new("");
+  astr as = rblist_from_string("");
 
   if (key & KBD_CTRL)
-    as = astr_cat(as, astr_new("C-"));
+    as = rblist_concat(as, rblist_from_string("C-"));
   if (key & KBD_META)
-    as = astr_cat(as, astr_new("M-"));
+    as = rblist_concat(as, rblist_from_string("M-"));
   key &= ~(KBD_CTRL | KBD_META);
 
   for (found = false, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
-      as = astr_cat(as, astr_new(keyname[i]));
+      as = rblist_concat(as, rblist_from_string(keyname[i]));
       found = true;
       break;
     }
 
   if (found == false) {
     if (isgraph(key))
-      as = astr_cat_char(as, (int)(key & 0xff));
+      as = rblist_concat_char(as, (int)(key & 0xff));
     else
-      as = astr_cat(as, astr_afmt("<%x>", key));
+      as = rblist_concat(as, astr_afmt("<%x>", key));
   }
 
   return as;
@@ -137,14 +137,14 @@ static size_t strtokey(astr buf, size_t *len)
 
   for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++) {
     size_t keylen = strlen(keyname[i]);
-    if (strncmp(astr_cstr(buf), keyname[i], min(keylen, astr_len(buf))) == 0) {
+    if (strncmp(rblist_to_string(buf), keyname[i], min(keylen, rblist_length(buf))) == 0) {
       *len = keylen;
       return keycode[i];
     }
   }
 
   *len = 1;
-  return (size_t)astr_char(buf, 0);
+  return (size_t)rblist_get(buf, 0);
 }
 
 /*
@@ -156,12 +156,12 @@ size_t strtochord(astr chord)
 
   do {
     size_t l;
-    k = strtokey(astr_sub(chord, (ptrdiff_t)len, (ptrdiff_t)astr_len(chord)), &l);
+    k = strtokey(rblist_sub(chord, len, rblist_length(chord)), &l);
     key |= k;
     len += l;
   } while (k == KBD_CTRL || k == KBD_META);
 
-  if (len != astr_len(chord))
+  if (len != rblist_length(chord))
     key = KBD_NOKEY;
 
   return key;

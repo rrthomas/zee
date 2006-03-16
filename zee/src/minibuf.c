@@ -33,7 +33,7 @@
 static void term_minibuf_write(astr as)
 {
   term_move(term_height() - 1, 0);
-  term_print(astr_sub(as, 0, (ptrdiff_t)min(astr_len(as), term_width())));
+  term_print(rblist_sub(as, 0, min(rblist_length(as), term_width())));
   term_clrtoeol();
 }
 
@@ -76,13 +76,13 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
   astr as;
 
   for (;;) {
-    as = minibuf_read_completion(prompt, astr_new(""), cp, NULL);
+    as = minibuf_read_completion(prompt, rblist_from_string(""), cp, NULL);
     if (as == NULL)             /* Cancelled. */
       return NULL;
 
     /* Complete partial words if possible. */
     if (completion_try(cp, as)) {
-      as = astr_dup(cp->match);
+      as = cp->match;
       if (list_length(cp->matches) == 1)
         return as;
     }
@@ -100,10 +100,10 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
 int minibuf_read_yesno(astr prompt)
 {
   Completion *cp = completion_new();
-  list_append(cp->completions, astr_new("yes"));
-  list_append(cp->completions, astr_new("no"));
-  astr reply = minibuf_read_forced(prompt, astr_new("Please answer `yes' or `no'."), cp);
-  return reply==NULL ? -1 : !astr_cmp(astr_new("yes"), reply);
+  list_append(cp->completions, rblist_from_string("yes"));
+  list_append(cp->completions, rblist_from_string("no"));
+  astr reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `yes' or `no'."), cp);
+  return reply==NULL ? -1 : !rblist_compare(rblist_from_string("yes"), reply);
 }
 
 /*
@@ -114,10 +114,10 @@ int minibuf_read_yesno(astr prompt)
 int minibuf_read_boolean(astr prompt)
 {
   Completion *cp = completion_new();
-  list_append(cp->completions, astr_new("true"));
-  list_append(cp->completions, astr_new("false"));
-  astr reply = minibuf_read_forced(prompt, astr_new("Please answer `true' or `false'."), cp);
-  return reply==NULL ? -1 : !astr_cmp(astr_new("true"), reply);
+  list_append(cp->completions, rblist_from_string("true"));
+  list_append(cp->completions, rblist_from_string("false"));
+  astr reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `true' or `false'."), cp);
+  return reply==NULL ? -1 : !rblist_compare(rblist_from_string("true"), reply);
 }
 
 /*
@@ -125,7 +125,7 @@ int minibuf_read_boolean(astr prompt)
  */
 void minibuf_clear(void)
 {
-  term_minibuf_write(astr_new(""));
+  term_minibuf_write(rblist_from_string(""));
 }
 
 
@@ -143,26 +143,26 @@ void minibuf_clear(void)
  */
 static void draw_minibuf_read(astr prompt, astr value, size_t offset)
 {
-  astr as = astr_dup(prompt); /* Text to print. */
-  size_t visible_width = max(3, term_width() - astr_len(prompt) - 2);
+  astr as = prompt;             /* Text to print. */
+  size_t visible_width = max(3, term_width() - rblist_length(prompt) - 2);
   visible_width--; /* Avoid the b.r. corner of the screen for broken
                       terminals and terminal emulators. */
   size_t scroll_pos =
     offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
   if (scroll_pos > 0)
-    as = astr_cat_char(as, '$');
+    as = rblist_concat_char(as, '$');
 
   /* Cursor position within `as'. */
-  size_t cursor_pos = astr_len(as) + (offset - scroll_pos);
+  size_t cursor_pos = rblist_length(as) + (offset - scroll_pos);
 
-  as = astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)min(astr_len(value), scroll_pos + visible_width)));
-  if (astr_len(value) > scroll_pos + visible_width)
-    as = astr_cat_char(as, '$');
+  as = rblist_concat(as, rblist_sub(value, scroll_pos, min(rblist_length(value), scroll_pos + visible_width)));
+  if (rblist_length(value) > scroll_pos + visible_width)
+    as = rblist_concat_char(as, '$');
 
   /* Handle terminals not wide enough to show "<prompt>$xxx$". */
-  if (astr_len(as) > term_width()) {
-    size_t to_lose = astr_len(as) - term_width();
-    as = astr_sub(as, (ptrdiff_t)to_lose, (ptrdiff_t)astr_len(as));
+  if (rblist_length(as) > term_width()) {
+    size_t to_lose = rblist_length(as) - term_width();
+    as = rblist_sub(as, to_lose, rblist_length(as));
     cursor_pos -= to_lose;
   }
 
@@ -171,7 +171,7 @@ static void draw_minibuf_read(astr prompt, astr value, size_t offset)
   term_refresh();
 }
 
-static ptrdiff_t mb_backward_char(ptrdiff_t i)
+static size_t mb_backward_char(size_t i)
 {
   if (i > 0)
     --i;
@@ -180,70 +180,70 @@ static ptrdiff_t mb_backward_char(ptrdiff_t i)
   return i;
 }
 
-static ptrdiff_t mb_forward_char(ptrdiff_t i, astr as)
+static size_t mb_forward_char(size_t i, astr as)
 {
-  if ((size_t)i < astr_len(as))
+  if ((size_t)i < rblist_length(as))
     ++i;
   else
     ding();
   return i;
 }
 
-static void mb_kill_line(ptrdiff_t i, astr *as)
+static void mb_kill_line(size_t i, astr *as)
 {
-  if ((size_t)i < astr_len(*as))
-    *as = astr_sub(*as, 0, i);
+  if ((size_t)i < rblist_length(*as))
+    *as = rblist_sub(*as, 0, i);
   else
     ding();
 }
 
-static ptrdiff_t mb_backward_delete_char(ptrdiff_t i, astr *as)
+static size_t mb_backward_delete_char(size_t i, astr *as)
 {
   if (i > 0) {
     i--;
-    *as = astr_cat(astr_sub(*as, 0, i), astr_sub(*as, i + 1, (ptrdiff_t)astr_len(*as)));
+    *as = rblist_concat(rblist_sub(*as, 0, i), rblist_sub(*as, i + 1, rblist_length(*as)));
   } else
     ding();
   return i;
 }
 
-static void mb_delete_char(ptrdiff_t i, astr *as)
+static void mb_delete_char(size_t i, astr *as)
 {
-  if ((size_t)i < astr_len(*as))
-    *as = astr_cat(astr_sub(*as, 0, i), astr_sub(*as, i + 1, (ptrdiff_t)astr_len(*as)));
+  if (i < rblist_length(*as))
+    *as = rblist_concat(rblist_sub(*as, 0, i), rblist_sub(*as, i + 1, rblist_length(*as)));
   else
     ding();
 }
 
-static void mb_prev_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
+static void mb_prev_history(History *hp, astr *as, size_t *_i, astr *_saved)
 {
-  ptrdiff_t i = *_i;
+  size_t i = *_i;
   astr saved = *_saved;
   if (hp) {
     astr elem = previous_history_element(hp);
     if (elem) {
       if (!saved)
-        saved = astr_dup(*as);
+        saved = *as;
 
-      i = astr_len(elem);
-      *as = astr_dup(elem);
+      i = rblist_length(elem);
+      *as = elem;
     }
   }
   *_i = i;
   *_saved = saved;
 }
 
-static void mb_next_history(History *hp, astr *as, ptrdiff_t *_i, astr *_saved)
+static void mb_next_history(History *hp, astr *as, size_t *_i, astr *_saved)
 {
-  ptrdiff_t i = *_i;
+  size_t i = *_i;
   astr saved = *_saved;
   if (hp) {
     astr elem = next_history_element(hp);
     if (elem)
-      *as = astr_dup(elem);
+      *as = elem;
     else if (saved) {
-      i = astr_len(saved);
-      *as = astr_dup(saved);
+      i = rblist_length(saved);
+      *as = saved;
       saved = NULL;
     }
   }
@@ -258,22 +258,22 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
 {
   int c;
   bool ret = false;
-  ptrdiff_t i;
-  astr as = astr_dup(value), retval = NULL, saved = NULL;
+  size_t i;
+  astr as = value, retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);
 
-  astr oldAs = NULL;
+  astr old_as = NULL;
 
-  for (i = astr_len(as);;) {
-    if (cp != NULL && (!oldAs || astr_cmp(oldAs, as))) {
+  for (i = rblist_length(as);;) {
+    if (cp != NULL && (!old_as || rblist_compare(old_as, as))) {
       /* Using completions and 'as' has changed, so display new completions. */
       completion_try(cp, as);
       completion_remove_suffix(cp);
       completion_remove_prefix(cp, as);
       completion_popup(cp);
-      oldAs = astr_dup(as);
+      old_as = as;
     }
     draw_minibuf_read(prompt, as, (size_t)i);
 
@@ -284,12 +284,12 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       CMDCALL(file_suspend);
       break;
     case KBD_RET:
-      term_minibuf_write(astr_new(""));
+      term_minibuf_write(rblist_from_string(""));
       retval = as;
       ret = true;
       break;
     case KBD_CANCEL:
-      term_minibuf_write(astr_new(""));
+      term_minibuf_write(rblist_from_string(""));
       ret = true;
       break;
     case KBD_CTRL | 'a':
@@ -298,7 +298,7 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       break;
     case KBD_CTRL | 'e':
     case KBD_END:
-      i = astr_len(as);
+      i = rblist_length(as);
       break;
     case KBD_CTRL | 'b':
     case KBD_LEFT:
@@ -343,9 +343,9 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       if (cp == NULL || list_empty(cp->matches))
         ding();
       else {
-        if (astr_cmp(as, cp->match) != 0) {
+        if (rblist_compare(as, cp->match) != 0) {
           as = cp->match;
-          i = astr_len(as);
+          i = rblist_length(as);
         } else
           popup_scroll_down();
       }
@@ -354,8 +354,8 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       if (c > 255 || !isprint(c))
         ding();
       else {
-        as = astr_cat(astr_cat_char(astr_sub(as, 0, i), c),
-                      astr_sub(as, i, (ptrdiff_t)astr_len(as)));
+        as = rblist_concat(rblist_concat_char(rblist_sub(as, 0, i), c),
+                      rblist_sub(as, i, rblist_length(as)));
         i++;
       }
     }

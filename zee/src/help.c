@@ -33,7 +33,7 @@ DEF(help_about,
 Show the version in the minibuffer.\
 ")
 {
-  minibuf_write(astr_new(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
+  minibuf_write(rblist_from_string(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
 }
 END_DEF
 
@@ -57,15 +57,15 @@ Display the help for the given command.\
 
   ok = false;
 
-  if ((name = minibuf_read_command_name(astr_new("Describe command: ")))) {
+  if ((name = minibuf_read_command_name(rblist_from_string("Describe command: ")))) {
     size_t i;
     for (i = 0; i < fentries; i++)
-      if (!astr_cmp(astr_new(ftable[i].name), name)) {
-        astr bindings = command_to_binding(get_command(name)), where = astr_new("");
-        if (astr_len(bindings) > 0)
-          where = astr_afmt("\n\nBound to: %s", astr_cstr(bindings));
+      if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
+        astr bindings = command_to_binding(get_command(name)), where = rblist_from_string("");
+        if (rblist_length(bindings) > 0)
+          where = astr_afmt("\n\nBound to: %s", rblist_to_string(bindings));
         popup_set(astr_afmt("Help for command `%s':\n\n%s%s",
-                            ftable[i].name, ftable[i].doc, astr_cstr(where)));
+                            ftable[i].name, ftable[i].doc, rblist_to_string(where)));
         ok = true;
         break;
       }
@@ -95,16 +95,16 @@ Display the full documentation of VARIABLE (a symbol).\
 
   ok = false;
 
-  if ((name = minibuf_read_variable_name(astr_new("Describe variable: ")))) {
+  if ((name = minibuf_read_variable_name(rblist_from_string("Describe variable: ")))) {
     size_t i;
     for (i = 0; i < ventries; i++)
-      if (!astr_cmp(astr_new(vtable[i].name), name)) {
+      if (!rblist_compare(rblist_from_string(vtable[i].name), name)) {
         popup_set(astr_afmt("Help for variable `%s':\n\n"
                             "Default value: %s\n"
                             "Current value: %s\n\n"
                             "Documentation:\n%s",
                             vtable[i].name, vtable[i].defval,
-                            astr_cstr(get_variable(name)), vtable[i].doc));
+                            rblist_to_string(get_variable(name)), vtable[i].doc));
         ok = true;
       }
   }
@@ -119,14 +119,14 @@ Display the command invoked by a key sequence.\
   size_t key;
   astr keyname, cmd;
 
-  minibuf_write(astr_new("Describe key:"));
+  minibuf_write(rblist_from_string("Describe key:"));
   key = getkey();
   keyname = chordtostr(key);
 
   if ((cmd = binding_to_command(key)) == NULL) {
-    minibuf_error(astr_afmt("%s is unbound", astr_cstr(keyname)));
+    minibuf_error(astr_afmt("%s is unbound", rblist_to_string(keyname)));
     ok = false;
   } else
-    minibuf_write(astr_afmt("%s runs the command `%s'", astr_cstr(keyname), astr_cstr(cmd)));
+    minibuf_write(astr_afmt("%s runs the command `%s'", rblist_to_string(keyname), rblist_to_string(cmd)));
 }
 END_DEF

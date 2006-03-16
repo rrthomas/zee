@@ -71,7 +71,7 @@ otherwise with the current column value.\
 ",
 UINT(col, "New wrap column: "))
 {
-  set_variable(astr_new("wrap_column"),
+  set_variable(rblist_from_string("wrap_column"),
                astr_afmt("%lu", list_empty(l) ? buf->pt.o + 1 : col));
 }
 END_DEF
@@ -82,7 +82,7 @@ Start selecting text.\
 ")
 {
   set_mark_to_point();
-  minibuf_write(astr_new("Mark set"));
+  minibuf_write(rblist_from_string("Mark set"));
   buf->flags |= BFLAG_ANCHORED;
 }
 END_DEF
@@ -93,7 +93,7 @@ Stop selecting text.\
 ")
 {
   buf->flags &= ~BFLAG_ANCHORED;
-  minibuf_write(astr_new(""));
+  minibuf_write(rblist_from_string(""));
   ok = false;
 }
 END_DEF
@@ -157,7 +157,7 @@ You may also type up to 3 octal digits, to insert a character with that code.\
 {
   int c;
 
-  minibuf_write(astr_new("Insert literal character: "));
+  minibuf_write(rblist_from_string("Insert literal character: "));
   c = xgetkey(GETKEY_UNFILTERED, 0);
 
   if (isdigit(c) && c - '0' < 8)
@@ -226,7 +226,7 @@ Move the cursor forward one word.\
     }
     if (gotword)
       break;
-    buf->pt.o = astr_len(buf->pt.p->item);
+    buf->pt.o = rblist_length(buf->pt.p->item);
     if (!CMDCALL(move_next_line)) {
       ok = false;
       break;
@@ -249,7 +249,7 @@ Move the cursor backwards one word.\
         ok = false;
         break;
       }
-      buf->pt.o = astr_len(buf->pt.p->item);
+      buf->pt.o = rblist_length(buf->pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -367,7 +367,7 @@ be set using set_wrap_column.\
   }
 
   CMDCALL(move_end_line);
-  while (get_goalc() > (size_t)get_variable_number(astr_new("wrap_column")) + 1)
+  while (get_goalc() > (size_t)get_variable_number(rblist_from_string("wrap_column")) + 1)
     wrap_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;
@@ -396,8 +396,8 @@ static int setcase_word(int rcase)
   }
 
   i = buf->pt.o;
-  while (i < astr_len(buf->pt.p->item)) {
-    if (!isalnum(astr_char(buf->pt.p->item, (ptrdiff_t)i)))
+  while (i < rblist_length(buf->pt.p->item)) {
+    if (!isalnum(rblist_get(buf->pt.p->item, i)))
       break;
     ++i;
   }
@@ -407,7 +407,7 @@ static int setcase_word(int rcase)
   for (firstchar = true;
        buf->pt.o < i;
        buf->pt.o++, firstchar = false) {
-    char c = astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
+    char c = rblist_get(buf->pt.p->item, buf->pt.o);
 
     if (isalpha(c)) {
       if (rcase == UPPERCASE)
@@ -421,7 +421,7 @@ static int setcase_word(int rcase)
                     rblist_concat(rblist_singleton(c),
                                   rblist_sub(buf->pt.p->item, buf->pt.o + 1,
                                              rblist_length(buf->pt.p->item))));
-/*       astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o) = c; */
+/*       rblist_get(buf->pt.p->item, buf->pt.o) = c; */
     } else if (!isdigit(c))
       break;
   }
@@ -478,39 +478,39 @@ file, replacing the selection.\n\
 {
   astr ms;
 
-  if ((ms = minibuf_read(astr_new("Shell command: "), astr_new(""))) == NULL)
+  if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_from_string(""))) == NULL)
     ok = CMDCALL(edit_select_off);
-  else if (astr_len(ms) == 0 || warn_if_no_mark())
+  else if (rblist_length(ms) == 0 || warn_if_no_mark())
     ok = false;
   else {
     char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
     int fd = mkstemp(tempfile);
 
     if (fd == -1) {
-      minibuf_error(astr_new("Cannot open temporary file"));
+      minibuf_error(rblist_from_string("Cannot open temporary file"));
       ok = false;
     } else {
       FILE *pipe;
       Region r;
-      astr cmd = astr_new(""), as;
+      astr cmd = rblist_from_string(""), as;
 
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
-      write(fd, astr_cstr(as), r.size);
+      write(fd, rblist_to_string(as), r.size);
 
       close(fd);
 
-      cmd = astr_afmt("%s 2>&1 <%s", astr_cstr(ms), tempfile);
+      cmd = astr_afmt("%s 2>&1 <%s", rblist_to_string(ms), tempfile);
 
-      if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
-        minibuf_error(astr_new("Cannot open pipe to process"));
+      if ((pipe = popen(rblist_to_string(cmd), "r")) == NULL) {
+        minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {
-        astr out = astr_new(""), s;
+        astr out = rblist_from_string(""), s;
 
-        while (astr_len(s = astr_fgets(pipe)) > 0) {
-          out = astr_cat(out, s);
-          out = astr_cat(out, astr_new("\n"));
+        while (rblist_length(s = astr_fgets(pipe)) > 0) {
+          out = rblist_concat(out, s);
+          out = rblist_concat(out, rblist_from_string("\n"));
         }
         pclose(pipe);
         remove(tempfile);

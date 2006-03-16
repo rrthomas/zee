@@ -51,7 +51,7 @@ DEF(move_end_line,
 Move the cursor to the end of the line.\
 ")
 {
-  buf->pt.o = astr_len(buf->pt.p->item);
+  buf->pt.o = rblist_length(buf->pt.p->item);
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-next/previous-line' calls.  */
@@ -68,7 +68,7 @@ size_t get_goalc(void)
   size_t col = 0, t = tab_width(), i;
 
   for (i = 0; i < buf->pt.o; i++) {
-    if (astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t')
+    if (rblist_get(buf->pt.p->item, i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -86,10 +86,10 @@ static void goto_goalc(int goalc)
 
   t = tab_width();
 
-  for (i = 0; i < astr_len(buf->pt.p->item); i++) {
+  for (i = 0; i < rblist_length(buf->pt.p->item); i++) {
     if (col == goalc)
       break;
-    else if (astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t') {
+    else if (rblist_get(buf->pt.p->item, i) == '\t') {
       for (w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;
@@ -274,7 +274,7 @@ Scroll text of current window downward near full screen.\
   if (buf->pt.n > 0)
     ok = goto_line(buf->pt.n - win.eheight) ? true : false;
   else {
-    minibuf_error(astr_new("Beginning of buffer"));
+    minibuf_error(rblist_from_string("Beginning of buffer"));
     ok = false;
   }
 }
@@ -288,7 +288,7 @@ Scroll text of current window upward near full screen.\
   if (buf->pt.n < buf->num_lines)
     ok = goto_line(buf->pt.n + win.eheight) ? true : false;
   else {
-    minibuf_error(astr_new("End of buffer"));
+    minibuf_error(rblist_from_string("End of buffer"));
     ok = false;
   }
 }

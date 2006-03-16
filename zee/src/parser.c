@@ -28,20 +28,20 @@
 
 
 static size_t line;
-static ptrdiff_t pos;
+static size_t pos;
 static bool bol;
 static astr expr;
 
 static int getch(void)
 {
-  if ((size_t)pos < astr_len(expr))
-    return astr_char(expr, pos++);
+  if ((size_t)pos < rblist_length(expr))
+    return rblist_get(expr, pos++);
   return EOF;
 }
 
 static void ungetch(void)
 {
-  if (pos > 0 && (size_t)pos < astr_len(expr))
+  if (pos > 0 && (size_t)pos < rblist_length(expr))
     pos--;
 }
 
@@ -85,7 +85,7 @@ static int getch_skipspace(void) {
 static astr gettok(void)
 {
   int c;
-  astr tok = astr_new("");
+  astr tok = rblist_from_string("");
 
   switch ((c = getch_skipspace())) {
   case EOF:
@@ -105,7 +105,7 @@ static astr gettok(void)
           eos = true;
           break;
         default:
-          tok = astr_cat_char(tok, c);
+          tok = rblist_concat_char(tok, c);
         }
       } while (!eos);
     }
@@ -113,10 +113,10 @@ static astr gettok(void)
 
   default:                      /* word */
     do {
-      tok = astr_cat_char(tok, c);
+      tok = rblist_concat_char(tok, c);
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();
-        tok = astr_sub(tok, 0, (ptrdiff_t)astr_len(tok) - 1);
+        tok = rblist_sub(tok, 0, rblist_length(tok) - 1);
         break;
       }
       c = getch();
@@ -181,7 +181,7 @@ Command get_command(astr name)
   size_t i;
   if (name)
     for (i = 0; i < fentries; i++)
-      if (!astr_cmp(name, astr_new(ftable[i].name)))
+      if (!rblist_compare(name, rblist_from_string(ftable[i].name)))
         return ftable[i].cmd;
   return NULL;
 }
@@ -191,7 +191,7 @@ astr get_command_name(Command cmd)
   size_t i;
   for (i = 0; i < fentries; i++)
     if (ftable[i].cmd == cmd)
-      return astr_new(ftable[i].name);
+      return rblist_from_string(ftable[i].name);
   return NULL;
 }
 
@@ -199,6 +199,6 @@ list command_list(void)
 {
   list l = list_new();
   for (size_t i = 0; i < fentries; ++i)
-    list_append(l, astr_new(ftable[i].name));
+    list_append(l, rblist_from_string(ftable[i].name));
   return l;
 }
