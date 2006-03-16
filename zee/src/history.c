@@ -23,9 +23,9 @@
 #include "main.h"
 #include "extern.h"
 
-void add_history_element(History *hp, astr string)
+void add_history_element(History *hp, rblist string)
 {
-  astr last;
+  rblist last;
 
   if (!hp->elements)
     hp->elements = list_new();
@@ -40,9 +40,9 @@ void prepare_history(History *hp)
   hp->sel = NULL;
 }
 
-astr previous_history_element(History *hp)
+rblist previous_history_element(History *hp)
 {
-  astr as = NULL;
+  rblist as = NULL;
 
   if (hp->elements) {
     if (!hp->sel) { /* First call for this history. */
@@ -63,9 +63,9 @@ astr previous_history_element(History *hp)
   return as ? as : NULL;
 }
 
-astr next_history_element(History *hp)
+rblist next_history_element(History *hp)
 {
-  astr as = NULL;
+  rblist as = NULL;
 
   if (hp->elements && hp->sel) {
     /* Next element. */

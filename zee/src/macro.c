@@ -109,7 +109,7 @@ FIXME: Such a command cannot be called non-interactively, but it is a\n\
 valid editor command.\
 ")
 {
-  astr ms;
+  rblist ms;
   Macro *mp;
 
   if ((ms = minibuf_read(rblist_from_string("Name for last kbd macro: "), rblist_from_string(""))) == NULL) {
@@ -167,7 +167,7 @@ END_DEF
 /*
  * Find a macro given its name.
  */
-Macro *get_macro(astr name)
+Macro *get_macro(rblist name)
 {
   Macro *mp;
   assert(name);

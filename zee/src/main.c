@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   int longopt;
   bool bflag = false, hflag = false, nflag = false;
   size_t line = 1;
-  astr as;
+  rblist as;
 
   GC_INIT();
 
@@ -212,7 +212,7 @@ int main(int argc, char **argv)
 
     /* Load user init file */
     if (!nflag) {
-      astr home = get_home_dir();
+      rblist home = get_home_dir();
       if (rblist_length(home) > 0) {
         home = rblist_concat(home, rblist_from_string("/." PACKAGE_NAME));
         if ((as = file_read(home)))
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
     if (!bflag) {
       /* FIXME: allow help message to be overwritten by errors from
          loading init files */
-      astr quitstr = command_to_binding(F_file_quit);
+      rblist quitstr = command_to_binding(F_file_quit);
       if (!rblist_compare(quitstr, rblist_from_string("")))
         quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
       if (buf) {

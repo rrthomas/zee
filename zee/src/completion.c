@@ -46,7 +46,7 @@ Completion *completion_new(void)
  * COLUMN_GAP-character gap between each column.
  */
 #define COLUMN_GAP 5
-static astr completion_write(list l)
+static rblist completion_write(list l)
 {
   size_t maxlen = 0;
   for (list p = list_first(l); p != l; p = list_next(p))
@@ -55,7 +55,7 @@ static astr completion_write(list l)
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t i = 0, col = 0;
-  astr as = rblist_from_string("");
+  rblist as = rblist_from_string("");
   for (list p = list_first(l);
        p != l && i < list_length(l);
        p = list_next(p), i++) {
@@ -81,7 +81,7 @@ void completion_popup(Completion *cp)
 {
   assert(cp);
   assert(cp->matches);
-  astr as = rblist_from_string("Completions\n\n");
+  rblist as = rblist_from_string("Completions\n\n");
   switch (list_length(cp->matches)) {
     case 0:
       as = rblist_concat(as, rblist_from_string("No completions"));
@@ -102,7 +102,7 @@ void completion_popup(Completion *cp)
  * Returns the length of the longest string that is a prefix of
  * both as and bs.
  */
-static size_t common_prefix_length(astr as, astr bs)
+static size_t common_prefix_length(rblist as, rblist bs)
 {
   size_t len = min(rblist_length(as), rblist_length(bs));
   for (size_t i = 0; i < len; i++)
@@ -113,7 +113,7 @@ static size_t common_prefix_length(astr as, astr bs)
 
 static int hcompar(const void *p1, const void *p2)
 {
-  return rblist_compare(*(const astr *)p1, *(const astr *)p2);
+  return rblist_compare(*(const rblist *)p1, *(const rblist *)p2);
 }
 
 /*
@@ -131,7 +131,7 @@ static int hcompar(const void *p1, const void *p2)
  * after this method. You may want to call completion_remove_suffix and/or
  * completion_remove_prefix in between to keep the list manageable.
  */
-bool completion_try(Completion *cp, astr search)
+bool completion_try(Completion *cp, rblist search)
 {
   size_t fullmatches = 0;
 
@@ -160,7 +160,7 @@ bool completion_try(Completion *cp, astr search)
  * Tests whether there was an exact match.
  * Not currently used, but it's worth remembering how to do it.
  */
-bool completion_is_exact(Completion *cp, astr search)
+bool completion_is_exact(Completion *cp, rblist search)
 {
   return
     !list_empty(cp->matches) &&
@@ -171,7 +171,7 @@ bool completion_is_exact(Completion *cp, astr search)
  * Find the last occurrence of character 'c' before 'before_pos' in 'as'.
  * Returns the offset into 'as' of the character after 'c', or '0' if not found.
  */
-static size_t last_occurrence(astr as, size_t before_pos, int c)
+static size_t last_occurrence(rblist as, size_t before_pos, int c)
 {
   while (before_pos > 0 && rblist_get(as, before_pos - 1) != c)
     before_pos--;
@@ -189,7 +189,7 @@ void completion_remove_suffix(Completion *cp)
     return;
   list ans = list_new();
   list p = list_first(cp->matches);
-  astr previous = p->item;
+  rblist previous = p->item;
   for (p = list_next(p); p != cp->matches; p = list_next(p)) {
     size_t length = last_occurrence(previous, common_prefix_length(previous, p->item), '_');
     if (length > rblist_length(cp->match))
@@ -207,7 +207,7 @@ void completion_remove_suffix(Completion *cp)
  * it from all 'cp->matches'. Does nothing if there is no such prefix.
  * Returns the length of the removed prefix.
  */
-size_t completion_remove_prefix(Completion *cp, astr search)
+size_t completion_remove_prefix(Completion *cp, rblist search)
 {
   size_t pos = last_occurrence(search, rblist_length(search), '_');
   if (pos > 0)

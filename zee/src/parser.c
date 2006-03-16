@@ -30,7 +30,7 @@
 static size_t line;
 static size_t pos;
 static bool bol;
-static astr expr;
+static rblist expr;
 
 static int getch(void)
 {
@@ -82,10 +82,10 @@ static int getch_skipspace(void) {
   } while (true);
 }
 
-static astr gettok(void)
+static rblist gettok(void)
 {
   int c;
-  astr tok = rblist_from_string("");
+  rblist tok = rblist_from_string("");
 
   switch ((c = getch_skipspace())) {
   case EOF:
@@ -129,7 +129,7 @@ static astr gettok(void)
 /*
  * Execute a string as commands
  */
-void cmd_eval(astr as)
+void cmd_eval(rblist as)
 {
   assert(as);
   pos = 0;
@@ -137,11 +137,11 @@ void cmd_eval(astr as)
   line = 0;
   bol = true;
 
-  astr tok = gettok();
+  rblist tok = gettok();
   while (tok) {
     Command cmd;
     list l = list_new();
-    astr fname;
+    rblist fname;
 
     /* Get tokens until we run out or reach a new line */
     while (tok && !bol) {
@@ -176,7 +176,7 @@ static struct {
 };
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
-Command get_command(astr name)
+Command get_command(rblist name)
 {
   size_t i;
   if (name)
@@ -186,7 +186,7 @@ Command get_command(astr name)
   return NULL;
 }
 
-astr get_command_name(Command cmd)
+rblist get_command_name(Command cmd)
 {
   size_t i;
   for (i = 0; i < fentries; i++)

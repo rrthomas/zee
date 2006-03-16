@@ -476,7 +476,7 @@ If the shell command produces any output, it is inserted into the\n\
 file, replacing the selection.\n\
 ")
 {
-  astr ms;
+  rblist ms;
 
   if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_from_string(""))) == NULL)
     ok = CMDCALL(edit_select_off);
@@ -492,7 +492,7 @@ file, replacing the selection.\n\
     } else {
       FILE *pipe;
       Region r;
-      astr cmd = rblist_from_string(""), as;
+      rblist cmd = rblist_from_string(""), as;
 
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
@@ -506,7 +506,7 @@ file, replacing the selection.\n\
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {
-        astr out = rblist_from_string(""), s;
+        rblist out = rblist_from_string(""), s;
 
         while (rblist_length(s = astr_fgets(pipe)) > 0) {
           out = rblist_concat(out, s);

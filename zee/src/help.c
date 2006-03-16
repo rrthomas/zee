@@ -53,7 +53,7 @@ DEF(help_command,
 Display the help for the given command.\
 ")
 {
-  astr name;
+  rblist name;
 
   ok = false;
 
@@ -61,7 +61,7 @@ Display the help for the given command.\
     size_t i;
     for (i = 0; i < fentries; i++)
       if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
-        astr bindings = command_to_binding(get_command(name)), where = rblist_from_string("");
+        rblist bindings = command_to_binding(get_command(name)), where = rblist_from_string("");
         if (rblist_length(bindings) > 0)
           where = astr_afmt("\n\nBound to: %s", rblist_to_string(bindings));
         popup_set(astr_afmt("Help for command `%s':\n\n%s%s",
@@ -91,7 +91,7 @@ DEF(help_variable,
 Display the full documentation of VARIABLE (a symbol).\
 ")
 {
-  astr name;
+  rblist name;
 
   ok = false;
 
@@ -117,7 +117,7 @@ Display the command invoked by a key sequence.\
 ")
 {
   size_t key;
-  astr keyname, cmd;
+  rblist keyname, cmd;
 
   minibuf_write(rblist_from_string("Describe key:"));
   key = getkey();

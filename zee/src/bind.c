@@ -105,9 +105,9 @@ void process_key(size_t key)
 /*
  * Read a command name from the minibuffer.
  */
-astr minibuf_read_command_name(astr prompt)
+rblist minibuf_read_command_name(rblist prompt)
 {
-  astr ms;
+  rblist ms;
   Completion *cp = completion_new();
   cp->completions = command_list();
 
@@ -168,7 +168,7 @@ chord.\
 ")
 {
   size_t key = KBD_NOKEY;
-  astr name = NULL;
+  rblist name = NULL;
 
   ok = false;
 
@@ -176,7 +176,7 @@ chord.\
     key = strtochord(list_behead(l));
     name = list_behead(l);
   } else {
-    astr as;
+    rblist as;
 
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
@@ -200,15 +200,15 @@ chord.\
 }
 END_DEF
 
-astr command_to_binding(Command cmd)
+rblist command_to_binding(Command cmd)
 {
   size_t i, n = 0;
-  astr as = rblist_from_string("");
+  rblist as = rblist_from_string("");
 
   for (i = 0; i < vec_items(bindings); i++)
     if (vec_item(bindings, i, Binding).cmd == cmd) {
       size_t key = vec_item(bindings, i, Binding).key;
-      astr binding = chordtostr(key);
+      rblist binding = chordtostr(key);
       if (n++ != 0)
         as = rblist_concat(as, rblist_from_string(", "));
       as = rblist_concat(as, binding);
@@ -217,7 +217,7 @@ astr command_to_binding(Command cmd)
   return as;
 }
 
-astr binding_to_command(size_t key)
+rblist binding_to_command(size_t key)
 {
   Binding *p;
 

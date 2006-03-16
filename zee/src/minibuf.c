@@ -30,7 +30,7 @@
 
 
 /* FIXME: \n's mess up the display */
-static void term_minibuf_write(astr as)
+static void term_minibuf_write(rblist as)
 {
   term_move(term_height() - 1, 0);
   term_print(rblist_sub(as, 0, min(rblist_length(as), term_width())));
@@ -40,7 +40,7 @@ static void term_minibuf_write(astr as)
 /*
  * Write the specified string in the minibuffer.
  */
-void minibuf_write(astr as)
+void minibuf_write(rblist as)
 {
   term_minibuf_write(as);
 
@@ -52,7 +52,7 @@ void minibuf_write(astr as)
 /*
  * Write the specified error string in the minibuffer and beep.
  */
-void minibuf_error(astr as)
+void minibuf_error(rblist as)
 {
   minibuf_write(as);
   ding();
@@ -61,7 +61,7 @@ void minibuf_error(astr as)
 /*
  * Read a string from the minibuffer.
  */
-astr minibuf_read(astr as, astr value)
+rblist minibuf_read(rblist as, rblist value)
 {
   return minibuf_read_completion(as, value, NULL, NULL);
 }
@@ -71,9 +71,9 @@ astr minibuf_read(astr as, astr value)
  * cp->completions.
  * Returns NULL if cancelled, otherwise returns the chosen option.
  */
-static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
+static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
 {
-  astr as;
+  rblist as;
 
   for (;;) {
     as = minibuf_read_completion(prompt, rblist_from_string(""), cp, NULL);
@@ -97,12 +97,12 @@ static astr minibuf_read_forced(astr prompt, astr errmsg, Completion *cp)
  * Returns -1 for cancelled, otherwise true for "yes" and false for "no".
  * Suggestion: inline? Probably not.
  */
-int minibuf_read_yesno(astr prompt)
+int minibuf_read_yesno(rblist prompt)
 {
   Completion *cp = completion_new();
   list_append(cp->completions, rblist_from_string("yes"));
   list_append(cp->completions, rblist_from_string("no"));
-  astr reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `yes' or `no'."), cp);
+  rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `yes' or `no'."), cp);
   return reply==NULL ? -1 : !rblist_compare(rblist_from_string("yes"), reply);
 }
 
@@ -111,12 +111,12 @@ int minibuf_read_yesno(astr prompt)
  * Returns -1 for cancelled, otherwise true for "true" and false for "false".
  * Suggestion: inline? Probably not.
  */
-int minibuf_read_boolean(astr prompt)
+int minibuf_read_boolean(rblist prompt)
 {
   Completion *cp = completion_new();
   list_append(cp->completions, rblist_from_string("true"));
   list_append(cp->completions, rblist_from_string("false"));
-  astr reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `true' or `false'."), cp);
+  rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `true' or `false'."), cp);
   return reply==NULL ? -1 : !rblist_compare(rblist_from_string("true"), reply);
 }
 
@@ -141,9 +141,9 @@ void minibuf_clear(void)
  * characters are chopped off the left of the prompt. If the terminal is
  * narrower than four charaters we give up and corrupt the display a bit.
  */
-static void draw_minibuf_read(astr prompt, astr value, size_t offset)
+static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
 {
-  astr as = prompt;             /* Text to print. */
+  rblist as = prompt;             /* Text to print. */
   size_t visible_width = max(3, term_width() - rblist_length(prompt) - 2);
   visible_width--; /* Avoid the b.r. corner of the screen for broken
                       terminals and terminal emulators. */
@@ -180,7 +180,7 @@ static size_t mb_backward_char(size_t i)
   return i;
 }
 
-static size_t mb_forward_char(size_t i, astr as)
+static size_t mb_forward_char(size_t i, rblist as)
 {
   if ((size_t)i < rblist_length(as))
     ++i;
@@ -189,7 +189,7 @@ static size_t mb_forward_char(size_t i, astr as)
   return i;
 }
 
-static void mb_kill_line(size_t i, astr *as)
+static void mb_kill_line(size_t i, rblist *as)
 {
   if ((size_t)i < rblist_length(*as))
     *as = rblist_sub(*as, 0, i);
@@ -197,7 +197,7 @@ static void mb_kill_line(size_t i, astr *as)
     ding();
 }
 
-static size_t mb_backward_delete_char(size_t i, astr *as)
+static size_t mb_backward_delete_char(size_t i, rblist *as)
 {
   if (i > 0) {
     i--;
@@ -207,7 +207,7 @@ static size_t mb_backward_delete_char(size_t i, astr *as)
   return i;
 }
 
-static void mb_delete_char(size_t i, astr *as)
+static void mb_delete_char(size_t i, rblist *as)
 {
   if (i < rblist_length(*as))
     *as = rblist_concat(rblist_sub(*as, 0, i), rblist_sub(*as, i + 1, rblist_length(*as)));
@@ -215,12 +215,12 @@ static void mb_delete_char(size_t i, astr *as)
     ding();
 }
 
-static void mb_prev_history(History *hp, astr *as, size_t *_i, astr *_saved)
+static void mb_prev_history(History *hp, rblist *as, size_t *_i, rblist *_saved)
 {
   size_t i = *_i;
-  astr saved = *_saved;
+  rblist saved = *_saved;
   if (hp) {
-    astr elem = previous_history_element(hp);
+    rblist elem = previous_history_element(hp);
     if (elem) {
       if (!saved)
         saved = *as;
@@ -233,12 +233,12 @@ static void mb_prev_history(History *hp, astr *as, size_t *_i, astr *_saved)
   *_saved = saved;
 }
 
-static void mb_next_history(History *hp, astr *as, size_t *_i, astr *_saved)
+static void mb_next_history(History *hp, rblist *as, size_t *_i, rblist *_saved)
 {
   size_t i = *_i;
-  astr saved = *_saved;
+  rblist saved = *_saved;
   if (hp) {
-    astr elem = next_history_element(hp);
+    rblist elem = next_history_element(hp);
     if (elem)
       *as = elem;
     else if (saved) {
@@ -254,17 +254,17 @@ static void mb_next_history(History *hp, astr *as, size_t *_i, astr *_saved)
 /*
  * Read a string from the minibuffer using a completion.
  */
-astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *hp)
+rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp)
 {
   int c;
   bool ret = false;
   size_t i;
-  astr as = value, retval = NULL, saved = NULL;
+  rblist as = value, retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);
 
-  astr old_as = NULL;
+  rblist old_as = NULL;
 
   for (i = rblist_length(as);;) {
     if (cp != NULL && (!old_as || rblist_compare(old_as, as))) {

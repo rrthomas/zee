@@ -115,10 +115,10 @@ size_t tab_width(void)
 /*
  * Return a string containing `size' characters from point `start'.
  */
-astr copy_text_block(Point start, size_t size)
+rblist copy_text_block(Point start, size_t size)
 {
   size_t n = buf->pt.n, i;
-  astr as = rblist_from_string("");
+  rblist as = rblist_from_string("");
   Line *lp = buf->pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the

@@ -120,9 +120,9 @@ Line *line_new(void)
 }
 
 /*
- * Read an astr into a Line list.
+ * Read an rblist into a Line list.
  */
-Line *string_to_lines(astr as, size_t *lines)
+Line *string_to_lines(rblist as, size_t *lines)
 {
   size_t p, q, end = rblist_length(as);
   Line *lp = line_new();
@@ -226,7 +226,7 @@ bool eolp(void)
  */
 bool insert_char(int c)
 {
-  astr as = astr_afmt("%c", c);
+  rblist as = astr_afmt("%c", c);
   return insert_nstring(as);
 }
 
@@ -283,7 +283,7 @@ static bool intercalate_newline(void)
  * Returns 2 if it is all upper case, 1 if just the first letter is,
  * and 0 otherwise.
  */
-static int check_case(astr as)
+static int check_case(rblist as)
 {
   size_t i;
 
@@ -300,11 +300,11 @@ static int check_case(astr as)
 /*
  * Recase str according to case of tmpl.
  */
-static astr recase(astr str, astr tmpl)
+static rblist recase(rblist str, rblist tmpl)
 {
   size_t i;
   int tmpl_case = check_case(tmpl), c;
-  astr ret = rblist_from_string("");
+  rblist ret = rblist_from_string("");
 
   assert(rblist_length(str) > 0);
   assert(rblist_length(str) == rblist_length(tmpl));
@@ -330,7 +330,7 @@ static astr recase(astr str, astr tmpl)
  * Return flag indicating whether modifications have been made.
  */
 bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
-                      astr newtext, bool replace_case)
+                      rblist newtext, bool replace_case)
 {
   bool changed = false;
 
@@ -425,7 +425,7 @@ Insert a newline, wrapping if in Wrap mode.\
 }
 END_DEF
 
-bool insert_nstring(astr as)
+bool insert_nstring(rblist as)
 {
   size_t i;
 
@@ -453,7 +453,7 @@ bool insert_nstring(astr as)
 /*
  * Delete a string of the given length from point, returning it
  */
-bool delete_nstring(size_t size, astr *as)
+bool delete_nstring(size_t size, rblist *as)
 {
   buf->flags &= ~BFLAG_ANCHORED;
 
@@ -534,7 +534,7 @@ Delete the following character.\n\
 Join lines if the character is a newline.\
 ")
 {
-  astr as;
+  rblist as;
   ok = delete_nstring(1, &as);
 }
 END_DEF

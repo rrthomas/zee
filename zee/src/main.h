@@ -71,7 +71,7 @@ typedef struct Undo {
   Point pt;               /* Where the undo delta is to be applied. */
   int unchanged; /* Flag indicating that reverting this undo leaves the buffer
                     in an unchanged state */
-  astr text;                    /* Replacement string */
+  rblist text;                    /* Replacement string */
   size_t size;                  /* Block size for replace */
 } Undo;
 
@@ -104,7 +104,7 @@ typedef struct {
   Undo *next_undop;     /* The undo deltas recorded for this buffer */
   Undo *last_undop;
   int flags;                    /* Buffer flags */
-  astr filename;               /* The name of the file being edited */
+  rblist filename;               /* The name of the file being edited */
 } Buffer;
 
 /*
@@ -123,7 +123,7 @@ typedef struct {
 typedef struct {
   list completions;             /* The completion strings */
   list matches;                 /* The matches list */
-  astr match;                   /* The current matched string */
+  rblist match;                   /* The current matched string */
 } Completion;
 
 typedef struct {
@@ -134,7 +134,7 @@ typedef struct {
 
 typedef struct Macro {
   vector *keys;                 /* Vector of keystrokes */
-  astr name;                    /* Name of the macro */
+  rblist name;                    /* Name of the macro */
   struct Macro *next;           /* Next macro in the list */
 } Macro;
 
@@ -234,14 +234,14 @@ typedef struct {
   }
 
 #define STR(name, prompt) \
-    astr name = NULL; \
+    rblist name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
     else if ((name = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
 #define COMMAND(name, prompt) \
-    astr name = NULL; \
+    rblist name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
     else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
@@ -250,11 +250,11 @@ typedef struct {
 #define UINT(name, prompt) \
     size_t name = 0; \
     if (!list_empty(l)) { \
-      astr as = list_behead(l); \
+      rblist as = list_behead(l); \
       if ((name = strtoul(rblist_to_string(as), NULL, 10)) == ULONG_MAX) \
         ok = false; \
     } else do { \
-      astr ms; \
+      rblist ms; \
       if ((ms = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) { \
         ok = CMDCALL(edit_select_off); \
         break; \

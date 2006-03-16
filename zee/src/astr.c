@@ -25,14 +25,13 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "nonstd.h"
 #include "zmalloc.h"
 #include "astr.h"
 
 
-size_t astr_str(astr haystack, size_t from, astr needle)
+size_t astr_str(rblist haystack, size_t from, rblist needle)
 {
   size_t pos;
 
@@ -44,20 +43,20 @@ size_t astr_str(astr haystack, size_t from, astr needle)
   return SIZE_MAX;
 }
 
-astr astr_fread(FILE *fp)
+rblist astr_fread(FILE *fp)
 {
   int c;
-  astr as = rblist_from_string("");
+  rblist as = rblist_from_string("");
 
   while ((c = getc(fp)) != EOF)
     as = rblist_concat_char(as, c);
   return as;
 }
 
-astr astr_fgets(FILE *fp)
+rblist astr_fgets(FILE *fp)
 {
   int c;
-  astr as;
+  rblist as;
 
   if (feof(fp))
     return NULL;
@@ -67,7 +66,7 @@ astr astr_fgets(FILE *fp)
   return as;
 }
 
-astr astr_afmt(const char *fmt, ...)
+rblist astr_afmt(const char *fmt, ...)
 {
   va_list ap;
   int len;
@@ -99,7 +98,7 @@ void die(int exitcode)
 
 int main(void)
 {
-  astr as1, as2, as3;
+  rblist as1, as2, as3;
   FILE *fp;
 
   as1 = rblist_from_string("hello world!");

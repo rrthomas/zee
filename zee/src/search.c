@@ -41,7 +41,7 @@
 static const char *find_err = NULL;
 
 /* FIXME: Use PCRE instead */
-static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
+static size_t find_substr(rblist s1, rblist as2, int bol, int eol, int backward)
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
@@ -82,11 +82,11 @@ static size_t find_substr(astr s1, astr as2, int bol, int eol, int backward)
   return ret;
 }
 
-static int search_forward(Line *startp, size_t starto, astr as)
+static int search_forward(Line *startp, size_t starto, rblist as)
 {
   if (rblist_length(as) > 0) {
     Line *lp;
-    astr sp;
+    rblist sp;
 
     for (lp = startp, sp = rblist_sub(lp->item, starto, rblist_length(lp->item));
          lp != list_last(buf->lines);
@@ -106,7 +106,7 @@ static int search_forward(Line *startp, size_t starto, astr as)
   return false;
 }
 
-static int search_backward(Line *startp, size_t starto, astr as)
+static int search_backward(Line *startp, size_t starto, rblist as)
 {
   if (rblist_length(as) > 0) {
     Line *lp;
@@ -115,7 +115,7 @@ static int search_backward(Line *startp, size_t starto, astr as)
     for (lp = startp, s1size = starto;
          lp != list_first(buf->lines);
          lp = list_prev(lp), s1size = rblist_length(lp->item)) {
-      astr sp = lp->item;
+      rblist sp = lp->item;
       if (s1size > 0) {
         size_t off = find_substr(sp, as, true, s1size == rblist_length(lp->item), true);
         if (off != SIZE_MAX) {
@@ -131,7 +131,7 @@ static int search_backward(Line *startp, size_t starto, astr as)
   return false;
 }
 
-static astr last_search = NULL;
+static rblist last_search = NULL;
 
 #define ISEARCH_FORWARD		1
 #define ISEARCH_BACKWARD	2
@@ -143,8 +143,8 @@ static int isearch(int dir)
 {
   int c;
   int last = true;
-  astr as;
-  astr pattern = rblist_from_string("");
+  rblist as;
+  rblist pattern = rblist_from_string("");
   Point start, cur;
   Marker *old_mark;
 
@@ -278,7 +278,7 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
-static bool no_upper(astr as)
+static bool no_upper(rblist as)
 {
   size_t i;
 
@@ -298,7 +298,7 @@ what to do with it.\
 {
   int count = 0;
   bool noask = false, exitloop = false, find_no_upper;
-  astr find, repl;
+  rblist find, repl;
 
   if ((find = minibuf_read(rblist_from_string("Query replace string: "), rblist_from_string(""))) == NULL)
     ok = CMDCALL(edit_select_off);

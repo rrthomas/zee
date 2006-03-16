@@ -32,8 +32,8 @@
 static list varlist;
 
 typedef struct {
-  astr key;
-  astr value;
+  rblist key;
+  rblist value;
 } vpair;
 
 void init_variables(void)
@@ -41,7 +41,7 @@ void init_variables(void)
   varlist = list_new();
 }
 
-static list variable_find(astr key)
+static list variable_find(rblist key)
 {
   list p;
 
@@ -53,7 +53,7 @@ static list variable_find(astr key)
   return NULL;
 }
 
-void set_variable(astr key, astr value)
+void set_variable(rblist key, rblist value)
 {
   if (key && value) {
     list temp = variable_find(key);
@@ -86,7 +86,7 @@ static var_entry def_vars[] = {
 #undef X
 };
 
-static var_entry *get_variable_default(astr var)
+static var_entry *get_variable_default(rblist var)
 {
   var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
@@ -96,7 +96,7 @@ static var_entry *get_variable_default(astr var)
   return NULL;
 }
 
-astr get_variable(astr var)
+rblist get_variable(rblist var)
 {
   var_entry *p;
 
@@ -110,9 +110,9 @@ astr get_variable(astr var)
   return NULL;
 }
 
-int get_variable_number(astr var)
+int get_variable_number(rblist var)
 {
-  astr as;
+  rblist as;
 
   if ((as = get_variable(var)))
     return atoi(rblist_to_string(as));
@@ -120,9 +120,9 @@ int get_variable_number(astr var)
   return 0;
 }
 
-bool get_variable_bool(astr var)
+bool get_variable_bool(rblist var)
 {
-  astr as;
+  rblist as;
 
   if ((as = get_variable(var)))
     return !rblist_compare(as, rblist_from_string("true"));
@@ -130,9 +130,9 @@ bool get_variable_bool(astr var)
   return false;
 }
 
-astr minibuf_read_variable_name(astr msg)
+rblist minibuf_read_variable_name(rblist msg)
 {
-  astr ms;
+  rblist ms;
   Completion *cp = completion_new();
   var_entry *p;
 
@@ -167,7 +167,7 @@ DEF(preferences_set_variable,
 Set a variable to the specified value.\
 ")
 {
-  astr var, val;
+  rblist var, val;
 
   ok = false;
 

@@ -30,36 +30,27 @@
 #include "rblist.h"
 
 /*
- * The astr library provides dynamically allocated null-terminated C
- * strings.
- *
- * String positions start at zero, as with ordinary C strings.
- */
-
-typedef rblist astr;
-
-/*
  * Find first occurrence of needle in haystack starting at position
  * pos; return -1 if no occurrence.
  */
-size_t astr_str(const astr haystack, size_t pos, const astr needle);
+size_t astr_str(const rblist haystack, size_t pos, const rblist needle);
 
 /*
  * Read a file into an astr.
  */
-astr astr_fread(FILE *fp);
+rblist astr_fread(FILE *fp);
 
 /*
  * Read a line from the stream fp and return it. The trailing newline
  * is removed from the string. If the stream is at eof when astr_fgets
  * is called, it returns NULL.
  */
-astr astr_fgets(FILE *fp);
+rblist astr_fgets(FILE *fp);
 
 /*
  * Format text into an astr
  */
-astr astr_afmt(const char *fmt, ...);
+rblist astr_afmt(const char *fmt, ...);
 
 
 #endif /* ASTR_H */

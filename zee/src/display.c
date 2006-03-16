@@ -90,7 +90,7 @@ size_t popup_lines(void)
  * Set the popup string to as, which should not have a trailing newline.
  * Passing NULL for as clears the popup string.
  */
-void popup_set(astr as)
+void popup_set(rblist as)
 {
   if (as)
     popup = string_to_lines(as, &popup_num_lines);
@@ -170,7 +170,7 @@ void term_set_size(size_t cols, size_t rows)
   height = rows;
 }
 
-static astr make_char_printable(size_t c)
+static rblist make_char_printable(size_t c)
 {
   if (c == '\0')
     return rblist_from_string("^@");
@@ -204,7 +204,7 @@ static void outch(int c, Font font, size_t *x)
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
-    astr as = make_char_printable((size_t)c);
+    rblist as = make_char_printable((size_t)c);
     for (w = 0; w < rblist_length(as) && *x < width; ++w)
       term_addch(rblist_get(as, w)), ++(*x);
   }
@@ -313,7 +313,7 @@ static void draw_window(size_t topline)
 /*
  * Print a string on the terminal.
  */
-void term_print(astr as)
+void term_print(rblist as)
 {
   size_t i;
 

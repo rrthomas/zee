@@ -37,10 +37,10 @@
  * Get HOME directory.
  * If none, or invalid, return blank string.
  */
-astr get_home_dir(void)
+rblist get_home_dir(void)
 {
   char *s = getenv("HOME");
-  astr as;
+  rblist as;
 
   if (s && strlen(s) < PATH_MAX)
     as = rblist_from_string(s);
@@ -54,13 +54,13 @@ astr get_home_dir(void)
  * Read the file contents into a string.
  * Return quietly if the file can't be read.
  */
-astr file_read(astr filename)
+rblist file_read(rblist filename)
 {
   FILE *fp;
   if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
     return NULL;
   else {
-    astr as = astr_fread(fp);
+    rblist as = astr_fread(fp);
     fclose(fp);
     return as;
   }
@@ -70,9 +70,9 @@ astr file_read(astr filename)
  * Read the file contents into a buffer.
  * Return quietly if the file can't be read.
  */
-void file_open(astr filename)
+void file_open(rblist filename)
 {
-  astr as;
+  rblist as;
 
   buffer_new();
   buf->filename = filename;
@@ -95,7 +95,7 @@ void file_open(astr filename)
  * can be used, e.g. in an emergency by die.
  * Returns true on success, false on failure.
  */
-static bool buffer_write(Buffer *bp, astr filename)
+static bool buffer_write(Buffer *bp, rblist filename)
 {
   FILE *fp;
   Line *lp;
@@ -164,7 +164,7 @@ void die(int exitcode)
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf && buf->flags & BFLAG_MODIFIED) {
-    astr as = rblist_from_string("");
+    rblist as = rblist_from_string("");
     already_dying = true;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)

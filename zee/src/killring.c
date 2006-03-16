@@ -27,7 +27,7 @@
 #include "extern.h"
 
 
-static astr killed_text;
+static rblist killed_text;
 
 static void clear_kill_buffer(void)
 {
@@ -39,7 +39,7 @@ DEF(edit_kill_line,
 Delete the current line.\
 ")
 {
-  astr as;
+  rblist as;
 
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();
@@ -94,7 +94,7 @@ the text killed this time appends to the text killed last time.\
     if (!(buf->flags & BFLAG_ANCHORED))
       ok = CMDCALL(edit_kill_line);
     else {
-      astr as;
+      rblist as;
       assert(calculate_the_region(&r));
 
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)

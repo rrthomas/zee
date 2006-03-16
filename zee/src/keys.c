@@ -99,11 +99,11 @@ static const char *keyname[] = {
 /*
  * Convert a key chord into its ASCII representation
  */
-astr chordtostr(size_t key)
+rblist chordtostr(size_t key)
 {
   bool found;
   size_t i;
-  astr as = rblist_from_string("");
+  rblist as = rblist_from_string("");
 
   if (key & KBD_CTRL)
     as = rblist_concat(as, rblist_from_string("C-"));
@@ -131,7 +131,7 @@ astr chordtostr(size_t key)
 /*
  * Convert a key string to its key code
  */
-static size_t strtokey(astr buf, size_t *len)
+static size_t strtokey(rblist buf, size_t *len)
 {
   size_t i;
 
@@ -150,7 +150,7 @@ static size_t strtokey(astr buf, size_t *len)
 /*
  * Convert a key chord string to its key code
  */
-size_t strtochord(astr chord)
+size_t strtochord(rblist chord)
 {
   size_t key = 0, len = 0, k;
 
