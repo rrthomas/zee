@@ -27,6 +27,7 @@
 
 #include "main.h"
 #include "extern.h"
+#include "vector.h"
 
 
 static History commands_history;
