@@ -397,7 +397,7 @@ static int setcase_word(int rcase)
 
   i = buf->pt.o;
   while (i < astr_len(buf->pt.p->item)) {
-    if (!isalnum(*astr_char(buf->pt.p->item, (ptrdiff_t)i)))
+    if (!isalnum(astr_char(buf->pt.p->item, (ptrdiff_t)i)))
       break;
     ++i;
   }
@@ -407,7 +407,7 @@ static int setcase_word(int rcase)
   for (firstchar = true;
        buf->pt.o < i;
        buf->pt.o++, firstchar = false) {
-    char c = *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
+    char c = astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
 
     if (isalpha(c)) {
       if (rcase == UPPERCASE)
@@ -417,7 +417,11 @@ static int setcase_word(int rcase)
       else if (rcase == CAPITALIZE)
         c = firstchar ? toupper(c) : tolower(c);
 
-      *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o) = c;
+      rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o - 1),
+                    rblist_concat(rblist_singleton(c),
+                                  rblist_sub(buf->pt.p->item, buf->pt.o + 1,
+                                             rblist_length(buf->pt.p->item))));
+/*       astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o) = c; */
     } else if (!isdigit(c))
       break;
   }
@@ -505,8 +509,8 @@ file, replacing the selection.\n\
         astr out = astr_new(""), s;
 
         while (astr_len(s = astr_fgets(pipe)) > 0) {
-          astr_cat(out, s);
-          astr_cat(out, astr_new("\n"));
+          out = astr_cat(out, s);
+          out = astr_cat(out, astr_new("\n"));
         }
         pclose(pipe);
         remove(tempfile);

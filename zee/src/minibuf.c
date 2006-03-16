@@ -155,11 +155,7 @@ static void draw_minibuf_read(astr prompt, astr value, size_t offset)
   /* Cursor position within `as'. */
   size_t cursor_pos = astr_len(as) + (offset - scroll_pos);
 
-  as = astr_cat(as, astr_sub(
-    value,
-    (ptrdiff_t)scroll_pos,
-    (ptrdiff_t)min(astr_len(value), scroll_pos + visible_width)
-  ));
+  as = astr_cat(as, astr_sub(value, (ptrdiff_t)scroll_pos, (ptrdiff_t)min(astr_len(value), scroll_pos + visible_width)));
   if (astr_len(value) > scroll_pos + visible_width)
     as = astr_cat_char(as, '$');
 
@@ -213,7 +209,7 @@ static ptrdiff_t mb_backward_delete_char(ptrdiff_t i, astr *as)
 
 static void mb_delete_char(ptrdiff_t i, astr *as)
 {
-  if ((size_t)i < astr_len(as))
+  if ((size_t)i < astr_len(*as))
     *as = astr_cat(astr_sub(*as, 0, i), astr_sub(*as, i + 1, (ptrdiff_t)astr_len(*as)));
   else
     ding();
@@ -358,10 +354,8 @@ astr minibuf_read_completion(astr prompt, astr value, Completion *cp, History *h
       if (c > 255 || !isprint(c))
         ding();
       else {
-        as = astr_cat(
-          astr_cat_char(astr_sub(as, 0, i), c),
-          astr_sub(as, i, (ptrdiff_t)astr_len(as))
-        );
+        as = astr_cat(astr_cat_char(astr_sub(as, 0, i), c),
+                      astr_sub(as, i, (ptrdiff_t)astr_len(as)));
         i++;
       }
     }

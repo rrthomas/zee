@@ -169,7 +169,7 @@ void die(int exitcode)
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)
       as = astr_dup(buf->filename);
-    astr_cat(as, astr_new("." PACKAGE_NAME "SAVE"));
+    as = astr_cat(as, astr_new("." PACKAGE_NAME "SAVE"));
     fprintf(stderr, "Saving %s...\r\n", astr_cstr(as));
     buffer_write(buf, as);
     term_close();

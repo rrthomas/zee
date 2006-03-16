@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "vector.h"
+#include "rblist.h"
 
 /*
  * The astr library provides dynamically allocated null-terminated C
@@ -38,7 +38,7 @@
  * string.
  */
 
-typedef vector *astr;
+typedef rblist astr;
 
 /*
  * Create a new string with initial contents s.
@@ -54,12 +54,12 @@ const char *astr_cstr(const astr as);
 /*
  * Return the length of the argument string as.
  */
-#define astr_len(as)            ((const size_t)(((astr)(as))->items))
+size_t astr_len(astr as);
 
 /*
- * Return the address of the pos'th character of as.
+ * Return the pos'th character of as.
  */
-char *astr_char(const astr as, ptrdiff_t pos);
+char astr_char(const astr as, ptrdiff_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as.

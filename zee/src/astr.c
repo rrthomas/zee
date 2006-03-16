@@ -30,96 +30,64 @@
 #include "zmalloc.h"
 #include "astr.h"
 
-/* Copies n characters from s onto the end of as, growing as as necessary. */
-static astr ncat(astr as, const char *s, size_t n)
-{
-  size_t i, len = astr_len(as);
-  for (i = 0; i < n; i++)
-    *(char *)vec_index(as, len + i) = s[i];
-  return as;
-}
-
-/* Converts a possibly negative pos into a definitely non-negative pos. */
-static int abspos(astr as, ptrdiff_t pos)
-{
-  assert(as);
-  if (pos < 0)
-    pos = astr_len(as) + pos;
-  assert(pos >= 0 && pos <= (ptrdiff_t)astr_len(as));
-  return pos;
-}
 
 astr astr_new(const char *s)
 {
-  astr as = vec_new(sizeof(char));
-  return ncat(as, s, strlen(s));
+  return rblist_from_string(s);
+}
+
+size_t astr_len(const astr as)
+{
+  return rblist_length(as);
+}
+
+char astr_char(const astr as, ptrdiff_t pos)
+{
+  return rblist_get(as, (size_t)pos);
 }
 
 const char *astr_cstr(const astr as)
 {
-  char *s = zmalloc(astr_len(as) + 1);
-  memcpy(s, vec_array(as), astr_len(as));
-  return s;
-}
-
-char *astr_char(const astr as, ptrdiff_t pos)
-{
-  pos = abspos(as, pos);
-  return ((char *)vec_array(as)) + pos;
+  return rblist_to_string(as);
 }
 
 astr astr_cat(astr as, const astr src)
 {
-  assert(src);
-  return ncat(as, vec_array(src), astr_len(src));
+  return rblist_concat(as, src);
 }
 
 astr astr_cat_char(astr as, int c)
 {
-  char ch = c;
-  return ncat(as, &ch, 1);
+  return rblist_concat(as, rblist_singleton(c));
 }
 
 astr astr_dup(const astr src)
 {
-  return astr_cat(astr_new(""), src);
+  return src;
 }
 
 astr astr_sub(const astr as, ptrdiff_t from, ptrdiff_t to)
 {
-  from = abspos(as, from);
-  to = abspos(as, to);
-  return ncat(astr_new(""), astr_char(as, from), (size_t)(to - from));
+  return rblist_sub(as, (size_t)from, (size_t)to);
 }
 
 int astr_cmp(const astr as1, const astr as2)
 {
-  int ret = memcmp((char *)vec_array(as1), (char *)vec_array(as2),
-                   min(astr_len(as1), astr_len(as2)));
-
-  if (ret == 0 && astr_len(as1) != astr_len(as2))
-    ret = astr_len(as1) < astr_len(as2) ? -1 : 1;
-
-  return ret;
+  return rblist_compare(as1, as2);
 }
 
 int astr_ncmp(const astr as1, const astr as2, size_t n)
 {
-  if (astr_len(as1) < n || astr_len(as2) < n)
-    return astr_cmp(as1, as2);
-  else
-    return memcmp((char *)vec_array(as1), (char *)vec_array(as2), n);
+  return rblist_ncompare(as1, as2, n);
 }
 
 ptrdiff_t astr_str(astr haystack, ptrdiff_t from, astr needle)
 {
   ptrdiff_t pos;
 
-  from = abspos(haystack, from);
-
   if (from + astr_len(needle) <= astr_len(haystack))
     for (pos = from; (size_t)pos <= astr_len(haystack) - astr_len(needle); pos++)
-      if (!memcmp(astr_char(haystack, pos), vec_array(needle), astr_len(needle)))
+      if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + astr_len(needle)), needle))
         return pos;
 
   return -1;
@@ -131,7 +99,7 @@ astr astr_fread(FILE *fp)
   astr as = astr_new("");
 
   while ((c = getc(fp)) != EOF)
-    astr_cat_char(as, c);
+    as = astr_cat_char(as, c);
   return as;
 }
 
@@ -144,7 +112,7 @@ astr astr_fgets(FILE *fp)
     return NULL;
   as = astr_new("");
   while ((c = getc(fp)) != EOF && c != '\n')
-    astr_cat_char(as, c);
+    as = astr_cat_char(as, c);
   return as;
 }
 
@@ -188,17 +156,17 @@ int main(void)
   assert(!astr_cmp(as3, astr_new("world")));
 
   as2 = astr_new("The ");
-  astr_cat(as2, as3);
+  as2 = astr_cat(as2, as3);
   assert(!astr_cmp(as2, astr_new("The world")));
 
-  as3 = astr_sub(as1, -6, 11);
+  as3 = astr_sub(as1, 6, 11);
   assert(!astr_cmp(as3, astr_new("world")));
 
   as1 = astr_new("12345");
-  as2 = astr_sub(as1, -2, (ptrdiff_t)astr_len(as1));
+  as2 = astr_sub(as1, 3, (ptrdiff_t)astr_len(as1));
   assert(!astr_cmp(as2, astr_new("45")));
 
-  assert(!astr_cmp(astr_sub(astr_new("12345"), -5, (ptrdiff_t)astr_len(as1)),
+  assert(!astr_cmp(astr_sub(astr_new("12345"), 0, (ptrdiff_t)astr_len(as1)),
                    astr_new("12345")));
 
   assert(!astr_cmp(astr_cat(astr_afmt("%s * %d = ", "5", 3), astr_afmt("%d", 15)),
@@ -218,9 +186,6 @@ int main(void)
   as1 = astr_fgets(fp);
   assert(!astr_cmp(as1, astr_new("/* Dynamically allocated strings")));
   assert(fclose(fp) == 0);
-
-  as1 = astr_cat(astr_new(""), astr_new("x"));
-  assert(as1->size >= astr_len(as1));
 
   return EXIT_SUCCESS;
 }

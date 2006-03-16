@@ -35,7 +35,7 @@ static astr expr;
 static int getch(void)
 {
   if ((size_t)pos < astr_len(expr))
-    return *astr_char(expr, pos++);
+    return astr_char(expr, pos++);
   return EOF;
 }
 
@@ -105,7 +105,7 @@ static astr gettok(void)
           eos = true;
           break;
         default:
-          astr_cat_char(tok, c);
+          tok = astr_cat_char(tok, c);
         }
       } while (!eos);
     }
@@ -113,7 +113,7 @@ static astr gettok(void)
 
   default:                      /* word */
     do {
-      astr_cat_char(tok, c);
+      tok = astr_cat_char(tok, c);
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();
         tok = astr_sub(tok, 0, (ptrdiff_t)astr_len(tok) - 1);

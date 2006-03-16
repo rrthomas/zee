@@ -106,23 +106,23 @@ astr chordtostr(size_t key)
   astr as = astr_new("");
 
   if (key & KBD_CTRL)
-    astr_cat(as, astr_new("C-"));
+    as = astr_cat(as, astr_new("C-"));
   if (key & KBD_META)
-    astr_cat(as, astr_new("M-"));
+    as = astr_cat(as, astr_new("M-"));
   key &= ~(KBD_CTRL | KBD_META);
 
   for (found = false, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
-      astr_cat(as, astr_new(keyname[i]));
+      as = astr_cat(as, astr_new(keyname[i]));
       found = true;
       break;
     }
 
   if (found == false) {
     if (isgraph(key))
-      astr_cat_char(as, (int)(key & 0xff));
+      as = astr_cat_char(as, (int)(key & 0xff));
     else
-      astr_cat(as, astr_afmt("<%x>", key));
+      as = astr_cat(as, astr_afmt("<%x>", key));
   }
 
   return as;
@@ -144,7 +144,7 @@ static size_t strtokey(astr buf, size_t *len)
   }
 
   *len = 1;
-  return (size_t)*astr_char(buf, 0);
+  return (size_t)astr_char(buf, 0);
 }
 
 /*

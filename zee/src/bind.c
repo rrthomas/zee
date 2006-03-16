@@ -209,8 +209,8 @@ astr command_to_binding(Command cmd)
       size_t key = vec_item(bindings, i, Binding).key;
       astr binding = chordtostr(key);
       if (n++ != 0)
-        astr_cat(as, astr_new(", "));
-      astr_cat(as, binding);
+        as = astr_cat(as, astr_new(", "));
+      as = astr_cat(as, binding);
     }
 
   return as;

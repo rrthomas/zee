@@ -214,7 +214,7 @@ int main(int argc, char **argv)
     if (!nflag) {
       astr home = get_home_dir();
       if (astr_len(home) > 0) {
-        astr_cat(home, astr_new("/." PACKAGE_NAME));
+        home = astr_cat(home, astr_new("/." PACKAGE_NAME));
         if ((as = file_read(home)))
           cmd_eval(as);
       }

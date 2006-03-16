@@ -50,7 +50,7 @@ size_t list_length(list l)
 }
 
 /* Add an item to the head of a list */
-list list_prepend(list l, void *i)
+list list_prepend(list l, const void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -63,7 +63,7 @@ list list_prepend(list l, void *i)
 }
 
 /* Add an item to the tail of a list */
-list list_append(list l, void *i)
+list list_append(list l, const void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
 
@@ -76,16 +76,16 @@ list list_append(list l, void *i)
 }
 
 /* Return the first item of a list, or NULL if the list is empty */
-void *list_head(list l)
+const void *list_head(list l)
 {
   return l == l->next ? NULL : l->next->item;
 }
 
 /* Remove the first item of a list, returning the item, or NULL if the
    list is empty */
-void *list_behead(list l)
+const void *list_behead(list l)
 {
-  void *i;
+  const void *i;
   list p = l->next;
 
   if (p == l)
@@ -99,9 +99,9 @@ void *list_behead(list l)
 
 /* Remove the last item of a list, returning the item, or NULL if the
    list is empty */
-void *list_betail(list l)
+const void *list_betail(list l)
 {
-  void *i;
+  const void *i;
   list p = l->prev;
 
   if (p == l)
@@ -115,7 +115,7 @@ void *list_betail(list l)
 
 /* Return the nth item of l, or l->item (usually NULL) if that is out
    of range */
-void *list_at(list l, size_t n)
+const void *list_at(list l, size_t n)
 {
   size_t i;
   list p;
@@ -132,7 +132,7 @@ void *list_at(list l, size_t n)
 void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
 {
   list p;
-  void **vec;
+  const void **vec;
   size_t i, len = list_length(l);
 
   assert(l && cmp);

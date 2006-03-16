@@ -206,7 +206,7 @@ static void outch(int c, Font font, size_t *x)
   else {
     astr as = make_char_printable((size_t)c);
     for (w = 0; w < astr_len(as) && *x < width; ++w)
-      term_addch(*astr_char(as, (ptrdiff_t)w)), ++(*x);
+      term_addch(astr_char(as, (ptrdiff_t)w)), ++(*x);
   }
 
   term_attrset(1, FONT_NORMAL);
@@ -262,9 +262,9 @@ static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
   term_move(line, 0);
   for (x = 0, i = startcol; i < astr_len(lp->item) && x < win.ewidth; i++) {
     if (in_region(lineno, i, &r))
-      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
+      outch(astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
     else
-      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
+      outch(astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
   }
 
   if (x >= term_width()) {
@@ -317,9 +317,9 @@ void term_print(astr as)
 {
   size_t i;
 
-  for (i = 0; i < astr_len(as) && *astr_char(as, (ptrdiff_t)i) != '\0'; i++)
-    if (*astr_char(as, (ptrdiff_t)i) != '\n')
-      term_addch(*astr_char(as, (ptrdiff_t)i));
+  for (i = 0; i < astr_len(as) && astr_char(as, (ptrdiff_t)i) != '\0'; i++)
+    if (astr_char(as, (ptrdiff_t)i) != '\n')
+      term_addch(astr_char(as, (ptrdiff_t)i));
     else {
       term_clrtoeol();
       term_nl();
@@ -342,13 +342,13 @@ static void calculate_start_column(void)
 
   for (lp = rp; lp >= 0; --lp) {
     for (col = 0, p = lp; p < rp; ++p)
-      if (*astr_char(pt.p->item, p) == '\t') {
+      if (astr_char(pt.p->item, p) == '\t') {
         col |= t - 1;
         ++col;
-      } else if (isprint(*astr_char(pt.p->item, p)))
+      } else if (isprint(astr_char(pt.p->item, p)))
         ++col;
       else
-        col += astr_len(make_char_printable((size_t)*astr_char(pt.p->item, p)));
+        col += astr_len(make_char_printable((size_t)astr_char(pt.p->item, p)));
 
     lpfact = lp / (win.ewidth / 3);
 

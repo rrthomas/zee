@@ -25,7 +25,6 @@
 
 #include <ctype.h>
 #include <stdbool.h>
-#include <string.h>
 
 #include "main.h"
 #include "extern.h"
@@ -131,13 +130,13 @@ Line *string_to_lines(astr as, size_t *lines)
   for (p = 0, *lines = 1;
        p < end && (q = (astr_str(as, p, astr_new("\n")))) >= 0;
        p = q + 1) {
-    astr_cat(list_last(lp)->item, astr_sub(as, p, q));
+    list_last(lp)->item = astr_cat(list_last(lp)->item, astr_sub(as, p, q));
     list_append(lp, astr_new(""));
     ++*lines;
   }
 
   /* Add the rest of the string, if any */
-  astr_cat(list_last(lp)->item, astr_sub(as, p, end));
+  list_last(lp)->item = astr_cat(list_last(lp)->item, astr_sub(as, p, end));
 
   return lp;
 }
@@ -158,7 +157,7 @@ bool is_blank_line(void)
   size_t c;
 
   for (c = 0; c < astr_len(buf->pt.p->item); c++)
-    if (!isspace(*astr_char(buf->pt.p->item, (ptrdiff_t)c)))
+    if (!isspace(astr_char(buf->pt.p->item, (ptrdiff_t)c)))
       return false;
   return true;
 }
@@ -173,7 +172,7 @@ int following_char(void)
   else if (eolp())
     return '\n';
   else
-    return *astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
+    return astr_char(buf->pt.p->item, (ptrdiff_t)buf->pt.o);
 }
 
 /*
@@ -186,7 +185,7 @@ int preceding_char(void)
   else if (bolp())
     return '\n';
   else
-    return *astr_char(buf->pt.p->item, (ptrdiff_t)(buf->pt.o - 1));
+    return astr_char(buf->pt.p->item, (ptrdiff_t)(buf->pt.o - 1));
 }
 
 /*
@@ -288,11 +287,11 @@ static int check_case(astr as)
 {
   size_t i;
 
-  if (!isupper(*astr_char(as, 0)))
+  if (!isupper(astr_char(as, 0)))
     return 0;
 
   for (i = 1; i < astr_len(as); i++)
-    if (!isupper(*astr_char(as, (ptrdiff_t)i)))
+    if (!isupper(astr_char(as, (ptrdiff_t)i)))
       return 1;
 
   return 2;
@@ -301,17 +300,28 @@ static int check_case(astr as)
 /*
  * Recase str according to case of tmpl.
  */
-static void recase(astr str, astr tmpl)
+static astr recase(astr str, astr tmpl)
 {
   size_t i;
-  int tmpl_case = check_case(tmpl);
+  int tmpl_case = check_case(tmpl), c;
+  astr ret = astr_new("");
 
+  assert(astr_len(str) > 0);
+  assert(astr_len(str) == astr_len(tmpl));
+
+  c = astr_char(str, 0);
   if (tmpl_case >= 1)
-    *astr_char(str, 0) = toupper(*astr_char(str, 0));
+    c = toupper(c);
+  ret = astr_cat_char(ret, c);
 
-  if (tmpl_case == 2)
-    for (i = 1; i < astr_len(str); i++)
-      *astr_char(str, (ptrdiff_t)i) = toupper(*astr_char(str, (ptrdiff_t)i));
+  for (i = 1; i < astr_len(str); i++) {
+    c = astr_char(str, (ptrdiff_t)i);
+    if (tmpl_case == 2)
+      c = toupper(c);
+    ret = astr_cat_char(ret, c);
+  }
+
+  return ret;
 }
 
 /*
@@ -326,17 +336,19 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
 
   if (oldlen > 0) {
     if (replace_case && get_variable_bool(astr_new("case_replace")))
-      recase(newtext, astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)(offset + oldlen)));
+      newtext = recase(newtext, astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)(offset + oldlen)));
 
     if (astr_len(newtext) != oldlen) {
       (*lp)->item = astr_cat(astr_cat(astr_sub((*lp)->item, 0, (ptrdiff_t)offset), newtext),
                              astr_sub((*lp)->item, (ptrdiff_t)(offset + oldlen), (ptrdiff_t)astr_len((*lp)->item)));
       adjust_markers(*lp, *lp, offset, 0, (int)(astr_len(newtext) - oldlen));
       changed = true;
-    } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
-                      astr_cstr(newtext), astr_len(newtext)) != 0) {
-      memcpy(astr_char((*lp)->item, (ptrdiff_t)offset),
-             astr_cstr(newtext), astr_len(newtext));
+    } else if (astr_ncmp(astr_sub((*lp)->item, (ptrdiff_t)offset, (ptrdiff_t)astr_len((*lp)->item)),
+                                  newtext, astr_len(newtext)) != 0) {
+      (*lp)->item = astr_cat(astr_sub((*lp)->item, 0, (ptrdiff_t)(offset - 1)),
+                             astr_cat(newtext, astr_sub((*lp)->item, (ptrdiff_t)(offset + astr_len(newtext)), (ptrdiff_t)astr_len((*lp)->item))));
+/*       memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), */
+/*              astr_cstr(newtext), astr_len(newtext)); */
       changed = true;
     }
   }
@@ -368,7 +380,7 @@ void wrap_break_line(void)
 
   /* Find break point moving left from wrap_column. */
   for (i = buf->pt.o; i > 0; i--) {
-    int c = *astr_char(buf->pt.p->item, (ptrdiff_t)(i - 1));
+    int c = astr_char(buf->pt.p->item, (ptrdiff_t)(i - 1));
     if (isspace(c)) {
       break_col = i;
       break;
@@ -379,7 +391,7 @@ void wrap_break_line(void)
      possible moving right. */
   if (break_col == 0) {
     for (i = buf->pt.o + 1; i < astr_len(buf->pt.p->item); i++) {
-      int c = *astr_char(buf->pt.p->item, (ptrdiff_t)(i - 1));
+      int c = astr_char(buf->pt.p->item, (ptrdiff_t)(i - 1));
       if (isspace(c)) {
         break_col = i;
         break;
@@ -423,7 +435,7 @@ bool insert_nstring(astr as)
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, astr_len(as));
 
   for (i = 0; i < astr_len(as); i++) {
-    if (*astr_char(as, (ptrdiff_t)i) == '\n') {
+    if (astr_char(as, (ptrdiff_t)i) == '\n') {
       intercalate_newline();
       CMDCALL(move_next_character);
     } else {
@@ -454,9 +466,9 @@ bool delete_nstring(size_t size, astr *as)
   buf->flags |= BFLAG_MODIFIED;
   while (size--) {
     if (!eolp())
-      astr_cat_char(*as, following_char());
+      *as = astr_cat_char(*as, following_char());
     else
-      astr_cat(*as, astr_new("\n"));
+      *as = astr_cat(*as, astr_new("\n"));
 
     if (eobp()) {
       minibuf_error(astr_new("End of buffer"));
@@ -470,7 +482,7 @@ bool delete_nstring(size_t size, astr *as)
 
       /* Move the next line of text into the current line. */
       lp2 = list_next(buf->pt.p);
-      astr_cat(lp1->item, list_next(buf->pt.p)->item);
+      lp1->item = astr_cat(lp1->item, list_next(buf->pt.p)->item);
       list_behead(lp1);
       --buf->num_lines;
 

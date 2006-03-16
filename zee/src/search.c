@@ -171,7 +171,7 @@ static int isearch(int dir)
           (strncmp(find_err, "Invalid ", 8) == 0)) {
         find_err = "incomplete input";
       }
-      astr_cat(as, astr_afmt(" [%s]", find_err));
+      as = astr_cat(as, astr_afmt(" [%s]", find_err));
       find_err = NULL;
     }
 
@@ -229,7 +229,7 @@ static int isearch(int dir)
         minibuf_clear();
       break;
     } else
-      astr_cat_char(pattern, c);
+      pattern = astr_cat_char(pattern, c);
 
     if (astr_len(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)
@@ -283,7 +283,7 @@ static bool no_upper(astr as)
   size_t i;
 
   for (i = 0; i < astr_len(as); i++)
-    if (isupper(*astr_char(as, (ptrdiff_t)i)))
+    if (isupper(astr_char(as, (ptrdiff_t)i)))
       return false;
 
   return true;

@@ -68,7 +68,7 @@ size_t get_goalc(void)
   size_t col = 0, t = tab_width(), i;
 
   for (i = 0; i < buf->pt.o; i++) {
-    if (*astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t')
+    if (astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -89,7 +89,7 @@ static void goto_goalc(int goalc)
   for (i = 0; i < astr_len(buf->pt.p->item); i++) {
     if (col == goalc)
       break;
-    else if (*astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t') {
+    else if (astr_char(buf->pt.p->item, (ptrdiff_t)i) == '\t') {
       for (w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;

@@ -137,9 +137,9 @@ astr copy_text_block(Point start, size_t size)
   /* Copy one character at a time. */
   for (i = start.o; astr_len(as) < size;) {
     if (i < astr_len(lp->item))
-      astr_cat_char(as, *astr_char(lp->item, (ptrdiff_t)(i++)));
+      as = astr_cat_char(as, astr_char(lp->item, (ptrdiff_t)(i++)));
     else {
-      astr_cat(as, astr_new("\n"));
+      as = astr_cat(as, astr_new("\n"));
       lp = list_next(lp);
       i = 0;
     }

@@ -13,7 +13,7 @@ vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 vector_LDADD = zmalloc.o
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-astr_LDADD = zmalloc.o vector.o
+astr_LDADD = zmalloc.o rblist.o
 
 rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 rblist_LDADD = zmalloc.o vector.o astr.o

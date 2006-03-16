@@ -61,12 +61,12 @@ static astr completion_write(list l)
        p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
-      astr_cat(as, astr_new("\n"));
+      as = astr_cat(as, astr_new("\n"));
     }
-    astr_cat(as, p->item);
+    as = astr_cat(as, p->item);
     if (++col < numcols)
       for (size_t i = maxlen - astr_len(p->item); i > 0; i--)
-        astr_cat(as, astr_new(" "));
+        as = astr_cat(as, astr_new(" "));
   }
 
   return as;
@@ -84,15 +84,15 @@ void completion_popup(Completion *cp)
   astr as = astr_new("Completions\n\n");
   switch (list_length(cp->matches)) {
     case 0:
-      astr_cat(as, astr_new("No completions"));
+      as = astr_cat(as, astr_new("No completions"));
       break;
     case 1:
-      astr_cat(as, astr_new("Sole completion: "));
-      astr_cat(as, list_first(cp->matches)->item);
+      as = astr_cat(as, astr_new("Sole completion: "));
+      as = astr_cat(as, list_first(cp->matches)->item);
       break;
     default:
-      astr_cat(as, astr_new("Possible completions are:\n"));
-      astr_cat(as, completion_write(cp->matches));
+      as = astr_cat(as, astr_new("Possible completions are:\n"));
+      as = astr_cat(as, completion_write(cp->matches));
   }
   popup_set(as);
   term_display();
@@ -106,7 +106,7 @@ static size_t common_prefix_length(astr as, astr bs)
 {
   size_t len = min(astr_len(as), astr_len(bs));
   for (size_t i = 0; i < len; i++)
-    if (*astr_char(as, (ptrdiff_t)i) != *astr_char(bs, (ptrdiff_t)i))
+    if (astr_char(as, (ptrdiff_t)i) != astr_char(bs, (ptrdiff_t)i))
       return i;
   return len;
 }
@@ -173,7 +173,7 @@ bool completion_is_exact(Completion *cp, astr search)
  */
 static size_t last_occurrence(astr as, size_t before_pos, int c)
 {
-  while (before_pos > 0 && *astr_char(as, (ptrdiff_t)before_pos - 1) != c)
+  while (before_pos > 0 && astr_char(as, (ptrdiff_t)before_pos - 1) != c)
     before_pos--;
   return before_pos;
 }
