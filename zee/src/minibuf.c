@@ -103,7 +103,7 @@ int minibuf_read_yesno(rblist prompt)
   list_append(cp->completions, rblist_from_string("yes"));
   list_append(cp->completions, rblist_from_string("no"));
   rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `yes' or `no'."), cp);
-  return reply==NULL ? -1 : !rblist_compare(rblist_from_string("yes"), reply);
+  return reply == NULL ? -1 : !rblist_compare(rblist_from_string("yes"), reply);
 }
 
 /*
@@ -117,7 +117,7 @@ int minibuf_read_boolean(rblist prompt)
   list_append(cp->completions, rblist_from_string("true"));
   list_append(cp->completions, rblist_from_string("false"));
   rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `true' or `false'."), cp);
-  return reply==NULL ? -1 : !rblist_compare(rblist_from_string("true"), reply);
+  return reply == NULL ? -1 : !rblist_compare(rblist_from_string("true"), reply);
 }
 
 /*
