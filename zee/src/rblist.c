@@ -587,10 +587,10 @@ static void test(rblist rbl, const char *s, size_t length)
       nl_pos[line++] = pos;
     pos++;
   RBLIST_END;
-  
+
   assert(pos == length);
   assert(line == nl_count);
-  
+
   for (line = 0; line <= nl_count; line++) {
     assert(rblist_line_to_start_pos(rbl, line) == (line ? nl_pos[line - 1] + 1 : 0));
     assert(rblist_line_to_end_pos(rbl, line) == (line < nl_count ? nl_pos[line] : length));
@@ -604,7 +604,7 @@ int main(void)
   const char *s1 = "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
   /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
-  
+
   size_t count;
 
   /* Test loads of things for empty, short and long strings. */
@@ -648,9 +648,9 @@ int main(void)
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
 #endif
   }
-  
+
   /* Test compare. */
-  
+
   char *t[] = {"", "a", "b", "aa", "ab", "ba", "bb", NULL};
   for (int i = 0; t[i]; i++) for (int j = 0; t[j]; j++) {
     rbl1 = rblist_from_string(t[i]);

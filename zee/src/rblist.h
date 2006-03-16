@@ -232,7 +232,7 @@ char *rblist_to_string(rblist rbl);
 
 /*
  * Returns the portion of `rbl' from `from' to `to'. If `to' is too
- * big it is clipped to the length of `rbl'. If from > to the result 
+ * big it is clipped to the length of `rbl'. If from > to the result
  * is rblist_empty.
  *
  * To break a list into pieces, it is more efficient to use
