@@ -181,7 +181,7 @@ Set a variable to the specified value.\
       if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
         int i;
         if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_to_string(var)))) == -1)
-          CMDCALL(edit_select_off); /* FIXME: val for set_variable() below... */
+          CMDCALL(edit_select_off);
         else {
           val = rblist_from_string((i == true) ? "true" : "false");
           ok = true;
