@@ -63,9 +63,9 @@ Display the help for the given command.\
       if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
         rblist bindings = command_to_binding(get_command(name)), where = rblist_from_string("");
         if (rblist_length(bindings) > 0)
-          where = astr_afmt("\n\nBound to: %s", rblist_to_string(bindings));
+          where = astr_afmt("\n\nBound to: %s", astr_to_string(bindings));
         popup_set(astr_afmt("Help for command `%s':\n\n%s%s",
-                            ftable[i].name, ftable[i].doc, rblist_to_string(where)));
+                            ftable[i].name, ftable[i].doc, astr_to_string(where)));
         ok = true;
         break;
       }
@@ -104,7 +104,7 @@ Display the full documentation of VARIABLE (a symbol).\
                             "Current value: %s\n\n"
                             "Documentation:\n%s",
                             vtable[i].name, vtable[i].defval,
-                            rblist_to_string(get_variable(name)), vtable[i].doc));
+                            astr_to_string(get_variable(name)), vtable[i].doc));
         ok = true;
       }
   }
@@ -124,9 +124,9 @@ Display the command invoked by a key sequence.\
   keyname = chordtostr(key);
 
   if ((cmd = binding_to_command(key)) == NULL) {
-    minibuf_error(astr_afmt("%s is unbound", rblist_to_string(keyname)));
+    minibuf_error(astr_afmt("%s is unbound", astr_to_string(keyname)));
     ok = false;
   } else
-    minibuf_write(astr_afmt("%s runs the command `%s'", rblist_to_string(keyname), rblist_to_string(cmd)));
+    minibuf_write(astr_afmt("%s runs the command `%s'", astr_to_string(keyname), astr_to_string(cmd)));
 }
 END_DEF

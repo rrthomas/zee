@@ -496,13 +496,13 @@ file, replacing the selection.\n\
 
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
-      write(fd, rblist_to_string(as), r.size);
+      write(fd, astr_to_string(as), r.size);
 
       close(fd);
 
-      cmd = astr_afmt("%s 2>&1 <%s", rblist_to_string(ms), tempfile);
+      cmd = astr_afmt("%s 2>&1 <%s", astr_to_string(ms), tempfile);
 
-      if ((pipe = popen(rblist_to_string(cmd), "r")) == NULL) {
+      if ((pipe = popen(astr_to_string(cmd), "r")) == NULL) {
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {

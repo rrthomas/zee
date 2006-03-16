@@ -348,7 +348,7 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
       (*lp)->item = rblist_concat(rblist_sub((*lp)->item, 0, (offset - 1)),
                              rblist_concat(newtext, rblist_sub((*lp)->item, (offset + rblist_length(newtext)), rblist_length((*lp)->item))));
 /*       memcpy(rblist_get((*lp)->item, offset), */
-/*              rblist_to_string(newtext), rblist_length(newtext)); */
+/*              astr_to_string(newtext), rblist_length(newtext)); */
       changed = true;
     }
   }

@@ -137,7 +137,7 @@ static size_t strtokey(rblist buf, size_t *len)
 
   for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++) {
     size_t keylen = strlen(keyname[i]);
-    if (strncmp(rblist_to_string(buf), keyname[i], min(keylen, rblist_length(buf))) == 0) {
+    if (strncmp(astr_to_string(buf), keyname[i], min(keylen, rblist_length(buf))) == 0) {
       *len = keylen;
       return keycode[i];
     }

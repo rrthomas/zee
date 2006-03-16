@@ -52,5 +52,12 @@ rblist astr_fgets(FILE *fp);
  */
 rblist astr_afmt(const char *fmt, ...);
 
+/*
+ * Returns the elements of `rbl' in a freshly allocated array with a 0
+ * terminator (i.e. as a C string).
+ *
+ * Takes time O(n) where `n' is the length of the list.
+ */
+char *astr_to_string(rblist rbl);
 
 #endif /* ASTR_H */

@@ -133,7 +133,7 @@ rblist minibuf_read_command_name(rblist prompt)
       minibuf_clear();        /* Remove any error message */
       break;
     } else {
-      minibuf_error(astr_afmt("Undefined command `%s'", rblist_to_string(ms)));
+      minibuf_error(astr_afmt("Undefined command `%s'", astr_to_string(ms)));
       waitkey(WAITKEY_DEFAULT);
     }
   }
@@ -182,7 +182,7 @@ chord.\
     key = getkey();
 
     as = chordtostr(key);
-    name = minibuf_read_command_name(astr_afmt("Bind key %s to command: ", rblist_to_string(as)));
+    name = minibuf_read_command_name(astr_afmt("Bind key %s to command: ", astr_to_string(as)));
   }
 
   if (name) {
@@ -195,7 +195,7 @@ chord.\
       } else
         minibuf_error(rblist_from_string("Invalid key"));
     } else
-      minibuf_error(astr_afmt("No such command `%s'", rblist_to_string(name)));
+      minibuf_error(astr_afmt("No such command `%s'", astr_to_string(name)));
   }
 }
 END_DEF

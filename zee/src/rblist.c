@@ -209,11 +209,9 @@ static rblist make_rblist(rblist left, rblist right)
 }
 
 /* The recursive part of rblist_split. */
+/* Not easy to make iterative because of the `if' in make_rblist. */
 static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 {
-  /* FIXME: Rewrite using a while loop instead of recursion? Not easy
-   * because of the `if' in make_rblist. */
-
   if (is_leaf(rbl)) {
     *left = leaf_from_array(&rbl->leaf.data[0], pos);
     *right = leaf_from_array(&rbl->leaf.data[pos], rbl->leaf.length - pos);
@@ -302,8 +300,6 @@ rblist rblist_singleton(char c)
  */
 rblist rblist_concat(rblist left, rblist right)
 {
-  /* FIXME: Rewrite using a while loop instead of recursion. */
-
   #define llen (left->stats.length)
   #define rlen (right->stats.length)
   #define mid (left->stats.length)
@@ -483,13 +479,6 @@ char *rblist_copy_into(rblist rbl, char *s)
   return s;
 }
 
-char *rblist_to_string(rblist rbl)
-{
-  char *s = zmalloc(rblist_length(rbl) + 1);
-  *rblist_copy_into(rbl, s) = 0;
-  return s;
-}
-
 rblist rblist_sub(rblist rbl, size_t from, size_t to)
 {
   rblist dummy;
@@ -542,9 +531,9 @@ void die(int exitcode)
 static const char *rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return rblist_to_string(astr_afmt("%d", rbl->leaf.length));
+    return astr_to_string(astr_afmt("%d", rbl->leaf.length));
   else
-    return rblist_to_string(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
+    return astr_to_string(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
                                rbl_structure(rbl->node.right)));
 }
 
@@ -569,7 +558,7 @@ static void assert_invariants(rblist rbl) {
  * Passes `rbl' to assert_invariants. Checks that its length is `length'.
  * If `s' is not NULL, checks that the elements returned by an iterator
  * over 'rbl' match the corresponding elements of `s', and also that
- * rblist_to_string works. Checks that the numbers of elements and
+ * astr_to_string works. Checks that the numbers of elements and
  * newline characters returned by the iterator match respectively the
  * length and nl_count of `rbl'. Checks that the characters returned by
  * the iterator match those returned by rblist_get. Checks that
@@ -581,7 +570,7 @@ static void test(rblist rbl, const char *s, size_t length)
 {
   assert(rblist_length(rbl) == length);
   if (s)
-    assert(!memcmp(rblist_to_string(rbl), s, length));
+    assert(!memcmp(astr_to_string(rbl), s, length));
 
   size_t nl_count = rblist_nl_count(rbl);
   size_t pos = 0, line = 0;
@@ -613,8 +602,6 @@ int main(void)
   const char *s1 = "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
   /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
-
-  size_t count;
 
   /* Test loads of things for empty, short and long strings. */
 
@@ -653,7 +640,7 @@ int main(void)
     rbl4 = rblist_concat(rbl2, rbl3);
     test(rbl4, s1, 19 * 7);
 #ifdef DEBUG
-    printf("rbl2 = %s\nrbl3 = %s\n", rblist_to_string(rbl2), rblist_to_string(rbl3));
+    printf("rbl2 = %s\nrbl3 = %s\n", astr_to_string(rbl2), astr_to_string(rbl3));
     printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
 #endif
   }

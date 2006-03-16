@@ -115,7 +115,7 @@ int get_variable_number(rblist var)
   rblist as;
 
   if ((as = get_variable(var)))
-    return atoi(rblist_to_string(as));
+    return atoi(astr_to_string(as));
 
   return 0;
 }
@@ -151,7 +151,7 @@ rblist minibuf_read_variable_name(rblist msg)
       minibuf_error(rblist_from_string("No variable name given"));
       return NULL;
     } else if (get_variable(ms) == NULL) {
-      minibuf_error(astr_afmt("There is no variable called `%s'", rblist_to_string(ms)));
+      minibuf_error(astr_afmt("There is no variable called `%s'", astr_to_string(ms)));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -180,14 +180,14 @@ Set a variable to the specified value.\
       var_entry *p = get_variable_default(var);
       if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
         int i;
-        if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", rblist_to_string(var)))) == -1)
+        if ((i = minibuf_read_boolean(astr_afmt("Set %s to value: ", astr_to_string(var)))) == -1)
           CMDCALL(edit_select_off); /* FIXME: val for set_variable() below... */
         else {
           val = rblist_from_string((i == true) ? "true" : "false");
           ok = true;
         }
       } else                    /* Non-boolean variable. */
-        if ((val = minibuf_read(astr_afmt("Set %s to value: ", rblist_to_string(var)), rblist_from_string(""))) == NULL)
+        if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_to_string(var)), rblist_from_string(""))) == NULL)
           CMDCALL(edit_select_off);
         else
           ok = true;

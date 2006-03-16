@@ -57,16 +57,16 @@ static size_t find_substr(rblist s1, rblist as2, int bol, int eol, int backward)
   pattern.buffer = NULL;
   pattern.allocated = 0;
 
-  find_err = re_compile_pattern(rblist_to_string(as2), (int)rblist_length(as2), &pattern);
+  find_err = re_compile_pattern(astr_to_string(as2), (int)rblist_length(as2), &pattern);
   if (!find_err) {
     pattern.not_bol = !bol;
     pattern.not_eol = !eol;
 
     if (!backward)
-      index = re_search(&pattern, rblist_to_string(s1), (int)rblist_length(s1), 0, (int)rblist_length(s1),
+      index = re_search(&pattern, astr_to_string(s1), (int)rblist_length(s1), 0, (int)rblist_length(s1),
                         &search_regs);
     else
-      index = re_search(&pattern, rblist_to_string(s1), (int)rblist_length(s1), (int)rblist_length(s1), -(int)rblist_length(s1),
+      index = re_search(&pattern, astr_to_string(s1), (int)rblist_length(s1), (int)rblist_length(s1), -(int)rblist_length(s1),
                         &search_regs);
 
     if (index >= 0) {
@@ -162,7 +162,7 @@ static int isearch(int dir)
     as = astr_afmt("%sI-search%s: %s",
               (last ? "" : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
-              rblist_to_string(pattern));
+              astr_to_string(pattern));
 
     /* Regex error. */
     if (find_err) {
@@ -307,7 +307,7 @@ what to do with it.\
   else {
     find_no_upper = no_upper(find);
 
-    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", rblist_to_string(find)), rblist_from_string(""))) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_to_string(find)), rblist_from_string(""))) == NULL)
       ok = CMDCALL(edit_select_off);
     if (ok) {
       while (search_forward(buf->pt.p, buf->pt.o, find)) {
@@ -317,7 +317,7 @@ what to do with it.\
             resync_display();
           for (;;) {
             /* FIXME: Can we use minibuf_read_forced? */
-            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", rblist_to_string(find), rblist_to_string(repl)));
+            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_to_string(find), astr_to_string(repl)));
             c = getkey();
             if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
                 c == 'q' || c == '.' || c == '!')

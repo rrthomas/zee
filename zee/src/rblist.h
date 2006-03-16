@@ -226,16 +226,6 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 char *rblist_copy_into(rblist rbl, char *s);
 
 /*
- * Returns the elements of `rbl' in a freshly allocated array with a 0
- * terminator (i.e. as a C string).
- *
- * Takes time O(n) where `n' is the length of the list.
- *
- * FIXME: Does not generify nicely because of the terminator. Remove?
- */
-char *rblist_to_string(rblist rbl);
-
-/*
  * Returns the portion of `rbl' from `from' to `to'. If `to' is too
  * big it is clipped to the length of `rbl'. If from > to the result
  * is rblist_empty.

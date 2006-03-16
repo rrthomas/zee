@@ -57,7 +57,7 @@ rblist get_home_dir(void)
 rblist file_read(rblist filename)
 {
   FILE *fp;
-  if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
+  if ((fp = fopen(astr_to_string(filename), "r")) == NULL)
     return NULL;
   else {
     rblist as = astr_fread(fp);
@@ -102,12 +102,12 @@ static bool buffer_write(Buffer *bp, rblist filename)
 
   assert(bp);
 
-  if ((fp = fopen(rblist_to_string(filename), "w")) == NULL)
+  if ((fp = fopen(astr_to_string(filename), "w")) == NULL)
     return false;
 
   /* Save all the lines. */
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
-    if (fwrite(rblist_to_string(lp->item), sizeof(char), rblist_length(lp->item), fp) < rblist_length(lp->item) ||
+    if (fwrite(astr_to_string(lp->item), sizeof(char), rblist_length(lp->item), fp) < rblist_length(lp->item) ||
         (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {
       fclose(fp);
       return false;
@@ -125,7 +125,7 @@ Save buffer in visited file.\
   if (buffer_write(buf, buf->filename) == false) {
     minibuf_error(astr_afmt("%s: %s", buf->filename, strerror(errno)));
   } else {
-    minibuf_write(astr_afmt("Wrote `%s'", rblist_to_string(buf->filename)));
+    minibuf_write(astr_afmt("Wrote `%s'", astr_to_string(buf->filename)));
     buf->flags &= ~BFLAG_MODIFIED;
 
     if (buf->last_undop)
@@ -170,7 +170,7 @@ void die(int exitcode)
     if (buf->filename)
       as = buf->filename;
     as = rblist_concat(as, rblist_from_string("." PACKAGE_NAME "SAVE"));
-    fprintf(stderr, "Saving %s...\r\n", rblist_to_string(as));
+    fprintf(stderr, "Saving %s...\r\n", astr_to_string(as));
     buffer_write(buf, as);
     term_close();
   }

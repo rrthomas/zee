@@ -31,6 +31,13 @@
 #include "astr.h"
 
 
+char *astr_to_string(rblist rbl)
+{
+  char *s = zmalloc(rblist_length(rbl) + 1);
+  *rblist_copy_into(rbl, s) = 0;
+  return s;
+}
+
 size_t astr_str(rblist haystack, size_t from, rblist needle)
 {
   size_t pos;
