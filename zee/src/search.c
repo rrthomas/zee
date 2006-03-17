@@ -296,8 +296,8 @@ As each match is found, the user must type a character saying\n\
 what to do with it.\
 ")
 {
-  int count = 0;
-  bool noask = false, exitloop = false, find_no_upper;
+  size_t count = 0;
+  bool noask = false, find_no_upper;
   rblist find, repl;
 
   if ((find = minibuf_read(rblist_from_string("Query replace string: "), rblist_from_string(""))) == NULL)
@@ -309,63 +309,42 @@ what to do with it.\
 
     if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_to_string(find)), rblist_from_string(""))) == NULL)
       ok = CMDCALL(edit_select_off);
-    if (ok) {
-      while (search_forward(buf->pt.p, buf->pt.o, find)) {
-        if (!noask) {
-          int c;
-          if (thisflag & FLAG_NEED_RESYNC)
-            resync_display();
-          for (;;) {
-            /* FIXME: Can we use minibuf_read_forced? */
-            minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_to_string(find), astr_to_string(repl)));
-            c = getkey();
-            if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
-                c == 'q' || c == '.' || c == '!')
-              goto exitloop;
-            minibuf_error(rblist_from_string("Please answer y, n, !, . or q."));
-            waitkey(WAITKEY_DEFAULT);
-          }
-        exitloop:
-          minibuf_clear();
-
-          switch (c) {
-          case KBD_CANCEL: /* C-g */
-            ok = CMDCALL(edit_select_off);
-            /* Fall through. */
-          case 'q': /* Quit immediately. */
-            goto endoffunc;
-          case '.': /* Replace and quit. */
-            exitloop = true;
-            goto replblock;
-          case '!': /* Replace all without asking. */
-            noask = true;
-            goto replblock;
-          case ' ': /* Replace. */
-          case 'y':
-            goto replblock;
+    while (ok && search_forward(buf->pt.p, buf->pt.o, find)) {
+      if (!noask) {
+        int c;
+        if (thisflag & FLAG_NEED_RESYNC)
+          resync_display();
+        for (;;) {
+          minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !)? ", astr_to_string(find), astr_to_string(repl)));
+          c = getkey();
+          if (c == KBD_CANCEL || c == 'y' || c == 'n' || c == '!')
             break;
-          case 'n': /* Do not replace. */
-          case KBD_RET:
-          case KBD_DEL:
-            goto nextmatch;
-          }
+          minibuf_error(rblist_from_string("Please answer `y', `n', or `!'"));
+          waitkey(WAITKEY_DEFAULT);
         }
+        minibuf_clear();
 
-      replblock:
-        ++count;
-        undo_save(UNDO_REPLACE_BLOCK,
-                  make_point(buf->pt.n, buf->pt.o - rblist_length(find)),
-                  rblist_length(find), rblist_length(repl));
-        if (line_replace_text(&buf->pt.p, buf->pt.o - rblist_length(find),
-                              rblist_length(find), repl, find_no_upper))
-          buf->flags |= BFLAG_MODIFIED;
-        /* FALLTHROUGH */
-      nextmatch:
-        if (exitloop)
+        switch (c) {
+        case KBD_CANCEL: /* C-g: quit immediately */
+          ok = CMDCALL(edit_select_off);
           break;
+        case '!': /* Replace all without asking. */
+          noask = true;
+          /* FALLTHROUGH */
+        case 'y':
+          ++count;
+          undo_save(UNDO_REPLACE_BLOCK,
+                    make_point(buf->pt.n, buf->pt.o - rblist_length(find)),
+                    rblist_length(find), rblist_length(repl));
+          if (line_replace_text(&buf->pt.p, buf->pt.o - rblist_length(find),
+                                rblist_length(find), repl, find_no_upper))
+            buf->flags |= BFLAG_MODIFIED;
+          break;
+        case 'n': /* Do not replace. */
+          break;
+        }
       }
 
-    endoffunc:
       if (thisflag & FLAG_NEED_RESYNC)
         resync_display();
       term_display();
