@@ -431,7 +431,7 @@ static void draw_status_line(size_t line)
   else if (buf->pt.n + (win.eheight - win.topdelta) > buf->num_lines)
     term_print(rblist_from_string("Bot"));
   else
-    term_print(astr_afmt("%2d%%", (int)((float)buf->pt.n / buf->num_lines * 100)));
+    term_print(astr_afmt("%d%%", (int)((float)buf->pt.n / buf->num_lines * 100)));
 
   term_attrset(1, FONT_NORMAL);
 }

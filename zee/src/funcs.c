@@ -71,8 +71,9 @@ otherwise with the current column value.\
 ",
 UINT(col, "New wrap column: "))
 {
+  /* FIXME: is_empty(l) is always true. */
   set_variable(rblist_from_string("wrap_column"),
-               astr_afmt("%lu", list_empty(l) ? buf->pt.o + 1 : col));
+               astr_afmt("%d", list_empty(l) ? buf->pt.o + 1 : col));
 }
 END_DEF
 
@@ -336,6 +337,8 @@ Select the current paragraph.\
 END_DEF
 
 /* FIXME: wrap_paragraph undo goes bananas. */
+/* FIXME: if wrap_column is set to 1, hangs with 100% CPU and starts consuming
+ * all memory. */
 DEF(edit_wrap_paragraph,
 "\
 Wrap the paragraph at or after the cursor. The wrap column can\n\
