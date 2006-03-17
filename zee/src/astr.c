@@ -29,6 +29,7 @@
 #include "nonstd.h"
 #include "zmalloc.h"
 #include "astr.h"
+#include "rblist.h"
 
 
 char *astr_to_string(rblist rbl)
@@ -67,7 +68,7 @@ rblist astr_fgets(FILE *fp)
 
   if (feof(fp))
     return NULL;
-  as = rblist_from_string("");
+  as = rblist_empty;
   while ((c = getc(fp)) != EOF && c != '\n')
     as = rblist_concat_char(as, c);
   return as;

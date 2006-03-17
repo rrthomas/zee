@@ -16,61 +16,64 @@
 #include "zmalloc.c"
 #include "astr.c"
 #include "vector.c"
+#include "rblist.c"
 
 #define NAME "mkdoc"
 
+
+/* FIXME: Far too many "char *"s. */
+
 struct fentry {
-  astr name;
-  astr doc;
+  rblist name;
+  rblist doc;
 };
 
 static vector *ftable;
 static size_t fentries = 0;
 
-static void fdecl(FILE *fp, astr name)
+static void fdecl(FILE *fp, rblist name)
 {
   int state = 0;
-  astr doc = astr_new(""), line;
+  rblist doc = rblist_empty, line;
 
   while ((line = astr_fgets(fp)) != NULL) {
     if (state == 1) {
-      if (astr_ncmp(line, astr_new("\")"), 3) == 0
-          || astr_ncmp(line, astr_new("\","), 3) == 0) {
+      if (rblist_ncompare(line, rblist_from_string("\")"), 3) == 0
+          || rblist_ncompare(line, rblist_from_string("\","), 3) == 0) {
         state = 2;
         break;
       }
-      astr_cat(doc, line);
-      astr_cat_char(doc, '\n');
-    } else if (astr_ncmp(line, astr_new("\"\\"), 3) == 0)
+      doc = rblist_concat(doc, rblist_concat_char(line, '\n'));
+    } else if (rblist_ncompare(line, rblist_from_string("\"\\"), 3) == 0)
       state = 1;
   }
 
-  if (astr_len(doc) == 0) {
-    fprintf(stderr, NAME ": no docstring for %s\n", astr_cstr(name));
+  if (rblist_length(doc) == 0) {
+    fprintf(stderr, NAME ": no docstring for %s\n", astr_to_string(name));
     exit(1);
   } else if (state == 1) {
-    fprintf(stderr, NAME ": unterminated docstring for %s\n", astr_cstr(name));
+    fprintf(stderr, NAME ": unterminated docstring for %s\n", astr_to_string(name));
     exit(1);
   }
 
-  vec_item(ftable, fentries++, struct fentry) = (struct fentry){astr_dup(name), doc};
+  vec_item(ftable, fentries++, struct fentry) = (struct fentry){name, doc};
 }
 
 static void get_funcs(FILE *fp)
 {
-  astr buf;
+  rblist buf;
 
   while ((buf = astr_fgets(fp)) != NULL) {
-    if (!astr_ncmp(buf, astr_new("DEF("), 4) ||
-        !astr_ncmp(buf, astr_new("DEF_ARG("), 8)) {
-      const char *s = astr_cstr(buf);
+    if (!rblist_ncompare(buf, rblist_from_string("DEF("), 4) ||
+        !rblist_ncompare(buf, rblist_from_string("DEF_ARG("), 8)) {
+      const char *s = astr_to_string(buf);
       char *p = strchr(s, '(');
       char *q = strrchr(s, ',');
       if (p == NULL || q == NULL || p == q) {
         fprintf(stderr, NAME ": invalid DEF[_ARG]() syntax `%s'\n", s);
         exit(1);
       }
-      fdecl(fp, astr_sub(buf, (p - s) + 1, q - s));
+      fdecl(fp, rblist_sub(buf, (size_t)((p - s) + 1), (size_t)(q - s)));
     }
   }
 }
@@ -92,10 +95,10 @@ static void dump_funcs(void)
           "\n");
 
   for (size_t i = 0; i < fentries; ++i) {
-    fprintf(fp, "@item %s\n%s", astr_cstr(vec_item(ftable, i, struct fentry).name),
-            astr_cstr(vec_item(ftable, i, struct fentry).doc));
-    fprintf(stdout, "X(%s,\n\"\\\n%s\")\n", astr_cstr(vec_item(ftable, i, struct fentry).name),
-            astr_cstr(vec_item(ftable, i, struct fentry).doc));
+    fprintf(fp, "@item %s\n%s", astr_to_string(vec_item(ftable, i, struct fentry).name),
+            astr_to_string(vec_item(ftable, i, struct fentry).doc));
+    fprintf(stdout, "X(%s,\n\"\\\n%s\")\n", astr_to_string(vec_item(ftable, i, struct fentry).name),
+            astr_to_string(vec_item(ftable, i, struct fentry).doc));
   }
 
   fprintf(fp, "@end table");
@@ -124,12 +127,12 @@ static void dump_vars(void)
   fprintf(fp, "@table @code\n");
 
   for (size_t i = 0; i < ventries; ++i) {
-    astr doc = astr_new(vtable[i].doc);
-    if (!doc || astr_len(doc) == 0) {
+    rblist doc = rblist_from_string(vtable[i].doc);
+    if (!doc || rblist_length(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for %s\n", vtable[i].name);
       exit(1);
     }
-    fprintf(fp, "@item %s\n%s\n", vtable[i].name, astr_cstr(doc));
+    fprintf(fp, "@item %s\n%s\n", vtable[i].name, astr_to_string(doc));
   }
 
   fprintf(fp, "@end table");
@@ -157,12 +160,12 @@ static void dump_opts(void)
   fprintf(fp, "@table @samp\n");
 
   for (size_t i = 0; i < oentries; ++i) {
-    astr doc = astr_new(otable[i].doc);
-    if (!doc || astr_len(doc) == 0) {
+    rblist doc = rblist_from_string(otable[i].doc);
+    if (!doc || rblist_length(doc) == 0) {
       fprintf(stderr, NAME ": no docstring for --%s\n", otable[i].longname);
       exit(1);
     }
-    fprintf(fp, "@item --%s\n%s\n", otable[i].longname, astr_cstr(doc));
+    fprintf(fp, "@item --%s\n%s\n", otable[i].longname, astr_to_string(doc));
   }
 
   fprintf(fp, "@end table");
