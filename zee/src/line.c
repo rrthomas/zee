@@ -128,7 +128,7 @@ Line *string_to_lines(rblist as, size_t *lines)
   Line *lp = line_new();
 
   for (p = 0, *lines = 1;
-       p < end && (q = (astr_str(as, p, rblist_from_string("\n")))) != SIZE_MAX;
+       p < end && (q = (astr_str(as, p, rblist_singleton('\n')))) != SIZE_MAX;
        p = q + 1) {
     list_last(lp)->item = rblist_concat(list_last(lp)->item, rblist_sub(as, p, q));
     list_append(lp, rblist_empty);
@@ -312,13 +312,13 @@ static rblist recase(rblist str, rblist tmpl)
   c = rblist_get(str, 0);
   if (tmpl_case >= 1)
     c = toupper(c);
-  ret = rblist_concat_char(ret, c);
+  ret = rblist_append(ret, c);
 
   for (i = 1; i < rblist_length(str); i++) {
     c = rblist_get(str, i);
     if (tmpl_case == 2)
       c = toupper(c);
-    ret = rblist_concat_char(ret, c);
+    ret = rblist_append(ret, c);
   }
 
   return ret;
@@ -466,9 +466,9 @@ bool delete_nstring(size_t size, rblist *as)
   buf->flags |= BFLAG_MODIFIED;
   while (size--) {
     if (!eolp())
-      *as = rblist_concat_char(*as, following_char());
+      *as = rblist_append(*as, following_char());
     else
-      *as = rblist_concat(*as, rblist_from_string("\n"));
+      *as = rblist_append(*as, '\n'));
 
     if (eobp()) {
       minibuf_error(rblist_from_string("End of buffer"));

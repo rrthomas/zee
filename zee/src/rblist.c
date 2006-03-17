@@ -340,7 +340,7 @@ rblist rblist_concat(rblist left, rblist right)
 /*************************/
 /* Derived constructors. */
 
-rblist rblist_concat_char(rblist rbl, char c)
+rblist rblist_append(rblist rbl, char c)
 {
   return rblist_concat(rbl, rblist_singleton(c));
 }

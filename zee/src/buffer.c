@@ -137,9 +137,9 @@ rblist copy_text_block(Point start, size_t size)
   /* Copy one character at a time. */
   for (i = start.o; rblist_length(as) < size;) {
     if (i < rblist_length(lp->item))
-      as = rblist_concat_char(as, rblist_get(lp->item, (i++)));
+      as = rblist_append(as, rblist_get(lp->item, (i++)));
     else {
-      as = rblist_concat(as, rblist_from_string("\n"));
+      as = rblist_append(as, '\n');
       lp = list_next(lp);
       i = 0;
     }

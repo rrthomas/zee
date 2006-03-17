@@ -229,7 +229,7 @@ static int isearch(int dir)
         minibuf_clear();
       break;
     } else
-      pattern = rblist_concat_char(pattern, c);
+      pattern = rblist_append(pattern, c);
 
     if (rblist_length(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)

@@ -89,7 +89,7 @@ rblist rblist_concat(rblist left, rblist right);
 /*
  * Append the contents of the argument string or character to rbl.
  */
-rblist rblist_concat_char(rblist rbl, char c);
+rblist rblist_append(rblist rbl, char c);
 
 /*
  * Makes an rblist from a 0-terminated string.

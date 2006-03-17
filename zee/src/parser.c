@@ -105,7 +105,7 @@ static rblist gettok(void)
           eos = true;
           break;
         default:
-          tok = rblist_concat_char(tok, c);
+          tok = rblist_append(tok, c);
         }
       } while (!eos);
     }
@@ -113,7 +113,7 @@ static rblist gettok(void)
 
   default:                      /* word */
     do {
-      tok = rblist_concat_char(tok, c);
+      tok = rblist_append(tok, c);
       if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
         ungetch();
         tok = rblist_sub(tok, 0, rblist_length(tok) - 1);
