@@ -43,7 +43,7 @@ static void fdecl(FILE *fp, rblist name)
         state = 2;
         break;
       }
-      doc = rblist_concat(doc, rblist_concat_char(line, '\n'));
+      doc = rblist_concat(doc, rblist_append(line, '\n'));
     } else if (rblist_ncompare(line, rblist_from_string("\"\\"), 3) == 0)
       state = 1;
   }
