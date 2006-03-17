@@ -468,7 +468,7 @@ bool delete_nstring(size_t size, rblist *as)
     if (!eolp())
       *as = rblist_append(*as, following_char());
     else
-      *as = rblist_append(*as, '\n'));
+      *as = rblist_append(*as, '\n');
 
     if (eobp()) {
       minibuf_error(rblist_from_string("End of buffer"));

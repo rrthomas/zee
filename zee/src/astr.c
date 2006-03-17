@@ -43,10 +43,9 @@ size_t astr_str(rblist haystack, size_t from, rblist needle)
 {
   size_t pos;
 
-  if (from + rblist_length(needle) <= rblist_length(haystack))
-    for (pos = from; (size_t)pos <= rblist_length(haystack) - rblist_length(needle); pos++)
-      if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + rblist_length(needle)), needle))
-        return pos;
+  for (pos = from; pos + rblist_length(needle) <= rblist_length(haystack); pos++)
+    if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + rblist_length(needle)), needle))
+      return pos;
 
   return SIZE_MAX;
 }
