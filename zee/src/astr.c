@@ -54,7 +54,7 @@ size_t astr_str(rblist haystack, size_t from, rblist needle)
 rblist astr_fread(FILE *fp)
 {
   int c;
-  rblist as = rblist_from_string("");
+  rblist as = rblist_empty;
 
   while ((c = getc(fp)) != EOF)
     as = rblist_concat_char(as, c);

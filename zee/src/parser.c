@@ -85,7 +85,7 @@ static int getch_skipspace(void) {
 static rblist gettok(void)
 {
   int c;
-  rblist tok = rblist_from_string("");
+  rblist tok = rblist_empty;
 
   switch ((c = getch_skipspace())) {
   case EOF:

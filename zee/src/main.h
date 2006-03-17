@@ -117,7 +117,6 @@ typedef struct {
                              (space used on the terminal). */
   size_t ewidth, eheight; /* The effective width and height of the
                              window (space available for buffer display). */
-
 } Window;
 
 typedef struct {

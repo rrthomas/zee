@@ -144,7 +144,7 @@ static int isearch(int dir)
   int c;
   int last = true;
   rblist as;
-  rblist pattern = rblist_from_string("");
+  rblist pattern = rblist_empty;
   Point start, cur;
   Marker *old_mark;
 
@@ -300,14 +300,14 @@ what to do with it.\
   bool noask = false, find_no_upper;
   rblist find, repl;
 
-  if ((find = minibuf_read(rblist_from_string("Query replace string: "), rblist_from_string(""))) == NULL)
+  if ((find = minibuf_read(rblist_from_string("Query replace string: "), rblist_empty)) == NULL)
     ok = CMDCALL(edit_select_off);
   else if (rblist_length(find) == 0)
     ok = false;
   else {
     find_no_upper = no_upper(find);
 
-    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_to_string(find)), rblist_from_string(""))) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_to_string(find)), rblist_empty)) == NULL)
       ok = CMDCALL(edit_select_off);
     while (ok && search_forward(buf->pt.p, buf->pt.o, find)) {
       if (!noask) {

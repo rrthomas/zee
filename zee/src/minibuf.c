@@ -76,7 +76,7 @@ static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
   rblist as;
 
   for (;;) {
-    as = minibuf_read_completion(prompt, rblist_from_string(""), cp, NULL);
+    as = minibuf_read_completion(prompt, rblist_empty, cp, NULL);
     if (as == NULL)             /* Cancelled. */
       return NULL;
 
@@ -125,7 +125,7 @@ int minibuf_read_boolean(rblist prompt)
  */
 void minibuf_clear(void)
 {
-  term_minibuf_write(rblist_from_string(""));
+  term_minibuf_write(rblist_empty);
 }
 
 
@@ -284,12 +284,12 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       CMDCALL(file_suspend);
       break;
     case KBD_RET:
-      term_minibuf_write(rblist_from_string(""));
+      term_minibuf_write(rblist_empty);
       retval = as;
       ret = true;
       break;
     case KBD_CANCEL:
-      term_minibuf_write(rblist_from_string(""));
+      term_minibuf_write(rblist_empty);
       ret = true;
       break;
     case KBD_CTRL | 'a':

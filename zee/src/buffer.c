@@ -118,7 +118,7 @@ size_t tab_width(void)
 rblist copy_text_block(Point start, size_t size)
 {
   size_t n = buf->pt.n, i;
-  rblist as = rblist_from_string("");
+  rblist as = rblist_empty;
   Line *lp = buf->pt.p;
 
   /* Have to do a linear search through the buffer to find the start of the

@@ -45,7 +45,7 @@ rblist get_home_dir(void)
   if (s && strlen(s) < PATH_MAX)
     as = rblist_from_string(s);
   else
-    as = rblist_from_string("");
+    as = rblist_empty;
 
   return as;
 }
@@ -164,7 +164,7 @@ void die(int exitcode)
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf && buf->flags & BFLAG_MODIFIED) {
-    rblist as = rblist_from_string("");
+    rblist as = rblist_empty;
     already_dying = true;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)

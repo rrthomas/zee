@@ -31,7 +31,7 @@ static rblist killed_text;
 
 static void clear_kill_buffer(void)
 {
-  killed_text = rblist_from_string("");
+  killed_text = rblist_empty;
 }
 
 DEF(edit_kill_line,
@@ -195,5 +195,5 @@ END_DEF
 
 void init_kill_ring(void)
 {
-  killed_text = rblist_from_string("");
+  killed_text = rblist_empty;
 }

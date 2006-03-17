@@ -115,7 +115,7 @@ void set_mark_to_point(void)
 Line *line_new(void)
 {
   Line *lp = list_new();
-  list_append(lp, rblist_from_string(""));
+  list_append(lp, rblist_empty);
   return lp;
 }
 
@@ -131,7 +131,7 @@ Line *string_to_lines(rblist as, size_t *lines)
        p < end && (q = (astr_str(as, p, rblist_from_string("\n")))) != SIZE_MAX;
        p = q + 1) {
     list_last(lp)->item = rblist_concat(list_last(lp)->item, rblist_sub(as, p, q));
-    list_append(lp, rblist_from_string(""));
+    list_append(lp, rblist_empty);
     ++*lines;
   }
 
@@ -262,7 +262,7 @@ static bool intercalate_newline(void)
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, 1);
 
   /* Update line linked list. */
-  list_prepend(buf->pt.p, rblist_from_string(""));
+  list_prepend(buf->pt.p, rblist_empty);
   new_lp = list_first(buf->pt.p);
   ++buf->num_lines;
 
@@ -304,7 +304,7 @@ static rblist recase(rblist str, rblist tmpl)
 {
   size_t i;
   int tmpl_case = check_case(tmpl), c;
-  rblist ret = rblist_from_string("");
+  rblist ret = rblist_empty;
 
   assert(rblist_length(str) > 0);
   assert(rblist_length(str) == rblist_length(tmpl));
@@ -460,7 +460,7 @@ bool delete_nstring(size_t size, rblist *as)
   if (warn_if_readonly_buffer())
     return false;
 
-  *as = rblist_from_string("");
+  *as = rblist_empty;
 
   undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, 0);
   buf->flags |= BFLAG_MODIFIED;

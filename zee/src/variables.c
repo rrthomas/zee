@@ -140,7 +140,7 @@ rblist minibuf_read_variable_name(rblist msg)
     list_append(cp->completions, rblist_from_string(p->var));
 
   for (;;) {
-    ms = minibuf_read_completion(msg, rblist_from_string(""), cp, NULL);
+    ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
 
     if (ms == NULL) {
       CMDCALL(edit_select_off);
@@ -187,7 +187,7 @@ Set a variable to the specified value.\
           ok = true;
         }
       } else                    /* Non-boolean variable. */
-        if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_to_string(var)), rblist_from_string(""))) == NULL)
+        if ((val = minibuf_read(astr_afmt("Set %s to value: ", astr_to_string(var)), rblist_empty)) == NULL)
           CMDCALL(edit_select_off);
         else
           ok = true;

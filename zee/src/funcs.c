@@ -93,7 +93,7 @@ Stop selecting text.\
 ")
 {
   buf->flags &= ~BFLAG_ANCHORED;
-  minibuf_write(rblist_from_string(""));
+  minibuf_write(rblist_empty);
   ok = false;
 }
 END_DEF
@@ -478,7 +478,7 @@ file, replacing the selection.\n\
 {
   rblist ms;
 
-  if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_from_string(""))) == NULL)
+  if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_empty)) == NULL)
     ok = CMDCALL(edit_select_off);
   else if (rblist_length(ms) == 0 || warn_if_no_mark())
     ok = false;
@@ -492,7 +492,7 @@ file, replacing the selection.\n\
     } else {
       FILE *pipe;
       Region r;
-      rblist cmd = rblist_from_string(""), as;
+      rblist cmd = rblist_empty, as;
 
       assert(calculate_the_region(&r));
       as = copy_text_block(r.start, r.size);
@@ -506,7 +506,7 @@ file, replacing the selection.\n\
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {
-        rblist out = rblist_from_string(""), s;
+        rblist out = rblist_empty, s;
 
         while (rblist_length(s = astr_fgets(pipe)) > 0) {
           out = rblist_concat(out, s);

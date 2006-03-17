@@ -112,7 +112,7 @@ valid editor command.\
   rblist ms;
   Macro *mp;
 
-  if ((ms = minibuf_read(rblist_from_string("Name for last kbd macro: "), rblist_from_string(""))) == NULL) {
+  if ((ms = minibuf_read(rblist_from_string("Name for last kbd macro: "), rblist_empty)) == NULL) {
     minibuf_error(rblist_from_string("No command name given"));
     ok = false;
   } else if (cur_mp == NULL) {

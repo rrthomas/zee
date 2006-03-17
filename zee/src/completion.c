@@ -55,7 +55,7 @@ static rblist completion_write(list l)
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t i = 0, col = 0;
-  rblist as = rblist_from_string("");
+  rblist as = rblist_empty;
   for (list p = list_first(l);
        p != l && i < list_length(l);
        p = list_next(p), i++) {

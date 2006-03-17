@@ -112,7 +112,7 @@ rblist minibuf_read_command_name(rblist prompt)
   cp->completions = command_list();
 
   for (;;) {
-    ms = minibuf_read_completion(prompt, rblist_from_string(""), cp, &commands_history);
+    ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);
 
     if (ms == NULL) {
       CMDCALL(edit_select_off);
@@ -203,7 +203,7 @@ END_DEF
 rblist command_to_binding(Command cmd)
 {
   size_t i, n = 0;
-  rblist as = rblist_from_string("");
+  rblist as = rblist_empty;
 
   for (i = 0; i < vec_items(bindings); i++)
     if (vec_item(bindings, i, Binding).cmd == cmd) {

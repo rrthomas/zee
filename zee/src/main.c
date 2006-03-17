@@ -224,11 +224,11 @@ int main(int argc, char **argv)
       /* FIXME: allow help message to be overwritten by errors from
          loading init files */
       rblist quitstr = command_to_binding(F_file_quit);
-      if (!rblist_compare(quitstr, rblist_from_string("")))
+      if (!rblist_compare(quitstr, rblist_empty))
         quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
       if (buf) {
         minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %s to quit", astr_to_string(quitstr)));
-        quitstr = rblist_from_string("");
+        quitstr = rblist_empty;
         run();
       }
 

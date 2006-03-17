@@ -203,11 +203,12 @@ static void outch(int c, Font font, size_t *x)
       term_addch(' '), ++(*x);
   else if (isprint(c))
     term_addch(c), ++(*x);
-  else {
-    rblist as = make_char_printable((size_t)c);
-    for (w = 0; w < rblist_length(as) && *x < width; ++w)
-      term_addch(rblist_get(as, w)), ++(*x);
-  }
+  else
+    RBLIST_FOR(c, make_char_printable((size_t)c))
+      if (*x >= width) break;
+      term_addch(c);
+      ++(*x);
+    RBLIST_END
 
   term_attrset(1, FONT_NORMAL);
 }
@@ -271,7 +272,9 @@ static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
     term_move(line, win.ewidth - 1);
     term_addch('$');
   } else
-    for (; x < win.ewidth && in_region(lineno, i, &r); ++i)
+    /* In the following loop is in_region(lineno, i, &r) constant?
+       If so, replace with an if and a while. */
+    for (; x < win.ewidth && in_region(lineno, i, &r); i++)
       outch(' ', FONT_REVERSE, &x);
 }
 
@@ -283,7 +286,8 @@ static void draw_window(size_t topline)
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
-       i > 0 && list_prev(lp) != buf->lines; lp = list_prev(lp), --i, --lineno);
+       i > 0 && list_prev(lp) != buf->lines;
+       lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width();
 
@@ -330,6 +334,7 @@ void term_print(rblist as)
  * Calculate the best start column to draw if the line needs to be
  * truncated.
  * Called only for the line where the point is.
+ * FIXME: What the hell does this actually do?! And is it sensible?
  */
 static void calculate_start_column(void)
 {
@@ -343,6 +348,8 @@ static void calculate_start_column(void)
   for (lp = rp; ; lp--) {
     for (col = 0, p = lp; p < rp; ++p)
       if (rblist_get(pt.p->item, p) == '\t') {
+        /* FIXME: Broken unless t is a power of two. */
+        /* FIXME: Broken unless lp starts at a tab position. */
         col |= t - 1;
         ++col;
       } else if (isprint(rblist_get(pt.p->item, p)))
@@ -352,7 +359,7 @@ static void calculate_start_column(void)
 
     lpfact = lp / (win.ewidth / 3);
 
-    if (col >= win.ewidth - 1 || lpfact < (rpfact - 2)) {
+    if (col >= win.ewidth - 1 || lpfact + 2 < rpfact) {
       point_start_column = lp + 1;
       point_screen_column = lastcol;
       return;

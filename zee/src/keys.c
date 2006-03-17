@@ -103,7 +103,7 @@ rblist chordtostr(size_t key)
 {
   bool found;
   size_t i;
-  rblist as = rblist_from_string("");
+  rblist as = rblist_empty;
 
   if (key & KBD_CTRL)
     as = rblist_concat(as, rblist_from_string("C-"));
