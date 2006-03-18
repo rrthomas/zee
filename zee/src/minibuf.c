@@ -347,7 +347,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
           as = cp->match;
           i = rblist_length(as);
         } else
-          popup_scroll_down();
+          popup_scroll_down_and_loop();
       }
       break;
     default:

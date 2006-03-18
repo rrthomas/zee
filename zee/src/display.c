@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "main.h"
+#include "rblist.h"
 #include "extern.h"
 
 
@@ -66,9 +67,8 @@ END_DEF
 
 
 /* Contents of popup window. */
-static Line *popup = NULL;
-static size_t popup_num_lines = 0;
-static size_t popup_pos_line = 0;
+static rblist popup_text = NULL;
+static size_t popup_line = 0;
 
 /*
  * Set the popup string to as, which should not have a trailing newline.
@@ -76,13 +76,8 @@ static size_t popup_pos_line = 0;
  */
 void popup_set(rblist as)
 {
-  if (as)
-    popup = string_to_lines(as, &popup_num_lines);
-  else {
-    popup = NULL;
-    popup_num_lines = 0;
-  }
-  popup_pos_line = 0;
+  popup_text = as;
+  popup_line = 0;
 }
 
 /*
@@ -94,30 +89,37 @@ void popup_clear(void)
 }
 
 /*
- * Scroll the popup text up.
+ * Scroll the popup text and loop having reached the bottom.
  */
-void popup_scroll_down(void)
+void popup_scroll_down_and_loop(void)
 {
-  if (popup_pos_line + term_height() - 3 < popup_num_lines)
-    popup_pos_line += term_height() - 3;
-  else
-    popup_pos_line = 0;
-
+  const size_t h = term_height() - 3;
+  const size_t inc = h;
+  popup_line += inc;
+  if (popup_line > rblist_nl_count(popup_text))
+    popup_line = 0;
   term_display();
 }
 
 /*
- * Scroll the popup text down.
+ * Scroll down the popup text.
+ */
+void popup_scroll_down(void)
+{
+  const size_t h = term_height() - 3;
+  const size_t inc = h;
+  popup_line = min(popup_line + inc, rblist_nl_count(popup_text) + 1 - h);
+  term_display();
+}
+
+/*
+ * Scroll up the popup text.
  */
 void popup_scroll_up(void)
 {
-  if (popup_pos_line >= (term_height() - 3))
-    popup_pos_line -= term_height() - 3;
-  else if (popup_pos_line > 0)
-    popup_pos_line = 0;
-  else
-    popup_pos_line = popup_num_lines - (term_height() - 3);
-
+  const size_t h = term_height() - 3;
+  const size_t inc = h;
+  popup_line -= min(inc, popup_line);
   term_display();
 }
 
@@ -295,15 +297,14 @@ static void draw_window(size_t topline)
  */
 void term_print(rblist as)
 {
-  size_t i;
-
-  for (i = 0; i < rblist_length(as) && rblist_get(as, i) != '\0'; i++)
-    if (rblist_get(as, i) != '\n')
-      term_addch(rblist_get(as, i));
+  RBLIST_FOR(c, as)
+    if (c != '\n')
+      term_addch(c);
     else {
       term_clrtoeol();
       term_nl();
     }
+  RBLIST_END
 }
 
 /*
@@ -417,34 +418,27 @@ static void draw_status_line(size_t line)
  */
 static void draw_popup(void)
 {
-  Line *popup = popup;
+  /* Number of lines of popup_text that will fit on the terminal.
+   * Allow 3 for the border above, and minibuffer and status line below. */
+  const size_t h = term_height() - 3;
+  /* Number of lines is one more than number of newline characters. */
+  const size_t l = rblist_nl_count(popup_text) + 1;
+  /* Position of top of popup == number of lines not to use. */
+  const size_t y = h > l ? h - l : 0;
+  /* Number of lines to print. */
+  const size_t p = min(h - y, l - popup_line);
 
-  if (popup) {
-    Line *lp;
-    size_t i, y = 0;
+  term_move(y, 0);
+  draw_border();
 
-    /* Add 3 to popup_lines for the border above, and minibuffer and
-       status line below. */
-    if (term_height() - 3 > popup_num_lines)
-      y = term_height() - 3 - popup_num_lines;
-    term_move(y++, 0);
-    draw_border();
+  size_t start_pos = rblist_line_to_start_pos(popup_text, popup_line);
+  size_t end_pos = rblist_line_to_end_pos(popup_text, popup_line + p - 1);
+  term_print(rblist_sub(popup_text, start_pos, end_pos));
+  term_print(astr_nl());
 
-    /* Skip down to first line to display. */
-    for (i = 0, lp = list_first(popup); i < popup_pos_line; i++, lp = list_next(lp))
-      ;
-
-    /* Draw lines. */
-    for (; i < popup_num_lines && y < term_height() - 2;
-         i++, y++, lp = list_next(lp)) {
-      term_print(rblist_sub(lp->item, 0, min(term_width(), rblist_length(lp->item))));
-      term_print(rblist_from_string("\n"));
-    }
-
-    /* Draw blank lines to bottom of window. */
-    for (; y < term_height() - 2; y++)
-      term_print(rblist_from_string("\n"));
-  }
+  /* Draw blank lines to bottom of window. */
+  for (size_t i = h - y - p; i > 0; i--)
+    term_print(astr_nl());
 }
 
 /*
@@ -469,7 +463,8 @@ void term_display(void)
   topline += win.fheight;
 
   /* Draw the popup window. */
-  draw_popup();
+  if (popup_text)
+    draw_popup();
 
   /* Redraw cursor. */
   term_move(cur_topline + win.topdelta, point_screen_column);

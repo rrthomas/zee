@@ -32,6 +32,15 @@
 #include "rblist.h"
 
 
+rblist astr_nl(void)
+{
+  static rblist ret;
+  /* It is infuriating to have to do this "if"! Is there a better way? */
+  if (!ret)
+    ret = rblist_singleton('\n');
+  return ret;
+}
+
 char *astr_to_string(rblist rbl)
 {
   char *s = zmalloc(rblist_length(rbl) + 1);

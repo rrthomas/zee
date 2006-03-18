@@ -121,6 +121,7 @@ Line *line_new(void)
 
 /*
  * Read an rblist into a Line list.
+ * FIXME: Since the introduction of rblists, this is never necessary.
  */
 Line *string_to_lines(rblist as, size_t *lines)
 {

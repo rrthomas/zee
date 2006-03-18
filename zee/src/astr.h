@@ -29,6 +29,9 @@
 
 #include "rblist.h"
 
+/* Useful constant: rblist_singleton('\n') */
+rblist astr_nl(void);
+
 /*
  * Find first occurrence of needle in haystack starting at position
  * pos; return -1 if no occurrence.
