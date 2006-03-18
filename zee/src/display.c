@@ -71,22 +71,6 @@ static size_t popup_num_lines = 0;
 static size_t popup_pos_line = 0;
 
 /*
- * Return the contents of the popup window.
- */
-Line *popup_get(void)
-{
-  return popup;
-}
-
-/*
- * Return number of lines in popup.
- */
-size_t popup_lines(void)
-{
-  return popup_num_lines;
-}
-
-/*
  * Set the popup string to as, which should not have a trailing newline.
  * Passing NULL for as clears the popup string.
  */
@@ -107,14 +91,6 @@ void popup_set(rblist as)
 void popup_clear(void)
 {
   popup_set(NULL);
-}
-
-/*
- * Return the popup position.
- */
-size_t popup_pos(void)
-{
-  return popup_pos_line;
 }
 
 /*
@@ -441,7 +417,7 @@ static void draw_status_line(size_t line)
  */
 static void draw_popup(void)
 {
-  Line *popup = popup_get();
+  Line *popup = popup;
 
   if (popup) {
     Line *lp;
@@ -449,17 +425,17 @@ static void draw_popup(void)
 
     /* Add 3 to popup_lines for the border above, and minibuffer and
        status line below. */
-    if (term_height() - 3 > popup_lines())
-      y = term_height() - 3 - popup_lines();
+    if (term_height() - 3 > popup_num_lines)
+      y = term_height() - 3 - popup_num_lines;
     term_move(y++, 0);
     draw_border();
 
     /* Skip down to first line to display. */
-    for (i = 0, lp = list_first(popup); i < popup_pos(); i++, lp = list_next(lp))
+    for (i = 0, lp = list_first(popup); i < popup_pos_line; i++, lp = list_next(lp))
       ;
 
     /* Draw lines. */
-    for (; i < popup_lines() && y < term_height() - 2;
+    for (; i < popup_num_lines && y < term_height() - 2;
          i++, y++, lp = list_next(lp)) {
       term_print(rblist_sub(lp->item, 0, min(term_width(), rblist_length(lp->item))));
       term_print(rblist_from_string("\n"));

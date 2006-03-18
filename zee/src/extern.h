@@ -52,11 +52,8 @@ size_t completion_remove_prefix(Completion *cp, rblist search);
 /* display.c -------------------------------------------------------------- */
 void resync_display(void);
 void resize_window(void);
-Line *popup_get(void);
-size_t popup_lines(void);
 void popup_set(rblist as);
 void popup_clear(void);
-size_t popup_pos(void);
 void popup_scroll_up(void);
 void popup_scroll_down(void);
 size_t term_width(void);
