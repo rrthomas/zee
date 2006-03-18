@@ -125,7 +125,7 @@ Save buffer in visited file.\
   if (buffer_write(buf, buf->filename) == false) {
     minibuf_error(astr_afmt("%s: %s", buf->filename, strerror(errno)));
   } else {
-    minibuf_write(astr_afmt("Wrote `%s'", astr_to_string(buf->filename)));
+    minibuf_write(astr_afmt("Wrote `%r'", buf->filename));
     buf->flags &= ~BFLAG_MODIFIED;
 
     if (buf->last_undop)
@@ -170,7 +170,7 @@ void die(int exitcode)
     if (buf->filename)
       as = buf->filename;
     as = rblist_concat(as, rblist_from_string("." PACKAGE_NAME "SAVE"));
-    fprintf(stderr, "Saving %s...\r\n", astr_to_string(as));
+    fprintf(stderr, "Saving %r...\r\n", as);
     buffer_write(buf, as);
     term_close();
   }

@@ -503,7 +503,7 @@ file, replacing the selection.\n\
 
       close(fd);
 
-      cmd = astr_afmt("%s 2>&1 <%s", astr_to_string(ms), tempfile);
+      cmd = astr_afmt("%r 2>&1 <%s", ms, tempfile);
 
       if ((pipe = popen(astr_to_string(cmd), "r")) == NULL) {
         minibuf_error(rblist_from_string("Cannot open pipe to process"));

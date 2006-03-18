@@ -75,7 +75,7 @@ static rblist completion_write(list l)
 /*
  * Pop up the completion window, showing cp->matches. If there are no
  * completions, the popup just says "No completions". If there is exactly
- * one completion the popup says "Sole completion: %s".
+ * one completion the popup says "Sole completion: %r".
  */
 void completion_popup(Completion *cp)
 {

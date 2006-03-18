@@ -159,10 +159,10 @@ static int isearch(int dir)
 
   for (;;) {
     /* Make the minibuf message. */
-    as = astr_afmt("%sI-search%s: %s",
+    as = astr_afmt("%sI-search%s: %r",
               (last ? "" : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
-              astr_to_string(pattern));
+              pattern);
 
     /* Regex error. */
     if (find_err) {
@@ -307,7 +307,7 @@ what to do with it.\
   else {
     find_no_upper = no_upper(find);
 
-    if ((repl = minibuf_read(astr_afmt("Query replace `%s' with: ", astr_to_string(find)), rblist_empty)) == NULL)
+    if ((repl = minibuf_read(astr_afmt("Query replace `%r' with: ", find), rblist_empty)) == NULL)
       ok = CMDCALL(edit_select_off);
     while (ok && search_forward(buf->pt.p, buf->pt.o, find)) {
       if (!noask) {
@@ -315,7 +315,7 @@ what to do with it.\
         if (thisflag & FLAG_NEED_RESYNC)
           resync_display();
         for (;;) {
-          minibuf_write(astr_afmt("Query replacing `%s' with `%s' (y, n, !)? ", astr_to_string(find), astr_to_string(repl)));
+          minibuf_write(astr_afmt("Query replacing `%r' with `%r' (y, n, !)? ", find, repl));
           c = getkey();
           if (c == KBD_CANCEL || c == 'y' || c == 'n' || c == '!')
             break;

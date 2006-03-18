@@ -528,13 +528,12 @@ void die(int exitcode)
 /* Print the lengths of a list into a string.
    Return a char * because that's always what we want for diagnostic
    messages below. */
-static const char *rbl_structure(rblist rbl)
+static rblist rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return astr_to_string(astr_afmt("%d", rbl->leaf.length));
+    return astr_afmt("%d", rbl->leaf.length);
   else
-    return astr_to_string(astr_afmt("(%s,%s)", rbl_structure(rbl->node.left),
-                               rbl_structure(rbl->node.right)));
+    return astr_afmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
 }
 
 /* Checks all structural invariants that are supposed to hold for 'rbl'. */
@@ -622,7 +621,7 @@ int main(void)
 #ifdef DEBUG
   printf("Making a list of length %d by appending one element at a time required\n"
          "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
-  printf("%s\n", rbl_structure(rbl1));
+  printf("%s\n", astr_to_string(rbl_structure(rbl1)));
 #endif
 
   /* Test split and stress concat some more. Break 's1' at positions
@@ -631,7 +630,7 @@ int main(void)
 
   rbl1 = rblist_from_array(s1, strlen(s1));
 #ifdef DEBUG
-  printf("%s\n", rbl_structure(rbl1));
+  printf("%s\n", astr_to_string(rbl_structure(rbl1)));
 #endif
   for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
     rblist_split(rbl1, i, &rbl2, &rbl3);
@@ -641,7 +640,7 @@ int main(void)
     test(rbl4, s1, 19 * 7);
 #ifdef DEBUG
     printf("rbl2 = %s\nrbl3 = %s\n", astr_to_string(rbl2), astr_to_string(rbl3));
-    printf("%s plus %s makes %s\n", rbl_structure(rbl2), rbl_structure(rbl3), rbl_structure(rbl4));
+    printf("%s plus %s makes %s\n", astr_to_string(rbl_structure(rbl2)), astr_to_string(rbl_structure(rbl3)), astr_to_string(rbl_structure(rbl4)));
 #endif
   }
 
