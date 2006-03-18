@@ -418,6 +418,8 @@ static void draw_status_line(size_t line)
  */
 static void draw_popup(void)
 {
+  assert(popup_text);
+  
   /* Number of lines of popup_text that will fit on the terminal.
    * Allow 3 for the border above, and minibuffer and status line below. */
   const size_t h = term_height() - 3;
