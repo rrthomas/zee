@@ -73,26 +73,6 @@ rblist astr_fgets(FILE *fp)
   return as;
 }
 
-/* Tentatively replaced with a version that understands rblists
-rblist astr_afmt(const char *fmt, ...)
-{
-  va_list ap;
-  int len;
-  char *s = NULL;
-
-  va_start(ap, fmt);
-  len = vsnprintf(s, 0, fmt, ap);
-  va_end(ap);
-  s = zmalloc((size_t)len + 1);
-
-  va_start(ap, fmt);
-  assert(vsnprintf(s, (size_t)len + 1, fmt, ap) == len);
-  va_end(ap);
-
-  return rblist_from_string(s);
-}
-*/
-
 /*
  * Used internally by astr_afmt. Formats an unsigned number in any
  * base up to 16. If the result has more than 64 digits, higher
