@@ -170,7 +170,7 @@ void die(int exitcode)
     if (buf->filename)
       as = buf->filename;
     as = rblist_concat(as, rblist_from_string("." PACKAGE_NAME "SAVE"));
-    fprintf(stderr, "Saving %r...\r\n", as);
+    fprintf(stderr, "Saving %s...\r\n", astr_to_string(as));
     buffer_write(buf, as);
     term_close();
   }
