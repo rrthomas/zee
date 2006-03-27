@@ -92,7 +92,7 @@ static rblist fmt_number(size_t x, int base)
   static const char const *digits = "0123456789abcdef";
   #define MAX_DIGITS 64
   static char buf[MAX_DIGITS];
-  
+
   if (!x)
     return rblist_from_string("0");
   size_t i;
