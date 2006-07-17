@@ -41,7 +41,7 @@
 static const char *find_err = NULL;
 
 /* FIXME: Use PCRE instead */
-static size_t find_substr(rblist s1, rblist as2, int bol, int eol, int backward)
+static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward)
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
@@ -63,11 +63,17 @@ static size_t find_substr(rblist s1, rblist as2, int bol, int eol, int backward)
     pattern.not_eol = !eol;
 
     if (!backward)
-      index = re_search(&pattern, astr_to_string(s1), (int)rblist_length(s1), 0, (int)rblist_length(s1),
+      index = re_search(&pattern, astr_to_string(as1), (int)rblist_length(as1), 0, (int)rblist_length(as1),
                         &search_regs);
-    else
-      index = re_search(&pattern, astr_to_string(s1), (int)rblist_length(s1), (int)rblist_length(s1), -(int)rblist_length(s1),
-                        &search_regs);
+    else {
+      for (size_t i = (int)rblist_length(as1); ; i--) {
+        index = re_search(&pattern, astr_to_string(as1), (int)rblist_length(as1), i, 0,
+                          &search_regs);
+
+        if (i == 0)
+          break;
+      }
+    }
 
     if (index >= 0) {
       if (!backward)
