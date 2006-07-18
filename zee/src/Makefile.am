@@ -1,11 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 
-if HAVE_REGEX_H
-regex =
-else
-regex = regex.o
-endif
-
 TESTS = vector astr rblist
 check_PROGRAMS = vector astr rblist
 
@@ -68,9 +62,9 @@ else
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
 endif
 
-zee_LDADD = $(regex) @LIBOBJS@
+zee_LDADD = @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h key_bindings.el
+EXTRA_DIST = key_bindings.el
 
 distclean-local:
 	rm -f paths.h tbl_funcs.h

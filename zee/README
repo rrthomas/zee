@@ -1,16 +1,14 @@
                                  Zee
                                  ---
 
-Zee an experimental editor and programming environment based on the
-Emacs clone Zile (http://zile.sourceforge.net/).
+Zee is an experimental editor and programming environment, hosted on
+SourceForge at http://sourceforge.net/projects/zee/. It is free
+software, licensed under the GNU GPL.
 
-Zee is written in POSIX C and requires the Boehm garbage collector,
-libgc, and a terminal library (either termcap or Allegro).
-
-Zee is free software, licensed under the GNU GPL.
+Zee is written in POSIX C and requires the Boehm garbage collector
+(libgc), PCRE (the Perl-compatible regular expressions library), and a
+terminal library (either ncurses or Allegro).
 
 See INSTALL for installation instructions.
-
-Zee is hosted on SourceForge at http://sourceforge.net/projects/zee/
 
 Any questions, comments, or bug reports should be sent to rrt@sc3d.org.

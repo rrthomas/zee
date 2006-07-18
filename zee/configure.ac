@@ -35,29 +35,13 @@ dnl ==================================================================
 AC_HEADER_STDC
 
 dnl ==================================================================
-dnl Check for GNU Regex library
+dnl Check for PCRE
 dnl ==================================================================
 
-AC_MSG_CHECKING([for GNU regex.h])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <regex.h>
-], [
-struct re_pattern_buffer pattern;
-struct re_registers search_regs;
-re_set_syntax(RE_SYNTAX_EMACS);
-re_compile_pattern(".*", 2, &pattern);
-re_search(&pattern, "test", 4, 0, 4, &search_regs);
-], have_regex_h=true, have_regex_h=false)
-
-if test x$have_regex_h = xtrue ; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_REGEX_H, 1, [Define this to use GNU regex.h.])
-else
-	AC_MSG_RESULT(no)
-fi
-
-AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
+AC_CHECK_HEADER(pcre.h, ,
+        AC_MSG_FAILURE([cannot find pcre.h]))
+AC_CHECK_LIB(pcre, pcre_compile, [LIBS="$LIBS -lpcre"],
+        AC_MSG_FAILURE([cannot find libpcre]))
 
 dnl ==================================================================
 dnl Debugging
@@ -100,9 +84,7 @@ AC_HELP_STRING([--enable-allegro], [use allegro interface]),
 if test $enableval = yes; then
         allegro=true
         AC_MSG_RESULT(yes)
-        AC_CHECK_HEADER(allegro.h,
-			AC_DEFINE(HAVE_ALLEGRO_H, 1, [We have the allegro.h header.]),
-			AC_MSG_FAILURE([cannot find allegro.h]))
+        AC_CHECK_HEADER(allegro.h, , AC_MSG_FAILURE([cannot find allegro.h]))
         AC_DEFINE(ALLEGRO, 1, [Define this to use Allegro library.])
 else
         allegro=false
@@ -161,13 +143,13 @@ AC_DEFUN([CHECK_CURSES],
         AC_MSG_CHECKING([use curses])
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
-        AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
-[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
+        AC_CHECK_HEADER(ncurses.h, AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
+        [AC_CHECK_HEADER(curses.h, AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
         AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
-        dnl Check if ncurses library is available as libncurses or libcurses
-        AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+dnl Check if ncurses library is available as libncurses or libcurses
+AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
         [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
+        AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 ])
 
 if test x$allegro = xfalse; then

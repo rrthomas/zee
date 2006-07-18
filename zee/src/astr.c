@@ -35,7 +35,7 @@
 rblist astr_nl(void)
 {
   static rblist ret = NULL;
-  /* It is infuriating to have to do this "if"! Is there a better way? */
+  /* FIXME: It is infuriating to have to do this "if"! Is there a better way? */
   if (!ret)
     ret = rblist_singleton('\n');
   return ret;

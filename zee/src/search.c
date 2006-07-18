@@ -29,61 +29,50 @@
 #include <string.h>
 #include <stdint.h>
 
+#include <pcre.h>
+
 #include "main.h"
 #include "extern.h"
-#ifdef HAVE_REGEX_H
-#include <regex.h>
-#else
-#include "regex.h"
-#endif
 
 
-static const char *find_err = NULL;
+static const char *find_err;
 
-/* FIXME: Use PCRE instead */
 static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward)
 {
-  struct re_pattern_buffer pattern;
-  struct re_registers search_regs;
+  pcre *pattern;
   size_t ret = SIZE_MAX;
-  int index;
+  int ovector[3], err_offset;
 
-  search_regs.num_regs = 1;
-  search_regs.start = zmalloc(sizeof(regoff_t));
-  search_regs.end = zmalloc(sizeof(regoff_t));
+  if ((pattern = pcre_compile(astr_to_string(as2), 0, &find_err, &err_offset, NULL))) {
+    int options = 0;
+    int index = 0;
 
-  pattern.translate = NULL;
-  pattern.fastmap = NULL;
-  pattern.buffer = NULL;
-  pattern.allocated = 0;
-
-  find_err = re_compile_pattern(astr_to_string(as2), (int)rblist_length(as2), &pattern);
-  if (!find_err) {
-    pattern.not_bol = !bol;
-    pattern.not_eol = !eol;
+    if (!bol)
+      options |= PCRE_NOTBOL;
+    if (!eol)
+      options |= PCRE_NOTEOL;
 
     if (!backward)
-      index = re_search(&pattern, astr_to_string(as1), (int)rblist_length(as1), 0, (int)rblist_length(as1),
-                        &search_regs);
-    else {
-      for (size_t i = (int)rblist_length(as1); ; i--) {
-        index = re_search(&pattern, astr_to_string(as1), (int)rblist_length(as1), i, 0,
-                          &search_regs);
-
-        if (i == 0)
-          break;
-      }
+      index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), 0,
+                        options, ovector, 3);
+    else
+      for (int i = (int)rblist_length(as1); i >= 0; i--) {
+        index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), i,
+                          options | PCRE_ANCHORED, ovector, 3);
     }
+
+    fprintf(stderr, "%d\n", index);
 
     if (index >= 0) {
       if (!backward)
-        ret = search_regs.end[0];
+        ret = ovector[1];
       else
-        ret = search_regs.start[0];
+        ret = ovector[0];
     }
-  }
 
-  regfree(&pattern);
+    pcre_free(pattern);
+  } else
+    fprintf(stderr, "%s %d\n", find_err, err_offset);
 
   return ret;
 }
@@ -95,7 +84,7 @@ static int search_forward(Line *startp, size_t starto, rblist as)
     rblist sp;
 
     for (lp = startp, sp = rblist_sub(lp->item, starto, rblist_length(lp->item));
-         lp != list_last(buf->lines);
+         ;
          lp = list_next(lp), sp = lp->item) {
       if (rblist_length(sp) > 0) {
         size_t off = find_substr(sp, as, sp == lp->item, true, false);
@@ -106,6 +95,8 @@ static int search_forward(Line *startp, size_t starto, rblist as)
           return true;
         }
       }
+      if (lp == list_last(buf->lines))
+        break;
     }
   }
 
@@ -119,7 +110,7 @@ static int search_backward(Line *startp, size_t starto, rblist as)
     size_t s1size;
 
     for (lp = startp, s1size = starto;
-         lp != list_first(buf->lines);
+         ;
          lp = list_prev(lp), s1size = rblist_length(lp->item)) {
       rblist sp = lp->item;
       if (s1size > 0) {
@@ -131,6 +122,8 @@ static int search_backward(Line *startp, size_t starto, rblist as)
           return true;
         }
       }
+      if (lp != list_first(buf->lines))
+        break;
     }
   }
 
