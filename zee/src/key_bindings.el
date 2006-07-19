@@ -26,7 +26,6 @@ key_bind "C-END" move_end_file
 # Selection.
 # select_other_end
 key_bind "C-@" edit_select_toggle
-key_bind "C-g" edit_select_off
 
 # Absolute navigation.
 
