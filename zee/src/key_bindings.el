@@ -25,10 +25,8 @@ key_bind "C-END" move_end_file
 
 # Selection.
 # select_other_end
-key_bind "M-h" edit_select_paragraph
 key_bind "C-@" edit_select_toggle
 key_bind "C-g" edit_select_off
-key_bind "M-@" edit_select_word
 
 # Absolute navigation.
 

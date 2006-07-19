@@ -253,32 +253,6 @@ Move the cursor backwards one word.\
 }
 END_DEF
 
-DEF(edit_select_word,
-"\
-Select the current word.\
-")
-{
-  if (!eolp() && isalnum(following_char()))
-    ok = CMDCALL(move_next_word) &&
-      CMDCALL(edit_select_on) &&
-      CMDCALL(move_previous_word) &&
-      CMDCALL(edit_select_other_end);
-}
-END_DEF
-
-DEF(edit_select_word_backward,
-"\
-Select the previous word.\
-")
-{
-  if (!bolp() && isalnum(preceding_char()))
-    ok = CMDCALL(move_previous_word) &&
-      CMDCALL(edit_select_on) &&
-      CMDCALL(move_next_word) &&
-      CMDCALL(edit_select_other_end);
-}
-END_DEF
-
 DEF(move_previous_paragraph,
 "\
 Move the cursor backward to the start of the paragraph.\
@@ -307,18 +281,6 @@ Move the cursor forward to the end of the paragraph.\
     CMDCALL(move_start_line);
   else
     CMDCALL(move_end_line);
-}
-END_DEF
-
-DEF(edit_select_paragraph,
-"\
-Select the current paragraph.\
-")
-{
-  CMDCALL(move_next_paragraph);
-  CMDCALL(edit_select_on);
-  CMDCALL(move_previous_paragraph);
-  CMDCALL(edit_select_other_end);
 }
 END_DEF
 
