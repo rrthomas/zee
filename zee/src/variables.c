@@ -167,34 +167,26 @@ DEF(preferences_set_variable,
 Set a variable to the specified value.\
 ")
 {
-  rblist var, val;
-
-  ok = false;
+  rblist var, val = NULL;
 
   if (list_length(l) > 1) {
     var = list_behead(l);
     val = list_behead(l);
-    ok = true;
-  } else {
-    if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: ")))) {
-      var_entry *p = get_variable_default(var);
-      if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
-        int i;
-        if ((i = minibuf_read_boolean(astr_afmt("Set %r to value: ", var))) == -1)
-          CMDCALL(edit_select_off);
-        else {
-          val = rblist_from_string((i == true) ? "true" : "false");
-          ok = true;
-        }
-      } else                    /* Non-boolean variable. */
-        if ((val = minibuf_read(astr_afmt("Set %r to value: ", var), rblist_empty)) == NULL)
-          CMDCALL(edit_select_off);
-        else
-          ok = true;
-    }
+  } else if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: ")))) {
+    var_entry *p = get_variable_default(var);
+    if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
+      int b;
+      if ((b = minibuf_read_boolean(astr_afmt("Set %r to value: ", var))) != -1)
+        val = rblist_from_string((b == true) ? "true" : "false");
+    } else                      /* Non-boolean variable. */
+      val = minibuf_read(astr_afmt("Set %r to value: ", var), rblist_empty);
   }
 
-  if (ok)
+  if (val)
     set_variable(var, val);
+  else {
+    ok = false;
+    CMDCALL(edit_select_off);
+  }
 }
 END_DEF
