@@ -136,7 +136,7 @@ END_DEF
 
 DEF(file_quit,
 "\
-Offer to save the buffer if there are unsaved changes, then quit.\
+Quit, requiring confirmation if there are unsaved changes.\
 ")
 {
   if (buf->flags & BFLAG_MODIFIED) {
