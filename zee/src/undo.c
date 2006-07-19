@@ -54,7 +54,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 }
 
 /*
- * Revert an action.  Return the next undo entry.
+ * Revert an action. Return the next undo entry.
  */
 static Undo *revert_action(Undo *up)
 {
