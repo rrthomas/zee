@@ -314,11 +314,11 @@ what to do with it.\
         if (thisflag & FLAG_NEED_RESYNC)
           resync_display();
         for (;;) {
-          minibuf_write(astr_afmt("Query replacing `%r' with `%r' (y, n, !)? ", find, repl));
+          minibuf_write(astr_afmt("Query replacing `%r' with `%r' ([y]es, [n]o, [a]ll)? ", find, repl));
           c = getkey();
-          if (c == KBD_CANCEL || c == 'y' || c == 'n' || c == '!')
+          if (c == KBD_CANCEL || c == 'y' || c == 'n' || c == 'a')
             break;
-          minibuf_error(rblist_from_string("Please answer `y', `n', or `!'"));
+          minibuf_error(rblist_from_string("Please answer `y', `n', or `a'"));
           waitkey(WAITKEY_DEFAULT);
         }
         minibuf_clear();
@@ -327,7 +327,7 @@ what to do with it.\
         case KBD_CANCEL: /* C-g: quit immediately */
           ok = CMDCALL(edit_select_off);
           break;
-        case '!': /* Replace all without asking. */
+        case 'a': /* Replace all without asking. */
           noask = true;
           /* FALLTHROUGH */
         case 'y':
