@@ -523,12 +523,9 @@ void resize_window(void)
 }
 
 /*
- * Emit an error sound and cancel any macro definition.
+ * Emit an error sound.
  */
 void ding(void)
 {
   term_beep();
-
-  if (thisflag & FLAG_DEFINING_MACRO)
-    cancel_kbd_macro();
 }

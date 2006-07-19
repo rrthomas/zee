@@ -56,6 +56,9 @@ void minibuf_error(rblist as)
 {
   minibuf_write(as);
   ding();
+
+  if (thisflag & FLAG_DEFINING_MACRO)
+    cancel_kbd_macro();
 }
 
 /*
