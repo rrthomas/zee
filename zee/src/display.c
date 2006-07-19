@@ -315,7 +315,7 @@ void term_print(rblist as)
  */
 static void calculate_start_column(void)
 {
-  size_t col = 0, lastcol = 0, t = tab_width();
+  size_t col = 0, lastcol = 0;
   size_t rp, lp, p, rpfact, lpfact;
   Point pt = buf->pt;
 
@@ -325,10 +325,9 @@ static void calculate_start_column(void)
   for (lp = rp; ; lp--) {
     for (col = 0, p = lp; p < rp; ++p)
       if (rblist_get(pt.p->item, p) == '\t') {
-        /* FIXME: Broken unless t is a power of two. */
         /* FIXME: Broken unless lp starts at a tab position. */
-        col |= t - 1;
-        ++col;
+        size_t t = tab_width();
+        col += t - (col % t);
       } else if (isprint(rblist_get(pt.p->item, p)))
         ++col;
       else
@@ -419,7 +418,7 @@ static void draw_status_line(size_t line)
 static void draw_popup(void)
 {
   assert(popup_text);
-  
+
   /* Number of lines of popup_text that will fit on the terminal.
    * Allow 3 for the border above, and minibuffer and status line below. */
   const size_t h = term_height() - 3;
