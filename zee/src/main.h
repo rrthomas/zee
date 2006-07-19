@@ -273,4 +273,6 @@ typedef struct {
 #define CMDCALL_UINT(name, arg) \
   F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
+#define VERSION_STRING TEXT_NAME " " VERSION
+
 #endif /* !MAIN_H */

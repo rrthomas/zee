@@ -33,7 +33,12 @@ DEF(help_about,
 Show the version in the minibuffer.\
 ")
 {
-  minibuf_write(rblist_from_string(PACKAGE_NAME " " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST));
+  rblist quitstr = command_to_binding(F_file_quit);
+
+  if (!rblist_compare(quitstr, rblist_empty))
+    quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
+
+  minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %r to quit", quitstr));
 }
 END_DEF
 

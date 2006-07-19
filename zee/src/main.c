@@ -43,8 +43,6 @@
 #include "extern.h"
 
 
-#define VERSION_STRING TEXT_NAME " " VERSION
-
 #define COPYRIGHT_STRING \
   "Copyright (c) 2003-2006 Reuben Thomas <rrt@sc3d.org>\n"\
   "Copyright (c) 2005-2006 Alistair Turbull <apt1002@mupsych.org>\n"\
@@ -85,7 +83,7 @@ static void run(void)
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, TEXT_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
+  fprintf(stderr, TEXT_NAME " crashed. Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
   die(2);
 }
 
@@ -221,14 +219,10 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
-      /* FIXME: allow help message to be overwritten by errors from
-         loading init files */
-      rblist quitstr = command_to_binding(F_file_quit);
-      if (!rblist_compare(quitstr, rblist_empty))
-        quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
       if (buf) {
-        minibuf_write(astr_afmt("Welcome to " VERSION_STRING "! For a menu type Alt-x; %r to quit", quitstr));
-        quitstr = rblist_empty;
+        /* FIXME: allow help message to be overwritten by errors from
+           loading init files */
+        CMDCALL(help_about);
         run();
       }
 
