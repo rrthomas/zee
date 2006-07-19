@@ -63,20 +63,6 @@ Paragraphs can also be wrapped using the `wrap_paragraph'.\
 }
 END_DEF
 
-DEF_ARG(set_wrap_column,
-"\
-Set the wrap column.\n\
-If an argument value is passed, set `wrap_column' to that value,\n\
-otherwise with the current column value.\
-",
-UINT(col, "New wrap column: "))
-{
-  /* FIXME: is_empty(l) is always true. */
-  set_variable(rblist_from_string("wrap_column"),
-               astr_afmt("%d", list_empty(l) ? buf->pt.o + 1 : col));
-}
-END_DEF
-
 DEF(edit_select_on,
 "\
 Start selecting text.\
