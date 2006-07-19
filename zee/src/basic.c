@@ -61,7 +61,7 @@ Move the cursor to the end of the line.\
 END_DEF
 
 /*
- * Get the goal column.  Take care of expanding tabulations.
+ * Get the goal column. Take care of expanding tabulations.
  */
 size_t get_goalc(void)
 {
@@ -179,7 +179,7 @@ int goto_point(Point pt)
 }
 
 /*
- * Go to the line `to_line', counting from 0.  Point will end up in
+ * Go to the line `to_line', counting from 0. Point will end up in a
  * "random" column.
  */
 int goto_line(size_t to_line)
