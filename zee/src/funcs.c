@@ -194,35 +194,6 @@ END_DEF
 			  Move through words
 ***********************************************************************/
 
-DEF(move_next_word,
-"\
-Move the cursor forward one word.\
-")
-{
-  bool gotword = false;
-
-  for (;;) {
-    while (!eolp()) {
-      int c = following_char();
-      if (!isalnum(c)) {
-        if (gotword)
-          break;
-      } else
-        gotword = true;
-      buf->pt.o++;
-    }
-    if (gotword)
-      break;
-    buf->pt.o = rblist_length(buf->pt.p->item);
-    if (!CMDCALL(move_next_line)) {
-      ok = false;
-      break;
-    }
-    buf->pt.o = 0;
-  }
-}
-END_DEF
-
 DEF(move_previous_word,
 "\
 Move the cursor backwards one word.\
@@ -249,6 +220,35 @@ Move the cursor backwards one word.\
     }
     if (gotword)
       break;
+  }
+}
+END_DEF
+
+DEF(move_next_word,
+"\
+Move the cursor forward one word.\
+")
+{
+  bool gotword = false;
+
+  for (;;) {
+    while (!eolp()) {
+      int c = following_char();
+      if (!isalnum(c)) {
+        if (gotword)
+          break;
+      } else
+        gotword = true;
+      buf->pt.o++;
+    }
+    if (gotword)
+      break;
+    buf->pt.o = rblist_length(buf->pt.p->item);
+    if (!CMDCALL(move_next_line)) {
+      ok = false;
+      break;
+    }
+    buf->pt.o = 0;
   }
 }
 END_DEF
