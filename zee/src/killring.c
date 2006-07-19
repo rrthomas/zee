@@ -74,36 +74,23 @@ END_DEF
 DEF(edit_kill_selection,
 "\
 Kill between point and mark.\n\
-The text is deleted but saved in the kill buffer.\n\
-The command paste can retrieve it from there.\n\
-If the buffer is read-only, the text will not be deleted, but it will\n\
-be added to the kill buffer anyway.  This means that\n\
-you can use the killing commands to copy text from a read-only buffer.\n\
+The text is deleted, unless the buffer is read-only, and saved in the\n\
+kill buffer; the `edit_paste' command retrieves it.\n\
 If the previous command was also a kill command,\n\
 the text killed this time appends to the text killed last time.\
 ")
 {
-  Region r;
-
-  if (buf->flags & BFLAG_READONLY)
-    warn_if_readonly_buffer();
-  else {
-    if (!(lastflag & FLAG_DONE_KILL))
-      clear_kill_buffer();
-
-    if (!(buf->flags & BFLAG_ANCHORED))
-      ok = CMDCALL(edit_kill_line);
+  if (CMDCALL(edit_copy)) {
+    if (buf->flags & BFLAG_READONLY)
+      warn_if_readonly_buffer();
     else {
+      Region r;
       rblist as;
-      assert(calculate_the_region(&r));
 
+      assert(calculate_the_region(&r));
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
       delete_nstring(r.size, &as);
-      killed_text = rblist_concat(killed_text, as);
-
-      thisflag |= FLAG_DONE_KILL;
-      buf->flags &= ~BFLAG_ANCHORED;
     }
   }
 }
@@ -114,14 +101,14 @@ DEF(edit_copy,
 Copy the region to the kill buffer.\
 ")
 {
-  Region r;
-
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();
 
   if (warn_if_no_mark())
     ok = false;
   else {
+    Region r;
+
     assert(calculate_the_region(&r));
     killed_text = rblist_concat(killed_text, copy_text_block(r.start, r.size));
 
@@ -143,7 +130,8 @@ static bool kill_helper(Command cmd)
   else {
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-    ok = cmd(NULL);
+    if (ok = CMDCALL(edit_select_on))
+      ok = cmd(NULL);
     if (ok)
       ok = CMDCALL(edit_kill_selection);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
@@ -163,7 +151,7 @@ DEF(edit_kill_word,
 Kill characters forward until encountering the end of a word.\
 ")
 {
-  ok = kill_helper(F_edit_select_word);
+  ok = kill_helper(F_move_next_word);
 }
 END_DEF
 
@@ -172,7 +160,7 @@ DEF(edit_kill_word_backward,
 Kill characters backward until encountering the end of a word.\
 ")
 {
-  ok = kill_helper(F_edit_select_word_backward);
+  ok = kill_helper(F_move_previous_word);
 }
 END_DEF
 
