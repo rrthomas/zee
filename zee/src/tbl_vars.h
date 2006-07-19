@@ -9,7 +9,7 @@
  * The fourth column specifies the variable documentation.
  */
 
-X("wrap_mode",			"b", "false", "\
+X("wrap_mode",				"b", "false", "\
 If enabled, the Wrap Mode is automatically enabled.")
 X("case_replace",			"b", "true", "\
 Non-nil means `edit_find_and_replace' should preserve case in replacements.")
