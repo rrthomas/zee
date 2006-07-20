@@ -210,10 +210,10 @@ int main(int argc, char **argv)
 
     /* Load user init file */
     if (!nflag) {
-      rblist home = get_home_dir();
-      if (rblist_length(home) > 0) {
-        home = rblist_concat(home, rblist_from_string("/." PACKAGE_NAME));
-        if ((as = file_read(home)))
+      rblist userrc = get_home_dir();
+      if (rblist_length(userrc) > 0) {
+        userrc = rblist_concat(userrc, rblist_from_string("/." PACKAGE_NAME "rc"));
+        if ((as = file_read(userrc)))
           cmd_eval(as);
       }
     }

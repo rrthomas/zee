@@ -2,25 +2,24 @@
 
 		   Last updated: $Date$
 
+
+For questions not answered here, see the README and the info
+documentation (`info zee').
+
 ------------------------------------------------------------------------------
 
 INDEX
 
 1. General questions
    1.1. What does `Zee' mean?
-   1.2. What is Zee's license?
-   1.3. Where can I get the latest version?
-   1.4. Zee has a bug!
-   1.5. Zee is weird!
-   1.6. Zee doesn't compile.
+   1.2. Zee doesn't compile.
+   1.3. Zee is weird!
 
 2. Functionality
    2.1. How do I quit Zee?
    2.2. How do I return to the shell without leaving Zee?
    2.3. How do I undo the previous command?
-   2.4. What does `C-something' or `M-something' mean?
-   2.5. What settings can I change?
-   2.6. How do I handle non-ASCII characters?
+   2.4. How do I handle non-ASCII characters?
 
 ------------------------------------------------------------------------------
 
@@ -32,72 +31,37 @@ INDEX
     its descent from Zile). SourceForge doesn't allow two-letter
     names, so I chose `Zee' instead, which can be pronounced the same.
 
-1.2. What is Zee's license?
+1.2. Zee doesn't compile.
 
-    Zee is released under the GNU General Public License. For more
-    information, see http://www.gnu.org/licenses/gpl.html.
+    Zee should work on any POSIX-compliant OS that supports termcap or
+    Allegro. If you get Zee running a non-POSIX OS, please tell us and
+    send us the necessary patches.
 
-1.3. Where can I get the latest version?
-
-    The Zee project is hosted on SourceForge at:
-
-	http://zee.sourceforge.net/
-
-1.4. Zee has a bug!
-
-    Bug reports can be sent to the authors at
-    zee-devel@lists.sourceforge.net or entered directly into Bugzilla
-    at http://sourceforge.net/projects/zee. Patches are appreciated.
-
-1.5. Zee is weird!
+1.3. Zee is weird!
 
     Zee was written to be as small and simple as possible. If you
     don't like it, it might be because it doesn't work the way you're
     used to, or it may have been badly designed. If after trying it
-    for a bit you still don't like the way it works, complain!
+    for a bit you still don't like the way it works, please tell us
+    what you don't like (see the README for the address).
 
-1.6. Zee doesn't compile.
-
-    We have only tested Zee on GNU/Linux, although it should work on
-    any POSIX-compliant OS that supports termcap or Allegro. If you
-    get Zee running under another OS, please send a message to the
-    developers (see question 1.4 for the address) telling them that
-    (you might also send any patches you have made to the sources if
-    you want them included in the next release).
-
-------------------------------------------------------------------------------
 
 2. Functionality
 
 2.1. How do I quit Zee?
 
-    Type `C-q'.
+    Type `Alt-X file_quit RETURN'. (Ctrl-Q normally works too,
+    depending on your key bindings.)
 
 2.2. How do I return to the shell without leaving Zee?
 
-    Type `M-x suspend RETURN'.
+    Type `Alt-X file_suspend RETURN'.
 
 2.3. How do I undo the previous command?
 
-    Type `C-z'.
+    Type Ctrl-Z (or `Alt-X edit_undo RETURN').
 
-2.4. What does `C-something' or `M-something' mean?
-
-    From the tutorial:
-
-    C-<chr> means hold the CONTROL key while typing the character
-	     <chr> Thus, `C-f' would be: hold the CONTROL key and type
-	     `f'.
-    M-<chr> means hold the META or EDIT or ALT key down while typing
-	     <chr>. If there is no META, EDIT or ALT key, instead
-	     press and release the ESC key and then type <chr>. We
-	     write <ESC> for the ESC key.
-
-2.5. What settings can I change?
-
-    Check out the `dotzee.sample' file for a full list of variables.
-
-2.6. How do I handle non-ASCII characters?
+2.4. How do I handle non-ASCII characters?
 
     Zee uses the operating system's locale support, so you need to set
     an appropriate locale. How you do this depends on your OS.

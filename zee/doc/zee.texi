@@ -7,13 +7,8 @@
 * Zee: (zee).                 Zee text editor.
 @end direntry
 
-@c If "finalout" is commented out, the printed output will show
-@c black boxes that mark lines that are too long.  Thus, it is
-@c unwise to comment it out when running a master in case there are
-@c overfulls which are deemed okay.
-
 @iftex
-@c @finalout
+@finalout
 @end iftex
 
 @setchapternewpage odd
@@ -41,9 +36,8 @@ Zee is a customizable, self-documenting real-time display editor.
 
 @menu
 * Overview::                    An overview of the Zee editor.
-* Features::                    The characteristics of Zee.
 * Invoking Zee::               Command line options that you can give to Zee.
-* Initialization file::         The ``.zee'' initialization file.
+* Initialization file::         The ``.zeerc'' initialization file.
 * Key names::                   How the keys are named.
 * Commands::                    The list of commands.
 * Variables::                   The list of variables.
@@ -51,44 +45,17 @@ Zee is a customizable, self-documenting real-time display editor.
 @end menu
 
 @c ---------------------------------------------------------------------------
-@node Overview, Features, Top, Top
+@node Overview, Invoking Zee, Top, Top
 @chapter Overview
 
-The @emph{Zee} editor is written entirely in @emph{@w{ANSI C}}.
-It should run on any POSIX system.
+Zee is a fast, small, 8-bit clean editor with a minimal but powerful
+feature set including unlimited undo.
+
+Zee is written entirely in @emph{@w{ANSI C}}. It should run on any
+POSIX system.
 
 @c ---------------------------------------------------------------------------
-@node Features, Invoking Zee, Overview, Top
-@chapter Features
-
-@itemize -
-@item Small but fast and powerful.
-It is very useful for small footprint installations (e.g. on floppy disk)
-or quick editing sessions.
-@item 8-bit clean.
-Zee can operate with binary files.
-@item Looks familiar.
-Most Zee key sequences and command names are identical to standard CUA
-ones (as used in Microsoft Windows, Mac OS and other common GUIs).
-@item Multi buffer editing with multi level undo.
-Zee can open an infinite number of files and can record an infinite
-sequence of undo operations (limited only by the amount of free memory).
-@item Multi window.
-Zee can display multiple windows on the screen.
-@item Minibuffer completion.
-This works for @kbd{M-x} commands.
-@item Auto fill (word wrap).
-Zee automatically breaks the lines when they become too wide (if the
-@i{Auto Fill Mode} is enabled).
-@item Auto line ending detection.
-When a file is loaded, its line ending is detected automatically
-according to the first end of line, either LF, CR, CRLF or LFCR.  Files with
-mixed line endings will not be corrupted, but the line breaks will not be correctly
-displayed.
-@end itemize
-
-@c ---------------------------------------------------------------------------
-@node Invoking Zee, Initialization file, Features, Top
+@node Invoking Zee, Initialization file, Overview, Top
 @chapter Invoking Zee
 
 The options are as follows:
@@ -99,31 +66,24 @@ The options are as follows:
 @node Initialization file, Key names, Invoking Zee, Top
 @chapter Initialization file
 
-When Zee is started, it normally loads the @file{.zee} file in your
+When Zee is started, it normally loads the @file{.zeerc} file in your
 home directory. We call this file your ``initialization file'' because
 it specifies how to initialize Zee for you. You can use the command
 line switch @samp{--no-init-file} to tell Zee not to load the initialization file.
 
 @menu
 * File syntax::                 The initialization file syntax.
-* Sample file::                 A sample initialization file.
 @end menu
 
 @c ---------------------------------------------------------------------------
-@node File syntax, Sample file, Initialization file, Initialization file
+@node File syntax, , Initialization file, Initialization file
 @section File syntax
 
 The initialization file is a sequence of commands.
 The file is most commonly used to initialize
-variables; see the next subsection for an example.
+variables and bind keys.
 
-@c ---------------------------------------------------------------------------
-@node Sample file,  , File syntax, Initialization file
-@section A sample file
-
-This is the initialization file that comes with the Zee sources.
-
-@include dotzee.texi
+FIXME: add an example, and make @samp{/etc/zeerc}.
 
 @c ---------------------------------------------------------------------------
 @node Key names, Commands, Initialization file, Top
@@ -136,8 +96,6 @@ This table contains the names of the keys that are used in Zee.
 Space
 @item RET
 Return
-@item LFD
-Linefeed
 @item TAB
 Tab
 @item BS
@@ -148,21 +106,20 @@ Escape
 Delete
 @item CTRL
 Control
-@item META
-Meta (also known as @key{EDIT} or @key{ALT} on some keyboards).
+@item ALT
+Alt
 @end table
 
-In key combinations, like @kbd{M-g}, the @kbd{M-} prefix means hold the
-@key{META} (or @key{EDIT} or @key{ALT}) key down while typing @kbd{g}.
-The combination @kbd{C-x} means hold the @key{CTRL} key down while
-typing @kbd{x}.
+In key combinations, like @kbd{Alt-G}, the @kbd{Alt-} prefix means
+hold the @key{ALT} key down while typing @kbd{g}. The combination
+@kbd{Ctrl-X} means hold the @key{CTRL} key down while typing @kbd{x}.
 
 @c ---------------------------------------------------------------------------
 @node Commands, Variables, Key names, Top
 @chapter Commands
 
 This table contains the full list of available commands that can be
-called with the @kbd{M-x} key (please note that most commands have a
+called with the @kbd{Alt-X} key (please note that most commands have a
 key binding anyway).
 
 @include zee_funcs.texi
@@ -172,8 +129,8 @@ key binding anyway).
 @chapter Variables
 
 This table contains the full list of available variables, that can be
-modified at run-time with the @samp{set-variable} command or set at start-up
-in the @file{.zee} initialization file.
+modified at run-time with the @samp{set_variable} command or set at start-up
+in the @file{.zeerc} initialization file.
 
 Please note that some variables may be not available depending
 on the compilation options given to @samp{configure}.

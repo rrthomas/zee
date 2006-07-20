@@ -32,7 +32,6 @@ key_bind "C-@" edit_select_toggle
 key_bind "C-M-g" edit_goto_column
 key_bind "M-g" edit_goto_line
 
-# Open, save, close, quit etc.
 # Save
 key_bind "C-s" file_save
 # Quit
@@ -63,7 +62,7 @@ key_bind "C-v" edit_paste
 # would be better.
 # The proposed meaning of ESC obviates the current behaviour of RET.
 key_bind "C-f" edit_find
-key_bind "C-S-f" edit_find_backwards
+key_bind "C-M-f" edit_find_backward
 key_bind "C-r" edit_find_and_replace
 
 # Insert special characters.

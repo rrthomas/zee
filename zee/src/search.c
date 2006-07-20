@@ -137,6 +137,11 @@ static rblist last_search = NULL;
 
 /*
  * Incremental search engine.
+ *
+ * FIXME: Once the search is underway, "find next" is hard-wired to C-s.
+ * Having it hard-wired is obviously broken, but something neutral like RET
+ * would be better.
+ * The proposed meaning of ESC obviates the current behaviour of RET.
  */
 static int isearch(int dir)
 {

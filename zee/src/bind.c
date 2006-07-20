@@ -49,25 +49,20 @@ static Binding *get_binding(size_t key)
   return NULL;
 }
 
-static void add_binding(size_t key, Command cmd)
-{
-  Binding b;
-
-  b.key = key;
-  b.cmd = cmd;
-
-  vec_item(bindings, vec_items(bindings), Binding) = b;
-}
-
 void bind_key(size_t key, Command cmd)
 {
   Binding *p;
 
   assert(key != KBD_NOKEY);
 
-  if ((p = get_binding(key)) == NULL)
-    add_binding(key, cmd);
-  else
+  if ((p = get_binding(key)) == NULL) {
+    Binding b;
+
+    b.key = key;
+    b.cmd = cmd;
+
+    vec_item(bindings, vec_items(bindings), Binding) = b;
+  } else
     p->cmd = cmd;
 }
 
