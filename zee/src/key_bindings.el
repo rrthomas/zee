@@ -12,8 +12,8 @@ key_bind "DOWN" move_next_line
 # Word/paragraph
 key_bind "C-LEFT" move_previous_word
 key_bind "C-RIGHT" move_next_word
-key_bind "M-{" move_previous_paragraph # FIXME Doesn't work!
-key_bind "M-}" move_next_paragraph # FIXME Doesn't work!
+key_bind "M-{" move_previous_paragraph
+key_bind "M-}" move_next_paragraph
 # Line/page
 key_bind "HOME" move_start_line
 key_bind "END" move_end_line
