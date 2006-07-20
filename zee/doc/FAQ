@@ -1,12 +1,12 @@
-		    Zee FAQ - Frequently Asked Questions
+                 Zee FAQ - Frequently Asked Questions
 
-		   Last updated: $Date$
+              Last updated: $Date$
 
 
-For questions not answered here, see the README and the info
-documentation (`info zee').
+For questions not answered here, see the README file and the manual
+(`info zee').
 
-------------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 INDEX
 
@@ -21,7 +21,7 @@ INDEX
    2.3. How do I undo the previous command?
    2.4. How do I handle non-ASCII characters?
 
-------------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 1. General questions
 
