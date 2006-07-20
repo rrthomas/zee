@@ -167,11 +167,6 @@ AH_BOTTOM([
 #define TEXT_NAME "Zee"
 ])
 
-AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
-		   [The date of compilation.])
-AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
-		   [The host of compilation.])
-
 rm -f src/paths.h
 
 dnl ==================================================================
