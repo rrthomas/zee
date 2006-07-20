@@ -9,7 +9,6 @@ zee_DATA =					\
 
 EXTRA_DIST =					\
 	FAQ					\
-	dot$(PACKAGE_NAME).sample		\
 	mkdoc.c
 
 DOCSRCS = $(top_srcdir)/src/*.c
@@ -26,14 +25,14 @@ mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
 
 $(PACKAGE_NAME).info $(PACKAGE_NAME).dvi: $(GENERATED_TEXI)
 
-$(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+dot$(PACKAGE_NAME).sample $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) > $(top_builddir)/src/tbl_funcs.h
 
 dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
 	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
 	@echo "@setfilename dot$(PACKAGE_NAME).info" >>$@
 	@echo "@example" >>$@
-	expand $? >>$@
+	cat $? >>$@
 	@echo "@end example" >>$@
 
 clean-local:

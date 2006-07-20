@@ -3,4 +3,5 @@ Makefile
 Makefile.in
 mkdoc
 zee.info
+dotzee.sample
 dotzee.texi zee_funcs.texi zee_vars.texi zee_opts.texi

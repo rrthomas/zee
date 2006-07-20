@@ -21,8 +21,6 @@
 #define NAME "mkdoc"
 
 
-/* FIXME: Far too many "char *"s. */
-
 struct fentry {
   rblist name;
   rblist doc;
@@ -80,7 +78,7 @@ static void get_funcs(FILE *fp)
 
 static void dump_funcs(void)
 {
-  FILE *fp = fopen("zee_funcs.texi", "w");
+  FILE *fp = fopen(PACKAGE "_funcs.texi", "w");
 
   assert(fp);
   fprintf(fp,
@@ -120,11 +118,16 @@ static struct {
 
 static void dump_vars(void)
 {
-  FILE *fp = fopen("zee_vars.texi", "w");
+  FILE *fp = fopen(PACKAGE "_vars.texi", "w");
+  FILE *fp2 = fopen("dot" PACKAGE ".sample", "w");
 
   assert(fp);
+  assert(fp2);
+
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
   fprintf(fp, "@table @code\n");
+
+  fprintf(fp2, "# ." PACKAGE " sample configuration\n");
 
   for (size_t i = 0; i < ventries; ++i) {
     rblist doc = rblist_from_string(vtable[i].doc);
@@ -133,10 +136,15 @@ static void dump_vars(void)
       exit(1);
     }
     fprintf(fp, "@item %s\n%s\n", vtable[i].name, astr_to_string(doc));
+
+    fprintf(fp2, "\n# %s [default: %s]\n", astr_to_string(doc), vtable[i].defval);
+    fprintf(fp2, "set_variable %s %s\n", vtable[i].name, vtable[i].defval);
   }
 
   fprintf(fp, "@end table");
   fclose(fp);
+
+  fclose(fp2);
 }
 
 static struct {
@@ -153,7 +161,7 @@ static struct {
 
 static void dump_opts(void)
 {
-  FILE *fp = fopen("zee_opts.texi", "w");
+  FILE *fp = fopen(PACKAGE "_opts.texi", "w");
 
   assert(fp);
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
