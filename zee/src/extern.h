@@ -39,6 +39,7 @@ bool warn_if_readonly_buffer(void);
 bool warn_if_no_mark(void);
 bool calculate_the_region(Region *rp);
 size_t tab_width(void);
+size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
 /* completion.c ----------------------------------------------------------- */

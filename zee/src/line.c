@@ -233,15 +233,14 @@ bool insert_char(int c)
 
 DEF(edit_insert_tab,
 "\
-Insert spaces or tabs to next defined tab-stop column.\n\
-Convert the tabulation into spaces.\
+Indent to next multiple of `indent_width'.\
 ")
 {
   if (warn_if_readonly_buffer())
     ok = false;
   else {
     int c = get_goalc();
-    int t = tab_width();
+    int t = indent_width();
 
     for (c = t - c % t; c > 0; c--)
       insert_char(' ');

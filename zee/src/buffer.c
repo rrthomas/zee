@@ -113,6 +113,15 @@ size_t tab_width(void)
 }
 
 /*
+ * Return a safe tab width for the given buffer.
+ */
+size_t indent_width(void)
+{
+  size_t t = get_variable_number(rblist_from_string("indent_width"));
+  return t ? t : 1;
+}
+
+/*
  * Return a string containing `size' characters from point `start'.
  */
 rblist copy_text_block(Point start, size_t size)

@@ -15,5 +15,7 @@ X("case_replace",			"b", "true", "\
 Non-nil means `edit_find_and_replace' should preserve case in replacements.")
 X("wrap_column",			"", "72", "\
 Column beyond which automatic line-wrapping should happen.")
-X("tab_width",				"", "8", "\
-Distance between tab stops (for display of tab characters), in columns.")
+X("tab_display_width",			"", "8", "\
+Number of spaces displayed for a tab character.")
+X("indent_width",			"", "2", "\
+Number per indentation for `edit_insert_tab'.")
