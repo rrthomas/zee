@@ -98,7 +98,6 @@ static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
 /*
  * Forces the user to answer "yes" or "no".
  * Returns -1 for cancelled, otherwise true for "yes" and false for "no".
- * Suggestion: inline? Probably not.
  */
 int minibuf_read_yesno(rblist prompt)
 {
@@ -112,7 +111,6 @@ int minibuf_read_yesno(rblist prompt)
 /*
  * Forces the user to answer "true" or "false".
  * Returns -1 for cancelled, otherwise true for "true" and false for "false".
- * Suggestion: inline? Probably not.
  */
 int minibuf_read_boolean(rblist prompt)
 {
