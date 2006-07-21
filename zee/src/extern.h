@@ -27,6 +27,7 @@ int goto_point(Point pt);
 
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(size_t key, Command func);
+void unbind_key(size_t key);
 rblist minibuf_read_command_name(rblist as);
 rblist command_to_binding(Command f);
 rblist binding_to_command(size_t key);

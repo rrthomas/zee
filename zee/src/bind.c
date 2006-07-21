@@ -71,7 +71,7 @@ void bind_key(size_t key, Command cmd)
     p->cmd = cmd;
 }
 
-static void unbind_key(size_t key)
+void unbind_key(size_t key)
 {
   Binding *p;
 
@@ -141,25 +141,6 @@ rblist minibuf_read_command_name(rblist prompt)
   return ms;
 }
 
-DEF(key_unbind,
-"\
-Unbind a key.\n\
-Read key chord, and unbind it.\
-")
-{
-  size_t key = KBD_NOKEY;
-
-  if (list_length(l) > 0)
-    key = strtochord(list_behead(l));
-  else {
-    minibuf_write(rblist_from_string("Unbind key: "));
-    key = getkey();
-  }
-
-  unbind_key(key);
-}
-END_DEF
-
 DEF(key_bind,
 "\
 Bind a command to a key chord.\n\
@@ -200,6 +181,25 @@ chord.\
 }
 END_DEF
 
+DEF(key_unbind,
+"\
+Unbind a key.\n\
+Read key chord, and unbind it.\
+")
+{
+  size_t key = KBD_NOKEY;
+
+  if (list_length(l) > 0)
+    key = strtochord(list_behead(l));
+  else {
+    minibuf_write(rblist_from_string("Unbind key: "));
+    key = getkey();
+  }
+
+  unbind_key(key);
+}
+END_DEF
+
 rblist command_to_binding(Command cmd)
 {
   size_t i, n = 0;
@@ -220,9 +220,6 @@ rblist command_to_binding(Command cmd)
 rblist binding_to_command(size_t key)
 {
   Binding *p;
-
-  if (key & KBD_META && isdigit(key & 255))
-    return rblist_from_string("universal_argument");
 
   if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
