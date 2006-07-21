@@ -14,8 +14,7 @@ rblist_LDADD = zmalloc.o vector.o astr.o
 
 bin_PROGRAMS = zee
 
-zeedir = $(datadir)/$(PACKAGE_NAME)
-zee_DATA =					\
+dist_pkgdata_DATA =				\
 	key_bindings.el
 
 zee_base_SOURCES =				\
@@ -64,19 +63,16 @@ endif
 
 zee_LDADD = @LIBOBJS@
 
-EXTRA_DIST = key_bindings.el
-
 distclean-local:
 	rm -f paths.h tbl_funcs.h
 
-help.o: paths.h
-
-paths.h:
+paths.h: $(top_srcdir)/configure.ac
 	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
 	@echo "" >>paths.h.tmp
 	@echo '#define PATH_DATA "$(pkgdatadir)"' >>paths.h.tmp
+	@echo '#define PATH_CONF "$(sysconfdir)"' >>paths.h.tmp
 	if test ! -f paths.h -o				\
-	        ! "cmp paths.h paths.h.tmp -s" ; then	\
+	        "cmp paths.h paths.h.tmp -s" ; then	\
 		mv paths.h.tmp paths.h ;		\
 	fi
 

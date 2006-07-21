@@ -1,13 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(zee, 0.6, zee-devel@lists.sourceforge.net)
+AC_INIT(Zee, 0.6, zee-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
 
-TEXT_NAME="Zee"
-AC_SUBST(TEXT_NAME)
 AC_SUBST(VERSION)
 
 dnl Allow GNU functions to be used if present
@@ -160,19 +158,7 @@ fi
 AM_CONDITIONAL(CURSES, test x$curses = xtrue)
 
 dnl ==================================================================
-dnl Extra definitions for config.h
-dnl ==================================================================
-
-AH_BOTTOM([
-#define TEXT_NAME "Zee"
-])
-
-rm -f src/paths.h
-
-dnl ==================================================================
 dnl Generate makefiles
 dnl ==================================================================
 
-AC_OUTPUT(Makefile \
-	  doc/Makefile \
-	  src/Makefile)
+AC_OUTPUT(Makefile doc/Makefile src/Makefile)

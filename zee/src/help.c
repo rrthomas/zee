@@ -38,7 +38,7 @@ Show the version in the minibuffer.\
   if (!rblist_compare(quitstr, rblist_empty))
     quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
 
-  minibuf_write(astr_afmt(VERSION_STRING ". For a menu type Alt-x. To quit, type %r.", quitstr));
+  minibuf_write(astr_afmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %r.", quitstr));
 }
 END_DEF
 

@@ -83,14 +83,14 @@ static void run(void)
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, TEXT_NAME " crashed. Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
+  fprintf(stderr, PACKAGE_NAME " crashed. Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
   die(2);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, TEXT_NAME " terminated with signal %d\r\n", signo);
+  fprintf(stderr, PACKAGE_NAME " terminated with signal %d\r\n", signo);
   die(2);
 }
 
@@ -144,10 +144,10 @@ int main(int argc, char **argv)
       break;
     case 4:
       fprintf(stderr,
-              VERSION_STRING "\n"
+              PACKAGE_STRING "\n"
               COPYRIGHT_STRING "\n"
-              TEXT_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of " TEXT_NAME "\n"
+              PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of " PACKAGE_NAME "\n"
               "under the terms of the GNU General Public License.\n"
               "For more information about these matters, see the file named COPYING.\n"
               );
@@ -161,8 +161,8 @@ int main(int argc, char **argv)
 
   if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
-            "Usage: " PACKAGE_NAME " [OPTION-OR-FILENAME]...\n"
-            "Run " TEXT_NAME ", the lightweight editor.\n"
+            "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
+            "Run " PACKAGE_NAME ", the lightweight editor.\n"
             "\n");
 #define X(longname, doc, opt) \
     fprintf(stderr, "--" longname doc);
@@ -210,9 +210,11 @@ int main(int argc, char **argv)
 
     /* Load user init file */
     if (!nflag) {
+      if ((as = file_read(rblist_from_string(PATH_CONF "/" PACKAGE "rc"))))
+        cmd_eval(as);
       rblist userrc = get_home_dir();
       if (rblist_length(userrc) > 0) {
-        userrc = rblist_concat(userrc, rblist_from_string("/." PACKAGE_NAME "rc"));
+        userrc = rblist_concat(userrc, rblist_from_string("/." PACKAGE "rc"));
         if ((as = file_read(userrc)))
           cmd_eval(as);
       }
