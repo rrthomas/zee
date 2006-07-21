@@ -181,18 +181,8 @@ enum {
 #define FLAG_DEFINING_MACRO             0x0010
 
 /*--------------------------------------------------------------------------
- * Miscellaneous stuff.
+ * Commands.
  *--------------------------------------------------------------------------*/
-
-/* Ensure PATH_MAX is defined */
-#ifndef PATH_MAX
-#ifdef _POSIX_PATH_MAX
-#define PATH_MAX	_POSIX_PATH_MAX
-#else
-/* Guess if all else fails */
-#define PATH_MAX	254
-#endif
-#endif
 
 /* The type of a user command. */
 typedef bool (*Command)(list l);
