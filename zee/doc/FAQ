@@ -12,8 +12,7 @@ INDEX
 
 1. General questions
    1.1. What does `Zee' mean?
-   1.2. Zee doesn't compile.
-   1.3. Zee is weird!
+   1.2. Zee is weird!
 
 2. Functionality
    2.1. How do I return to the shell without leaving Zee?
@@ -30,13 +29,7 @@ INDEX
     its descent from Zile). SourceForge doesn't allow two-letter
     names, so I chose `Zee' instead, which can be pronounced the same.
 
-1.2. Zee doesn't compile.
-
-    Zee should work on any POSIX-compliant OS that supports termcap or
-    Allegro. If you get Zee running a non-POSIX OS, please tell us and
-    send us the necessary patches.
-
-1.3. Zee is weird!
+1.2. Zee is weird!
 
     Zee was written to be as small and simple as possible. If you
     don't like it, it might be because it doesn't work the way you're
