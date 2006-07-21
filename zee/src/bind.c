@@ -93,11 +93,20 @@ void process_key(size_t key)
 
   if (p)
     p->cmd(list_new());
-  else
-    CMDCALL_UINT(edit_insert_character, (int)key);
+  else {
+    if (key == KBD_RET)
+      key = '\n';
+    else if (key == KBD_TAB)
+      key = '\t';
+
+    if (key <= 255)
+      CMDCALL_UINT(edit_insert_character, (int)key);
+    else
+      ding();
+  }
 
   /* Only add keystrokes if we're already in macro defining mode
-     before the command call, to cope with start-kbd-macro */
+     before the command call, to cope with macro_record */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro();
 }
@@ -223,7 +232,7 @@ rblist binding_to_command(size_t key)
 
   if ((p = get_binding(key)) == NULL) {
     if (key == KBD_RET || key == KBD_TAB || key <= 255)
-      return rblist_from_string("self_insert_command");
+      return rblist_from_string("edit_insert_character");
     else
       return NULL;
   } else
