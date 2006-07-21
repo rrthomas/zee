@@ -106,7 +106,7 @@ static void signal_init(void)
 
 /* Options table */
 struct option longopts[] = {
-#define X(longname, doc, opt) \
+#define X(longname, opt, doc) \
     {longname, opt, NULL, 0},
 #include "tbl_opts.h"
 #undef X
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
             "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
             "Run " PACKAGE_NAME ", the lightweight editor.\n"
             "\n");
-#define X(longname, doc, opt) \
+#define X(longname, opt, doc) \
     fprintf(stderr, "--" longname doc);
 #include "tbl_opts.h"
 #undef X

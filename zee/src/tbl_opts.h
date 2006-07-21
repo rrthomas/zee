@@ -2,20 +2,14 @@
 
 /*
  * The first column specifies the long name.
- * The second column is the documentation.
- * The third column specifies the short namee.
- * The fourth column specifies whether it takes a parameter.
+ * The second column specifies whether it takes a parameter.
+ * The third column is the documentation.
+ * N.B. The options' order must correspond to the code in main.c.
  */
 
-X("batch", "            run non-interactively\n",
-  0)
-X("eval", " CMD         execute command CMD\n",
-  1)
-X("help", "             display this help message and exit\n",
-  0)
-X("load", " FILE        load file of commands\n",
-  1)
-X("no-init-file", "     do not load ~/." PACKAGE_NAME "\n",
-  0)
-X("version", "          display version information and exit\n",
-  0)
+X("batch",	0, "            run non-interactively\n")
+X("eval",	1, " CMD         execute command CMD\n")
+X("load",	1, " FILE        load file of commands\n")
+X("no-user-rc",	0, "       do not load ~/." PACKAGE "rc\n")
+X("help",	0, "             display this help message and exit\n")
+X("version",	0, "          display version information and exit\n")
