@@ -83,7 +83,7 @@ The initialization file is a sequence of commands.
 The file is most commonly used to initialize
 variables and bind keys.
 
-FIXME: add an example, and make @samp{/etc/zeerc}.
+FIXME: add examples.
 
 @c ---------------------------------------------------------------------------
 @node Key names, Commands, Initialization file, Top

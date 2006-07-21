@@ -2,10 +2,10 @@
 
 info_TEXINFOS = zee.texi
 
-zeedir = $(datadir)/$(PACKAGE_NAME)
-zee_DATA =					\
-	FAQ					\
-	dot$(PACKAGE_NAME).sample
+dist_sysconf_DATA = $(PACKAGE_NAME)rc
+
+dist_pkgdata_DATA =				\
+	FAQ
 
 EXTRA_DIST =					\
 	FAQ					\
@@ -14,7 +14,7 @@ EXTRA_DIST =					\
 DOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
 
-GENERATED_TEXI = dot$(PACKAGE_NAME).texi $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi
+GENERATED_TEXI = $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi
 
 mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LIBS) $(LDFLAGS) -o $@ mkdoc.o
@@ -25,15 +25,8 @@ mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
 
 $(PACKAGE_NAME).info $(PACKAGE_NAME).dvi: $(GENERATED_TEXI)
 
-dot$(PACKAGE_NAME).sample $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+$(PACKAGE_NAME)rc $(PACKAGE_NAME)_funcs.texi $(PACKAGE_NAME)_vars.texi $(PACKAGE_NAME)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) > $(top_builddir)/src/tbl_funcs.h
-
-dot$(PACKAGE_NAME).texi: dot$(PACKAGE_NAME).sample
-	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
-	@echo "@setfilename dot$(PACKAGE_NAME).info" >>$@
-	@echo "@example" >>$@
-	cat $? >>$@
-	@echo "@end example" >>$@
 
 clean-local:
 	rm -f mkdoc$(EXEEXT_FOR_BUILD) *.o

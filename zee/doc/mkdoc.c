@@ -119,7 +119,7 @@ static struct {
 static void dump_vars(void)
 {
   FILE *fp = fopen(PACKAGE "_vars.texi", "w");
-  FILE *fp2 = fopen("dot" PACKAGE ".sample", "w");
+  FILE *fp2 = fopen(PACKAGE "rc", "w");
 
   assert(fp);
   assert(fp2);
@@ -127,7 +127,7 @@ static void dump_vars(void)
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
   fprintf(fp, "@table @code\n");
 
-  fprintf(fp2, "# ." PACKAGE " sample configuration\n");
+  fprintf(fp2, "# ." PACKAGE " configuration\n");
 
   for (size_t i = 0; i < ventries; ++i) {
     rblist doc = rblist_from_string(vtable[i].doc);
