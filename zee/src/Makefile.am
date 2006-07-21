@@ -61,20 +61,11 @@ else
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
 endif
 
+zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
 distclean-local:
-	rm -f paths.h tbl_funcs.h
-
-paths.h: $(top_srcdir)/configure.ac
-	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
-	@echo "" >>paths.h.tmp
-	@echo '#define PATH_DATA "$(pkgdatadir)"' >>paths.h.tmp
-	@echo '#define PATH_CONF "$(sysconfdir)"' >>paths.h.tmp
-	if test ! -f paths.h -o				\
-	        "cmp paths.h paths.h.tmp -s" ; then	\
-		mv paths.h.tmp paths.h ;		\
-	fi
+	rm -f tbl_funcs.h
 
 sloccount:
-	sloccount $(zee_base_SOURCES) $(EXTRA_DIST) term_*.c
+	sloccount $(zee_base_SOURCES) term_*.c

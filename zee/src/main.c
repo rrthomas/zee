@@ -39,7 +39,6 @@
 #endif
 
 #include "main.h"
-#include "paths.h"
 #include "extern.h"
 
 
@@ -204,13 +203,13 @@ int main(int argc, char **argv)
       }
 
       /* Load default bindings file. */
-      if ((as = file_read(rblist_from_string(PATH_DATA "/key_bindings.el"))))
+      if ((as = file_read(rblist_from_string(PKGDATADIR "/key_bindings.el"))))
         cmd_eval(as);
     }
 
     /* Load user init file */
     if (!nflag) {
-      if ((as = file_read(rblist_from_string(PATH_CONF "/" PACKAGE "rc"))))
+      if ((as = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
         cmd_eval(as);
       rblist userrc = get_home_dir();
       if (rblist_length(userrc) > 0) {
