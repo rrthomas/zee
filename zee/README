@@ -5,9 +5,9 @@ Zee is an experimental editor and programming environment, hosted on
 SourceForge at http://sourceforge.net/projects/zee/. It is free
 software, licensed under the GNU GPL.
 
-Zee is written in POSIX C and requires the Boehm garbage collector
-(libgc), PCRE (the Perl-compatible regular expressions library), and a
-terminal library (either ncurses or Allegro).
+Zee is written in ISO C99 for POSIX and requires the Boehm garbage
+collector (libgc), PCRE (the Perl-compatible regular expressions
+library), and a terminal library (either ncurses or Allegro).
 
 See INSTALL for installation instructions.
 
