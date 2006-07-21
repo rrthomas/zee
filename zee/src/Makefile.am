@@ -28,10 +28,10 @@ zee_base_SOURCES =				\
 	astr.h					\
 	zmalloc.h				\
 	zmalloc.c				\
-	parser.c				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
+	command.c				\
 	completion.c				\
 	display.c				\
 	extern.h				\

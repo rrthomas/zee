@@ -36,6 +36,11 @@ static History commands_history;
  * Key binding
  *--------------------------------------------------------------------------*/
 
+typedef struct {
+  size_t key;
+  Command cmd;
+} Binding;
+
 vector *bindings;               /* Vector of Binding *s */
 
 static Binding *get_binding(size_t key)

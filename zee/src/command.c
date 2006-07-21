@@ -1,5 +1,4 @@
-/* Command parser
-   Copyright (c) 2001 Scott "Jerry" Lawrence.
+/* Command parser and executor
    Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
@@ -27,138 +26,69 @@
 #include "extern.h"
 
 
-static size_t line;
-static size_t pos;
-static bool bol;
-static rblist expr;
-
-static int getch(void)
+static inline int getch(rblist line, size_t *pos)
 {
-  if ((size_t)pos < rblist_length(expr))
-    return rblist_get(expr, pos++);
+  if (*pos < rblist_length(line))
+    return rblist_get(line, (*pos)++);
   return EOF;
 }
 
-static void ungetch(void)
+static rblist gettok(rblist line, size_t *pos)
 {
-  if (pos > 0 && (size_t)pos < rblist_length(expr))
-    pos--;
-}
-
-/*
- * Skip space to next non-space character
- */
-static int getch_skipspace(void) {
-  do {
-    int c = getch();
-
-    switch (c) {
-    case ' ':
-    case '\t':
-      break;
-
-    case '#':
-      /* Skip comment */
-      do {
-        c = getch();
-      } while (c != EOF && c != '\n');
-      /* FALLTHROUGH */
-
-    case '\n':
-      bol = true;
-      line++;
-      break;
-
-    case '\\':
-      if ((c = getch()) == '\n')
-        line++;                 /* For source position, count \n */
-      else
-        ungetch();
-      break;
-
-    default:
-      return c;
-    }
-  } while (true);
-}
-
-static rblist gettok(void)
-{
+  /* Skip space and comments to next non-space character. */
   int c;
+  do {
+    c = getch(line, pos);
+
+    /* Skip comments */
+    if (c == '#')
+      do
+        c = getch(line, pos);
+      while (c != EOF && c != '\n');
+  } while (c == ' ' || c == '\t');
+
+  /* Read token. */
   rblist tok = rblist_empty;
-
-  switch ((c = getch_skipspace())) {
-  case EOF:
-    return NULL;
-
-  case '\"':                    /* string */
-    {
-      bool eos = false;
-
-      do {
-        switch ((c = getch())) {
-        case '\n':
-        case EOF:
-          ungetch();
-          /* FALLTHROUGH */
-        case '\"':
-          eos = true;
-          break;
-        default:
-          tok = rblist_append(tok, c);
-        }
-      } while (!eos);
-    }
-    break;
-
-  default:                      /* word */
-    do {
-      tok = rblist_append(tok, c);
-      if (c == '#' || c == ' ' || c == '\n' || c == EOF) {
-        ungetch();
-        tok = rblist_sub(tok, 0, rblist_length(tok) - 1);
-        break;
-      }
-      c = getch();
-    } while (true);
+  while (c != '#' && c != ' ' && c != '\t' && c != '\n' && c != EOF) {
+    tok = rblist_append(tok, c);
+    c = getch(line, pos);
   }
 
+  if (c == EOF && tok == rblist_empty)
+    return NULL;
   return tok;
 }
 
 /*
  * Execute a string as commands
+ * FIXME: Use line number for errors.
  */
 void cmd_eval(rblist as)
 {
+  bool ok = true;
+  size_t lineno = 1, pos = 0;
+
   assert(as);
-  pos = 0;
-  expr = as;
-  line = 0;
-  bol = true;
 
-  rblist tok = gettok();
-  while (tok) {
-    Command cmd;
-    list l = list_new();
-    rblist fname;
-
+  for (rblist tok = gettok(as, &pos);
+       tok != NULL;
+       tok = gettok(as, &pos)) {
     /* Get tokens until we run out or reach a new line */
-    while (tok && !bol) {
+    list l = list_new();
+    while (tok && tok != rblist_empty) {
       list_append(l, tok);
-      tok = gettok();
+      tok = gettok(as, &pos);
     }
-    bol = false;
 
     /* Execute the line */
+    rblist fname;
+    Command cmd;
     while ((fname = list_behead(l)) &&
            (cmd = get_command(fname)) &&
-           cmd(l))
+           (ok = cmd(l)))
       ;
-
-    /* The first token for the next line, if any, was read above */
+    lineno++;
   }
-  expr = NULL;
 }
 
 /*--------------------------------------------------------------------------

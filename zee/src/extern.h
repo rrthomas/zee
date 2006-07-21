@@ -42,6 +42,12 @@ size_t tab_width(void);
 size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
+/* command.c -------------------------------------------------------------- */
+void cmd_eval(rblist as);
+Command get_command(rblist name);
+rblist get_command_name(Command cmd);
+list command_list(void);
+
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new(void);
 void completion_popup(Completion *cp);
@@ -132,12 +138,6 @@ int minibuf_read_yesno(rblist as);
 int minibuf_read_boolean(rblist as);
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
-
-/* parser.c --------------------------------------------------------------- */
-void cmd_eval(rblist as);
-Command get_command(rblist name);
-rblist get_command_name(Command cmd);
-list command_list(void);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);

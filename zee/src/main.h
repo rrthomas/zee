@@ -187,17 +187,7 @@ enum {
 /* The type of a user command. */
 typedef bool (*Command)(list l);
 
-typedef struct {
-  size_t key;
-  Command cmd;
-} Binding;
-
 /* Define an interactive command.
- *
- * DEF(command, doc) declares a command.
- * DEF_ARG(command, doc, arg1, ..., argn) declares a command that
- * takes arguments.
- * INT(arg) declares an integer argument.
  *
  * The C prototype for commands is Command (see above).
  *
@@ -205,23 +195,29 @@ typedef struct {
  * the arguments (which should all be astrs) in a list.
  *
  * The macro `CMDCALL' can be used to call zero-argument commands.
- * The macro `CMDCALL_INT' can be used to call commands taking a
- * single integer argument.
+ * The macro `CMDCALL_UINT' can be used to call commands taking a
+ * single unsigned integer argument.
  */
+
+/* Declare a command. */
 #define DEF(name, doc) \
   bool F_ ## name(list l) \
   { \
     bool ok = true; \
     assert(l);
 
+/* Declare a command that takes arguments.
+   `args' is a comma-separated list. */
 #define DEF_ARG(name, doc, args) \
   DEF(name, doc) \
   args
 
+/* End a command definition. */
 #define END_DEF \
     return ok; \
   }
 
+/* Declare a string argument, with prompt. */
 #define STR(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
@@ -229,6 +225,7 @@ typedef struct {
     else if ((name = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
+/* Declare a command name argument, with prompt. */
 #define COMMAND(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
@@ -236,6 +233,7 @@ typedef struct {
     else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
+/* Declare an unsigned integer argument, with prompt. */
 #define UINT(name, prompt) \
     size_t name = 0; \
     if (!list_empty(l)) { \
@@ -252,10 +250,10 @@ typedef struct {
         ding(); \
     } while (name == ULONG_MAX);
 
-/* Call an interactive command */
 /* FIXME: These macros don't work properly within command definitions,
    as they create a new argument list. This breaks e.g. a non-interactive
    use of execute_command. */
+/* Call an interactive command */
 #define CMDCALL(name) \
   F_ ## name(list_new())
 
