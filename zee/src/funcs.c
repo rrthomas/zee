@@ -420,14 +420,13 @@ Reads a line of text using the minibuffer and creates an inferior shell\n\
 to execute the line as a command; passes the selection as input to the\n\
 shell command.\n\
 If the shell command produces any output, it is inserted into the\n\
-file, replacing the selection.\n\
+file, replacing the selection if any.\n\
 ")
 {
   rblist ms;
 
-  if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_empty)) == NULL)
-    ok = CMDCALL(edit_select_off);
-  else if (rblist_length(ms) == 0 || warn_if_no_mark())
+  if ((ms = minibuf_read(rblist_from_string("Shell command: "), rblist_empty)) == NULL ||
+      rblist_length(ms) == 0)
     ok = false;
   else {
     char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
@@ -437,18 +436,19 @@ file, replacing the selection.\n\
       minibuf_error(rblist_from_string("Cannot open temporary file"));
       ok = false;
     } else {
-      FILE *pipe;
-      Region r;
-      rblist cmd = rblist_empty, as;
+      if (!(buf->flags & BFLAG_ANCHORED))
+        CMDCALL(edit_select_on);
 
+      Region r;
       assert(calculate_the_region(&r));
-      as = copy_text_block(r.start, r.size);
+      rblist as = copy_text_block(r.start, r.size);
       write(fd, astr_to_string(as), r.size);
 
       close(fd);
 
-      cmd = astr_afmt("%r 2>&1 <%s", ms, tempfile);
+      rblist cmd = astr_afmt("%r 2>&1 <%s", ms, tempfile);
 
+      FILE *pipe;
       if ((pipe = popen(astr_to_string(cmd), "r")) == NULL) {
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
@@ -469,12 +469,11 @@ file, replacing the selection.\n\
 #endif
 
         undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-        calculate_the_region(&r);
-        if (buf->pt.p != r.start.p
-            || r.start.o != buf->pt.o)
+        if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
           CMDCALL(edit_select_other_end);
         ok = replace_nstring(r.size, NULL, out);
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+        buf->flags &= ~BFLAG_ANCHORED;
       }
     }
   }
