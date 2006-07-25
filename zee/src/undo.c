@@ -58,8 +58,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
  */
 static Undo *revert_action(Undo *up)
 {
-  rblist as;
-
   doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE) {
@@ -75,7 +73,7 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   assert(up->type == UNDO_REPLACE_BLOCK);
-  replace_nstring(up->size, &as, up->text);
+  replace_nstring(up->size, NULL, up->text);
 
   doing_undo = false;
 

@@ -528,8 +528,7 @@ Delete the following character.\n\
 Join lines if the character is a newline.\
 ")
 {
-  rblist as;
-  ok = replace_nstring(1, &as, NULL);
+  ok = replace_nstring(1, NULL, NULL);
 }
 END_DEF
 

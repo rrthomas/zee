@@ -473,8 +473,7 @@ file, replacing the selection.\n\
         if (buf->pt.p != r.start.p
             || r.start.o != buf->pt.o)
           CMDCALL(edit_select_other_end);
-        replace_nstring(r.size, &s, NULL);
-        ok = replace_nstring(0, NULL, out);
+        ok = replace_nstring(r.size, NULL, out);
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
       }
     }
