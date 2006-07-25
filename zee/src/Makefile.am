@@ -19,6 +19,7 @@ dist_pkgdata_DATA =				\
 
 zee_base_SOURCES =				\
 	rblist.c				\
+	rblist.h				\
 	nonstd.h				\
 	vector.c				\
 	vector.h				\
