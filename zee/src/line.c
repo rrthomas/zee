@@ -434,15 +434,17 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
     undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, bs ? rblist_length(bs) : 0);
 
   if (size) {
-    assert(as);
-    *as = rblist_empty;
+    if (as)
+      *as = rblist_empty;
     buf->flags &= ~BFLAG_ANCHORED;
 
     while (size--) {
-      if (!eolp())
-        *as = rblist_append(*as, following_char());
-      else
-        *as = rblist_append(*as, '\n');
+      if (as) {
+        if (!eolp())
+          *as = rblist_append(*as, following_char());
+        else
+          *as = rblist_append(*as, '\n');
+      }
 
       if (eobp()) {
         minibuf_error(rblist_from_string("End of buffer"));
@@ -475,7 +477,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
   }
 
   /* Insert string. */
-  /* FIXME: Inefficient. Could search as for \n's using astr_str. */
+  /* FIXME: Inefficient. Could search bs for \n's using astr_str. */
   if (bs && rblist_length(bs))
     for (size_t i = 0; i < rblist_length(bs); i++) {
       if (rblist_get(bs, i) == '\n') {

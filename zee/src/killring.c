@@ -71,6 +71,27 @@ Delete the current line.\
 }
 END_DEF
 
+/* Copy selection to the kill buffer, appending if the last command
+   was also a kill. */
+static int copy_selection(void)
+{
+  if (!(lastflag & FLAG_DONE_KILL))
+    clear_kill_buffer();
+
+  if (warn_if_no_mark())
+    return false;
+  else {
+    Region r;
+
+    assert(calculate_the_region(&r));
+    killed_text = rblist_concat(killed_text, copy_text_block(r.start, r.size));
+
+    thisflag |= FLAG_DONE_KILL;
+  }
+
+  return true;
+}
+
 DEF(edit_kill_selection,
 "\
 Kill between point and mark.\n\
@@ -80,17 +101,15 @@ If the previous command was also a kill command,\n\
 the text killed this time appends to the text killed last time.\
 ")
 {
-  if (CMDCALL(edit_copy)) {
+  if (copy_selection()) {
     if (buf->flags & BFLAG_READONLY)
       warn_if_readonly_buffer();
     else {
       Region r;
-      rblist as;
-
       assert(calculate_the_region(&r));
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
-      replace_nstring(r.size, &as, NULL);
+      replace_nstring(r.size, NULL, NULL);
     }
   }
 }
@@ -101,20 +120,8 @@ DEF(edit_copy,
 Copy the region to the kill buffer.\
 ")
 {
-  if (!(lastflag & FLAG_DONE_KILL))
-    clear_kill_buffer();
-
-  if (warn_if_no_mark())
-    ok = false;
-  else {
-    Region r;
-
-    assert(calculate_the_region(&r));
-    killed_text = rblist_concat(killed_text, copy_text_block(r.start, r.size));
-
-    thisflag |= FLAG_DONE_KILL;
+  if (copy_selection())
     buf->flags &= ~BFLAG_ANCHORED;
-  }
 }
 END_DEF
 
@@ -130,7 +137,7 @@ static bool kill_helper(Command cmd)
   else {
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-    if (ok = CMDCALL(edit_select_on))
+    if ((ok = CMDCALL(edit_select_on)))
       ok = cmd(NULL);
     if (ok)
       ok = CMDCALL(edit_kill_selection);
