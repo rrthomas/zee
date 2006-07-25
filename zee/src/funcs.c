@@ -284,7 +284,6 @@ Move the cursor forward to the end of the paragraph.\
 }
 END_DEF
 
-/* FIXME: wrap_paragraph undo goes bananas. */
 /* FIXME: if wrap_column is set to 1, hangs with 100% CPU and starts consuming
  * all memory. */
 DEF(edit_wrap_paragraph,
@@ -293,14 +292,14 @@ Wrap the paragraph at or after the cursor. The wrap column can\n\
 be set using set_wrap_column.\
 ")
 {
-  int i, start, end;
+  size_t i, start, end;
   Marker *m = point_marker();
 
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
   CMDCALL(move_next_paragraph);
   end = buf->pt.n;
-  if (is_empty_line())
+  if (is_empty_line() && end > 0)
     end--;
 
   CMDCALL(move_previous_paragraph);
@@ -318,7 +317,8 @@ be set using set_wrap_column.\
   }
 
   CMDCALL(move_end_line);
-  while (get_goalc() > (size_t)get_variable_number(rblist_from_string("wrap_column")) + 1)
+  size_t wrap_col = (size_t)get_variable_number(rblist_from_string("wrap_column"));
+  while (get_goalc() > wrap_col + 1)
     wrap_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;

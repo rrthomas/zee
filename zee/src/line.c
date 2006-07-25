@@ -121,7 +121,7 @@ Line *line_new(void)
 
 /*
  * Read an rblist into a Line list.
- * FIXME: Since the introduction of rblists, this is never necessary.
+ * FIXME: Remove once Line list is abandoned for rblists.
  */
 Line *string_to_lines(rblist as, size_t *lines)
 {
@@ -247,36 +247,6 @@ Indent to next multiple of `indent_width'.\
   }
 }
 END_DEF
-
-/*
- * Insert a newline at the current position without moving the cursor.
- * Update markers that point to the splitted line.
- */
-static bool intercalate_newline(void)
-{
-  Line *new_lp;
-
-  if (warn_if_readonly_buffer())
-    return false;
-
-  undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, 1);
-
-  /* Update line linked list. */
-  list_prepend(buf->pt.p, rblist_empty);
-  new_lp = list_first(buf->pt.p);
-  ++buf->num_lines;
-
-  /* Move the text after the point into the new line. */
-  new_lp->item = rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item));
-  buf->pt.p->item = rblist_sub(buf->pt.p->item, 0, buf->pt.o);
-
-  adjust_markers(new_lp, buf->pt.p, buf->pt.o, 1, 0);
-
-  buf->flags |= BFLAG_MODIFIED;
-  thisflag |= FLAG_NEED_RESYNC;
-
-  return true;
-}
 
 /*
  * Check the case of a string.
@@ -477,11 +447,29 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
   }
 
   /* Insert string. */
-  /* FIXME: Inefficient. Could search bs for \n's using astr_str. */
+  /* FIXME: Inefficient. Could search bs for \n's using astr_str.
+     There is code for the string version of this in CVS history. */
   if (bs && rblist_length(bs))
     for (size_t i = 0; i < rblist_length(bs); i++) {
       if (rblist_get(bs, i) == '\n') {
-        intercalate_newline();
+        /* Insert a newline at the current position. */
+        Line *new_lp;
+
+        /* Update line linked list. */
+        list_prepend(buf->pt.p, rblist_empty);
+        new_lp = list_first(buf->pt.p);
+        ++buf->num_lines;
+
+        /* Move the text after the point into the new line. */
+        new_lp->item = rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item));
+        buf->pt.p->item = rblist_sub(buf->pt.p->item, 0, buf->pt.o);
+
+        /* Update markers that point to the splitted line. */
+        adjust_markers(new_lp, buf->pt.p, buf->pt.o, 1, 0);
+
+        buf->flags |= BFLAG_MODIFIED;
+        thisflag |= FLAG_NEED_RESYNC;
+
         CMDCALL(move_next_character);
       } else {
         buf->pt.p->item = rblist_concat(rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
