@@ -197,7 +197,7 @@ int main(int argc, char **argv)
     if (!bflag) {
       term_init();
       resize_window(); /* Can't run until there is a buffer */
-      if (buf) {
+      if (buf && line > 0) {
         goto_line(line - 1);
         resync_display();
       }

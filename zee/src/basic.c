@@ -205,7 +205,7 @@ Line 1 is the beginning of the buffer.\
 ",
 UINT(to_line, "Goto line: "))
 {
-  if (ok) {
+  if (ok && to_line > 0) {
     goto_line(to_line - 1);
     buf->pt.o = 0;
   }
@@ -272,7 +272,7 @@ Scroll text of current window downward near full screen.\
 ")
 {
   if (buf->pt.n > 0)
-    ok = goto_line(buf->pt.n - win.eheight) ? true : false;
+    ok = goto_line(buf->pt.n > win.eheight ? buf->pt.n - win.eheight : 0) ? true : false;
   else {
     minibuf_error(rblist_from_string("Beginning of buffer"));
     ok = false;

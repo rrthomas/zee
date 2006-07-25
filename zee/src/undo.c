@@ -75,8 +75,7 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   assert(up->type == UNDO_REPLACE_BLOCK);
-  delete_nstring(up->size, &as);
-  insert_nstring(up->text);
+  replace_nstring(up->size, &as, up->text);
 
   doing_undo = false;
 

@@ -54,7 +54,7 @@ Delete the current line.\
       killed_text = rblist_concat(killed_text,
                              rblist_sub(buf->pt.p->item, 0,
                                       rblist_length(buf->pt.p->item)));
-      delete_nstring(rblist_length(buf->pt.p->item), &as);
+      replace_nstring(rblist_length(buf->pt.p->item), &as, NULL);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -90,7 +90,7 @@ the text killed this time appends to the text killed last time.\
       assert(calculate_the_region(&r));
       if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
-      delete_nstring(r.size, &as);
+      replace_nstring(r.size, &as, NULL);
     }
   }
 }
@@ -175,7 +175,7 @@ Set mark at beginning, and put point at end.\
     ok = false;
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
-    insert_nstring(killed_text);
+    replace_nstring(0, NULL, killed_text);
     buf->flags &= ~BFLAG_ANCHORED;
   }
 }

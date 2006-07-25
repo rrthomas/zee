@@ -228,7 +228,7 @@ bool eolp(void)
 bool insert_char(int c)
 {
   rblist as = astr_afmt("%c", c);
-  return insert_nstring(as);
+  return replace_nstring(0, NULL, as);
 }
 
 DEF(edit_insert_tab,
@@ -425,78 +425,70 @@ Insert a newline, wrapping if in Wrap mode.\
 }
 END_DEF
 
-bool insert_nstring(rblist as)
+bool replace_nstring(size_t size, rblist *as, rblist bs)
 {
-  size_t i;
-
   if (warn_if_readonly_buffer())
     return false;
 
-  undo_save(UNDO_REPLACE_BLOCK, buf->pt, 0, rblist_length(as));
+  if (size || (bs && rblist_length(bs)))
+    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, bs ? rblist_length(bs) : 0);
 
-  for (i = 0; i < rblist_length(as); i++) {
-    if (rblist_get(as, i) == '\n') {
-      intercalate_newline();
-      CMDCALL(move_next_character);
-    } else {
-      buf->pt.p->item = rblist_concat(rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
-                                         rblist_sub(as, i, i + 1)),
-                                rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item)));
+  if (size) {
+    assert(as);
+    *as = rblist_empty;
+    buf->flags &= ~BFLAG_ANCHORED;
+
+    while (size--) {
+      if (!eolp())
+        *as = rblist_append(*as, following_char());
+      else
+        *as = rblist_append(*as, '\n');
+
+      if (eobp()) {
+        minibuf_error(rblist_from_string("End of buffer"));
+        return false;
+      }
+
+      if (eolp()) {
+        Line *lp1 = buf->pt.p;
+        Line *lp2 = list_next(lp1);
+        size_t lp1len = rblist_length(lp1->item);
+
+        /* Move the next line of text into the current line. */
+        lp2 = list_next(buf->pt.p);
+        lp1->item = rblist_concat(lp1->item, list_next(buf->pt.p)->item);
+        list_behead(lp1);
+        --buf->num_lines;
+
+        adjust_markers(lp1, lp2, lp1len, -1, 0);
+
+        thisflag |= FLAG_NEED_RESYNC;
+      } else {
+        /* Move the text one position backward after the point. */
+        buf->pt.p->item = rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
+                                        rblist_sub(buf->pt.p->item, buf->pt.o + 1,
+                                                   rblist_length(buf->pt.p->item)));
+        adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, -1);
+      }
       buf->flags |= BFLAG_MODIFIED;
-      adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, 1);
     }
   }
 
-  return true;
-}
-
-/*
- * Delete a string of the given length from point, returning it
- */
-bool delete_nstring(size_t size, rblist *as)
-{
-  buf->flags &= ~BFLAG_ANCHORED;
-
-  if (warn_if_readonly_buffer())
-    return false;
-
-  *as = rblist_empty;
-
-  undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, 0);
-  buf->flags |= BFLAG_MODIFIED;
-  while (size--) {
-    if (!eolp())
-      *as = rblist_append(*as, following_char());
-    else
-      *as = rblist_append(*as, '\n');
-
-    if (eobp()) {
-      minibuf_error(rblist_from_string("End of buffer"));
-      return false;
+  /* Insert string. */
+  /* FIXME: Inefficient. Could search as for \n's using astr_str. */
+  if (bs && rblist_length(bs))
+    for (size_t i = 0; i < rblist_length(bs); i++) {
+      if (rblist_get(bs, i) == '\n') {
+        intercalate_newline();
+        CMDCALL(move_next_character);
+      } else {
+        buf->pt.p->item = rblist_concat(rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
+                                                      rblist_sub(bs, i, i + 1)),
+                                        rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item)));
+        buf->flags |= BFLAG_MODIFIED;
+        adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, 1);
+      }
     }
-
-    if (eolp()) {
-      Line *lp1 = buf->pt.p;
-      Line *lp2 = list_next(lp1);
-      size_t lp1len = rblist_length(lp1->item);
-
-      /* Move the next line of text into the current line. */
-      lp2 = list_next(buf->pt.p);
-      lp1->item = rblist_concat(lp1->item, list_next(buf->pt.p)->item);
-      list_behead(lp1);
-      --buf->num_lines;
-
-      adjust_markers(lp1, lp2, lp1len, -1, 0);
-
-      thisflag |= FLAG_NEED_RESYNC;
-    } else {
-      /* Move the text one position backward after the point. */
-      buf->pt.p->item = rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
-                                rblist_sub(buf->pt.p->item, buf->pt.o + 1,
-                                         rblist_length(buf->pt.p->item)));
-      adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, -1);
-    }
-  }
 
   return true;
 }
@@ -535,7 +527,7 @@ Join lines if the character is a newline.\
 ")
 {
   rblist as;
-  ok = delete_nstring(1, &as);
+  ok = replace_nstring(1, &as, NULL);
 }
 END_DEF
 

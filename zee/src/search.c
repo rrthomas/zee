@@ -61,8 +61,6 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
                           options | PCRE_ANCHORED, ovector, 3);
     }
 
-    fprintf(stderr, "%d\n", index);
-
     if (index >= 0) {
       if (!backward)
         ret = ovector[1];
@@ -71,8 +69,7 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
     }
 
     pcre_free(pattern);
-  } else
-    fprintf(stderr, "%s %d\n", find_err, err_offset);
+  }
 
   return ret;
 }

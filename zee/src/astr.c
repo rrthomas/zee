@@ -44,7 +44,7 @@ rblist astr_nl(void)
 char *astr_to_string(rblist rbl)
 {
   char *s = zmalloc(rblist_length(rbl) + 1);
-  *rblist_copy_into(rbl, s) = 0;
+  *rblist_to_string(rbl, s) = 0;
   return s;
 }
 

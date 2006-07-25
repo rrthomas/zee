@@ -368,11 +368,7 @@ static int setcase_word(int rcase)
       else if (rcase == CAPITALIZE)
         c = firstchar ? toupper(c) : tolower(c);
 
-      rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o - 1),
-                    rblist_concat(rblist_singleton(c),
-                                  rblist_sub(buf->pt.p->item, buf->pt.o + 1,
-                                             rblist_length(buf->pt.p->item))));
-/*       rblist_get(buf->pt.p->item, buf->pt.o) = c; */
+      buf->pt.p->item = rblist_set(buf->pt.p->item, buf->pt.o, c);
     } else if (!isdigit(c))
       break;
   }
@@ -477,8 +473,8 @@ file, replacing the selection.\n\
         if (buf->pt.p != r.start.p
             || r.start.o != buf->pt.o)
           CMDCALL(edit_select_other_end);
-        delete_nstring(r.size, &s);
-        ok = insert_nstring(out);
+        replace_nstring(r.size, &s, NULL);
+        ok = replace_nstring(0, NULL, out);
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
       }
     }

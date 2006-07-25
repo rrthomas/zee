@@ -87,7 +87,8 @@ rblist rblist_concat(rblist left, rblist right);
 /* Derived constructors. */
 
 /*
- * Append the contents of the argument string or character to rbl.
+ * Append the argument character to rbl.
+ * FIXME: Generalise to rblist_insert, and use in ninsert_string.
  */
 rblist rblist_append(rblist rbl, char c);
 
@@ -150,7 +151,7 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
 
 /*
  * Returns the specified element of the specified rblist. `pos' must be
- * in the range from 0 to rblist_length(rbl) - 1.
+ * in the range 0 to rblist_length(rbl) - 1.
  *
  * This is a slow way of extracting elements from a list, and should
  * be used only when accesses are scattered randomly throughout the
@@ -159,6 +160,14 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 char rblist_get(rblist rbl, size_t pos);
+
+/*
+ * Changes a character in the specified rblist at the given position.
+ * `pos' must be in the range 0 to rblist_length(rbl) - 1.
+ *
+ * Takes time O(log(n)), where `n' is the length of the list.
+ */
+rblist rblist_set(rblist rbl, size_t pos, char c);
 
 /*
  * Converts a character position into a line number. More precisely,
@@ -223,7 +232,7 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
  *
  * Takes time O(n) where `n' is the length of the list.
  */
-char *rblist_copy_into(rblist rbl, char *s);
+char *rblist_to_string(rblist rbl, char *s);
 
 /*
  * Returns the portion of `rbl' from `from' to `to'. If `to' is too

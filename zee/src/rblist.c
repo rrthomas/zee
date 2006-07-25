@@ -300,9 +300,9 @@ rblist rblist_singleton(char c)
  */
 rblist rblist_concat(rblist left, rblist right)
 {
-  #define llen (left->stats.length)
-  #define rlen (right->stats.length)
-  #define mid (left->stats.length)
+#define llen (left->stats.length)
+#define rlen (right->stats.length)
+#define mid (left->stats.length)
   size_t new_len = llen + rlen;
 
   if (new_len == 0)
@@ -332,9 +332,9 @@ rblist rblist_concat(rblist left, rblist right)
     return (rblist)ret;
   }
 
-  #undef llen
-  #undef rlen
-  #undef mid
+#undef llen
+#undef rlen
+#undef mid
 }
 
 /*************************/
@@ -365,7 +365,7 @@ size_t rblist_nl_count(rblist rbl)
 
 void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 {
-  if (pos <= 0) {
+  if (pos == 0) {
     *left = rblist_empty;
     *right = rbl;
   } else if (pos >= rbl->stats.length) {
@@ -410,6 +410,13 @@ char rblist_get(rblist rbl, size_t pos)
     }
   }
   return rbl->leaf.data[pos];
+}
+
+rblist rblist_set(rblist rbl, size_t pos, char c)
+{
+  rblist left, right;
+  rblist_split(rbl, pos, &left, &right);
+  return rblist_concat(rblist_append(left, c), rblist_sub(right, 1, rblist_length(right)));
 }
 
 /*
@@ -471,7 +478,7 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line)
 /************************/
 /* Derived destructors. */
 
-char *rblist_copy_into(rblist rbl, char *s)
+char *rblist_to_string(rblist rbl, char *s)
 {
   RBLIST_FOR(c, rbl)
     *(s++) = c;
@@ -613,7 +620,7 @@ int main(void)
 
   rbl1 = rblist_empty;
   rbl2 = rblist_singleton('x');
-  #define TEST_SIZE 1000
+#define TEST_SIZE 1000
   random_counter = 0;
   for (size_t i = 0; i < TEST_SIZE; i++)
     rbl1 = rblist_concat(rbl1, rbl2);
