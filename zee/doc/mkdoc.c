@@ -149,11 +149,11 @@ static void dump_vars(void)
 
 static struct {
   char *longname;
-  char *doc;
   int opt;
+  char *doc;
 } otable[] = {
-#define X(longname, doc, opt) \
-        {longname, doc, opt},
+#define X(longname, opt, doc) \
+        {longname, opt, doc},
 #include "tbl_opts.h"
 #undef X
 };
