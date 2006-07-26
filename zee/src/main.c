@@ -203,7 +203,7 @@ int main(int argc, char **argv)
       }
 
       /* Load default bindings file. */
-      if ((as = file_read(rblist_from_string(PKGDATADIR "/key_bindings.el"))))
+      if ((as = file_read(rblist_from_string(PKGDATADIR "/cua_bindings"))))
         cmd_eval(as);
     }
 

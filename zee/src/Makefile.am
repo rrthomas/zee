@@ -15,7 +15,7 @@ rblist_LDADD = zmalloc.o vector.o astr.o
 bin_PROGRAMS = zee
 
 dist_pkgdata_DATA =				\
-	key_bindings.el
+	cua_bindings
 
 zee_base_SOURCES =				\
 	rblist.c				\
