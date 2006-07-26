@@ -60,7 +60,7 @@ POSIX system.
 
 The options are as follows:
 
-@include zee_opts.texi
+@include opts.texi
 
 @c ---------------------------------------------------------------------------
 @node Initialization file, Key names, Invoking Zee, Top
@@ -122,7 +122,7 @@ This table contains the full list of available commands that can be
 called with the @kbd{Alt-X} key (please note that most commands have a
 key binding anyway).
 
-@include zee_funcs.texi
+@include funcs.texi
 
 @c ---------------------------------------------------------------------------
 @node Variables, Bug reports, Commands, Top
@@ -135,7 +135,7 @@ in the @file{.zeerc} initialization file.
 Please note that some variables may be not available depending
 on the compilation options given to @samp{configure}.
 
-@include zee_vars.texi
+@include vars.texi
 
 @c ---------------------------------------------------------------------------
 @node Bug reports,  , Variables, Top

@@ -13,7 +13,7 @@ EXTRA_DIST =					\
 
 DOCSRCS = $(top_srcdir)/src/*.c
 
-GENERATED_TEXI = $(PACKAGE)_funcs.texi $(PACKAGE)_vars.texi $(PACKAGE)_opts.texi
+GENERATED_TEXI = funcs.texi vars.texi opts.texi
 
 mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LIBS) $(LDFLAGS) -o $@ mkdoc.o
@@ -24,7 +24,7 @@ mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
 
 $(PACKAGE).info $(PACKAGE).dvi: $(GENERATED_TEXI)
 
-$(PACKAGE)rc $(PACKAGE)_funcs.texi $(PACKAGE)_vars.texi $(PACKAGE)_opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+$(PACKAGE)rc funcs.texi vars.texi opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) > $(top_builddir)/src/tbl_funcs.h
 
 clean-local:

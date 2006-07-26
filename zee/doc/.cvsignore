@@ -4,4 +4,4 @@ Makefile.in
 mkdoc
 zee.info
 zeerc
-zee_funcs.texi zee_vars.texi zee_opts.texi
+funcs.texi vars.texi opts.texi

@@ -78,7 +78,7 @@ static void get_funcs(FILE *fp)
 
 static void dump_funcs(void)
 {
-  FILE *fp = fopen(PACKAGE "_funcs.texi", "w");
+  FILE *fp = fopen("funcs.texi", "w");
 
   assert(fp);
   fprintf(fp,
@@ -118,7 +118,7 @@ static struct {
 
 static void dump_vars(void)
 {
-  FILE *fp = fopen(PACKAGE "_vars.texi", "w");
+  FILE *fp = fopen("vars.texi", "w");
   FILE *fp2 = fopen(PACKAGE "rc", "w");
 
   assert(fp);
@@ -161,7 +161,7 @@ static struct {
 
 static void dump_opts(void)
 {
-  FILE *fp = fopen(PACKAGE "_opts.texi", "w");
+  FILE *fp = fopen("opts.texi", "w");
 
   assert(fp);
   fprintf(fp, "@c Automatically generated file: DO NOT EDIT!\n");
