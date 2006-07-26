@@ -161,4 +161,4 @@ dnl ==================================================================
 dnl Generate makefiles
 dnl ==================================================================
 
-AC_OUTPUT(Makefile doc/Makefile src/Makefile)
+AC_OUTPUT(Makefile src/Makefile)
