@@ -14,8 +14,13 @@ rblist_LDADD = zmalloc.o vector.o astr.o
 
 bin_PROGRAMS = zee
 
-dist_pkgdata_DATA =				\
-	cua_bindings
+dist_pkgdata_DATA = cua_bindings
+
+info_TEXINFOS = zee.texi
+
+dist_sysconf_DATA = $(PACKAGE)rc
+
+EXTRA_DIST = mkdoc.c
 
 zee_base_SOURCES =				\
 	rblist.c				\
@@ -65,8 +70,27 @@ endif
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
+DOCSRCS = $(top_srcdir)/src/*.c
+
+GENERATED_TEXI = funcs.texi vars.texi opts.texi
+
+mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
+	$(CC_FOR_BUILD) $(CFLAGS) $(LIBS) $(LDFLAGS) -o $@ mkdoc.o
+
+mkdoc.o: mkdoc.c $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/tbl_opts.h \
+        $(top_srcdir)/src/zmalloc.c $(top_srcdir)/src/astr.c
+	$(CC_FOR_BUILD) -c -I$(top_builddir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
+
+$(PACKAGE).info $(PACKAGE).dvi: $(GENERATED_TEXI)
+
+$(PACKAGE)rc funcs.texi vars.texi opts.texi: $(DOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
+	./mkdoc$(EXEEXT_FOR_BUILD) $(DOCSRCS) > $(top_builddir)/src/tbl_funcs.h
+
+clean-local:
+	rm -f mkdoc$(EXEEXT_FOR_BUILD) *.o
+
 distclean-local:
-	rm -f tbl_funcs.h
+	rm -f tbl_funcs.h $(GENERATED_TEXI) $(PACKAGE)rc
 
 sloccount:
 	sloccount $(zee_base_SOURCES) term_*.c

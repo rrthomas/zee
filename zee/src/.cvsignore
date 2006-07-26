@@ -4,3 +4,7 @@ Makefile.in
 zee
 paths.h tbl_funcs.h
 vector astr rblist
+mkdoc
+zee.info
+zeerc
+funcs.texi vars.texi opts.texi
