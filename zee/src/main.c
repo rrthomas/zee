@@ -58,8 +58,6 @@ static void run(void)
   for (;
        !(thisflag & FLAG_QUIT);
        lastflag = thisflag) {
-    size_t key;
-
     if (lastflag & FLAG_NEED_RESYNC)
       resync_display();
     term_display();
@@ -69,7 +67,7 @@ static void run(void)
     if (lastflag & FLAG_DEFINING_MACRO)
       thisflag |= FLAG_DEFINING_MACRO;
 
-    key = getkey();
+    size_t key = getkey();
     popup_clear();
     minibuf_clear();
     process_key(key);
@@ -79,7 +77,7 @@ static void run(void)
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, PACKAGE_NAME " crashed. Please send a bug report to <" PACKAGE_BUGREPORT ">\r\n");
+  fprintf(stderr, PACKAGE_NAME " crashed. Please send a bug report to " PACKAGE_BUGREPORT "\r\n");
   die(2);
 }
 
