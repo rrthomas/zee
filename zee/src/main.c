@@ -142,6 +142,9 @@ int main(int argc, char **argv)
       nflag = true;
       break;
     case 4:
+      hflag = true;
+      break;
+    case 5:
       fprintf(stderr,
               PACKAGE_STRING "\n"
               COPYRIGHT_STRING "\n"
@@ -151,9 +154,6 @@ int main(int argc, char **argv)
               "For more information about these matters, see the file named COPYING.\n"
               );
       return 0;
-    case 5:
-      hflag = true;
-      break;
     }
   argc -= optind;
   argv += optind;
