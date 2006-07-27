@@ -1,4 +1,4 @@
-/* Table of variables */
+// Table of variables
 
 /*
  * The first column specifies the variable name.

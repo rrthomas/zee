@@ -100,7 +100,7 @@ void term_init(void)
 
   if (term && strcmp(term, "xterm") == 0) {
     xterm = true;
-    printf("\033[?1036h");      /* Make Meta send ESC */
+    printf("\033[?1036h");      // Make Meta send ESC
   }
   initscr();
   term_set_size((size_t)COLS, (size_t)LINES);
@@ -113,28 +113,28 @@ void term_init(void)
 
 void term_close(void)
 {
-  /* Clear last line. */
+  // Clear last line.
   term_move((size_t)(LINES - 1), 0);
   term_clrtoeol();
   term_refresh();
 
-  /* Free memory and finish with ncurses. */
+  // Free memory and finish with ncurses.
   endwin();
   if (xterm)
-    printf("\033[?1036l");      /* Reset Meta key */
+    printf("\033[?1036l");      // Reset Meta key
 }
 
 static size_t translate_key(int c)
 {
   switch (c) {
-  case '\0':		/* C-@ */
+  case '\0':		// C-@
     return KBD_CTRL | '@';
   case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
   case '\6':  case '\7':  case '\10':             case '\12':
   case '\13': case '\14':             case '\16': case '\17':
   case '\20': case '\21': case '\22': case '\23': case '\24':
   case '\25': case '\26': case '\27': case '\30': case '\31':
-  case '\32':		/* C-a ... C-z */
+  case '\32':		// C-a ... C-z
     return KBD_CTRL | ('a' + c - 1);
   case '\11':
     return KBD_TAB;
@@ -143,25 +143,25 @@ static size_t translate_key(int c)
   case '\37':
     return KBD_CTRL | (c ^ 0x40);
 #ifdef __linux__
-  case 0627:		/* C-z */
+  case 0627:		// C-z
     return KBD_CTRL | 'z';
 #endif
-  case '\33':		/* META */
+  case '\33':		// META
     return KBD_META;
-  case KEY_PPAGE:	/* PGUP */
+  case KEY_PPAGE:	// PGUP
     return KBD_PGUP;
-  case KEY_NPAGE:	/* PGDN */
+  case KEY_NPAGE:	// PGDN
     return KBD_PGDN;
   case KEY_HOME:
     return KBD_HOME;
   case KEY_END:
     return KBD_END;
-  case KEY_DC:		/* DEL */
+  case KEY_DC:		// DEL
     return KBD_DEL;
-  case KEY_BACKSPACE:	/* BS */
-  case 0177:		/* BS */
+  case KEY_BACKSPACE:	// BS
+  case 0177:		// BS
     return KBD_BS;
-  case KEY_IC:		/* INSERT */
+  case KEY_IC:		// INSERT
     return KBD_INS;
   case KEY_LEFT:
     return KBD_LEFT;
@@ -203,7 +203,7 @@ static size_t translate_key(int c)
     return KBD_F12;
   default:
     if (c > 255)
-      return KBD_NOKEY;	/* Undefined behaviour. */
+      return KBD_NOKEY;	// Undefined behaviour.
     return c;
   }
 }

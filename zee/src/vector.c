@@ -68,7 +68,7 @@ void vec_shrink(vector *v, size_t idx, size_t items)
 {
   if (idx >= vec_items(v))
     return;
-  if (idx + items > vec_items(v))   /* items can't be negative */
+  if (idx + items > vec_items(v))   // items can't be negative
     items = vec_items(v) - idx;
   memmove(vec_index(v, idx), vec_index(v, idx + items),
           (vec_items(v) - (idx + items)) * vec_itemsize(v));
@@ -92,7 +92,7 @@ vector *vec_copy(vector *v)
 
 #include <stdlib.h>
 
-/* Stub to make zrealloc happy */
+// Stub to make zrealloc happy
 void die(int exitcode)
 {
   exit(exitcode);
@@ -103,4 +103,4 @@ int main(void)
   return EXIT_SUCCESS;
 }
 
-#endif /* TEST */
+#endif // TEST

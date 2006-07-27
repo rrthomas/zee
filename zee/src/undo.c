@@ -27,7 +27,7 @@
 #include "extern.h"
 
 
-/* This variable is set to true when the undo is in execution. */
+// This variable is set to true when the undo is in execution.
 static bool doing_undo = false;
 
 /*

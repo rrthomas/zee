@@ -155,17 +155,17 @@ static int isearch(int dir)
   start = buf->pt;
   cur = buf->pt;
 
-  /* I-search mode. */
+  // I-search mode.
   buf->flags |= BFLAG_ISEARCH;
 
   for (;;) {
-    /* Make the minibuf message. */
+    // Make the minibuf message.
     as = astr_afmt("%sI-search%s: %r",
               (last ? "" : "Failing "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               pattern);
 
-    /* Regex error. */
+    // Regex error.
     if (find_err) {
       if ((strncmp(find_err, "Premature ", 10) == 0) ||
           (strncmp(find_err, "Unmatched ", 10) == 0) ||
@@ -185,7 +185,7 @@ static int isearch(int dir)
       thisflag |= FLAG_NEED_RESYNC;
       CMDCALL(edit_select_off);
 
-      /* Restore old mark position. */
+      // Restore old mark position.
       assert(buf->mark);
       remove_marker(buf->mark);
 
@@ -202,27 +202,27 @@ static int isearch(int dir)
       } else
         ding();
     } else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
-      /* Invert direction. */
+      // Invert direction.
       if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
         dir = ISEARCH_BACKWARD;
       else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
         dir = ISEARCH_FORWARD;
       if (rblist_length(pattern) > 0) {
-        /* Find next match. */
+        // Find next match.
         cur = buf->pt;
 
-        /* Save search string. */
+        // Save search string.
         last_search = pattern;
       }
       else if (last_search)
         pattern = last_search;
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (rblist_length(pattern) > 0) {
-        /* Save mark. */
+        // Save mark.
         set_mark_to_point();
         buf->mark->pt = start;
 
-        /* Save search string. */
+        // Save search string.
         last_search = pattern;
 
         minibuf_write(rblist_from_string("Mark saved when search started"));
@@ -244,7 +244,7 @@ static int isearch(int dir)
       resync_display();
   }
 
-  /* done */
+  // done
   buf->flags &= ~BFLAG_ISEARCH;
 
   if (old_mark)
@@ -326,12 +326,12 @@ what to do with it.\
         minibuf_clear();
 
         switch (c) {
-        case KBD_CANCEL: /* C-g: quit immediately */
+        case KBD_CANCEL: // C-g: quit immediately
           ok = CMDCALL(edit_select_off);
           break;
-        case 'a': /* Replace all without asking. */
+        case 'a': // Replace all without asking.
           noask = true;
-          /* FALLTHROUGH */
+          // FALLTHROUGH
         case 'y':
           ++count;
           undo_save(UNDO_REPLACE_BLOCK,
@@ -341,7 +341,7 @@ what to do with it.\
                                 rblist_length(find), repl, find_no_upper))
             buf->flags |= BFLAG_MODIFIED;
           break;
-        case 'n': /* Do not replace. */
+        case 'n': // Do not replace.
           break;
         }
       }

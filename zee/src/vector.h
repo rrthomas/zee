@@ -24,12 +24,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Uninitialised vector elements are zeroed */
+// Uninitialised vector elements are zeroed
 typedef struct {
-  size_t itemsize;        /* size of each item in bytes */
-  size_t items;           /* number of items used */
-  size_t size;            /* size of array in items */
-  void *array;            /* the array of contents; NULL means empty. */
+  size_t itemsize;        // size of each item in bytes
+  size_t items;           // number of items used
+  size_t size;            // size of array in items
+  void *array;            // the array of contents; NULL means empty.
 } vector;
 
 vector *vec_new(size_t itemsize);

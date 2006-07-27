@@ -45,16 +45,16 @@ rblist previous_history_element(History *hp)
   rblist as = NULL;
 
   if (hp->elements) {
-    if (!hp->sel) { /* First call for this history. */
-      /* Select last element. */
+    if (!hp->sel) { // First call for this history.
+      // Select last element.
       if (list_last(hp->elements) != hp->elements) {
         hp->sel = list_last(hp->elements);
         as = hp->sel->item;
       }
     }
-    /* Is there another element? */
+    // Is there another element?
     else if (list_prev(hp->sel) != hp->elements) {
-      /* Select it. */
+      // Select it.
       hp->sel = list_prev(hp->sel);
       as = hp->sel->item;
     }
@@ -68,12 +68,12 @@ rblist next_history_element(History *hp)
   rblist as = NULL;
 
   if (hp->elements && hp->sel) {
-    /* Next element. */
+    // Next element.
     if (list_next(hp->sel) != hp->elements) {
       hp->sel = list_next(hp->sel);
       as = hp->sel->item;
     }
-    /* No more elements (back to original status). */
+    // No more elements (back to original status).
     else
       hp->sel = NULL;
   }

@@ -66,7 +66,7 @@ The desired position of point is always relative to the current window.\
 END_DEF
 
 
-/* Contents of popup window. */
+// Contents of popup window.
 static rblist popup_text = NULL;
 static size_t popup_line = 0;
 
@@ -124,7 +124,7 @@ void popup_scroll_up(void)
 }
 
 
-/* Window properties */
+// Window properties
 
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
@@ -262,20 +262,20 @@ static void draw_window(size_t topline)
   Line *lp;
   Point pt = buf->pt;
 
-  /* Find the first line to display on the first screen line. */
+  // Find the first line to display on the first screen line.
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
        i > 0 && list_prev(lp) != buf->lines;
        lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width();
 
-  /* Draw the window lines. */
+  // Draw the window lines.
   for (i = topline; i < win.eheight + topline; ++i, ++lineno) {
-    /* Clear the line. */
+    // Clear the line.
     term_move(i, 0);
     term_clrtoeol();
 
-    /* If at the end of the buffer, don't write any text. */
+    // If at the end of the buffer, don't write any text.
     if (lp == buf->lines)
       continue;
 
@@ -325,7 +325,7 @@ static void calculate_start_column(void)
   for (lp = rp; ; lp--) {
     for (col = 0, p = lp; p < rp; ++p)
       if (rblist_get(pt.p->item, p) == '\t') {
-        /* FIXME: Broken unless lp starts at a tab position. */
+        // FIXME: Broken unless lp starts at a tab position.
         size_t t = tab_width();
         col += t - (col % t);
       } else if (isprint(rblist_get(pt.p->item, p)))
@@ -422,11 +422,11 @@ static void draw_popup(void)
   /* Number of lines of popup_text that will fit on the terminal.
    * Allow 3 for the border above, and minibuffer and status line below. */
   const size_t h = term_height() - 3;
-  /* Number of lines is one more than number of newline characters. */
+  // Number of lines is one more than number of newline characters.
   const size_t l = rblist_nl_count(popup_text) + 1;
-  /* Position of top of popup == number of lines not to use. */
+  // Position of top of popup == number of lines not to use.
   const size_t y = h > l ? h - l : 0;
-  /* Number of lines to print. */
+  // Number of lines to print.
   const size_t p = min(h - y, l - popup_line);
 
   term_move(y, 0);
@@ -437,7 +437,7 @@ static void draw_popup(void)
   term_print(rblist_sub(popup_text, start_pos, end_pos));
   term_print(astr_nl());
 
-  /* Draw blank lines to bottom of window. */
+  // Draw blank lines to bottom of window.
   for (size_t i = h - y - p; i > 0; i--)
     term_print(astr_nl());
 }
@@ -463,11 +463,11 @@ void term_display(void)
 
   topline += win.fheight;
 
-  /* Draw the popup window. */
+  // Draw the popup window.
   if (popup_text)
     draw_popup();
 
-  /* Redraw cursor. */
+  // Redraw cursor.
   term_move(cur_topline + win.topdelta, point_screen_column);
 }
 
@@ -486,7 +486,7 @@ void resize_window(void)
 {
   int hdelta;
 
-  /* Resize window horizontally. */
+  // Resize window horizontally.
   win.fwidth = win.ewidth = term_width();
 
   /* Work out difference in window height; window may be taller than
@@ -494,14 +494,14 @@ void resize_window(void)
   hdelta = term_height() - 1;
   hdelta -= win.fheight;
 
-  /* Resize window vertically. */
-  if (hdelta > 0) { /* Increase window height. */
+  // Resize window vertically.
+  if (hdelta > 0) { // Increase window height.
     while (hdelta > 0) {
       ++win.fheight;
       ++win.eheight;
       --hdelta;
     }
-  } else { /* Decrease window height. */
+  } else { // Decrease window height.
     int decreased = true;
     while (decreased) {
       decreased = false;
@@ -512,7 +512,7 @@ void resize_window(void)
           ++hdelta;
           decreased = true;
         } else
-          /* FIXME: Window too small! */
+          // FIXME: Window too small!
           assert(0);
       }
     }

@@ -29,7 +29,7 @@
 
 #include "rblist.h"
 
-/* Useful constant: rblist_singleton('\n') */
+// Useful constant: rblist_singleton('\n')
 rblist astr_nl(void);
 
 /*
@@ -63,4 +63,4 @@ rblist astr_afmt(const char *fmt, ...);
  */
 char *astr_to_string(rblist rbl);
 
-#endif /* ASTR_H */
+#endif // ASTR_H

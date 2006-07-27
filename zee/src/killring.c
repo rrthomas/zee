@@ -146,7 +146,7 @@ static bool kill_helper(Command cmd)
 
     thisflag |= FLAG_DONE_KILL;
 
-    minibuf_clear();            /* Erase "Set mark" message. */
+    minibuf_clear();            // Erase "Set mark" message.
   }
 
   return ok;

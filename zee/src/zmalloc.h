@@ -23,7 +23,7 @@
 
 #include <stddef.h>
 
-/* Prototype here to break dependency cycle with extern.h */
+// Prototype here to break dependency cycle with extern.h
 void die(int exitcode);
 
 #define zmalloc(size) \

@@ -41,7 +41,7 @@ typedef struct {
   Command cmd;
 } Binding;
 
-vector *bindings;               /* Vector of Binding *s */
+vector *bindings;               // Vector of Binding *s
 
 static Binding *get_binding(size_t key)
 {
@@ -135,13 +135,13 @@ rblist minibuf_read_command_name(rblist prompt)
       return NULL;
     }
 
-    /* Complete partial words if possible */
+    // Complete partial words if possible
     if (completion_try(cp, ms))
       ms = cp->match;
 
     if (get_command(ms) || get_macro(ms)) {
       add_history_element(&commands_history, ms);
-      minibuf_clear();        /* Remove any error message */
+      minibuf_clear();        // Remove any error message
       break;
     } else {
       minibuf_error(astr_afmt("Undefined command `%r'", ms));

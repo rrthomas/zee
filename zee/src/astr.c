@@ -35,7 +35,7 @@
 rblist astr_nl(void)
 {
   static rblist ret = NULL;
-  /* FIXME: It is infuriating to have to do this "if"! Is there a better way? */
+  // FIXME: It is infuriating to have to do this "if"! Is there a better way?
   if (!ret)
     ret = rblist_singleton('\n');
   return ret;
@@ -125,12 +125,12 @@ rblist astr_afmt(const char *format, ...)
   int x;
   size_t i;
   while (1) {
-    /* Skip to next '%' or to end of string. */
+    // Skip to next '%' or to end of string.
     for (i = 0; format[i] && format[i] != '%'; i++);
     ret = rblist_concat(ret, rblist_from_array(format, i));
     if (!format[i++])
       break;
-    /* We've found a '%'. */
+    // We've found a '%'.
     switch (format[i++]) {
       case 'c':
         ret = rblist_append(ret, (char)va_arg(ap, int));
@@ -173,7 +173,7 @@ rblist astr_afmt(const char *format, ...)
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Stub to make zrealloc happy */
+// Stub to make zrealloc happy
 void die(int exitcode)
 {
   exit(exitcode);
@@ -223,4 +223,4 @@ int main(void)
   return EXIT_SUCCESS;
 }
 
-#endif /* TEST */
+#endif // TEST

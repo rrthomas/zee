@@ -120,16 +120,16 @@ valid editor command.\
     ok = false;
   } else {
     if ((mp = get_macro(ms))) {
-      /* If a macro with this name already exists, update its key list */
+      // If a macro with this name already exists, update its key list
     } else {
-      /* Add a new macro to the list */
+      // Add a new macro to the list
       mp = macro_new();
       mp->next = head_mp;
       mp->name = ms;
       head_mp = mp;
     }
 
-    /* Copy the keystrokes from cur_mp. */
+    // Copy the keystrokes from cur_mp.
     mp->keys = vec_copy(cur_mp->keys);
   }
 }
@@ -138,7 +138,7 @@ END_DEF
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
    keystrokes. Macros should return success/failure. */
-/* FIXME: Add bind_command to make new commands. */
+// FIXME: Add bind_command to make new commands.
 void call_macro(Macro *mp)
 {
   size_t i;

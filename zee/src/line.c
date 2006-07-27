@@ -136,7 +136,7 @@ Line *string_to_lines(rblist as, size_t *lines)
     ++*lines;
   }
 
-  /* Add the rest of the string, if any */
+  // Add the rest of the string, if any
   list_last(lp)->item = rblist_concat(list_last(lp)->item, rblist_sub(as, p, end));
 
   return lp;
@@ -317,8 +317,8 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
                                   newtext, rblist_length(newtext)) != 0) {
       (*lp)->item = rblist_concat(rblist_sub((*lp)->item, 0, (offset - 1)),
                              rblist_concat(newtext, rblist_sub((*lp)->item, (offset + rblist_length(newtext)), rblist_length((*lp)->item))));
-/*       memcpy(rblist_get((*lp)->item, offset), */
-/*              astr_to_string(newtext), rblist_length(newtext)); */
+//       memcpy(rblist_get((*lp)->item, offset),
+//              astr_to_string(newtext), rblist_length(newtext));
       changed = true;
     }
   }
@@ -337,18 +337,18 @@ void wrap_break_line(void)
   size_t i, break_col = 0, excess = 0, old_col;
   size_t wrapcol = get_variable_number(rblist_from_string("wrap_column"));
 
-  /* If we're not beyond wrap_column, stop now. */
+  // If we're not beyond wrap_column, stop now.
   if (get_goalc() <= wrapcol)
     return;
 
-  /* Move cursor back to wrap_column */
+  // Move cursor back to wrap_column
   old_col = buf->pt.o;
   while (get_goalc() > wrapcol + 1) {
     buf->pt.o--;
     excess++;
   }
 
-  /* Find break point moving left from wrap_column. */
+  // Find break point moving left from wrap_column.
   for (i = buf->pt.o; i > 0; i--) {
     int c = rblist_get(buf->pt.p->item, (i - 1));
     if (isspace(c)) {
@@ -370,14 +370,14 @@ void wrap_break_line(void)
   }
 
   if (break_col >= 1) {
-    /* Break line. */
+    // Break line.
     size_t last_col = buf->pt.o - break_col;
     buf->pt.o = break_col;
     CMDCALL(delete_horizontal_space);
     insert_char('\n');
     buf->pt.o = last_col + excess;
   } else
-    /* Undo fiddling with point. */
+    // Undo fiddling with point.
     buf->pt.o = old_col;
 }
 
@@ -426,7 +426,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
         Line *lp2 = list_next(lp1);
         size_t lp1len = rblist_length(lp1->item);
 
-        /* Move the next line of text into the current line. */
+        // Move the next line of text into the current line.
         lp2 = list_next(buf->pt.p);
         lp1->item = rblist_concat(lp1->item, list_next(buf->pt.p)->item);
         list_behead(lp1);
@@ -436,7 +436,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
 
         thisflag |= FLAG_NEED_RESYNC;
       } else {
-        /* Move the text one position backward after the point. */
+        // Move the text one position backward after the point.
         buf->pt.p->item = rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
                                         rblist_sub(buf->pt.p->item, buf->pt.o + 1,
                                                    rblist_length(buf->pt.p->item)));
@@ -446,25 +446,25 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
     }
   }
 
-  /* Insert string. */
+  // Insert string.
   /* FIXME: Inefficient. Could search bs for \n's using astr_str.
      There is code for the string version of this in CVS history. */
   if (bs && rblist_length(bs))
     for (size_t i = 0; i < rblist_length(bs); i++) {
       if (rblist_get(bs, i) == '\n') {
-        /* Insert a newline at the current position. */
+        // Insert a newline at the current position.
         Line *new_lp;
 
-        /* Update line linked list. */
+        // Update line linked list.
         list_prepend(buf->pt.p, rblist_empty);
         new_lp = list_first(buf->pt.p);
         ++buf->num_lines;
 
-        /* Move the text after the point into the new line. */
+        // Move the text after the point into the new line.
         new_lp->item = rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item));
         buf->pt.p->item = rblist_sub(buf->pt.p->item, 0, buf->pt.o);
 
-        /* Update markers that point to the splitted line. */
+        // Update markers that point to the splitted line.
         adjust_markers(new_lp, buf->pt.p, buf->pt.o, 1, 0);
 
         buf->flags |= BFLAG_MODIFIED;
@@ -565,10 +565,10 @@ static void previous_nonblank_goalc(void)
 {
   size_t cur_goalc = get_goalc();
 
-  /* Find previous non-blank line. */
+  // Find previous non-blank line.
   while (CMDCALL(move_previous_line) && is_blank_line());
 
-  /* Go to `cur_goalc' in that non-blank line. */
+  // Go to `cur_goalc' in that non-blank line.
   while (!eolp() && get_goalc() < cur_goalc)
     CMDCALL(move_next_character);
 }
@@ -587,23 +587,23 @@ Indent line or insert a tab.\
     buf->flags &= ~BFLAG_ANCHORED;
     previous_nonblank_goalc();
 
-    /* Now find the next blank char. */
+    // Now find the next blank char.
     if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
       while (!eolp() && !isspace(following_char()))
         CMDCALL(move_next_character);
 
-    /* Find next non-blank char. */
+    // Find next non-blank char.
     while (!eolp() && isspace(following_char()))
       CMDCALL(move_next_character);
 
-    /* Record target column. */
+    // Record target column.
     if (!eolp())
       target_goalc = get_goalc();
 
     buf->pt = old_point->pt;
     remove_marker(old_point);
 
-    /* Indent. */
+    // Indent.
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     if (target_goalc > 0)
       /* If not at EOL on target line, insert spaces up to
@@ -611,7 +611,7 @@ Indent line or insert a tab.\
       while (get_goalc() < target_goalc)
         insert_char(' ');
     else
-      /* If already at EOL on target line, insert a tab. */
+      // If already at EOL on target line, insert a tab.
       ok = CMDCALL(edit_insert_tab);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
@@ -638,7 +638,7 @@ no indenting is performed.\
 
       undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
-      /* Check where last non-blank goalc is. */
+      // Check where last non-blank goalc is.
       previous_nonblank_goalc();
       pos = get_goalc();
       indent = pos > 0 || (!eolp() && isspace(following_char()));

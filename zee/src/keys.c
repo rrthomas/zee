@@ -30,7 +30,7 @@
 #include "extern.h"
 
 
-/* Get keystrokes */
+// Get keystrokes
 
 #define MAX_KEY_BUF	16
 
@@ -80,7 +80,7 @@ void ungetkey(size_t key)
 }
 
 
-/* Key code and name arrays */
+// Key code and name arrays
 
 static size_t keycode[] = {
 #define X(key_sym, key_name, key_code) \

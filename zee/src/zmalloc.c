@@ -44,7 +44,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
   if (newsize < oldsize)
     memset((char *)ptr + newsize, 0, oldsize - newsize);
 
-  /* Behaviour in this case is unspecified for malloc and GC_REALLOC */
+  // Behaviour in this case is unspecified for malloc and GC_REALLOC
   if (newsize == 0)
     return NULL;
 
@@ -59,7 +59,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
     die(1);
   }
 
-#ifdef DEBUG /* GC_REALLOC does this anyway */
+#ifdef DEBUG // GC_REALLOC does this anyway
   if (newsize > oldsize)
     memset((char *)ptr + oldsize, 0, newsize - oldsize);
 #endif

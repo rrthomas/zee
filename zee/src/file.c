@@ -81,7 +81,7 @@ void file_open(rblist filename)
     if (errno != ENOENT)
       buf->flags |= BFLAG_READONLY;
   } else {
-    /* Add lines to buffer */
+    // Add lines to buffer
     buf->lines = string_to_lines(as, &buf->num_lines);
     buf->pt.p = list_first(buf->lines);
   }
@@ -105,7 +105,7 @@ static bool buffer_write(Buffer *bp, rblist filename)
   if ((fp = fopen(astr_to_string(filename), "w")) == NULL)
     return false;
 
-  /* Save all the lines. */
+  // Save all the lines.
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     if (fwrite(astr_to_string(lp->item), sizeof(char), rblist_length(lp->item), fp) < rblist_length(lp->item) ||
         (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {

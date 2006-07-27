@@ -35,19 +35,19 @@ static inline int getch(rblist line, size_t *pos)
 
 static rblist gettok(rblist line, size_t *pos)
 {
-  /* Skip space and comments to next non-space character. */
+  // Skip space and comments to next non-space character.
   int c;
   do {
     c = getch(line, pos);
 
-    /* Skip comments */
+    // Skip comments
     if (c == '#')
       do
         c = getch(line, pos);
       while (c != EOF && c != '\n');
   } while (c == ' ' || c == '\t');
 
-  /* Read token. */
+  // Read token.
   rblist tok = rblist_empty;
   while (c != '#' && c != ' ' && c != '\t' && c != '\n' && c != EOF) {
     tok = rblist_append(tok, c);
@@ -73,14 +73,14 @@ void cmd_eval(rblist as)
   for (rblist tok = gettok(as, &pos);
        tok != NULL;
        tok = gettok(as, &pos)) {
-    /* Get tokens until we run out or reach a new line */
+    // Get tokens until we run out or reach a new line
     list l = list_new();
     while (tok && tok != rblist_empty) {
       list_append(l, tok);
       tok = gettok(as, &pos);
     }
 
-    /* Execute the line */
+    // Execute the line
     rblist fname;
     Command cmd;
     while ((fname = list_behead(l)) &&
@@ -96,8 +96,8 @@ void cmd_eval(rblist as)
  *--------------------------------------------------------------------------*/
 
 static struct {
-  const char *name;             /* The command name */
-  Command cmd;                  /* The function pointer */
+  const char *name;             // The command name
+  Command cmd;                  // The function pointer
 } ftable[] = {
 #define X(cmd_name, doc) \
 	{# cmd_name, F_ ## cmd_name},

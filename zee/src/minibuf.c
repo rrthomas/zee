@@ -29,7 +29,7 @@
 #include "extern.h"
 
 
-/* FIXME: \n's mess up the display */
+// FIXME: \n's mess up the display
 static void term_minibuf_write(rblist as)
 {
   term_move(term_height() - 1, 0);
@@ -44,7 +44,7 @@ void minibuf_write(rblist as)
 {
   term_minibuf_write(as);
 
-  /* Redisplay (and leave the cursor in the correct position). */
+  // Redisplay (and leave the cursor in the correct position).
   term_display();
   term_refresh();
 }
@@ -80,10 +80,10 @@ static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
 
   for (;;) {
     as = minibuf_read_completion(prompt, rblist_empty, cp, NULL);
-    if (as == NULL)             /* Cancelled. */
+    if (as == NULL)             // Cancelled.
       return NULL;
 
-    /* Complete partial words if possible. */
+    // Complete partial words if possible.
     if (completion_try(cp, as)) {
       as = cp->match;
       if (list_length(cp->matches) == 1)
@@ -144,7 +144,7 @@ void minibuf_clear(void)
  */
 static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
 {
-  rblist as = prompt;             /* Text to print. */
+  rblist as = prompt;             // Text to print.
   size_t visible_width = max(3, term_width() - rblist_length(prompt) - 2);
   visible_width--; /* Avoid the b.r. corner of the screen for broken
                       terminals and terminal emulators. */
@@ -153,14 +153,14 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
   if (scroll_pos > 0)
     as = rblist_append(as, '$');
 
-  /* Cursor position within `as'. */
+  // Cursor position within `as'.
   size_t cursor_pos = rblist_length(as) + (offset - scroll_pos);
 
   as = rblist_concat(as, rblist_sub(value, scroll_pos, min(rblist_length(value), scroll_pos + visible_width)));
   if (rblist_length(value) > scroll_pos + visible_width)
     as = rblist_append(as, '$');
 
-  /* Handle terminals not wide enough to show "<prompt>$xxx$". */
+  // Handle terminals not wide enough to show "<prompt>$xxx$".
   if (rblist_length(as) > term_width()) {
     size_t to_lose = rblist_length(as) - term_width();
     as = rblist_sub(as, to_lose, rblist_length(as));
@@ -269,7 +269,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
 
   for (i = rblist_length(as);;) {
     if (cp != NULL && (!old_as || rblist_compare(old_as, as))) {
-      /* Using completions and 'as' has changed, so display new completions. */
+      // Using completions and 'as' has changed, so display new completions.
       completion_try(cp, as);
       completion_remove_suffix(cp);
       completion_remove_prefix(cp, as);

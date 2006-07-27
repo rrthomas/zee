@@ -34,11 +34,11 @@
 #include "main.h"
 #include "extern.h"
 
-/* Font width and height */
-#define FW		(8)	/* font_length (font, ...) */
-#define FH		(8)	/* font_height (font) */
+// Font width and height
+#define FW		(8)	// font_length (font, ...)
+#define FH		(8)	// font_height (font)
 
-/* current position and color */
+// current position and color
 static size_t cur_x = 0;
 static size_t cur_y = 0;
 static Font cur_color = 0;
@@ -184,7 +184,7 @@ void term_attrset(size_t attrs, ...)
 
 void term_beep(void)
 {
-  /* nothing */
+  // nothing
 }
 
 void term_init(void)
@@ -215,7 +215,7 @@ void term_init(void)
 
 void term_close(void)
 {
-  /* Finish with allegro. */
+  // Finish with allegro.
   set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
   allegro_exit();
 }

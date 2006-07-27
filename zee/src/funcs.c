@@ -304,7 +304,7 @@ be set using set_wrap_column.\
 
   CMDCALL(move_previous_paragraph);
   start = buf->pt.n;
-  if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
+  if (is_empty_line()) {  // Move to next line if between two paragraphs.
     CMDCALL(move_next_line);
     start++;
   }

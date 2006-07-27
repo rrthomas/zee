@@ -74,9 +74,9 @@ void set_variable(rblist key, rblist value)
  * Default variables values table.
  */
 typedef struct {
-  const char *var;              /* Variable name. */
-  const char *fmt;              /* Variable format (boolean, etc.). */
-  const char *val;              /* Default value. */
+  const char *var;              // Variable name.
+  const char *fmt;              // Variable format (boolean, etc.).
+  const char *val;              // Default value.
 } var_entry;
 
 static var_entry def_vars[] = {
@@ -178,7 +178,7 @@ Set a variable to the specified value.\
       int b;
       if ((b = minibuf_read_boolean(astr_afmt("Set %r to value: ", var))) != -1)
         val = rblist_from_string((b == true) ? "true" : "false");
-    } else                      /* Non-boolean variable. */
+    } else                      // Non-boolean variable.
       val = minibuf_read(astr_afmt("Set %r to value: ", var), rblist_empty);
   }
 

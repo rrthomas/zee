@@ -37,11 +37,11 @@ void buffer_new(void)
 {
   buf = zmalloc(sizeof(Buffer));
 
-  /* Allocate the lines. */
+  // Allocate the lines.
   buf->lines = line_new();
   buf->pt.p = list_first(buf->lines);
 
-  /* Set the initial mark (needs limit marker to be set up). */
+  // Set the initial mark (needs limit marker to be set up).
   buf->mark = marker_new(point_min(buf));
 
   if (get_variable_bool(rblist_from_string("wrap_mode")))
@@ -77,11 +77,11 @@ bool warn_if_no_mark(void)
 static void region_size(Region *rp, Point from, Point to)
 {
   if (cmp_point(from, to) < 0) {
-    /* The point is before the mark. */
+    // The point is before the mark.
     rp->start = from;
     rp->end = to;
   } else {
-    /* The mark is before the point. */
+    // The mark is before the point.
     rp->start = to;
     rp->end = from;
   }
@@ -143,7 +143,7 @@ rblist copy_text_block(Point start, size_t size)
       lp = list_next(lp);
     while (++n < start.n);
 
-  /* Copy one character at a time. */
+  // Copy one character at a time.
   for (i = start.o; rblist_length(as) < size;) {
     if (i < rblist_length(lp->item))
       as = rblist_append(as, rblist_get(lp->item, (i++)));

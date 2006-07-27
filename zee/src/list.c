@@ -26,7 +26,7 @@
 #include "zmalloc.h"
 
 
-/* Create an empty list, returning a pointer to the list */
+// Create an empty list, returning a pointer to the list
 list list_new(void)
 {
   list l = zmalloc(sizeof(struct list_s));
@@ -37,7 +37,7 @@ list list_new(void)
   return l;
 }
 
-/* Return the length of a list */
+// Return the length of a list
 size_t list_length(list l)
 {
   list p;
@@ -49,7 +49,7 @@ size_t list_length(list l)
   return length;
 }
 
-/* Add an item to the head of a list */
+// Add an item to the head of a list
 list list_prepend(list l, const void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
@@ -62,7 +62,7 @@ list list_prepend(list l, const void *i)
   return l;
 }
 
-/* Add an item to the tail of a list */
+// Add an item to the tail of a list
 list list_append(list l, const void *i)
 {
   list n = zmalloc(sizeof(struct list_s));
@@ -75,7 +75,7 @@ list list_append(list l, const void *i)
   return l;
 }
 
-/* Return the first item of a list, or NULL if the list is empty */
+// Return the first item of a list, or NULL if the list is empty
 const void *list_head(list l)
 {
   return l == l->next ? NULL : l->next->item;
@@ -128,7 +128,7 @@ const void *list_at(list l, size_t n)
   return p->item;
 }
 
-/* Sort list l with qsort using comparison function cmp */
+// Sort list l with qsort using comparison function cmp
 void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
 {
   list p;

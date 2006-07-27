@@ -44,67 +44,67 @@
  */
 typedef struct list_s Line;
 
-/* Point and Marker */
+// Point and Marker
 typedef struct {
-  Line *p;                      /* Line pointer */
-  size_t n;                     /* Line number */
-  size_t o;                     /* Offset */
+  Line *p;                      // Line pointer
+  size_t n;                     // Line number
+  size_t o;                     // Offset
 } Point;
 
 /* A Marker points to a position in a buffer, and is updated when
    the buffer is modified */
 typedef struct Marker {
-  Point pt;                     /* Point position */
-  struct Marker *next;   /* Used to chain all markers in the buffer */
+  Point pt;                     // Point position
+  struct Marker *next;   // Used to chain all markers in the buffer
 } Marker;
 
-/* Undo delta types */
+// Undo delta types
 enum {
-  UNDO_REPLACE_BLOCK,           /* Replace a block of characters */
-  UNDO_START_SEQUENCE,          /* Start a multi operation sequence */
-  UNDO_END_SEQUENCE             /* End a multi operation sequence */
+  UNDO_REPLACE_BLOCK,           // Replace a block of characters
+  UNDO_START_SEQUENCE,          // Start a multi operation sequence
+  UNDO_END_SEQUENCE             // End a multi operation sequence
 };
 
 typedef struct Undo {
-  struct Undo *next;            /* Next undo delta in list */
-  int type;                     /* The type of undo delta */
-  Point pt;               /* Where the undo delta is to be applied. */
+  struct Undo *next;            // Next undo delta in list
+  int type;                     // The type of undo delta
+  Point pt;               // Where the undo delta is to be applied.
   int unchanged; /* Flag indicating that reverting this undo leaves the buffer
                     in an unchanged state */
-  rblist text;                    /* Replacement string */
-  size_t size;                  /* Block size for replace */
+  rblist text;                    // Replacement string
+  size_t size;                  // Block size for replace
 } Undo;
 
 typedef struct {
-  Point start;                  /* The region start */
-  Point end;                    /* The region end */
-  size_t size;                  /* The region size */
+  Point start;                  // The region start
+  Point end;                    // The region end
+  size_t size;                  // The region size
 
-  /* The total number of lines ('\n' newlines) in region */
+  // The total number of lines ('\n' newlines) in region
   int num_lines;
 } Region;
 
-/* Buffer flags or minor modes */
+// Buffer flags or minor modes
 
-#define BFLAG_MODIFIED  (0x0001) /* The buffer has been modified */
-#define BFLAG_READONLY  (0x0002) /* The buffer cannot be modified */
-#define BFLAG_AUTOFILL  (0x0004) /* The buffer is in Auto Fill mode */
-#define BFLAG_ISEARCH   (0x0008) /* The buffer is in Isearch loop */
-#define BFLAG_ANCHORED  (0x0010) /* The mark is anchored */
+#define BFLAG_MODIFIED  (0x0001) // The buffer has been modified
+#define BFLAG_READONLY  (0x0002) // The buffer cannot be modified
+#define BFLAG_AUTOFILL  (0x0004) // The buffer is in Auto Fill mode
+#define BFLAG_ISEARCH   (0x0008) // The buffer is in Isearch loop
+#define BFLAG_ANCHORED  (0x0010) // The mark is anchored
 
 /*
  * Represents a buffer.
  */
 typedef struct {
-  Line *lines;                  /* The lines of text */
-  size_t num_lines;      /* The total number of lines in the buffer */
-  Point pt;                     /* The point */
-  Marker *mark;                 /* The mark */
-  Marker *markers;              /* Markers */
-  Undo *next_undop;     /* The undo deltas recorded for this buffer */
+  Line *lines;                  // The lines of text
+  size_t num_lines;      // The total number of lines in the buffer
+  Point pt;                     // The point
+  Marker *mark;                 // The mark
+  Marker *markers;              // Markers
+  Undo *next_undop;     // The undo deltas recorded for this buffer
   Undo *last_undop;
-  int flags;                    /* Buffer flags */
-  rblist filename;               /* The name of the file being edited */
+  int flags;                    // Buffer flags
+  rblist filename;               // The name of the file being edited
 } Buffer;
 
 /*
@@ -112,7 +112,7 @@ typedef struct {
  * display a buffer.
  */
 typedef struct {
-  size_t topdelta; /* The buffer line displayed in the topmost window line */
+  size_t topdelta; // The buffer line displayed in the topmost window line
   size_t fwidth, fheight; /* The formal width and height of the window
                              (space used on the terminal). */
   size_t ewidth, eheight; /* The effective width and height of the
@@ -120,24 +120,24 @@ typedef struct {
 } Window;
 
 typedef struct {
-  list completions;             /* The completion strings */
-  list matches;                 /* The matches list */
-  rblist match;                   /* The current matched string */
+  list completions;             // The completion strings
+  list matches;                 // The matches list
+  rblist match;                   // The current matched string
 } Completion;
 
 typedef struct {
-  list elements;                /* Elements (strings) */
+  list elements;                // Elements (strings)
   list sel;                     /* Currently selected element (pointer
                                    to elements) */
 } History;
 
 typedef struct Macro {
-  vector *keys;                 /* Vector of keystrokes */
-  rblist name;                    /* Name of the macro */
-  struct Macro *next;           /* Next macro in the list */
+  vector *keys;                 // Vector of keystrokes
+  rblist name;                    // Name of the macro
+  struct Macro *next;           // Next macro in the list
 } Macro;
 
-/* Type of font attributes */
+// Type of font attributes
 typedef size_t Font;
 
 /* Font codes
@@ -152,16 +152,16 @@ typedef size_t Font;
 #define GETKEY_DELAYED                  0x1
 #define GETKEY_UNFILTERED               0x2
 
-/* Default waitkey pause in ds */
+// Default waitkey pause in ds
 #define WAITKEY_DEFAULT 20
 
-/* Named keys */
+// Named keys
 enum {
 #define X(key_sym, key_name, key_code) \
 	key_sym = key_code,
 #include "tbl_keys.h"
 #undef X
-  KBD_CANCEL = (KBD_CTRL | 'g'), /* Special key that shouldn't be in text tables */
+  KBD_CANCEL = (KBD_CTRL | 'g'), // Special key that shouldn't be in text tables
   KBD_NOKEY = INT_MAX
 };
 
@@ -169,22 +169,22 @@ enum {
  * Global flags.
  *--------------------------------------------------------------------------*/
 
-/* The last command was a C-p or a C-n */
+// The last command was a C-p or a C-n
 #define FLAG_DONE_CPCN                  0x0001
-/* The last command was a kill */
+// The last command was a kill
 #define FLAG_DONE_KILL                  0x0002
-/* Hint for the redisplay engine: a resync is required */
+// Hint for the redisplay engine: a resync is required
 #define FLAG_NEED_RESYNC                0x0004
-/* Quit the editor as soon as possible */
+// Quit the editor as soon as possible
 #define FLAG_QUIT                       0x0008
-/* We are defining a macro */
+// We are defining a macro
 #define FLAG_DEFINING_MACRO             0x0010
 
 /*--------------------------------------------------------------------------
  * Commands.
  *--------------------------------------------------------------------------*/
 
-/* The type of a user command. */
+// The type of a user command.
 typedef bool (*Command)(list l);
 
 /* Define an interactive command.
@@ -199,7 +199,7 @@ typedef bool (*Command)(list l);
  * single unsigned integer argument.
  */
 
-/* Declare a command. */
+// Declare a command.
 #define DEF(name, doc) \
   bool F_ ## name(list l) \
   { \
@@ -212,12 +212,12 @@ typedef bool (*Command)(list l);
   DEF(name, doc) \
   args
 
-/* End a command definition. */
+// End a command definition.
 #define END_DEF \
     return ok; \
   }
 
-/* Declare a string argument, with prompt. */
+// Declare a string argument, with prompt.
 #define STR(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
@@ -225,7 +225,7 @@ typedef bool (*Command)(list l);
     else if ((name = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
-/* Declare a command name argument, with prompt. */
+// Declare a command name argument, with prompt.
 #define COMMAND(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
@@ -233,7 +233,7 @@ typedef bool (*Command)(list l);
     else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
-/* Declare an unsigned integer argument, with prompt. */
+// Declare an unsigned integer argument, with prompt.
 #define UINT(name, prompt) \
     size_t name = 0; \
     if (!list_empty(l)) { \
@@ -253,12 +253,12 @@ typedef bool (*Command)(list l);
 /* FIXME: These macros don't work properly within command definitions,
    as they create a new argument list. This breaks e.g. a non-interactive
    use of execute_command. */
-/* Call an interactive command */
+// Call an interactive command
 #define CMDCALL(name) \
   F_ ## name(list_new())
 
-/* Call an interactive command with an integer argument */
+// Call an interactive command with an integer argument
 #define CMDCALL_UINT(name, arg) \
   F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
-#endif /* !MAIN_H */
+#endif // !MAIN_H

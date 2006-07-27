@@ -1,4 +1,4 @@
-/* Table of command-line options */
+// Table of command-line options
 
 /*
  * The first column specifies the long name.

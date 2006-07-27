@@ -52,7 +52,7 @@ typedef const union rblist *rblist;
 typedef struct rblist_iterator *rblist_iterator;
 
 /***************************/
-/* Primitive constructors. */
+// Primitive constructors.
 
 /*
  * Make an rblist from an array. This can be achieved using
@@ -84,7 +84,7 @@ rblist rblist_singleton(char c);
 rblist rblist_concat(rblist left, rblist right);
 
 /*************************/
-/* Derived constructors. */
+// Derived constructors.
 
 /*
  * Append the argument character to rbl.
@@ -100,7 +100,7 @@ rblist rblist_append(rblist rbl, char c);
 rblist rblist_from_string(const char *s);
 
 /**************************/
-/* Primitive destructors. */
+// Primitive destructors.
 
 /*
  * Read the length of an rblist.
@@ -205,7 +205,7 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line);
 size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 
 /************************/
-/* Derived destructors. */
+// Derived destructors.
 
 /*
  * Syntactic sugar for looping through the elements of an rblist. It

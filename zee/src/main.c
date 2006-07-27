@@ -48,13 +48,10 @@
   "Copyright (c) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (c) 2003-2004 David A. Capello <dacap@users.sourceforge.net>"
 
-/* The window. */
-Window win;
-/* The buffer. */
-Buffer *buf = NULL;
+Window win;                     // the window
+Buffer *buf = NULL;             // the buffer
 
-/* The global editor flags. */
-int thisflag = 0, lastflag = 0;
+int thisflag = 0, lastflag = 0; // the global editor flags
 
 static void run(void)
 {
@@ -95,7 +92,7 @@ static void other_sig_handler(int signo)
 
 static void signal_init(void)
 {
-  /* Set up signal handling */
+  // Set up signal handling
   signal(SIGSEGV, segv_sig_handler);
   signal(SIGHUP, other_sig_handler);
   signal(SIGINT, other_sig_handler);
@@ -104,7 +101,7 @@ static void signal_init(void)
   signal(SIGPIPE, SIG_IGN);
 }
 
-/* Options table */
+// Options table
 struct option longopts[] = {
 #define X(longname, opt, doc) \
     {longname, opt, NULL, 0},
@@ -135,6 +132,7 @@ int main(int argc, char **argv)
       cmd_eval(rblist_from_string(optarg));
       break;
     case 2:
+      // FIXME: Make a file_load command
       if ((as = file_read(rblist_from_string(optarg))))
         cmd_eval(as);
       break;
@@ -175,7 +173,7 @@ int main(int argc, char **argv)
     signal_init();
     setlocale(LC_ALL, "");
 
-    /* Open file given on command line. */
+    // Open file given on command line.
     while (*argv) {
       if (**argv == '+')
         line = strtoul(*argv++ + 1, NULL, 10);
@@ -186,20 +184,20 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
-      win.fheight = 1; /* Initialise window; fheight must be > eheight */
+      win.fheight = 1; // Initialise window; fheight must be > eheight
       term_init();
-      resize_window(); /* Can't run until there is a buffer */
+      resize_window(); // Can't run until there is a buffer
       if (buf && line > 0) {
         goto_line(line - 1);
         resync_display();
       }
     }
 
-    /* Load system init file. */
+    // Load system init file.
     if ((as = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
       cmd_eval(as);
 
-    /* Load user init file if not disabled. */
+    // Load user init file if not disabled.
     if (!nflag) {
       rblist home = get_home_dir();
       if (rblist_length(home) > 0 &&
