@@ -6,40 +6,15 @@ AM_INIT_AUTOMAKE
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
 
-AC_SUBST(VERSION)
-
 dnl Allow GNU functions to be used if present
 AC_GNU_SOURCE
 
-dnl ==================================================================
-dnl Checks for programs.
-dnl ==================================================================
-
+dnl Find programs
 AC_PROG_CC
-BFD_CC_FOR_BUILD
 AC_PROG_INSTALL
 AC_PATH_PROG(MAKEINFO, makeinfo)
-
-dnl ==================================================================
-dnl Checks for functions.
-dnl ==================================================================
-
 AC_REPLACE_FUNCS(getopt_long_only)
-
-dnl ==================================================================
-dnl Checks for header files.
-dnl ==================================================================
-
 AC_HEADER_STDC
-
-dnl ==================================================================
-dnl Check for PCRE
-dnl ==================================================================
-
-AC_CHECK_HEADER(pcre.h, ,
-        AC_MSG_FAILURE([cannot find pcre.h]))
-AC_CHECK_LIB(pcre, pcre_compile, [LIBS="$LIBS -lpcre"],
-        AC_MSG_FAILURE([cannot find libpcre]))
 
 dnl ==================================================================
 dnl Debugging
@@ -72,31 +47,111 @@ if test "$GCC" = "yes"; then
 fi
 
 dnl ==================================================================
-dnl Allegro
+dnl Lua
 dnl ==================================================================
 
-AC_MSG_CHECKING([use allegro library])
-AC_ARG_ENABLE(allegro,
-AC_HELP_STRING([--enable-allegro], [use allegro interface]),
-[
-if test $enableval = yes; then
-        allegro=true
-        AC_MSG_RESULT(yes)
-        AC_CHECK_HEADER(allegro.h, , AC_MSG_FAILURE([cannot find allegro.h]))
-        AC_DEFINE(ALLEGRO, 1, [Define this to use Allegro library.])
+AC_SUBST([LUA])
+AC_SUBST([LUAC])
+AC_SUBST([LUA_INCLUDES])
+AC_SUBST([LUA_LIBS])
+
+dnl Arguments
+AC_ARG_WITH([lua-prefix],
+            [AS_HELP_STRING([--with-lua-prefix=DIR],
+                            [Lua files are in DIR])])
+AC_ARG_WITH([lua-includes],
+            [AS_HELP_STRING([--with-lua-includes=DIR],
+                            [Lua include files are in DIR])])
+AC_ARG_WITH([lua-libraries],
+            [AS_HELP_STRING([--with-lua-libraries=DIR],
+                            [Lua library files are in DIR])])
+AC_ARG_WITH([lua-suffix],
+            [AS_HELP_STRING([--with-lua-suffix=ARG],
+                            [Lua binary and library files are suffixed with
+                             ARG])])
+
+dnl LUA
+if test "x$with_lua_prefix" = x; then
+    lua_search_path="$PATH"
 else
-        allegro=false
-        AC_MSG_RESULT(no)
+    lua_search_path="$with_lua_prefix/bin"
 fi
-],[
-        allegro=false
-        AC_MSG_RESULT(no)
-])
+if test "x$LUA" = x; then
+    AC_PATH_PROG([LUA], [lua$with_lua_suffix], [], [$lua_search_path])
+    test "x$LUA" = x && AC_MSG_ERROR([*** Can't build ion without lua])
+fi
 
-AM_CONDITIONAL(ALLEGRO, test x$allegro = xtrue)
+dnl lua_version
+AC_MSG_CHECKING([for lua version >= 5.1])
+lua_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
+case $lua_version in
+0.* | 1.* | 2.* | 3.* | 4.* | 5.0)
+    AC_MSG_RESULT([no (found $lua_version)])
+    AC_MSG_ERROR([*** can't build ion with this version of lua])
+    ;;
+*)
+    AC_MSG_RESULT([yes (found $lua_version)])
+    ;;
+esac
+
+dnl LUA_INCLUDES
+if test "x$with_lua_includes" != x; then
+    LUA_INCLUDES="-I$with_lua_includes"
+elif test "x$with_lua_prefix" != x; then
+    LUA_INCLUDES="-I$with_lua_prefix/include"
+fi
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $LUA_INCLUDES"
+AC_CHECK_HEADERS([lua.h lualib.h], [],
+                 [AC_MSG_ERROR([*** missing headers lua.h or lualib.h.
+                  *** install the Lua dev package or check --with-lua-includes option.])], [])
+CFLAGS="$save_CFLAGS"
+
+dnl LUA_LIBS
+if test "x$with_lua_libraries" != x; then
+    LUA_LIBS="-L$with_lua_libraries"
+elif test "x$with_lua_prefix" != x; then
+    LUA_LIBS="-L$with_lua_prefix/lib"
+fi
+AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
+AC_CHECK_LIB([lua$with_lua_suffix],
+             [lua_call],
+             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
+             [AC_MSG_ERROR([*** Can't find lua_call in lua$with_lua_suffix.
+                  *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
+             [$LUA_LIBS $lua_extra_libs])
+
+dnl liblua_version
+AC_MSG_CHECKING([for liblua version >= 5.1])
+save_CFLAGS="$CFLAGS"
+save_LIBS="$LIBS"
+CFLAGS="$CFLAGS $LUA_INCLUDES"
+LIBS="$LIBS $LUA_LIBS"
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+
+#include <lua.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+int main()
+{
+    printf("(found %s, %d)... ", LUA_VERSION, LUA_VERSION_NUM);
+    if(LUA_VERSION_NUM >= 501)
+        exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
+}
+
+]])],
+              [AC_MSG_RESULT([yes])],
+              [AC_MSG_RESULT([no])
+               exit 1])
+CFLAGS="$save_CFLAGS"
+LIBS="$save_LIBS"
 
 dnl ==================================================================
-dnl gc
+dnl libgc (BDW garbage collector)
 dnl ==================================================================
 
 AC_CHECK_HEADERS([gc.h gc/gc.h],
@@ -131,6 +186,39 @@ AC_CHECK_HEADERS([gc.h gc/gc.h],
 if test "x$gc_ok" != "xyes"; then
         AC_MSG_FAILURE([cannot find libgc])
 fi
+
+dnl ==================================================================
+dnl PCRE
+dnl ==================================================================
+
+AC_CHECK_HEADER(pcre.h, ,
+        AC_MSG_FAILURE([cannot find pcre.h]))
+AC_CHECK_LIB(pcre, pcre_compile, [LIBS="$LIBS -lpcre"],
+        AC_MSG_FAILURE([cannot find libpcre]))
+
+dnl ==================================================================
+dnl Allegro
+dnl ==================================================================
+
+AC_MSG_CHECKING([use allegro library])
+AC_ARG_ENABLE(allegro,
+AC_HELP_STRING([--enable-allegro], [use allegro interface]),
+[
+if test $enableval = yes; then
+        allegro=true
+        AC_MSG_RESULT(yes)
+        AC_CHECK_HEADER(allegro.h, , AC_MSG_FAILURE([cannot find allegro.h]))
+        AC_DEFINE(ALLEGRO, 1, [Define this to use Allegro library.])
+else
+        allegro=false
+        AC_MSG_RESULT(no)
+fi
+],[
+        allegro=false
+        AC_MSG_RESULT(no)
+])
+
+AM_CONDITIONAL(ALLEGRO, test x$allegro = xtrue)
 
 dnl ==================================================================
 dnl Curses

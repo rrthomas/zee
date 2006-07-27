@@ -161,7 +161,7 @@ int main(int argc, char **argv)
   if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
             "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
-            "Run " PACKAGE_NAME ", the lightweight editor.\n"
+            "Run " PACKAGE_NAME ", the editor.\n"
             "\n");
 #define X(longname, opt, doc) \
     fprintf(stderr, "--" longname doc);
@@ -175,15 +175,6 @@ int main(int argc, char **argv)
     signal_init();
     setlocale(LC_ALL, "");
 
-    if (!bflag) {
-      /* Initialise window */
-      win.fheight = 1;           /* fheight must be > eheight */
-
-      /* Create a single default binding so M-x commands can still be
-         issued if the default bindings file can't be loaded. */
-      bind_key(strtochord(rblist_from_string("M-x")), F_execute_command);
-    }
-
     /* Open file given on command line. */
     while (*argv) {
       if (**argv == '+')
@@ -195,28 +186,25 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
+      win.fheight = 1; /* Initialise window; fheight must be > eheight */
       term_init();
       resize_window(); /* Can't run until there is a buffer */
       if (buf && line > 0) {
         goto_line(line - 1);
         resync_display();
       }
-
-      /* Load default bindings file. */
-      if ((as = file_read(rblist_from_string(PKGDATADIR "/cua_bindings"))))
-        cmd_eval(as);
     }
 
-    /* Load user init file */
+    /* Load system init file. */
+    if ((as = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
+      cmd_eval(as);
+
+    /* Load user init file if not disabled. */
     if (!nflag) {
-      if ((as = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
+      rblist home = get_home_dir();
+      if (rblist_length(home) > 0 &&
+          (as = file_read(rblist_concat(home, rblist_from_string("/." PACKAGE "rc")))))
         cmd_eval(as);
-      rblist userrc = get_home_dir();
-      if (rblist_length(userrc) > 0) {
-        userrc = rblist_concat(userrc, rblist_from_string("/." PACKAGE "rc"));
-        if ((as = file_read(userrc)))
-          cmd_eval(as);
-      }
     }
 
     if (!bflag) {

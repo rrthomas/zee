@@ -4,7 +4,7 @@ Makefile.in
 zee
 paths.h tbl_funcs.h
 vector astr rblist
-mkdoc
+mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua
 zee.info
 zeerc
-funcs.texi vars.texi opts.texi
+funcs.texi vars.texi opts.texi default_bindings.c

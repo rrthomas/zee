@@ -14,13 +14,16 @@ rblist_LDADD = zmalloc.o vector.o astr.o
 
 bin_PROGRAMS = zee
 
-dist_pkgdata_DATA = cua_bindings
+dist_pkgdata_DATA = cua_bindings emacs_bindings
 
 info_TEXINFOS = zee.texi
 
 dist_sysconf_DATA = $(PACKAGE)rc
 
 zee_doc_SOURCES =				\
+	tbl_opts.h				\
+	tbl_vars.h				\
+	tbl_keys.h				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
@@ -55,9 +58,6 @@ zee_nondoc_SOURCES =				\
 	zmalloc.h				\
 	zmalloc.c				\
 	extern.h				\
-	tbl_keys.h				\
-	tbl_opts.h				\
-	tbl_vars.h				\
 	main.h
 
 zee_base_SOURCES = $(zee_doc_SOURCES) $(zee_nondoc_SOURCES)
@@ -74,24 +74,24 @@ zee_LDADD = @LIBOBJS@
 
 GENERATED_TEXI = funcs.texi vars.texi opts.texi
 
-EXTRA_DIST = mkdoc.c
-
-mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LIBS) $(LDFLAGS) -o $@ mkdoc.o
-
-mkdoc.o: mkdoc.c tbl_vars.h tbl_opts.h zmalloc.c astr.c vector.c rblist.c
-	$(CC_FOR_BUILD) -c -I$(top_builddir) -I$(top_srcdir)/src $(CFLAGS) mkdoc.c
+EXTRA_DIST = mkfuncs.lua mkvars.lua mkopts.lua default_bindings.c
 
 $(PACKAGE).info $(PACKAGE).dvi: $(GENERATED_TEXI)
 
-$(PACKAGE)rc funcs.texi vars.texi opts.texi: $(zee_doc_SRCS) mkdoc$(EXEEXT_FOR_BUILD)
-	./mkdoc$(EXEEXT_FOR_BUILD) $(zee_doc_SRCS) > tbl_funcs.h
+tbl_funcs.h funcs.texi: $(zee_doc_SOURCES) mkfuncs.lua
+	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkfuncs.lua $(zee_doc_SOURCES)
 
-clean-local:
-	rm -f mkdoc$(EXEEXT_FOR_BUILD) *.o
+$(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
+	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkvars.lua
+
+opts.texi: tbl_opts.h mkopts.lua
+	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkopts.lua
+
+default_bindings.c: mkbindings.lua
+	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
 
 distclean-local:
-	rm -f tbl_funcs.h $(GENERATED_TEXI) $(PACKAGE)rc
+	rm -f $(GENERATED_TEXI) tbl_funcs.h $(PACKAGE)rc
 
 sloccount:
-	sloccount $(zee_base_SOURCES) term_*.c
+	sloccount $(zee_base_SOURCES) term_*.c *.lua

@@ -82,6 +82,8 @@ void unbind_key(size_t key)
 void init_bindings(void)
 {
   bindings = vec_new(sizeof(Binding));
+
+#include "default_bindings.c"
 }
 
 void process_key(size_t key)
