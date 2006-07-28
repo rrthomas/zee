@@ -27,8 +27,8 @@
 #include "extern.h"
 
 
-// This variable is set to true when the undo is in execution.
-static bool doing_undo = false;
+static bool doing_undo = false; // currently performing undo
+static size_t doing_sequence = 0; // currently writing an undo sequence
 
 /*
  * Save a reverse delta for doing undo.
@@ -41,15 +41,26 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
   up->pt = pt;
   up->unchanged = !(buf->flags & BFLAG_MODIFIED);
 
-  if (type == UNDO_REPLACE_BLOCK) {
+  switch (type) {
+  case UNDO_REPLACE_BLOCK:
     up->text = copy_text_block(pt, arg1);
     up->size = arg2;
+    break;
+
+  case UNDO_START_SEQUENCE:
+    doing_sequence++;
+    break;
+
+  case UNDO_END_SEQUENCE:
+    assert(doing_sequence > 0);
+    --doing_sequence;
+    break;
   }
 
   up->next = buf->last_undop;
   buf->last_undop = up;
 
-  if (!doing_undo)
+  if (!doing_undo && !doing_sequence)
     buf->next_undop = up;
 }
 
@@ -93,15 +104,28 @@ Repeat this command to undo more changes.\
 {
   ok = false;
 
-  if (warn_if_readonly_buffer());
-  else if (buf->next_undop == NULL) {
-    minibuf_error(rblist_from_string("No further undo information"));
-    buf->next_undop = buf->last_undop;
-  } else {
-    buf->next_undop = revert_action(buf->next_undop);
-    minibuf_write(rblist_from_string("Undo!"));
-    ok = true;
+  if (!warn_if_readonly_buffer()) {
+    if (buf->next_undop == NULL) {
+      minibuf_error(rblist_from_string("No further undo information"));
+      buf->next_undop = buf->last_undop;
+    } else {
+      buf->next_undop = revert_action(buf->next_undop);
+      minibuf_write(rblist_from_string("Undo!"));
+      ok = true;
+    }
   }
+}
+END_DEF
+
+DEF(edit_revert,
+"\
+Undo until buffer is unmodified.\
+")
+{
+  // FIXME: save pointer to current undo action and abort if we get
+  // back to it.
+  while (buf->flags & BFLAG_MODIFIED)
+    CMDCALL(edit_undo);
 }
 END_DEF
 

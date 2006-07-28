@@ -55,7 +55,7 @@ typedef struct {
    the buffer is modified */
 typedef struct Marker {
   Point pt;                     // Point position
-  struct Marker *next;   // Used to chain all markers in the buffer
+  struct Marker *next;      // Used to chain all markers in the buffer
 } Marker;
 
 // Undo delta types
@@ -68,10 +68,10 @@ enum {
 typedef struct Undo {
   struct Undo *next;            // Next undo delta in list
   int type;                     // The type of undo delta
-  Point pt;               // Where the undo delta is to be applied.
+  Point pt;                  // Where the undo delta is to be applied.
   int unchanged; /* Flag indicating that reverting this undo leaves the buffer
                     in an unchanged state */
-  rblist text;                    // Replacement string
+  rblist text;                  // Replacement string
   size_t size;                  // Block size for replace
 } Undo;
 
@@ -97,14 +97,14 @@ typedef struct {
  */
 typedef struct {
   Line *lines;                  // The lines of text
-  size_t num_lines;      // The total number of lines in the buffer
+  size_t num_lines;         // The total number of lines in the buffer
   Point pt;                     // The point
   Marker *mark;                 // The mark
   Marker *markers;              // Markers
-  Undo *next_undop;     // The undo deltas recorded for this buffer
+  Undo *next_undop;        // The undo deltas recorded for this buffer
   Undo *last_undop;
   int flags;                    // Buffer flags
-  rblist filename;               // The name of the file being edited
+  rblist filename;              // The name of the file being edited
 } Buffer;
 
 /*
@@ -122,18 +122,17 @@ typedef struct {
 typedef struct {
   list completions;             // The completion strings
   list matches;                 // The matches list
-  rblist match;                   // The current matched string
+  rblist match;                 // The current matched string
 } Completion;
 
 typedef struct {
   list elements;                // Elements (strings)
-  list sel;                     /* Currently selected element (pointer
-                                   to elements) */
+  list sel;                     // Currently selected element (pointer to elements)
 } History;
 
 typedef struct Macro {
   vector *keys;                 // Vector of keystrokes
-  rblist name;                    // Name of the macro
+  rblist name;                  // Name of the macro
   struct Macro *next;           // Next macro in the list
 } Macro;
 

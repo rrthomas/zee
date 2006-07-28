@@ -72,21 +72,18 @@ rblist file_read(rblist filename)
  */
 void file_open(rblist filename)
 {
-  rblist as;
-
   buffer_new();
   buf->filename = filename;
 
-  if ((as = file_read(filename)) == NULL) {
-    if (errno != ENOENT)
-      buf->flags |= BFLAG_READONLY;
-  } else {
+  thisflag |= FLAG_NEED_RESYNC;
+
+  rblist as;
+  if ((as = file_read(buf->filename)) != NULL) {
     // Add lines to buffer
     buf->lines = string_to_lines(as, &buf->num_lines);
     buf->pt.p = list_first(buf->lines);
-  }
-
-  thisflag |= FLAG_NEED_RESYNC;
+  } else if (errno != ENOENT)
+    buf->flags |= BFLAG_READONLY;
 }
 
 /*
@@ -136,16 +133,12 @@ END_DEF
 
 DEF(file_quit,
 "\
-Quit, requiring confirmation if there are unsaved changes.\
+Quit, unless there are unsaved changes.\
 ")
 {
   if (buf->flags & BFLAG_MODIFIED) {
-    int ans;
-
-    if ((ans = minibuf_read_yesno(rblist_from_string("Unsaved changes; exit anyway? (yes or no) "))) == -1)
-      ok = CMDCALL(edit_select_off);
-    else if (!ans)
-      ok = false;
+    minibuf_error(rblist_from_string("Unsaved changes; use `file_save' or `edit_revert'"));
+    ok = false;
   }
 
   if (ok)

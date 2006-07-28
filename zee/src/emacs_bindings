@@ -2,6 +2,7 @@
 
 # Command execution.
 key_bind M-x execute_command
+key_bind C-u edit_repeat
 
 # Navigation. Mostly arrows and things.
 # Ideally everything should have a home keys alternative, but this is
@@ -17,14 +18,25 @@ key_bind C-f move_next_character
 key_bind C-p move_previous_line
 key_bind C-n move_next_line
 # Word/paragraph
+key_bind C-LEFT move_previous_word
+key_bind C-RIGHT move_next_word
 key_bind M-b move_previous_word
 key_bind M-f move_next_word
 # Line/page
+key_bind HOME move_start_line
+key_bind END move_end_line
+key_bind PGUP move_previous_page
+key_bind PGDN move_next_page
 key_bind C-a move_start_line
 key_bind C-e move_end_line
 # Whole buffer
+key_bind C-HOME move_start_file
+key_bind C-END move_end_file
 key_bind M-< move_start_file
 key_bind M-> move_end_file
+
+# FIXME: Improve name, reduce function to redraw.
+key_bind C-l recenter
 
 # Absolute navigation. These are like navigation commands but they
 # don't become selection commands when combined with SHIFT.
@@ -65,10 +77,11 @@ key_bind M-( macro_record
 key_bind M-) macro_stop
 key_bind M-e macro_play
 
+# Wrap.
+key_bind M-q edit_wrap_paragraph
+
 # Rare commands.
 # FIXME: Reconsider and possibly remove bindings.
 key_bind M-i edit_insert_tab
-key_bind C-l recenter
-key_bind M-q edit_wrap_paragraph
-key_bind C-u edit_repeat
 key_bind M-! edit_shell_command
+key_bind C-z file_suspend

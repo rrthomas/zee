@@ -90,7 +90,6 @@ static void other_sig_handler(int signo)
 
 static void signal_init(void)
 {
-  // Set up signal handling
   signal(SIGSEGV, segv_sig_handler);
   signal(SIGHUP, other_sig_handler);
   signal(SIGINT, other_sig_handler);
