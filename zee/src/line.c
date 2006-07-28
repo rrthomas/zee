@@ -194,7 +194,7 @@ int preceding_char(void)
  */
 bool bobp(void)
 {
-  return (bolp() && list_prev(buf->pt.p) == buf->lines);
+  return (bolp() && buf->pt.n == 0);
 }
 
 /*
@@ -202,7 +202,7 @@ bool bobp(void)
  */
 bool eobp(void)
 {
-  return (eolp() && list_next(buf->pt.p) == buf->lines);
+  return (eolp() && buf->pt.n == buf->num_lines - 1);
 }
 
 /*

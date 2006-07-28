@@ -224,12 +224,12 @@ static void calculate_highlight_region(Region *r)
 
 /*
  * Prints a line on the terminal.
- *  - 'line' is the line number on the terminal.
- *  - 'start_col' is the horizontal scroll offset: the character position (not
- *    cursor position) within 'lp' of the first character that should be
+ *  - `line' is the line number on the terminal.
+ *  - `start_col' is the horizontal scroll offset: the character position (not
+ *    cursor position) within `lp' of the first character that should be
  *    displayed.
- *  - 'lp' is the line to display.
- *  - 'lineno' is the line number of 'lp' within the buffer.
+ *  - `lp' is the line to display.
+ *  - `lineno' is the line number of `lp' within the buffer.
  */
 static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
 {
@@ -258,37 +258,35 @@ static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
 
 static void draw_window(size_t topline)
 {
-  size_t i, startcol, lineno;
+  size_t i, lineno;
   Line *lp;
   Point pt = buf->pt;
 
   // Find the first line to display on the first screen line.
   for (lp = pt.p, lineno = pt.n, i = win.topdelta;
-       i > 0 && list_prev(lp) != buf->lines;
+       i > 0 && lineno > 0;
        lp = list_prev(lp), --i, --lineno);
 
   cur_tab_width = tab_width();
 
   // Draw the window lines.
-  for (i = topline; i < win.eheight + topline; ++i, ++lineno) {
+  for (i = topline;
+       i < win.eheight + topline;
+       ++i, ++lineno, lp = list_next(lp)) {
     // Clear the line.
     term_move(i, 0);
     term_clrtoeol();
 
     // If at the end of the buffer, don't write any text.
-    if (lp == buf->lines)
+    if (lineno >= buf->num_lines)
       continue;
 
-    startcol = point_start_column;
-
-    draw_line(i, startcol, lp, lineno);
+    draw_line(i, point_start_column, lp, lineno);
 
     if (point_start_column > 0) {
       term_move(i, 0);
       term_addch('$');
     }
-
-    lp = list_next(lp);
   }
 }
 

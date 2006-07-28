@@ -65,9 +65,9 @@ END_DEF
  */
 size_t get_goalc(void)
 {
-  size_t col = 0, t = tab_width(), i;
+  size_t col = 0, t = tab_width();
 
-  for (i = 0; i < buf->pt.o; i++) {
+  for (size_t i = 0; i < buf->pt.o; i++) {
     if (rblist_get(buf->pt.p->item, i) == '\t')
       col |= t - 1;
     ++col;
@@ -108,7 +108,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (list_prev(buf->pt.p) == buf->lines)
+  if (buf->pt.n == 0)
     ok = false;
   else {
     thisflag |= FLAG_NEED_RESYNC | FLAG_DONE_CPCN;
@@ -132,7 +132,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (list_next(buf->pt.p) == buf->lines)
+  if (buf->pt.n == buf->num_lines - 1)
     ok = false;
   else {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
