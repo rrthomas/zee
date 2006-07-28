@@ -354,7 +354,7 @@ file, replacing the selection if any.\n\
       rblist_length(ms) == 0)
     ok = false;
   else {
-    char tempfile[] = P_tmpdir "/" PACKAGE_NAME "XXXXXX";
+    char tempfile[] = P_tmpdir "/" PACKAGE "XXXXXX";
     int fd = mkstemp(tempfile);
 
     if (fd == -1) {
