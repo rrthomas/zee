@@ -27,7 +27,7 @@ Point make_point(size_t lineno, size_t offset)
 {
   Point pt;
 
-  pt.p = list_next(buf->lines);
+  pt.p = list_first(buf->lines);
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0) {
