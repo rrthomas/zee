@@ -87,7 +87,7 @@ $(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
 opts.texi: tbl_opts.h mkopts.lua
 	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkopts.lua
 
-default_bindings.c: mkbindings.lua
+default_bindings.c: mkbindings.lua cua_bindings
 	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
 
 distclean-local:
