@@ -13,4 +13,4 @@ X("tab_display_width", "", "8", "Number of spaces displayed for a tab character.
 X("indent_width", "", "2", "Number per indentation for `edit_insert_tab'.")
 X("wrap_mode", "b", "false", "Whether Wrap Mode is automatically enabled.")
 X("wrap_column", "", "72", "Column beyond which wrapping occurs in Wrap Mode.")
-X("case_replace", "b", "true", "Whether `edit_find_and_replace' should preserve case.")
+X("case_replace", "b", "true", "Whether `edit_replace' should preserve case.")

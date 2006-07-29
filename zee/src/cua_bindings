@@ -68,7 +68,7 @@ key_bind C-v edit_paste
 # The proposed meaning of ESC obviates the current behaviour of RET.
 key_bind C-f edit_find
 key_bind C-M-f edit_find_backward
-key_bind C-r edit_find_and_replace
+key_bind C-r edit_replace
 
 # Insert special characters.
 key_bind C-RET edit_insert_newline

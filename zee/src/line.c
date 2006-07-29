@@ -314,7 +314,7 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
       changed = true;
     } else if (rblist_ncompare(rblist_sub((*lp)->item, offset, rblist_length((*lp)->item)),
                                   newtext, rblist_length(newtext)) != 0) {
-      (*lp)->item = rblist_concat(rblist_sub((*lp)->item, 0, (offset - 1)),
+      (*lp)->item = rblist_concat(rblist_sub((*lp)->item, 0, offset),
                              rblist_concat(newtext, rblist_sub((*lp)->item, (offset + rblist_length(newtext)), rblist_length((*lp)->item))));
       changed = true;
     }

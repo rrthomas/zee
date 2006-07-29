@@ -64,7 +64,7 @@ key_bind C-y edit_paste
 # Search
 key_bind C-s edit_find
 key_bind C-r edit_find_backward
-key_bind M-% edit_find_and_replace
+key_bind M-% edit_replace
 
 # Insert special characters.
 key_bind C-RET edit_insert_newline
