@@ -289,10 +289,6 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       retval = as;
       ret = true;
       break;
-    case KBD_CANCEL:
-      term_minibuf_write(rblist_empty);
-      ret = true;
-      break;
     case KBD_CTRL | 'a':
     case KBD_HOME:
       i = 0;
@@ -308,6 +304,10 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
     case KBD_CTRL | 'f':
     case KBD_RIGHT:
       i = mb_forward_char(i, as);
+      break;
+    case KBD_CTRL | 'g':
+      term_minibuf_write(rblist_empty);
+      ret = true;
       break;
     case KBD_CTRL | 'k':
       mb_kill_line(i, &as);

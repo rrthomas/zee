@@ -168,7 +168,7 @@ static int isearch(int dir)
     minibuf_write(as);
 
     int c = getkey();
-    if (c == KBD_CANCEL) {
+    if (c == KBD_CTRL | 'g') {
       buf->pt = start;
       thisflag |= FLAG_NEED_RESYNC;
       CMDCALL(edit_select_off);
@@ -275,6 +275,7 @@ static bool no_upper(rblist as)
   return true;
 }
 
+// FIXME: Make edit_replace run on selection.
 DEF_ARG(edit_replace,
 "\
 Replace the next occurrence of a regexp with other text.\n\

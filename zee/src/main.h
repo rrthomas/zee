@@ -160,7 +160,6 @@ enum {
 	key_sym = key_code,
 #include "tbl_keys.h"
 #undef X
-  KBD_CANCEL = (KBD_CTRL | 'g'), // Special key that shouldn't be in text tables
   KBD_NOKEY = INT_MAX
 };
 

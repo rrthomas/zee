@@ -269,18 +269,12 @@ static int translate_key(int c)
       return ' ';
   default:
     if ((scancode >= KEY_0 && scancode <= KEY_9) &&
-        (ascii < 32 || ascii == 127)) {
-      return ('0'+scancode-KEY_0) | KBD_CTRL;
-    }
-    else if (ascii >= 1 && ascii <= 'z' - 'a' + 1) {
-      if ('a' + ascii - 1 == 'g')
-        return KBD_CANCEL;
-      else
-        return ('a' + ascii - 1) | KBD_CTRL;
-    }
-    else if (ascii >= ' ') {
+        (ascii < 32 || ascii == 127))
+      return ('0' + scancode - KEY_0) | KBD_CTRL;
+    else if (ascii >= 1 && ascii <= 'z' - 'a' + 1)
+      return ('a' + ascii - 1) | KBD_CTRL;
+    else if (ascii >= ' ')
       return ascii;
-    }
   }
 
   return KBD_NOKEY;
