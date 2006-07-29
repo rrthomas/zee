@@ -45,7 +45,6 @@ void remove_marker(Marker *marker)
         prev->next = next;
       else
         buf->markers = next;
-
       break;
     }
     prev = m;
