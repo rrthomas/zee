@@ -118,19 +118,15 @@ void term_clrtoeol(void)
 
 void term_refresh(void)
 {
-  int c, i, bg, fg;
-  size_t x, y;
-  i = 0;
-  for (y = 0; y < term_height(); y++)
-    for (x = 0; x < term_width(); x++) {
+  size_t i = 0;
+  for (size_t y = 0; y < term_height(); y++)
+    for (size_t x = 0; x < term_width(); x++) {
       if (new_scr[i] != cur_scr[i]) {
-        c = cur_scr[i] = new_scr[i];
+        int bg, fg, c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
         text_mode(bg);
-        font->vtable->render_char
-          (font,
-           ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
-           fg, bg, screen, (int)(x * FW), (int)(y * FH));
+        font->vtable->render_char(font, ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
+                                  fg, bg, screen, (int)(x * FW), (int)(y * FH));
       }
       i++;
     }
@@ -226,8 +222,7 @@ static int translate_key(int c)
   int scancode = c >> 8;
 
   if (!ascii && key_shifts & KB_ALT_FLAG) {
-    ascii = scancode_to_ascii(scancode);
-    if (ascii)
+    if ((ascii = scancode_to_ascii(scancode)))
       return KBD_META | ascii |
         ((key_shifts & KB_CTRL_FLAG) ? KBD_CTRL : 0);
     else
