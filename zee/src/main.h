@@ -221,7 +221,7 @@ typedef bool (*Command)(list l);
     rblist name = NULL; \
     if (!list_empty(l)) \
       name = list_behead(l); \
-    else if ((name = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) \
+    else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) \
       ok = CMDCALL(edit_select_off);
 
 // Declare a command name argument, with prompt.
@@ -252,11 +252,11 @@ typedef bool (*Command)(list l);
 /* FIXME: These macros don't work properly within command definitions,
    as they create a new argument list. This breaks e.g. a non-interactive
    use of execute_command. */
-// Call an interactive command
+// Call a command
 #define CMDCALL(name) \
   F_ ## name(list_new())
 
-// Call an interactive command with an integer argument
+// Call a command with an integer argument
 #define CMDCALL_UINT(name, arg) \
   F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
 
