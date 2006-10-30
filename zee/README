@@ -12,4 +12,4 @@ library), and a terminal library (either ncurses or Allegro).
 See INSTALL for installation instructions.
 
 Any questions, comments, or bug reports should be sent to
-zee-devel@lists.sourceforge.net
+<zee-devel@lists.sourceforge.net>.
