@@ -90,6 +90,8 @@ opts.texi: tbl_opts.h mkopts.lua
 default_bindings.c: mkbindings.lua cua_bindings
 	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
 
+bind.c: default_bindings.c
+
 distclean-local:
 	rm -f $(GENERATED_TEXI) tbl_funcs.h $(PACKAGE)rc
 
