@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "nonstd.h"
 #include "zmalloc.h"
 
 
