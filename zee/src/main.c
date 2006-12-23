@@ -204,8 +204,7 @@ int main(int argc, char **argv)
 
     if (!bflag) {
       if (buf) {
-        /* FIXME: allow help message to be overwritten by errors from
-           loading init files */
+        // FIXME: allow help message to be overwritten by errors from loading init files
         CMDCALL(help_about);
         run();
       }
