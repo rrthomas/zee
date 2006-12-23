@@ -78,16 +78,16 @@ else
 fi
 if test "x$LUA" = x; then
     AC_PATH_PROG([LUA], [lua$with_lua_suffix], [], [$lua_search_path])
-    test "x$LUA" = x && AC_MSG_ERROR([*** Can't build ion without lua])
+    test "x$LUA" = x && AC_MSG_FAILURE([*** Can't build Zee without Lua])
 fi
 
 dnl lua_version
-AC_MSG_CHECKING([for lua version >= 5.1])
+AC_MSG_CHECKING([for Lua version >= 5.1])
 lua_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
 case $lua_version in
 0.* | 1.* | 2.* | 3.* | 4.* | 5.0)
     AC_MSG_RESULT([no (found $lua_version)])
-    AC_MSG_ERROR([*** can't build ion with this version of lua])
+    AC_MSG_FAILURE([*** can't build Zee with this version of Lua])
     ;;
 *)
     AC_MSG_RESULT([yes (found $lua_version)])
@@ -103,7 +103,7 @@ fi
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
 AC_CHECK_HEADERS([lua.h lualib.h], [],
-                 [AC_MSG_ERROR([*** missing headers lua.h or lualib.h.
+                 [AC_MSG_FAILURE([*** missing headers lua.h or lualib.h.
                   *** install the Lua dev package or check --with-lua-includes option.])], [])
 CFLAGS="$save_CFLAGS"
 
@@ -118,7 +118,7 @@ AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
 AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
              [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
-             [AC_MSG_ERROR([*** Can't find lua_call in lua$with_lua_suffix.
+             [AC_MSG_FAILURE([*** Can't find lua_call in lua$with_lua_suffix.
                   *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
              [$LUA_LIBS $lua_extra_libs])
 
@@ -129,16 +129,13 @@ save_LIBS="$LIBS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
 LIBS="$LIBS $LUA_LIBS"
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
-
 #include <lua.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-
 int main()
 {
     printf("(found %s, %d)... ", LUA_VERSION, LUA_VERSION_NUM);
-    if(LUA_VERSION_NUM >= 501)
+    if (LUA_VERSION_NUM >= 501)
         exit(EXIT_SUCCESS);
     exit(EXIT_FAILURE);
 }
