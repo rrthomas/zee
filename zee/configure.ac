@@ -11,6 +11,7 @@ AC_GNU_SOURCE
 
 dnl Find programs
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PATH_PROG(MAKEINFO, makeinfo)
 AC_REPLACE_FUNCS(getopt_long_only)
