@@ -32,11 +32,11 @@ Copyright @copyright{} 2004 David A. Capello
 
 This is the @emph{Zee} manual.
 
-Zee is a customizable, self-documenting real-time display editor.
+Zee is an experimental editor and programming environment.
 
 @menu
 * Overview::                    An overview of the Zee editor.
-* Invoking Zee::               Command line options that you can give to Zee.
+* Invoking Zee::                Command line options that you can give to Zee.
 * Initialization file::         The ``.zeerc'' initialization file.
 * Key names::                   How the keys are named.
 * Commands::                    The list of commands.
@@ -48,11 +48,13 @@ Zee is a customizable, self-documenting real-time display editor.
 @node Overview, Invoking Zee, Top, Top
 @chapter Overview
 
-Zee is a fast, small, 8-bit clean editor with a minimal but powerful
-feature set including unlimited undo.
+Zee is an experimental editor and programming environment, hosted on
+SourceForge at http://sourceforge.net/projects/zee/. It is free
+software, licensed under the GNU GPL.
 
-Zee is written entirely in @emph{@w{ANSI C}}. It should run on any
-POSIX system.
+Zee is written in ISO C99 for POSIX and requires the Boehm garbage
+collector (libgc), PCRE (the Perl-compatible regular expressions
+library), and a terminal library (either ncurses or Allegro).
 
 @c ---------------------------------------------------------------------------
 @node Invoking Zee, Initialization file, Overview, Top
