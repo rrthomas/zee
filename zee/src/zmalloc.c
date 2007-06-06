@@ -55,7 +55,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 
   if (ptr == NULL) {
     fprintf(stderr, PACKAGE_NAME ": out of memory\n");
-    die(1);
+    die(2);
   }
 
 #ifdef DEBUG // GC_REALLOC does this anyway
