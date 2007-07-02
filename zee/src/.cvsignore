@@ -5,6 +5,6 @@ zee
 paths.h tbl_funcs.h
 vector astr rblist
 mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua
-zee.info
+zee.info texinfo.tex
 zeerc
 funcs.texi vars.texi opts.texi default_bindings.c
