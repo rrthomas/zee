@@ -54,7 +54,7 @@ void *zrealloc(void *ptr, size_t oldsize, size_t newsize)
 #endif
 
   if (ptr == NULL) {
-    fprintf(stderr, PACKAGE_NAME ": out of memory\n");
+    fprintf(stderr, PACKAGE ": out of memory\n");
     die(2);
   }
 
