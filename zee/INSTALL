@@ -11,17 +11,17 @@ To build zee:
 
 	make
 
-3a) To install zee, run
+2a) To try zee without installing it, just run it: 
+
+	src/zee
+
+3) To install zee, run
 
 	make install
 
    By default, zee is installed under /usr/local (and hence requires
    root privileges); this can be changed by using the --prefix
    argument to configure.
-
-3b) To try zee without installing it, just run it: 
-
-	src/zee
 
 
 Options
