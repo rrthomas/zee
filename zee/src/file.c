@@ -162,7 +162,7 @@ void die(int exitcode)
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)
       as = buf->filename;
-    as = rblist_concat(as, rblist_from_string("." PACKAGE_NAME "SAVE"));
+    as = rblist_concat(as, rblist_from_string("." PACKAGE "SAVE"));
     fprintf(stderr, "Saving %s...\r\n", astr_to_string(as));
     buffer_write(buf, as);
     term_close();
