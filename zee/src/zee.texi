@@ -134,9 +134,6 @@ This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set_variable} command or set at start-up
 in the @file{.zeerc} initialization file.
 
-Please note that some variables may be not available depending
-on the compilation options given to @samp{configure}.
-
 @include vars.texi
 
 @c ---------------------------------------------------------------------------
