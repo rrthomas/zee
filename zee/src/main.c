@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 
   if (hflag || (argc == 0 && optind == 1)) {
     fprintf(stderr,
-            "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
+            "Usage: " PACKAGE " [OPTION...] [+LINE] FILE\n"
             "Run " PACKAGE_NAME ", the editor.\n"
             "\n");
 #define X(longname, opt, doc) \
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 #undef X
     fprintf(stderr,
             "FILE               edit FILE\n"
-            "+LINE              set line at which to visit next FILE\n"
+            "+LINE              start editing FILE at line LINE\n"
             );
   } else {
     signal_init();
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
-      win.fheight = 1; // Initialise window; fheight must be > eheight
+      win.fheight = 1; // Initialise window; need fheight > eheight
       term_init();
       resize_window(); // Can't run until there is a buffer
       if (buf && line > 0) {
