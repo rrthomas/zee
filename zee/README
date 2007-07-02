@@ -1,9 +1,9 @@
                                  Zee
                                  ---
 
-Zee is an experimental editor and programming environment, hosted on
-SourceForge at http://sourceforge.net/projects/zee/. It is free
-software, licensed under the GNU GPL.
+Zee is an experimental editor, hosted on SourceForge at
+http://sourceforge.net/projects/zee/. It is free software, licensed
+under the GNU GPL.
 
 Zee is written in ISO C99 for POSIX and requires the Boehm garbage
 collector (libgc), PCRE (the Perl-compatible regular expressions
