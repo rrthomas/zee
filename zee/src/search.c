@@ -168,7 +168,7 @@ static int isearch(int dir)
     minibuf_write(as);
 
     int c = getkey();
-    if (c == KBD_CTRL | 'g') {
+    if (c == (KBD_CTRL | 'g')) {
       buf->pt = start;
       thisflag |= FLAG_NEED_RESYNC;
       CMDCALL(edit_select_off);

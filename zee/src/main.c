@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2006 Reuben Thomas.
+   Copyright (c) 2004-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -36,6 +36,8 @@
 #endif
 #ifdef ALLEGRO
 #include <allegro.h>
+#include "config.h"             // Re-include to override overridden
+                                // autotools macros
 #endif
 
 #include "main.h"
@@ -43,7 +45,7 @@
 
 
 #define COPYRIGHT_STRING \
-  "Copyright (c) 2003-2006 Reuben Thomas <rrt@sc3d.org>\n"\
+  "Copyright (c) 2003-2007 Reuben Thomas <rrt@sc3d.org>\n"\
   "Copyright (c) 2005-2006 Alistair Turbull <apt1002@mupsych.org>\n"\
   "Copyright (c) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (c) 2003-2004 David A. Capello <dacap@users.sourceforge.net>"

@@ -1,6 +1,6 @@
-/* Exported terminal
+/* Allegro terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -30,6 +30,8 @@
 #include <string.h>
 #include <allegro.h>
 #include <allegro/internal/aintern.h>
+#include "config.h"             // Re-include to override overridden
+                                // autotools macros
 
 #include "main.h"
 #include "extern.h"
