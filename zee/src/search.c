@@ -55,12 +55,13 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
     if (!backward)
       index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), 0,
                         options, ovector, 3);
-    else
+    else {
       for (int i = (int)rblist_length(as1); i >= 0; i--) {
         index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), i,
                           options | PCRE_ANCHORED, ovector, 3);
+      }
     }
-
+    
     if (index >= 0) {
       if (!backward)
         ret = ovector[1];
