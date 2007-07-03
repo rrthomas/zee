@@ -40,6 +40,7 @@ void buffer_new(void)
   // Allocate the lines.
   buf->lines = line_new();
   buf->pt.p = list_first(buf->lines);
+  buf->num_lines = 1;
 
   // Set the initial mark (needs limit marker to be set up).
   buf->mark = marker_new(point_min(buf));
