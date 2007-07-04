@@ -249,17 +249,15 @@ END_DEF
 
 /*
  * Check the case of a string.
- * Returns 2 if it is all upper case, 1 if just the first letter is,
- * and 0 otherwise.
+ * Returns 2 if it is all upper case, 1 if the first character is
+ * upper case, or 0 otherwise.
  */
 static int check_case(rblist as)
 {
-  size_t i;
-
   if (!isupper(rblist_get(as, 0)))
     return 0;
 
-  for (i = 1; i < rblist_length(as); i++)
+  for (size_t i = 1; i < rblist_length(as); i++)
     if (!isupper(rblist_get(as, i)))
       return 1;
 
@@ -304,7 +302,7 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
   bool changed = false;
 
   if (oldlen > 0) {
-    if (replace_case && get_variable_bool(rblist_from_string("case_replace")))
+    if (replace_case)
       newtext = recase(newtext, rblist_sub((*lp)->item, offset, (offset + oldlen)));
 
     if (rblist_length(newtext) != oldlen) {

@@ -43,7 +43,7 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
   size_t ret = SIZE_MAX;
   int ovector[3], err_offset;
 
-  if ((pattern = pcre_compile(astr_to_string(as2), 0, &find_err, &err_offset, NULL))) {
+  if ((pattern = pcre_compile(astr_to_string(as2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
     int options = 0;
     int index = 0;
 
@@ -202,8 +202,7 @@ static int isearch(int dir)
 
         // Save search string.
         last_search = pattern;
-      }
-      else if (last_search)
+      } else if (last_search)
         pattern = last_search;
     } else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB) {
       if (rblist_length(pattern) > 0) {
@@ -285,7 +284,7 @@ STR(find, "Replace string: ")
 STR(repl, astr_to_string(astr_afmt("Replace `%r' with: ", find))))
 {
   if (ok) {
-    bool find_no_upper = no_upper(find);
+    bool find_no_upper = no_upper(find) && get_variable_bool(rblist_from_string("case_replace"));
     if (search_forward(buf->pt, find)) {
       undo_save(UNDO_REPLACE_BLOCK,
                 make_point(buf->pt.n, buf->pt.o - rblist_length(find)),
