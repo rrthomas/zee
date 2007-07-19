@@ -327,18 +327,18 @@ bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
  * one, or at the left-most at or after wrap_column, if not. If the
  * line contains no spaces, no break is made.
  */
-void wrap_break_line(void)
+bool wrap_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
-  size_t wrapcol = get_variable_number(rblist_from_string("wrap_column"));
+  size_t wrap_col = get_variable_number(rblist_from_string("wrap_column"));
 
   // If we're not beyond wrap_column, stop now.
-  if (get_goalc() <= wrapcol)
+  if (get_goalc() <= wrap_col)
     return;
 
   // Move cursor back to wrap_column
   old_col = buf->pt.o;
-  while (get_goalc() > wrapcol + 1) {
+  while (get_goalc() > wrap_col + 1) {
     buf->pt.o--;
     excess++;
   }
@@ -371,9 +371,12 @@ void wrap_break_line(void)
     CMDCALL(delete_horizontal_space);
     insert_char('\n');
     buf->pt.o = last_col + excess;
-  } else
+    return true;
+  } else {
     // Undo fiddling with point.
     buf->pt.o = old_col;
+    return false;
+  }
 }
 
 DEF(edit_insert_newline,

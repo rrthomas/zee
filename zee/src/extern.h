@@ -115,7 +115,7 @@ bool bolp(void);
 bool eolp(void);
 bool line_replace_text(Line **lp, size_t offset, size_t oldlen, rblist newtext, bool replace_case);
 bool insert_char(int c);
-void wrap_break_line(void);
+bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
 
 // macro.c ----------------------------------------------------------------

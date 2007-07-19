@@ -284,8 +284,6 @@ Move the cursor forward to the end of the paragraph.\
 }
 END_DEF
 
-/* FIXME: if wrap_column is set to 1, hangs with 100% CPU and starts consuming
- * all memory. */
 DEF(edit_wrap_paragraph,
 "\
 Wrap the paragraph at or after the cursor. The wrap column can\n\
@@ -318,8 +316,8 @@ be set using set_wrap_column.\
 
   CMDCALL(move_end_line);
   size_t wrap_col = (size_t)get_variable_number(rblist_from_string("wrap_column"));
-  while (get_goalc() > wrap_col + 1)
-    wrap_break_line();
+  while (get_goalc() > wrap_col + 1 && wrap_break_line())
+    ;
 
   thisflag &= ~FLAG_DONE_CPCN;
 
