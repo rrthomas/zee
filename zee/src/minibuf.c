@@ -30,8 +30,7 @@
 #include "extern.h"
 
 
-// FIXME: \n's mess up the display
-static void term_minibuf_write(rblist as)
+static void minibuf_draw(rblist as)
 {
   term_move(term_height() - 1, 0);
   term_print(rblist_sub(as, 0, min(rblist_length(as), term_width())));
@@ -43,7 +42,7 @@ static void term_minibuf_write(rblist as)
  */
 void minibuf_write(rblist as)
 {
-  term_minibuf_write(as);
+  minibuf_draw(as);
 
   // Redisplay (and leave the cursor in the correct position).
   term_display();
@@ -127,7 +126,7 @@ int minibuf_read_boolean(rblist prompt)
  */
 void minibuf_clear(void)
 {
-  term_minibuf_write(rblist_empty);
+  minibuf_draw(rblist_empty);
 }
 
 
@@ -168,7 +167,7 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
     cursor_pos -= to_lose;
   }
 
-  term_minibuf_write(as);
+  minibuf_draw(as);
   term_move(term_height() - 1, cursor_pos);
   term_refresh();
 }
@@ -286,7 +285,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       CMDCALL(file_suspend);
       break;
     case KBD_RET:
-      term_minibuf_write(rblist_empty);
+      minibuf_clear();
       retval = as;
       ret = true;
       break;
@@ -307,7 +306,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       i = mb_forward_char(i, as);
       break;
     case KBD_CTRL | 'g':
-      term_minibuf_write(rblist_empty);
+      minibuf_clear();
       ret = true;
       break;
     case KBD_CTRL | 'k':
