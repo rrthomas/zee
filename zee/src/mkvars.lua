@@ -44,7 +44,7 @@ for l in io.lines("tbl_vars.h") do
     h1:write("@item " .. name .. "\n" .. doc .. "\n")
 
     h2:write("\n# " .. doc .. " [default: " .. defval .. "]\n")
-    h2:write("set_variable " .. name .. " " .. defval .. "\n")
+    h2:write("preferences_set_variable " .. name .. " " .. defval .. "\n")
   end
 end
 
