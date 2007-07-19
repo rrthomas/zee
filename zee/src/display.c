@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "main.h"
+#include "term.h"
 #include "rblist.h"
 #include "extern.h"
 
@@ -296,12 +297,7 @@ static void draw_window(size_t topline)
 void term_print(rblist as)
 {
   RBLIST_FOR(c, as)
-    if (c != '\n')
-      term_addch(c);
-    else {
-      term_clrtoeol();
-      term_nl();
-    }
+    term_addch(c);
   RBLIST_END
 }
 
@@ -430,14 +426,15 @@ static void draw_popup(void)
   term_move(y, 0);
   draw_border();
 
-  size_t start_pos = rblist_line_to_start_pos(popup_text, popup_line);
-  size_t end_pos = rblist_line_to_end_pos(popup_text, popup_line + p - 1);
-  term_print(rblist_sub(popup_text, start_pos, end_pos));
-  term_print(astr_nl());
-
-  // Draw blank lines to bottom of window.
-  for (size_t i = h - y - p; i > 0; i--)
-    term_print(astr_nl());
+  // Draw popup text, and blank lines to bottom of window.
+  for (size_t i = 0; i < h - y; i++) {
+    if (i < p)
+      term_print(rblist_sub(popup_text,
+                            rblist_line_to_start_pos(popup_text, popup_line + i),
+                            rblist_line_to_end_pos(popup_text, popup_line + i)));
+    term_clrtoeol();
+    term_nl();
+  }
 }
 
 /*

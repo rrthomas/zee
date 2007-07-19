@@ -148,19 +148,6 @@ void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);
 
-// term_{allegro,ncurses}.c -----------------------------------------------
-void term_init(void);
-void term_close(void);
-void term_move(size_t y, size_t x);
-void term_clrtoeol(void);
-void term_refresh(void);
-void term_clear(void);
-void term_addch(int c);
-void term_nl(void);
-void term_attrset(size_t attrs, ...);
-void term_beep(void);
-size_t term_xgetkey(int mode, size_t timeout);
-
 // undo.c -----------------------------------------------------------------
 void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void undo_reset_unmodified(Undo *up);

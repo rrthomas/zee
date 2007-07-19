@@ -34,6 +34,7 @@
 #endif
 
 #include "main.h"
+#include "term.h"
 #include "extern.h"
 
 bool xterm;

@@ -57,6 +57,7 @@ zee_nondoc_SOURCES =				\
 	astr.h					\
 	zmalloc.h				\
 	zmalloc.c				\
+	term.h					\
 	extern.h				\
 	main.h
 
