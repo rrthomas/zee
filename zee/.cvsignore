@@ -2,6 +2,7 @@ depcomp install-sh missing
 configure configure.lineno
 autom4te.cache
 stamp-h1
+compile
 aclocal.m4
 config.log
 config.status config.status.lineno
