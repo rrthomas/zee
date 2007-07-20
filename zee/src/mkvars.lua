@@ -33,7 +33,7 @@ h1:write("@table @code\n")
 
 h2:write("# ." .. PACKAGE .. " configuration\n")
 
-for l in io.lines("tbl_vars.h") do
+for l in io.lines(arg[1]) do
   if string.find(l, "^X%(") then
     assert(loadstring(l))()
     local name, type, defval, doc = unpack(xarg)

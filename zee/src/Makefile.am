@@ -73,41 +73,36 @@ endif
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
-GENERATED_TEXI = funcs.texi vars.texi opts.texi
-
-# FIXME: The generated files are all added below so as not to need to
-# run Lua scripts in make checkdist (the Lua script rules don't work
-# in VPATH builds, and for some reason aren't even called). Really, we
-# should make VPATH builds work, but for now I give up.
 EXTRA_DIST =  								\
-		tbl_funcs.h funcs.texi 					\
-		vars.texi						\
-		opts.texi						\
-		default_bindings.c					\
 		lib.lua							\
 		mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua	\
 		cua_bindings emacs_bindings
 
-$(PACKAGE).info $(PACKAGE).dvi: $(GENERATED_TEXI)
+BUILT_TEXI = funcs.texi vars.texi opts.texi
 
-basic.o: tbl_funcs.h
+BUILT_SOURCES =								\
+		tbl_funcs.h 						\
+		default_bindings.c					\
+		$(PACKAGE)rc						\
+		$(BUILT_TEXI)
+
+CLEANFILES = $(BUILT_SOURCES)
+
+$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
 tbl_funcs.h funcs.texi: $(zee_doc_SOURCES) mkfuncs.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkfuncs.lua $(zee_doc_SOURCES)
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkfuncs.lua $(top_srcdir)/src $(zee_doc_SOURCES)
 
 $(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkvars.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkvars.lua $(top_srcdir)/src/tbl_vars.h
 
 opts.texi: tbl_opts.h mkopts.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkopts.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkopts.lua $(top_srcdir)/src/tbl_opts.h
 
 default_bindings.c: mkbindings.lua cua_bindings
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkbindings.lua < $(top_srcdir)/src/cua_bindings
 
 bind.c: default_bindings.c
-
-distclean-local:
-	rm -f $(GENERATED_TEXI) tbl_funcs.h $(PACKAGE)rc
 
 sloccount:
 	sloccount $(zee_base_SOURCES) term_*.c *.lua

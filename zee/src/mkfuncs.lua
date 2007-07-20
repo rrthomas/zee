@@ -22,6 +22,9 @@ NAME="mkfuncs"
 
 require "lib"
 
+dir = arg[1]
+table.remove(arg, 1)
+
 h1 = io.open("funcs.texi", "w")
 assert(h1)
 
@@ -39,7 +42,7 @@ h2:write("\n")
 
 for i in ipairs(arg) do
   if arg[i] then
-    lines = io.lines(arg[i])
+    lines = io.lines(dir .. "/" .. arg[i])
     for l in lines do
       if string.sub(l, 1, 4) == "DEF(" or
         string.sub(l, 1, 8) == "DEF_ARG(" then

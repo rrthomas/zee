@@ -28,7 +28,7 @@ assert(h)
 h:write("@c Automatically generated file: DO NOT EDIT!\n")
 h:write("@table @samp\n")
 
-for l in io.lines("tbl_opts.h") do
+for l in io.lines(arg[1]) do
   if string.find(l, "^X%(") then
     assert(loadstring(l))()
     local longname, param, doc = unpack(xarg)
