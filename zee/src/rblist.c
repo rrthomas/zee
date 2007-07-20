@@ -30,7 +30,7 @@
 #include "rblist.h"
 
 
-// For debugging: incremented every time random_float is called.
+// For debugging: incremented every time random_double is called.
 static size_t random_counter = 0;
 
 // Returns a random double in the range 0.0 (inclusive) to 1.0 (exclusive).
