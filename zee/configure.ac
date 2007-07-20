@@ -83,15 +83,15 @@ if test "x$LUA" = x; then
 fi
 
 dnl lua_version
-AC_MSG_CHECKING([for Lua version >= 5.1])
+AC_MSG_CHECKING([for Lua version = 5.1.x])
 lua_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
 case $lua_version in
-0.* | 1.* | 2.* | 3.* | 4.* | 5.0)
-    AC_MSG_RESULT([no (found $lua_version)])
-    AC_MSG_FAILURE([*** can't build Zee with this version of Lua])
+5.1*)
+    AC_MSG_RESULT([yes (found $lua_version)])
     ;;
 *)
-    AC_MSG_RESULT([yes (found $lua_version)])
+    AC_MSG_RESULT([no (found $lua_version)])
+    AC_MSG_FAILURE([*** can't build Zee with this version of Lua])
     ;;
 esac
 
