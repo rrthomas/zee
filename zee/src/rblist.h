@@ -221,11 +221,9 @@ size_t rblist_line_length(rblist rbl, size_t line);
  * Syntactic sugar for looping through the elements of an rblist. It
  * should be used thus:
  *
- *   RBLIST_FOR(my_i, my_rblist)
- *     ... Do something with my_i ...
+ *   RBLIST_FOR(c, rblist)
+ *     ... Do something with c ...
  *   RBLIST_END
- *
- * This expands to a for loop with 'my_i' as the loop variable.
  */
 
 #define RBLIST_FOR(c, rbl) \
