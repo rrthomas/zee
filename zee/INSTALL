@@ -43,3 +43,12 @@ If you are debugging the editor, you can enable the debugging code:
 For other configure options, run
 
 	./configure --help
+
+
+Note to developers
+------------------
+
+"make distcheck" needs the same options for finding Lua as configure.
+The configure line above becomes:
+
+	make DISTCHECK_CONFIGURE_FLAGS="--with-lua-includes=/usr/include/lua5.1 --with-lua-suffix=5.1" distcheck
