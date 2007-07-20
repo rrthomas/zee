@@ -104,11 +104,11 @@ void completion_popup(Completion *cp)
  */
 static size_t common_prefix_length(rblist as, rblist bs)
 {
-  size_t len = min(rblist_length(as), rblist_length(bs));
-  for (size_t i = 0; i < len; i++)
+  size_t i, len = min(rblist_length(as), rblist_length(bs));
+  for (i = 0; i < len; i++)
     if (rblist_get(as, i) != rblist_get(bs, i))
-      return i;
-  return len;
+      break;
+  return i;
 }
 
 static int hcompar(const void *p1, const void *p2)

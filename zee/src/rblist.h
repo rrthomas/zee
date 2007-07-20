@@ -213,7 +213,16 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
  */
 size_t rblist_line_length(rblist rbl, size_t line);
 
+/*
+ * Returns the line `line'.
+ *
+ * Requires 0 <= line <= rblist_nl_count(rbl).
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+rblist rblist_line(rblist rbl, size_t line);
 
+ 
 /************************/
 // Derived destructors.
 

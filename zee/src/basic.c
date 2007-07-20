@@ -67,11 +67,11 @@ size_t get_goalc(void)
 {
   size_t col = 0, t = tab_width();
 
-  for (size_t i = 0; i < buf->pt.o; i++) {
-    if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i) == '\t')
+  RBLIST_FOR(c, rblist_sub(rblist_line(buf->lines, buf->pt.n), 0, buf->pt.o))
+    if (c == '\t')
       col |= t - 1;
     ++col;
-  }
+  RBLIST_END
 
   return col;
 }
@@ -81,21 +81,19 @@ size_t get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-  int col = 0, t, w;
-  size_t i;
+  int i = 0, col = 0, t = tab_width();
 
-  t = tab_width();
-
-  for (i = 0; i < rblist_line_length(buf->lines, buf->pt.n); i++) {
+  RBLIST_FOR(c, rblist_line(buf->lines, buf->pt.n))
     if (col == goalc)
       break;
-    else if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i) == '\t') {
-      for (w = t - col % t; w > 0; w--)
+    else if (c == '\t') {
+      for (int w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;
     } else
-      ++col;
-  }
+      col++;
+    i++;
+  RBLIST_END
 
   buf->pt.o = i;
 }

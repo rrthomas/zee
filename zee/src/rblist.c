@@ -480,6 +480,11 @@ size_t rblist_line_length(rblist rbl, size_t line)
   return rblist_line_to_end_pos(rbl, line) - rblist_line_to_start_pos(rbl, line);
 }
 
+rblist rblist_line(rblist rbl, size_t line)
+{
+  return rblist_sub(rbl, rblist_line_to_start_pos(rbl, line), rblist_line_to_end_pos(rbl, line));
+}
+
 /************************/
 // Derived destructors.
 

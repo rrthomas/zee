@@ -247,8 +247,6 @@ END_DEF
 
 static bool no_upper(rblist as)
 {
-  size_t i;
-
   RBLIST_FOR(c, as)
     if (isupper(c))
       return false;

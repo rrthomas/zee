@@ -120,9 +120,10 @@ bool is_empty_line(void)
  */
 bool is_blank_line(void)
 {
-  for (size_t i = 0; i < rblist_line_length(buf->lines, buf->pt.n); i++)
-    if (!isspace(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i)))
+  RBLIST_FOR(c, rblist_line(buf->lines, buf->pt.n))
+    if (!isspace(c))
       return false;
+  RBLIST_END
   return true;
 }
 
@@ -221,9 +222,10 @@ static int check_case(rblist as)
   if (!isupper(rblist_get(as, 0)))
     return 0;
 
-  for (size_t i = 1; i < rblist_length(as); i++)
-    if (!isupper(rblist_get(as, i)))
+  RBLIST_FOR(c, rblist_sub(as, 1, rblist_length(as)))
+    if (!isupper(c))
       return 1;
+  RBLIST_END
 
   return 2;
 }
@@ -245,12 +247,11 @@ static rblist recase(rblist str, rblist tmpl)
     c = toupper(c);
   ret = rblist_append(ret, c);
 
-  for (i = 1; i < rblist_length(str); i++) {
-    c = rblist_get(str, i);
+  RBLIST_FOR(c, rblist_sub(str, 1, rblist_length(str)))
     if (tmpl_case == 2)
       c = toupper(c);
     ret = rblist_append(ret, c);
-  }
+  RBLIST_END
 
   return ret;
 }

@@ -239,26 +239,24 @@ static void calculate_highlight_region(Region *r)
 static void draw_line(size_t line, size_t startcol, size_t lineno)
 {
   size_t x, i;
-  size_t start = rblist_line_to_start_pos(buf->lines, lineno);
-  size_t len = rblist_line_length(buf->lines, lineno);
+  rblist as = rblist_sub(rblist_line(buf->lines, lineno), startcol, rblist_line_length(buf->lines, lineno));
+  size_t len = rblist_length(as);
   Region r;
 
   calculate_highlight_region(&r);
 
   term_move(line, 0);
-  for (x = 0, i = startcol; i < len && x < win.ewidth; i++) {
+  for (x = 0, i = 0; i < len && x < win.ewidth; i++) {
     if (in_region(lineno, i, &r))
-      outch(rblist_get(buf->lines, start + i), FONT_REVERSE, &x);
+      outch(rblist_get(as, i), FONT_REVERSE, &x);
     else
-      outch(rblist_get(buf->lines, start + i), FONT_NORMAL, &x);
+      outch(rblist_get(as, i), FONT_NORMAL, &x);
   }
 
   if (x >= term_width()) {
     term_move(line, win.ewidth - 1);
     term_addch('$');
   } else
-    /* In the following loop is in_region(lineno, i, &r) constant?
-       If so, replace with an if and a while. */
     for (; x < win.ewidth && in_region(lineno, i, &r); i++)
       outch(' ', FONT_REVERSE, &x);
 }
@@ -322,15 +320,17 @@ static void calculate_start_column(void)
   rpfact = pt.o / (win.ewidth / 3);
 
   for (lp = rp; ; lp--) {
-    for (col = 0, p = lp; p < rp; ++p)
-      if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p) == '\t') {
+    for (col = 0, p = lp; p < rp; p++) {
+      char c = rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p);
+      if (c == '\t') {
         // FIXME: Broken unless lp starts at a tab position.
         size_t t = tab_width();
         col += t - (col % t);
-      } else if (isprint(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p)))
+      } else if (isprint(c))
         ++col;
       else
-        col += rblist_length(make_char_printable(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p)));
+        col += rblist_length(make_char_printable(c));
+    }
 
     lpfact = lp / (win.ewidth / 3);
 

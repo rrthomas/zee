@@ -52,7 +52,7 @@ ssize_t point_dist(Point pt1, Point pt2)
  */
 size_t count_lines(Point pt1, Point pt2)
 {
-  return labs(pt2.n - pt1.n);
+  return labs((ssize_t)pt2.n - (ssize_t)pt1.n);
 }
 
 void swap_point(Point *pt1, Point *pt2)
