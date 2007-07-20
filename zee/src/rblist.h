@@ -74,7 +74,7 @@ const rblist rblist_empty;
  *
  * Takes time O(1).
  */
-rblist rblist_singleton(char c);
+rblist rblist_singleton(int c);
 
 /*
  * Concatenate two lists. The originals are not modified.
@@ -90,7 +90,7 @@ rblist rblist_concat(rblist left, rblist right);
  * Append the argument character to rbl.
  * FIXME: Generalise to rblist_insert, and use in replace_nstring.
  */
-rblist rblist_append(rblist rbl, char c);
+rblist rblist_append(rblist rbl, int c);
 
 /*
  * Makes an rblist from a 0-terminated string.
@@ -167,7 +167,7 @@ char rblist_get(rblist rbl, size_t pos);
  *
  * Takes time O(log(n)), where `n' is the length of the list.
  */
-rblist rblist_set(rblist rbl, size_t pos, char c);
+rblist rblist_set(rblist rbl, size_t pos, int c);
 
 /*
  * Converts a character position into a line number. More precisely,
@@ -239,7 +239,7 @@ rblist rblist_line(rblist rbl, size_t line);
   for (rblist_iterator _it_##c = rblist_iterate(rbl); \
        _it_##c; \
        _it_##c = rblist_iterator_next(_it_##c)) { \
-    char c = rblist_iterator_value(_it_##c);
+    int c = rblist_iterator_value(_it_##c);
 
 #define RBLIST_END }
 

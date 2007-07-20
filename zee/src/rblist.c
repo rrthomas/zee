@@ -280,9 +280,10 @@ rblist rblist_from_array(const char *s, size_t length)
 
 const rblist rblist_empty = (rblist)&empty;
 
-rblist rblist_singleton(char c)
+rblist rblist_singleton(int c)
 {
-  return leaf_from_array(&c, 1);
+  char cc = c;
+  return leaf_from_array(&cc, 1);
 }
 
 /*
@@ -340,7 +341,7 @@ rblist rblist_concat(rblist left, rblist right)
 /*************************/
 // Derived constructors.
 
-rblist rblist_append(rblist rbl, char c)
+rblist rblist_append(rblist rbl, int c)
 {
   return rblist_concat(rbl, rblist_singleton(c));
 }
@@ -412,7 +413,7 @@ char rblist_get(rblist rbl, size_t pos)
   return rbl->leaf.data[pos];
 }
 
-rblist rblist_set(rblist rbl, size_t pos, char c)
+rblist rblist_set(rblist rbl, size_t pos, int c)
 {
   rblist left, right;
   rblist_split(rbl, pos, &left, &right);
