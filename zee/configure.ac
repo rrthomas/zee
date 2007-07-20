@@ -79,7 +79,7 @@ else
 fi
 if test "x$LUA" = x; then
     AC_PATH_PROG([LUA], [lua$with_lua_suffix], [], [$lua_search_path])
-    test "x$LUA" = x && AC_MSG_FAILURE([*** Can't build Zee without Lua])
+    test "x$LUA" = x && AC_MSG_FAILURE([*** Can't build Zee without Lua 5.1])
 fi
 
 dnl lua_version
@@ -124,7 +124,7 @@ AC_CHECK_LIB([lua$with_lua_suffix],
              [$LUA_LIBS $lua_extra_libs])
 
 dnl liblua_version
-AC_MSG_CHECKING([for liblua version >= 5.1])
+AC_MSG_CHECKING([for liblua version 5.1.x])
 save_CFLAGS="$CFLAGS"
 save_LIBS="$LIBS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
@@ -136,7 +136,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 int main()
 {
     printf("(found %s, %d)... ", LUA_VERSION, LUA_VERSION_NUM);
-    if (LUA_VERSION_NUM >= 501)
+    if (LUA_VERSION_NUM == 501)
         exit(EXIT_SUCCESS);
     exit(EXIT_FAILURE);
 }
@@ -144,7 +144,8 @@ int main()
 ]])],
               [AC_MSG_RESULT([yes])],
               [AC_MSG_RESULT([no])
-               exit 1])
+               AC_MSG_FAILURE([*** liblua is not version 5.1.
+                  *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])])
 CFLAGS="$save_CFLAGS"
 LIBS="$save_LIBS"
 
