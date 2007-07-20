@@ -394,7 +394,8 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
     thisflag |= FLAG_NEED_RESYNC;
-    adjust_markers(buf->pt.n, buf->pt.o, 0, rblist_length(bs));
+    // FIXME: int below should be > size_t
+    adjust_markers(buf->pt.n, buf->pt.o, 0, (int)rblist_length(bs));
     for (size_t i = 0; i < rblist_nl_count(bs); i++)
       CMDCALL(move_next_character);
   }
