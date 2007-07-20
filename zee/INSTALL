@@ -1,11 +1,20 @@
                Zee build and installation instructions
                ---------------------------------------
 
-To build zee:
+To build and install Zee:
+
+0) If you're building from CVS sources,
+
+	autoreconf -i
 
 1) Run configure:
 
 	./configure
+
+On many systems, you'll need to tell configure how to find Lua; the
+following works on Debian:
+
+	./configure --with-lua-includes=/usr/include/lua5.1 --with-lua-suffix=5.1
 
 2) Compile the sources:
 
