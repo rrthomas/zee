@@ -1,10 +1,10 @@
 depcomp install-sh missing
-configure
+configure configure.lineno
 autom4te.cache
 stamp-h1
 aclocal.m4
 config.log
-config.status
+config.status config.status.lineno
 config.h
 config.h.in
 Makefile
