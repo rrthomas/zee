@@ -3,7 +3,8 @@
 
 To build and install Zee:
 
-0) If you're building from CVS sources,
+0) If you're building from CVS sources, make sure you have the GNU
+   autotools and makeinfo installed, and
 
 	autoreconf -i
 
