@@ -200,11 +200,11 @@ static void outch(int c, Font font, size_t *x)
  * Region. The offset is measured in characters, not in character
  * positions.
  */
-static bool in_region(size_t lineno, size_t x, Region *r)
+static bool in_region(size_t line, size_t x, Region *r)
 {
   Point pt;
 
-  pt.n = lineno;
+  pt.n = line;
   pt.o = x;
 
   return point_dist(r->start, pt) <= 0 && point_dist(pt, r->end) < 0;
@@ -229,63 +229,62 @@ static void calculate_highlight_region(Region *r)
 
 /*
  * Prints a line on the terminal.
- *  - `line' is the line number on the terminal.
+ *  - `row' is the line number on the terminal.
  *  - `start_col' is the horizontal scroll offset: the character
  *    position (not cursor position) within the line of the first
  *    character that should be displayed.
- *  - `lineno' is the line number within the buffer.
+ *  - `line' is the line number within the buffer.
  */
-// FIXME: Improve var names `line' and `lineno'
-static void draw_line(size_t line, size_t startcol, size_t lineno)
+static void draw_line(size_t row, size_t startcol, size_t line)
 {
   size_t x, i;
-  rblist as = rblist_sub(rblist_line(buf->lines, lineno), startcol, rblist_line_length(buf->lines, lineno));
+  rblist as = rblist_sub(rblist_line(buf->lines, line), startcol, rblist_line_length(buf->lines, line));
   size_t len = rblist_length(as);
   Region r;
 
   calculate_highlight_region(&r);
 
-  term_move(line, 0);
+  term_move(row, 0);
   for (x = 0, i = 0; i < len && x < win.ewidth; i++) {
-    if (in_region(lineno, i, &r))
+    if (in_region(line, i, &r))
       outch(rblist_get(as, i), FONT_REVERSE, &x);
     else
       outch(rblist_get(as, i), FONT_NORMAL, &x);
   }
 
   if (x >= term_width()) {
-    term_move(line, win.ewidth - 1);
+    term_move(row, win.ewidth - 1);
     term_addch('$');
   } else
-    for (; x < win.ewidth && in_region(lineno, i, &r); i++)
+    for (; x < win.ewidth && in_region(line, i, &r); i++)
       outch(' ', FONT_REVERSE, &x);
 }
 
 static void draw_window(size_t topline)
 {
-  size_t i, lineno;
+  size_t i, line;
   Point pt = buf->pt;
 
   // Find the first line to display on the first screen line.
-  for (lineno = pt.n, i = win.topdelta;
-       i > 0 && lineno > 0;
-       --i, --lineno);
+  for (line = pt.n, i = win.topdelta;
+       i > 0 && line > 0;
+       --i, --line);
 
   cur_tab_width = tab_width();
 
   // Draw the window lines.
   for (i = topline;
        i < win.eheight + topline;
-       ++i, ++lineno) {
+       ++i, ++line) {
     // Clear the line.
     term_move(i, 0);
     term_clrtoeol();
 
     // If at the end of the buffer, don't write any text.
-    if (lineno >= buf->num_lines)
+    if (line >= buf->num_lines)
       continue;
 
-    draw_line(i, point_start_column, lineno);
+    draw_line(i, point_start_column, line);
 
     if (point_start_column > 0) {
       term_move(i, 0);

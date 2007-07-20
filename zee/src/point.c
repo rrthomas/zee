@@ -27,11 +27,11 @@
 #include "main.h"
 #include "extern.h"
 
-Point make_point(size_t lineno, size_t offset)
+Point make_point(size_t line, size_t offset)
 {
   Point pt;
 
-  pt.n = lineno;
+  pt.n = line;
   pt.o = offset;
 
   return pt;
