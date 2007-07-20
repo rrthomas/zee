@@ -281,7 +281,7 @@ static void draw_window(size_t topline)
     term_clrtoeol();
 
     // If at the end of the buffer, don't write any text.
-    if (line >= buf->num_lines)
+    if (line >= rblist_nl_count(buf->lines))
       continue;
 
     draw_line(i, point_start_column, line);
@@ -398,14 +398,14 @@ static void draw_status_line(size_t line)
 
   term_print(astr_afmt(")--L%d--C%d--", buf->pt.n + 1, get_goalc()));
 
-  if (buf->num_lines <= win.eheight && win.topdelta == buf->pt.n)
+  if (rblist_nl_count(buf->lines) <= win.eheight && win.topdelta == buf->pt.n)
     term_print(rblist_from_string("All"));
   else if (buf->pt.n == win.topdelta)
     term_print(rblist_from_string("Top"));
-  else if (buf->pt.n + (win.eheight - win.topdelta) > buf->num_lines)
+  else if (buf->pt.n + (win.eheight - win.topdelta) > rblist_nl_count(buf->lines))
     term_print(rblist_from_string("Bot"));
   else
-    term_print(astr_afmt("%d%%", (int)((float)buf->pt.n / buf->num_lines * 100)));
+    term_print(astr_afmt("%d%%", (int)((float)buf->pt.n / rblist_nl_count(buf->lines) * 100)));
 
   term_attrset(1, FONT_NORMAL);
 }

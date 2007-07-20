@@ -74,7 +74,7 @@ Point point_min(Buffer *bp)
 Point point_max(Buffer *bp)
 {
   Point pt;
-  pt.n = bp->num_lines;
+  pt.n = rblist_nl_count(bp->lines);
   pt.o = rblist_line_length(bp->lines, bp->pt.n);
   return pt;
 }

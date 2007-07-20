@@ -72,9 +72,6 @@ typedef struct {
   Point start;                  // The region start
   Point end;                    // The region end
   size_t size;                  // The region size
-
-  // The total number of lines ('\n' newlines) in region
-  size_t num_lines; // FIXME: Remove this, use rblist_nl_count instead.
 } Region;
 
 // Buffer flags or minor modes
@@ -90,8 +87,6 @@ typedef struct {
  */
 typedef struct {
   rblist lines;                 // The lines of text
-  size_t num_lines;         // The total number of lines in the buffer
-   // FIXME: Remove this, use rblist_nl_count instead.
   Point pt;                     // The point
   Marker *mark;                 // The mark
   Marker *markers;              // Markers

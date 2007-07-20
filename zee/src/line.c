@@ -166,7 +166,7 @@ bool bobp(void)
  */
 bool eobp(void)
 {
-  return (eolp() && buf->pt.n == buf->num_lines - 1);
+  return (eolp() && buf->pt.n == rblist_nl_count(buf->lines) - 1);
 }
 
 /*
@@ -389,7 +389,6 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
 
   // Insert string.
   if (bs && rblist_length(bs)) {
-    buf->num_lines += rblist_nl_count(bs);
     buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), bs),
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;

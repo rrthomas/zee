@@ -129,7 +129,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (buf->pt.n == buf->num_lines - 1)
+  if (buf->pt.n == rblist_nl_count(buf->lines) - 1)
     ok = false;
   else {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
@@ -279,7 +279,7 @@ DEF(move_next_page,
 Scroll text of current window upward near full screen.\
 ")
 {
-  if (buf->pt.n < buf->num_lines)
+  if (buf->pt.n < rblist_nl_count(buf->lines))
     ok = goto_line(buf->pt.n + win.eheight) ? true : false;
   else {
     minibuf_error(rblist_from_string("End of buffer"));

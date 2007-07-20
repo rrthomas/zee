@@ -79,11 +79,10 @@ void file_open(rblist filename)
   thisflag |= FLAG_NEED_RESYNC;
 
   rblist as;
-  if ((as = file_read(buf->filename)) != NULL) {
+  if ((as = file_read(buf->filename)) != NULL)
     // Add lines to buffer
     buf->lines = as;
-    buf->num_lines = rblist_nl_count(as);
-  } else if (errno != ENOENT)
+  else if (errno != ENOENT)
     buf->flags |= BFLAG_READONLY;
 }
 

@@ -39,9 +39,8 @@ void buffer_new(void)
 
   // Allocate the lines.
   buf->lines = rblist_empty;
-  buf->num_lines = 1;
 
-  // Set the initial mark (needs limit marker to be set up).
+  // Set the initial mark.
   buf->mark = marker_new(point_min(buf));
 
   if (get_variable_bool(rblist_from_string("wrap_mode")))
@@ -87,7 +86,6 @@ static void region_size(Region *rp, Point from, Point to)
   }
 
   rp->size = point_dist(rp->start, rp->end);
-  rp->num_lines = count_lines(rp->start, rp->end);
 }
 
 /*
