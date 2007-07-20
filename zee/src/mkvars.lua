@@ -20,7 +20,7 @@
 
 NAME="mkvars"
 
-dofile("lib.lua")
+require "lib"
 
 h1 = io.open("vars.texi", "w")
 assert(h1)

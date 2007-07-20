@@ -20,7 +20,7 @@
 
 NAME="mkbindings"
 
-dofile("lib.lua")
+require "lib"
 
 h = io.open("default_bindings.c", "w")
 assert(h)

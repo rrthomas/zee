@@ -20,7 +20,7 @@
 
 NAME="mkfuncs"
 
-dofile("lib.lua")
+require "lib"
 
 h1 = io.open("funcs.texi", "w")
 assert(h1)

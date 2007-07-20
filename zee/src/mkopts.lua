@@ -20,7 +20,7 @@
 
 NAME="mkopts"
 
-dofile("lib.lua")
+require "lib"
 
 h = io.open("opts.texi", "w")
 assert(h)

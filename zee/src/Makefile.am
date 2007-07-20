@@ -45,20 +45,20 @@ zee_doc_SOURCES =				\
 	undo.c					\
 	variables.c
 
-zee_nondoc_SOURCES =				\
-	rblist.c				\
-	rblist.h				\
-	nonstd.h				\
-	vector.c				\
-	vector.h				\
-	list.c					\
-	list.h					\
-	astr.c					\
-	astr.h					\
-	zmalloc.h				\
-	zmalloc.c				\
-	term.h					\
-	extern.h				\
+zee_nondoc_SOURCES =			        \
+	rblist.c			        \
+	rblist.h			        \
+	nonstd.h			        \
+	vector.c			        \
+	vector.h			        \
+	list.c				        \
+	list.h				        \
+	astr.c				        \
+	astr.h				        \
+	zmalloc.h			        \
+	zmalloc.c			        \
+	term.h				        \
+	extern.h			        \
 	main.h
 
 zee_base_SOURCES = $(zee_doc_SOURCES) $(zee_nondoc_SOURCES)
@@ -75,21 +75,34 @@ zee_LDADD = @LIBOBJS@
 
 GENERATED_TEXI = funcs.texi vars.texi opts.texi
 
-EXTRA_DIST = mkfuncs.lua mkvars.lua mkopts.lua default_bindings.c
+# FIXME: The generated files are all added below so as not to need to
+# run Lua scripts in make checkdist (the Lua script rules don't work
+# in VPATH builds, and for some reason aren't even called). Really, we
+# should make VPATH builds work, but for now I give up.
+EXTRA_DIST =  								\
+		tbl_funcs.h funcs.texi 					\
+		vars.texi						\
+		opts.texi						\
+		default_bindings.c					\
+		lib.lua							\
+		mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua	\
+		cua_bindings emacs_bindings
 
 $(PACKAGE).info $(PACKAGE).dvi: $(GENERATED_TEXI)
 
+basic.o: tbl_funcs.h
+
 tbl_funcs.h funcs.texi: $(zee_doc_SOURCES) mkfuncs.lua
-	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkfuncs.lua $(zee_doc_SOURCES)
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkfuncs.lua $(zee_doc_SOURCES)
 
 $(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
-	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkvars.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkvars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
-	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkopts.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkopts.lua
 
 default_bindings.c: mkbindings.lua cua_bindings
-	$(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' mkbindings.lua < cua_bindings
 
 bind.c: default_bindings.c
 
