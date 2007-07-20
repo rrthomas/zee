@@ -132,7 +132,7 @@ int main(int argc, char **argv)
       cmd_eval(rblist_from_string(optarg));
       break;
     case 2:
-      // FIXME: Make a file_load command
+      // FIXME: Make a file_insert command
       if ((as = file_read(rblist_from_string(optarg))))
         cmd_eval(as);
       break;

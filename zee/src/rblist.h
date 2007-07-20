@@ -1,6 +1,6 @@
 /* Randomly balanced lists.
    Copyright (c) 2006 Alistair Turnbull.
-   Copyright (c) 2006 Reuben Thomas.
+   Copyright (c) 2006-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -88,7 +88,7 @@ rblist rblist_concat(rblist left, rblist right);
 
 /*
  * Append the argument character to rbl.
- * FIXME: Generalise to rblist_insert, and use in ninsert_string.
+ * FIXME: Generalise to rblist_insert, and use in replace_nstring.
  */
 rblist rblist_append(rblist rbl, char c);
 
@@ -203,6 +203,16 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line);
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 size_t rblist_line_to_end_pos(rblist rbl, size_t line);
+
+/*
+ * Calculates the length of line `line'.
+ *
+ * Requires 0 <= line <= rblist_nl_count(rbl).
+ *
+ * Takes time O(log(n)) where `n' is the length of the list.
+ */
+size_t rblist_line_length(rblist rbl, size_t line);
+
 
 /************************/
 // Derived destructors.

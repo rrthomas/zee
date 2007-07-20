@@ -38,8 +38,7 @@ void buffer_new(void)
   buf = zmalloc(sizeof(Buffer));
 
   // Allocate the lines.
-  buf->lines = line_new();
-  buf->pt.p = list_first(buf->lines);
+  buf->lines = rblist_empty;
   buf->num_lines = 1;
 
   // Set the initial mark (needs limit marker to be set up).
@@ -77,7 +76,7 @@ bool warn_if_no_mark(void)
  */
 static void region_size(Region *rp, Point from, Point to)
 {
-  if (cmp_point(from, to) < 0) {
+  if (point_dist(from, to) < 0) {
     // The point is before the mark.
     rp->start = from;
     rp->end = to;
@@ -127,33 +126,5 @@ size_t indent_width(void)
  */
 rblist copy_text_block(Point start, size_t size)
 {
-  size_t n = buf->pt.n, i;
-  rblist as = rblist_empty;
-  Line *lp = buf->pt.p;
-
-  /* Have to do a linear search through the buffer to find the start of the
-   * region. Doesn't matter where we start. Starting at 'buf->pt' is a good
-   * heuristic.
-   */
-  if (n > start.n)
-    do
-      lp = list_prev(lp);
-    while (--n > start.n);
-  else if (n < start.n)
-    do
-      lp = list_next(lp);
-    while (++n < start.n);
-
-  // Copy one character at a time.
-  for (i = start.o; rblist_length(as) < size;) {
-    if (i < rblist_length(lp->item))
-      as = rblist_append(as, rblist_get(lp->item, (i++)));
-    else {
-      as = rblist_append(as, '\n');
-      lp = list_next(lp);
-      i = 0;
-    }
-  }
-
-  return as;
+  return rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, size);
 }

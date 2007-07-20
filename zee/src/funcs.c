@@ -1,6 +1,6 @@
-/* Miscellaneous Emacs functions reimplementation
+/* Miscellaneous user commands
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -207,7 +207,7 @@ Move the cursor backwards one word.\
         ok = false;
         break;
       }
-      buf->pt.o = rblist_length(buf->pt.p->item);
+      buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -243,7 +243,7 @@ Move the cursor forward one word.\
     }
     if (gotword)
       break;
-    buf->pt.o = rblist_length(buf->pt.p->item);
+    buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
     if (!CMDCALL(move_next_line)) {
       ok = false;
       break;
@@ -392,7 +392,7 @@ file, replacing the selection if any.\n\
 #endif
 
         undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-        if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
+        if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
           CMDCALL(edit_select_other_end);
         ok = replace_nstring(r.size, NULL, out);
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);

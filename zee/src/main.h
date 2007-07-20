@@ -1,6 +1,6 @@
 /* Main types and definitions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -38,15 +38,8 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-/* Line.
- * A line is a list whose items are astrs. The newline at the end of
- * each line is implicit.
- */
-typedef struct list_s Line;
-
 // Point and Marker
 typedef struct {
-  Line *p;                      // Line pointer
   size_t n;                     // Line number
   size_t o;                     // Offset
 } Point;
@@ -81,7 +74,7 @@ typedef struct {
   size_t size;                  // The region size
 
   // The total number of lines ('\n' newlines) in region
-  int num_lines;
+  size_t num_lines; // FIXME: Remove this, use rblist_nl_count instead.
 } Region;
 
 // Buffer flags or minor modes
@@ -96,8 +89,9 @@ typedef struct {
  * Represents a buffer.
  */
 typedef struct {
-  Line *lines;                  // The lines of text
+  rblist lines;                 // The lines of text
   size_t num_lines;         // The total number of lines in the buffer
+   // FIXME: Remove this, use rblist_nl_count instead.
   Point pt;                     // The point
   Marker *mark;                 // The mark
   Marker *markers;              // Markers

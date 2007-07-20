@@ -1,6 +1,6 @@
 /* Search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2005-2006 Reuben Thomas.
+   Copyright (c) 2005-2007 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -78,23 +78,14 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
 static int search_forward(Point start, rblist as)
 {
   if (rblist_length(as) > 0) {
-    Line *lp;
-    rblist sp;
-
-    for (lp = start.p, sp = rblist_sub(lp->item, start.o, rblist_length(lp->item));
-         ;
-         lp = list_next(lp), sp = lp->item) {
-      if (rblist_length(sp) > 0) {
-        size_t off = find_substr(sp, as, sp == lp->item, true, false);
-        if (off != SIZE_MAX) {
-          while (buf->pt.p != lp)
-            CMDCALL(move_next_line);
-          buf->pt.o = off;
-          return true;
-        }
-      }
-      if (lp == list_last(buf->lines))
-        break;
+    // FIXME: BOL should not always be true!
+    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), as, true, true, false);
+    if (off != SIZE_MAX) {
+      size_t n = rblist_pos_to_line(buf->lines, off);
+      while (buf->pt.n != n)
+        CMDCALL(move_next_line);
+      buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
+      return true;
     }
   }
 
@@ -104,24 +95,14 @@ static int search_forward(Point start, rblist as)
 static int search_backward(Point start, rblist as)
 {
   if (rblist_length(as) > 0) {
-    Line *lp;
-    size_t s1size;
-
-    for (lp = start.p, s1size = start.o;
-         ;
-         lp = list_prev(lp), s1size = rblist_length(lp->item)) {
-      rblist sp = lp->item;
-      if (s1size > 0) {
-        size_t off = find_substr(sp, as, true, s1size == rblist_length(lp->item), true);
-        if (off != SIZE_MAX) {
-          while (buf->pt.p != lp)
-            CMDCALL(move_previous_line);
-          buf->pt.o = off;
-          return true;
-        }
-      }
-      if (lp != list_first(buf->lines))
-        break;
+    // FIXME: EOL should not always be true!
+    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), as, true, true, true);
+    if (off != SIZE_MAX) {
+      size_t n = rblist_pos_to_line(buf->lines, off);
+      while (buf->pt.n != n)
+        CMDCALL(move_previous_line);
+      buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
+      return true;
     }
   }
 
@@ -289,7 +270,7 @@ STR(repl, astr_to_string(astr_afmt("Replace `%r' with: ", find))))
       undo_save(UNDO_REPLACE_BLOCK,
                 make_point(buf->pt.n, buf->pt.o - rblist_length(find)),
                 rblist_length(find), rblist_length(repl));
-      if (line_replace_text(&buf->pt.p, buf->pt.o - rblist_length(find),
+      if (line_replace_text(buf->pt.n, buf->pt.o - rblist_length(find),
                             rblist_length(find), repl, find_no_upper))
         buf->flags |= BFLAG_MODIFIED;
     }

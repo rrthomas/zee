@@ -1,6 +1,6 @@
 /* Disk file handling
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -81,8 +81,8 @@ void file_open(rblist filename)
   rblist as;
   if ((as = file_read(buf->filename)) != NULL) {
     // Add lines to buffer
-    buf->lines = string_to_lines(as, &buf->num_lines);
-    buf->pt.p = list_first(buf->lines);
+    buf->lines = as;
+    buf->num_lines = rblist_nl_count(as);
   } else if (errno != ENOENT)
     buf->flags |= BFLAG_READONLY;
 }
@@ -96,7 +96,9 @@ void file_open(rblist filename)
 static bool buffer_write(Buffer *bp, rblist filename)
 {
   FILE *fp;
-  Line *lp;
+  char *s = zmalloc(rblist_length(buf->lines));
+
+  rblist_to_string(buf->lines, s);
 
   assert(bp);
 
@@ -104,12 +106,9 @@ static bool buffer_write(Buffer *bp, rblist filename)
     return false;
 
   // Save all the lines.
-  for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
-    if (fwrite(astr_to_string(lp->item), sizeof(char), rblist_length(lp->item), fp) < rblist_length(lp->item) ||
-        (list_next(lp) != bp->lines && putc('\n', fp) == EOF)) {
-      fclose(fp);
-      return false;
-    }
+  if (fwrite(s, sizeof(char), rblist_length(buf->lines), fp) < rblist_length(buf->lines)) {
+    fclose(fp);
+    return false;
   }
 
   return fclose(fp) == 0;

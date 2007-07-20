@@ -1,6 +1,6 @@
 /* Global functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -103,8 +103,6 @@ Marker *point_marker(void);
 Marker *get_mark(void);
 void set_mark(Marker *m);
 void set_mark_to_point(void);
-Line *line_new(void);
-Line *string_to_lines(rblist as, size_t *lines);
 bool is_empty_line(void);
 bool is_blank_line(void);
 int following_char(void);
@@ -113,7 +111,7 @@ bool bobp(void);
 bool eobp(void);
 bool bolp(void);
 bool eolp(void);
-bool line_replace_text(Line **lp, size_t offset, size_t oldlen, rblist newtext, bool replace_case);
+bool line_replace_text(size_t line, size_t offset, size_t oldlen, rblist newtext, bool replace_case);
 bool insert_char(int c);
 bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
@@ -141,9 +139,8 @@ void minibuf_clear(void);
 
 // point.c ----------------------------------------------------------------
 Point make_point(size_t lineno, size_t offset);
-int cmp_point(Point pt1, Point pt2);
-int point_dist(Point pt1, Point pt2);
-int count_lines(Point pt1, Point pt2);
+ssize_t point_dist(Point pt1, Point pt2);
+size_t count_lines(Point pt1, Point pt2);
 void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);

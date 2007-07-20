@@ -1,6 +1,6 @@
 /* Basic movement functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -51,7 +51,7 @@ DEF(move_end_line,
 Move the cursor to the end of the line.\
 ")
 {
-  buf->pt.o = rblist_length(buf->pt.p->item);
+  buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
 
   /* Change the `goalc' to the end of line for next
      `edit-navigate-next/previous-line' calls.  */
@@ -68,7 +68,7 @@ size_t get_goalc(void)
   size_t col = 0, t = tab_width();
 
   for (size_t i = 0; i < buf->pt.o; i++) {
-    if (rblist_get(buf->pt.p->item, i) == '\t')
+    if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -86,10 +86,10 @@ static void goto_goalc(int goalc)
 
   t = tab_width();
 
-  for (i = 0; i < rblist_length(buf->pt.p->item); i++) {
+  for (i = 0; i < rblist_line_length(buf->lines, buf->pt.n); i++) {
     if (col == goalc)
       break;
-    else if (rblist_get(buf->pt.p->item, i) == '\t') {
+    else if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i) == '\t') {
       for (w = t - col % t; w > 0; w--)
         if (++col == goalc)
           break;
@@ -116,7 +116,6 @@ column, or at the end of the line if it is not long enough.\
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    buf->pt.p = list_prev(buf->pt.p);
     buf->pt.n--;
 
     goto_goalc(cur_goalc);
@@ -140,7 +139,6 @@ column, or at the end of the line if it is not long enough.\
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
 
-    buf->pt.p = list_next(buf->pt.p);
     buf->pt.n++;
 
     goto_goalc(cur_goalc);
@@ -241,7 +239,6 @@ Move the cursor left one character.\
     buf->pt.o--;
   else if (!bobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    buf->pt.p = list_prev(buf->pt.p);
     buf->pt.n--;
     CMDCALL(move_end_line);
   } else
@@ -258,7 +255,6 @@ Move the cursor right one character.\
     buf->pt.o++;
   else if (!eobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    buf->pt.p = list_next(buf->pt.p);
     buf->pt.n++;
     CMDCALL(move_start_line);
   } else

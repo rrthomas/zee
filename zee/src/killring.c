@@ -1,6 +1,6 @@
 /* Kill facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -52,9 +52,9 @@ Delete the current line.\
     if (!eolp()) {
       CMDCALL(move_start_line);
       killed_text = rblist_concat(killed_text,
-                             rblist_sub(buf->pt.p->item, 0,
-                                      rblist_length(buf->pt.p->item)));
-      replace_nstring(rblist_length(buf->pt.p->item), &as, NULL);
+                                  rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n),
+                                             rblist_line_length(buf->lines, buf->pt.n)));
+      replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &as, NULL);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -107,7 +107,7 @@ the text killed this time appends to the text killed last time.\
     else {
       Region r;
       assert(calculate_the_region(&r));
-      if (buf->pt.p != r.start.p || r.start.o != buf->pt.o)
+      if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
       replace_nstring(r.size, NULL, NULL);
     }

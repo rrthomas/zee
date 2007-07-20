@@ -1,6 +1,6 @@
 /* Line-oriented editing functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -65,14 +65,13 @@ Marker *point_marker(void)
   return marker_new(buf->pt);
 }
 
-static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int offset)
+// FIXME: offset should be > size_t
+static void adjust_markers(size_t line, size_t pointo, int dir, int offset)
 {
   Marker *m = point_marker(), *marker;
 
   for (marker = buf->markers; marker; marker = marker->next)
-    if (marker->pt.p == oldlp &&
-        (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
-      marker->pt.p = newlp;
+    if (marker->pt.n == line && (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
       marker->pt.o -= pointo * dir - offset;
       marker->pt.n += dir;
     } else if (marker->pt.n > buf->pt.n)
@@ -109,44 +108,11 @@ void set_mark_to_point(void)
 
 
 /*
- * Create a Line list.
- */
-Line *line_new(void)
-{
-  Line *lp = list_new();
-  list_append(lp, rblist_empty);
-  return lp;
-}
-
-/*
- * Read an rblist into a Line list.
- * FIXME: Remove once Line list is abandoned for rblists.
- */
-Line *string_to_lines(rblist as, size_t *lines)
-{
-  size_t p, q, end = rblist_length(as);
-  Line *lp = line_new();
-
-  for (p = 0, *lines = 1;
-       p < end && (q = (astr_str(as, p, rblist_singleton('\n')))) != SIZE_MAX;
-       p = q + 1) {
-    list_last(lp)->item = rblist_concat(list_last(lp)->item, rblist_sub(as, p, q));
-    list_append(lp, rblist_empty);
-    ++*lines;
-  }
-
-  // Add the rest of the string, if any
-  list_last(lp)->item = rblist_concat(list_last(lp)->item, rblist_sub(as, p, end));
-
-  return lp;
-}
-
-/*
  * Return a flag indicating whether the current line is empty
  */
 bool is_empty_line(void)
 {
-  return rblist_length(buf->pt.p->item) == 0;
+  return rblist_line_length(buf->lines, buf->pt.n) == 0;
 }
 
 /*
@@ -154,10 +120,8 @@ bool is_empty_line(void)
  */
 bool is_blank_line(void)
 {
-  size_t c;
-
-  for (c = 0; c < rblist_length(buf->pt.p->item); c++)
-    if (!isspace(rblist_get(buf->pt.p->item, c)))
+  for (size_t i = 0; i < rblist_line_length(buf->lines, buf->pt.n); i++)
+    if (!isspace(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i)))
       return false;
   return true;
 }
@@ -172,7 +136,7 @@ int following_char(void)
   else if (eolp())
     return '\n';
   else
-    return rblist_get(buf->pt.p->item, buf->pt.o);
+    return rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o);
 }
 
 /*
@@ -185,7 +149,7 @@ int preceding_char(void)
   else if (bolp())
     return '\n';
   else
-    return rblist_get(buf->pt.p->item, (buf->pt.o - 1));
+    return rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o - 1);
 }
 
 /*
@@ -217,7 +181,7 @@ bool bolp(void)
  */
 bool eolp(void)
 {
-  return buf->pt.o == rblist_length(buf->pt.p->item);
+  return buf->pt.o == rblist_line_length(buf->lines, buf->pt.n);
 }
 
 /*
@@ -292,30 +256,23 @@ static rblist recase(rblist str, rblist tmpl)
 }
 
 /*
- * Replace text in the line lp with newtext. If replace_case is
+ * Replace text in the line `line' with newtext. If replace_case is
  * true then the new characters will be the same case as the old.
  * Return flag indicating whether modifications have been made.
  */
-bool line_replace_text(Line **lp, size_t offset, size_t oldlen,
+bool line_replace_text(size_t line, size_t offset, size_t oldlen,
                       rblist newtext, bool replace_case)
 {
   bool changed = false;
 
   if (oldlen > 0) {
     if (replace_case)
-      newtext = recase(newtext, rblist_sub((*lp)->item, offset, (offset + oldlen)));
+      newtext = recase(newtext, rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, line) + offset, offset + oldlen));
 
-    if (rblist_length(newtext) != oldlen) {
-      (*lp)->item = rblist_concat(rblist_concat(rblist_sub((*lp)->item, 0, offset), newtext),
-                             rblist_sub((*lp)->item, (offset + oldlen), rblist_length((*lp)->item)));
-      adjust_markers(*lp, *lp, offset, 0, (int)(rblist_length(newtext) - oldlen));
-      changed = true;
-    } else if (rblist_ncompare(rblist_sub((*lp)->item, offset, rblist_length((*lp)->item)),
-                                  newtext, rblist_length(newtext)) != 0) {
-      (*lp)->item = rblist_concat(rblist_sub((*lp)->item, 0, offset),
-                             rblist_concat(newtext, rblist_sub((*lp)->item, (offset + rblist_length(newtext)), rblist_length((*lp)->item))));
-      changed = true;
-    }
+    buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, line) + offset),
+                               rblist_concat(newtext,
+                                             rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, line) + offset + rblist_length(newtext), rblist_length(buf->lines))));
+    changed = true;
   }
 
   return changed;
@@ -334,7 +291,7 @@ bool wrap_break_line(void)
 
   // If we're not beyond wrap_column, stop now.
   if (get_goalc() <= wrap_col)
-    return;
+    return false;
 
   // Move cursor back to wrap_column
   old_col = buf->pt.o;
@@ -345,7 +302,7 @@ bool wrap_break_line(void)
 
   // Find break point moving left from wrap_column.
   for (i = buf->pt.o; i > 0; i--) {
-    int c = rblist_get(buf->pt.p->item, (i - 1));
+    int c = rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + i - 1);
     if (isspace(c)) {
       break_col = i;
       break;
@@ -355,8 +312,8 @@ bool wrap_break_line(void)
   /* If no break point moving left from wrap_column, find first
      possible moving right. */
   if (break_col == 0) {
-    for (i = buf->pt.o + 1; i < rblist_length(buf->pt.p->item); i++) {
-      int c = rblist_get(buf->pt.p->item, (i - 1));
+    for (i = buf->pt.o + 1; i < rblist_line_length(buf->lines, buf->pt.n); i++) {
+      int c = rblist_get(buf->lines, rblist_line_length(buf->lines, buf->pt.n) + i - 1);
       if (isspace(c)) {
         break_col = i;
         break;
@@ -419,64 +376,28 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
         return false;
       }
 
-      if (eolp()) {
-        Line *lp1 = buf->pt.p;
-        Line *lp2 = list_next(lp1);
-        size_t lp1len = rblist_length(lp1->item);
-
-        // Move the next line of text into the current line.
-        lp2 = list_next(buf->pt.p);
-        lp1->item = rblist_concat(lp1->item, list_next(buf->pt.p)->item);
-        list_behead(lp1);
-        --buf->num_lines;
-
-        adjust_markers(lp1, lp2, lp1len, -1, 0);
-
+      if (eolp())
         thisflag |= FLAG_NEED_RESYNC;
-      } else {
-        // Move the text one position backward after the point.
-        buf->pt.p->item = rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
-                                        rblist_sub(buf->pt.p->item, buf->pt.o + 1,
-                                                   rblist_length(buf->pt.p->item)));
-        adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, -1);
-      }
+
+      buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
+                                 rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
+                                                          rblist_length(buf->lines)));
+      adjust_markers(buf->pt.n, buf->pt.o, 0, -1);
       buf->flags |= BFLAG_MODIFIED;
     }
   }
 
   // Insert string.
-  /* FIXME: Inefficient. Could search bs for \n's using astr_str.
-     There is code for the string version of this in CVS history. */
-  if (bs && rblist_length(bs))
-    for (size_t i = 0; i < rblist_length(bs); i++) {
-      if (rblist_get(bs, i) == '\n') {
-        // Insert a newline at the current position.
-        Line *new_lp;
-
-        // Update line linked list.
-        list_prepend(buf->pt.p, rblist_empty);
-        new_lp = list_first(buf->pt.p);
-        ++buf->num_lines;
-
-        // Move the text after the point into the new line.
-        new_lp->item = rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item));
-        buf->pt.p->item = rblist_sub(buf->pt.p->item, 0, buf->pt.o);
-
-        // Update markers that point to the splitted line.
-        adjust_markers(new_lp, buf->pt.p, buf->pt.o, 1, 0);
-
-        buf->flags |= BFLAG_MODIFIED;
-        thisflag |= FLAG_NEED_RESYNC;
-
-        CMDCALL(move_next_character);
-      } else {
-        buf->pt.p->item = rblist_concat(rblist_concat(rblist_sub(buf->pt.p->item, 0, buf->pt.o),
-                                                      rblist_sub(bs, i, i + 1)),
-                                        rblist_sub(buf->pt.p->item, buf->pt.o, rblist_length(buf->pt.p->item)));
-        buf->flags |= BFLAG_MODIFIED;
-        adjust_markers(buf->pt.p, buf->pt.p, buf->pt.o, 0, 1);
-      }
-    }
+  if (bs && rblist_length(bs)) {
+    buf->num_lines += rblist_nl_count(bs);
+    buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), bs),
+                               rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
+    buf->flags |= BFLAG_MODIFIED;
+    thisflag |= FLAG_NEED_RESYNC;
+    adjust_markers(buf->pt.n, buf->pt.o, 0, rblist_length(bs));
+    for (size_t i = 0; i < rblist_nl_count(bs); i++)
+      CMDCALL(move_next_character);
+  }
 
   return true;
 }

@@ -1,5 +1,7 @@
 /* Point facility functions
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2005-2007 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -20,6 +22,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include "main.h"
 #include "extern.h"
 
@@ -27,65 +31,28 @@ Point make_point(size_t lineno, size_t offset)
 {
   Point pt;
 
-  pt.p = list_first(buf->lines);
   pt.n = lineno;
   pt.o = offset;
-  while (lineno > 0) {
-    pt.p = list_next(pt.p);
-    lineno--;
-  }
-  return pt;
-}
 
-/*
- * Compare two points, and return `-1' for `less than', '0' for
- * `equal' or `1' for `greater than'.
- */
-int cmp_point(Point pt1, Point pt2)
-{
-  if (pt1.n < pt2.n)
-    return -1;
-  else if (pt1.n > pt2.n)
-    return 1;
-  else
-    return ((pt1.o < pt2.o) ? -1 :
-            (pt1.o > pt2.o) ? 1 : 0);
+  return pt;
 }
 
 /*
  * Return the distance in chars between two points.
  */
-int point_dist(Point pt1, Point pt2)
+// FIXME: Offset should be > size_t
+ssize_t point_dist(Point pt1, Point pt2)
 {
-  int size = 0;
-  Line *lp;
-
-  if (cmp_point(pt1, pt2) > 0)
-    swap_point(&pt1, &pt2);
-
-  for (lp = pt1.p; ; lp = list_next(lp)) {
-    size += rblist_length(lp->item);
-
-    if (lp == pt1.p)
-      size -= pt1.o;
-
-    if (lp == pt2.p) {
-      size -= rblist_length(lp->item) - pt2.o;
-      break;
-    }
-    else
-      size++;
-  }
-
-  return size;
+  // Subtract number of lines (== number of newlines)
+  return rblist_line_to_start_pos(buf->lines, pt2.n) + pt2.o - rblist_line_to_start_pos(buf->lines, pt1.n) - pt1.o - (pt2.n - pt1.n);
 }
 
-int count_lines(Point pt1, Point pt2)
+/*
+ * Return the number of lines between two points.
+ */
+size_t count_lines(Point pt1, Point pt2)
 {
-  if (cmp_point(pt1, pt2) > 0)
-    swap_point(&pt1, &pt2);
-
-  return pt2.n - pt1.n;
+  return labs(pt2.n - pt1.n);
 }
 
 void swap_point(Point *pt1, Point *pt2)
@@ -97,8 +64,8 @@ void swap_point(Point *pt1, Point *pt2)
 
 Point point_min(Buffer *bp)
 {
+  (void)bp;
   Point pt;
-  pt.p = list_next(bp->lines);
   pt.n = 0;
   pt.o = 0;
   return pt;
@@ -107,8 +74,7 @@ Point point_min(Buffer *bp)
 Point point_max(Buffer *bp)
 {
   Point pt;
-  pt.p = list_prev(bp->lines);
-  pt.n = buf->num_lines;
-  pt.o = rblist_length(list_prev(bp->lines)->item);
+  pt.n = bp->num_lines;
+  pt.o = rblist_line_length(bp->lines, bp->pt.n);
   return pt;
 }

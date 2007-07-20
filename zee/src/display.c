@@ -1,6 +1,6 @@
 /* Terminal-independent display routines
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -149,17 +149,20 @@ void term_set_size(size_t cols, size_t rows)
   height = rows;
 }
 
-static rblist make_char_printable(size_t c)
+static rblist make_char_printable(int c)
 {
+  c &= 0xff;
+
   if (c == '\0')
     return rblist_from_string("^@");
   else if (c <= '\32')
     return astr_afmt("^%c", 'A' + c - 1);
   else
-    return astr_afmt("\\%o", c & 0xff);
+    return astr_afmt("\\%o", c);
 }
 
-/* Prints a printable representation of the character c on the screen in the
+/*
+ * Prints a printable representation of the character c on the screen in the
  * specified font, and updates the cursor position x. On exit, the font is set
  * to FONT_NORMAL.
  *
@@ -183,7 +186,7 @@ static void outch(int c, Font font, size_t *x)
   else if (isprint(c))
     term_addch(c), ++(*x);
   else
-    RBLIST_FOR(c, make_char_printable((size_t)c))
+    RBLIST_FOR(c, make_char_printable(c))
       if (*x >= width) break;
       term_addch(c);
       ++(*x);
@@ -193,8 +196,9 @@ static void outch(int c, Font font, size_t *x)
 }
 
 /*
- * Tests whether the specified line and offset is within the specified Region.
- * The offset is measured in characters, not in character positions.
+ * Tests whether the specified line and offset is within the specified
+ * Region. The offset is measured in characters, not in character
+ * positions.
  */
 static bool in_region(size_t lineno, size_t x, Region *r)
 {
@@ -203,13 +207,13 @@ static bool in_region(size_t lineno, size_t x, Region *r)
   pt.n = lineno;
   pt.o = x;
 
-  return cmp_point(r->start, pt) != 1 && cmp_point(pt, r->end) == -1;
+  return point_dist(r->start, pt) <= 0 && point_dist(pt, r->end) < 0;
 }
 
 /*
  * Sets 'r->start' to the lesser of the point and mark,
- * and sets 'r->end' to the greater. If the mark is not anchored, it is treated
- * as if it were at the point.
+ * and sets 'r->end' to the greater. If the mark is not anchored, it
+ * is treated as if it were at the point.
  */
 static void calculate_highlight_region(Region *r)
 {
@@ -217,7 +221,7 @@ static void calculate_highlight_region(Region *r)
   r->start = buf->pt;
   if (buf->flags & BFLAG_ANCHORED) {
     r->end = buf->mark->pt;
-    if (cmp_point(r->end, r->start) < 0)
+    if (point_dist(r->end, r->start) < 0)
       swap_point(&r->end, &r->start);
   } else
     r->end = buf->pt;
@@ -226,25 +230,27 @@ static void calculate_highlight_region(Region *r)
 /*
  * Prints a line on the terminal.
  *  - `line' is the line number on the terminal.
- *  - `start_col' is the horizontal scroll offset: the character position (not
- *    cursor position) within `lp' of the first character that should be
- *    displayed.
- *  - `lp' is the line to display.
- *  - `lineno' is the line number of `lp' within the buffer.
+ *  - `start_col' is the horizontal scroll offset: the character
+ *    position (not cursor position) within the line of the first
+ *    character that should be displayed.
+ *  - `lineno' is the line number within the buffer.
  */
-static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
+// FIXME: Improve var names `line' and `lineno'
+static void draw_line(size_t line, size_t startcol, size_t lineno)
 {
   size_t x, i;
+  size_t start = rblist_line_to_start_pos(buf->lines, lineno);
+  size_t len = rblist_line_length(buf->lines, lineno);
   Region r;
 
   calculate_highlight_region(&r);
 
   term_move(line, 0);
-  for (x = 0, i = startcol; i < rblist_length(lp->item) && x < win.ewidth; i++) {
+  for (x = 0, i = startcol; i < len && x < win.ewidth; i++) {
     if (in_region(lineno, i, &r))
-      outch(rblist_get(lp->item, i), FONT_REVERSE, &x);
+      outch(rblist_get(buf->lines, start + i), FONT_REVERSE, &x);
     else
-      outch(rblist_get(lp->item, i), FONT_NORMAL, &x);
+      outch(rblist_get(buf->lines, start + i), FONT_NORMAL, &x);
   }
 
   if (x >= term_width()) {
@@ -260,20 +266,19 @@ static void draw_line(size_t line, size_t startcol, Line *lp, size_t lineno)
 static void draw_window(size_t topline)
 {
   size_t i, lineno;
-  Line *lp;
   Point pt = buf->pt;
 
   // Find the first line to display on the first screen line.
-  for (lp = pt.p, lineno = pt.n, i = win.topdelta;
+  for (lineno = pt.n, i = win.topdelta;
        i > 0 && lineno > 0;
-       lp = list_prev(lp), --i, --lineno);
+       --i, --lineno);
 
   cur_tab_width = tab_width();
 
   // Draw the window lines.
   for (i = topline;
        i < win.eheight + topline;
-       ++i, ++lineno, lp = list_next(lp)) {
+       ++i, ++lineno) {
     // Clear the line.
     term_move(i, 0);
     term_clrtoeol();
@@ -282,7 +287,7 @@ static void draw_window(size_t topline)
     if (lineno >= buf->num_lines)
       continue;
 
-    draw_line(i, point_start_column, lp, lineno);
+    draw_line(i, point_start_column, lineno);
 
     if (point_start_column > 0) {
       term_move(i, 0);
@@ -318,14 +323,14 @@ static void calculate_start_column(void)
 
   for (lp = rp; ; lp--) {
     for (col = 0, p = lp; p < rp; ++p)
-      if (rblist_get(pt.p->item, p) == '\t') {
+      if (rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p) == '\t') {
         // FIXME: Broken unless lp starts at a tab position.
         size_t t = tab_width();
         col += t - (col % t);
-      } else if (isprint(rblist_get(pt.p->item, p)))
+      } else if (isprint(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p)))
         ++col;
       else
-        col += rblist_length(make_char_printable((size_t)rblist_get(pt.p->item, p)));
+        col += rblist_length(make_char_printable(rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p)));
 
     lpfact = lp / (win.ewidth / 3);
 
