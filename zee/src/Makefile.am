@@ -104,5 +104,5 @@ default_bindings.c: mkbindings.lua cua_bindings
 
 bind.c: default_bindings.c
 
-sloccount:
-	sloccount $(zee_base_SOURCES) term_*.c *.lua
+loc:
+	cloc $(zee_base_SOURCES) term_*.c *.lua
