@@ -235,7 +235,6 @@ static int check_case(rblist as)
  */
 static rblist recase(rblist str, rblist tmpl)
 {
-  size_t i;
   int tmpl_case = check_case(tmpl), c;
   rblist ret = rblist_empty;
 
