@@ -43,7 +43,7 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
   size_t ret = SIZE_MAX;
   int ovector[3], err_offset;
 
-  if ((pattern = pcre_compile(astr_to_string(as2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
+  if ((pattern = pcre_compile(rblist_to_string(as2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
     int options = 0;
     int index = 0;
 
@@ -53,11 +53,11 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
       options |= PCRE_NOTEOL;
 
     if (!backward)
-      index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), 0,
+      index = pcre_exec(pattern, NULL, rblist_to_string(as1), (int)rblist_length(as1), 0,
                         options, ovector, 3);
     else {
       for (int i = (int)rblist_length(as1); i >= 0; i--) {
-        index = pcre_exec(pattern, NULL, astr_to_string(as1), (int)rblist_length(as1), i,
+        index = pcre_exec(pattern, NULL, rblist_to_string(as1), (int)rblist_length(as1), i,
                           options | PCRE_ANCHORED, ovector, 3);
       }
     }
@@ -261,7 +261,7 @@ DEF_ARG(edit_replace,
 Replace the next occurrence of a regexp with other text.\n\
 ",
 STR(find, "Replace string: ")
-STR(repl, astr_to_string(astr_afmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(astr_afmt("Replace `%r' with: ", find))))
 {
   if (ok) {
     bool find_no_upper = no_upper(find) && get_variable_bool(rblist_from_string("case_replace"));
@@ -283,7 +283,7 @@ Replace all occurrences of a regexp with other text from the cursor\n\
 to end of the buffer.\n\
 ",
 STR(find, "Replace string: ")
-STR(repl, astr_to_string(astr_afmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(astr_afmt("Replace `%r' with: ", find))))
 {
   if (ok)
     while (F_edit_replace(list_append(list_append(list_new(), find), repl)))

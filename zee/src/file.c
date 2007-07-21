@@ -58,7 +58,7 @@ rblist get_home_dir(void)
 rblist file_read(rblist filename)
 {
   FILE *fp;
-  if ((fp = fopen(astr_to_string(filename), "r")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
     return NULL;
   else {
     rblist as = astr_fread(fp);
@@ -95,17 +95,15 @@ void file_open(rblist filename)
 static bool buffer_write(Buffer *bp, rblist filename)
 {
   FILE *fp;
-  char *s = zmalloc(rblist_length(buf->lines));
-
-  rblist_to_string(buf->lines, s);
+  size_t len = rblist_length(buf->lines);
 
   assert(bp);
 
-  if ((fp = fopen(astr_to_string(filename), "w")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "w")) == NULL)
     return false;
 
   // Save all the lines.
-  if (fwrite(s, sizeof(char), rblist_length(buf->lines), fp) < rblist_length(buf->lines)) {
+  if (fwrite(rblist_to_string(buf->lines), sizeof(char), len, fp) < len) {
     fclose(fp);
     return false;
   }
@@ -162,7 +160,7 @@ void die(int exitcode)
     if (buf->filename)
       as = buf->filename;
     as = rblist_concat(as, rblist_from_string("." PACKAGE "SAVE"));
-    fprintf(stderr, "Saving %s...\r\n", astr_to_string(as));
+    fprintf(stderr, "Saving %s...\r\n", rblist_to_string(as));
     buffer_write(buf, as);
     term_close();
   }

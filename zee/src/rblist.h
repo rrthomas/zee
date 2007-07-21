@@ -244,12 +244,11 @@ rblist rblist_line(rblist rbl, size_t line);
 #define RBLIST_END }
 
 /*
- * Copies the elements of `rbl' into contiguous memory locations
- * starting at `s'. Returns the next unused location.
+ * Returns 'rbl' as a newly allocated 0-terminated C string.
  *
  * Takes time O(n) where `n' is the length of the list.
  */
-char *rblist_to_string(rblist rbl, char *s);
+char *rblist_to_string(rblist rbl);
 
 /*
  * Returns the portion of `rbl' from `from' to `to'. If `to' is too

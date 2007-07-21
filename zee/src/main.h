@@ -225,7 +225,7 @@ typedef bool (*Command)(list l);
     size_t name = 0; \
     if (!list_empty(l)) { \
       rblist as = list_behead(l); \
-      if ((name = strtoul(astr_to_string(as), NULL, 10)) == ULONG_MAX) \
+      if ((name = strtoul(rblist_to_string(as), NULL, 10)) == ULONG_MAX) \
         ok = false; \
     } else do { \
       rblist ms; \
@@ -233,7 +233,7 @@ typedef bool (*Command)(list l);
         ok = CMDCALL(edit_select_off); \
         break; \
       } \
-      if ((name = strtoul(astr_to_string(ms), NULL, 10)) == ULONG_MAX) \
+      if ((name = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
         ding(); \
     } while (name == ULONG_MAX);
 

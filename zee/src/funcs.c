@@ -365,14 +365,14 @@ file, replacing the selection if any.\n\
       Region r;
       assert(calculate_the_region(&r));
       rblist as = copy_text_block(r.start, r.size);
-      write(fd, astr_to_string(as), r.size);
+      write(fd, rblist_to_string(as), r.size);
 
       close(fd);
 
       rblist cmd = astr_afmt("%r 2>&1 <%s", ms, tempfile);
 
       FILE *pipe;
-      if ((pipe = popen(astr_to_string(cmd), "r")) == NULL) {
+      if ((pipe = popen(rblist_to_string(cmd), "r")) == NULL) {
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {

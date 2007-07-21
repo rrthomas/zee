@@ -115,7 +115,7 @@ int get_variable_number(rblist var)
   rblist as;
 
   if ((as = get_variable(var)))
-    return atoi(astr_to_string(as));
+    return atoi(rblist_to_string(as));
 
   return 0;
 }

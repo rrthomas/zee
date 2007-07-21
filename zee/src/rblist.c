@@ -40,7 +40,7 @@ static inline double random_double(void)
 
   random_counter++;
   seed = (2 * seed - 1) * seed + 1; // Maximal period mod any power of two.
-  return seed * (1.0 / (1.0 + (double)UINT32_MAX + 1.0));
+  return seed * (1.0 / (1.0 + (double)UINT32_MAX));
 }
 
 // Returns a random size_t in the range from 1 to 'n'.
@@ -351,6 +351,13 @@ rblist rblist_from_string(const char *s)
   return rblist_from_array(s, strlen(s));
 }
 
+rblist rblist_set(rblist rbl, size_t pos, int c)
+{
+  rblist left, right;
+  rblist_split(rbl, pos, &left, &right);
+  return rblist_concat(rblist_append(left, c), rblist_sub(right, 1, rblist_length(right)));
+}
+
 /**************************/
 // Primitive destructors.
 
@@ -413,13 +420,6 @@ char rblist_get(rblist rbl, size_t pos)
   return rbl->leaf.data[pos];
 }
 
-rblist rblist_set(rblist rbl, size_t pos, int c)
-{
-  rblist left, right;
-  rblist_split(rbl, pos, &left, &right);
-  return rblist_concat(rblist_append(left, c), rblist_sub(right, 1, rblist_length(right)));
-}
-
 /*
  * This doesn't need to be primitive, but it's short and efficient
  * so why not?
@@ -476,6 +476,9 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line)
     return rblist_line_to_start_pos(rbl, line + 1) - 1;
 }
 
+/************************/
+// Derived destructors.
+
 size_t rblist_line_length(rblist rbl, size_t line)
 {
   return rblist_line_to_end_pos(rbl, line) - rblist_line_to_start_pos(rbl, line);
@@ -486,15 +489,15 @@ rblist rblist_line(rblist rbl, size_t line)
   return rblist_sub(rbl, rblist_line_to_start_pos(rbl, line), rblist_line_to_end_pos(rbl, line));
 }
 
-/************************/
-// Derived destructors.
-
-char *rblist_to_string(rblist rbl, char *s)
+char *rblist_to_string(rblist rbl)
 {
+  const char *ans = zmalloc(sizeof(char) * (rblist_length(rbl)+1));
+  char *s = ans;
   RBLIST_FOR(c, rbl)
     *(s++) = c;
   RBLIST_END
-  return s;
+  *s = 0;
+  return ans;
 }
 
 rblist rblist_sub(rblist rbl, size_t from, size_t to)
@@ -543,9 +546,10 @@ void die(int exitcode)
   exit(exitcode);
 }
 
-/* Print the lengths of a list into a string.
-   Return a char * because that's always what we want for diagnostic
-   messages below. */
+/*
+ * Describes the internal structure of an rblist in a slightly
+ * human-readable form.
+ */
 static rblist rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
@@ -575,7 +579,7 @@ static void assert_invariants(rblist rbl) {
  * Passes `rbl' to assert_invariants. Checks that its length is `length'.
  * If `s' is not NULL, checks that the elements returned by an iterator
  * over 'rbl' match the corresponding elements of `s', and also that
- * astr_to_string works. Checks that the numbers of elements and
+ * rblist_to_string works. Checks that the numbers of elements and
  * newline characters returned by the iterator match respectively the
  * length and nl_count of `rbl'. Checks that the characters returned by
  * the iterator match those returned by rblist_get. Checks that
@@ -587,7 +591,7 @@ static void test(rblist rbl, const char *s, size_t length)
 {
   assert(rblist_length(rbl) == length);
   if (s)
-    assert(!memcmp(astr_to_string(rbl), s, length));
+    assert(!memcmp(rblist_to_string(rbl), s, length));
 
   size_t nl_count = rblist_nl_count(rbl);
   size_t pos = 0, line = 0;
@@ -639,7 +643,7 @@ int main(void)
 #ifdef DEBUG
   printf("Making a list of length %d by appending one element at a time required\n"
          "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
-  printf("%s\n", astr_to_string(rbl_structure(rbl1)));
+  printf("%s\n", rblist_to_string(rbl_structure(rbl1)));
 #endif
 
   /* Test split and stress concat some more. Break 's1' at positions
@@ -648,7 +652,7 @@ int main(void)
 
   rbl1 = rblist_from_array(s1, strlen(s1));
 #ifdef DEBUG
-  printf("%s\n", astr_to_string(rbl_structure(rbl1)));
+  printf("%s\n", rblist_to_string(rbl_structure(rbl1)));
 #endif
   for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
     rblist_split(rbl1, i, &rbl2, &rbl3);
@@ -657,8 +661,8 @@ int main(void)
     rbl4 = rblist_concat(rbl2, rbl3);
     test(rbl4, s1, 19 * 7);
 #ifdef DEBUG
-    printf("rbl2 = %s\nrbl3 = %s\n", astr_to_string(rbl2), astr_to_string(rbl3));
-    printf("%s plus %s makes %s\n", astr_to_string(rbl_structure(rbl2)), astr_to_string(rbl_structure(rbl3)), astr_to_string(rbl_structure(rbl4)));
+    printf("rbl2 = %s\nrbl3 = %s\n", rblist_to_string(rbl2), rblist_to_string(rbl3));
+    printf("%s plus %s makes %s\n", rblist_to_string(rbl_structure(rbl2)), rblist_to_string(rbl_structure(rbl3)), rblist_to_string(rbl_structure(rbl4)));
 #endif
   }
 
