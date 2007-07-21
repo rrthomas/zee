@@ -130,7 +130,7 @@ void popup_scroll_up(void)
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
-static size_t point_start_column;
+static size_t point_start_character;
 static size_t point_screen_column;
 
 size_t term_width(void)
@@ -233,6 +233,7 @@ static void calculate_highlight_region(Region *r)
  *  - `start_col' is the horizontal scroll offset: the character
  *    position (not cursor position) within the line of the first
  *    character that should be displayed.
+ *    // FIXME: but start_col *should* be a column
  *  - `line' is the line number within the buffer.
  */
 static void draw_line(size_t row, size_t startcol, size_t line)
@@ -284,9 +285,9 @@ static void draw_window(size_t topline)
     if (line >= rblist_nl_count(buf->lines))
       continue;
 
-    draw_line(i, point_start_column, line);
+    draw_line(i, point_start_character, line);
 
-    if (point_start_column > 0) {
+    if (point_start_character > 0) {
       term_move(i, 0);
       term_addch('$');
     }
@@ -304,49 +305,55 @@ void term_print(rblist as)
 }
 
 /*
- * Calculate the best start column to draw if the line needs to be
- * truncated.
- * Called only for the line where the point is.
- * FIXME: What the hell does this actually do?! And is it sensible?
+ * Calculate the display width of a string in screen columns
+ */
+static size_t string_display_width(rblist as)
+{
+  size_t cols = 0, t = tab_width();
+
+  fprintf(stderr, "width ");
+  RBLIST_FOR(c, as)
+    if (c == '\t')
+      cols += t - (cols % t);
+    else
+      cols += rblist_length(make_char_printable(c));
+    fprintf(stderr, "%d %d, !%d!", cols, c, rblist_length(make_char_printable('T')));
+  RBLIST_END
+  fprintf(stderr, "\n");
+
+  return cols;
+}
+
+/*
+ * Calculate the character to start drawing from in the current line.
+ * We start from whichever is furthest away and still fits on the
+ * screen out of:
+ *
+ *  * a screen's width of text;
+ *  * a number of characters greater than 2/3 the width of the screen,
+ *    measured from the left edge (so we can normally move a third of
+ *    the width of the screen before it scrolls again); or
+ *  * the start of the line
  */
 static void calculate_start_column(void)
 {
-  size_t col = 0, lastcol = 0;
-  size_t rp, lp, p, rpfact, lpfact;
-  Point pt = buf->pt;
+  size_t lp = buf->pt.o + 1, rpthirds = buf->pt.o / (win.ewidth / 3);
+  size_t lastcol = 0, col = 0, lpthirds;
 
-  rp = pt.o;
-  rpfact = pt.o / (win.ewidth / 3);
-
-  for (lp = rp; ; lp--) {
-    for (col = 0, p = lp; p < rp; p++) {
-      char c = rblist_get(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + p);
-      if (c == '\t') {
-        // FIXME: Broken unless lp starts at a tab position.
-        size_t t = tab_width();
-        col += t - (col % t);
-      } else if (isprint(c))
-        ++col;
-      else
-        col += rblist_length(make_char_printable(c));
-    }
-
-    lpfact = lp / (win.ewidth / 3);
-
-    if (col >= win.ewidth - 1 || lpfact + 2 < rpfact) {
-      point_start_column = lp + 1;
-      point_screen_column = lastcol;
-      return;
-    }
-
+  fprintf(stderr, "* %d\n", buf->pt.o);
+  /* Move left one character at a time from point until we've gone far
+     enough. */
+  do {
+    lp--;
+    lpthirds = lp / (win.ewidth / 3);
     lastcol = col;
+    col = string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), lp, buf->pt.o));
+    fprintf(stderr, "%d %d %d %d\n", col, lpthirds, rpthirds, lp);
+  } while (col < win.ewidth - 1 && lpthirds + 2 > rpthirds && lp != 0);
 
-    if (lp == 0)
-      break;
-  }
-
-  point_start_column = 0;
-  point_screen_column = col;
+  point_start_character = lp;
+  point_screen_column = lastcol;
+  fprintf(stderr, "%d %d\n", point_start_character, point_screen_column);
 }
 
 static void draw_border(void)
