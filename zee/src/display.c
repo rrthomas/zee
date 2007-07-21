@@ -128,10 +128,8 @@ void popup_scroll_up(void)
 // Window properties
 
 static size_t width = 0, height = 0;
-static size_t cur_tab_width;
-static size_t cur_topline;
-static size_t point_start_character;
-static size_t point_screen_column;
+static size_t start_column; // Column of screen on page (i.e. scroll offset).
+static size_t point_screen_column; // Column of cursor on screen.
 
 size_t term_width(void)
 {
@@ -163,37 +161,44 @@ static rblist make_char_printable(int c)
 }
 
 /*
- * Prints a printable representation of the character c on the screen in the
- * specified font, and updates the cursor position x. On exit, the font is set
- * to FONT_NORMAL.
- *
- * Printing is suppressed if x reaches term_width(); in this case x is set to
- * term_width.
- *
- * This function is implemented in terms of term_addch().
+ * Prints character c (which must be printable and single-width) provided
+ * the column x is visible (i.e. at least 'start_col and less than term_width())
+ * and returns the next column to the right.
  */
-static void outch(int c, Font font, size_t *x)
+static size_t outch_printable(int c, size_t x)
 {
-  size_t w, width = term_width();
+  if (x >= start_column && x < start_column + term_width())
+    term_addch(c);
+  return x + 1;
+}
 
-  if (*x >= width)
-    return;
+/*
+ * Prints a printable representation of the character c on the screen in the
+ * specified font at column x, and returns the new column. On exit, the font
+ * is set to FONT_NORMAL.
+ *
+ * Printing is suppressed if x is less than start_column or at least
+ * start_column + term_width().
+ */
+static size_t outch(int c, Font font, size_t x)
+{
+  size_t t = tab_width();
 
   term_attrset(1, font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < width; w--)
-      term_addch(' '), ++(*x);
+    for (size_t w = t - (x % t); w > 0; w--)
+      x = outch_printable(' ', x);
   else if (isprint(c))
-    term_addch(c), ++(*x);
+    x = outch_printable(c, x);
   else
-    RBLIST_FOR(c, make_char_printable(c))
-      if (*x >= width) break;
-      term_addch(c);
-      ++(*x);
+    RBLIST_FOR(d, make_char_printable(c))
+      x = outch_printable(d, x);
     RBLIST_END
 
   term_attrset(1, FONT_NORMAL);
+
+  return x;
 }
 
 /*
@@ -231,78 +236,43 @@ static void calculate_highlight_region(Region *r)
 /*
  * Prints a line on the terminal.
  *  - `row' is the line number on the terminal.
- *  - `start_col' is the horizontal scroll offset: the character
- *    position (not cursor position) within the line of the first
- *    character that should be displayed.
- *    // FIXME: but start_col *should* be a column
  *  - `line' is the line number within the buffer.
+ *
+ * This function reads the static variable start_column: the horizontal
+ * scroll offset.
+ *
+ * If any part of the line is off the left-hand side of the screen,
+ * prints a '$' character in the left-hand column. If any part is off
+ * the right, prints a '$' character in the right-hand column. Any
+ * part that is within the highlight region is highlighted. If the
+ * final position is within the highlight region then the remainder of
+ * the line is also highlighted.
  */
-static void draw_line(size_t row, size_t startcol, size_t line)
+static void draw_line(size_t row, size_t line)
 {
-  size_t x, i;
-  rblist as = rblist_sub(rblist_line(buf->lines, line), startcol, rblist_line_length(buf->lines, line));
-  size_t len = rblist_length(as);
   Region r;
-
   calculate_highlight_region(&r);
 
   term_move(row, 0);
-  for (x = 0, i = 0; i < len && x < win.ewidth; i++) {
-    if (in_region(line, i, &r))
-      outch(rblist_get(as, i), FONT_REVERSE, &x);
-    else
-      outch(rblist_get(as, i), FONT_NORMAL, &x);
-  }
+  size_t x = 0, i = 0;
+  RBLIST_FOR(c, rblist_line(buf->lines, line))
+    if (x >= start_column + term_width())
+      break; // No point in printing the rest of the line.
+    Font font = in_region(line, i, &r) ? FONT_REVERSE : FONT_NORMAL;
+    x = outch(c, font, x);
+    i++;
+  RBLIST_END
 
+  if (start_column > 0) {
+    term_move(row, 0);
+    term_addch('$');
+  }
   if (x >= term_width()) {
     term_move(row, win.ewidth - 1);
     term_addch('$');
-  } else
-    for (; x < win.ewidth && in_region(line, i, &r); i++)
-      outch(' ', FONT_REVERSE, &x);
-}
-
-static void draw_window(size_t topline)
-{
-  size_t i, line;
-  Point pt = buf->pt;
-
-  // Find the first line to display on the first screen line.
-  for (line = pt.n, i = win.topdelta;
-       i > 0 && line > 0;
-       --i, --line);
-
-  cur_tab_width = tab_width();
-
-  // Draw the window lines.
-  for (i = topline;
-       i < win.eheight + topline;
-       ++i, ++line) {
-    // Clear the line.
-    term_move(i, 0);
-    term_clrtoeol();
-
-    // If at the end of the buffer, don't write any text.
-    if (line >= rblist_nl_count(buf->lines))
-      continue;
-
-    draw_line(i, point_start_character, line);
-
-    if (point_start_character > 0) {
-      term_move(i, 0);
-      term_addch('$');
-    }
-  }
-}
-
-/*
- * Print a string on the terminal.
- */
-void term_print(rblist as)
-{
-  RBLIST_FOR(c, as)
-    term_addch(c);
-  RBLIST_END
+  } else if (in_region(line, i, &r))
+    while (x < win.ewidth)
+      x = outch(' ', FONT_REVERSE, x);
 }
 
 /*
@@ -333,6 +303,7 @@ static size_t string_display_width(rblist rbl)
  *    the width of the screen before it scrolls again); or
  *  * the start of the line
  */
+// FIXME: Rewrite.
 static void calculate_start_column(void)
 {
   size_t lp = buf->pt.o + 1, rpthirds = buf->pt.o / (win.ewidth / 3);
@@ -347,8 +318,38 @@ static void calculate_start_column(void)
     col = string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), lp, buf->pt.o));
   } while (col < win.ewidth - 1 && lpthirds + 2 > rpthirds && lp != 0);
 
-  point_start_character = lp;
+  start_column = lp;
   point_screen_column = lastcol;
+}
+
+/*
+ * Draws the window.
+ */
+// FIXME: Inline into term_display() and remove point_screen_column.
+static void draw_window(void)
+{
+  // Find the first line to display on the first screen line.
+  size_t line = max(buf->pt.n - win.topdelta, 0);
+
+  calculate_start_column();
+
+  // Draw the window lines.
+  for (size_t i = 0; i < win.eheight; ++i, ++line) {
+    term_move(i, 0);
+    term_clrtoeol();
+    if (line < rblist_nl_count(buf->lines))
+      draw_line(i, line);
+  }
+}
+
+/*
+ * Print a string on the terminal.
+ */
+void term_print(rblist as)
+{
+  RBLIST_FOR(c, as)
+    term_addch(c);
+  RBLIST_END
 }
 
 static void draw_border(void)
@@ -444,32 +445,25 @@ static void draw_popup(void)
 }
 
 /*
- * Draw all the windows in turn, and draw the status line if any space
+ * Draw the window, and draw the status line if any space
  * remains. Finally, move the cursor to the correct position.
  */
 void term_display(void)
 {
-  size_t topline;
-
-  cur_topline = topline = 0;
-  calculate_start_column();
-  cur_topline = topline;
   if (buf)
-    draw_window(topline);
+    draw_window();
 
   /* Draw the status line only if there is available space after the
      buffer text space. */
   if (win.fheight - win.eheight > 0)
-    draw_status_line(topline + win.eheight);
-
-  topline += win.fheight;
+    draw_status_line(win.eheight);
 
   // Draw the popup window.
   if (popup_text)
     draw_popup();
 
   // Redraw cursor.
-  term_move(cur_topline + win.topdelta, point_screen_column);
+  term_move(win.topdelta, point_screen_column);
 }
 
 /*
