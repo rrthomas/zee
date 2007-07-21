@@ -151,7 +151,7 @@ rblist minibuf_read_variable_name(rblist msg)
       minibuf_error(rblist_from_string("No variable name given"));
       return NULL;
     } else if (get_variable(ms) == NULL) {
-      minibuf_error(astr_afmt("There is no variable called `%r'", ms));
+      minibuf_error(rblist_afmt("There is no variable called `%r'", ms));
       waitkey(WAITKEY_DEFAULT);
     } else {
       minibuf_clear();
@@ -176,10 +176,10 @@ Set a variable to the specified value.\
     var_entry *p = get_variable_default(var);
     if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
       int b;
-      if ((b = minibuf_read_boolean(astr_afmt("Set %r to value: ", var))) != -1)
+      if ((b = minibuf_read_boolean(rblist_afmt("Set %r to value: ", var))) != -1)
         val = rblist_from_string((b == true) ? "true" : "false");
     } else                      // Non-boolean variable.
-      val = minibuf_read(astr_afmt("Set %r to value: ", var), rblist_empty);
+      val = minibuf_read(rblist_afmt("Set %r to value: ", var), rblist_empty);
   }
 
   if (val)

@@ -47,9 +47,4 @@ rblist astr_fread(FILE *fp);
  */
 rblist astr_fgets(FILE *fp);
 
-/*
- * Format text into an astr
- */
-rblist astr_afmt(const char *fmt, ...);
-
 #endif // ASTR_H

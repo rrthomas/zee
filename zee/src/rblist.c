@@ -21,6 +21,7 @@
    02111-1301, USA.  */
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -358,6 +359,91 @@ rblist rblist_set(rblist rbl, size_t pos, int c)
   return rblist_concat(rblist_append(left, c), rblist_sub(right, 1, rblist_length(right)));
 }
 
+/*
+ * Used internally by rblist_afmt. Formats an unsigned number in any
+ * base up to 16. If the result has more than 64 digits, higher
+ * digits are discarded.
+ */
+static rblist fmt_number(size_t x, int base)
+{
+  static const char const *digits = "0123456789abcdef";
+  #define MAX_DIGITS 64
+  static char buf[MAX_DIGITS];
+
+  if (!x)
+    return rblist_from_string("0");
+  size_t i;
+  for (i = MAX_DIGITS; i && x; x /= base)
+    buf[--i] = digits[x % base];
+  return rblist_from_array(&buf[i], MAX_DIGITS - i);
+}
+
+/*
+ * Formats a string a bit like printf, and returns the result as an
+ * rblist. This function understands "%r" to mean an rblist. This
+ * function does not undertand the full syntax for printf format
+ * strings. The only conversion specifications it understands are:
+ *
+ *   %r - an rblist (non-standard!),
+ *   %s - a C string,
+ *   %c - a char,
+ *   %d - an int,
+ *   %o - an unsigned int, printed in octal,
+ *   %x - an unsigned int, printed in hexadecimal,
+ *   %% - a % character.
+ *
+ * Width and precision specifiers are not supported.
+ */
+rblist rblist_afmt(const char *format, ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  rblist ret = rblist_empty;
+  int x;
+  size_t i;
+  while (1) {
+    // Skip to next '%' or to end of string.
+    for (i = 0; format[i] && format[i] != '%'; i++);
+    ret = rblist_concat(ret, rblist_from_array(format, i));
+    if (!format[i++])
+      break;
+    // We've found a '%'.
+    switch (format[i++]) {
+      case 'c':
+        ret = rblist_append(ret, (char)va_arg(ap, int));
+        break;
+      case 'd': {
+        x = va_arg(ap, int);
+        if (x < 0)
+          ret = rblist_concat(rblist_append(ret, '-'), fmt_number((unsigned)-x, 10));
+        else
+          ret = rblist_concat(ret, fmt_number((unsigned)x, 10));
+        break;
+      }
+      case 'o':
+        ret = rblist_concat(ret, fmt_number(va_arg(ap, unsigned int), 8));
+        break;
+      case 'r':
+        ret = rblist_concat(ret, va_arg(ap, rblist));
+        break;
+      case 's':
+        ret = rblist_concat(ret, rblist_from_string(va_arg(ap, const char *)));
+        break;
+      case 'x':
+        ret = rblist_concat(ret, fmt_number(va_arg(ap, unsigned int), 16));
+        break;
+      case '%':
+        ret = rblist_append(ret, '%');
+        break;
+      default:
+        assert(0);
+    }
+    format = &format[i];
+  }
+  va_end(ap);
+  return ret;
+}
+
 /**************************/
 // Primitive destructors.
 
@@ -491,7 +577,7 @@ rblist rblist_line(rblist rbl, size_t line)
 
 char *rblist_to_string(rblist rbl)
 {
-  const char *ans = zmalloc(sizeof(char) * (rblist_length(rbl)+1));
+  char *const ans = zmalloc(sizeof(char) * (rblist_length(rbl)+1));
   char *s = ans;
   RBLIST_FOR(c, rbl)
     *(s++) = c;
@@ -553,9 +639,9 @@ void die(int exitcode)
 static rblist rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return astr_afmt("%d", rbl->leaf.length);
+    return rblist_afmt("%d", rbl->leaf.length);
   else
-    return astr_afmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
+    return rblist_afmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
 }
 
 // Checks all structural invariants that are supposed to hold for 'rbl'.

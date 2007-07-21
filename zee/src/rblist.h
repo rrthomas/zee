@@ -99,6 +99,20 @@ rblist rblist_append(rblist rbl, int c);
  */
 rblist rblist_from_string(const char *s);
 
+/*
+ * Replaces a character in the specified rblist at the given position.
+ * `pos' must be in the range 0 to rblist_length(rbl) - 1. Result is
+ * returned as a fresh rblist; the original is not modified.
+ *
+ * Takes time O(log(n)), where `n' is the length of the list.
+ */
+rblist rblist_set(rblist rbl, size_t pos, int c);
+
+/*
+ * Format text into an rblist.
+ */
+rblist rblist_afmt(const char *fmt, ...);
+
 /**************************/
 // Primitive destructors.
 
@@ -155,19 +169,12 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
  *
  * This is a slow way of extracting elements from a list, and should
  * be used only when accesses are scattered randomly throughout the
- * list. For sequential access, use rblist_iterate.
+ * list. For sequential access, use rblist_iterate. The RBLIST_FOR macro
+ * may be helpful.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
 char rblist_get(rblist rbl, size_t pos);
-
-/*
- * Changes a character in the specified rblist at the given position.
- * `pos' must be in the range 0 to rblist_length(rbl) - 1.
- *
- * Takes time O(log(n)), where `n' is the length of the list.
- */
-rblist rblist_set(rblist rbl, size_t pos, int c);
 
 /*
  * Converts a character position into a line number. More precisely,
@@ -204,6 +211,10 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line);
  */
 size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 
+ 
+/************************/
+// Derived destructors.
+
 /*
  * Calculates the length of line `line'.
  *
@@ -222,19 +233,18 @@ size_t rblist_line_length(rblist rbl, size_t line);
  */
 rblist rblist_line(rblist rbl, size_t line);
 
- 
-/************************/
-// Derived destructors.
-
 /*
- * Syntactic sugar for looping through the elements of an rblist. It
+ * Syntactic sugar for looping through the elements of an rblist.
+ * RBLIST_FOR is much faster than calling rblist_get in a loop. It
  * should be used thus:
  *
  *   RBLIST_FOR(c, rblist)
  *     ... Do something with c ...
  *   RBLIST_END
+ *
+ * Note that RBLIST_FOR can be combined with rblist_sub to loop
+ * through any part of an rblist.
  */
-
 #define RBLIST_FOR(c, rbl) \
   for (rblist_iterator _it_##c = rblist_iterate(rbl); \
        _it_##c; \

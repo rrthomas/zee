@@ -246,6 +246,6 @@ typedef bool (*Command)(list l);
 
 // Call a command with an integer argument
 #define CMDCALL_UINT(name, arg) \
-  F_ ## name(list_append(list_new(), astr_afmt("%d", arg)))
+  F_ ## name(list_append(list_new(), rblist_afmt("%d", arg)))
 
 #endif // !MAIN_H

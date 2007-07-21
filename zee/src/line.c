@@ -191,8 +191,7 @@ bool eolp(void)
  */
 bool insert_char(int c)
 {
-  rblist as = astr_afmt("%c", c);
-  return replace_nstring(0, NULL, as);
+  return replace_nstring(0, NULL, rblist_singleton(c));
 }
 
 DEF(edit_insert_tab,
@@ -350,6 +349,7 @@ Insert a newline, wrapping if in Wrap mode.\
 }
 END_DEF
 
+// FIXME: Documentation missing.
 bool replace_nstring(size_t size, rblist *as, rblist bs)
 {
   if (warn_if_readonly_buffer())

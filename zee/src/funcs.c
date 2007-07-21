@@ -112,7 +112,7 @@ END_DEF
 static int quoted_insert_octal(int c1)
 {
   int c2, c3;
-  minibuf_write(astr_afmt("Insert octal character %d-", c1 - '0'));
+  minibuf_write(rblist_afmt("Insert octal character %d-", c1 - '0'));
   c2 = getkey();
 
   if (!isdigit(c2) || c2 - '0' >= 8) {
@@ -121,7 +121,7 @@ static int quoted_insert_octal(int c1)
     return true;
   }
 
-  minibuf_write(astr_afmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
+  minibuf_write(rblist_afmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
   c3 = getkey();
 
   if (!isdigit(c3) || c3 - '0' >= 8) {
@@ -369,7 +369,7 @@ file, replacing the selection if any.\n\
 
       close(fd);
 
-      rblist cmd = astr_afmt("%r 2>&1 <%s", ms, tempfile);
+      rblist cmd = rblist_afmt("%r 2>&1 <%s", ms, tempfile);
 
       FILE *pipe;
       if ((pipe = popen(rblist_to_string(cmd), "r")) == NULL) {
