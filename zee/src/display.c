@@ -151,12 +151,13 @@ void term_set_size(size_t cols, size_t rows)
 
 static rblist make_char_printable(int c)
 {
+  const char ctrls[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   c &= 0xff;
 
-  if (c == '\0')
-    return rblist_from_string("^@");
-  else if (c <= '\32')
-    return rblist_afmt("^%c", 'A' + c - 1);
+  if ((size_t)c < sizeof(ctrls))
+    return rblist_afmt("^%c", ctrls[c]);
+  else if (isprint(c))
+    return rblist_singleton(c); // FIXME: Won't work for double-width characters.
   else
     return rblist_afmt("\\%o", c);
 }
@@ -307,21 +308,18 @@ void term_print(rblist as)
 /*
  * Calculate the display width of a string in screen columns
  */
-static size_t string_display_width(rblist as)
+static size_t string_display_width(rblist rbl)
 {
-  size_t cols = 0, t = tab_width();
+  size_t col_count = 0, t = tab_width();
 
-  fprintf(stderr, "width ");
-  RBLIST_FOR(c, as)
+  RBLIST_FOR(c, rbl)
     if (c == '\t')
-      cols += t - (cols % t);
+      col_count += t - (col_count % t);
     else
-      cols += rblist_length(make_char_printable(c));
-    fprintf(stderr, "%d %d, !%d!", cols, c, rblist_length(make_char_printable('T')));
+      col_count += rblist_length(make_char_printable(c));
   RBLIST_END
-  fprintf(stderr, "\n");
 
-  return cols;
+  return col_count;
 }
 
 /*
@@ -340,7 +338,6 @@ static void calculate_start_column(void)
   size_t lp = buf->pt.o + 1, rpthirds = buf->pt.o / (win.ewidth / 3);
   size_t lastcol = 0, col = 0, lpthirds;
 
-  fprintf(stderr, "* %d\n", buf->pt.o);
   /* Move left one character at a time from point until we've gone far
      enough. */
   do {
@@ -348,12 +345,10 @@ static void calculate_start_column(void)
     lpthirds = lp / (win.ewidth / 3);
     lastcol = col;
     col = string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), lp, buf->pt.o));
-    fprintf(stderr, "%d %d %d %d\n", col, lpthirds, rpthirds, lp);
   } while (col < win.ewidth - 1 && lpthirds + 2 > rpthirds && lp != 0);
 
   point_start_character = lp;
   point_screen_column = lastcol;
-  fprintf(stderr, "%d %d\n", point_start_character, point_screen_column);
 }
 
 static void draw_border(void)
