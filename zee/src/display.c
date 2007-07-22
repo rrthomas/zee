@@ -1,6 +1,7 @@
 /* Terminal-independent display routines
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2003-2007 Reuben Thomas.
+   Copyright (c) 2007 Alistair Turnbull.
    All rights reserved.
 
    This file is part of Zee.

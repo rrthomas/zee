@@ -47,7 +47,7 @@
 
 #define COPYRIGHT_STRING \
   "Copyright (c) 2003-2007 Reuben Thomas <rrt@sc3d.org>\n"\
-  "Copyright (c) 2005-2006 Alistair Turbull <apt1002@mupsych.org>\n"\
+  "Copyright (c) 2005-2007 Alistair Turbull <apt1002@mupsych.org>\n"\
   "Copyright (c) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (c) 2004 David A. Capello <dacap@users.sourceforge.net>"
 
