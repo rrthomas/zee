@@ -268,7 +268,7 @@ static void draw_line(size_t row, size_t line)
     term_move(row, 0);
     term_addch('$');
   }
-  if (x >= term_width()) {
+  if (x >= start_column + term_width()) {
     term_move(row, win.ewidth - 1);
     term_addch('$');
   } else if (in_region(line, i, &r))
@@ -294,39 +294,43 @@ static size_t string_display_width(rblist rbl)
 }
 
 /*
- * Calculate the character to start drawing from in the current line.
- * We start from whichever is furthest away and still fits on the
- * screen out of:
+ * Calculate start_column (the horizontal scroll offset) and
+ * point_screen_column (the horizontal position of the cursor on the
+ * screen).
  *
- *  * a screen's width of text;
- *  * a number of characters greater than 2/3 the width of the screen,
- *    measured from the left edge (so we can normally move a third of
- *    the width of the screen before it scrolls again); or
- *  * the start of the line
+ * The start_column is always a multiple of a third of a screen width. It is
+ * chosen so as to put the cursor in the middle third, unless the cursor is near
+ * one or other end of the line, in which case it is chosen to show as much of
+ * the line as possible.
  */
-// FIXME: Rewrite.
 static void calculate_start_column(void)
 {
-  size_t lp = buf->pt.o + 1, rpthirds = buf->pt.o / (win.ewidth / 3);
-  size_t lastcol = 0, col = 0, lpthirds;
+  const size_t width = term_width(), third_width = max(1, width / 3);
+  
+  // Calculate absolute column of cursor and of end of line.
+  const rblist line = rblist_line(buf->lines, buf->pt.n);
+  const size_t x = string_display_width(rblist_sub(line, 0, buf->pt.o));
+  const size_t length = string_display_width(line);
+  
+  // Choose start_column.
+  if (x < third_width || length < width) {
+    // No-brainer cases: show left-hand end of line.
+    start_column = 0;
+  } else {
+    // Put cursor in the middle third.
+    start_column = x - (x % third_width) - third_width;
+    // But scroll left if the right-hand end of the line stays on the screen.
+    while (start_column + width >= length + third_width)
+      start_column -= third_width;
+  }
 
-  /* Move left one character at a time from point until we've gone far
-     enough. */
-  do {
-    lp--;
-    lpthirds = lp / (win.ewidth / 3);
-    lastcol = col;
-    col = string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), lp, buf->pt.o));
-  } while (col < win.ewidth - 1 && lpthirds + 2 > rpthirds && lp != 0);
-
-  start_column = lp;
-  point_screen_column = lastcol;
+  // Consequently, calculate screen-relative column.
+  point_screen_column = x - start_column;
 }
 
 /*
  * Draws the window.
  */
-// FIXME: Inline into term_display() and remove point_screen_column.
 static void draw_window(void)
 {
   // Find the first line to display on the first screen line.
