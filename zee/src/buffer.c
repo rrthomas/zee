@@ -102,7 +102,7 @@ bool calculate_the_region(Region *rp)
 }
 
 /*
- * Return a safe tab width for the given buffer.
+ * Return a safe tab width.
  */
 size_t tab_width(void)
 {
@@ -111,7 +111,7 @@ size_t tab_width(void)
 }
 
 /*
- * Return a safe indent width for the given buffer.
+ * Return a safe indent width.
  */
 size_t indent_width(void)
 {
