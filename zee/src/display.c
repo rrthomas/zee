@@ -174,21 +174,20 @@ static size_t outch_printable(int c, size_t x)
 }
 
 /*
- * Prints a printable representation of the character c on the screen in the
- * specified font at column x, and returns the new column. On exit, the font
- * is set to FONT_NORMAL.
+ * Prints a printable representation of the character `c' on the
+ * screen in font `font' at column `x', where the tab width is `tab',
+ * and returns the new column. On exit, the font is set to
+ * FONT_NORMAL.
  *
  * Printing is suppressed if x is less than start_column or at least
  * start_column + term_width().
  */
-static size_t outch(int c, Font font, size_t x)
+static size_t outch(int c, Font font, size_t x, size_t tab)
 {
-  size_t t = tab_width();
-
   term_attrset(1, font);
 
   if (c == '\t')
-    for (size_t w = t - (x % t); w > 0; w--)
+    for (size_t w = tab - (x % tab); w > 0; w--)
       x = outch_printable(' ', x);
   else if (isprint(c))
     x = outch_printable(c, x);
@@ -238,6 +237,7 @@ static void calculate_highlight_region(Region *r)
  * Prints a line on the terminal.
  *  - `row' is the line number on the terminal.
  *  - `line' is the line number within the buffer.
+ *  - `tab' is the display width of a tab character.
  *
  * This function reads the static variable start_column: the horizontal
  * scroll offset.
@@ -249,7 +249,7 @@ static void calculate_highlight_region(Region *r)
  * final position is within the highlight region then the remainder of
  * the line is also highlighted.
  */
-static void draw_line(size_t row, size_t line)
+static void draw_line(size_t row, size_t line, size_t tab)
 {
   Region r;
   calculate_highlight_region(&r);
@@ -260,7 +260,7 @@ static void draw_line(size_t row, size_t line)
     if (x >= start_column + term_width())
       break; // No point in printing the rest of the line.
     Font font = in_region(line, i, &r) ? FONT_REVERSE : FONT_NORMAL;
-    x = outch(c, font, x);
+    x = outch(c, font, x, tab);
     i++;
   RBLIST_END
 
@@ -273,7 +273,7 @@ static void draw_line(size_t row, size_t line)
     term_addch('$');
   } else if (in_region(line, i, &r))
     while (x < win.ewidth)
-      x = outch(' ', FONT_REVERSE, x);
+      x = outch(' ', FONT_REVERSE, x, tab);
 }
 
 /*
@@ -335,6 +335,7 @@ static void draw_window(void)
 {
   // Find the first line to display on the first screen line.
   size_t line = max(buf->pt.n - win.topdelta, 0);
+  size_t tab = tab_width();
 
   calculate_start_column();
 
@@ -343,7 +344,7 @@ static void draw_window(void)
     term_move(i, 0);
     term_clrtoeol();
     if (line < rblist_nl_count(buf->lines))
-      draw_line(i, line);
+      draw_line(i, line, tab);
   }
 }
 
