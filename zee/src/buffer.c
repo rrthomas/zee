@@ -111,7 +111,7 @@ size_t tab_width(void)
 }
 
 /*
- * Return a safe tab width for the given buffer.
+ * Return a safe indent width for the given buffer.
  */
 size_t indent_width(void)
 {
