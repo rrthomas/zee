@@ -63,6 +63,7 @@ END_DEF
 /*
  * Get the goal column. Take care of expanding tabulations.
  */
+// FIXME: Should use string_display_width().
 size_t get_goalc(void)
 {
   size_t col = 0, t = tab_width();
@@ -79,6 +80,7 @@ size_t get_goalc(void)
 /*
  * Go to column goalc. Take care of expanding tabulations
  */
+// FIXME: Should use string_display_width() or similar.
 static void goto_goalc(int goalc)
 {
   int i = 0, col = 0, t = tab_width();
