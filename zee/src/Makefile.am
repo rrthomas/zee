@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = vector astr rblist
-check_PROGRAMS = vector astr rblist
+TESTS = vector astr rblist rbacc
+check_PROGRAMS = vector astr rblist rbacc
 
 vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 vector_LDADD = zmalloc.o
@@ -11,6 +11,9 @@ astr_LDADD = zmalloc.o rblist.o
 
 rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 rblist_LDADD = zmalloc.o vector.o astr.o
+
+rbacc_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
@@ -48,6 +51,7 @@ zee_doc_SOURCES =				\
 zee_nondoc_SOURCES =			        \
 	rblist.c			        \
 	rblist.h			        \
+	rbacc.c			        	\
 	nonstd.h			        \
 	vector.c			        \
 	vector.h			        \

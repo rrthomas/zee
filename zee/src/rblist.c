@@ -1,4 +1,4 @@
-/* Randomly balanced lists.
+/* Randomly balanced lists of characters.
    Copyright (c) 2006-2007 Alistair Turnbull.
    Copyright (c) 2006-2007 Reuben Thomas.
    All rights reserved.
