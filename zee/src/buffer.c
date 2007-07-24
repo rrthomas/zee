@@ -48,8 +48,8 @@ void buffer_new(void)
 }
 
 /*
- * Print an error message into the echo area and return true
- * if the current buffer is readonly; otherwise return false.
+ * Print an error message in the minibuffer and return true
+ * if the buffer is read-only; otherwise return false.
  */
 bool warn_if_readonly_buffer(void)
 {
@@ -60,6 +60,10 @@ bool warn_if_readonly_buffer(void)
   return false;
 }
 
+/*
+ * Print an error message in the minibuffer and return true
+ * if the buffer has no mark; otherwise return false.
+ */
 bool warn_if_no_mark(void)
 {
   assert(buf->mark);
