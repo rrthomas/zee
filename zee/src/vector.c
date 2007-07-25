@@ -88,6 +88,9 @@ vector *vec_copy(vector *v)
 }
 
 
+/*************/
+// Test code
+
 #ifdef TEST
 
 #include <stdlib.h>
