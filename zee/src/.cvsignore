@@ -8,3 +8,4 @@ mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua
 zee.info texinfo.tex
 zeerc
 funcs.texi vars.texi opts.texi default_bindings.c
+gmon.out

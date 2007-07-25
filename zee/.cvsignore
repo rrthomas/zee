@@ -11,3 +11,4 @@ config.h.in
 Makefile
 Makefile.in
 zee*.tar.gz
+gmon.out
