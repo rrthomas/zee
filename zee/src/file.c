@@ -62,7 +62,7 @@ rblist file_read(rblist filename)
   if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
     return NULL;
   else {
-    rbacc rba = rbacc_file(rbacc_new(), fp);
+    rbacc rba = rbacc_add_file(rbacc_new(), fp);
     fclose(fp);
     return rbacc_to_rblist(rba);
   }

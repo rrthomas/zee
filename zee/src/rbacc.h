@@ -47,27 +47,27 @@ rbacc rbacc_new(void);
 /*
  * Appends a character to `rba', returning `rba'.
  */
-rbacc rbacc_char(rbacc rba, int c);
+rbacc rbacc_add_char(rbacc rba, int c);
 
 /*
  * Appends an rblist to `rba', returning `rba'.
  */
-rbacc rbacc_rblist(rbacc rba, rblist rbl);
+rbacc rbacc_add_rblist(rbacc rba, rblist rbl);
 
 /*
  * Appends an array of characters to `rba', returning `rba'.
  */
-rbacc rbacc_array(rbacc rba, const char *cs, size_t length);
+rbacc rbacc_add_array(rbacc rba, const char *cs, size_t length);
 
 /*
  * Appends a 0-terminated C string to `rba', returning `rba'.
  */
-rbacc rbacc_string(rbacc rba, const char *s);
+rbacc rbacc_add_string(rbacc rba, const char *s);
 
 /*
  * Appends the contents of a file to `rba' and returns `rba'.
  */
-rbacc rbacc_file(rbacc rba, FILE *fp);
+rbacc rbacc_add_file(rbacc rba, FILE *fp);
 
 /*
  * Returns the number of characters in `rba'.

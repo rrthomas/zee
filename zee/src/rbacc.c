@@ -74,7 +74,7 @@ rbacc rbacc_new(void)
 /*************/
 // Methods.
 
-rbacc rbacc_char(rbacc rba, int c)
+rbacc rbacc_add_char(rbacc rba, int c)
 {
   if (rba->used >= ACCUMULATOR_LENGTH)
     flush(rba);
@@ -83,7 +83,7 @@ rbacc rbacc_char(rbacc rba, int c)
   return rba;
 }
 
-rbacc rbacc_rblist(rbacc rba, rblist rbl)
+rbacc rbacc_add_rblist(rbacc rba, rblist rbl)
 {
   if (rba->used + rblist_length(rbl) > ACCUMULATOR_LENGTH)
     flush(rba);
@@ -99,7 +99,7 @@ rbacc rbacc_rblist(rbacc rba, rblist rbl)
   return rba;
 }
 
-rbacc rbacc_array(rbacc rba, const char *cs, size_t length)
+rbacc rbacc_add_array(rbacc rba, const char *cs, size_t length)
 {
   if (rba->used + length > ACCUMULATOR_LENGTH)
     flush(rba);
@@ -114,18 +114,18 @@ rbacc rbacc_array(rbacc rba, const char *cs, size_t length)
   return rba;
 }
 
-rbacc rbacc_string(rbacc rba, const char *s)
+rbacc rbacc_add_string(rbacc rba, const char *s)
 {
-  return rbacc_array(rba, s, strlen(s));
+  return rbacc_add_array(rba, s, strlen(s));
 }
 
-rbacc rbacc_file(rbacc rba, FILE *fp)
+rbacc rbacc_add_file(rbacc rba, FILE *fp)
 {
   int c;
 
   // FIXME: Read BUFSIZ bytes at a time
   while ((c = getc(fp)) != EOF)
-    rbacc_char(rba, c);
+    rbacc_add_char(rba, c);
 
   return rba;
 }

@@ -372,7 +372,7 @@ file, replacing the selection if any.\n\
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {
-        rblist out = rbacc_to_rblist(rbacc_file(rbacc_new(), pipe));
+        rblist out = rbacc_to_rblist(rbacc_add_file(rbacc_new(), pipe));
         pclose(pipe);
         remove(tempfile);
 
