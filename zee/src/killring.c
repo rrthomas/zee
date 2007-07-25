@@ -39,7 +39,7 @@ DEF(edit_kill_line,
 Delete the current line.\
 ")
 {
-  rblist as;
+  rblist rbl;
 
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();
@@ -54,7 +54,7 @@ Delete the current line.\
       killed_text = rblist_concat(killed_text,
                                   rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n),
                                              rblist_line_length(buf->lines, buf->pt.n)));
-      replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &as, NULL);
+      ok = replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &rbl, NULL);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -109,7 +109,7 @@ the text killed this time appends to the text killed last time.\
       assert(calculate_the_region(&r));
       if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
-      replace_nstring(r.size, NULL, NULL);
+      ok = replace_nstring(r.size, NULL, NULL);
     }
   }
 }
@@ -181,7 +181,7 @@ Set mark at beginning, and put point at end.\
     ok = false;
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
-    replace_nstring(0, NULL, killed_text);
+    ok = replace_nstring(0, NULL, killed_text);
     buf->flags &= ~BFLAG_ANCHORED;
   }
 }
