@@ -31,17 +31,6 @@
 #include "rblist.h"
 
 
-size_t astr_str(rblist haystack, size_t from, rblist needle)
-{
-  size_t pos;
-
-  for (pos = from; pos + rblist_length(needle) <= rblist_length(haystack); pos++)
-    if (!rblist_compare(rblist_sub(haystack, (size_t)pos, (size_t)pos + rblist_length(needle)), needle))
-      return pos;
-
-  return SIZE_MAX;
-}
-
 rblist astr_fread(FILE *fp)
 {
   int c;
@@ -106,12 +95,6 @@ int main(void)
   assert(rblist_compare(rblist_from_string("a"), rblist_from_string("abc")) == -1);
 
   assert(rblist_compare(rblist_from_string("abc"), rblist_from_string("a")) == 1);
-
-  assert(astr_str(rblist_from_string("rumblebumbleapplebombleboo"), 0, rblist_from_string("apple")) == 12);
-
-  assert(astr_str(rblist_from_string("rumblebumbleapple"), 0, rblist_from_string("apple")) == 12);
-
-  assert(astr_str(rblist_from_string("appleabumbleapplebombleboo"), 6, rblist_from_string("apple")) == 12);
 
   assert(fp = fopen(SRCPATH "astr.c", "r"));
   as1 = astr_fgets(fp);

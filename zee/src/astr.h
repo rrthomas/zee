@@ -29,11 +29,6 @@
 
 #include "rblist.h"
 
-/*
- * Find first occurrence of needle in haystack starting at position
- * pos; return -1 if no occurrence.
- */
-size_t astr_str(const rblist haystack, size_t pos, const rblist needle);
 
 /*
  * Read a file into an astr.
