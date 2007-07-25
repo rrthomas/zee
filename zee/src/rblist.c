@@ -44,7 +44,7 @@ static inline double random_double(void)
   return seed * (1.0 / (1.0 + (double)UINT32_MAX));
 }
 
-// Returns a random size_t in the range from 1 to 'n'.
+// Returns a random size_t in the range from 1 to `n'.
 static inline size_t random_one_to_n(size_t n)
 {
   return 1 + (size_t)(n * random_double());
@@ -161,11 +161,11 @@ static inline bool is_leaf(rblist rbl)
 /*
  * Used internally by rblist_concat.
  *
- * Splits 'rbl' into two halves and stores those halves in *left and
- * *right. If is_leaf(rbl), the split is made at position 'pos', which
+ * Splits `rbl' into two halves and stores those halves in *left and
+ * *right. If is_leaf(rbl), the split is made at position `pos', which
  * must be chosen from a uniform probability distribution over
  * 0 < pos < rbl->length. If !is_leaf(rbl), the split is made
- * in the same place that 'rbl' was split last time, i.e. the two halves
+ * in the same place that `rbl' was split last time, i.e. the two halves
  * are rbl->node.left and rbl->node.right.
  *
  * Either way, the split happens at a random position chosen from a
@@ -234,8 +234,8 @@ static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 }
 
 /*
- * Constructs an iterator that iterates over 'rbl' and then over all the
- * rblists in 'next'.
+ * Constructs an iterator that iterates over `rbl' and then over all the
+ * rblists in `next'.
  */
 static rblist_iterator make_iterator(rblist rbl, const struct link *next)
 {
@@ -402,12 +402,12 @@ rblist rblist_fmt(const char *format, ...)
   int x;
   size_t i;
   while (1) {
-    // Skip to next '%' or to end of string.
+    // Skip to next `%' or to end of string.
     for (i = 0; format[i] && format[i] != '%'; i++);
     ret = rblist_concat(ret, rblist_from_array(format, i));
     if (!format[i++])
       break;
-    // We've found a '%'.
+    // We've found a `%'.
     switch (format[i++]) {
       case 'c':
         ret = rblist_append(ret, (char)va_arg(ap, int));
@@ -644,7 +644,7 @@ static rblist rbl_structure(rblist rbl)
     return rblist_fmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
 }
 
-// Checks all structural invariants that are supposed to hold for 'rbl'.
+// Checks all structural invariants that are supposed to hold for `rbl'.
 static void assert_invariants(rblist rbl) {
   if (is_leaf(rbl)) {
     assert((rbl->leaf.length == 0) == (rbl == rblist_empty));
@@ -664,7 +664,7 @@ static void assert_invariants(rblist rbl) {
 /*
  * Passes `rbl' to assert_invariants. Checks that its length is `length'.
  * If `s' is not NULL, checks that the elements returned by an iterator
- * over 'rbl' match the corresponding elements of `s', and also that
+ * over `rbl' match the corresponding elements of `s', and also that
  * rblist_to_string works. Checks that the numbers of elements and
  * newline characters returned by the iterator match respectively the
  * length and nl_count of `rbl'. Checks that the characters returned by
@@ -732,7 +732,7 @@ int main(void)
   printf("%s\n", rblist_to_string(rbl_structure(rbl1)));
 #endif
 
-  /* Test split and stress concat some more. Break 's1' at positions
+  /* Test split and stress concat some more. Break `s1' at positions
    * 0, 19, 19*2, ..., 19*7 and for each position check that we can
    * put it back together again. */
 

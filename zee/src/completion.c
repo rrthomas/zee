@@ -180,8 +180,8 @@ static size_t last_occurrence(rblist rbl, size_t before_pos, int c)
 }
 
 /*
- * If two or more 'cp->matches' have a common prefix that is longer than
- * 'cp->match' and ends in '_', replaces them with the longest such prefix.
+ * If two or more `cp->matches' have a common prefix that is longer than
+ * `cp->match' and ends in `_', replaces them with the longest such prefix.
  * Repeats as often as possible.
  */
 void completion_remove_suffix(Completion *cp)
@@ -204,8 +204,8 @@ void completion_remove_suffix(Completion *cp)
 }
 
 /*
- * Finds the longest prefix of 'search' that ends in an underscore, and removes
- * it from all 'cp->matches'. Does nothing if there is no such prefix.
+ * Finds the longest prefix of `search' that ends in an underscore, and removes
+ * it from all `cp->matches'. Does nothing if there is no such prefix.
  * Returns the length of the removed prefix.
  */
 size_t completion_remove_prefix(Completion *cp, rblist search)

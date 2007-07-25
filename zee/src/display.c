@@ -163,8 +163,8 @@ static rblist make_char_printable(int c)
 
 /*
  * Prints character c (which must be printable and single-width) provided
- * the column x is visible (i.e. at least 'start_col and less than term_width())
- * and returns the next column to the right.
+ * the column x is visible (i.e. at least `start_column' and less than
+ * term_width()) and returns the next column to the right.
  */
 static size_t outch_printable(int c, size_t x)
 {
@@ -217,8 +217,8 @@ static bool in_region(size_t line, size_t x, Region *r)
 }
 
 /*
- * Sets 'r->start' to the lesser of the point and mark,
- * and sets 'r->end' to the greater. If the mark is not anchored, it
+ * Sets `r->start' to the lesser of the point and mark,
+ * and sets `r->end' to the greater. If the mark is not anchored, it
  * is treated as if it were at the point.
  */
 static void calculate_highlight_region(Region *r)
@@ -243,8 +243,8 @@ static void calculate_highlight_region(Region *r)
  * scroll offset.
  *
  * If any part of the line is off the left-hand side of the screen,
- * prints a '$' character in the left-hand column. If any part is off
- * the right, prints a '$' character in the right-hand column. Any
+ * prints a `$' character in the left-hand column. If any part is off
+ * the right, prints a `$' character in the right-hand column. Any
  * part that is within the highlight region is highlighted. If the
  * final position is within the highlight region then the remainder of
  * the line is also highlighted.
