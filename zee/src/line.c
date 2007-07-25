@@ -346,26 +346,33 @@ Insert a newline, wrapping if in Wrap mode.\
 }
 END_DEF
 
-// FIXME: Documentation missing.
-bool replace_nstring(size_t size, rblist *as, rblist bs)
+/*
+ * Replace `size' characters at point with the string `repl'.
+ * If `ret' is non-NULL, return the characters replaced in it.
+ * Return `true' if the replacement is performed without incident, or
+ * `false' if the buffer is read-only or if there are fewer than
+ * `size' characters after point (in which case nothing is inserted).
+ * FIXME: Check the contract by looking at the callers.
+ */
+bool replace_nstring(size_t size, rblist *ret, rblist repl)
 {
   if (warn_if_readonly_buffer())
     return false;
 
-  if (size || (bs && rblist_length(bs)))
-    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, bs ? rblist_length(bs) : 0);
+  if (size || (repl && rblist_length(repl)))
+    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, repl ? rblist_length(repl) : 0);
 
   if (size) {
-    if (as)
-      *as = rblist_empty;
+    if (ret)
+      *ret = rblist_empty;
     buf->flags &= ~BFLAG_ANCHORED;
 
     while (size--) {
-      if (as) {
+      if (ret) {
         if (!eolp())
-          *as = rblist_append(*as, following_char());
+          *ret = rblist_append(*ret, following_char());
         else
-          *as = rblist_append(*as, '\n');
+          *ret = rblist_append(*ret, '\n');
       }
 
       if (eobp()) {
@@ -385,13 +392,13 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
   }
 
   // Insert string.
-  if (bs && rblist_length(bs)) {
-    buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), bs),
+  if (repl && rblist_length(repl)) {
+    buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), repl),
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
     thisflag |= FLAG_NEED_RESYNC;
-    adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(bs));
-    for (size_t i = 0; i < rblist_nl_count(bs); i++)
+    adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(repl));
+    for (size_t i = 0; i < rblist_nl_count(repl); i++)
       CMDCALL(move_next_character);
   }
 
