@@ -1,13 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = vector astr rblist rbacc
-check_PROGRAMS = vector astr rblist rbacc
+TESTS = vector rblist rbacc
+check_PROGRAMS = vector rblist rbacc
 
 vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 vector_LDADD = zmalloc.o
-
-astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-astr_LDADD = zmalloc.o rblist.o
 
 rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 rblist_LDADD = zmalloc.o vector.o astr.o
@@ -52,13 +49,12 @@ zee_nondoc_SOURCES =			        \
 	rblist.c			        \
 	rblist.h			        \
 	rbacc.c			        	\
+	rbacc.h					\
 	nonstd.h			        \
 	vector.c			        \
 	vector.h			        \
 	list.c				        \
 	list.h				        \
-	astr.c				        \
-	astr.h				        \
 	zmalloc.h			        \
 	zmalloc.c			        \
 	term.h				        \

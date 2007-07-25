@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "main.h"
+#include "rbacc.h"
 #include "term.h"
 #include "extern.h"
 
@@ -61,9 +62,10 @@ rblist file_read(rblist filename)
   if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
     return NULL;
   else {
-    rblist as = astr_fread(fp);
+    rbacc rba = rbacc_new();
+    rbacc_file(rba, fp);
     fclose(fp);
-    return as;
+    return rbacc_to_rblist(rba);
   }
 }
 

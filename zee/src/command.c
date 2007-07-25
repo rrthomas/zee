@@ -20,6 +20,7 @@
    02111-1301, USA.  */
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "config.h"
 #include "main.h"

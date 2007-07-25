@@ -20,6 +20,11 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+
+#include <stddef.h>
+#include <unistd.h>
+
+
 // basic.c ----------------------------------------------------------------
 size_t get_goalc(void);
 int goto_line(size_t to_line);

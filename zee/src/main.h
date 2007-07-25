@@ -32,7 +32,8 @@
 #include "zmalloc.h"
 #include "vector.h"
 #include "list.h"
-#include "astr.h"
+#include "rblist.h"
+
 
 /*--------------------------------------------------------------------------
  * Main editor structures.

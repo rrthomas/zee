@@ -27,9 +27,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <signal.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include "main.h"
+#include "rbacc.h"
 #include "extern.h"
 
 
@@ -378,10 +380,8 @@ file, replacing the selection if any.\n\
       } else {
         rblist out = rblist_empty, s;
 
-        while (rblist_length(s = astr_fgets(pipe)) > 0) {
-          out = rblist_concat(out, s);
-          out = rblist_concat(out, rblist_from_string("\n"));
-        }
+        while (rblist_length(s = rbacc_to_rblist(rbacc_file_line(rbacc_new(), pipe))) > 0)
+          out = rblist_concat(out, rblist_concat(s, rblist_singleton('\n')));
         pclose(pipe);
         remove(tempfile);
 

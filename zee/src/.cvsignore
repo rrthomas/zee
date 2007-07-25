@@ -3,7 +3,7 @@ Makefile
 Makefile.in
 zee
 paths.h tbl_funcs.h
-vector astr rblist
+vector rblist rbacc
 mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua
 zee.info texinfo.tex
 zeerc

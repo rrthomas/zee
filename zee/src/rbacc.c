@@ -1,5 +1,6 @@
 /* Character buffers optimised for repeated append.
    Copyright (c) 2007 Alistair Turnbull.
+   Copyright (c) 2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -20,23 +21,15 @@
    02111-1301, USA.  */
 
 #include <assert.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "zmalloc.h"
 #include "rblist.h"
+#include "rbacc.h"
 
-
-/*
- * The type of character buffers. This is a pointer type. The structure it
- * points to is opaque. The structure is modified in place when characters
- * are appended to the buffer, and it should therefore not be shared
- * without due care. If you want to share the data in an rbacc, your best
- * bet is to convert it to an rblist using rbacc_get.
- */
-typedef struct rbacc *rbacc;
 
 /*
  * Tuning parameter which controls memory/CPU compromise.
@@ -52,6 +45,7 @@ struct rbacc {
   char tail[ACCUMULATOR_LENGTH];
 };
 
+
 /*****************************/
 // Static utility functions.
 
@@ -64,34 +58,32 @@ static void flush(rbacc rba)
   rba->used = 0;
 }
 
-/***************/
-// Public API.
 
-/*
- * Makes a new, empty rbacc.
- */
+/**************************/
+// Constructor.
+
 rbacc rbacc_new(void)
 {
-  rbacc ret = zmalloc(sizeof(struct rbacc));
-  ret->head = rblist_empty;
-  ret->used = 0;
-  return ret;
+  rbacc rba = zmalloc(sizeof(struct rbacc));
+  rba->head = rblist_empty;
+  rba->used = 0;
+  return rba;
 }
 
-/*
- * Appends a character to an rbacc.
- */
-void rbacc_char(rbacc rba, int c)
+
+/*************/
+// Methods.
+
+rbacc rbacc_char(rbacc rba, int c)
 {
   if (rba->used >= ACCUMULATOR_LENGTH)
     flush(rba);
   rba->tail[rba->used++] = (char)c;
+
+  return rba;
 }
 
-/*
- * Appends an rblist to an rbacc.
- */
-void rbacc_rblist(rbacc rba, rblist rbl)
+rbacc rbacc_rblist(rbacc rba, rblist rbl)
 {
   if (rba->used + rblist_length(rbl) > ACCUMULATOR_LENGTH)
     flush(rba);
@@ -103,12 +95,11 @@ void rbacc_rblist(rbacc rba, rblist rbl)
     assert(rba->used == 0);
     rba->head = rblist_concat(rba->head, rbl);
   }
+
+  return rba;
 }
 
-/*
- * Appends an array of characters to an rbacc.
- */
-void rbacc_array(rbacc rba, const char *cs, size_t length)
+rbacc rbacc_array(rbacc rba, const char *cs, size_t length)
 {
   if (rba->used + length > ACCUMULATOR_LENGTH)
     flush(rba);
@@ -119,31 +110,48 @@ void rbacc_array(rbacc rba, const char *cs, size_t length)
     assert(rba->used == 0);
     rba->head = rblist_concat(rba->head, rblist_from_array(cs, length));
   }
+
+  return rba;
 }
 
-/*
- * Appends a 0-terminated C string to an rbacc.
- */
-void rbacc_string(rbacc rba, const char *s)
+rbacc rbacc_string(rbacc rba, const char *s)
 {
-  rbacc_array(rba, s, strlen(s));
+  return rbacc_array(rba, s, strlen(s));
 }
 
-/*
- * Returns the number of characters in an rbacc.
- */
+rbacc rbacc_file(rbacc rba, FILE *fp)
+{
+  int c;
+
+  // FIXME: Read BUFSIZ bytes at a time
+  while ((c = getc(fp)) != EOF)
+    rbacc_char(rba, c);
+
+  return rba;
+}
+
+rbacc rbacc_file_line(rbacc rba, FILE *fp)
+{
+  int c;
+
+  if (feof(fp))
+    return NULL;
+
+  while ((c = getc(fp)) != EOF && c != '\n')
+    rbacc_char(rba, c);
+
+  return rba;
+}
+
 size_t rbacc_length(rbacc rba)
 {
   return rblist_length(rba->head) + rba->used;
 }
 
-/*
- * Returns the contents of an rbacc as an rblist. The returned rblist is
- * independent of the rbacc, so you can later append more to the rbacc
- * if you want.
+/* 
+ * This function serves as a definition of the contents of an rbacc.
  */
-// This function also serves as a definition of the contents of an rbacc.
-rblist rbacc_get(rbacc rba)
+rblist rbacc_to_rblist(rbacc rba)
 {
   flush(rba);
   return rba->head;
@@ -191,6 +199,7 @@ int main(void)
   const char *s1 = "Hello, world!";
   const char *s2 = "Hello, very very very very very very very very big world!";
   const rblist rbl1 = rblist_from_string(s1), rbl2 = rblist_from_string(s2);
+  FILE *fp;
   
   // Basic functionality tests.
   rba = rbacc_new();
@@ -205,7 +214,7 @@ int main(void)
   flush(rba);
   test(rba, "xyfoo", 5);
   assert(rba->used==0);
-  assert(!rblist_compare(rbacc_get(rba), rblist_from_string("xyfoo")));
+  assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("xyfoo")));
   
   // Test various ways of appending `s1'.
   rba = rbacc_new();
@@ -252,6 +261,15 @@ int main(void)
     rbacc_rblist(rba, rbl2);
     assert(rbacc_length(rba) == i * strlen(s2));
   }
+
+  // rbacc_file_line
+  assert(fp = fopen(SRCPATH "rbacc.c", "r"));
+  rba = rbacc_new();
+  rbacc_file_line(rba, fp);
+  assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("/* Character buffers optimised for repeated append.")));
+  assert(fclose(fp) == 0);
+
+  return EXIT_SUCCESS;
 }
 
 #endif // TEST
