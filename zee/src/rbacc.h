@@ -65,6 +65,17 @@ rbacc rbacc_array(rbacc rba, const char *cs, size_t length);
 rbacc rbacc_string(rbacc rba, const char *s);
 
 /*
+ * Read a file into an rbacc.
+ */
+rbacc rbacc_file(rbacc rba, FILE *fp);
+
+/*
+ * Append a line from the stream `fp', excluding any trailing newline,
+ * and return the rbacc.
+ */
+rbacc rbacc_file_line(rbacc rba, FILE *fp);
+
+/*
  * Returns the number of characters in `rba'.
  */
 size_t rbacc_length(rbacc rba);
@@ -73,15 +84,3 @@ size_t rbacc_length(rbacc rba);
  * Returns the contents of `rba' as an rblist.
  */
 rblist rbacc_to_rblist(rbacc rba);
-
-/*
- * Read a file into an rbacc.
- */
-rbacc rbacc_file(rbacc rba, FILE *fp);
-
-/*
- * Append a line from the stream `fp', excluding any trailing newline,
- * and return the rbacc, or just return NULL if the stream is already at
- * EOF.
- */
-rbacc rbacc_file_line(rbacc rba, FILE *fp);

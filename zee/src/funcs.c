@@ -373,10 +373,10 @@ file, replacing the selection if any.\n\
         minibuf_error(rblist_from_string("Cannot open pipe to process"));
         ok = false;
       } else {
-        rblist out = rblist_empty, s;
+        rblist out = rblist_empty;
 
-        while ((s = rbacc_to_rblist(rbacc_file_line(rbacc_new(), pipe))))
-          out = rblist_concat(out, rblist_concat(s, rblist_singleton('\n')));
+        while (!feof(pipe))
+          out = rblist_concat(out, rblist_concat(rbacc_to_rblist(rbacc_file_line(rbacc_new(), pipe)), rblist_singleton('\n')));
         pclose(pipe);
         remove(tempfile);
 

@@ -134,9 +134,6 @@ rbacc rbacc_file_line(rbacc rba, FILE *fp)
 {
   int c;
 
-  if (feof(fp))
-    return NULL;
-
   while ((c = getc(fp)) != EOF && c != '\n')
     rbacc_char(rba, c);
 
