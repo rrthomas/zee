@@ -102,15 +102,6 @@ rblist rblist_append(rblist rbl, int c);
 rblist rblist_from_string(const char *s);
 
 /*
- * Replaces a character in the specified rblist at the given position.
- * `pos' must be in the range 0 to rblist_length(rbl) - 1. Result is
- * returned as a fresh rblist; the original is not modified.
- *
- * Takes time O(log(n)), where `n' is the length of the list.
- */
-rblist rblist_set(rblist rbl, size_t pos, int c);
-
-/*
  * Format text into an rblist.
  */
 rblist rblist_fmt(const char *fmt, ...);

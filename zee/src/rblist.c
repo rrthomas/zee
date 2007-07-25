@@ -352,13 +352,6 @@ rblist rblist_from_string(const char *s)
   return rblist_from_array(s, strlen(s));
 }
 
-rblist rblist_set(rblist rbl, size_t pos, int c)
-{
-  rblist left, right;
-  rblist_split(rbl, pos, &left, &right);
-  return rblist_concat(rblist_append(left, c), rblist_sub(right, 1, rblist_length(right)));
-}
-
 /*
  * Used internally by rblist_fmt. Formats an unsigned number in any
  * base up to 16. If the result has more than 64 digits, higher
