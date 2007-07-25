@@ -111,7 +111,7 @@ When selecting text, move the cursor to the other end of the selection.\
 }
 END_DEF
 
-static int quoted_insert_octal(int c1)
+static void quoted_insert_octal(int c1)
 {
   int c2, c3;
   minibuf_write(rblist_fmt("Insert octal character %d-", c1 - '0'));
@@ -120,21 +120,16 @@ static int quoted_insert_octal(int c1)
   if (!isdigit(c2) || c2 - '0' >= 8) {
     insert_char(c1 - '0');
     insert_char(c2);
-    return true;
+  } else {
+    minibuf_write(rblist_fmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
+    c3 = getkey();
+    
+    if (!isdigit(c3) || c3 - '0' >= 8) {
+      insert_char((c1 - '0') * 8 + (c2 - '0'));
+      insert_char(c3);
+    } else
+      insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
   }
-
-  minibuf_write(rblist_fmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
-  c3 = getkey();
-
-  if (!isdigit(c3) || c3 - '0' >= 8) {
-    insert_char((c1 - '0') * 8 + (c2 - '0'));
-    insert_char(c3);
-    return true;
-  }
-
-  insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
-
-  return true;
 }
 
 DEF(edit_insert_quoted,

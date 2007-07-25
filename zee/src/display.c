@@ -369,7 +369,7 @@ static void draw_border(void)
 
 static void draw_status_line(size_t line)
 {
-  int someflag = 0;
+  bool someflag;
 
   term_move(line, 0);
   draw_border();
@@ -391,13 +391,13 @@ static void draw_status_line(size_t line)
   term_print(rblist_from_string("-("));
   if (buf->flags & BFLAG_AUTOFILL) {
     term_print(rblist_from_string("Fill"));
-    someflag = 1;
+    someflag = true;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
     if (someflag)
       term_print(rblist_from_string(" "));
     term_print(rblist_from_string("Def"));
-    someflag = 1;
+    someflag = true;
   }
   if (buf->flags & BFLAG_ISEARCH) {
     if (someflag)
@@ -503,7 +503,7 @@ void resize_window(void)
       --hdelta;
     }
   } else { // Decrease window height.
-    int decreased = true;
+    bool decreased = true;
     while (decreased) {
       decreased = false;
       while (hdelta < 0) {

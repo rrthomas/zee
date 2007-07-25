@@ -364,7 +364,7 @@ rblist rblist_set(rblist rbl, size_t pos, int c)
  * base up to 16. If the result has more than 64 digits, higher
  * digits are discarded.
  */
-static rblist fmt_number(size_t x, int base)
+static rblist fmt_number(size_t x, unsigned base)
 {
   static const char const *digits = "0123456789abcdef";
   #define MAX_DIGITS 64

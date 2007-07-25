@@ -37,7 +37,7 @@
 
 static const char *find_err;
 
-static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward)
+static size_t find_substr(rblist as1, rblist as2, bool bol, bool eol, bool backward)
 {
   pcre *pattern;
   size_t ret = SIZE_MAX;
@@ -75,7 +75,7 @@ static size_t find_substr(rblist as1, rblist as2, int bol, int eol, int backward
   return ret;
 }
 
-static int search_forward(Point start, rblist as)
+static bool search_forward(Point start, rblist as)
 {
   if (rblist_length(as) > 0) {
     // FIXME: BOL should not always be true!
@@ -92,7 +92,7 @@ static int search_forward(Point start, rblist as)
   return false;
 }
 
-static int search_backward(Point start, rblist as)
+static bool search_backward(Point start, rblist as)
 {
   if (rblist_length(as) > 0) {
     // FIXME: EOL should not always be true!
@@ -122,7 +122,7 @@ static rblist last_search = NULL;
  * would be better.
  * The proposed meaning of ESC obviates the current behaviour of RET.
  */
-static int isearch(int dir)
+static bool isearch(int dir)
 {
   assert(buf->mark);
   Marker *old_mark = marker_new(buf->mark->pt);
@@ -132,7 +132,7 @@ static int isearch(int dir)
 
   buf->flags |= BFLAG_ISEARCH;
 
-  int last = true;
+  bool last = true;
   rblist pattern = rblist_empty;
   for (;;) {
     // Make the minibuf message.

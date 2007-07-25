@@ -27,8 +27,8 @@
 
 // basic.c ----------------------------------------------------------------
 size_t get_goalc(void);
-int goto_line(size_t to_line);
-int goto_point(Point pt);
+bool goto_line(size_t to_line);
+bool goto_point(Point pt);
 
 // bind.c -----------------------------------------------------------------
 void bind_key(size_t key, Command func);

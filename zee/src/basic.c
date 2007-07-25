@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <limits.h>
 
 #include "main.h"
@@ -30,7 +31,7 @@
 
 /* Goal column to arrive at when `move_down/up_line'
    commands are used. */
-static int cur_goalc;
+static size_t cur_goalc;
 
 DEF(move_start_line,
 "\
@@ -56,7 +57,7 @@ Move the cursor to the end of the line.\
   /* Change the `goalc' to the end of line for next
      `edit-navigate-next/previous-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
-  cur_goalc = INT_MAX;
+  cur_goalc = SIZE_MAX;
 }
 END_DEF
 
@@ -81,9 +82,9 @@ size_t get_goalc(void)
  * Go to column goalc. Take care of expanding tabulations
  */
 // FIXME: Should use string_display_width() or similar.
-static void goto_goalc(int goalc)
+static void goto_goalc(size_t goalc)
 {
-  int i = 0, col = 0, t = tab_width();
+  size_t i = 0, col = 0, t = tab_width();
 
   RBLIST_FOR(c, rblist_line(buf->lines, buf->pt.n))
     if (col == goalc)
@@ -168,9 +169,9 @@ END_DEF
 /*
  * Go to the given point.
  */
-int goto_point(Point pt)
+bool goto_point(Point pt)
 {
-  int ok = goto_line(pt.n);
+  bool ok = goto_line(pt.n);
   if (ok)
     ok = CMDCALL_UINT(edit_goto_column, pt.o);
   return ok;
@@ -180,9 +181,9 @@ int goto_point(Point pt)
  * Go to the line `to_line', counting from 0. Point will end up in a
  * "random" column.
  */
-int goto_line(size_t to_line)
+bool goto_line(size_t to_line)
 {
-  int ok = true;
+  bool ok = true;
 
   if (buf->pt.n > to_line)
     do

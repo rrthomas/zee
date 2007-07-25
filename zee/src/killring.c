@@ -73,7 +73,7 @@ END_DEF
 
 /* Copy selection to the kill buffer, appending if the last command
    was also a kill. */
-static int copy_selection(void)
+static bool copy_selection(void)
 {
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();

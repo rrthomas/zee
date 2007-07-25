@@ -65,17 +65,13 @@ Marker *point_marker(void)
   return marker_new(buf->pt);
 }
 
-// FIXME: offset should be > size_t
-static void adjust_markers(size_t line, size_t pointo, int dir, int offset)
+static void adjust_markers(size_t line, size_t pointo, ssize_t offset)
 {
   Marker *m = point_marker(), *marker;
 
   for (marker = buf->markers; marker; marker = marker->next)
-    if (marker->pt.n == line && (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
-      marker->pt.o -= pointo * dir - offset;
-      marker->pt.n += dir;
-    } else if (marker->pt.n > buf->pt.n)
-      marker->pt.n += dir;
+    if (marker->pt.n == line && (marker->pt.o >= pointo + (offset < 0)))
+      marker->pt.o += offset;
 
   buf->pt = m->pt;
   remove_marker(m);
@@ -202,8 +198,8 @@ Indent to next multiple of `indent_width'.\
   if (warn_if_readonly_buffer())
     ok = false;
   else {
-    int c = get_goalc();
-    int t = indent_width();
+    size_t c = get_goalc();
+    size_t t = indent_width();
 
     for (c = t - c % t; c > 0; c--)
       insert_char(' ');
@@ -216,7 +212,7 @@ END_DEF
  * Returns 2 if it is all upper case, 1 if the first character is
  * upper case, or 0 otherwise.
  */
-static int check_case(rblist as)
+static unsigned check_case(rblist as)
 {
   if (!isupper(rblist_get(as, 0)))
     return 0;
@@ -234,7 +230,8 @@ static int check_case(rblist as)
  */
 static rblist recase(rblist str, rblist tmpl)
 {
-  int tmpl_case = check_case(tmpl), c;
+  int c;
+  unsigned tmpl_case = check_case(tmpl);
   rblist ret = rblist_empty;
 
   assert(rblist_length(str) > 0);
@@ -382,7 +379,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
       buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
                                  rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
                                                           rblist_length(buf->lines)));
-      adjust_markers(buf->pt.n, buf->pt.o, 0, -1);
+      adjust_markers(buf->pt.n, buf->pt.o, -1);
       buf->flags |= BFLAG_MODIFIED;
     }
   }
@@ -393,8 +390,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs)
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
     thisflag |= FLAG_NEED_RESYNC;
-    // FIXME: int below should be > size_t
-    adjust_markers(buf->pt.n, buf->pt.o, 0, (int)rblist_length(bs));
+    adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(bs));
     for (size_t i = 0; i < rblist_nl_count(bs); i++)
       CMDCALL(move_next_character);
   }
@@ -551,16 +547,14 @@ no indenting is performed.\
     buf->flags &= ~BFLAG_ANCHORED;
 
     if ((ok = insert_char('\n'))) {
-      int indent;
-      size_t pos;
       Marker *old_point = point_marker();
 
       undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
       // Check where last non-blank goalc is.
       previous_nonblank_goalc();
-      pos = get_goalc();
-      indent = pos > 0 || (!eolp() && isspace(following_char()));
+      size_t pos = get_goalc();
+      bool indent = pos > 0 || (!eolp() && isspace(following_char()));
       buf->pt = old_point->pt;
       remove_marker(old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and
