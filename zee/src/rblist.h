@@ -51,6 +51,7 @@ typedef const union rblist *rblist;
  */
 typedef struct rblist_iterator *rblist_iterator;
 
+
 /***************************/
 // Primitive constructors.
 
@@ -83,6 +84,7 @@ rblist rblist_singleton(int c);
  */
 rblist rblist_concat(rblist left, rblist right);
 
+
 /*************************/
 // Derived constructors.
 
@@ -112,6 +114,7 @@ rblist rblist_set(rblist rbl, size_t pos, int c);
  * Format text into an rblist.
  */
 rblist rblist_fmt(const char *fmt, ...);
+
 
 /**************************/
 // Primitive destructors.
@@ -290,4 +293,4 @@ int rblist_compare(rblist left, rblist right);
  */
 int rblist_ncompare(rblist left, rblist right, size_t n);
 
-#endif
+#endif // !RBLIST_H
