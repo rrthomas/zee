@@ -130,28 +130,24 @@ rblist chordtostr(size_t key)
 }
 
 /*
- * Convert a key name to its key code
+ * Find a key name as a prefix of `rbl', returning its keycode, and
+ * the number of characters consumed in `*len'.
  */
-// FIXME: This seems to match any entry 'i' where 'name' is a prefix of
-// 'keyname[i]' or vice-versa.
-// Matching when 'keyname[i]' is a prefix of 'name' is intended, but matching
-// when 'name' is a prefix of 'keyname[i]' is not. (Intention inferred from
-// the sole caller which is strtochord below). Therefore there are actually
-// two bugs here: one in the code and one in the comment.
-static size_t strtokey(rblist name, size_t *len)
+static size_t strtokey(rblist rbl, size_t *len)
 {
   size_t i;
 
   for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++) {
     size_t keylen = strlen(keyname[i]);
-    if (strncmp(rblist_to_string(name), keyname[i], min(keylen, rblist_length(name))) == 0) {
+    if (rblist_length(rbl) >= keylen &&
+        strncmp(rblist_to_string(rbl), keyname[i], min(keylen, rblist_length(rbl))) == 0) {
       *len = keylen;
       return keycode[i];
     }
   }
 
   *len = 1;
-  return (size_t)rblist_get(name, 0);
+  return (size_t)rblist_get(rbl, 0);
 }
 
 /*
