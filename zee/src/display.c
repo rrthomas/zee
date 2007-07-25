@@ -46,8 +46,8 @@ void resync_display(void)
       win.topdelta = win.eheight / 2;
     else
       win.topdelta = buf->pt.n;
+    lastpointn = buf->pt.n;
   }
-  lastpointn = buf->pt.n;
 }
 
 DEF(recenter,

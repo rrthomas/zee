@@ -380,9 +380,6 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
         return false;
       }
 
-      if (eolp())
-        thisflag |= FLAG_NEED_RESYNC;
-
       buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
                                  rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
                                                           rblist_length(buf->lines)));
@@ -396,7 +393,6 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
     buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), repl),
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
-    thisflag |= FLAG_NEED_RESYNC;
     adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(repl));
     for (size_t i = 0; i < rblist_nl_count(repl); i++)
       CMDCALL(move_next_character);

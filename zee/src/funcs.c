@@ -107,7 +107,6 @@ When selecting text, move the cursor to the other end of the selection.\
   assert(buf->mark);
   swap_point(&buf->pt, &buf->mark->pt);
   buf->flags |= BFLAG_ANCHORED;
-  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEF
 

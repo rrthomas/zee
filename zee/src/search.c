@@ -152,7 +152,6 @@ static bool isearch(int dir)
     int c = getkey();
     if (c == (KBD_CTRL | 'g')) {
       buf->pt = start;
-      thisflag |= FLAG_NEED_RESYNC;
       CMDCALL(edit_select_off);
 
       // Restore old mark position.
@@ -168,7 +167,6 @@ static bool isearch(int dir)
       if (rblist_length(pattern) > 0) {
         pattern = rblist_sub(pattern, 0, rblist_length(pattern) - 1);
         buf->pt = start;
-        thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
     } else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
@@ -206,8 +204,7 @@ static bool isearch(int dir)
     } else
       last = true;
 
-    if (thisflag & FLAG_NEED_RESYNC)
-      resync_display();
+    resync_display();
   }
 
   // done

@@ -61,9 +61,7 @@ static void run(void)
   for (;
        !(thisflag & FLAG_QUIT);
        lastflag = thisflag) {
-    // FIXME: Is there ever a reason not to resync_display()?
-    if (lastflag & FLAG_NEED_RESYNC)
-      resync_display();
+    resync_display();
     term_display();
     term_refresh();
 

@@ -112,7 +112,7 @@ column, or at the end of the line if it is not long enough.\
   if (buf->pt.n == 0)
     ok = false;
   else {
-    thisflag |= FLAG_NEED_RESYNC | FLAG_DONE_CPCN;
+    thisflag |= FLAG_DONE_CPCN;
 
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
@@ -135,7 +135,7 @@ column, or at the end of the line if it is not long enough.\
   if (buf->pt.n == rblist_nl_count(buf->lines) - 1)
     ok = false;
   else {
-    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+    thisflag |= FLAG_DONE_CPCN;
 
     if (!(lastflag & FLAG_DONE_CPCN))
       cur_goalc = get_goalc();
@@ -217,7 +217,7 @@ Move the cursor to the beginning of the file.\
 ")
 {
   buf->pt = point_min(buf);
-  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  thisflag |= FLAG_DONE_CPCN;
 }
 END_DEF
 
@@ -227,7 +227,7 @@ Move the cursor to the end of the file.\
 ")
 {
   buf->pt = point_max(buf);
-  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  thisflag |= FLAG_DONE_CPCN;
 }
 END_DEF
 
@@ -239,7 +239,6 @@ Move the cursor left one character.\
   if (!bolp())
     buf->pt.o--;
   else if (!bobp()) {
-    thisflag |= FLAG_NEED_RESYNC;
     buf->pt.n--;
     CMDCALL(move_end_line);
   } else
@@ -255,7 +254,6 @@ Move the cursor right one character.\
   if (!eolp())
     buf->pt.o++;
   else if (!eobp()) {
-    thisflag |= FLAG_NEED_RESYNC;
     buf->pt.n++;
     CMDCALL(move_start_line);
   } else

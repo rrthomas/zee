@@ -78,8 +78,6 @@ void file_open(rblist filename)
   buffer_new();
   buf->filename = filename;
 
-  thisflag |= FLAG_NEED_RESYNC;
-
   rblist as;
   if ((as = file_read(buf->filename)) != NULL)
     // Add lines to buffer
