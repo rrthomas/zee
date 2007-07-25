@@ -37,13 +37,13 @@
 
 static const char *find_err;
 
-static size_t find_substr(rblist as1, rblist as2, bool bol, bool eol, bool backward)
+static size_t find_substr(rblist rbl1, rblist rbl2, bool bol, bool eol, bool backward)
 {
   pcre *pattern;
   size_t ret = SIZE_MAX;
   int ovector[3], err_offset;
 
-  if ((pattern = pcre_compile(rblist_to_string(as2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
+  if ((pattern = pcre_compile(rblist_to_string(rbl2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
     int options = 0;
     int index = 0;
 
@@ -53,11 +53,11 @@ static size_t find_substr(rblist as1, rblist as2, bool bol, bool eol, bool backw
       options |= PCRE_NOTEOL;
 
     if (!backward)
-      index = pcre_exec(pattern, NULL, rblist_to_string(as1), (int)rblist_length(as1), 0,
+      index = pcre_exec(pattern, NULL, rblist_to_string(rbl1), (int)rblist_length(rbl1), 0,
                         options, ovector, 3);
     else {
-      for (int i = (int)rblist_length(as1); i >= 0; i--) {
-        index = pcre_exec(pattern, NULL, rblist_to_string(as1), (int)rblist_length(as1), i,
+      for (int i = (int)rblist_length(rbl1); i >= 0; i--) {
+        index = pcre_exec(pattern, NULL, rblist_to_string(rbl1), (int)rblist_length(rbl1), i,
                           options | PCRE_ANCHORED, ovector, 3);
       }
     }
@@ -75,11 +75,11 @@ static size_t find_substr(rblist as1, rblist as2, bool bol, bool eol, bool backw
   return ret;
 }
 
-static bool search_forward(Point start, rblist as)
+static bool search_forward(Point start, rblist rbl)
 {
-  if (rblist_length(as) > 0) {
+  if (rblist_length(rbl) > 0) {
     // FIXME: BOL should not always be true!
-    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), as, true, true, false);
+    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), rbl, true, true, false);
     if (off != SIZE_MAX) {
       size_t n = rblist_pos_to_line(buf->lines, off);
       while (buf->pt.n != n)
@@ -92,11 +92,11 @@ static bool search_forward(Point start, rblist as)
   return false;
 }
 
-static bool search_backward(Point start, rblist as)
+static bool search_backward(Point start, rblist rbl)
 {
-  if (rblist_length(as) > 0) {
+  if (rblist_length(rbl) > 0) {
     // FIXME: EOL should not always be true!
-    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), as, true, true, true);
+    size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), rbl, true, true, true);
     if (off != SIZE_MAX) {
       size_t n = rblist_pos_to_line(buf->lines, off);
       while (buf->pt.n != n)
@@ -136,18 +136,18 @@ static bool isearch(int dir)
   rblist pattern = rblist_empty;
   for (;;) {
     // Make the minibuf message.
-    rblist as = rblist_fmt("%sI-search%s: %r",
-                          (last ? "" : "Failing "),
-                          (dir == ISEARCH_FORWARD) ? "" : " backward",
-                          pattern);
+    rblist rbl = rblist_fmt("%sI-search%s: %r",
+                            (last ? "" : "Failing "),
+                            (dir == ISEARCH_FORWARD) ? "" : " backward",
+                            pattern);
 
     // Regex error.
     if (find_err) {
-      as = rblist_fmt("%r [%s]", as, find_err);
+      rbl = rblist_fmt("%r [%s]", rbl, find_err);
       find_err = NULL;
     }
 
-    minibuf_write(as);
+    minibuf_write(rbl);
 
     int c = getkey();
     if (c == (KBD_CTRL | 'g')) {
@@ -242,9 +242,9 @@ C-g when search is successful aborts and moves point to starting point.\
 }
 END_DEF
 
-static bool no_upper(rblist as)
+static bool no_upper(rblist rbl)
 {
-  RBLIST_FOR(c, as)
+  RBLIST_FOR(c, rbl)
     if (isupper(c))
       return false;
   RBLIST_END

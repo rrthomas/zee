@@ -64,21 +64,21 @@ static rblist gettok(rblist line, size_t *pos)
  * Execute a string as commands
  * FIXME: Use line number for errors.
  */
-void cmd_eval(rblist as)
+void cmd_eval(rblist rbl)
 {
   bool ok = true;
   size_t lineno = 1, pos = 0;
 
-  assert(as);
+  assert(rbl);
 
-  for (rblist tok = gettok(as, &pos);
+  for (rblist tok = gettok(rbl, &pos);
        tok != NULL;
-       tok = gettok(as, &pos)) {
+       tok = gettok(rbl, &pos)) {
     // Get tokens until we run out or reach a new line
     list l = list_new();
     while (tok && tok != rblist_empty) {
       list_append(l, tok);
-      tok = gettok(as, &pos);
+      tok = gettok(rbl, &pos);
     }
 
     // Execute the line

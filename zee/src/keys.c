@@ -102,31 +102,31 @@ static const char *keyname[] = {
  */
 rblist chordtostr(size_t key)
 {
-  bool found;
   size_t i;
-  rblist as = rblist_empty;
+  rblist rbl = rblist_empty;
 
   if (key & KBD_CTRL)
-    as = rblist_concat(as, rblist_from_string("C-"));
+    rbl = rblist_concat(rbl, rblist_from_string("C-"));
   if (key & KBD_META)
-    as = rblist_concat(as, rblist_from_string("M-"));
+    rbl = rblist_concat(rbl, rblist_from_string("M-"));
   key &= ~(KBD_CTRL | KBD_META);
 
-  for (found = false, i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
+  bool found = false;
+  for (i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
-      as = rblist_concat(as, rblist_from_string(keyname[i]));
+      rbl = rblist_concat(rbl, rblist_from_string(keyname[i]));
       found = true;
       break;
     }
 
   if (found == false) {
     if (isgraph(key))
-      as = rblist_append(as, (int)(key & 0xff));
+      rbl = rblist_append(rbl, (int)(key & 0xff));
     else
-      as = rblist_concat(as, rblist_fmt("<%x>", key));
+      rbl = rblist_concat(rbl, rblist_fmt("<%x>", key));
   }
 
-  return as;
+  return rbl;
 }
 
 /*

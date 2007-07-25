@@ -168,13 +168,9 @@ chord.\
     key = strtochord(list_behead(l));
     name = list_behead(l);
   } else {
-    rblist as;
-
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
-
-    as = chordtostr(key);
-    name = minibuf_read_command_name(rblist_fmt("Bind key %r to command: ", as));
+    name = minibuf_read_command_name(rblist_fmt("Bind key %r to command: ", chordtostr(key)));
   }
 
   if (name) {
@@ -214,18 +210,18 @@ END_DEF
 rblist command_to_binding(Command cmd)
 {
   size_t i, n = 0;
-  rblist as = rblist_empty;
+  rblist rbl = rblist_empty;
 
   for (i = 0; i < vec_items(bindings); i++)
     if (vec_item(bindings, i, Binding).cmd == cmd) {
       size_t key = vec_item(bindings, i, Binding).key;
       rblist binding = chordtostr(key);
       if (n++ != 0)
-        as = rblist_concat(as, rblist_from_string(", "));
-      as = rblist_concat(as, binding);
+        rbl = rblist_concat(rbl, rblist_from_string(", "));
+      rbl = rblist_concat(rbl, binding);
     }
 
-  return as;
+  return rbl;
 }
 
 rblist binding_to_command(size_t key)

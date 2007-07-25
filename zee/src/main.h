@@ -224,8 +224,8 @@ typedef bool (*Command)(list l);
 #define UINT(name, prompt) \
     size_t name = 0; \
     if (!list_empty(l)) { \
-      rblist as = list_behead(l); \
-      if ((name = strtoul(rblist_to_string(as), NULL, 10)) == ULONG_MAX) \
+      rblist rbl = list_behead(l); \
+      if ((name = strtoul(rblist_to_string(rbl), NULL, 10)) == ULONG_MAX) \
         ok = false; \
     } else do { \
       rblist ms; \

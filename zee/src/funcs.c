@@ -360,8 +360,7 @@ file, replacing the selection if any.\n\
 
       Region r;
       assert(calculate_the_region(&r));
-      rblist as = copy_text_block(r.start, r.size);
-      write(fd, rblist_to_string(as), r.size);
+      write(fd, rblist_to_string(copy_text_block(r.start, r.size)), r.size);
 
       close(fd);
 

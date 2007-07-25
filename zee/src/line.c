@@ -212,12 +212,12 @@ END_DEF
  * Returns 2 if it is all upper case, 1 if the first character is
  * upper case, or 0 otherwise.
  */
-static unsigned check_case(rblist as)
+static unsigned check_case(rblist rbl)
 {
-  if (!isupper(rblist_get(as, 0)))
+  if (!isupper(rblist_get(rbl, 0)))
     return 0;
 
-  RBLIST_FOR(c, rblist_sub(as, 1, rblist_length(as)))
+  RBLIST_FOR(c, rblist_sub(rbl, 1, rblist_length(rbl)))
     if (!isupper(c))
       return 1;
   RBLIST_END

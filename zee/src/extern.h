@@ -33,7 +33,7 @@ bool goto_point(Point pt);
 // bind.c -----------------------------------------------------------------
 void bind_key(size_t key, Command func);
 void unbind_key(size_t key);
-rblist minibuf_read_command_name(rblist as);
+rblist minibuf_read_command_name(rblist rbl);
 rblist command_to_binding(Command f);
 rblist binding_to_command(size_t key);
 void process_key(size_t key);
@@ -49,7 +49,7 @@ size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
 // command.c --------------------------------------------------------------
-void cmd_eval(rblist as);
+void cmd_eval(rblist rbl);
 Command get_command(rblist name);
 rblist get_command_name(Command cmd);
 list command_list(void);
@@ -67,7 +67,7 @@ void resync_display(void);
 void resize_window(void);
 size_t column_to_character(rblist rbl, size_t goal);
 size_t string_display_width(rblist rbl);
-void popup_set(rblist as);
+void popup_set(rblist rbl);
 void popup_clear(void);
 void popup_scroll_down_and_loop(void);
 void popup_scroll_down(void);
@@ -77,7 +77,7 @@ size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_tidy(void);
-void term_print(rblist as);
+void term_print(rblist rbl);
 void ding(void);
 
 // file.c -----------------------------------------------------------------
@@ -136,11 +136,11 @@ extern Buffer *buf;
 extern int thisflag, lastflag, uniarg;
 
 // minibuf.c --------------------------------------------------------------
-void minibuf_write(rblist as);
-void minibuf_error(rblist as);
-rblist minibuf_read(rblist as, rblist value);
-int minibuf_read_yesno(rblist as);
-int minibuf_read_boolean(rblist as);
+void minibuf_write(rblist rbl);
+void minibuf_error(rblist rbl);
+rblist minibuf_read(rblist rbl, rblist value);
+int minibuf_read_yesno(rblist rbl);
+int minibuf_read_boolean(rblist rbl);
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
 

@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   int longopt;
   bool bflag = false, hflag = false, nflag = false;
   size_t line = 1;
-  rblist as;
+  rblist rbl;
 
   GC_INIT();
 
@@ -132,8 +132,8 @@ int main(int argc, char **argv)
       break;
     case 2:
       // FIXME: Make a file_insert command
-      if ((as = file_read(rblist_from_string(optarg))))
-        cmd_eval(as);
+      if ((rbl = file_read(rblist_from_string(optarg))))
+        cmd_eval(rbl);
       break;
     case 3:
       nflag = true;
@@ -193,15 +193,15 @@ int main(int argc, char **argv)
     }
 
     // Load system init file.
-    if ((as = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
-      cmd_eval(as);
+    if ((rbl = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
+      cmd_eval(rbl);
 
     // Load user init file if not disabled.
     if (!nflag) {
       rblist home = get_home_dir();
       if (rblist_length(home) > 0 &&
-          (as = file_read(rblist_concat(home, rblist_from_string("/." PACKAGE "rc")))))
-        cmd_eval(as);
+          (rbl = file_read(rblist_concat(home, rblist_from_string("/." PACKAGE "rc")))))
+        cmd_eval(rbl);
     }
 
     if (!bflag) {

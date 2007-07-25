@@ -76,9 +76,9 @@ static size_t popup_line = 0;
  * Set the popup string to as, which should not have a trailing newline.
  * Passing NULL for as clears the popup string.
  */
-void popup_set(rblist as)
+void popup_set(rblist rbl)
 {
-  popup_text = as;
+  popup_text = rbl;
   popup_line = 0;
 }
 
@@ -371,9 +371,9 @@ static void draw_window(void)
 /*
  * Print a string on the terminal.
  */
-void term_print(rblist as)
+void term_print(rblist rbl)
 {
-  RBLIST_FOR(c, as)
+  RBLIST_FOR(c, rbl)
     term_addch(c);
   RBLIST_END
 }

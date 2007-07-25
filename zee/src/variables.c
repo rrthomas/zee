@@ -112,20 +112,20 @@ rblist get_variable(rblist var)
 
 int get_variable_number(rblist var)
 {
-  rblist as;
+  rblist rbl = get_variable(var);
 
-  if ((as = get_variable(var)))
-    return atoi(rblist_to_string(as));
+  if (rbl)
+    return atoi(rblist_to_string(rbl));
 
   return 0;
 }
 
 bool get_variable_bool(rblist var)
 {
-  rblist as;
+  rblist rbl = get_variable(var);
 
-  if ((as = get_variable(var)))
-    return !rblist_compare(as, rblist_from_string("true"));
+  if (rbl)
+    return !rblist_compare(rbl, rblist_from_string("true"));
 
   return false;
 }

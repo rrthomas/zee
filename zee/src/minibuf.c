@@ -30,19 +30,19 @@
 #include "extern.h"
 
 
-static void minibuf_draw(rblist as)
+static void minibuf_draw(rblist rbl)
 {
   term_move(term_height() - 1, 0);
-  term_print(rblist_sub(as, 0, min(rblist_length(as), term_width())));
+  term_print(rblist_sub(rbl, 0, min(rblist_length(rbl), term_width())));
   term_clrtoeol();
 }
 
 /*
  * Write the specified string in the minibuffer.
  */
-void minibuf_write(rblist as)
+void minibuf_write(rblist rbl)
 {
-  minibuf_draw(as);
+  minibuf_draw(rbl);
 
   // Redisplay (and leave the cursor in the correct position).
   term_display();
@@ -52,9 +52,9 @@ void minibuf_write(rblist as)
 /*
  * Write the specified error string in the minibuffer and beep.
  */
-void minibuf_error(rblist as)
+void minibuf_error(rblist rbl)
 {
-  minibuf_write(as);
+  minibuf_write(rbl);
   ding();
 
   if (thisflag & FLAG_DEFINING_MACRO)
@@ -64,9 +64,9 @@ void minibuf_error(rblist as)
 /*
  * Read a string from the minibuffer.
  */
-rblist minibuf_read(rblist as, rblist value)
+rblist minibuf_read(rblist rbl, rblist value)
 {
-  return minibuf_read_completion(as, value, NULL, NULL);
+  return minibuf_read_completion(rbl, value, NULL, NULL);
 }
 
 /*
@@ -76,18 +76,18 @@ rblist minibuf_read(rblist as, rblist value)
  */
 static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
 {
-  rblist as;
+  rblist rbl;
 
   for (;;) {
-    as = minibuf_read_completion(prompt, rblist_empty, cp, NULL);
-    if (as == NULL)             // Cancelled.
+    rbl = minibuf_read_completion(prompt, rblist_empty, cp, NULL);
+    if (rbl == NULL)             // Cancelled.
       return NULL;
 
     // Complete partial words if possible.
-    if (completion_try(cp, as)) {
-      as = cp->match;
+    if (completion_try(cp, rbl)) {
+      rbl = cp->match;
       if (list_length(cp->matches) == 1)
-        return as;
+        return rbl;
     }
 
     minibuf_error(errmsg);
@@ -144,30 +144,30 @@ void minibuf_clear(void)
  */
 static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
 {
-  rblist as = prompt;             // Text to print.
+  rblist rbl = prompt;          // Text to print.
   size_t visible_width = max(3, term_width() - rblist_length(prompt) - 2);
   visible_width--; /* Avoid the b.r. corner of the screen for broken
                       terminals and terminal emulators. */
   size_t scroll_pos =
     offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
   if (scroll_pos > 0)
-    as = rblist_append(as, '$');
+    rbl = rblist_append(rbl, '$');
 
-  // Cursor position within `as'.
-  size_t cursor_pos = rblist_length(as) + (offset - scroll_pos);
+  // Cursor position within `rbl'.
+  size_t cursor_pos = rblist_length(rbl) + (offset - scroll_pos);
 
-  as = rblist_concat(as, rblist_sub(value, scroll_pos, min(rblist_length(value), scroll_pos + visible_width)));
+  rbl = rblist_concat(rbl, rblist_sub(value, scroll_pos, min(rblist_length(value), scroll_pos + visible_width)));
   if (rblist_length(value) > scroll_pos + visible_width)
-    as = rblist_append(as, '$');
+    rbl = rblist_append(rbl, '$');
 
   // Handle terminals not wide enough to show "<prompt>$xxx$".
-  if (rblist_length(as) > term_width()) {
-    size_t to_lose = rblist_length(as) - term_width();
-    as = rblist_sub(as, to_lose, rblist_length(as));
+  if (rblist_length(rbl) > term_width()) {
+    size_t to_lose = rblist_length(rbl) - term_width();
+    rbl = rblist_sub(rbl, to_lose, rblist_length(rbl));
     cursor_pos -= to_lose;
   }
 
-  minibuf_draw(as);
+  minibuf_draw(rbl);
   term_move(term_height() - 1, cursor_pos);
   term_refresh();
 }
@@ -181,9 +181,9 @@ static size_t mb_backward_char(size_t i)
   return i;
 }
 
-static size_t mb_forward_char(size_t i, rblist as)
+static size_t mb_forward_char(size_t i, rblist rbl)
 {
-  if ((size_t)i < rblist_length(as))
+  if ((size_t)i < rblist_length(rbl))
     ++i;
   else
     ding();
@@ -260,23 +260,23 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
   int c;
   bool ret = false;
   size_t i;
-  rblist as = value, retval = NULL, saved = NULL;
+  rblist rbl = value, retval = NULL, saved = NULL;
 
   if (hp)
     prepare_history(hp);
 
   rblist old_as = NULL;
 
-  for (i = rblist_length(as);;) {
-    if (cp != NULL && (!old_as || rblist_compare(old_as, as))) {
-      // Using completions and 'as' has changed, so display new completions.
-      completion_try(cp, as);
+  for (i = rblist_length(rbl);;) {
+    if (cp != NULL && (!old_as || rblist_compare(old_as, rbl))) {
+      // Using completions and `rbl' has changed, so display new completions.
+      completion_try(cp, rbl);
       completion_remove_suffix(cp);
-      completion_remove_prefix(cp, as);
+      completion_remove_prefix(cp, rbl);
       completion_popup(cp);
-      old_as = as;
+      old_as = rbl;
     }
-    draw_minibuf_read(prompt, as, (size_t)i);
+    draw_minibuf_read(prompt, rbl, (size_t)i);
 
     switch (c = getkey()) {
     case KBD_NOKEY:
@@ -286,7 +286,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     case KBD_RET:
       minibuf_clear();
-      retval = as;
+      retval = rbl;
       ret = true;
       break;
     case KBD_CTRL | 'a':
@@ -295,7 +295,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     case KBD_CTRL | 'e':
     case KBD_END:
-      i = rblist_length(as);
+      i = rblist_length(rbl);
       break;
     case KBD_CTRL | 'b':
     case KBD_LEFT:
@@ -303,20 +303,20 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     case KBD_CTRL | 'f':
     case KBD_RIGHT:
-      i = mb_forward_char(i, as);
+      i = mb_forward_char(i, rbl);
       break;
     case KBD_CTRL | 'g':
       minibuf_clear();
       ret = true;
       break;
     case KBD_CTRL | 'k':
-      mb_kill_line(i, &as);
+      mb_kill_line(i, &rbl);
       break;
     case KBD_BS:
-      i = mb_backward_delete_char(i, &as);
+      i = mb_backward_delete_char(i, &rbl);
       break;
     case KBD_DEL:
-      mb_delete_char(i, &as);
+      mb_delete_char(i, &rbl);
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
@@ -334,19 +334,19 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     case KBD_UP:
     case KBD_META | 'p':
-      mb_prev_history(hp, &as, &i, &saved);
+      mb_prev_history(hp, &rbl, &i, &saved);
       break;
     case KBD_DOWN:
     case KBD_META | 'n':
-      mb_next_history(hp, &as, &i, &saved);
+      mb_next_history(hp, &rbl, &i, &saved);
       break;
     case KBD_TAB:
       if (cp == NULL || list_empty(cp->matches))
         ding();
       else {
-        if (rblist_compare(as, cp->match) != 0) {
-          as = cp->match;
-          i = rblist_length(as);
+        if (rblist_compare(rbl, cp->match) != 0) {
+          rbl = cp->match;
+          i = rblist_length(rbl);
         } else
           popup_scroll_down_and_loop();
       }
@@ -355,8 +355,8 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       if (c > 255 || !isprint(c))
         ding();
       else {
-        as = rblist_concat(rblist_append(rblist_sub(as, 0, i), c),
-                      rblist_sub(as, i, rblist_length(as)));
+        rbl = rblist_concat(rblist_append(rblist_sub(rbl, 0, i), c),
+                      rblist_sub(rbl, i, rblist_length(rbl)));
         i++;
       }
     }

@@ -42,14 +42,11 @@
 rblist get_home_dir(void)
 {
   char *s = getenv("HOME");
-  rblist as;
 
   if (s && strlen(s) < PATH_MAX)
-    as = rblist_from_string(s);
+    return rblist_from_string(s);
   else
-    as = rblist_empty;
-
-  return as;
+    return rblist_empty;
 }
 
 /*
@@ -77,10 +74,10 @@ void file_open(rblist filename)
   buffer_new();
   buf->filename = filename;
 
-  rblist as;
-  if ((as = file_read(buf->filename)) != NULL)
+  rblist rbl;
+  if ((rbl = file_read(buf->filename)) != NULL)
     // Add lines to buffer
-    buf->lines = as;
+    buf->lines = rbl;
   else if (errno != ENOENT)
     buf->flags |= BFLAG_READONLY;
 }
@@ -153,14 +150,14 @@ void die(int exitcode)
   if (already_dying)
     fprintf(stderr, "die() called recursively; aborting.\r\n");
   else if (buf && buf->flags & BFLAG_MODIFIED) {
-    rblist as = rblist_empty;
+    rblist rbl = rblist_empty;
     already_dying = true;
     fprintf(stderr, "Trying to save modified buffer...\r\n");
     if (buf->filename)
-      as = buf->filename;
-    as = rblist_concat(as, rblist_from_string("." PACKAGE "SAVE"));
-    fprintf(stderr, "Saving %s...\r\n", rblist_to_string(as));
-    buffer_write(buf, as);
+      rbl = buf->filename;
+    rbl = rblist_concat(rbl, rblist_from_string("." PACKAGE "SAVE"));
+    fprintf(stderr, "Saving %s...\r\n", rblist_to_string(rbl));
+    buffer_write(buf, rbl);
     term_close();
   }
   exit(exitcode);

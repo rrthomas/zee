@@ -55,21 +55,21 @@ static rblist completion_write(list l)
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t i = 0, col = 0;
-  rblist as = rblist_empty;
+  rblist rbl = rblist_empty;
   for (list p = list_first(l);
        p != l && i < list_length(l);
        p = list_next(p), i++) {
     if (col >= numcols) {
       col = 0;
-      as = rblist_concat(as, rblist_from_string("\n"));
+      rbl = rblist_concat(rbl, rblist_from_string("\n"));
     }
-    as = rblist_concat(as, p->item);
+    rbl = rblist_concat(rbl, p->item);
     if (++col < numcols)
       for (size_t i = maxlen - rblist_length(p->item); i > 0; i--)
-        as = rblist_concat(as, rblist_from_string(" "));
+        rbl = rblist_concat(rbl, rblist_from_string(" "));
   }
 
-  return as;
+  return rbl;
 }
 
 /*
@@ -81,32 +81,32 @@ void completion_popup(Completion *cp)
 {
   assert(cp);
   assert(cp->matches);
-  rblist as = rblist_from_string("Completions\n\n");
+  rblist rbl = rblist_from_string("Completions\n\n");
   switch (list_length(cp->matches)) {
     case 0:
-      as = rblist_concat(as, rblist_from_string("No completions"));
+      rbl = rblist_concat(rbl, rblist_from_string("No completions"));
       break;
     case 1:
-      as = rblist_concat(as, rblist_from_string("Sole completion: "));
-      as = rblist_concat(as, list_first(cp->matches)->item);
+      rbl = rblist_concat(rbl, rblist_from_string("Sole completion: "));
+      rbl = rblist_concat(rbl, list_first(cp->matches)->item);
       break;
     default:
-      as = rblist_concat(as, rblist_from_string("Possible completions are:\n"));
-      as = rblist_concat(as, completion_write(cp->matches));
+      rbl = rblist_concat(rbl, rblist_from_string("Possible completions are:\n"));
+      rbl = rblist_concat(rbl, completion_write(cp->matches));
   }
-  popup_set(as);
+  popup_set(rbl);
   term_display();
 }
 
 /*
  * Returns the length of the longest string that is a prefix of
- * both as and bs.
+ * both rbl1 and rbl2.
  */
-static size_t common_prefix_length(rblist as, rblist bs)
+static size_t common_prefix_length(rblist rbl1, rblist rbl2)
 {
-  size_t i, len = min(rblist_length(as), rblist_length(bs));
+  size_t i, len = min(rblist_length(rbl1), rblist_length(rbl2));
   for (i = 0; i < len; i++)
-    if (rblist_get(as, i) != rblist_get(bs, i))
+    if (rblist_get(rbl1, i) != rblist_get(rbl2, i))
       break;
   return i;
 }
@@ -168,12 +168,13 @@ bool completion_is_exact(Completion *cp, rblist search)
 }
 
 /*
- * Find the last occurrence of character 'c' before 'before_pos' in 'as'.
- * Returns the offset into 'as' of the character after 'c', or '0' if not found.
+ * Find the last occurrence of character `c' before `before_pos' in
+ * `rbl'. Returns the offset into `rbl' of the character after `c', or
+ * 0 if not found.
  */
-static size_t last_occurrence(rblist as, size_t before_pos, int c)
+static size_t last_occurrence(rblist rbl, size_t before_pos, int c)
 {
-  while (before_pos > 0 && rblist_get(as, before_pos - 1) != c)
+  while (before_pos > 0 && rblist_get(rbl, before_pos - 1) != c)
     before_pos--;
   return before_pos;
 }
