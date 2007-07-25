@@ -181,7 +181,7 @@ typedef bool (*Command)(list l);
  * The C prototype for commands is Command (see above).
  *
  * To call such a command with an argument list a1, a2, ..., an, pass
- * the arguments (which should all be astrs) in a list.
+ * the arguments (which should all be rblists) in a list.
  *
  * The macro `CMDCALL' can be used to call zero-argument commands.
  * The macro `CMDCALL_UINT' can be used to call commands taking a

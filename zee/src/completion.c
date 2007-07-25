@@ -41,8 +41,8 @@ Completion *completion_new(void)
 }
 
 /*
- * Write the astrs in `l' in a set of columns. The width of the
- * columns is chosen to be big enough for the longest astr, with a
+ * Write the rblists in `l' in a set of columns. The width of the
+ * columns is chosen to be big enough for the longest rblist, with a
  * COLUMN_GAP-character gap between each column.
  */
 #define COLUMN_GAP 5
