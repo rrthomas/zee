@@ -25,4 +25,4 @@
 #undef max
 #define max(a, b)                       ((a) > (b) ? (a) : (b))
 
-#endif
+#endif // !NONSTD_H
