@@ -130,16 +130,6 @@ rbacc rbacc_file(rbacc rba, FILE *fp)
   return rba;
 }
 
-rbacc rbacc_file_line(rbacc rba, FILE *fp)
-{
-  int c;
-
-  while ((c = getc(fp)) != EOF && c != '\n')
-    rbacc_char(rba, c);
-
-  return rba;
-}
-
 size_t rbacc_length(rbacc rba)
 {
   return rblist_length(rba->head) + rba->used;
@@ -258,13 +248,6 @@ int main(void)
     rbacc_rblist(rba, rbl2);
     assert(rbacc_length(rba) == i * strlen(s2));
   }
-
-  // rbacc_file_line
-  assert(fp = fopen(SRCPATH "rbacc.c", "r"));
-  rba = rbacc_new();
-  rbacc_file_line(rba, fp);
-  assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("/* Character buffers optimised for repeated append.")));
-  assert(fclose(fp) == 0);
 
   return EXIT_SUCCESS;
 }

@@ -70,12 +70,6 @@ rbacc rbacc_string(rbacc rba, const char *s);
 rbacc rbacc_file(rbacc rba, FILE *fp);
 
 /*
- * Append a line from the stream `fp', excluding any trailing newline,
- * and return the rbacc.
- */
-rbacc rbacc_file_line(rbacc rba, FILE *fp);
-
-/*
  * Returns the number of characters in `rba'.
  */
 size_t rbacc_length(rbacc rba);

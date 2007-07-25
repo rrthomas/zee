@@ -279,7 +279,7 @@ static void draw_line(size_t row, size_t line, size_t tab)
 /*
  * Calculate the display width of a string in screen columns
  */
-static size_t string_display_width(rblist rbl)
+size_t string_display_width(rblist rbl)
 {
   size_t col_count = 0, t = tab_width();
 

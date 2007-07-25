@@ -64,34 +64,25 @@ END_DEF
 /*
  * Get the goal column. Take care of expanding tabulations.
  */
-// FIXME: Should use string_display_width().
 size_t get_goalc(void)
 {
-  size_t col = 0, t = tab_width();
-
-  RBLIST_FOR(c, rblist_sub(rblist_line(buf->lines, buf->pt.n), 0, buf->pt.o))
-    if (c == '\t')
-      col |= t - 1;
-    ++col;
-  RBLIST_END
-
-  return col;
+  return string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), 0, buf->pt.o));
 }
 
 /*
- * Go to column goalc. Take care of expanding tabulations
+ * Go to column `goalc'. Take care of expanding tabulations.
  */
 // FIXME: Should use string_display_width() or similar.
-static void goto_goalc(size_t goalc)
+static void goto_goalc(void)
 {
   size_t i = 0, col = 0, t = tab_width();
 
   RBLIST_FOR(c, rblist_line(buf->lines, buf->pt.n))
-    if (col == goalc)
+    if (col == cur_goalc)
       break;
     else if (c == '\t') {
       for (int w = t - col % t; w > 0; w--)
-        if (++col == goalc)
+        if (++col == cur_goalc)
           break;
     } else
       col++;
@@ -119,7 +110,7 @@ column, or at the end of the line if it is not long enough.\
 
     buf->pt.n--;
 
-    goto_goalc(cur_goalc);
+    goto_goalc();
   }
 }
 END_DEF
@@ -142,7 +133,7 @@ column, or at the end of the line if it is not long enough.\
 
     buf->pt.n++;
 
-    goto_goalc(cur_goalc);
+    goto_goalc();
   }
 }
 END_DEF
