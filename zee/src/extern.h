@@ -49,7 +49,7 @@ size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
 // command.c --------------------------------------------------------------
-void cmd_eval(rblist rbl);
+bool cmd_eval(rblist rbl, rblist source);
 Command get_command(rblist name);
 rblist get_command_name(Command cmd);
 list command_list(void);

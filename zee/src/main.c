@@ -112,7 +112,7 @@ struct option longopts[] = {
 int main(int argc, char **argv)
 {
   int longopt;
-  bool bflag = false, hflag = false, nflag = false;
+  bool bflag = false, hflag = false, nflag = false, ok = true;
   size_t line = 1;
   rblist rbl;
 
@@ -128,13 +128,16 @@ int main(int argc, char **argv)
       bflag = true;
       break;
     case 1:
-      cmd_eval(rblist_from_string(optarg));
+      cmd_eval(rblist_from_string(optarg), rblist_from_string("command-line options"));
       break;
     case 2:
-      // FIXME: Make a file_insert command
-      if ((rbl = file_read(rblist_from_string(optarg))))
-        cmd_eval(rbl);
-      break;
+      {
+        // FIXME: Make a file_insert command
+        rblist arg = rblist_from_string(optarg);
+        if ((rbl = file_read(arg)))
+          ok &= cmd_eval(rbl, rblist_fmt("`%r'", arg));
+        break;
+      }
     case 3:
       nflag = true;
       break;
@@ -193,21 +196,23 @@ int main(int argc, char **argv)
     }
 
     // Load system init file.
-    if ((rbl = file_read(rblist_from_string(SYSCONFDIR "/" PACKAGE "rc"))))
-      cmd_eval(rbl);
+    rblist file = rblist_from_string(SYSCONFDIR "/" PACKAGE "rc");
+    if ((rbl = file_read(file)))
+      ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
 
     // Load user init file if not disabled.
     if (!nflag) {
       rblist home = get_home_dir();
+      rblist file = rblist_from_string("/." PACKAGE "rc");
       if (rblist_length(home) > 0 &&
-          (rbl = file_read(rblist_concat(home, rblist_from_string("/." PACKAGE "rc")))))
-        cmd_eval(rbl);
+          (rbl = file_read(rblist_concat(home, file))))
+        ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
     }
 
     if (!bflag) {
       if (buf) {
-        // FIXME: allow help message to be overwritten by errors from loading init files
-        CMDCALL(help_about);
+        if (ok)
+          CMDCALL(help_about);
         run();
       }
 

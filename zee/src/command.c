@@ -62,23 +62,22 @@ static rblist gettok(rblist line, size_t *pos)
 
 /*
  * Execute a string as commands
- * FIXME: Use line number for errors.
  */
-void cmd_eval(rblist rbl)
+bool cmd_eval(rblist s, rblist source)
 {
   bool ok = true;
   size_t lineno = 1, pos = 0;
 
-  assert(rbl);
+  assert(s);
 
-  for (rblist tok = gettok(rbl, &pos);
+  for (rblist tok = gettok(s, &pos);
        tok != NULL;
-       tok = gettok(rbl, &pos)) {
+       tok = gettok(s, &pos)) {
     // Get tokens until we run out or reach a new line
     list l = list_new();
     while (tok && tok != rblist_empty) {
       list_append(l, tok);
-      tok = gettok(rbl, &pos);
+      tok = gettok(s, &pos);
     }
 
     // Execute the line
@@ -86,10 +85,16 @@ void cmd_eval(rblist rbl)
     Command cmd;
     while ((fname = list_behead(l)) &&
            (cmd = get_command(fname)) &&
-           (ok = cmd(l)))
+           (ok &= cmd(l)))
       ;
+    if (fname && !cmd) {
+      minibuf_error(rblist_fmt("No such command `%r' at line %d of %r", fname, lineno, source));
+      ok = false;
+    }
     lineno++;
   }
+
+  return ok;
 }
 
 /*--------------------------------------------------------------------------
