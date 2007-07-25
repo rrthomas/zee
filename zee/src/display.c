@@ -369,7 +369,7 @@ static void draw_border(void)
 
 static void draw_status_line(size_t line)
 {
-  bool someflag;
+  bool someflag = false;
 
   term_move(line, 0);
   draw_border();

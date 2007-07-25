@@ -27,7 +27,7 @@
  * points to is opaque. The structure is modified in place when characters
  * are appended to the buffer, and it should therefore not be shared
  * without due care. If you want to share the data in an rbacc, your best
- * bet is to convert it to an rblist using rbacc_get.
+ * bet is to convert it to an rblist using rbacc_to_rblist.
  */
 typedef struct rbacc *rbacc;
 
@@ -65,7 +65,7 @@ rbacc rbacc_array(rbacc rba, const char *cs, size_t length);
 rbacc rbacc_string(rbacc rba, const char *s);
 
 /*
- * Read a file into an rbacc.
+ * Appends the contents of a file to `rba' and returns `rba'.
  */
 rbacc rbacc_file(rbacc rba, FILE *fp);
 
