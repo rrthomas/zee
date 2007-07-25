@@ -89,7 +89,7 @@ int main(void)
   assert(!rblist_compare(rblist_sub(rblist_from_string("12345"), 0, rblist_length(as1)),
                    rblist_from_string("12345")));
 
-  assert(!rblist_compare(rblist_concat(rblist_afmt("%s * %d = ", "5", 3), rblist_afmt("%d", 15)),
+  assert(!rblist_compare(rblist_concat(rblist_fmt("%s * %d = ", "5", 3), rblist_fmt("%d", 15)),
                    rblist_from_string("5 * 3 = 15")));
 
   assert(rblist_compare(rblist_from_string("a"), rblist_from_string("abc")) == -1);

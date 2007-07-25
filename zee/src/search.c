@@ -136,14 +136,14 @@ static int isearch(int dir)
   rblist pattern = rblist_empty;
   for (;;) {
     // Make the minibuf message.
-    rblist as = rblist_afmt("%sI-search%s: %r",
+    rblist as = rblist_fmt("%sI-search%s: %r",
                           (last ? "" : "Failing "),
                           (dir == ISEARCH_FORWARD) ? "" : " backward",
                           pattern);
 
     // Regex error.
     if (find_err) {
-      as = rblist_afmt("%r [%s]", as, find_err);
+      as = rblist_fmt("%r [%s]", as, find_err);
       find_err = NULL;
     }
 
@@ -261,7 +261,7 @@ DEF_ARG(edit_replace,
 Replace the next occurrence of a regexp with other text.\n\
 ",
 STR(find, "Replace string: ")
-STR(repl, rblist_to_string(rblist_afmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
 {
   if (ok) {
     bool find_no_upper = no_upper(find) && get_variable_bool(rblist_from_string("case_replace"));
@@ -283,7 +283,7 @@ Replace all occurrences of a regexp with other text from the cursor\n\
 to end of the buffer.\n\
 ",
 STR(find, "Replace string: ")
-STR(repl, rblist_to_string(rblist_afmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
 {
   if (ok)
     while (F_edit_replace(list_append(list_append(list_new(), find), repl)))

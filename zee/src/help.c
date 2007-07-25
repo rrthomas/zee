@@ -38,7 +38,7 @@ Show the version in the minibuffer.\
   if (!rblist_compare(quitstr, rblist_empty))
     quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
 
-  minibuf_write(rblist_afmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %r.", quitstr));
+  minibuf_write(rblist_fmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %r.", quitstr));
 }
 END_DEF
 
@@ -68,8 +68,8 @@ Display the help for the given command.\
       if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
         rblist bindings = command_to_binding(get_command(name)), where = rblist_empty;
         if (rblist_length(bindings) > 0)
-          where = rblist_afmt("\n\nBound to: %r", bindings);
-        popup_set(rblist_afmt("Help for command `%s':\n\n%s%r", ftable[i].name, ftable[i].doc, where));
+          where = rblist_fmt("\n\nBound to: %r", bindings);
+        popup_set(rblist_fmt("Help for command `%s':\n\n%s%r", ftable[i].name, ftable[i].doc, where));
         ok = true;
         break;
       }
@@ -103,7 +103,7 @@ Display the full documentation of VARIABLE (a symbol).\
     size_t i;
     for (i = 0; i < ventries; i++)
       if (!rblist_compare(rblist_from_string(vtable[i].name), name)) {
-        popup_set(rblist_afmt("Help for variable `%s':\n\n"
+        popup_set(rblist_fmt("Help for variable `%s':\n\n"
                               "Default value: %s\n"
                               "Current value: %r\n\n"
                               "Documentation:\n%s",
@@ -128,9 +128,9 @@ Display the command invoked by a key sequence.\
   keyname = chordtostr(key);
 
   if ((cmd = binding_to_command(key)) == NULL) {
-    minibuf_error(rblist_afmt("%r is unbound", keyname));
+    minibuf_error(rblist_fmt("%r is unbound", keyname));
     ok = false;
   } else
-    minibuf_write(rblist_afmt("%r runs the command `%r'", keyname, cmd));
+    minibuf_write(rblist_fmt("%r runs the command `%r'", keyname, cmd));
 }
 END_DEF

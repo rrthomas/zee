@@ -360,7 +360,7 @@ rblist rblist_set(rblist rbl, size_t pos, int c)
 }
 
 /*
- * Used internally by rblist_afmt. Formats an unsigned number in any
+ * Used internally by rblist_fmt. Formats an unsigned number in any
  * base up to 16. If the result has more than 64 digits, higher
  * digits are discarded.
  */
@@ -394,7 +394,7 @@ static rblist fmt_number(size_t x, int base)
  *
  * Width and precision specifiers are not supported.
  */
-rblist rblist_afmt(const char *format, ...)
+rblist rblist_fmt(const char *format, ...)
 {
   va_list ap;
   va_start(ap, format);
@@ -639,9 +639,9 @@ void die(int exitcode)
 static rblist rbl_structure(rblist rbl)
 {
   if (is_leaf(rbl))
-    return rblist_afmt("%d", rbl->leaf.length);
+    return rblist_fmt("%d", rbl->leaf.length);
   else
-    return rblist_afmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
+    return rblist_fmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
 }
 
 // Checks all structural invariants that are supposed to hold for 'rbl'.

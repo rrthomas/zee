@@ -149,6 +149,7 @@ rblist rbacc_get(rbacc rba)
   return rba->head;
 }
 
+
 /*************/
 // Test code
 

@@ -117,9 +117,9 @@ Save buffer in visited file.\
 ")
 {
   if (buffer_write(buf, buf->filename) == false) {
-    minibuf_error(rblist_afmt("%s: %s", buf->filename, strerror(errno)));
+    minibuf_error(rblist_fmt("%s: %s", buf->filename, strerror(errno)));
   } else {
-    minibuf_write(rblist_afmt("Wrote `%r'", buf->filename));
+    minibuf_write(rblist_fmt("Wrote `%r'", buf->filename));
     buf->flags &= ~BFLAG_MODIFIED;
 
     if (buf->last_undop)

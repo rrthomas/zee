@@ -123,7 +123,7 @@ rblist chordtostr(size_t key)
     if (isgraph(key))
       as = rblist_append(as, (int)(key & 0xff));
     else
-      as = rblist_concat(as, rblist_afmt("<%x>", key));
+      as = rblist_concat(as, rblist_fmt("<%x>", key));
   }
 
   return as;

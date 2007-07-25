@@ -154,11 +154,11 @@ static rblist make_char_printable(int c)
   c &= 0xff;
 
   if ((size_t)c < sizeof(ctrls))
-    return rblist_afmt("^%c", ctrls[c]);
+    return rblist_fmt("^%c", ctrls[c]);
   else if (isprint(c))
     return rblist_singleton(c); // FIXME: Won't work for double-width characters.
   else
-    return rblist_afmt("\\%o", c);
+    return rblist_fmt("\\%o", c);
 }
 
 /*
@@ -405,7 +405,7 @@ static void draw_status_line(size_t line)
     term_print(rblist_from_string("Isearch"));
   }
 
-  term_print(rblist_afmt(")--L%d--C%d--", buf->pt.n + 1, get_goalc()));
+  term_print(rblist_fmt(")--L%d--C%d--", buf->pt.n + 1, get_goalc()));
 
   if (rblist_nl_count(buf->lines) <= win.eheight && win.topdelta == buf->pt.n)
     term_print(rblist_from_string("All"));
@@ -414,7 +414,7 @@ static void draw_status_line(size_t line)
   else if (buf->pt.n + (win.eheight - win.topdelta) > rblist_nl_count(buf->lines))
     term_print(rblist_from_string("Bot"));
   else
-    term_print(rblist_afmt("%d%%", (int)((float)buf->pt.n / rblist_nl_count(buf->lines) * 100)));
+    term_print(rblist_fmt("%d%%", (int)((float)buf->pt.n / rblist_nl_count(buf->lines) * 100)));
 
   term_attrset(1, FONT_NORMAL);
 }

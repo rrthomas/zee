@@ -111,7 +111,7 @@ rblist rblist_set(rblist rbl, size_t pos, int c);
 /*
  * Format text into an rblist.
  */
-rblist rblist_afmt(const char *fmt, ...);
+rblist rblist_fmt(const char *fmt, ...);
 
 /**************************/
 // Primitive destructors.
