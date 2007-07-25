@@ -34,7 +34,7 @@
                                 // autotools macros
 
 #include "main.h"
-#include "extern.h"
+#include "term.h"
 
 // Font width and height
 #define FW		(8)	// font_length (font, ...)
