@@ -277,6 +277,26 @@ static void draw_line(size_t row, size_t line, size_t tab)
 }
 
 /*
+ * Find the character position in `rbl' corresponding to display
+ * width `goal'.
+ */
+// FIXME: At the moment, display widths could overflow (even size_t!).
+size_t column_to_character(rblist rbl, size_t goal)
+{
+  size_t i = 0, col = 0;
+
+  RBLIST_FOR(c, rbl)
+    // FIXME: What should we do if we overrun (col > goal)?
+    if (col >= goal)
+      break;
+    col += rblist_length(make_char_printable(c));
+    i++;
+  RBLIST_END
+
+  return i;
+}
+
+/*
  * Calculate the display width of a string in screen columns
  */
 size_t string_display_width(rblist rbl)

@@ -65,6 +65,7 @@ size_t completion_remove_prefix(Completion *cp, rblist search);
 // display.c --------------------------------------------------------------
 void resync_display(void);
 void resize_window(void);
+size_t column_to_character(rblist rbl, size_t goal);
 size_t string_display_width(rblist rbl);
 void popup_set(rblist as);
 void popup_clear(void);

@@ -69,29 +69,6 @@ size_t get_goalc(void)
   return string_display_width(rblist_sub(rblist_line(buf->lines, buf->pt.n), 0, buf->pt.o));
 }
 
-/*
- * Go to column `goalc'. Take care of expanding tabulations.
- */
-// FIXME: Should use string_display_width() or similar.
-static void goto_goalc(void)
-{
-  size_t i = 0, col = 0, t = tab_width();
-
-  RBLIST_FOR(c, rblist_line(buf->lines, buf->pt.n))
-    if (col == cur_goalc)
-      break;
-    else if (c == '\t') {
-      for (int w = t - col % t; w > 0; w--)
-        if (++col == cur_goalc)
-          break;
-    } else
-      col++;
-    i++;
-  RBLIST_END
-
-  buf->pt.o = i;
-}
-
 DEF(move_previous_line,
 "\
 Move cursor vertically up one line.\n\
@@ -109,8 +86,7 @@ column, or at the end of the line if it is not long enough.\
       cur_goalc = get_goalc();
 
     buf->pt.n--;
-
-    goto_goalc();
+    buf->pt.o = column_to_character(rblist_line(buf->lines, buf->pt.n), cur_goalc);
   }
 }
 END_DEF
@@ -132,8 +108,7 @@ column, or at the end of the line if it is not long enough.\
       cur_goalc = get_goalc();
 
     buf->pt.n++;
-
-    goto_goalc();
+    buf->pt.o = column_to_character(rblist_line(buf->lines, buf->pt.n), cur_goalc);
   }
 }
 END_DEF
