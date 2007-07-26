@@ -186,14 +186,12 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
-      win.fheight = 2; // Initialise window; leave space for
-                       // minibuffer and status line
+      win.fheight = 2;          // Initialise window; leave space for
+                                // minibuffer and status line
       term_init();
-      term_resize(); // Can't run until there is a buffer
-      if (buf && line > 0) {
+      term_resize();            // Can't run until there is a buffer
+      if (buf && line > 0)
         goto_line(line - 1);
-        resync_display();
-      }
     }
 
     // Load system init file.
