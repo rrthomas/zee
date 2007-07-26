@@ -134,7 +134,7 @@ void term_set_size(size_t width, size_t height)
 {
   win.term_width = width;
   win.term_height = height;
-  resize_window();
+  term_resize();
 }
 
 static rblist make_char_printable(int c)
@@ -492,7 +492,7 @@ void term_tidy(void)
   term_refresh();
 }
 
-void resize_window(void)
+void term_resize(void)
 {
   // Resize window horizontally.
   win.ewidth = win.fwidth = win.term_width;
@@ -500,12 +500,4 @@ void resize_window(void)
   // Resize window vertically.
   win.eheight = win.fheight = win.term_height;
   win.eheight -= min(win.eheight, 2);
-}
-
-/*
- * Emit an error sound.
- */
-void ding(void)
-{
-  term_beep();
 }

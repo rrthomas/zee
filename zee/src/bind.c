@@ -104,7 +104,7 @@ void process_key(size_t key)
     if (key <= 255)
       CMDCALL_UINT(edit_insert_character, (int)key);
     else
-      ding();
+      term_beep();
   }
 
   /* Only add keystrokes if we're already in macro defining mode

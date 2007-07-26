@@ -237,7 +237,7 @@ typedef bool (*Command)(list l);
         break; \
       } \
       if ((name = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
-        ding(); \
+        term_beep(); \
     } while (name == ULONG_MAX);
 
 /* FIXME: These macros don't work properly within command definitions,

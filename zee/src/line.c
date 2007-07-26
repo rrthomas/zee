@@ -426,7 +426,7 @@ UINT(c, "Insert character: "))
         wrap_break_line();
       insert_char((int)c);
     } else {
-      ding();
+      term_beep();
       ok = false;
     }
 

@@ -29,7 +29,6 @@ zee_doc_SOURCES =				\
 	buffer.c				\
 	command.c				\
 	completion.c				\
-	display.c				\
 	file.c					\
 	funcs.c					\
 	help.c					\
@@ -42,6 +41,7 @@ zee_doc_SOURCES =				\
 	minibuf.c				\
 	point.c					\
 	search.c				\
+	term.c					\
 	undo.c					\
 	variables.c
 

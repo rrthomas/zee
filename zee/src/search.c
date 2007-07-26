@@ -166,7 +166,7 @@ static bool isearch(int dir)
         pattern = rblist_sub(pattern, 0, rblist_length(pattern) - 1);
         buf->pt = start;
       } else
-        ding();
+        term_beep();
     } else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
       // Invert direction.
       if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)

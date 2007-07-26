@@ -58,25 +58,8 @@ list command_list(void);
 Completion *completion_new(void);
 void completion_popup(Completion *cp);
 bool completion_try(Completion *cp, rblist search);
-bool completion_is_exact(Completion *cp, rblist search);
 void completion_remove_suffix(Completion *cp);
 size_t completion_remove_prefix(Completion *cp, rblist search);
-
-// display.c --------------------------------------------------------------
-void resync_display(void);
-void resize_window(void);
-size_t column_to_character(rblist rbl, size_t goal);
-size_t string_display_width(rblist rbl);
-void popup_set(rblist rbl);
-void popup_clear(void);
-void popup_scroll_down_and_loop(void);
-void popup_scroll_down(void);
-void popup_scroll_up(void);
-void term_set_size(size_t cols, size_t rows);
-void term_display(void);
-void term_tidy(void);
-void term_print(rblist rbl);
-void ding(void);
 
 // file.c -----------------------------------------------------------------
 rblist get_home_dir(void);
@@ -149,6 +132,22 @@ size_t count_lines(Point pt1, Point pt2);
 void swap_point(Point *pt1, Point *pt2);
 Point point_min(Buffer *bp);
 Point point_max(Buffer *bp);
+
+// term.c -----------------------------------------------------------------
+void resync_display(void);
+void term_resize(void);
+size_t column_to_character(rblist rbl, size_t goal);
+size_t string_display_width(rblist rbl);
+void popup_set(rblist rbl);
+void popup_clear(void);
+void popup_scroll_down_and_loop(void);
+void popup_scroll_down(void);
+void popup_scroll_up(void);
+void term_set_size(size_t cols, size_t rows);
+void term_display(void);
+void term_tidy(void);
+void term_print(rblist rbl);
+void term_beep(void);
 
 // undo.c -----------------------------------------------------------------
 void undo_save(int type, Point pt, size_t arg1, size_t arg2);

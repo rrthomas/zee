@@ -55,7 +55,7 @@ void minibuf_write(rblist rbl)
 void minibuf_error(rblist rbl)
 {
   minibuf_write(rbl);
-  ding();
+  term_beep();
 
   if (thisflag & FLAG_DEFINING_MACRO)
     cancel_kbd_macro();
@@ -177,7 +177,7 @@ static size_t mb_backward_char(size_t i)
   if (i > 0)
     --i;
   else
-    ding();
+    term_beep();
   return i;
 }
 
@@ -186,7 +186,7 @@ static size_t mb_forward_char(size_t i, rblist rbl)
   if ((size_t)i < rblist_length(rbl))
     ++i;
   else
-    ding();
+    term_beep();
   return i;
 }
 
@@ -195,7 +195,7 @@ static void mb_kill_line(size_t i, rblist *as)
   if ((size_t)i < rblist_length(*as))
     *as = rblist_sub(*as, 0, i);
   else
-    ding();
+    term_beep();
 }
 
 static size_t mb_backward_delete_char(size_t i, rblist *as)
@@ -204,7 +204,7 @@ static size_t mb_backward_delete_char(size_t i, rblist *as)
     i--;
     *as = rblist_concat(rblist_sub(*as, 0, i), rblist_sub(*as, i + 1, rblist_length(*as)));
   } else
-    ding();
+    term_beep();
   return i;
 }
 
@@ -213,7 +213,7 @@ static void mb_delete_char(size_t i, rblist *as)
   if (i < rblist_length(*as))
     *as = rblist_concat(rblist_sub(*as, 0, i), rblist_sub(*as, i + 1, rblist_length(*as)));
   else
-    ding();
+    term_beep();
 }
 
 static void mb_prev_history(History *hp, rblist *as, size_t *_i, rblist *_saved)
@@ -321,14 +321,14 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
     case KBD_META | 'v':
     case KBD_PGUP:
       if (cp == NULL)
-        ding();
+        term_beep();
       else
         popup_scroll_up();
       break;
     case KBD_CTRL | 'v':
     case KBD_PGDN:
       if (cp == NULL)
-        ding();
+        term_beep();
       else
         popup_scroll_down();
       break;
@@ -342,7 +342,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     case KBD_TAB:
       if (cp == NULL || list_empty(cp->matches))
-        ding();
+        term_beep();
       else {
         if (rblist_compare(rbl, cp->match) != 0) {
           rbl = cp->match;
@@ -353,7 +353,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       break;
     default:
       if (c > 255 || !isprint(c))
-        ding();
+        term_beep();
       else {
         rbl = rblist_concat(rblist_add_char(rblist_sub(rbl, 0, i), c),
                       rblist_sub(rbl, i, rblist_length(rbl)));

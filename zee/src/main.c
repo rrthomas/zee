@@ -189,7 +189,7 @@ int main(int argc, char **argv)
       win.fheight = 2; // Initialise window; leave space for
                        // minibuffer and status line
       term_init();
-      resize_window(); // Can't run until there is a buffer
+      term_resize(); // Can't run until there is a buffer
       if (buf && line > 0) {
         goto_line(line - 1);
         resync_display();
