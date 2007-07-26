@@ -95,7 +95,7 @@ void popup_clear(void)
  */
 void popup_scroll_down_and_loop(void)
 {
-  const size_t h = term_height() - 3;
+  const size_t h = win.fheight - 3;
   const size_t inc = h;
   popup_line += inc;
   if (popup_line > rblist_nl_count(popup_text))
@@ -108,7 +108,7 @@ void popup_scroll_down_and_loop(void)
  */
 void popup_scroll_down(void)
 {
-  const size_t h = term_height() - 3;
+  const size_t h = win.fheight - 3;
   const size_t inc = h;
   popup_line = min(popup_line + inc, rblist_nl_count(popup_text) + 1 - h);
   term_display();
@@ -119,7 +119,7 @@ void popup_scroll_down(void)
  */
 void popup_scroll_up(void)
 {
-  const size_t h = term_height() - 3;
+  const size_t h = win.fheight - 3;
   const size_t inc = h;
   popup_line -= min(inc, popup_line);
   term_display();
@@ -128,24 +128,14 @@ void popup_scroll_up(void)
 
 // Window properties
 
-static size_t width = 0, height = 0;
 static size_t start_column; // Column of screen on page (i.e. scroll offset).
 static size_t point_screen_column; // Column of cursor on screen.
 
-size_t term_width(void)
+void term_set_size(size_t width, size_t height)
 {
-  return width;
-}
-
-size_t term_height(void)
-{
-  return height;
-}
-
-void term_set_size(size_t cols, size_t rows)
-{
-  width = cols;
-  height = rows;
+  win.term_width = width;
+  win.term_height = height;
+  resize_window();
 }
 
 static rblist make_char_printable(int c)
@@ -164,11 +154,11 @@ static rblist make_char_printable(int c)
 /*
  * Prints character c (which must be printable and single-width) provided
  * the column x is visible (i.e. at least `start_column' and less than
- * term_width()) and returns the next column to the right.
+ * win.fwidth) and returns the next column to the right.
  */
 static size_t outch_printable(int c, size_t x)
 {
-  if (x >= start_column && x < start_column + term_width())
+  if (x >= start_column && x < start_column + win.fwidth)
     term_addch(c);
   return x + 1;
 }
@@ -180,7 +170,7 @@ static size_t outch_printable(int c, size_t x)
  * FONT_NORMAL.
  *
  * Printing is suppressed if x is less than start_column or at least
- * start_column + term_width().
+ * start_column + win.fwidth.
  */
 static size_t outch(int c, Font font, size_t x, size_t tab)
 {
@@ -257,7 +247,7 @@ static void draw_line(size_t row, size_t line, size_t tab)
   term_move(row, 0);
   size_t x = 0, i = 0;
   RBLIST_FOR(c, rblist_line(buf->lines, line))
-    if (x >= start_column + term_width())
+    if (x >= start_column + win.fwidth)
       break; // No point in printing the rest of the line.
     Font font = in_region(line, i, &r) ? FONT_REVERSE : FONT_NORMAL;
     x = outch(c, font, x, tab);
@@ -268,11 +258,11 @@ static void draw_line(size_t row, size_t line, size_t tab)
     term_move(row, 0);
     term_addch('$');
   }
-  if (x >= start_column + term_width()) {
-    term_move(row, win.ewidth - 1);
+  if (x >= start_column + win.fwidth) {
+    term_move(row, win.fwidth - 1);
     term_addch('$');
   } else if (in_region(line, i, &r))
-    while (x < win.ewidth)
+    while (x < win.fwidth)
       x = outch(' ', FONT_REVERSE, x, tab);
 }
 
@@ -325,7 +315,7 @@ size_t string_display_width(rblist rbl)
  */
 static void calculate_start_column(void)
 {
-  const size_t width = term_width(), third_width = max(1, width / 3);
+  const size_t width = win.ewidth, third_width = max(1, width / 3);
   
   // Calculate absolute column of cursor and of end of line.
   const rblist line = rblist_line(buf->lines, buf->pt.n);
@@ -382,7 +372,7 @@ static void draw_border(void)
 {
   size_t i;
   term_attrset(1, FONT_REVERSE);
-  for (i = 0; i < win.ewidth; ++i)
+  for (i = 0; i < win.fwidth; ++i)
     term_addch('-');
   term_attrset(1, FONT_NORMAL);
 }
@@ -448,7 +438,7 @@ static void draw_popup(void)
 
   /* Number of lines of popup_text that will fit on the terminal.
    * Allow 3 for the border above, and minibuffer and status line below. */
-  const size_t h = term_height() - 3;
+  const size_t h = win.fheight - 3;
   // Number of lines is one more than number of newline characters.
   const size_t l = rblist_nl_count(popup_text) + 1;
   // Position of top of popup == number of lines not to use.
@@ -497,7 +487,7 @@ void term_display(void)
  */
 void term_tidy(void)
 {
-  term_move(term_height() - 1, 0);
+  term_move(win.fheight - 1, 0);
   term_clrtoeol();
   term_attrset(1, FONT_NORMAL);
   term_refresh();
@@ -505,42 +495,20 @@ void term_tidy(void)
 
 void resize_window(void)
 {
-  int hdelta;
-
   // Resize window horizontally.
-  win.fwidth = win.ewidth = term_width();
+  win.ewidth = win.fwidth = win.term_width;
 
   /* Work out difference in window height; window may be taller than
      terminal if the terminal was very short. */
-  hdelta = term_height() - 1;
-  hdelta -= win.fheight;
+  ssize_t hdelta = win.term_height - win.fheight;
 
   // Resize window vertically.
-  if (hdelta > 0) { // Increase window height.
-    while (hdelta > 0) {
-      ++win.fheight;
-      ++win.eheight;
-      --hdelta;
-    }
-  } else { // Decrease window height.
-    bool decreased = true;
-    while (decreased) {
-      decreased = false;
-      while (hdelta < 0) {
-        if (win.fheight > 2) {
-          --win.fheight;
-          --win.eheight;
-          ++hdelta;
-          decreased = true;
-        } else
-          // FIXME: Window too small!
-          assert(0);
-      }
-    }
-  }
+  if (hdelta < 0 && win.fheight > (size_t)(2 - hdelta))
+    // FIXME: Window too small!
+    assert(0);
 
-  if (hdelta != 0)
-    CMDCALL(recenter);
+  win.fheight += hdelta;
+  win.eheight += hdelta;
 }
 
 /*

@@ -72,13 +72,13 @@ static volatile int cur_time = 0;
 
 static void draw_cursor(int state)
 {
-  if (cursor_state && cur_x < term_width() && cur_y < term_height()) {
+  if (cursor_state && cur_x < win.fwidth && cur_y < win.fheight) {
     if (state)
       rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
-      int fg, bg, c = new_scr[cur_y * term_width() + cur_x];
+      int fg, bg, c = new_scr[cur_y * win.fwidth + cur_x];
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
@@ -111,18 +111,18 @@ void term_move(size_t y, size_t x)
 
 void term_clrtoeol(void)
 {
-  if (cur_x < term_width() && cur_y < term_height()) {
+  if (cur_x < win.fwidth && cur_y < win.fheight) {
     size_t x;
-    for (x = cur_x; x < term_width(); x++)
-      new_scr[cur_y * term_width() + x] = 0;
+    for (x = cur_x; x < win.fwidth; x++)
+      new_scr[cur_y * win.fwidth + x] = 0;
   }
 }
 
 void term_refresh(void)
 {
   size_t i = 0;
-  for (size_t y = 0; y < term_height(); y++)
-    for (size_t x = 0; x < term_width(); x++) {
+  for (size_t y = 0; y < win.fheight; y++)
+    for (size_t x = 0; x < win.fwidth; x++) {
       if (new_scr[i] != cur_scr[i]) {
         int bg, fg, c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
@@ -136,12 +136,12 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(short) * term_width() * term_height());
+  memset(new_scr, 0, sizeof(short) * win.fwidth * win.fheight);
 }
 
 void term_addch(int c)
 {
-  if (cur_x < term_width() && cur_y < term_height()) {
+  if (cur_x < win.fwidth && cur_y < win.fheight) {
     int color = 0;
 
     if (c & 0x0f00)
@@ -156,7 +156,7 @@ void term_addch(int c)
     else
       color |= cur_color & 0xf000;
 
-    new_scr[cur_y*term_width()+cur_x] = (c & 0x00ff) | color;
+    new_scr[cur_y * win.fwidth + cur_x] = (c & 0x00ff) | color;
   }
   cur_x++;
 }
@@ -164,7 +164,7 @@ void term_addch(int c)
 void term_nl(void)
 {
   cur_x = 0;
-  if (cur_y < term_height())
+  if (cur_y < win.fheight)
     cur_y++;
 }
 
@@ -182,7 +182,7 @@ void term_attrset(size_t attrs, ...)
 
 void term_beep(void)
 {
-  // nothing
+  // FIXME: Make a noise
 }
 
 void term_init(void)
@@ -205,10 +205,10 @@ void term_init(void)
   LOCK_FUNCTION(inc_cur_time);
   install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-  term_set_size((size_t)(SCREEN_W / FW), (size_t)(SCREEN_H / FH));
+  term_set_size((size_t)SCREEN_W / FW, (size_t)SCREEN_H / FH);
 
-  cur_scr = zmalloc(sizeof(short) * term_width() * term_height());
-  new_scr = zmalloc(sizeof(short) * term_width() * term_height());
+  cur_scr = zmalloc(sizeof(short) * win.fwidth * win.fheight);
+  new_scr = zmalloc(sizeof(short) * win.fwidth * win.fheight);
 }
 
 void term_close(void)

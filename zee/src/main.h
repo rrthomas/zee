@@ -101,9 +101,12 @@ typedef struct {
  * Represents a window on the screen: a rectangular area used to
  * display a buffer.
  */
-// FIXME: Audit use of win.ewidth.
 typedef struct {
   size_t topdelta; // The buffer line displayed in the topmost window line
+  size_t term_width, term_height; /* The actual width and height of
+                                     the terminal (used for resizing;
+                                     normally the same as fwidth and
+                                     fheight) */
   size_t fwidth, fheight; /* The formal width and height of the window
                              (space used on the terminal). */
   size_t ewidth, eheight; /* The effective width and height of the

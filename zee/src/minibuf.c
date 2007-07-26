@@ -1,6 +1,6 @@
 /* Minibuffer
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2005 Reuben Thomas.
+   Copyright (c) 2004-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -32,8 +32,8 @@
 
 static void minibuf_draw(rblist rbl)
 {
-  term_move(term_height() - 1, 0);
-  term_print(rblist_sub(rbl, 0, min(rblist_length(rbl), term_width())));
+  term_move(win.fheight - 1, 0);
+  term_print(rblist_sub(rbl, 0, min(rblist_length(rbl), win.fwidth)));
   term_clrtoeol();
 }
 
@@ -145,7 +145,7 @@ void minibuf_clear(void)
 static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
 {
   rblist rbl = prompt;          // Text to print.
-  size_t visible_width = max(3, term_width() - rblist_length(prompt) - 2);
+  size_t visible_width = max(3, win.fwidth - rblist_length(prompt) - 2);
   visible_width--; /* Avoid the b.r. corner of the screen for broken
                       terminals and terminal emulators. */
   size_t scroll_pos =
@@ -161,14 +161,14 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
     rbl = rblist_add_char(rbl, '$');
 
   // Handle terminals not wide enough to show "<prompt>$xxx$".
-  if (rblist_length(rbl) > term_width()) {
-    size_t to_lose = rblist_length(rbl) - term_width();
+  if (rblist_length(rbl) > win.fwidth) {
+    size_t to_lose = rblist_length(rbl) - win.fwidth;
     rbl = rblist_sub(rbl, to_lose, rblist_length(rbl));
     cursor_pos -= to_lose;
   }
 
   minibuf_draw(rbl);
-  term_move(term_height() - 1, cursor_pos);
+  term_move(win.fheight - 1, cursor_pos);
   term_refresh();
 }
 

@@ -186,7 +186,8 @@ int main(int argc, char **argv)
     }
 
     if (!bflag) {
-      win.fheight = 1; // Initialise window; need fheight > eheight
+      win.fheight = 2; // Initialise window; leave space for
+                       // minibuffer and status line
       term_init();
       resize_window(); // Can't run until there is a buffer
       if (buf && line > 0) {

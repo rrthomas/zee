@@ -221,10 +221,9 @@ size_t term_xgetkey(int mode, size_t timeout)
     if (mode & GETKEY_DELAYED)
       wtimeout(stdscr, -1);
 
-    if (c == KEY_RESIZE) {
+    if (c == KEY_RESIZE)
       term_set_size((size_t)COLS, (size_t)LINES);
-      resize_window();
-    } else
+    else
       break;
   }
 

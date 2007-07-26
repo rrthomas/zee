@@ -72,8 +72,6 @@ void popup_clear(void);
 void popup_scroll_down_and_loop(void);
 void popup_scroll_down(void);
 void popup_scroll_up(void);
-size_t term_width(void);
-size_t term_height(void);
 void term_set_size(size_t cols, size_t rows);
 void term_display(void);
 void term_tidy(void);
