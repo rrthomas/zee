@@ -187,7 +187,7 @@ bool eolp(void)
  */
 bool insert_char(int c)
 {
-  return replace_nstring(0, NULL, rblist_singleton(c));
+  return replace_nstring(0, NULL, rblist_from_char(c));
 }
 
 DEF(edit_insert_tab,

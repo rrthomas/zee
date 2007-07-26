@@ -75,7 +75,7 @@ const rblist rblist_empty;
  *
  * Takes time O(1).
  */
-rblist rblist_singleton(int c);
+rblist rblist_from_char(int c);
 
 /*
  * Concatenate two lists. The originals are not modified.

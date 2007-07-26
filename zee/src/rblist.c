@@ -282,7 +282,7 @@ rblist rblist_from_array(const char *s, size_t length)
 
 const rblist rblist_empty = (rblist)&empty;
 
-rblist rblist_singleton(int c)
+rblist rblist_from_char(int c)
 {
   char cc = c;
   return leaf_from_array(&cc, 1);
@@ -355,7 +355,7 @@ rblist rblist_from_number(size_t x, unsigned base)
 
   rblist ret = rblist_empty;
   do {
-    ret = rblist_concat(rblist_singleton(digits[x % base]), ret);;
+    ret = rblist_concat(rblist_from_char(digits[x % base]), ret);;
     x /= base;
   } while (x);
 

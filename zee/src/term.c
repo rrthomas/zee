@@ -139,7 +139,7 @@ static rblist make_char_printable(int c)
   if ((size_t)c < sizeof(ctrls))
     return rblist_fmt("^%c", ctrls[c]);
   else if (isprint(c))
-    return rblist_singleton(c); // FIXME: Won't work for double-width characters.
+    return rblist_from_char(c); // FIXME: Won't work for double-width characters.
   else
     return rblist_fmt("\\%o", c);
 }

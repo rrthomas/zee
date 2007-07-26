@@ -151,14 +151,14 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
   size_t scroll_pos =
     offset == 0 ? 0 : visible_width * ((offset - 1) / visible_width);
   if (scroll_pos > 0)
-    rbl = rblist_concat(rbl, rblist_singleton('$'));
+    rbl = rblist_concat(rbl, rblist_from_char('$'));
 
   // Cursor position within `rbl'.
   size_t cursor_pos = rblist_length(rbl) + (offset - scroll_pos);
 
   rbl = rblist_concat(rbl, rblist_sub(value, scroll_pos, min(rblist_length(value), scroll_pos + visible_width)));
   if (rblist_length(value) > scroll_pos + visible_width)
-    rbl = rblist_concat(rbl, rblist_singleton('$'));
+    rbl = rblist_concat(rbl, rblist_from_char('$'));
 
   // Handle terminals not wide enough to show "<prompt>$xxx$".
   if (rblist_length(rbl) > win.fwidth) {
@@ -355,7 +355,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       if (c > 255 || !isprint(c))
         term_beep();
       else {
-        rbl = rblist_concat(rblist_concat(rblist_sub(rbl, 0, i), rblist_singleton(c)),
+        rbl = rblist_concat(rblist_concat(rblist_sub(rbl, 0, i), rblist_from_char(c)),
                       rblist_sub(rbl, i, rblist_length(rbl)));
         i++;
       }
