@@ -14,7 +14,7 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
-dist_pkgdata_DATA = cua_bindings emacs_bindings
+dist_pkgdata_DATA = cua_bindings emacs_bindings beep.wav
 
 info_TEXINFOS = zee.texi
 

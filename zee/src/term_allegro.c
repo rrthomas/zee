@@ -34,6 +34,7 @@
                                 // autotools macros
 
 #include "main.h"
+#include "extern.h"
 #include "term.h"
 
 // Font width and height
@@ -48,12 +49,23 @@ static Font cur_color = 0;
 static short *cur_scr = NULL;
 static short *new_scr = NULL;
 
-static void _get_color(int c, int *_fg, int *_bg)
-{
-  int fg, bg;
+// Text and cursor foreground and background colours
+#define FG_RED		255
+#define FG_GREEN	255
+#define FG_BLUE		255
+#define BG_RED		0
+#define BG_GREEN	0
+#define BG_BLUE		0
 
-  fg = makecol(170, 170, 170);
-  bg = makecol(0, 0, 0);
+static bool cursor_state = false;
+static volatile int blink_state = 0;
+
+static volatile int cur_time = 0;
+
+static void draw_char(int c, size_t x, size_t y)
+{
+  int fg = makecol(FG_RED, FG_GREEN, FG_BLUE);
+  int bg = makecol(BG_RED, BG_GREEN, BG_BLUE);
 
   if (c & FONT_REVERSE) {
     int aux = fg;
@@ -61,14 +73,14 @@ static void _get_color(int c, int *_fg, int *_bg)
     bg = aux;
   }
 
-  if (_fg) *_fg = fg;
-  if (_bg) *_bg = bg;
+  char s[2];
+  c &= 0xff;
+  c = c ? c : ' ';
+  s[0] = c;
+  s[1] = '\0';
+  textout_ex(screen, font, s, (int)(x * FW), (int)(y * FH), fg, bg);
 }
-
-static bool cursor_state = false;
-static volatile int blink_state = 0;
-
-static volatile int cur_time = 0;
+END_OF_STATIC_FUNCTION(draw_char)
 
 static void draw_cursor(int state)
 {
@@ -76,16 +88,9 @@ static void draw_cursor(int state)
     if (state)
       rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
                (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
-               makecol(170, 170, 170));
-    else {
-      int fg, bg, c = new_scr[cur_y * win.fwidth + cur_x];
-      _get_color(c, &fg, &bg);
-      text_mode(bg);
-      font->vtable->render_char
-        (font, ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
-         fg, bg, screen,
-         (int)(cur_x * FW), (int)(cur_y * FH));
-    }
+               makecol(FG_RED, FG_GREEN, FG_BLUE));
+    else
+      draw_char(new_scr[cur_y * win.fwidth + cur_x], cur_x, cur_y);
   }
 }
 END_OF_STATIC_FUNCTION(draw_cursor)
@@ -97,11 +102,22 @@ static void control_blink_state(void)
 }
 END_OF_STATIC_FUNCTION(control_blink_state)
 
+static void reset_cursor(void)
+{
+  blink_state = 1;
+  cursor_state = true;
+  draw_cursor(blink_state);
+  cursor_state = false;
+}
+END_OF_STATIC_FUNCTION(reset_cursor)
+
 static void inc_cur_time(void)
 {
   cur_time++;
 }
 END_OF_STATIC_FUNCTION(inc_cur_time)
+
+static SAMPLE *the_beep = NULL;
 
 void term_move(size_t y, size_t x)
 {
@@ -122,16 +138,12 @@ void term_refresh(void)
 {
   size_t i = 0;
   for (size_t y = 0; y < win.fheight; y++)
-    for (size_t x = 0; x < win.fwidth; x++) {
+    for (size_t x = 0; x < win.fwidth; x++, i++)
       if (new_scr[i] != cur_scr[i]) {
-        int bg, fg, c = cur_scr[i] = new_scr[i];
-        _get_color(c, &fg, &bg);
-        text_mode(bg);
-        font->vtable->render_char(font, ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
-                                  fg, bg, screen, (int)(x * FW), (int)(y * FH));
+        cur_scr[i] = new_scr[i];
+        draw_char(cur_scr[i], x, y);
       }
-      i++;
-    }
+  reset_cursor();
 }
 
 void term_clear(void)
@@ -182,17 +194,31 @@ void term_attrset(size_t attrs, ...)
 
 void term_beep(void)
 {
-  // FIXME: Make a noise
+   play_sample(the_beep, 255, 128, 1000, FALSE);
 }
 
 void term_init(void)
 {
-  allegro_init();
+  if (allegro_init() != 0) {
+    allegro_message("Could not initialise Allegro.\n");
+    die(1);
+  }
   install_timer();
   install_keyboard();
+
+  // If we can initialise sound, loud the beep sample.
+  if (install_sound(DIGI_AUTODETECT, MIDI_NONE, NULL) == 0) {
+    char *sample_file = PKGDATADIR "/beep.wav";
+    if ((the_beep = load_sample(sample_file)) == NULL) {
+      allegro_message("Could not read beep sample `%s'\n", sample_file);
+      die(1);
+    }
+  }
+
+  // Set up screen. After this we can't call allegro_message.
   set_color_depth(8);
   if (set_gfx_mode(GFX_SAFE, 640, 480, 0, 0) < 0) {
-    fprintf(stderr, "Could not set VGA screen mode.");
+    allegro_message("Could not set up screen.\n");
     die(1);
   }
 
@@ -203,7 +229,7 @@ void term_init(void)
 
   LOCK_VARIABLE(cur_time);
   LOCK_FUNCTION(inc_cur_time);
-  install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
+  install_int(inc_cur_time, 1);
 
   term_set_size((size_t)SCREEN_W / FW, (size_t)SCREEN_H / FH);
 
@@ -213,7 +239,8 @@ void term_init(void)
 
 void term_close(void)
 {
-  // Finish with allegro.
+  if (the_beep)
+    destroy_sample(the_beep);
   set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
   allegro_exit();
 }
@@ -276,6 +303,7 @@ static int translate_key(int c)
 
   return KBD_NOKEY;
 }
+END_OF_STATIC_FUNCTION(translate_key)
 
 static int hooked_readkey(int mode, size_t timeout)
 {
@@ -287,7 +315,7 @@ static int hooked_readkey(int mode, size_t timeout)
   if (timeout > 0)
     while (!keypressed() && (!(mode & GETKEY_DELAYED) ||
                              cur_time - beg_time < timeout))
-      rest(10);
+      rest(0);
 
   ret = readkey();
   draw_cursor(false);
@@ -295,6 +323,7 @@ static int hooked_readkey(int mode, size_t timeout)
 
   return ret;
 }
+END_OF_STATIC_FUNCTION(hooked_readkey)
 
 size_t term_xgetkey(int mode, size_t timeout)
 {
