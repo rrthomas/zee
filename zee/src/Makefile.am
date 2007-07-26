@@ -70,8 +70,8 @@ else
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
 endif
 
-zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
-zee_LDADD = @LIBOBJS@
+zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\"" @LUA_INCLUDES@
+zee_LDADD = @LIBOBJS@ @LUA_LIBS@
 
 EXTRA_DIST =  								\
 		lib.lua							\
