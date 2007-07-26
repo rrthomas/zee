@@ -49,7 +49,9 @@ struct rbacc {
 /*****************************/
 // Static utility functions.
 
-// Flushes the characters buffered in rbacc.tail into rbacc.head.
+/*
+ * Flushes the characters buffered in rbacc.tail into rbacc.head.
+ */
 static void flush(rbacc rba)
 {
   assert(rba->used <= ACCUMULATOR_LENGTH);
