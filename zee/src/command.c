@@ -70,11 +70,14 @@ bool cmd_eval(rblist s, rblist source)
   size_t lineno = 1, pos = 0;
 
   assert(s);
+  minibuf_error_set_source(source);
 
   for (rblist tok = gettok(s, &pos);
        tok != NULL;
        tok = gettok(s, &pos)) {
-    // Get tokens until we run out or reach a new line
+    minibuf_error_set_lineno(lineno);
+
+      // Get tokens until we run out or reach a new line
     list l = list_new();
     while (tok && tok != rblist_empty) {
       list_append(l, tok);
@@ -89,12 +92,14 @@ bool cmd_eval(rblist s, rblist source)
            (ok &= cmd(l)))
       ;
     if (fname && !cmd) {
-      minibuf_error(rblist_fmt("No such command `%r' at line %d of %r", fname, lineno, source));
+      minibuf_error(rblist_fmt("No such command `%r'", fname));
       ok = false;
     }
     lineno++;
   }
 
+  minibuf_error_set_lineno(0);
+  minibuf_error_set_source(NULL);
   return ok;
 }
 

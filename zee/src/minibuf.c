@@ -49,11 +49,29 @@ void minibuf_write(rblist rbl)
   term_refresh();
 }
 
+static size_t minibuf_error_lineno;
+static rblist minibuf_error_source;
+
+void minibuf_error_set_lineno(size_t lineno)
+{
+  minibuf_error_lineno = lineno;
+}
+
+void minibuf_error_set_source(rblist rbl)
+{
+  minibuf_error_source = rbl;
+}
+
 /*
  * Write the specified error string in the minibuffer and beep.
  */
 void minibuf_error(rblist rbl)
 {
+  if (minibuf_error_source)
+    rbl = rblist_concat(rbl, rblist_fmt(" in %r", minibuf_error_source));
+  if (minibuf_error_lineno)
+    rbl = rblist_concat(rbl, rblist_fmt(" at line %d", minibuf_error_lineno));
+
   minibuf_write(rbl);
   term_beep();
 

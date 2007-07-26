@@ -118,6 +118,8 @@ extern int thisflag, lastflag;
 
 // minibuf.c --------------------------------------------------------------
 void minibuf_write(rblist rbl);
+void minibuf_error_set_lineno(size_t lineno);
+void minibuf_error_set_source(rblist rbl);
 void minibuf_error(rblist rbl);
 rblist minibuf_read(rblist rbl, rblist value);
 int minibuf_read_yesno(rblist rbl);
