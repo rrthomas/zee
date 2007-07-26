@@ -35,7 +35,7 @@
 
 void resync_display(void)
 {
-  int delta = buf->pt.n - win.lastpointn;
+  ssize_t delta = buf->pt.n - win.lastpointn;
 
   if (delta) {
     if ((delta > 0 && win.topdelta + delta < win.eheight) ||
@@ -49,17 +49,12 @@ void resync_display(void)
   }
 }
 
-DEF(recenter,
+DEF(move_redraw,
 "\
-Center point in window and redisplay screen.\n\
+Redraw the display.\n\
 ")
 {
-  if (buf) {
-    if (buf->pt.n > win.eheight / 2)
-      win.topdelta = win.eheight / 2;
-    else
-      win.topdelta = buf->pt.n;
-  }
+  resync_display();
   term_clear();
   term_display();
 }
