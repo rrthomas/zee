@@ -28,6 +28,7 @@
 
 #include "main.h"
 #include "extern.h"
+#include "rbacc.h"
 
 
 /*--------------------------------------------------------------------------
@@ -230,25 +231,24 @@ static unsigned check_case(rblist rbl)
  */
 static rblist recase(rblist str, rblist tmpl)
 {
-  int c;
   unsigned tmpl_case = check_case(tmpl);
-  rblist ret = rblist_empty;
+  rbacc ret = rbacc_new();
 
   assert(rblist_length(str) > 0);
   assert(rblist_length(str) == rblist_length(tmpl));
 
-  c = rblist_get(str, 0);
+  int c = rblist_get(str, 0);
   if (tmpl_case >= 1)
     c = toupper(c);
-  ret = rblist_append(ret, c);
+  rbacc_add_char(ret, c);
 
   RBLIST_FOR(c, rblist_sub(str, 1, rblist_length(str)))
     if (tmpl_case == 2)
       c = toupper(c);
-    ret = rblist_append(ret, c);
+    rbacc_add_char(ret, c);
   RBLIST_END
 
-  return ret;
+  return rbacc_to_rblist(ret);
 }
 
 /*
@@ -356,6 +356,8 @@ END_DEF
  */
 bool replace_nstring(size_t size, rblist *ret, rblist repl)
 {
+  rbacc rba;
+
   if (warn_if_readonly_buffer())
     return false;
 
@@ -364,27 +366,33 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
 
   if (size) {
     if (ret)
-      *ret = rblist_empty;
+      rba = rbacc_new();
     buf->flags &= ~BFLAG_ANCHORED;
 
     while (size--) {
       if (ret) {
         if (!eolp())
-          *ret = rblist_append(*ret, following_char());
+          rbacc_add_char(rba, following_char());
         else
-          *ret = rblist_append(*ret, '\n');
+          rbacc_add_char(rba, '\n');
       }
 
-      if (eobp()) {
-        minibuf_error(rblist_from_string("End of buffer"));
-        return false;
-      }
+      if (eobp())
+        break;
 
       buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
                                  rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
                                                           rblist_length(buf->lines)));
       adjust_markers(buf->pt.n, buf->pt.o, -1);
       buf->flags |= BFLAG_MODIFIED;
+    }
+
+    if (ret)
+      *ret = rbacc_to_rblist(rba);
+
+    if (eobp()) {
+      minibuf_error(rblist_from_string("End of buffer"));
+      return false;
     }
   }
 

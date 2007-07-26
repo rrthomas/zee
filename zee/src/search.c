@@ -192,7 +192,7 @@ static bool isearch(int dir)
         minibuf_clear();
       break;
     } else
-      pattern = rblist_append(pattern, c);
+      pattern = rblist_add_char(pattern, c);
 
     if (rblist_length(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)

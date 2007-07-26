@@ -29,6 +29,7 @@
 
 #include "zmalloc.h"
 #include "rblist.h"
+#include "rbacc.h"
 
 
 // For debugging: incremented every time random_double is called.
@@ -342,7 +343,7 @@ rblist rblist_concat(rblist left, rblist right)
 /*************************/
 // Derived constructors.
 
-rblist rblist_append(rblist rbl, int c)
+rblist rblist_add_char(rblist rbl, int c)
 {
   return rblist_concat(rbl, rblist_singleton(c));
 }
@@ -357,18 +358,19 @@ rblist rblist_from_string(const char *s)
  * base up to 16. If the result has more than 64 digits, higher
  * digits are discarded.
  */
-static rblist fmt_number(size_t x, unsigned base)
+static char *fmt_number(size_t x, unsigned base)
 {
   static const char const *digits = "0123456789abcdef";
-  #define MAX_DIGITS 64
-  static char buf[MAX_DIGITS];
+#define MAX_DIGITS 64
+  static char buf[MAX_DIGITS + 1];
+  buf[MAX_DIGITS] = '\0';
 
   if (!x)
-    return rblist_from_string("0");
+    return "0";
   size_t i;
   for (i = MAX_DIGITS; i && x; x /= base)
     buf[--i] = digits[x % base];
-  return rblist_from_array(&buf[i], MAX_DIGITS - i);
+  return &buf[i];
 }
 
 /*
@@ -391,42 +393,43 @@ rblist rblist_fmt(const char *format, ...)
 {
   va_list ap;
   va_start(ap, format);
-  rblist ret = rblist_empty;
+  rbacc ret = rbacc_new();
   int x;
   size_t i;
   while (1) {
     // Skip to next `%' or to end of string.
     for (i = 0; format[i] && format[i] != '%'; i++);
-    ret = rblist_concat(ret, rblist_from_array(format, i));
+    rbacc_add_array(ret, format, i);
     if (!format[i++])
       break;
     // We've found a `%'.
     switch (format[i++]) {
       case 'c':
-        ret = rblist_append(ret, (char)va_arg(ap, int));
+        rbacc_add_char(ret, (char)va_arg(ap, int));
         break;
       case 'd': {
         x = va_arg(ap, int);
-        if (x < 0)
-          ret = rblist_concat(rblist_append(ret, '-'), fmt_number((unsigned)-x, 10));
-        else
-          ret = rblist_concat(ret, fmt_number((unsigned)x, 10));
+        if (x < 0) {
+          rbacc_add_char(ret, '-');
+          rbacc_add_string(ret, fmt_number((unsigned)-x, 10));
+        } else
+          rbacc_add_string(ret, fmt_number((unsigned)x, 10));
         break;
       }
       case 'o':
-        ret = rblist_concat(ret, fmt_number(va_arg(ap, unsigned int), 8));
+        ret = rbacc_add_string(ret, fmt_number(va_arg(ap, unsigned int), 8));
         break;
       case 'r':
-        ret = rblist_concat(ret, va_arg(ap, rblist));
+        ret = rbacc_add_rblist(ret, va_arg(ap, rblist));
         break;
       case 's':
-        ret = rblist_concat(ret, rblist_from_string(va_arg(ap, const char *)));
+        ret = rbacc_add_string(ret, va_arg(ap, const char *));
         break;
       case 'x':
-        ret = rblist_concat(ret, fmt_number(va_arg(ap, unsigned int), 16));
+        ret = rbacc_add_string(ret, fmt_number(va_arg(ap, unsigned int), 16));
         break;
       case '%':
-        ret = rblist_append(ret, '%');
+        ret = rbacc_add_char(ret, '%');
         break;
       default:
         assert(0);
@@ -434,7 +437,7 @@ rblist rblist_fmt(const char *format, ...)
     format = &format[i];
   }
   va_end(ap);
-  return ret;
+  return rbacc_to_rblist(ret);
 }
 
 /**************************/

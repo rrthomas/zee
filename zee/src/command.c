@@ -25,6 +25,7 @@
 #include "config.h"
 #include "main.h"
 #include "extern.h"
+#include "rbacc.h"
 
 
 static inline int getch(rblist line, size_t *pos)
@@ -49,15 +50,15 @@ static rblist gettok(rblist line, size_t *pos)
   } while (c == ' ' || c == '\t');
 
   // Read token.
-  rblist tok = rblist_empty;
+  rbacc tok = rbacc_new();
   while (c != '#' && c != ' ' && c != '\t' && c != '\n' && c != EOF) {
-    tok = rblist_append(tok, c);
+    tok = rbacc_add_char(tok, c);
     c = getch(line, pos);
   }
 
-  if (c == EOF && tok == rblist_empty)
+  if (c == EOF && rbacc_length(tok) == 0)
     return NULL;
-  return tok;
+  return rbacc_to_rblist(tok);
 }
 
 /*

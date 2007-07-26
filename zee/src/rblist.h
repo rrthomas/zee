@@ -92,7 +92,7 @@ rblist rblist_concat(rblist left, rblist right);
  * Append the argument character to rbl.
  * FIXME: Generalise to rblist_insert, and use in replace_nstring.
  */
-rblist rblist_append(rblist rbl, int c);
+rblist rblist_add_char(rblist rbl, int c);
 
 /*
  * Makes an rblist from a 0-terminated string.

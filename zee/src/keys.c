@@ -29,6 +29,7 @@
 #include "main.h"
 #include "term.h"
 #include "extern.h"
+#include "rbacc.h"
 
 
 // Get keystrokes
@@ -103,30 +104,30 @@ static const char *keyname[] = {
 rblist chordtostr(size_t key)
 {
   size_t i;
-  rblist rbl = rblist_empty;
+  rbacc rba = rbacc_new();
 
   if (key & KBD_CTRL)
-    rbl = rblist_concat(rbl, rblist_from_string("C-"));
+    rbacc_add_string(rba, "C-");
   if (key & KBD_META)
-    rbl = rblist_concat(rbl, rblist_from_string("M-"));
+    rbacc_add_string(rba, "M-");
   key &= ~(KBD_CTRL | KBD_META);
 
   bool found = false;
   for (i = 0; i < sizeof(keycode) / sizeof(keycode[0]); i++)
     if (keycode[i] == key) {
-      rbl = rblist_concat(rbl, rblist_from_string(keyname[i]));
+      rbacc_add_string(rba, keyname[i]);
       found = true;
       break;
     }
 
   if (found == false) {
     if (isgraph(key))
-      rbl = rblist_append(rbl, (int)(key & 0xff));
+      rbacc_add_char(rba, (int)(key & 0xff));
     else
-      rbl = rblist_concat(rbl, rblist_fmt("<%x>", key));
+      rbacc_add_rblist(rba, rblist_fmt("<%x>", key));
   }
 
-  return rbl;
+  return rbacc_to_rblist(rba);
 }
 
 /*
