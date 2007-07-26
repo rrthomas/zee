@@ -132,7 +132,6 @@ int main(int argc, char **argv)
       break;
     case 2:
       {
-        // FIXME: Make a file_insert command
         rblist arg = rblist_from_string(optarg);
         if ((rbl = file_read(arg)))
           ok &= cmd_eval(rbl, rblist_fmt("`%r'", arg));
