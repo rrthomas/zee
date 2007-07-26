@@ -5,34 +5,34 @@ key_bind M-x execute_command
 key_bind C-u edit_repeat
 
 # Navigation. Mostly arrows and things.
-# FIXME: Ideally everything should have a home keys alternative, but
-# this is currently not true.
 
 # Character/line
 key_bind LEFT move_previous_character
-key_bind RIGHT move_next_character
-key_bind UP move_previous_line
-key_bind DOWN move_next_line
 key_bind C-b move_previous_character
+key_bind RIGHT move_next_character
 key_bind C-f move_next_character
+key_bind UP move_previous_line
 key_bind C-p move_previous_line
+key_bind DOWN move_next_line
 key_bind C-n move_next_line
 # Word/paragraph
 key_bind C-LEFT move_previous_word
-key_bind C-RIGHT move_next_word
 key_bind M-b move_previous_word
+key_bind C-RIGHT move_next_word
 key_bind M-f move_next_word
 # Line/page
 key_bind HOME move_start_line
-key_bind END move_end_line
-key_bind PGUP move_previous_page
-key_bind PGDN move_next_page
 key_bind C-a move_start_line
+key_bind END move_end_line
 key_bind C-e move_end_line
+key_bind PGUP move_previous_page
+key_bind M-v move_previous_page
+key_bind PGDN move_next_page
+key_bind C-v move_next_page
 # Whole buffer
 key_bind C-HOME move_start_file
-key_bind C-END move_end_file
 key_bind M-< move_start_file
+key_bind C-END move_end_file
 key_bind M-> move_end_file
 # Window
 key_bind C-l move_redraw
