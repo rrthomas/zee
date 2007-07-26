@@ -229,7 +229,7 @@ END_DEF
 
 DEF(move_previous_page,
 "\
-Scroll text of current window downward near full screen.\
+Scroll text of window downward near full screen.\
 ")
 {
   if (buf->pt.n > 0)
@@ -243,7 +243,7 @@ END_DEF
 
 DEF(move_next_page,
 "\
-Scroll text of current window upward near full screen.\
+Scroll text of window upward near full screen.\
 ")
 {
   if (buf->pt.n < rblist_nl_count(buf->lines))

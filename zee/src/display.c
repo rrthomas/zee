@@ -53,7 +53,6 @@ void resync_display(void)
 DEF(recenter,
 "\
 Center point in window and redisplay screen.\n\
-The desired position of point is always relative to the current window.\
 ")
 {
   if (buf) {

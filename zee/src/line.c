@@ -125,7 +125,7 @@ bool is_blank_line(void)
 }
 
 /*
- * Return the character following point in the current buffer
+ * Return the character following point
  */
 int following_char(void)
 {
@@ -138,7 +138,7 @@ int following_char(void)
 }
 
 /*
- * Return the character preceding point in the current buffer
+ * Return the character preceding point
  */
 int preceding_char(void)
 {
@@ -183,8 +183,7 @@ bool eolp(void)
 }
 
 /*
- * Insert the character `c' at the current point position
- * into the current buffer.
+ * Insert the character `c' at point.
  */
 bool insert_char(int c)
 {
