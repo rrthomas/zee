@@ -157,17 +157,6 @@ bool completion_try(Completion *cp, rblist search)
 }
 
 /*
- * Tests whether there was an exact match.
- * Not currently used, but it's worth remembering how to do it.
- */
-bool completion_is_exact(Completion *cp, rblist search)
-{
-  return
-    !list_empty(cp->matches) &&
-    rblist_length(search) == rblist_length(list_first(cp->matches)->item);
-}
-
-/*
  * Find the last occurrence of character `c' before `before_pos' in
  * `rbl'. Returns the offset into `rbl' of the character after `c', or
  * 0 if not found.
