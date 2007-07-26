@@ -1,12 +1,12 @@
 # CUA key bindings
 
-# Command execution.
+# Command execution
 key_bind M-x execute_command
 key_bind C-u edit_repeat
 
 # Navigation. Mostly arrows and things.
-# Ideally everything should have a home keys alternative, but this is
-# currently not true.
+# FIXME: Ideally everything should have a home keys alternative, but
+# this is currently not true.
 
 # Character/line
 key_bind LEFT move_previous_character
@@ -39,25 +39,26 @@ key_bind C-l move_redraw
 
 # Absolute navigation. These are like navigation commands but they
 # don't become selection commands when combined with SHIFT.
-
 key_bind C-M-g edit_goto_column
 key_bind M-g edit_goto_line
 
 # Save
 key_bind M-s file_save
+# Suspend
+key_bind C-z file_suspend
 # Quit
 key_bind C-M-q file_quit
 
 # Undo
 key_bind C-_ edit_undo
-# Cut selection to clipboard.
+# Cut selection to clipboard
 key_bind C-k edit_kill_selection
 key_bind M-d edit_kill_word
-# Copy selection to clipboard.
+# Copy selection to clipboard
 key_bind M-w edit_copy
-# Delete without modifying clipboard.
+# Delete without modifying clipboard
 key_bind C-d edit_delete_next_character
-# Paste.
+# Paste
 key_bind C-y edit_paste
 
 # Search
@@ -65,22 +66,18 @@ key_bind C-s edit_find
 key_bind C-r edit_find_backward
 key_bind M-% edit_replace
 
-# Insert special characters.
+# Insert special characters
 key_bind C-RET edit_insert_newline
 key_bind RET edit_insert_newline_and_indent
-key_bind TAB indent_relative # FIXME: edit_insert_tab?
+key_bind TAB indent_relative
 key_bind C-q edit_insert_quoted
+key_bind M-i edit_insert_tab
+key_bind M-! edit_shell_command
 
-# Macros.
+# Macros
 key_bind M-( macro_record
 key_bind M-) macro_stop
 key_bind M-e macro_play
 
-# Wrap.
+# Wrap
 key_bind M-q edit_wrap_paragraph
-
-# Rare commands.
-# FIXME: Reconsider and possibly remove bindings.
-key_bind M-i edit_insert_tab
-key_bind M-! edit_shell_command
-key_bind C-z file_suspend
