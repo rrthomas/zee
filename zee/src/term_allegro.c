@@ -58,7 +58,7 @@ static short *new_scr = NULL;
 #define BG_BLUE		0
 
 static bool cursor_state = false;
-static volatile int blink_state = 0;
+static volatile bool blink_state = false;
 
 static volatile int cur_time = 0;
 
@@ -82,7 +82,7 @@ static void draw_char(int c, size_t x, size_t y)
 }
 END_OF_STATIC_FUNCTION(draw_char)
 
-static void draw_cursor(int state)
+static void draw_cursor(bool state)
 {
   if (cursor_state && cur_x < win.fwidth && cur_y < win.fheight) {
     if (state)
@@ -97,7 +97,7 @@ END_OF_STATIC_FUNCTION(draw_cursor)
 
 static void control_blink_state(void)
 {
-  blink_state ^= 1;
+  blink_state = !blink_state;
   draw_cursor(blink_state);
 }
 END_OF_STATIC_FUNCTION(control_blink_state)
@@ -308,7 +308,6 @@ END_OF_STATIC_FUNCTION(translate_key)
 static int hooked_readkey(int mode, size_t timeout)
 {
   size_t beg_time = cur_time;
-  int ret;
   term_refresh();
 
   cursor_state = true;
@@ -317,7 +316,7 @@ static int hooked_readkey(int mode, size_t timeout)
                              cur_time - beg_time < timeout))
       rest(0);
 
-  ret = readkey();
+  int ret = readkey();
   draw_cursor(false);
   cursor_state = false;
 
