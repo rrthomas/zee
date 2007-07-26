@@ -497,16 +497,9 @@ void resize_window(void)
   // Resize window horizontally.
   win.ewidth = win.fwidth = win.term_width;
 
-  /* Work out difference in window height; window may be taller than
-     terminal if the terminal was very short. */
-  ssize_t hdelta = win.term_height - win.fheight;
-  
-  // FIXME: Window too small!
-  assert(hdelta >= 0 || win.fheight <= (size_t)(2 - hdelta));
-
   // Resize window vertically.
-  win.fheight += hdelta;
-  win.eheight += hdelta;
+  win.eheight = win.fheight = win.term_height;
+  win.eheight -= min(win.eheight, 2);
 }
 
 /*
