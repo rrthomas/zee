@@ -114,7 +114,7 @@ Macro *get_macro(rblist name);
 // main.c -----------------------------------------------------------------
 extern Window win;
 extern Buffer *buf;
-extern int thisflag, lastflag, uniarg;
+extern int thisflag, lastflag;
 
 // minibuf.c --------------------------------------------------------------
 void minibuf_write(rblist rbl);
