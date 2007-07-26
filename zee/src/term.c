@@ -35,8 +35,7 @@
 
 void resync_display(void)
 {
-  static size_t lastpointn = 0;
-  int delta = buf->pt.n - lastpointn;
+  int delta = buf->pt.n - win.lastpointn;
 
   if (delta) {
     if ((delta > 0 && win.topdelta + delta < win.eheight) ||
@@ -46,7 +45,7 @@ void resync_display(void)
       win.topdelta = win.eheight / 2;
     else
       win.topdelta = buf->pt.n;
-    lastpointn = buf->pt.n;
+    win.lastpointn = buf->pt.n;
   }
 }
 

@@ -103,6 +103,7 @@ typedef struct {
  */
 typedef struct {
   size_t topdelta; // The buffer line displayed in the topmost window line
+  size_t lastpointn;            // Point line at last resync
   size_t term_width, term_height; /* The actual width and height of
                                      the terminal (used for resizing;
                                      normally the same as fwidth and
