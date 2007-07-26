@@ -343,34 +343,23 @@ rblist rblist_concat(rblist left, rblist right)
 /*************************/
 // Derived constructors.
 
-rblist rblist_add_char(rblist rbl, int c)
-{
-  return rblist_concat(rbl, rblist_singleton(c));
-}
-
 rblist rblist_from_string(const char *s)
 {
   return rblist_from_array(s, strlen(s));
 }
 
-/*
- * Used internally by rblist_fmt. Formats an unsigned number in any
- * base up to 16. If the result has more than 64 digits, higher
- * digits are discarded.
- */
-static char *fmt_number(size_t x, unsigned base)
+rblist rblist_from_number(size_t x, unsigned base)
 {
-  static const char const *digits = "0123456789abcdef";
-#define MAX_DIGITS 64
-  static char buf[MAX_DIGITS + 1];
-  buf[MAX_DIGITS] = '\0';
+  static const char const digits[] = "0123456789abcdef";
+  assert(base <= sizeof(digits) / sizeof(char));
 
-  if (!x)
-    return "0";
-  size_t i;
-  for (i = MAX_DIGITS; i && x; x /= base)
-    buf[--i] = digits[x % base];
-  return &buf[i];
+  rblist ret = rblist_empty;
+  do {
+    ret = rblist_concat(rblist_singleton(digits[x % base]), ret);;
+    x /= base;
+  } while (x);
+
+  return ret;
 }
 
 /*
@@ -411,13 +400,13 @@ rblist rblist_fmt(const char *format, ...)
         x = va_arg(ap, int);
         if (x < 0) {
           rbacc_add_char(ret, '-');
-          rbacc_add_string(ret, fmt_number((unsigned)-x, 10));
+          rbacc_add_rblist(ret, rblist_from_number((unsigned)-x, 10));
         } else
-          rbacc_add_string(ret, fmt_number((unsigned)x, 10));
+          rbacc_add_rblist(ret, rblist_from_number((unsigned)x, 10));
         break;
       }
       case 'o':
-        ret = rbacc_add_string(ret, fmt_number(va_arg(ap, unsigned int), 8));
+        ret = rbacc_add_rblist(ret, rblist_from_number(va_arg(ap, unsigned int), 8));
         break;
       case 'r':
         ret = rbacc_add_rblist(ret, va_arg(ap, rblist));
@@ -426,7 +415,7 @@ rblist rblist_fmt(const char *format, ...)
         ret = rbacc_add_string(ret, va_arg(ap, const char *));
         break;
       case 'x':
-        ret = rbacc_add_string(ret, fmt_number(va_arg(ap, unsigned int), 16));
+        ret = rbacc_add_rblist(ret, rblist_from_number(va_arg(ap, unsigned int), 16));
         break;
       case '%':
         ret = rbacc_add_char(ret, '%');

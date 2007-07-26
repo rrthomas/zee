@@ -89,17 +89,18 @@ rblist rblist_concat(rblist left, rblist right);
 // Derived constructors.
 
 /*
- * Append the argument character to rbl.
- * FIXME: Generalise to rblist_insert, and use in replace_nstring.
- */
-rblist rblist_add_char(rblist rbl, int c);
-
-/*
  * Makes an rblist from a 0-terminated string.
  *
  * Uses rblist_from_array, so takes time O(n).
  */
 rblist rblist_from_string(const char *s);
+
+/*
+ * Formats an unsigned number in any base up to 16.
+ *
+ * Takes time O(1) (numbers are fixed size).
+ */
+rblist rblist_from_number(size_t x, unsigned base);
 
 /*
  * Format text into an rblist.
