@@ -351,7 +351,7 @@ rblist rblist_from_string(const char *s)
 rblist rblist_from_number(size_t x, unsigned base)
 {
   static const char const digits[] = "0123456789abcdef";
-  assert(base <= sizeof(digits) / sizeof(char));
+  assert(base <= sizeof(digits) / sizeof(digits[0]));
 
   rblist ret = rblist_empty;
   do {
