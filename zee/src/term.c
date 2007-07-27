@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "main.h"
 #include "term.h"
@@ -131,19 +132,6 @@ void term_set_size(size_t width, size_t height)
   term_resize();
 }
 
-static rblist make_char_printable(int c)
-{
-  const char ctrls[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  c &= 0xff;
-
-  if ((size_t)c < sizeof(ctrls))
-    return rblist_fmt("^%c", ctrls[c]);
-  else if (isprint(c))
-    return rblist_from_char(c); // FIXME: Won't work for double-width characters.
-  else
-    return rblist_fmt("\\%o", c);
-}
-
 /*
  * Prints character c (which must be printable and single-width) provided
  * the column x is visible (i.e. at least `start_column' and less than
@@ -157,38 +145,12 @@ static size_t outch_printable(int c, size_t x)
 }
 
 /*
- * Prints a printable representation of the character `c' on the
- * screen in font `font' at column `x', where the tab width is `tab',
- * and returns the new column. On exit, the font is set to
- * FONT_NORMAL.
- *
- * Printing is suppressed if x is less than start_column or at least
- * start_column + win.fwidth.
- */
-static size_t outch(int c, Font font, size_t x, size_t tab)
-{
-  term_attrset(1, font);
-
-  if (c == '\t')
-    for (size_t w = tab - (x % tab); w > 0; w--)
-      x = outch_printable(' ', x);
-  else if (isprint(c))
-    x = outch_printable(c, x);
-  else
-    RBLIST_FOR(d, make_char_printable(c))
-      x = outch_printable(d, x);
-    RBLIST_END
-
-  term_attrset(1, FONT_NORMAL);
-
-  return x;
-}
-
-/*
  * Tests whether the specified line and offset is within the specified
  * Region. The offset is measured in characters, not in character
  * positions.
  */
+// FIXME: There's some sort of off-by-one error in here. Shows up when
+// selection ends at the start of a line.
 static bool in_region(size_t line, size_t x, Region *r)
 {
   Point pt;
@@ -238,25 +200,30 @@ static void draw_line(size_t row, size_t line, size_t tab)
   calculate_highlight_region(&r);
 
   term_move(row, 0);
-  size_t x = 0, i = 0;
+  size_t x = 0, i = 0, end = start_column + win.fwidth;
   RBLIST_FOR(c, rblist_line(buf->lines, line))
-    if (x >= start_column + win.fwidth)
+    if (x >= end)
       break; // No point in printing the rest of the line.
-    Font font = in_region(line, i, &r) ? FONT_REVERSE : FONT_NORMAL;
-    x = outch(c, font, x, tab);
+    term_attrset(1, in_region(line, i, &r) ? FONT_REVERSE : FONT_NORMAL);
+    RBLIST_FOR(pc, make_char_printable(c, x, tab))
+      x = outch_printable(pc, x);
+    RBLIST_END
     i++;
   RBLIST_END
+  while (x < end)
+    x = outch_printable(' ', x);
+
+  term_attrset(1, FONT_NORMAL);
 
   if (start_column > 0) {
     term_move(row, 0);
     term_addch('$');
   }
-  if (x >= start_column + win.fwidth) {
+
+  if (x >= end) {
     term_move(row, win.fwidth - 1);
     term_addch('$');
-  } else if (in_region(line, i, &r))
-    while (x < win.fwidth)
-      x = outch(' ', FONT_REVERSE, x, tab);
+  }
 }
 
 /*
@@ -266,17 +233,9 @@ static void draw_line(size_t row, size_t line, size_t tab)
 // FIXME: At the moment, display widths could overflow (even size_t!).
 size_t column_to_character(rblist rbl, size_t goal)
 {
-  size_t i = 0, col = 0;
-
-  RBLIST_FOR(c, rbl)
-    // FIXME: What should we do if we overrun (col > goal)?
-    if (col >= goal)
-      break;
-    col += rblist_length(make_char_printable(c));
-    i++;
-  RBLIST_END
-
-  return i;
+  size_t ret;
+  make_string_printable(rbl, 0, tab_width(), goal, &ret);
+  return ret;
 }
 
 /*
@@ -284,16 +243,7 @@ size_t column_to_character(rblist rbl, size_t goal)
  */
 size_t string_display_width(rblist rbl)
 {
-  size_t col_count = 0, t = tab_width();
-
-  RBLIST_FOR(c, rbl)
-    if (c == '\t')
-      col_count += t - (col_count % t);
-    else
-      col_count += rblist_length(make_char_printable(c));
-  RBLIST_END
-
-  return col_count;
+  return rblist_length(make_string_printable(rbl, 0, tab_width(), SIZE_MAX, NULL));
 }
 
 /*

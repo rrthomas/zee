@@ -34,6 +34,7 @@
 #include "vector.h"
 #include "list.h"
 #include "rblist.h"
+#include "rbutil.h"
 
 
 /*--------------------------------------------------------------------------

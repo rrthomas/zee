@@ -29,7 +29,6 @@
 
 #include "zmalloc.h"
 #include "rblist.h"
-#include "rbacc.h"
 
 
 // For debugging: incremented every time random_double is called.
@@ -348,73 +347,6 @@ rblist rblist_from_string(const char *s)
   return rblist_from_array(s, strlen(s));
 }
 
-/*
- * Formats a string a bit like printf, and returns the result as an
- * rblist. This function understands "%r" to mean an rblist. This
- * function does not undertand the full syntax for printf format
- * strings. The only conversion specifications it understands are:
- *
- *   %r - an rblist (non-standard!),
- *   %s - a C string,
- *   %c - a char,
- *   %d - an int,
- *   %o - an unsigned int, printed in octal,
- *   %x - an unsigned int, printed in hexadecimal,
- *   %% - a % character.
- *
- * Width and precision specifiers are not supported.
- */
-rblist rblist_fmt(const char *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-  rbacc ret = rbacc_new();
-  int x;
-  size_t i;
-  while (1) {
-    // Skip to next `%' or to end of string.
-    for (i = 0; format[i] && format[i] != '%'; i++);
-    rbacc_add_array(ret, format, i);
-    if (!format[i++])
-      break;
-    // We've found a `%'.
-    switch (format[i++]) {
-      case 'c':
-        rbacc_add_char(ret, (char)va_arg(ap, int));
-        break;
-      case 'd': {
-        x = va_arg(ap, int);
-        if (x < 0) {
-          rbacc_add_char(ret, '-');
-          rbacc_add_number(ret, (unsigned)-x, 10);
-        } else
-          rbacc_add_number(ret, (unsigned)x, 10);
-        break;
-      }
-      case 'o':
-        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 8);
-        break;
-      case 'r':
-        ret = rbacc_add_rblist(ret, va_arg(ap, rblist));
-        break;
-      case 's':
-        ret = rbacc_add_string(ret, va_arg(ap, const char *));
-        break;
-      case 'x':
-        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 16);
-        break;
-      case '%':
-        ret = rbacc_add_char(ret, '%');
-        break;
-      default:
-        assert(0);
-    }
-    format = &format[i];
-  }
-  va_end(ap);
-  return rbacc_to_rblist(ret);
-}
-
 /**************************/
 // Primitive destructors.
 
@@ -594,6 +526,8 @@ int rblist_ncompare(rblist left, rblist right, size_t n)
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "rbutil.h"
 
 // Stub to make zrealloc happy
 void die(int exitcode)

@@ -50,6 +50,8 @@ zee_nondoc_SOURCES =			        \
 	rblist.h			        \
 	rbacc.c			        	\
 	rbacc.h					\
+        rbutil.c				\
+        rbutil.h				\
 	nonstd.h			        \
 	vector.c			        \
 	vector.h			        \

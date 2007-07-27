@@ -19,6 +19,9 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#ifndef RBACC_H
+#define RBACC_H
+
 
 #include <stdio.h>
    
@@ -85,3 +88,5 @@ size_t rbacc_length(rbacc rba);
  * Returns the contents of `rba' as an rblist.
  */
 rblist rbacc_to_rblist(rbacc rba);
+
+#endif // !RBACC_H

@@ -95,11 +95,6 @@ rblist rblist_concat(rblist left, rblist right);
  */
 rblist rblist_from_string(const char *s);
 
-/*
- * Format text into an rblist.
- */
-rblist rblist_fmt(const char *fmt, ...);
-
 
 /**************************/
 // Primitive destructors.
