@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(Zee, 0.6, zee-devel@lists.sourceforge.net)
+AC_INIT(Zee, 0.7, zee-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
@@ -169,37 +169,39 @@ dnl ==================================================================
 dnl libgc (BDW garbage collector)
 dnl ==================================================================
 
-AC_CHECK_HEADERS([gc.h gc/gc.h],
-                 [
-                 # To test for the different required libs, we have to
-                 # overcome autoconf's caching system, so we change the
-                 # desired function name.  They're all in libgc.
-                 # The "break" will exit from the top level
-                 # AC_CHECK_HEADERS.
-                 gc_libs=""
-                 AC_CHECK_LIB(gc, GC_init,
-                              [gc_ok=yes;
-                               LIBS="-lgc $gc_libs $LIBS";
-                               break], [gc_ok=no], [$gc_libs])
-                 gc_libs="-lpthread"
-                 AC_CHECK_LIB(gc, GC_malloc,
-                              [gc_ok=yes;
-                               LIBS="-lgc $gc_libs $LIBS";
-                               break], [gc_ok=no], [$gc_libs])
-                 gc_libs="-ldl"
-                 AC_CHECK_LIB(gc, GC_realloc,
-                              [gc_ok=yes;
-                               LIBS="-lgc $gc_libs $LIBS";
-                               break], [gc_ok=no], [$gc_libs])
-                 gc_libs="-lpthread -ldl"
-                 AC_CHECK_LIB(gc, GC_free,
-                              [gc_ok=yes;
-                               LIBS="-lgc $gc_libs $LIBS";
-                               break], [gc_ok=no], [$gc_libs])
-                 break],
-                 [gc_ok=no])
-if test "x$gc_ok" != "xyes"; then
-        AC_MSG_FAILURE([cannot find libgc])
+if test "x$enable_debug" = "no"; then
+	AC_CHECK_HEADERS([gc.h gc/gc.h],
+	                 [
+	                 # To test for the different required libs, we have to
+	                 # overcome autoconf's caching system, so we change the
+	                 # desired function name.  They're all in libgc.
+	                 # The "break" will exit from the top level
+	                 # AC_CHECK_HEADERS.
+	                 gc_libs=""
+	                 AC_CHECK_LIB(gc, GC_init,
+	                              [gc_ok=yes;
+	                               LIBS="-lgc $gc_libs $LIBS";
+	                               break], [gc_ok=no], [$gc_libs])
+	                 gc_libs="-lpthread"
+	                 AC_CHECK_LIB(gc, GC_malloc,
+	                              [gc_ok=yes;
+	                               LIBS="-lgc $gc_libs $LIBS";
+	                               break], [gc_ok=no], [$gc_libs])
+	                 gc_libs="-ldl"
+	                 AC_CHECK_LIB(gc, GC_realloc,
+	                              [gc_ok=yes;
+	                               LIBS="-lgc $gc_libs $LIBS";
+	                               break], [gc_ok=no], [$gc_libs])
+	                 gc_libs="-lpthread -ldl"
+	                 AC_CHECK_LIB(gc, GC_free,
+	                              [gc_ok=yes;
+	                               LIBS="-lgc $gc_libs $LIBS";
+	                               break], [gc_ok=no], [$gc_libs])
+	                 break],
+	                 [gc_ok=no])
+	if test "x$gc_ok" != "xyes"; then
+	        AC_MSG_FAILURE([cannot find libgc])
+	fi
 fi
 
 dnl ==================================================================
