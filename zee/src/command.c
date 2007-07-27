@@ -144,3 +144,41 @@ list command_list(void)
     list_append(l, rblist_from_string(ftable[i].name));
   return l;
 }
+
+/*
+ * Read a command name from the minibuffer.
+ */
+rblist minibuf_read_command_name(rblist prompt)
+{
+  static History commands_history;
+  rblist ms;
+  Completion *cp = completion_new();
+  cp->completions = command_list();
+
+  for (;;) {
+    ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);
+
+    if (ms == NULL)
+      return NULL;
+
+    if (rblist_length(ms) == 0) {
+      minibuf_error(rblist_from_string("No command name given"));
+      return NULL;
+    }
+
+    // Complete partial words if possible
+    if (completion_try(cp, ms))
+      ms = cp->match;
+
+    if (get_command(ms) || get_macro(ms)) {
+      add_history_element(&commands_history, ms);
+      minibuf_clear();        // Remove any error message
+      break;
+    } else {
+      minibuf_error(rblist_fmt("Undefined command `%r'", ms));
+      waitkey(WAITKEY_DEFAULT);
+    }
+  }
+
+  return ms;
+}

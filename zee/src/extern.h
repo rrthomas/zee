@@ -31,7 +31,6 @@ bool goto_line(size_t to_line);
 bool goto_point(Point pt);
 
 // bind.c -----------------------------------------------------------------
-rblist minibuf_read_command_name(rblist rbl);
 rblist command_to_binding(Command f);
 rblist binding_to_command(size_t key);
 void process_key(size_t key);
@@ -51,6 +50,7 @@ bool cmd_eval(rblist rbl, rblist source);
 Command get_command(rblist name);
 rblist get_command_name(Command cmd);
 list command_list(void);
+rblist minibuf_read_command_name(rblist rbl);
 
 // completion.c -----------------------------------------------------------
 Completion *completion_new(void);
