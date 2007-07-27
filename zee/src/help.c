@@ -107,7 +107,7 @@ Display the full documentation of VARIABLE (a symbol).\
                               "Current value: %r\n\n"
                               "Documentation:\n%s",
                               vtable[i].name, vtable[i].defval,
-                              get_variable(name), vtable[i].doc));
+                              get_variable_string(name), vtable[i].doc));
         ok = true;
       }
   }

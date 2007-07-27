@@ -38,7 +38,29 @@ void set_variable(rblist key, rblist val)
   }
 }
 
-rblist get_variable(rblist key)
+void set_variable_blob(rblist key, void *val)
+{
+  if (key && val) {
+    lua_pushlightuserdata(L, val);
+    lua_setglobal(L, rblist_to_string(key));
+  }
+}
+
+void *get_variable_blob(rblist key)
+{
+  void *ret = NULL;
+
+  if (key) {
+    lua_getglobal(L, rblist_to_string(key));
+    if (lua_isuserdata(L, -1))
+      ret = lua_touserdata(L, -1);
+    lua_pop(L, 1);
+  }
+
+  return ret;
+}
+
+rblist get_variable_string(rblist key)
 {
   rblist ret = NULL;
 
@@ -54,7 +76,7 @@ rblist get_variable(rblist key)
 
 int get_variable_number(rblist var)
 {
-  rblist rbl = get_variable(var);
+  rblist rbl = get_variable_string(var);
 
   if (rbl)
     return atoi(rblist_to_string(rbl));
@@ -64,7 +86,7 @@ int get_variable_number(rblist var)
 
 bool get_variable_bool(rblist var)
 {
-  rblist rbl = get_variable(var);
+  rblist rbl = get_variable_string(var);
 
   if (rbl)
     return !rblist_compare(rbl, rblist_from_string("true"));
@@ -93,7 +115,7 @@ rblist minibuf_read_variable_name(rblist msg)
     if (rblist_length(ms) == 0) {
       minibuf_error(rblist_from_string("No variable name given"));
       return NULL;
-    } else if (get_variable(ms) == NULL) {
+    } else if (get_variable_string(ms) == NULL) {
       minibuf_error(rblist_fmt("There is no variable called `%r'", ms));
       waitkey(WAITKEY_DEFAULT);
     } else {

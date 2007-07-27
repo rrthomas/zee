@@ -107,7 +107,6 @@ void cancel_kbd_macro(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
 void call_macro(Macro *mp);
-Macro *get_macro(rblist name);
 
 // main.c -----------------------------------------------------------------
 extern Window win;
@@ -155,7 +154,9 @@ void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
 void set_variable(rblist var, rblist val);
-rblist get_variable(rblist var);
+void set_variable_blob(rblist key, void *val);
+void *get_variable_blob(rblist key);
+rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);
 rblist minibuf_read_variable_name(rblist msg);

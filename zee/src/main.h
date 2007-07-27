@@ -130,8 +130,6 @@ typedef struct {
 
 typedef struct Macro {
   vector *keys;                 // Vector of keystrokes
-  rblist name;                  // Name of the macro
-  struct Macro *next;           // Next macro in the list
 } Macro;
 
 // Type of font attributes

@@ -170,7 +170,7 @@ rblist minibuf_read_command_name(rblist prompt)
     if (completion_try(cp, ms))
       ms = cp->match;
 
-    if (get_command(ms) || get_macro(ms)) {
+    if (get_command(ms) || get_variable_blob(ms)) {
       add_history_element(&commands_history, ms);
       minibuf_clear();        // Remove any error message
       break;

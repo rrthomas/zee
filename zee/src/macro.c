@@ -27,7 +27,7 @@
 #include "extern.h"
 
 
-static Macro *cur_mp = NULL, *cmd_mp = NULL, *head_mp = NULL;
+static Macro *cur_mp = NULL, *cmd_mp = NULL;
 
 static Macro *macro_new(void)
 {
@@ -41,6 +41,9 @@ static void add_macro_key(Macro *mp, size_t key)
   vec_item(mp->keys, vec_items(mp->keys), size_t) = key;
 }
 
+/* FIXME: macros should be executed immediately and abort on error;
+   they should be stored as a macro list, not a series of
+   keystrokes. Macros should return success/failure. */
 void add_cmd_to_macro(void)
 {
   size_t i;
@@ -110,7 +113,6 @@ valid editor command.\
 ")
 {
   rblist ms;
-  Macro *mp;
 
   if ((ms = minibuf_read(rblist_from_string("Name for last kbd macro: "), rblist_empty)) == NULL) {
     minibuf_error(rblist_from_string("No command name given"));
@@ -119,14 +121,13 @@ valid editor command.\
     minibuf_error(rblist_from_string("No keyboard macro defined"));
     ok = false;
   } else {
-    if ((mp = get_macro(ms))) {
+    Macro *mp;
+
+    if ((mp = get_variable_blob(ms))) {
       // If a macro with this name already exists, update its key list
     } else {
-      // Add a new macro to the list
       mp = macro_new();
-      mp->next = head_mp;
-      mp->name = ms;
-      head_mp = mp;
+      set_variable_blob(ms, mp);
     }
 
     // Copy the keystrokes from cur_mp.
@@ -135,9 +136,6 @@ valid editor command.\
 }
 END_DEF
 
-/* FIXME: macros should be executed immediately and abort on error;
-   they should be stored as a macro list, not a series of
-   keystrokes. Macros should return success/failure. */
 void call_macro(Macro *mp)
 {
   /* The loop termination condition is really i >= 0, but unsigned
@@ -160,16 +158,3 @@ macro_name.\
     call_macro(cur_mp);
 }
 END_DEF
-
-/*
- * Find a macro given its name.
- */
-Macro *get_macro(rblist name)
-{
-  Macro *mp;
-  assert(name);
-  for (mp = head_mp; mp; mp = mp->next)
-    if (!rblist_compare(mp->name, name))
-      return mp;
-  return NULL;
-}
