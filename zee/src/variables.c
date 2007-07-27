@@ -30,26 +30,26 @@
 #include "extern.h"
 
 
+void set_variable(rblist key, rblist val)
+{
+  if (key && val) {
+    lua_pushstring(L, rblist_to_string(val));
+    lua_setglobal(L, rblist_to_string(key));
+  }
+}
+
 rblist get_variable(rblist key)
 {
   rblist ret = NULL;
 
   if (key) {
-    lua_getfield(L, LUA_GLOBALSINDEX, rblist_to_string(key));
+    lua_getglobal(L, rblist_to_string(key));
     if (lua_isstring(L, -1))
       ret = rblist_from_string(lua_tostring(L, -1));
     lua_pop(L, 1);
   }
 
   return ret;
-}
-
-void set_variable(rblist key, rblist val)
-{
-  if (key && val) {
-    lua_pushstring(L, rblist_to_string(val));
-    lua_setfield(L, LUA_GLOBALSINDEX, rblist_to_string(key));
-  }
 }
 
 int get_variable_number(rblist var)
@@ -77,7 +77,7 @@ rblist minibuf_read_variable_name(rblist msg)
   rblist ms;
   Completion *cp = completion_new();
 
-  lua_pushnil(L);  /* first key */
+  lua_pushnil(L);               // initial key
   while (lua_next(L, LUA_GLOBALSINDEX) != 0) {
     lua_pop(L, 1);        // remove value; keep key for next iteration
     list_append(cp->completions, rblist_from_string(lua_tostring(L, -1)));
