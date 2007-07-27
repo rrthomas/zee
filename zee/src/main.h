@@ -66,7 +66,7 @@ enum {
 typedef struct Undo {
   struct Undo *next;            // Next undo delta in list
   int type;                     // The type of undo delta
-  Point pt;                  // Where the undo delta is to be applied.
+  Point pt;                     // Where the undo delta is to be applied.
   bool unchanged; // Flag indicating that reverting this undo leaves the buffer
                   // in an unchanged state
   rblist text;                  // Replacement string
@@ -95,8 +95,9 @@ typedef struct {
   Point pt;                     // The point
   Marker *mark;                 // The mark
   Marker *markers;              // Markers
-  Undo *next_undop;        // The undo deltas recorded for this buffer
-  Undo *last_undop;
+  Undo *last_undop;             // What was done most recently.
+  Undo *next_undop;             // What edit_undo will undo next
+                                // (points into the same list).
   int flags;                    // Buffer flags
   rblist filename;              // The name of the file being edited
 } Buffer;
