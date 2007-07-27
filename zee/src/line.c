@@ -351,7 +351,6 @@ END_DEF
  * Return true if the replacement is performed without incident, or
  * false if the buffer is read-only or if there are fewer than
  * `size' characters after point (in which case nothing is inserted).
- * FIXME: Check the contract by looking at the callers.
  */
 // FIXME: check behaviour when there are not `size' characters to delete.
 // Is documentation correct? Is specification sensible?
