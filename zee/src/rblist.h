@@ -96,13 +96,6 @@ rblist rblist_concat(rblist left, rblist right);
 rblist rblist_from_string(const char *s);
 
 /*
- * Formats an unsigned number in any base up to 16.
- *
- * Takes time O(1) (numbers are fixed size).
- */
-rblist rblist_from_number(size_t x, unsigned base);
-
-/*
  * Format text into an rblist.
  */
 rblist rblist_fmt(const char *fmt, ...);

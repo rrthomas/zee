@@ -348,20 +348,6 @@ rblist rblist_from_string(const char *s)
   return rblist_from_array(s, strlen(s));
 }
 
-rblist rblist_from_number(size_t x, unsigned base)
-{
-  static const char const digits[] = "0123456789abcdef";
-  assert(base <= sizeof(digits) / sizeof(digits[0]));
-
-  rblist ret = rblist_empty;
-  do {
-    ret = rblist_concat(rblist_from_char(digits[x % base]), ret);;
-    x /= base;
-  } while (x);
-
-  return ret;
-}
-
 /*
  * Formats a string a bit like printf, and returns the result as an
  * rblist. This function understands "%r" to mean an rblist. This
@@ -400,13 +386,13 @@ rblist rblist_fmt(const char *format, ...)
         x = va_arg(ap, int);
         if (x < 0) {
           rbacc_add_char(ret, '-');
-          rbacc_add_rblist(ret, rblist_from_number((unsigned)-x, 10));
+          rbacc_add_number(ret, (unsigned)-x, 10);
         } else
-          rbacc_add_rblist(ret, rblist_from_number((unsigned)x, 10));
+          rbacc_add_number(ret, (unsigned)x, 10);
         break;
       }
       case 'o':
-        ret = rbacc_add_rblist(ret, rblist_from_number(va_arg(ap, unsigned int), 8));
+        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 8);
         break;
       case 'r':
         ret = rbacc_add_rblist(ret, va_arg(ap, rblist));
@@ -415,7 +401,7 @@ rblist rblist_fmt(const char *format, ...)
         ret = rbacc_add_string(ret, va_arg(ap, const char *));
         break;
       case 'x':
-        ret = rbacc_add_rblist(ret, rblist_from_number(va_arg(ap, unsigned int), 16));
+        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 16);
         break;
       case '%':
         ret = rbacc_add_char(ret, '%');
@@ -609,8 +595,6 @@ int rblist_ncompare(rblist left, rblist right, size_t n)
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "astr.h"
-
 // Stub to make zrealloc happy
 void die(int exitcode)
 {
@@ -698,14 +682,14 @@ int main(void)
   // Test loads of things for empty, short and long strings.
 
   test(rblist_empty, "", 0);
-  test(rblist_singleton('a'), "a", 1);
-  test(rblist_concat(rblist_singleton('a'), rblist_singleton('b')), "ab", 2);
+  test(rblist_from_char('a'), "a", 1);
+  test(rblist_concat(rblist_from_char('a'), rblist_from_char('b')), "ab", 2);
   test(rblist_from_array(s1, strlen(s1)), s1, strlen(s1));
 
   // Test computational complexity, and test concat for long strings.
 
   rbl1 = rblist_empty;
-  rbl2 = rblist_singleton('x');
+  rbl2 = rblist_from_char('x');
 #define TEST_SIZE 1000
   random_counter = 0;
   for (size_t i = 0; i < TEST_SIZE; i++)

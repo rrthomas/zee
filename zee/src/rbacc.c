@@ -121,6 +121,23 @@ rbacc rbacc_add_string(rbacc rba, const char *s)
   return rbacc_add_array(rba, s, strlen(s));
 }
 
+rbacc rbacc_add_number(rbacc rba, size_t x, unsigned base)
+{
+  static const char const digits[] = "0123456789abcdef";
+  assert(2 <= base && base <= sizeof(digits) / sizeof(digits[0]));
+#define MAX_DIGITS 64
+  static char buf[MAX_DIGITS + 1];
+
+  if (!x)
+    return rbacc_add_char(rba, '0');
+
+  size_t i;
+  for (i = MAX_DIGITS; i && x; x /= base)
+    buf[--i] = digits[x % base];
+
+  return rbacc_add_array(rba, &buf[i], MAX_DIGITS - i);
+}
+
 rbacc rbacc_add_file(rbacc rba, FILE *fp)
 {
   int c;
@@ -193,30 +210,34 @@ int main(void)
   // Basic functionality tests.
   rba = rbacc_new();
   test(rba, "", 0);
-  rbacc_char(rba, 'x');
+  rbacc_add_char(rba, 'x');
   test(rba, "x", 1);
-  rbacc_char(rba, 'y');
+  rbacc_add_char(rba, 'y');
   test(rba, "xy", 2);
-  rbacc_array(rba, "foo", 3);
+  rbacc_add_array(rba, "foo", 3);
   test(rba, "xyfoo", 5);
-  assert(rba->used==5);
+  rbacc_add_number(rba, 0, 2);
+  test(rba, "xyfoo0", 6);
+  rbacc_add_number(rba, 100, 16);
+  test(rba, "xyfoo064", 8);
+  assert(rba->used==8);
   flush(rba);
-  test(rba, "xyfoo", 5);
+  test(rba, "xyfoo064", 8);
   assert(rba->used==0);
-  assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("xyfoo")));
+  assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("xyfoo064")));
   
   // Test various ways of appending `s1'.
   rba = rbacc_new();
-  rbacc_string(rba, s1);
+  rbacc_add_string(rba, s1);
   test(rba, s1, strlen(s1));
   
   rba = rbacc_new();
-  rbacc_rblist(rba, rbl1);
+  rbacc_add_rblist(rba, rbl1);
   test(rba, s1, strlen(s1));
 
   rba = rbacc_new();
   for (int i=1; i<=10; i++) {
-    rbacc_string(rba, s1);
+    rbacc_add_string(rba, s1);
     assert(rbacc_length(rba) == i * strlen(s1));
   }
   flush(rba);
@@ -224,22 +245,22 @@ int main(void)
 
   rba = rbacc_new();
   for (int i=1; i<=10; i++) {
-    rbacc_rblist(rba, rbl1);
+    rbacc_add_rblist(rba, rbl1);
     assert(rbacc_length(rba) == i * strlen(s1));
   }
   
   // Test various ways of appending `s2'.
   rba = rbacc_new();
-  rbacc_string(rba, s2);
+  rbacc_add_string(rba, s2);
   test(rba, s2, strlen(s2));
   
   rba = rbacc_new();
-  rbacc_rblist(rba, rbl2);
+  rbacc_add_rblist(rba, rbl2);
   test(rba, s2, strlen(s2));
 
   rba = rbacc_new();
   for (int i=1; i<=10; i++) {
-    rbacc_string(rba, s2);
+    rbacc_add_string(rba, s2);
     assert(rbacc_length(rba) == i * strlen(s2));
   }
   flush(rba);
@@ -247,7 +268,7 @@ int main(void)
 
   rba = rbacc_new();
   for (int i=1; i<=10; i++) {
-    rbacc_rblist(rba, rbl2);
+    rbacc_add_rblist(rba, rbl2);
     assert(rbacc_length(rba) == i * strlen(s2));
   }
 

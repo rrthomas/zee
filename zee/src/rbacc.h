@@ -65,6 +65,13 @@ rbacc rbacc_add_array(rbacc rba, const char *cs, size_t length);
 rbacc rbacc_add_string(rbacc rba, const char *s);
 
 /*
+ * Formats an unsigned number in any base up to 16.
+ *
+ * Takes time O(1) (numbers are fixed size).
+ */
+rbacc rbacc_add_number(rbacc rba, size_t x, unsigned base);
+
+/*
  * Appends the contents of a file to `rba' and returns `rba'.
  */
 rbacc rbacc_add_file(rbacc rba, FILE *fp);
