@@ -348,8 +348,8 @@ END_DEF
 /*
  * Replace `size' characters at point with the string `repl'.
  * If `ret' is non-NULL, return the characters replaced in it.
- * Return `true' if the replacement is performed without incident, or
- * `false' if the buffer is read-only or if there are fewer than
+ * Return true if the replacement is performed without incident, or
+ * false if the buffer is read-only or if there are fewer than
  * `size' characters after point (in which case nothing is inserted).
  * FIXME: Check the contract by looking at the callers.
  */
