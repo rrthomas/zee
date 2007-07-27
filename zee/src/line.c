@@ -353,6 +353,8 @@ END_DEF
  * `size' characters after point (in which case nothing is inserted).
  * FIXME: Check the contract by looking at the callers.
  */
+// FIXME: check behaviour when there are not `size' characters to delete.
+// Is documentation correct? Is specification sensible?
 bool replace_nstring(size_t size, rblist *ret, rblist repl)
 {
   rbacc rba;
