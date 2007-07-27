@@ -162,7 +162,7 @@ dnl ==================================================================
 dnl libgc (BDW garbage collector)
 dnl ==================================================================
 
-if test "x$enable_debug" = "no"; then
+if test "x$enable_debug" != "yes"; then
 	AC_CHECK_HEADERS([gc.h gc/gc.h],
 	                 [
 	                 # To test for the different required libs, we have to
