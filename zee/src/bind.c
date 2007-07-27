@@ -189,5 +189,5 @@ rblist binding_to_command(size_t key)
     else
       return NULL;
   } else
-    return get_command_name(p->cmd);
+    return get_blob_variable_string((void *)p->cmd);
 }

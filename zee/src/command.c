@@ -121,18 +121,15 @@ static struct {
 void init_commands(void)
 {
 #define X(cmd_name, doc) \
-	set_variable_blob(rblist_from_string(# cmd_name), (void*)F_ ## cmd_name);
+  set_variable_blob(rblist_from_string(# cmd_name), (void *)F_ ## cmd_name);
 #include "tbl_funcs.h"
 #undef X
-}
-
-rblist get_command_name(Command cmd)
-{
-  size_t i;
-  for (i = 0; i < fentries; i++)
-    if (ftable[i].cmd == cmd)
-      return rblist_from_string(ftable[i].name);
-  return NULL;
+#define X(cmd_name, doc) \
+  lua_pushlightuserdata(L, (void *)F_ ## cmd_name); \
+  lua_pushstring(L, # cmd_name); \
+  lua_settable(L, LUA_GLOBALSINDEX);
+#include "tbl_funcs.h"
+#undef X
 }
 
 list command_list(void)

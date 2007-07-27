@@ -48,7 +48,6 @@ rblist copy_text_block(Point start, size_t size);
 // command.c --------------------------------------------------------------
 bool cmd_eval(rblist rbl, rblist source);
 void init_commands(void);
-rblist get_command_name(Command cmd);
 list command_list(void);
 rblist minibuf_read_command_name(rblist rbl);
 

@@ -46,6 +46,21 @@ void set_variable_blob(rblist key, void *val)
   }
 }
 
+rblist get_blob_variable_string(void *key)
+{
+  rblist ret = NULL;
+
+  if (key) {
+    lua_pushlightuserdata(L, key);
+    lua_gettable(L, LUA_GLOBALSINDEX);
+    if (lua_isstring(L, -1))
+      ret = rblist_from_string(lua_tostring(L, -1));
+    lua_pop(L, 1);
+  }
+
+  return ret;
+}
+
 void *get_variable_blob(rblist key)
 {
   void *ret = NULL;
