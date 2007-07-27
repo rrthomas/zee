@@ -27,6 +27,7 @@
 
 #include "main.h"
 #include "extern.h"
+#include "rbacc.h"
 
 
 typedef struct {
@@ -161,23 +162,21 @@ END_DEF
 rblist command_to_binding(Command cmd)
 {
   size_t n = 0;
-  rblist rbl = rblist_empty;    // FIXME: Use rbacc
+  rbacc rba = rbacc_new();
 
   lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
   lua_pushnil(L);               // first key
   while (lua_next(L, -2) != 0) {
     if ((Command)lua_touserdata(L, -1) == cmd) {
-      size_t key = (size_t)lua_tonumber(L, -2);
-      rblist binding = chordtostr(key);
       if (n++ != 0)
-        rbl = rblist_concat(rbl, rblist_from_string(", "));
-      rbl = rblist_concat(rbl, binding);
+        rbacc_add_string(rba, ", ");
+      rbacc_add_rblist(rba, chordtostr((size_t)lua_tonumber(L, -2)));
     }
     lua_pop(L, 1);        // remove value; keep key for next iteration
   }
   lua_pop(L, 2);                // pop last key and table
 
-  return rbl;
+  return rbacc_to_rblist(rba);
 }
 
 rblist binding_to_command(size_t key)
