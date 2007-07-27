@@ -138,14 +138,11 @@ END_DEF
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
    keystrokes. Macros should return success/failure. */
-// FIXME: Add bind_command to make new commands.
 void call_macro(Macro *mp)
 {
-  size_t i;
-
   /* The loop termination condition is really i >= 0, but unsigned
      types are always >= 0. */
-  for (i = vec_items(mp->keys) - 1; i < vec_items(mp->keys); i--)
+  for (size_t i = vec_items(mp->keys) - 1; i < vec_items(mp->keys); i--)
     ungetkey(vec_item(mp->keys, i, size_t));
 }
 
