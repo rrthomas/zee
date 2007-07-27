@@ -160,7 +160,7 @@ UINT(reps, "Repeat count: ")
 COMMAND(name, "Command: "))
 {
   if (ok) {
-    Command cmd = get_command(name);
+    Command cmd = (Command)get_variable_blob(name);
     if (cmd) {
       undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
       for (size_t i = 0; i < reps; i++)

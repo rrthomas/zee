@@ -66,7 +66,7 @@ Display the help for the given command.\
     size_t i;
     for (i = 0; i < fentries; i++)
       if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
-        rblist bindings = command_to_binding(get_command(name)), where = rblist_empty;
+        rblist bindings = command_to_binding((Command)get_variable_blob(name)), where = rblist_empty;
         if (rblist_length(bindings) > 0)
           where = rblist_fmt("\n\nBound to: %r", bindings);
         popup_set(rblist_fmt("Help for command `%s':\n\n%s%r", ftable[i].name, ftable[i].doc, where));

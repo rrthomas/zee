@@ -47,7 +47,7 @@ rblist copy_text_block(Point start, size_t size);
 
 // command.c --------------------------------------------------------------
 bool cmd_eval(rblist rbl, rblist source);
-Command get_command(rblist name);
+void init_commands(void);
 rblist get_command_name(Command cmd);
 list command_list(void);
 rblist minibuf_read_command_name(rblist rbl);
@@ -103,10 +103,9 @@ bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
 
 // macro.c ----------------------------------------------------------------
-void cancel_kbd_macro(void);
+void cancel_macro_definition(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
-void call_macro(Macro *mp);
 
 // main.c -----------------------------------------------------------------
 extern Window win;

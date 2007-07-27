@@ -76,7 +76,7 @@ void minibuf_error(rblist rbl)
   term_beep();
 
   if (thisflag & FLAG_DEFINING_MACRO)
-    cancel_kbd_macro();
+    cancel_macro_definition();
 }
 
 /*

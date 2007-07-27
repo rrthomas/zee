@@ -88,7 +88,7 @@ bool cmd_eval(rblist s, rblist source)
     rblist fname;
     Command cmd;
     while ((fname = list_behead(l)) &&
-           (cmd = get_command(fname)) &&
+           (cmd = (Command)get_variable_blob(fname)) &&
            (ok &= cmd(l)))
       ;
     if (fname && !cmd) {
@@ -118,14 +118,12 @@ static struct {
 };
 #define fentries (sizeof(ftable) / sizeof(ftable[0]))
 
-Command get_command(rblist name)
+void init_commands(void)
 {
-  size_t i;
-  if (name)
-    for (i = 0; i < fentries; i++)
-      if (!rblist_compare(name, rblist_from_string(ftable[i].name)))
-        return ftable[i].cmd;
-  return NULL;
+#define X(cmd_name, doc) \
+	set_variable_blob(rblist_from_string(# cmd_name), (void*)F_ ## cmd_name);
+#include "tbl_funcs.h"
+#undef X
 }
 
 rblist get_command_name(Command cmd)
@@ -170,7 +168,7 @@ rblist minibuf_read_command_name(rblist prompt)
     if (completion_try(cp, ms))
       ms = cp->match;
 
-    if (get_command(ms) || get_variable_blob(ms)) {
+    if (get_variable_blob(ms)) {
       add_history_element(&commands_history, ms);
       minibuf_clear();        // Remove any error message
       break;

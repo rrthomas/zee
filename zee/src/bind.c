@@ -128,7 +128,7 @@ chord.\
   if (name) {
     Command cmd;
 
-    if ((cmd = get_command(name))) {
+    if ((cmd = (Command)get_variable_blob(name))) {
       if (key != KBD_NOKEY) {
         bind_key(key, cmd);
         ok = true;

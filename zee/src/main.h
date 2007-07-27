@@ -128,10 +128,6 @@ typedef struct {
   list sel;                     // Currently selected element (pointer to elements)
 } History;
 
-typedef struct Macro {
-  vector *keys;                 // Vector of keystrokes
-} Macro;
-
 // Type of font attributes
 typedef size_t Font;
 

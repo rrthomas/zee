@@ -125,6 +125,7 @@ int main(int argc, char **argv)
   L = luaL_newstate();
   init_kill_ring();
   init_bindings();
+  init_commands();
 
   while (getopt_long_only(argc, argv, "", longopts, &longopt) != -1)
     switch (longopt) {
