@@ -36,13 +36,8 @@
 void buffer_new(void)
 {
   buf = zmalloc(sizeof(Buffer));
-
-  // Allocate the lines.
   buf->lines = rblist_empty;
-
-  // Set the initial mark.
   buf->mark = marker_new(point_min(buf));
-
   if (get_variable_bool(rblist_from_string("wrap_mode")))
     buf->flags ^= BFLAG_AUTOFILL;
 }
