@@ -87,10 +87,8 @@ rblist minibuf_read_variable_name(rblist msg)
   for (;;) {
     ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
 
-    if (ms == NULL) {
-      CMDCALL(edit_select_off);
+    if (ms == NULL)
       return NULL;
-    }
 
     if (rblist_length(ms) == 0) {
       minibuf_error(rblist_from_string("No variable name given"));
@@ -122,9 +120,7 @@ Set a variable to the specified value.\
 
   if (val)
     set_variable(var, val);
-  else {
+  else
     ok = false;
-    CMDCALL(edit_select_off);
-  }
 }
 END_DEF

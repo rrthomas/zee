@@ -150,7 +150,6 @@ static bool isearch(int dir)
     int c = getkey();
     if (c == (KBD_CTRL | 'g')) {
       buf->pt = start;
-      CMDCALL(edit_select_off);
 
       // Restore old mark position.
       assert(buf->mark);

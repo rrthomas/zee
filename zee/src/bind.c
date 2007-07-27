@@ -125,10 +125,8 @@ rblist minibuf_read_command_name(rblist prompt)
   for (;;) {
     ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);
 
-    if (ms == NULL) {
-      CMDCALL(edit_select_off);
+    if (ms == NULL)
       return NULL;
-    }
 
     if (rblist_length(ms) == 0) {
       minibuf_error(rblist_from_string("No command name given"));
