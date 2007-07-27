@@ -28,7 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#ifndef DEBUG
 #include <gc/gc.h>
+#endif
 #ifdef HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
 #else
@@ -116,7 +118,9 @@ int main(int argc, char **argv)
   size_t line = 1;
   rblist rbl;
 
+#ifndef DEBUG
   GC_INIT();
+#endif
 
   L = luaL_newstate();
   init_kill_ring();
