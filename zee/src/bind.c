@@ -1,6 +1,6 @@
-/* Key bindings and extended commands
+/* Key bindings
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -27,62 +27,52 @@
 
 #include "main.h"
 #include "extern.h"
-#include "vector.h"
 
-
-static History commands_history;
-
-/*--------------------------------------------------------------------------
- * Key binding
- *--------------------------------------------------------------------------*/
 
 typedef struct {
   size_t key;
   Command cmd;
 } Binding;
 
-vector *bindings;               // Vector of Binding *s
+static int bindings;            // Reference to bindings table
 
 static Binding *get_binding(size_t key)
 {
-  size_t i;
+  Binding *p = NULL;
 
-  for (i = 0; i < vec_items(bindings); i++)
-    if (vec_item(bindings, i, Binding).key == key)
-      return (Binding *)vec_index(bindings, i);
+  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
+  lua_pushnumber(L, (lua_Number)key);
+  lua_gettable(L, -2);
 
-  return NULL;
+  if (lua_isuserdata(L, -1)) {
+    p = zmalloc(sizeof(Binding));
+    p->key = key;
+    p->cmd = (Command)lua_touserdata(L, -1);
+  }
+
+  lua_pop(L, 2);                // Remove table and value
+  
+  return p;
 }
 
-void bind_key(size_t key, Command cmd)
+static void bind_key(size_t key, Command cmd)
 {
-  Binding *p;
+  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
+  lua_pushnumber(L, (lua_Number)key);
 
-  assert(key != KBD_NOKEY);
+  if (cmd == NULL)
+    lua_pushnil(L);
+  else
+    lua_pushlightuserdata(L, cmd);
 
-  if ((p = get_binding(key)) == NULL) {
-    Binding b;
-
-    b.key = key;
-    b.cmd = cmd;
-
-    vec_item(bindings, vec_items(bindings), Binding) = b;
-  } else
-    p->cmd = cmd;
-}
-
-void unbind_key(size_t key)
-{
-  Binding *p;
-
-  if ((p = get_binding(key)))
-    vec_shrink(bindings, vec_offset(bindings, p), 1);
+  lua_settable(L, -3);
+  lua_pop(L, 1);                // Remove table
 }
 
 void init_bindings(void)
 {
-  bindings = vec_new(sizeof(Binding));
-
+  lua_newtable(L);
+  bindings = luaL_ref(L, LUA_REGISTRYINDEX);
 #include "default_bindings.c"
 }
 
@@ -115,9 +105,11 @@ void process_key(size_t key)
 
 /*
  * Read a command name from the minibuffer.
+ * FIXME: Move to command.c.
  */
 rblist minibuf_read_command_name(rblist prompt)
 {
+  static History commands_history;
   rblist ms;
   Completion *cp = completion_new();
   cp->completions = command_list();
@@ -201,23 +193,28 @@ Read key chord, and unbind it.\
     key = getkey();
   }
 
-  unbind_key(key);
+  bind_key(key, NULL);
 }
 END_DEF
 
 rblist command_to_binding(Command cmd)
 {
-  size_t i, n = 0;
-  rblist rbl = rblist_empty;
+  size_t n = 0;
+  rblist rbl = rblist_empty;    // FIXME: Use rbacc
 
-  for (i = 0; i < vec_items(bindings); i++)
-    if (vec_item(bindings, i, Binding).cmd == cmd) {
-      size_t key = vec_item(bindings, i, Binding).key;
+  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
+  lua_pushnil(L);               // first key
+  while (lua_next(L, -2) != 0) {
+    if ((Command)lua_touserdata(L, -1) == cmd) {
+      size_t key = (size_t)lua_tonumber(L, -2);
       rblist binding = chordtostr(key);
       if (n++ != 0)
         rbl = rblist_concat(rbl, rblist_from_string(", "));
       rbl = rblist_concat(rbl, binding);
     }
+    lua_pop(L, 1);        // remove value; keep key for next iteration
+  }
+  lua_pop(L, 2);                // pop last key and table
 
   return rbl;
 }
