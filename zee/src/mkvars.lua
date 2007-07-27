@@ -1,5 +1,5 @@
 -- Produce vars.texi and zeerc
--- Copyright (c) 2006 Reuben Thomas.  All rights reserved.
+-- Copyright (c) 2006-2007 Reuben Thomas.  All rights reserved.
 --
 -- This file is part of Zee.
 --
@@ -36,7 +36,7 @@ h2:write("# ." .. PACKAGE .. " configuration\n")
 for l in io.lines(arg[1]) do
   if string.find(l, "^X%(") then
     assert(loadstring(l))()
-    local name, type, defval, doc = unpack(xarg)
+    local name, defval, doc = unpack(xarg)
     if doc == "" then
       die("empty docstring for " .. name)
     end

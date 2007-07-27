@@ -127,19 +127,6 @@ int minibuf_read_yesno(rblist prompt)
 }
 
 /*
- * Forces the user to answer "true" or "false".
- * Returns -1 for cancelled, otherwise true for "true" and false for "false".
- */
-int minibuf_read_boolean(rblist prompt)
-{
-  Completion *cp = completion_new();
-  list_append(cp->completions, rblist_from_string("true"));
-  list_append(cp->completions, rblist_from_string("false"));
-  rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `true' or `false'."), cp);
-  return reply == NULL ? -1 : !rblist_compare(rblist_from_string("true"), reply);
-}
-
-/*
  * Clear the minibuffer.
  */
 void minibuf_clear(void)

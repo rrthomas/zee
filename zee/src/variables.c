@@ -1,6 +1,6 @@
-/* Variables handling functions
+/* Variables functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -24,90 +24,32 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <lua.h>
 
 #include "main.h"
 #include "extern.h"
 
 
-static list varlist;
-
-typedef struct {
-  rblist key;
-  rblist value;
-} vpair;
-
-void init_variables(void)
+rblist get_variable(rblist key)
 {
-  varlist = list_new();
-}
+  rblist ret = NULL;
 
-static list variable_find(rblist key)
-{
-  list p;
-
-  if (key)
-    for (p = list_first(varlist); p != varlist; p = list_next(p))
-      if (!rblist_compare(key, ((vpair *)(p->item))->key))
-        return p;
-
-  return NULL;
-}
-
-void set_variable(rblist key, rblist value)
-{
-  if (key && value) {
-    list temp = variable_find(key);
-
-    if (temp == NULL || temp->item == NULL) {
-      vpair *vp = zmalloc(sizeof(vpair));
-      vp->key = key;
-      list_prepend(varlist, vp);
-      temp = list_first(varlist);
-    }
-
-    ((vpair *)(temp->item))->value = value;
+  if (key) {
+    lua_getfield(L, LUA_GLOBALSINDEX, rblist_to_string(key));
+    if (lua_isstring(L, -1))
+      ret = rblist_from_string(lua_tostring(L, -1));
+    lua_pop(L, 1);
   }
+
+  return ret;
 }
 
-
-/*
- * Default variables values table.
- */
-typedef struct {
-  const char *var;              // Variable name.
-  const char *fmt;              // Variable format (boolean, etc.).
-  const char *val;              // Default value.
-} var_entry;
-
-static var_entry def_vars[] = {
-#define X(var, fmt, val, doc) \
-    {var, fmt, val},
-#include "tbl_vars.h"
-#undef X
-};
-
-static var_entry *get_variable_default(rblist var)
+void set_variable(rblist key, rblist val)
 {
-  var_entry *p;
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!rblist_compare(rblist_from_string(p->var), var))
-      return p;
-
-  return NULL;
-}
-
-rblist get_variable(rblist var)
-{
-  var_entry *p;
-
-  list temp = variable_find(var);
-  if (temp && temp->item)
-    return ((vpair *)(temp->item))->value;
-
-  if ((p = get_variable_default(var)))
-    return rblist_from_string(p->val);
-
-  return NULL;
+  if (key && val) {
+    lua_pushstring(L, rblist_to_string(val));
+    lua_setfield(L, LUA_GLOBALSINDEX, rblist_to_string(key));
+  }
 }
 
 int get_variable_number(rblist var)
@@ -134,10 +76,13 @@ rblist minibuf_read_variable_name(rblist msg)
 {
   rblist ms;
   Completion *cp = completion_new();
-  var_entry *p;
 
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    list_append(cp->completions, rblist_from_string(p->var));
+  lua_pushnil(L);  /* first key */
+  while (lua_next(L, LUA_GLOBALSINDEX) != 0) {
+    lua_pop(L, 1);        // remove value; keep key for next iteration
+    list_append(cp->completions, rblist_from_string(lua_tostring(L, -1)));
+  }
+  lua_pop(L, 1);                // pop last key
 
   for (;;) {
     ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
@@ -172,15 +117,8 @@ Set a variable to the specified value.\
   if (list_length(l) > 1) {
     var = list_behead(l);
     val = list_behead(l);
-  } else if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: ")))) {
-    var_entry *p = get_variable_default(var);
-    if (!rblist_compare(rblist_from_string(p ? p->fmt : ""), rblist_from_string("b"))) {
-      int b;
-      if ((b = minibuf_read_boolean(rblist_fmt("Set %r to value: ", var))) != -1)
-        val = rblist_from_string((b == true) ? "true" : "false");
-    } else                      // Non-boolean variable.
-      val = minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty);
-  }
+  } else if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: "))))
+    val = minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty);
 
   if (val)
     set_variable(var, val);

@@ -156,7 +156,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
-void init_variables(void);
 void set_variable(rblist var, rblist val);
 rblist get_variable(rblist var);
 int get_variable_number(rblist var);

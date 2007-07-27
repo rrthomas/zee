@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <lauxlib.h>
 
 #include "nonstd.h"
 #include "zmalloc.h"
@@ -38,6 +39,8 @@
 /*--------------------------------------------------------------------------
  * Main editor structures.
  *--------------------------------------------------------------------------*/
+
+lua_State *L;                   // The Lua state
 
 // Point and Marker
 typedef struct {
@@ -63,8 +66,8 @@ typedef struct Undo {
   struct Undo *next;            // Next undo delta in list
   int type;                     // The type of undo delta
   Point pt;                  // Where the undo delta is to be applied.
-  int unchanged; /* Flag indicating that reverting this undo leaves the buffer
-                    in an unchanged state */
+  bool unchanged; // Flag indicating that reverting this undo leaves the buffer
+                  // in an unchanged state
   rblist text;                  // Replacement string
   size_t size;                  // Block size for replace
 } Undo;

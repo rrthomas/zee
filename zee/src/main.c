@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
   GC_INIT();
 
-  init_variables();
+  L = luaL_newstate();
   init_kill_ring();
   init_bindings();
 
@@ -174,6 +174,22 @@ int main(int argc, char **argv)
     signal_init();
     setlocale(LC_ALL, "");
 
+    // Load system init file.
+    rblist file = rblist_from_string(SYSCONFDIR "/" PACKAGE "rc");
+    if ((rbl = file_read(file)))
+      ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
+
+    // Load user init file if not disabled.
+    // FIXME: Want to make settings before loading file, but
+    // currently, interactive commands will crash.
+    if (!nflag) {
+      rblist home = get_home_dir();
+      rblist file = rblist_from_string("/." PACKAGE "rc");
+      if (rblist_length(home) > 0 &&
+          (rbl = file_read(rblist_concat(home, file))))
+        ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
+    }
+
     // Open file given on command line.
     while (*argv) {
       if (**argv == '+')
@@ -191,20 +207,6 @@ int main(int argc, char **argv)
       term_resize();            // Can't run until there is a buffer
       if (buf && line > 0)
         goto_line(line - 1);
-    }
-
-    // Load system init file.
-    rblist file = rblist_from_string(SYSCONFDIR "/" PACKAGE "rc");
-    if ((rbl = file_read(file)))
-      ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
-
-    // Load user init file if not disabled.
-    if (!nflag) {
-      rblist home = get_home_dir();
-      rblist file = rblist_from_string("/." PACKAGE "rc");
-      if (rblist_length(home) > 0 &&
-          (rbl = file_read(rblist_concat(home, file))))
-        ok &= cmd_eval(rbl, rblist_fmt("`%r'", file));
     }
 
     if (!bflag) {

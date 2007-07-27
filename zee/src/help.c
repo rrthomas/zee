@@ -79,12 +79,11 @@ END_DEF
 
 static struct {
   const char *name;
-  const char *fmt;
   const char *defval;
   const char *doc;
 } vtable[] = {
-#define X(name, fmt, defvalue, doc) \
-	{name, fmt, defvalue, doc},
+#define X(name, defvalue, doc) \
+	{name, defvalue, doc},
 #include "tbl_vars.h"
 #undef X
 };
