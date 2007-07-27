@@ -54,7 +54,7 @@ Delete the current line.\
       killed_text = rblist_concat(killed_text,
                                   rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n),
                                              rblist_line_length(buf->lines, buf->pt.n)));
-      ok = replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &rbl, NULL);
+      ok = replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &rbl, rblist_empty);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -109,7 +109,7 @@ the text killed this time appends to the text killed last time.\
       assert(calculate_the_region(&r));
       if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
         CMDCALL(edit_select_other_end);
-      ok = replace_nstring(r.size, NULL, NULL);
+      ok = replace_nstring(r.size, NULL, rblist_empty);
     }
   }
 }

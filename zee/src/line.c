@@ -351,17 +351,18 @@ END_DEF
  * Return true if the replacement is performed without incident, or
  * false if the buffer is read-only or if there are fewer than
  * `size' characters after point (in which case nothing is inserted).
- * FIXME: Check the contract by looking at the callers.
  */
 bool replace_nstring(size_t size, rblist *ret, rblist repl)
 {
   rbacc rba;
 
+  assert(repl);
+
   if (warn_if_readonly_buffer())
     return false;
 
-  if (size || (repl && rblist_length(repl)))
-    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, repl ? rblist_length(repl) : 0);
+  if (size || rblist_length(repl))
+    undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, rblist_length(repl));
 
   if (size) {
     if (ret)
@@ -401,6 +402,7 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
     adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(repl));
+    // FIXME: Surely the following is wrong?
     for (size_t i = 0; i < rblist_nl_count(repl); i++)
       CMDCALL(move_next_character);
   }
@@ -441,7 +443,7 @@ Delete the following character.\n\
 Join lines if the character is a newline.\
 ")
 {
-  ok = replace_nstring(1, NULL, NULL);
+  ok = replace_nstring(1, NULL, rblist_empty);
 }
 END_DEF
 
