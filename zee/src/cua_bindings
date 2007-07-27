@@ -5,8 +5,6 @@ key_bind M-x execute_command
 key_bind C-u edit_repeat
 
 # Navigation. Mostly arrows and things.
-# FIXME: Ideally everything should have a home keys alternative, but
-# this is currently not true.
 
 # Character/line
 key_bind LEFT move_previous_character
