@@ -3,13 +3,15 @@
 TESTS = vector rblist rbacc
 check_PROGRAMS = vector rblist rbacc
 
-vector_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+TESTCPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+
+vector_CPPFLAGS = $(TESTCPPFLAGS)
 vector_LDADD = zmalloc.o
 
-rblist_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+rblist_CPPFLAGS = $(TESTCPPFLAGS)
 rblist_LDADD = zmalloc.o rbacc.o
 
-rbacc_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+rbacc_CPPFLAGS = $(TESTCPPFLAGS)
 rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
@@ -72,8 +74,8 @@ else
 zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
 endif
 
-zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\"" @LUA_INCLUDES@
-zee_LDADD = @LIBOBJS@ @LUA_LIBS@
+zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
+zee_LDADD = @LIBOBJS@
 
 EXTRA_DIST =  								\
 		lib.lua							\

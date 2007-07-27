@@ -117,12 +117,10 @@ if test "x$with_lua_includes" != x; then
 elif test "x$with_lua_prefix" != x; then
     LUA_INCLUDES="-I$with_lua_prefix/include"
 fi
-save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $LUA_INCLUDES"
 AC_CHECK_HEADERS([lua.h lualib.h], [],
                  [AC_MSG_FAILURE([*** missing headers lua.h or lualib.h.
                   *** install the Lua dev package or check --with-lua-includes option.])], [])
-CFLAGS="$save_CFLAGS"
 
 dnl LUA_LIBS
 if test "x$with_lua_libraries" != x; then
@@ -141,9 +139,6 @@ AC_CHECK_LIB([lua$with_lua_suffix],
 
 dnl liblua_version
 AC_MSG_CHECKING([for liblua version 5.1.x])
-save_CFLAGS="$CFLAGS"
-save_LIBS="$LIBS"
-CFLAGS="$CFLAGS $LUA_INCLUDES"
 LIBS="$LIBS $LUA_LIBS"
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <lua.h>
@@ -162,8 +157,6 @@ int main()
               [AC_MSG_RESULT([no])
                AC_MSG_FAILURE([*** liblua is not version 5.1.
                   *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])])
-CFLAGS="$save_CFLAGS"
-LIBS="$save_LIBS"
 
 dnl ==================================================================
 dnl libgc (BDW garbage collector)
