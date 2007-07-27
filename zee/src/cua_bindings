@@ -68,7 +68,6 @@ key_bind C-r edit_replace
 # Insert special characters
 key_bind C-RET edit_insert_newline
 key_bind RET edit_insert_newline_and_indent
-key_bind TAB edit_insert_tab
 key_bind M-i edit_insert_quoted
 key_bind M-s edit_shell_command
 
