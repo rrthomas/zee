@@ -103,21 +103,9 @@ bool cmd_eval(rblist s, rblist source)
   return ok;
 }
 
-/*--------------------------------------------------------------------------
- * Command name to C function mapping
- *--------------------------------------------------------------------------*/
-
-static struct {
-  const char *name;             // The command name
-  Command cmd;                  // The function pointer
-} ftable[] = {
-#define X(cmd_name, doc) \
-	{# cmd_name, F_ ## cmd_name},
-#include "tbl_funcs.h"
-#undef X
-};
-#define fentries (sizeof(ftable) / sizeof(ftable[0]))
-
+/*
+ * Set up command name to C function mapping
+ */
 void init_commands(void)
 {
 #define X(cmd_name, doc) \
@@ -132,14 +120,6 @@ void init_commands(void)
 #undef X
 }
 
-list command_list(void)
-{
-  list l = list_new();
-  for (size_t i = 0; i < fentries; ++i)
-    list_append(l, rblist_from_string(ftable[i].name));
-  return l;
-}
-
 /*
  * Read a command name from the minibuffer.
  */
@@ -148,7 +128,7 @@ rblist minibuf_read_command_name(rblist prompt)
   static History commands_history;
   rblist ms;
   Completion *cp = completion_new();
-  cp->completions = command_list();
+  cp->completions = globals_list(); // FIXME: Need to filter out commands
 
   for (;;) {
     ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);

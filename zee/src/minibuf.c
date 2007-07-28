@@ -135,9 +135,9 @@ void minibuf_clear(void)
 }
 
 
-/*
+/*--------------------------------------------------------------------------
  * Minibuffer key action routines
- */
+ *--------------------------------------------------------------------------*/
 
 /*
  * Draws the string "<prompt><value>" in the minibuffer and leaves the
