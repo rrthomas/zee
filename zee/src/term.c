@@ -210,8 +210,9 @@ static void draw_line(size_t row, size_t line, size_t tab)
     RBLIST_END
     i++;
   RBLIST_END
-  while (x < end)
-    x = outch_printable(' ', x);
+
+  for (size_t j = max(end - x, win.fwidth); j>0; j--)
+    term_addch(' ');
 
   term_attrset(1, FONT_NORMAL);
 
