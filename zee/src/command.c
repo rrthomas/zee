@@ -105,6 +105,7 @@ bool cmd_eval(rblist s, rblist source)
 
 /*
  * Set up command name to C function mapping
+ * FIXME: Register the commands directly into Lua instead.
  */
 void init_commands(void)
 {
