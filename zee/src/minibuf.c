@@ -307,7 +307,7 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
       mb_next_history(hp, &rbl, &i, &saved);
       break;
     case KBD_TAB:
-      if (cp == NULL || list_empty(cp->matches))
+      if (cp == NULL || lualist_length(cp->matches) == 0)
         term_beep();
       else {
         if (rblist_compare(rbl, cp->match) != 0) {

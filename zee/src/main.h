@@ -119,14 +119,14 @@ typedef struct {
 } Window;
 
 typedef struct {
-  int completions; // Lua reference to list of completion strings
-  list matches;    // The matches list
+  int completions; // Lua stack index (N.B.) of list of completion strings
+  int matches;     // Lua reference (N.B.) to the list of matches
   rblist match;    // The current matched string
 } Completion;
 
 typedef struct {
-  list elements;                // Elements (strings)
-  list sel;                     // Currently selected element (pointer to elements)
+  int elements; // Reference to Lua list of elements (strings)
+  size_t sel; // Currently selected element (number of item in elements)
 } History;
 
 // Type of font attributes

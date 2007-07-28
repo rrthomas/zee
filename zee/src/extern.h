@@ -101,6 +101,13 @@ bool insert_char(int c);
 bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
 
+// lua.c ------------------------------------------------------------------
+int lualist_new(void);
+void lualist_free(int l);
+size_t lualist_length(int l);
+const char *lualist_get_string(int l, size_t n);
+void lualist_set_string(int l, size_t n, const char *s);
+
 // macro.c ----------------------------------------------------------------
 void cancel_macro_definition(void);
 void add_cmd_to_macro(void);

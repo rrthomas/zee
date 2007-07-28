@@ -22,10 +22,12 @@
    02111-1301, USA.  */
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "config.h"
 #include "main.h"
 #include "extern.h"
+#include "rbacc.h"
 
 
 /*
@@ -33,9 +35,7 @@
  */
 Completion *completion_new(void)
 {
-  Completion *cp = zmalloc(sizeof(Completion));
-  cp->matches = list_new();
-  return cp;
+  return zmalloc(sizeof(Completion));
 }
 
 /*
@@ -44,30 +44,28 @@ Completion *completion_new(void)
  * COLUMN_GAP-character gap between each column.
  */
 #define COLUMN_GAP 5
-static rblist completion_write(list l)
+static rblist completion_write(int l)
 {
   size_t maxlen = 0;
-  for (list p = list_first(l); p != l; p = list_next(p))
-    maxlen = max(maxlen, rblist_length(p->item));
+  for (size_t p = 1; p <= lualist_length(l); p++)
+    maxlen = max(maxlen, strlen(lualist_get_string(l, p)));
   maxlen += COLUMN_GAP;
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
-  size_t i = 0, col = 0;
-  rblist rbl = rblist_empty;
-  for (list p = list_first(l);
-       p != l && i < list_length(l);
-       p = list_next(p), i++) {
+  size_t col = 0;
+  rbacc rba = rbacc_new();
+  for (size_t p = 1; p <= lualist_length(l); p++) {
     if (col >= numcols) {
       col = 0;
-      rbl = rblist_concat(rbl, rblist_from_string("\n"));
+      rbacc_add_char(rba, '\n');
     }
-    rbl = rblist_concat(rbl, p->item);
+    rbacc_add_string(rba, lualist_get_string(l, p));
     if (++col < numcols)
-      for (size_t i = maxlen - rblist_length(p->item); i > 0; i--)
-        rbl = rblist_concat(rbl, rblist_from_string(" "));
+      for (size_t i = maxlen - strlen(lualist_get_string(l, p)); i > 0; i--)
+        rbacc_add_char(rba, ' ');
   }
 
-  return rbl;
+  return rbacc_to_rblist(rba);
 }
 
 /*
@@ -80,13 +78,13 @@ void completion_popup(Completion *cp)
   assert(cp);
   assert(cp->matches);
   rblist rbl = rblist_from_string("Completions\n\n");
-  switch (list_length(cp->matches)) {
+  switch (lualist_length(cp->matches)) {
     case 0:
       rbl = rblist_concat(rbl, rblist_from_string("No completions"));
       break;
     case 1:
-      rbl = rblist_concat(rbl, rblist_from_string("Sole completion: "));
-      rbl = rblist_concat(rbl, list_first(cp->matches)->item);
+      rbl = rblist_concat(rbl, rblist_fmt("Sole completion: %s",
+                                          lualist_get_string(cp->matches, 1)));
       break;
     default:
       rbl = rblist_concat(rbl, rblist_from_string("Possible completions are:\n"));
@@ -109,11 +107,6 @@ static size_t common_prefix_length(rblist rbl1, rblist rbl2)
   return i;
 }
 
-static int hcompar(const void *p1, const void *p2)
-{
-  return rblist_compare(*(const rblist *)p1, *(const rblist *)p2);
-}
-
 /*
  * Match completions
  * cp - the completions
@@ -133,31 +126,29 @@ bool completion_try(Completion *cp, rblist search)
 {
   size_t fullmatches = 0;
 
-  cp->matches = list_new();
-
+  cp->matches = lualist_new();
   lua_pushnil(L); // initial key
   while (lua_next(L, cp->completions) != 0) {
     lua_pop(L, 1); // remove value; keep key for next iteration
     if (lua_isstring(L, -1)) {
       rblist rbl = rblist_from_string(lua_tostring(L, -1));
       if (!rblist_ncompare(rbl, search, rblist_length(search))) {
-        list_append(cp->matches, rbl);
+        lualist_set_string(cp->matches, lualist_length(cp->matches) + 1, lua_tostring(L, -1));
         if (!rblist_compare(rbl, search))
           ++fullmatches;
       }
     }
   }
-  lua_pop(L, 1);                // pop last key
+  lua_pop(L, 1); // pop last key
 
-  list_sort(cp->matches, hcompar);
-
-  if (list_empty(cp->matches))
+  if (lualist_length(cp->matches) == 0)
     return false;
 
-  cp->match = list_first(cp->matches)->item;
+  // FIXME: sort(cp->matches);
+  cp->match = rblist_from_string(lualist_get_string(cp->matches, 1));
   size_t prefix_len = rblist_length(cp->match);
-  for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p))
-    prefix_len = min(prefix_len, common_prefix_length(cp->match, p->item));
+  for (size_t p = 1; p <= lualist_length(cp->matches); p++)
+    prefix_len = min(prefix_len, common_prefix_length(cp->match, rblist_from_string(lualist_get_string(cp->matches, p))));
   cp->match = rblist_sub(cp->match, 0, prefix_len);
 
   return true;
@@ -182,21 +173,22 @@ static size_t last_occurrence(rblist rbl, size_t before_pos, int c)
  */
 void completion_remove_suffix(Completion *cp)
 {
-  if (list_empty(cp->matches))
+  if (lualist_length(cp->matches) == 0)
     return;
-  list ans = list_new();
-  list p = list_first(cp->matches);
-  rblist previous = p->item;
-  for (p = list_next(p); p != cp->matches; p = list_next(p)) {
-    size_t length = last_occurrence(previous, common_prefix_length(previous, p->item), '_');
+  int ans = lualist_new();
+  rblist previous = rblist_from_string(lualist_get_string(cp->matches, 1));
+  for (size_t p = 2; p <= lualist_length(cp->matches); p++) {
+    size_t length = last_occurrence(previous, common_prefix_length(previous, rblist_from_string(lualist_get_string(cp->matches, p))), '_');
     if (length > rblist_length(cp->match))
       previous = rblist_sub(previous, 0, length);
     else {
-      list_append(ans, previous);
-      previous = p->item;
+      lualist_set_string(ans, lualist_length(ans) + 1, rblist_to_string(previous));
+      previous = rblist_from_string(lualist_get_string(cp->matches, p));
     }
   }
-  cp->matches = list_append(ans, previous);
+  lualist_set_string(ans, lualist_length(ans) + 1, rblist_to_string(previous));
+  lualist_free(cp->matches);
+  cp->matches = ans;
 }
 
 /*
@@ -208,7 +200,7 @@ size_t completion_remove_prefix(Completion *cp, rblist search)
 {
   size_t pos = last_occurrence(search, rblist_length(search), '_');
   if (pos > 0)
-    for (list p = list_first(cp->matches); p != cp->matches; p = list_next(p))
-      p->item = rblist_sub(p->item, pos, rblist_length(p->item));
+    for (size_t p = 1; p <= lualist_length(cp->matches); p++)
+      lualist_set_string(cp->matches, p, lualist_get_string(cp->matches, p) + pos);
   return pos;
 }

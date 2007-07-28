@@ -1,5 +1,7 @@
 /* History facility functions
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2007 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zee.
 
@@ -18,26 +20,27 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+#include <string.h>
+
 #include "config.h"
 
 #include "main.h"
 #include "extern.h"
 
+
 void add_history_element(History *hp, rblist string)
 {
-  rblist last;
+  if (hp->elements == 0)
+    hp->elements = lualist_new();
 
-  if (!hp->elements)
-    hp->elements = list_new();
-
-  last = list_last(hp->elements)->item;
-  if (!last || rblist_compare(last, string) != 0)
-    list_append(hp->elements, string);
+  if (lualist_length(hp->elements) == 0 ||
+      strcmp(lualist_get_string(hp->elements, lualist_length(hp->elements)), rblist_to_string(string)) != 0)
+    lualist_set_string(hp->elements, lualist_length(hp->elements) + 1, rblist_to_string(string));
 }
 
 void prepare_history(History *hp)
 {
-  hp->sel = NULL;
+  hp->sel = 0;
 }
 
 rblist previous_history_element(History *hp)
@@ -45,16 +48,16 @@ rblist previous_history_element(History *hp)
   rblist rbl = NULL;
 
   if (hp->elements) {
-    if (!hp->sel) { // First call for this history.
+    if (hp->sel == 0) { // First call for this history.
       // Select last element.
-      if (list_last(hp->elements) != hp->elements) {
-        hp->sel = list_last(hp->elements);
-        rbl = hp->sel->item;
+      if (lualist_length(hp->elements) > 0) {
+        hp->sel = lualist_length(hp->elements);
+        rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
       }
-    } else if (list_prev(hp->sel) != hp->elements) {
+    } else if (hp->sel > 1) {
       // If there is there another element, select it.
-      hp->sel = list_prev(hp->sel);
-      rbl = hp->sel->item;
+      hp->sel--;
+      rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
     }
   }
 
@@ -67,11 +70,11 @@ rblist next_history_element(History *hp)
 
   if (hp->elements && hp->sel) {
     // Next element.
-    if (list_next(hp->sel) != hp->elements) {
-      hp->sel = list_next(hp->sel);
-      rbl = hp->sel->item;
+    if (hp->sel < lualist_length(hp->elements)) {
+      hp->sel++;
+      rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
     } else              // No more elements (back to original status).
-      hp->sel = NULL;
+      hp->sel = 0;
   }
 
   return rbl;

@@ -54,6 +54,7 @@ zee_nondoc_SOURCES =			        \
 	nonstd.h			        \
 	list.c				        \
 	list.h				        \
+	lua.c					\
 	zmalloc.h			        \
 	zmalloc.c			        \
 	term.h				        \

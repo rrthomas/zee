@@ -77,7 +77,7 @@ bool cmd_eval(rblist s, rblist source)
        tok = gettok(s, &pos)) {
     minibuf_error_set_lineno(lineno);
 
-      // Get tokens until we run out or reach a new line
+    // Get tokens until we run out or reach a new line
     list l = list_new();
     while (tok && tok != rblist_empty) {
       list_append(l, tok);
