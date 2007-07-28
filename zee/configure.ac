@@ -117,7 +117,7 @@ if test "x$with_lua_includes" != x; then
 elif test "x$with_lua_prefix" != x; then
     LUA_INCLUDES="-I$with_lua_prefix/include"
 fi
-CFLAGS="$CFLAGS $LUA_INCLUDES"
+CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
 AC_CHECK_HEADERS([lua.h lualib.h], [],
                  [AC_MSG_FAILURE([*** missing headers lua.h or lualib.h.
                   *** install the Lua dev package or check --with-lua-includes option.])], [])
