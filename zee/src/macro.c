@@ -1,6 +1,6 @@
 /* Macro facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2005 Reuben Thomas.
+   Copyright (c) 2005, 2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -27,41 +27,58 @@
 #include "extern.h"
 
 
-static vector *cur_mp = NULL, *cmd_mp = NULL;
+static bool cmd_started = false, macro_defined = false;
 
-static vector *macro_new(void)
+#define MACRO_NAME "_macro"
+#define CMD_NAME "_cmd"
+
+static void macro_new(const char *name)
 {
-  return vec_new(sizeof(size_t));
+  lua_newtable(L);
+  lua_setglobal(L, name);
 }
 
-static void add_macro_key(vector *mp, size_t key)
+static void add_macro_key(const char *name, size_t key)
 {
-  vec_item(mp, vec_items(mp), size_t) = key;
+  lua_getglobal(L, name);
+  if (lua_istable(L, -1)) {
+    lua_pushnumber(L, (lua_Number)key);
+    lua_rawseti(L, -2, (int)lua_objlen(L, -2) + 1);
+  }
+  lua_pop(L, 1);
+  macro_defined = true;
 }
 
 /* FIXME: macros should be executed immediately and abort on error;
    they should be stored as a macro list, not a series of
-   keystrokes. vectors should return success/failure. */
+   keystrokes. Macros should return success/failure. */
 void add_cmd_to_macro(void)
 {
-  size_t i;
-  assert(cmd_mp);
-  for (i = 0; i < vec_items(cmd_mp); i++)
-    add_macro_key(cur_mp, vec_item(cmd_mp, i, size_t));
-  cmd_mp = NULL;
+  assert(cmd_started);
+  lua_getglobal(L, CMD_NAME);
+  lua_pushnil(L); // first key
+  while (lua_next(L, -2) != 0) {
+    if (lua_isnumber(L, -1))
+      add_macro_key(MACRO_NAME, (size_t)lua_tonumber(L, -1));
+    lua_pop(L, 1); // remove value; keep key for next iteration
+  }
+  lua_pop(L, 2); // pop last key and table
+  cmd_started = false;
 }
 
 void add_key_to_cmd(size_t key)
 {
-  if (cmd_mp == NULL)
-    cmd_mp = macro_new();
+  if (!cmd_started) {
+    macro_new(CMD_NAME);
+    cmd_started = true;
+  }
 
-  add_macro_key(cmd_mp, key);
+  add_macro_key(CMD_NAME, key);
 }
 
 void cancel_macro_definition(void)
 {
-  cmd_mp = cur_mp = NULL;
+  cmd_started = macro_defined = false;
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
@@ -77,13 +94,12 @@ Use macro_name to give it a permanent name.\
     minibuf_error(rblist_from_string("Already defining a macro"));
     ok = false;
   } else {
-    if (cur_mp)
+    if (macro_defined)
       cancel_macro_definition();
 
     minibuf_write(rblist_from_string("Defining macro..."));
-
     thisflag |= FLAG_DEFINING_MACRO;
-    cur_mp = macro_new();
+    macro_new(MACRO_NAME);
   }
 }
 END_DEF
@@ -114,20 +130,28 @@ FIXME: Such a command cannot be called at the moment!\
   if ((ms = minibuf_read(rblist_from_string("Name for last macro: "), rblist_empty)) == NULL) {
     minibuf_error(rblist_from_string("No command name given"));
     ok = false;
-  } else if (cur_mp == NULL) {
+  } else if (!macro_defined) {
     minibuf_error(rblist_from_string("No macro defined"));
     ok = false;
-  } else
-    set_variable_blob(ms, vec_copy(cur_mp));
+  } else {
+    lua_getglobal(L, MACRO_NAME);
+    lua_setglobal(L, rblist_to_string(ms));
+  }
 }
 END_DEF
 
-void call_macro(vector *mp)
+// FIXME: Allow named commands to be run. In order to do this need to
+// be able to distinguish C functions from macros.
+void call_macro(const char *name)
 {
-  /* The loop termination condition is really i >= 0, but unsigned
-     types are always >= 0. */
-  for (size_t i = vec_items(mp) - 1; i < vec_items(mp); i--)
-    ungetkey(vec_item(mp, i, size_t));
+  lua_getglobal(L, name);
+  lua_pushnil(L); // first key
+  while (lua_next(L, -2) != 0) {
+    if (lua_isnumber(L, -1))
+      ungetkey((size_t)lua_tonumber(L, -1));
+    lua_pop(L, 1); // remove value; keep key for next iteration
+  }
+  lua_pop(L, 2); // pop last key and table
 }
 
 DEF(macro_play,
@@ -137,10 +161,10 @@ To name a macro so you can call it after defining others, use\n\
 macro_name.\
 ")
 {
-  if (cur_mp == NULL) {
+  if (!macro_defined) {
     minibuf_error(rblist_from_string("No macro has been defined"));
     ok = false;
   } else
-    call_macro(cur_mp);
+    call_macro(MACRO_NAME);
 }
 END_DEF

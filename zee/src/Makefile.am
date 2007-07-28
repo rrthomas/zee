@@ -1,12 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
-TESTS = vector rblist rbacc
-check_PROGRAMS = vector rblist rbacc
+TESTS = rblist rbacc
+check_PROGRAMS = rblist rbacc
 
 TESTCPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
-
-vector_CPPFLAGS = $(TESTCPPFLAGS)
-vector_LDADD = zmalloc.o
 
 rblist_CPPFLAGS = $(TESTCPPFLAGS)
 rblist_LDADD = zmalloc.o rbacc.o
@@ -55,8 +52,6 @@ zee_nondoc_SOURCES =			        \
         rbutil.c				\
         rbutil.h				\
 	nonstd.h			        \
-	vector.c			        \
-	vector.h			        \
 	list.c				        \
 	list.h				        \
 	zmalloc.h			        \

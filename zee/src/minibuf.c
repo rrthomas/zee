@@ -88,45 +88,6 @@ rblist minibuf_read(rblist rbl, rblist value)
 }
 
 /*
- * Repeatedly prompts until the user gives one of the answers in
- * cp->completions.
- * Returns NULL if cancelled, otherwise returns the chosen option.
- */
-static rblist minibuf_read_forced(rblist prompt, rblist errmsg, Completion *cp)
-{
-  rblist rbl;
-
-  for (;;) {
-    rbl = minibuf_read_completion(prompt, rblist_empty, cp, NULL);
-    if (rbl == NULL)             // Cancelled.
-      return NULL;
-
-    // Complete partial words if possible.
-    if (completion_try(cp, rbl)) {
-      rbl = cp->match;
-      if (list_length(cp->matches) == 1)
-        return rbl;
-    }
-
-    minibuf_error(errmsg);
-    waitkey(WAITKEY_DEFAULT);
-  }
-}
-
-/*
- * Forces the user to answer "yes" or "no".
- * Returns -1 for cancelled, otherwise true for "yes" and false for "no".
- */
-int minibuf_read_yesno(rblist prompt)
-{
-  Completion *cp = completion_new();
-  list_append(cp->completions, rblist_from_string("yes"));
-  list_append(cp->completions, rblist_from_string("no"));
-  rblist reply = minibuf_read_forced(prompt, rblist_from_string("Please answer `yes' or `no'."), cp);
-  return reply == NULL ? -1 : !rblist_compare(rblist_from_string("yes"), reply);
-}
-
-/*
  * Clear the minibuffer.
  */
 void minibuf_clear(void)

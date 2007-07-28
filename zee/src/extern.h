@@ -105,6 +105,7 @@ bool replace_nstring(size_t size, rblist *as, rblist bs);
 void cancel_macro_definition(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
+void call_macro(const char *name);
 
 // main.c -----------------------------------------------------------------
 extern Window win;
@@ -117,8 +118,6 @@ void minibuf_error_set_lineno(size_t lineno);
 void minibuf_error_set_source(rblist rbl);
 void minibuf_error(rblist rbl);
 rblist minibuf_read(rblist rbl, rblist value);
-int minibuf_read_yesno(rblist rbl);
-int minibuf_read_boolean(rblist rbl);
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
 
@@ -154,6 +153,7 @@ void undo_reset_unmodified(Undo *up);
 void set_variable(rblist var, rblist val);
 void set_variable_blob(rblist key, void *val);
 void *get_variable_blob(rblist key);
+rblist get_blob_variable_string(void *key);
 rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);

@@ -31,7 +31,6 @@
 
 #include "nonstd.h"
 #include "zmalloc.h"
-#include "vector.h"
 #include "list.h"
 #include "rblist.h"
 #include "rbutil.h"
@@ -194,7 +193,7 @@ typedef bool (*Command)(list l);
   bool F_ ## name(list l) \
   { \
     bool ok = true; \
-    assert(l);
+    assert(l != NULL);
 
 /* Declare a command that takes arguments.
    `args' is a comma-separated list. */
