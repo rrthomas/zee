@@ -109,6 +109,9 @@ bool get_variable_bool(rblist var)
   return false;
 }
 
+/*
+ * Make a list of globals with string keys
+ */
 list globals_list(void)
 {
   list l = list_new();
@@ -116,7 +119,8 @@ list globals_list(void)
   lua_pushnil(L);               // initial key
   while (lua_next(L, LUA_GLOBALSINDEX) != 0) {
     lua_pop(L, 1);        // remove value; keep key for next iteration
-    list_append(l, rblist_from_string(lua_tostring(L, -1)));
+    if (lua_isstring(L, -1))
+      list_append(l, rblist_from_string(lua_tostring(L, -1)));
   }
   lua_pop(L, 1);                // pop last key
 
