@@ -119,9 +119,9 @@ typedef struct {
 } Window;
 
 typedef struct {
-  list completions;             // The completion strings
-  list matches;                 // The matches list
-  rblist match;                 // The current matched string
+  int completions; // Lua reference to list of completion strings
+  list matches;    // The matches list
+  rblist match;    // The current matched string
 } Completion;
 
 typedef struct {

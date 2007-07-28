@@ -1,6 +1,7 @@
 /* Completion facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2006 Reuben Thomas.
+   Copyright (c) 2006-2007 Reuben Thomas.
+   Copyright (c) 2006 Alistair Turnbull.
    All rights reserved.
 
    This file is part of Zee.
@@ -33,10 +34,7 @@
 Completion *completion_new(void)
 {
   Completion *cp = zmalloc(sizeof(Completion));
-
-  cp->completions = list_new();
   cp->matches = list_new();
-
   return cp;
 }
 
@@ -136,12 +134,21 @@ bool completion_try(Completion *cp, rblist search)
   size_t fullmatches = 0;
 
   cp->matches = list_new();
-  for (list p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-    if (!rblist_ncompare(p->item, search, rblist_length(search))) {
-      list_append(cp->matches, p->item);
-      if (!rblist_compare(p->item, search))
-        ++fullmatches;
+
+  lua_pushnil(L); // initial key
+  while (lua_next(L, cp->completions) != 0) {
+    lua_pop(L, 1); // remove value; keep key for next iteration
+    if (lua_isstring(L, -1)) {
+      rblist rbl = rblist_from_string(lua_tostring(L, -1));
+      if (!rblist_ncompare(rbl, search, rblist_length(search))) {
+        list_append(cp->matches, rbl);
+        if (!rblist_compare(rbl, search))
+          ++fullmatches;
+      }
     }
+  }
+  lua_pop(L, 1);                // pop last key
+
   list_sort(cp->matches, hcompar);
 
   if (list_empty(cp->matches))

@@ -157,7 +157,6 @@ rblist get_blob_variable_string(void *key);
 rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);
-list globals_list(void);
 rblist minibuf_read_variable_name(rblist msg);
 
 // External C functions for interactive commands --------------------------

@@ -129,7 +129,7 @@ rblist minibuf_read_command_name(rblist prompt)
   static History commands_history;
   rblist ms;
   Completion *cp = completion_new();
-  cp->completions = globals_list(); // FIXME: Need to filter out commands
+  cp->completions = LUA_GLOBALSINDEX; // FIXME: Need to filter out commands
 
   for (;;) {
     ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);

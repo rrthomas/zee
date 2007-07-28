@@ -109,30 +109,12 @@ bool get_variable_bool(rblist var)
   return false;
 }
 
-/*
- * Make a list of globals with string keys
- */
-list globals_list(void)
-{
-  list l = list_new();
-
-  lua_pushnil(L);               // initial key
-  while (lua_next(L, LUA_GLOBALSINDEX) != 0) {
-    lua_pop(L, 1);        // remove value; keep key for next iteration
-    if (lua_isstring(L, -1))
-      list_append(l, rblist_from_string(lua_tostring(L, -1)));
-  }
-  lua_pop(L, 1);                // pop last key
-
-  return l;
-}
-
 rblist minibuf_read_variable_name(rblist msg)
 {
   rblist ms;
   Completion *cp = completion_new();
 
-  cp->completions = globals_list(); // FIXME: Need to filter out commands
+  cp->completions = LUA_GLOBALSINDEX; // FIXME: Need to filter out commands
 
   for (;;) {
     ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
