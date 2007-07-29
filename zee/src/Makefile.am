@@ -13,6 +13,8 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
+# FIXME: Only install beep.wav for Allegro build (but always
+# distribute it)
 dist_pkgdata_DATA = cua_bindings emacs_bindings beep.wav
 
 info_TEXINFOS = zee.texi
