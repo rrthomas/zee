@@ -19,7 +19,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-#include <assert.h>
 #include <stdlib.h>
 
 #include "list.h"
@@ -49,19 +48,6 @@ size_t list_length(list l)
   return length;
 }
 
-// Add an item to the head of a list
-list list_prepend(list l, const void *i)
-{
-  list n = zmalloc(sizeof(struct list_s));
-
-  n->next = l->next;
-  n->prev = l;
-  n->item = i;
-  l->next = l->next->prev = n;
-
-  return l;
-}
-
 // Add an item to the tail of a list
 list list_append(list l, const void *i)
 {
@@ -73,12 +59,6 @@ list list_append(list l, const void *i)
   l->prev = l->prev->next = n;
 
   return l;
-}
-
-// Return the first item of a list, or NULL if the list is empty
-const void *list_head(list l)
-{
-  return l == l->next ? NULL : l->next->item;
 }
 
 /* Remove the first item of a list, returning the item, or NULL if the
@@ -95,55 +75,4 @@ const void *list_behead(list l)
   l->next->prev = l;
 
   return i;
-}
-
-/* Remove the last item of a list, returning the item, or NULL if the
-   list is empty */
-const void *list_betail(list l)
-{
-  const void *i;
-  list p = l->prev;
-
-  if (p == l)
-    return NULL;
-  i = p->item;
-  l->prev = l->prev->prev;
-  l->prev->next = l;
-
-  return i;
-}
-
-/* Return the nth item of l, or l->item (usually NULL) if that is out
-   of range */
-const void *list_at(list l, size_t n)
-{
-  size_t i;
-  list p;
-
-  assert(l);
-
-  for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++)
-    ;
-
-  return p->item;
-}
-
-// Sort list l with qsort using comparison function cmp
-void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
-{
-  list p;
-  const void **vec;
-  size_t i, len = list_length(l);
-
-  assert(l && cmp);
-
-  vec = zmalloc(sizeof(void *) * len);
-
-  for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
-    vec[i] = p->item;
-
-  qsort(vec, len, sizeof(void *), cmp);
-
-  for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
-    p->item = vec[i];
 }

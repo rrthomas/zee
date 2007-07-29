@@ -34,18 +34,11 @@ struct list_s {
 
 list list_new(void);
 size_t list_length(list l);
-list list_prepend(list l, const void *i);
 list list_append(list l, const void *i);
-const void *list_head(list l);
 const void *list_behead(list l);
-const void *list_betail(list l);
-const void *list_at(list l, size_t n);
-void list_sort(list l, int (*cmp)(const void *p1, const void *p2));
 
 #define list_first(l) ((l)->next)
-#define list_last(l)  ((l)->prev)
 #define list_next(l)  ((l)->next)
-#define list_prev(l)  ((l)->prev)
 
 #define list_empty(l)  ((l)->next == l)
 
