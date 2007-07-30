@@ -21,7 +21,21 @@ info_TEXINFOS = zee.texi
 
 dist_sysconf_DATA = $(PACKAGE)rc
 
-zee_doc_SOURCES =				\
+zee_base_SOURCES =				\
+	rblist.c			        \
+	rblist.h			        \
+	rbacc.c			        	\
+	rbacc.h					\
+        rbutil.c				\
+        rbutil.h				\
+	nonstd.h			        \
+	list.c				        \
+	list.h				        \
+	zmalloc.h			        \
+	zmalloc.c			        \
+	term.h				        \
+	extern.h			        \
+	main.h					\
 	tbl_opts.h				\
 	tbl_vars.h				\
 	tbl_keys.h				\
@@ -45,24 +59,6 @@ zee_doc_SOURCES =				\
 	term.c					\
 	undo.c					\
 	variables.c
-
-zee_nondoc_SOURCES =			        \
-	rblist.c			        \
-	rblist.h			        \
-	rbacc.c			        	\
-	rbacc.h					\
-        rbutil.c				\
-        rbutil.h				\
-	nonstd.h			        \
-	list.c				        \
-	list.h				        \
-	zmalloc.h			        \
-	zmalloc.c			        \
-	term.h				        \
-	extern.h			        \
-	main.h
-
-zee_base_SOURCES = $(zee_doc_SOURCES) $(zee_nondoc_SOURCES)
 
 if ALLEGRO
 zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
@@ -91,8 +87,8 @@ CLEANFILES = $(BUILT_SOURCES)
 
 $(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
-tbl_funcs.h funcs.texi: $(zee_doc_SOURCES) mkfuncs.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkfuncs.lua $(top_srcdir)/src $(zee_doc_SOURCES)
+tbl_funcs.h funcs.texi: $(zee_base_SOURCES) mkfuncs.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkfuncs.lua $(top_srcdir)/src $(zee_base_SOURCES)
 
 $(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkvars.lua $(top_srcdir)/src/tbl_vars.h
