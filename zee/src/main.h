@@ -257,6 +257,7 @@ enum {
 
 // Call a command with an integer argument
 #define CMDCALL_UINT(name, arg)                                         \
+  lua_pushnumber(L, (lua_Number)arg);                                   \
   assert(F_ ## name(L) == 1);                                           \
   ok = lua_toboolean(L, -1);                                            \
   lua_pop(L, 1)

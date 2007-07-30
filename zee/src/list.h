@@ -33,7 +33,6 @@ list list_new(void);
 void list_free(list l);
 size_t list_length(list l);
 list list_append(list l, void *i);
-list list_append_string(list l, const char *s);
 list list_set_string(list l, size_t n, const char *s);
 const char *list_get_string(int l, size_t n);
 const void *list_behead(list l);

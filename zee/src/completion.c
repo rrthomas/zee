@@ -140,7 +140,6 @@ bool completion_try(Completion *cp, rblist search)
       }
     }
   }
-  lua_pop(L, 1); // pop last key
 
   if (list_length(cp->matches) == 0)
     return false;

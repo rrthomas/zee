@@ -45,10 +45,10 @@ static Binding *get_binding(size_t key)
   lua_pushnumber(L, (lua_Number)key);
   lua_gettable(L, -2);
 
-  if (lua_isuserdata(L, -1)) {
+  if (lua_iscfunction(L, -1)) {
     p = zmalloc(sizeof(Binding));
     p->key = key;
-    p->cmd = (lua_CFunction)lua_touserdata(L, -1);
+    p->cmd = lua_tocfunction(L, -1);
   }
 
   lua_pop(L, 2);                // Remove table and value
@@ -64,7 +64,7 @@ static void bind_key(size_t key, lua_CFunction cmd)
   if (cmd == NULL)
     lua_pushnil(L);
   else
-    lua_pushlightuserdata(L, cmd);
+    lua_pushcfunction(L, cmd);
 
   lua_settable(L, -3);
   lua_pop(L, 1);                // Remove table
@@ -132,7 +132,7 @@ chord.\
   if (name) {
     lua_CFunction cmd;
 
-    if ((cmd = (lua_CFunction)get_variable_blob(name))) {
+    if ((cmd = get_variable_cfunction(name))) {
       if (key != KBD_NOKEY) {
         bind_key(key, cmd);
         ok = true;
@@ -170,16 +170,16 @@ rblist command_to_binding(lua_CFunction cmd)
   rbacc rba = rbacc_new();
 
   lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
-  lua_pushnil(L);               // first key
+  lua_pushnil(L); // first key
   while (lua_next(L, -2) != 0) {
-    if ((lua_CFunction)lua_touserdata(L, -1) == cmd) {
+    if (lua_tocfunction(L, -1) == cmd) {
       if (n++ != 0)
         rbacc_add_string(rba, ", ");
       rbacc_add_rblist(rba, chordtostr((size_t)lua_tonumber(L, -2)));
     }
-    lua_pop(L, 1);        // remove value; keep key for next iteration
+    lua_pop(L, 1); // remove value; keep key for next iteration
   }
-  lua_pop(L, 2);                // pop last key and table
+  lua_pop(L, 1); // pop table
 
   return rbacc_to_rblist(rba);
 }
@@ -193,6 +193,17 @@ rblist binding_to_command(size_t key)
       return rblist_from_string("edit_insert_character");
     else
       return NULL;
-  } else
-    return get_blob_variable_string((void *)p->cmd);
+  } else {
+    rblist ret = NULL;
+    
+    if (p->cmd) {
+      lua_pushcfunction(L, p->cmd);
+      lua_gettable(L, LUA_GLOBALSINDEX);
+      if (lua_isstring(L, -1))
+        ret = rblist_from_string(lua_tostring(L, -1));
+      lua_pop(L, 1);
+    }
+    
+    return ret;
+  }
 }

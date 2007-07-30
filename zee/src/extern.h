@@ -153,9 +153,7 @@ void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
 void set_variable(rblist var, rblist val);
-void set_variable_blob(rblist key, void *val);
-void *get_variable_blob(rblist key);
-rblist get_blob_variable_string(void *key);
+lua_CFunction get_variable_cfunction(rblist key);
 rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);

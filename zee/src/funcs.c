@@ -161,11 +161,14 @@ UINT(reps, "Repeat count: ")
 COMMAND(name, "Command: "))
 {
   if (ok) {
-    lua_CFunction cmd = (lua_CFunction)get_variable_blob(name);
+    lua_CFunction cmd = get_variable_cfunction(name);
     if (cmd) {
       undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-      for (size_t i = 0; i < reps; i++)
+      for (size_t i = 0; i < reps; i++) {
         cmd(L);
+        ok = lua_toboolean(L, -1);
+        lua_pop(L, 1);
+      }
       undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     }
   }

@@ -38,37 +38,14 @@ void set_variable(rblist key, rblist val)
   }
 }
 
-void set_variable_blob(rblist key, void *val)
+lua_CFunction get_variable_cfunction(rblist key)
 {
-  if (key && val) {
-    lua_pushlightuserdata(L, val);
-    lua_setglobal(L, rblist_to_string(key));
-  }
-}
-
-rblist get_blob_variable_string(void *key)
-{
-  rblist ret = NULL;
-
-  if (key) {
-    lua_pushlightuserdata(L, key);
-    lua_gettable(L, LUA_GLOBALSINDEX);
-    if (lua_isstring(L, -1))
-      ret = rblist_from_string(lua_tostring(L, -1));
-    lua_pop(L, 1);
-  }
-
-  return ret;
-}
-
-void *get_variable_blob(rblist key)
-{
-  void *ret = NULL;
+  lua_CFunction ret = NULL;
 
   if (key) {
     lua_getglobal(L, rblist_to_string(key));
-    if (lua_isuserdata(L, -1))
-      ret = lua_touserdata(L, -1);
+    if (lua_iscfunction(L, -1))
+      ret = lua_tocfunction(L, -1);
     lua_pop(L, 1);
   }
 

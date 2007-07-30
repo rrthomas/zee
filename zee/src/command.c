@@ -91,7 +91,7 @@ bool cmd_eval(rblist s, rblist source)
       const char *fname_s = lua_tostring(L, top + 1);
       if (fname_s) {
         fname = rblist_from_string(fname_s);
-        cmd = (lua_CFunction)get_variable_blob(fname);
+        cmd = get_variable_cfunction(fname);
         if (cmd) {
           assert(cmd(L) == 1);
           ok = lua_toboolean(L, -1);
@@ -120,11 +120,11 @@ bool cmd_eval(rblist s, rblist source)
 void init_commands(void)
 {
 #define X(cmd_name, doc)                                                \
-  set_variable_blob(rblist_from_string(# cmd_name), (void *)F_ ## cmd_name);
+  lua_register(L, # cmd_name, F_ ## cmd_name);
 #include "tbl_funcs.h"
 #undef X
 #define X(cmd_name, doc)                            \
-  lua_pushlightuserdata(L, (void *)F_ ## cmd_name); \
+  lua_pushcfunction(L, F_ ## cmd_name);             \
   lua_pushstring(L, # cmd_name);                    \
   lua_settable(L, LUA_GLOBALSINDEX);
 #include "tbl_funcs.h"
@@ -156,7 +156,7 @@ rblist minibuf_read_command_name(rblist prompt)
     if (completion_try(cp, ms))
       ms = cp->match;
 
-    if (get_variable_blob(ms)) {
+    if (get_variable_cfunction(ms) != NULL) {
       add_history_element(&commands_history, ms);
       minibuf_clear();        // Remove any error message
       break;

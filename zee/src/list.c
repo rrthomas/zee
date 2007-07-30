@@ -62,16 +62,6 @@ list list_append(list l, void *i)
   return l;
 }
 
-// Add an item to the tail of a list
-list list_append_string(list l, const char *s)
-{
-  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
-  lua_pushstring(L, s);
-  lua_rawseti(L, -2, (int)list_length(l) + 1);
-  lua_pop(L, 1);
-  return l;
-}
-
 // Return an arbitrary list item that is a string, or NULL if it is
 // not a string
 const char *list_get_string(int l, size_t n)

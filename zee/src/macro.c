@@ -62,7 +62,7 @@ void add_cmd_to_macro(void)
       add_macro_key(MACRO_NAME, (size_t)lua_tonumber(L, -1));
     lua_pop(L, 1); // remove value; keep key for next iteration
   }
-  lua_pop(L, 2); // pop last key and table
+  lua_pop(L, 1); // pop table
   cmd_started = false;
 }
 
@@ -151,7 +151,7 @@ void call_macro(const char *name)
       ungetkey((size_t)lua_tonumber(L, -1));
     lua_pop(L, 1); // remove value; keep key for next iteration
   }
-  lua_pop(L, 2); // pop last key and table
+  lua_pop(L, 1); // pop table
 }
 
 DEF(macro_play,
