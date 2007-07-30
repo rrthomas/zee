@@ -1,5 +1,5 @@
-/* Circular doubly-linked lists/queues
-   Copyright (c) 1997-2006 Reuben Thomas.
+/* C API for Lua lists
+   Copyright (c) 2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -20,59 +20,123 @@
    02111-1301, USA.  */
 
 #include <stdlib.h>
+#include <lauxlib.h>
 
 #include "list.h"
-#include "zmalloc.h"
+#include "main.h"
+#include "extern.h"
 
 
-// Create an empty list, returning a pointer to the list
+// Create an empty list, returning a reference to the list
 list list_new(void)
 {
-  list l = zmalloc(sizeof(struct list_s));
+  lua_newtable(L);
+  return luaL_ref(L, LUA_REGISTRYINDEX);
+}
 
-  l->next = l->prev = l;
-  l->item = NULL;
-
-  return l;
+// Destroy a list reference
+void list_free(list l)
+{
+  luaL_unref(L, LUA_REGISTRYINDEX, l);
 }
 
 // Return the length of a list
 size_t list_length(list l)
 {
-  list p;
-  size_t length = 0;
-
-  for (p = l->next; p != l; p = p->next)
-    ++length;
-
-  return length;
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  size_t ret = lua_objlen(L, -1);
+  lua_pop(L, 1);
+  return ret;
 }
 
 // Add an item to the tail of a list
-list list_append(list l, const void *i)
+list list_append(list l, void *i)
 {
-  list n = zmalloc(sizeof(struct list_s));
-
-  n->next = l;
-  n->prev = l->prev;
-  n->item = i;
-  l->prev = l->prev->next = n;
-
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_pushlightuserdata(L, i);
+  lua_rawseti(L, -2, (int)list_length(l) + 1);
+  lua_pop(L, 1);
   return l;
 }
 
-/* Remove the first item of a list, returning the item, or NULL if the
-   list is empty */
+// Add an item to the tail of a list
+list list_append_string(list l, const char *s)
+{
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_pushstring(L, s);
+  lua_rawseti(L, -2, (int)list_length(l) + 1);
+  lua_pop(L, 1);
+  return l;
+}
+
+// Return an arbitrary list item that is a string, or NULL if it is
+// not a string
+const char *list_get_string(int l, size_t n)
+{
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_rawgeti(L, -1, (int)n);
+  const char *ret = lua_tostring(L, -1);
+  lua_pop(L, 2);
+  return ret;
+}
+
+// Set an arbitrary list item to a string
+list list_set_string(list l, size_t n, const char *s)
+{
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_pushstring(L, s);
+  lua_rawseti(L, -2, (int)n);
+  lua_pop(L, 1);
+  return l;
+}
+
+/*
+ * Remove the first item of a list, returning the item, or NULL if the
+ * list is empty
+ */
 const void *list_behead(list l)
 {
-  const void *i;
-  list p = l->next;
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_rawgeti(L, -1, (int)1);
+  const char *ret = lua_topointer(L, -1);
+  lua_pop(L, 1);
 
-  if (p == l)
-    return NULL;
-  i = p->item;
-  l->next = l->next->next;
-  l->next->prev = l;
+  // Move other list items down
+  for (size_t n = 1; n < list_length(l); n++) {
+    lua_rawgeti(L, -1, (int)n + 1);
+    lua_rawseti(L, -2, (int)n);
+  }
 
-  return i;
+  lua_pop(L, 1);
+  return ret;
+}
+
+// Remove the first item of a list, returning the string, or NULL if the
+// list is empty or the item is not a string
+const char *list_behead_string(list l)
+{
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_rawgeti(L, -1, (int)1);
+  const char *ret = lua_tostring(L, -1);
+  lua_pop(L, 1);
+
+  // Move other list items down
+  for (size_t n = 1; n <= list_length(l); n++) {
+    lua_rawgeti(L, -1, (int)n + 1);
+    lua_rawseti(L, -2, (int)n);
+  }
+
+  lua_pop(L, 1);
+  return ret;
+}
+
+// Remove the first item of a list, returning the item, or NULL if the
+// list is empty
+const void *list_betail(list l)
+{
+  lua_rawgeti(L, LUA_REGISTRYINDEX, l);
+  lua_rawgeti(L, -1, (int)lua_objlen(L, -1));
+  const char *ret = lua_topointer(L, -1);
+  lua_pop(L, 2);
+  return ret;
 }

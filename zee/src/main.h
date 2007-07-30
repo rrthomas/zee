@@ -193,7 +193,7 @@ typedef bool (*Command)(list l);
   bool F_ ## name(list l) \
   { \
     bool ok = true; \
-    assert(l != NULL);
+    assert(l != 0);
 
 /* Declare a command that takes arguments.
    `args' is a comma-separated list. */
@@ -210,7 +210,7 @@ typedef bool (*Command)(list l);
 #define STR(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
-      name = list_behead(l); \
+      name = rblist_from_string(list_behead_string(l)); \
     else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) \
       ok = CMDCALL(edit_select_off);
 
@@ -218,16 +218,16 @@ typedef bool (*Command)(list l);
 #define COMMAND(name, prompt) \
     rblist name = NULL; \
     if (!list_empty(l)) \
-      name = list_behead(l); \
+      name = rblist_from_string(list_behead_string(l));                 \
     else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
       ok = CMDCALL(edit_select_off);
 
 // Declare an unsigned integer argument, with prompt.
-#define UINT(name, prompt) \
-    size_t name = 0; \
+#define UINT(num, prompt) \
+    size_t num = 0; \
     if (!list_empty(l)) { \
-      rblist rbl = list_behead(l); \
-      if ((name = strtoul(rblist_to_string(rbl), NULL, 10)) == ULONG_MAX) \
+      const char *s = list_behead_string(l);           \
+      if ((num = strtoul(s, NULL, 10)) == ULONG_MAX) \
         ok = false; \
     } else do { \
       rblist ms; \
@@ -235,9 +235,9 @@ typedef bool (*Command)(list l);
         ok = CMDCALL(edit_select_off); \
         break; \
       } \
-      if ((name = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
+      if ((num = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
         term_beep(); \
-    } while (name == ULONG_MAX);
+    } while (num == ULONG_MAX);
 
 /* FIXME: These macros don't work properly within command definitions,
    as they create a new argument list. This breaks e.g. a non-interactive
@@ -248,6 +248,6 @@ typedef bool (*Command)(list l);
 
 // Call a command with an integer argument
 #define CMDCALL_UINT(name, arg) \
-  F_ ## name(list_append(list_new(), rblist_fmt("%d", arg)))
+  F_ ## name(list_append_string(list_new(), rblist_to_string(rblist_fmt("%d", arg))))
 
 #endif // !MAIN_H

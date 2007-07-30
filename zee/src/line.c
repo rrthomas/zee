@@ -356,7 +356,7 @@ END_DEF
 // Is documentation correct? Is specification sensible?
 bool replace_nstring(size_t size, rblist *ret, rblist repl)
 {
-  rbacc rba;
+  rbacc rba = rbacc_new();
 
   assert(repl);
 
@@ -367,8 +367,6 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
     undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, rblist_length(repl));
 
   if (size) {
-    if (ret)
-      rba = rbacc_new();
     buf->flags &= ~BFLAG_ANCHORED;
 
     while (size--) {

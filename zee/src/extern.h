@@ -24,6 +24,8 @@
 #include <stddef.h>
 #include <unistd.h>
 
+#include "list.h"
+
 
 // basic.c ----------------------------------------------------------------
 size_t get_goalc(void);
@@ -48,7 +50,6 @@ rblist copy_text_block(Point start, size_t size);
 // command.c --------------------------------------------------------------
 bool cmd_eval(rblist rbl, rblist source);
 void init_commands(void);
-list command_list(void);
 rblist minibuf_read_command_name(rblist rbl);
 
 // completion.c -----------------------------------------------------------
@@ -100,13 +101,6 @@ bool line_replace_text(size_t line, size_t offset, size_t oldlen, rblist newtext
 bool insert_char(int c);
 bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
-
-// lua.c ------------------------------------------------------------------
-int lualist_new(void);
-void lualist_free(int l);
-size_t lualist_length(int l);
-const char *lualist_get_string(int l, size_t n);
-void lualist_set_string(int l, size_t n, const char *s);
 
 // macro.c ----------------------------------------------------------------
 void cancel_macro_definition(void);

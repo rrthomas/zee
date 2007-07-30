@@ -55,7 +55,7 @@ Move the cursor to the end of the line.\
   buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
 
   /* Change the `goalc' to the end of line for next
-     `edit-navigate-next/previous-line' calls.  */
+     `edit_move_next/previous_line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = SIZE_MAX;
 }

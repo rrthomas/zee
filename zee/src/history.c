@@ -31,11 +31,11 @@
 void add_history_element(History *hp, rblist string)
 {
   if (hp->elements == 0)
-    hp->elements = lualist_new();
+    hp->elements = list_new();
 
-  if (lualist_length(hp->elements) == 0 ||
-      strcmp(lualist_get_string(hp->elements, lualist_length(hp->elements)), rblist_to_string(string)) != 0)
-    lualist_set_string(hp->elements, lualist_length(hp->elements) + 1, rblist_to_string(string));
+  if (list_length(hp->elements) == 0 ||
+      strcmp(list_get_string(hp->elements, list_length(hp->elements)), rblist_to_string(string)) != 0)
+    list_set_string(hp->elements, list_length(hp->elements) + 1, rblist_to_string(string));
 }
 
 void prepare_history(History *hp)
@@ -50,14 +50,14 @@ rblist previous_history_element(History *hp)
   if (hp->elements) {
     if (hp->sel == 0) { // First call for this history.
       // Select last element.
-      if (lualist_length(hp->elements) > 0) {
-        hp->sel = lualist_length(hp->elements);
-        rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
+      if (list_length(hp->elements) > 0) {
+        hp->sel = list_length(hp->elements);
+        rbl = rblist_from_string(list_get_string(hp->elements, hp->sel));
       }
     } else if (hp->sel > 1) {
       // If there is there another element, select it.
       hp->sel--;
-      rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
+      rbl = rblist_from_string(list_get_string(hp->elements, hp->sel));
     }
   }
 
@@ -70,9 +70,9 @@ rblist next_history_element(History *hp)
 
   if (hp->elements && hp->sel) {
     // Next element.
-    if (hp->sel < lualist_length(hp->elements)) {
+    if (hp->sel < list_length(hp->elements)) {
       hp->sel++;
-      rbl = rblist_from_string(lualist_get_string(hp->elements, hp->sel));
+      rbl = rblist_from_string(list_get_string(hp->elements, hp->sel));
     } else              // No more elements (back to original status).
       hp->sel = 0;
   }

@@ -279,8 +279,13 @@ to end of the buffer.\n\
 STR(find, "Replace string: ")
 STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
 {
-  if (ok)
-    while (F_edit_replace(list_append(list_append(list_new(), find), repl)))
+  if (ok) {
+    int l = list_new();
+    list_set_string(l, list_length(l) + 1, rblist_to_string(find));
+    list_set_string(l, list_length(l) + 1, rblist_to_string(repl));
+    while (F_edit_replace(l))
       ;
+    list_free(l);
+  }
 }
 END_DEF

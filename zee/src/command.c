@@ -78,19 +78,21 @@ bool cmd_eval(rblist s, rblist source)
     minibuf_error_set_lineno(lineno);
 
     // Get tokens until we run out or reach a new line
-    list l = list_new();
+    int l = list_new();
     while (tok && tok != rblist_empty) {
-      list_append(l, tok);
+      list_set_string(l, list_length(l) + 1, rblist_to_string(tok));
       tok = gettok(s, &pos);
     }
 
     // Execute the line
+    char *fname_s;
     rblist fname;
     Command cmd;
-    while ((fname = list_behead(l)) &&
+    while ((fname_s = list_behead_string(l)) && (fname = rblist_from_string(fname_s)) &&
            (cmd = (Command)get_variable_blob(fname)) &&
            (ok &= cmd(l)))
       ;
+    list_free(l);
     if (fname && !cmd) {
       minibuf_error(rblist_fmt("No such command `%r'", fname));
       ok = false;

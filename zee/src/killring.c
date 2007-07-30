@@ -138,7 +138,7 @@ static bool kill_helper(Command cmd)
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     CMDCALL(edit_select_on);
-    if ((ok = cmd(NULL)))
+    if ((ok = cmd(0)))
       ok = CMDCALL(edit_kill_selection);
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     set_mark(m);

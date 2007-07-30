@@ -85,7 +85,7 @@ void process_key(size_t key)
     return;
 
   if (p)
-    p->cmd(list_new());
+    p->cmd(list_new()); // FIXME: Don't leak this list!
   else {
     if (key == KBD_RET)
       key = '\n';
@@ -117,8 +117,8 @@ chord.\
   ok = false;
 
   if (list_length(l) > 1) {
-    key = strtochord(list_behead(l));
-    name = list_behead(l);
+    key = strtochord(rblist_from_string(list_behead_string(l)));
+    name = rblist_from_string(list_behead_string(l));
   } else {
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
@@ -149,7 +149,7 @@ Read key chord, and unbind it.\
   size_t key = KBD_NOKEY;
 
   if (list_length(l) > 0)
-    key = strtochord(list_behead(l));
+    key = strtochord(rblist_from_string(list_behead_string(l)));
   else {
     minibuf_write(rblist_from_string("Unbind key: "));
     key = getkey();

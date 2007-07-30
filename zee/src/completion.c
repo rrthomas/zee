@@ -47,21 +47,21 @@ Completion *completion_new(void)
 static rblist completion_write(int l)
 {
   size_t maxlen = 0;
-  for (size_t p = 1; p <= lualist_length(l); p++)
-    maxlen = max(maxlen, strlen(lualist_get_string(l, p)));
+  for (size_t p = 1; p <= list_length(l); p++)
+    maxlen = max(maxlen, strlen(list_get_string(l, p)));
   maxlen += COLUMN_GAP;
   size_t numcols = (win.ewidth + COLUMN_GAP - 1) / maxlen;
 
   size_t col = 0;
   rbacc rba = rbacc_new();
-  for (size_t p = 1; p <= lualist_length(l); p++) {
+  for (size_t p = 1; p <= list_length(l); p++) {
     if (col >= numcols) {
       col = 0;
       rbacc_add_char(rba, '\n');
     }
-    rbacc_add_string(rba, lualist_get_string(l, p));
+    rbacc_add_string(rba, list_get_string(l, p));
     if (++col < numcols)
-      for (size_t i = maxlen - strlen(lualist_get_string(l, p)); i > 0; i--)
+      for (size_t i = maxlen - strlen(list_get_string(l, p)); i > 0; i--)
         rbacc_add_char(rba, ' ');
   }
 
@@ -78,13 +78,13 @@ void completion_popup(Completion *cp)
   assert(cp);
   assert(cp->matches);
   rblist rbl = rblist_from_string("Completions\n\n");
-  switch (lualist_length(cp->matches)) {
+  switch (list_length(cp->matches)) {
     case 0:
       rbl = rblist_concat(rbl, rblist_from_string("No completions"));
       break;
     case 1:
       rbl = rblist_concat(rbl, rblist_fmt("Sole completion: %s",
-                                          lualist_get_string(cp->matches, 1)));
+                                          list_get_string(cp->matches, 1)));
       break;
     default:
       rbl = rblist_concat(rbl, rblist_from_string("Possible completions are:\n"));
@@ -122,18 +122,19 @@ static size_t common_prefix_length(rblist rbl1, rblist rbl2)
  * after this method. You may want to call completion_remove_suffix and/or
  * completion_remove_prefix in between to keep the list manageable.
  */
+// FIXME: Callers must destroy the list
 bool completion_try(Completion *cp, rblist search)
 {
   size_t fullmatches = 0;
 
-  cp->matches = lualist_new();
+  cp->matches = list_new();
   lua_pushnil(L); // initial key
   while (lua_next(L, cp->completions) != 0) {
     lua_pop(L, 1); // remove value; keep key for next iteration
     if (lua_isstring(L, -1)) {
       rblist rbl = rblist_from_string(lua_tostring(L, -1));
       if (!rblist_ncompare(rbl, search, rblist_length(search))) {
-        lualist_set_string(cp->matches, lualist_length(cp->matches) + 1, lua_tostring(L, -1));
+        list_set_string(cp->matches, list_length(cp->matches) + 1, lua_tostring(L, -1));
         if (!rblist_compare(rbl, search))
           ++fullmatches;
       }
@@ -141,14 +142,14 @@ bool completion_try(Completion *cp, rblist search)
   }
   lua_pop(L, 1); // pop last key
 
-  if (lualist_length(cp->matches) == 0)
+  if (list_length(cp->matches) == 0)
     return false;
 
   // FIXME: sort(cp->matches);
-  cp->match = rblist_from_string(lualist_get_string(cp->matches, 1));
+  cp->match = rblist_from_string(list_get_string(cp->matches, 1));
   size_t prefix_len = rblist_length(cp->match);
-  for (size_t p = 1; p <= lualist_length(cp->matches); p++)
-    prefix_len = min(prefix_len, common_prefix_length(cp->match, rblist_from_string(lualist_get_string(cp->matches, p))));
+  for (size_t p = 1; p <= list_length(cp->matches); p++)
+    prefix_len = min(prefix_len, common_prefix_length(cp->match, rblist_from_string(list_get_string(cp->matches, p))));
   cp->match = rblist_sub(cp->match, 0, prefix_len);
 
   return true;
@@ -173,21 +174,21 @@ static size_t last_occurrence(rblist rbl, size_t before_pos, int c)
  */
 void completion_remove_suffix(Completion *cp)
 {
-  if (lualist_length(cp->matches) == 0)
+  if (list_length(cp->matches) == 0)
     return;
-  int ans = lualist_new();
-  rblist previous = rblist_from_string(lualist_get_string(cp->matches, 1));
-  for (size_t p = 2; p <= lualist_length(cp->matches); p++) {
-    size_t length = last_occurrence(previous, common_prefix_length(previous, rblist_from_string(lualist_get_string(cp->matches, p))), '_');
+  int ans = list_new();
+  rblist previous = rblist_from_string(list_get_string(cp->matches, 1));
+  for (size_t p = 2; p <= list_length(cp->matches); p++) {
+    size_t length = last_occurrence(previous, common_prefix_length(previous, rblist_from_string(list_get_string(cp->matches, p))), '_');
     if (length > rblist_length(cp->match))
       previous = rblist_sub(previous, 0, length);
     else {
-      lualist_set_string(ans, lualist_length(ans) + 1, rblist_to_string(previous));
-      previous = rblist_from_string(lualist_get_string(cp->matches, p));
+      list_set_string(ans, list_length(ans) + 1, rblist_to_string(previous));
+      previous = rblist_from_string(list_get_string(cp->matches, p));
     }
   }
-  lualist_set_string(ans, lualist_length(ans) + 1, rblist_to_string(previous));
-  lualist_free(cp->matches);
+  list_set_string(ans, list_length(ans) + 1, rblist_to_string(previous));
+  list_free(cp->matches);
   cp->matches = ans;
 }
 
@@ -200,7 +201,7 @@ size_t completion_remove_prefix(Completion *cp, rblist search)
 {
   size_t pos = last_occurrence(search, rblist_length(search), '_');
   if (pos > 0)
-    for (size_t p = 1; p <= lualist_length(cp->matches); p++)
-      lualist_set_string(cp->matches, p, lualist_get_string(cp->matches, p) + pos);
+    for (size_t p = 1; p <= list_length(cp->matches); p++)
+      list_set_string(cp->matches, p, list_get_string(cp->matches, p) + pos);
   return pos;
 }
