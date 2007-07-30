@@ -106,4 +106,4 @@ default_bindings.c: mkbindings.lua cua_bindings
 bind.c: default_bindings.c
 
 loc:
-	cloc $(zee_base_SOURCES) term_*.c *.lua
+	cloc --no3 $(zee_base_SOURCES) term_*.c *.lua
