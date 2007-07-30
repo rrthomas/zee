@@ -92,10 +92,11 @@ DEF(edit_select_toggle,
 Toggle selection mode.\
 ")
 {
-  if (buf->flags & BFLAG_ANCHORED)
+  if (buf->flags & BFLAG_ANCHORED) {
     CMDCALL(edit_select_off);
-  else
+  } else {
     CMDCALL(edit_select_on);
+  }
 }
 END_DEF
 
@@ -160,11 +161,11 @@ UINT(reps, "Repeat count: ")
 COMMAND(name, "Command: "))
 {
   if (ok) {
-    Command cmd = (Command)get_variable_blob(name);
+    lua_CFunction cmd = (lua_CFunction)get_variable_blob(name);
     if (cmd) {
       undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
       for (size_t i = 0; i < reps; i++)
-        cmd(l);
+        cmd(L);
       undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     }
   }
@@ -199,10 +200,9 @@ Move the cursor backwards one word.\
 
   for (;;) {
     if (bolp()) {
-      if (!CMDCALL(move_previous_line)) {
-        ok = false;
+      CMDCALL(move_previous_line);
+      if (!ok)
         break;
-      }
       buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
     }
     while (!bolp()) {
@@ -240,10 +240,9 @@ Move the cursor forward one word.\
     if (gotword)
       break;
     buf->pt.o = rblist_line_length(buf->lines, buf->pt.n);
-    if (!CMDCALL(move_next_line)) {
-      ok = false;
+    CMDCALL(move_next_line);
+    if (!ok)
       break;
-    }
     buf->pt.o = 0;
   }
 }
@@ -254,10 +253,12 @@ DEF(move_previous_paragraph,
 Move the cursor backward to the start of the paragraph.\
 ")
 {
-  while (is_empty_line() && CMDCALL(move_previous_line))
-    ;
-  while (!is_empty_line() && CMDCALL(move_previous_line))
-    ;
+  while (is_empty_line() && ok) {
+    CMDCALL(move_previous_line);
+  }
+  while (!is_empty_line() && ok) {
+    CMDCALL(move_previous_line);
+  }
 
   CMDCALL(move_start_line);
 }
@@ -268,15 +269,18 @@ DEF(move_next_paragraph,
 Move the cursor forward to the end of the paragraph.\
 ")
 {
-  while (is_empty_line() && CMDCALL(move_next_line))
-    ;
-  while (!is_empty_line() && CMDCALL(move_next_line))
-    ;
+  while (is_empty_line() && ok) {
+    CMDCALL(move_next_line);
+  }
+  while (!is_empty_line() && ok) {
+    CMDCALL(move_next_line);
+  }
 
-  if (is_empty_line())
+  if (is_empty_line()) {
     CMDCALL(move_start_line);
-  else
+  } else {
     CMDCALL(move_end_line);
+  }
 }
 END_DEF
 

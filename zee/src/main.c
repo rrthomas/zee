@@ -216,8 +216,9 @@ int main(int argc, char **argv)
 
     if (!bflag) {
       if (buf) {
-        if (ok)
+        if (ok) {
           CMDCALL(help_about);
+        }
         run();
       }
 

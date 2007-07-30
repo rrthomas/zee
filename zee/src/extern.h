@@ -23,6 +23,7 @@
 
 #include <stddef.h>
 #include <unistd.h>
+#include <lua.h>
 
 #include "list.h"
 
@@ -33,7 +34,7 @@ bool goto_line(size_t to_line);
 bool goto_point(Point pt);
 
 // bind.c -----------------------------------------------------------------
-rblist command_to_binding(Command f);
+rblist command_to_binding(lua_CFunction f);
 rblist binding_to_command(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
@@ -162,6 +163,6 @@ rblist minibuf_read_variable_name(rblist msg);
 
 // External C functions for interactive commands --------------------------
 #define X(cmd_name, doc) \
-  bool F_ ## cmd_name(list l);
+  int F_ ## cmd_name(lua_State *L);
 #include "tbl_funcs.h"
 #undef X

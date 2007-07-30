@@ -60,7 +60,8 @@ Delete the current line.\
 
     if (buf->pt.n != rblist_nl_count(buf->lines) - 1) {
       killed_text = rblist_concat(killed_text, rblist_from_string("\n"));
-      assert(CMDCALL(edit_delete_next_character));
+      CMDCALL(edit_delete_next_character);
+      assert(ok);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -125,7 +126,7 @@ Copy the region to the kill buffer.\
 }
 END_DEF
 
-static bool kill_helper(Command cmd)
+static bool kill_helper(lua_CFunction cmd)
 {
   bool ok;
 
@@ -138,8 +139,12 @@ static bool kill_helper(Command cmd)
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     CMDCALL(edit_select_on);
-    if ((ok = cmd(0)))
-      ok = CMDCALL(edit_kill_selection);
+    assert(cmd(0) == 1);
+    ok = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    if (ok) {
+      CMDCALL(edit_kill_selection);
+    }
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
     set_mark(m);
     remove_marker(m);

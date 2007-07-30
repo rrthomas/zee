@@ -27,6 +27,9 @@
 #include "extern.h"
 
 
+// FIXME: Check we have room to push stuff on the Lua stack
+// EVERYWHERE.
+
 // Create an empty list, returning a reference to the list
 list list_new(void)
 {

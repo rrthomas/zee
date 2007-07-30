@@ -144,9 +144,10 @@ Set a variable to the specified value.\
 {
   rblist var, val = NULL;
 
-  if (list_length(l) > 1) {
-    var = rblist_from_string(list_behead_string(l));
-    val = rblist_from_string(list_behead_string(l));
+  if (lua_gettop(L) > 1) {
+    var = rblist_from_string(lua_tostring(L, -2));
+    val = rblist_from_string(lua_tostring(L, -1));
+    lua_pop(L, 2);
   } else if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: "))))
     val = minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty);
 

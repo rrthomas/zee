@@ -224,7 +224,7 @@ static void mb_next_history(History *hp, rblist *as, size_t *_i, rblist *_saved)
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp)
 {
   int c;
-  bool ret = false;
+  bool ret = false, ok = true;
   size_t i;
   rblist rbl = value, retval = NULL, saved = NULL;
 
@@ -248,8 +248,10 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
     case KBD_NOKEY:
       break;
     case KBD_CTRL | 'z':
-      CMDCALL(file_suspend);
-      break;
+      {
+        CMDCALL(file_suspend);
+        break;
+      }
     case KBD_RET:
       minibuf_clear();
       retval = rbl;

@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <lua.h>
 #include <lauxlib.h>
 
 #include "nonstd.h"
@@ -173,12 +174,12 @@ enum {
  * Commands.
  *--------------------------------------------------------------------------*/
 
-// The type of a user command.
-typedef bool (*Command)(list l);
-
 /* Define an interactive command.
  *
- * The C prototype for commands is Command (see above).
+ * Commands are lua_CFunctions. The arguments are passed in the normal
+ * way (pushed in direct order on to the Lua stack), and the result, a
+ * boolean indicating success (true) or failure (false) is returned on
+ * the stack (hence commands always return 1).
  *
  * To call such a command with an argument list a1, a2, ..., an, pass
  * the arguments (which should all be rblists) in a list.
@@ -189,65 +190,75 @@ typedef bool (*Command)(list l);
  */
 
 // Declare a command.
-#define DEF(name, doc) \
-  bool F_ ## name(list l) \
-  { \
-    bool ok = true; \
-    assert(l != 0);
+#define DEF(name, doc)                                  \
+  int F_ ## name(lua_State *L)                          \
+  {                                                     \
+    bool ok = true;
 
 /* Declare a command that takes arguments.
    `args' is a comma-separated list. */
-#define DEF_ARG(name, doc, args) \
-  DEF(name, doc) \
+#define DEF_ARG(name, doc, args)                        \
+  DEF(name, doc)                                        \
   args
 
 // End a command definition.
-#define END_DEF \
-    return ok; \
+#define END_DEF                                 \
+  lua_pushboolean(L, ok);                       \
+  return 1;                                     \
   }
 
 // Declare a string argument, with prompt.
-#define STR(name, prompt) \
-    rblist name = NULL; \
-    if (!list_empty(l)) \
-      name = rblist_from_string(list_behead_string(l)); \
-    else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) \
-      ok = CMDCALL(edit_select_off);
+#define STR(name, prompt)                                               \
+  rblist name = NULL;                                                   \
+  if (lua_gettop(L) > 0) {                                              \
+    name = rblist_from_string(lua_tostring(L, -1));                     \
+    lua_pop(L, 1);                                                      \
+  } else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) { \
+    CMDCALL(edit_select_off);                                           \
+    ok = lua_toboolean(L, -1);                                          \
+    lua_pop(L, 1);                                                      \
+  }
 
 // Declare a command name argument, with prompt.
-#define COMMAND(name, prompt) \
-    rblist name = NULL; \
-    if (!list_empty(l)) \
-      name = rblist_from_string(list_behead_string(l));                 \
-    else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) \
-      ok = CMDCALL(edit_select_off);
+#define COMMAND(name, prompt)                                           \
+  rblist name = NULL;                                                   \
+  if (lua_gettop(L) > 0) {                                              \
+    name = rblist_from_string(lua_tostring(L, -1));                     \
+    lua_pop(L, 1);                                                      \
+  } else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) { \
+    CMDCALL(edit_select_off);                                           \
+    ok = lua_toboolean(L, -1);                                          \
+    lua_pop(L, 1);                                                      \
+  }
 
 // Declare an unsigned integer argument, with prompt.
-#define UINT(num, prompt) \
-    size_t num = 0; \
-    if (!list_empty(l)) { \
-      const char *s = list_behead_string(l);           \
-      if ((num = strtoul(s, NULL, 10)) == ULONG_MAX) \
-        ok = false; \
-    } else do { \
-      rblist ms; \
+#define UINT(num, prompt)                                               \
+  size_t num = 0;                                                       \
+  if (lua_gettop(L) > 0) {                                              \
+    num = (size_t)lua_tonumber(L, -1);                                  \
+    lua_pop(L, 1);                                                      \
+  } else                                                                \
+    do {                                                                \
+      rblist ms;                                                        \
       if ((ms = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) { \
-        ok = CMDCALL(edit_select_off); \
-        break; \
-      } \
+        CMDCALL(edit_select_off);                                       \
+        ok = lua_toboolean(L, -1);                                      \
+        lua_pop(L, 1);                                                  \
+        break;                                                          \
+      }                                                                 \
       if ((num = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
-        term_beep(); \
+        term_beep();                                                    \
     } while (num == ULONG_MAX);
 
-/* FIXME: These macros don't work properly within command definitions,
-   as they create a new argument list. This breaks e.g. a non-interactive
-   use of execute_command. */
-// Call a command
-#define CMDCALL(name) \
-  F_ ## name(list_new())
+#define CMDCALL(name)                                                   \
+  assert(F_ ## name(L) == 1);                                           \
+  ok = lua_toboolean(L, -1);                                            \
+  lua_pop(L, 1)
 
 // Call a command with an integer argument
-#define CMDCALL_UINT(name, arg) \
-  F_ ## name(list_append_string(list_new(), rblist_to_string(rblist_fmt("%d", arg))))
+#define CMDCALL_UINT(name, arg)                                         \
+  assert(F_ ## name(L) == 1);                                           \
+  ok = lua_toboolean(L, -1);                                            \
+  lua_pop(L, 1)
 
 #endif // !MAIN_H

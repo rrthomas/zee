@@ -32,7 +32,7 @@
 
 typedef struct {
   size_t key;
-  Command cmd;
+  lua_CFunction cmd;
 } Binding;
 
 static int bindings;            // Reference to bindings table
@@ -48,7 +48,7 @@ static Binding *get_binding(size_t key)
   if (lua_isuserdata(L, -1)) {
     p = zmalloc(sizeof(Binding));
     p->key = key;
-    p->cmd = (Command)lua_touserdata(L, -1);
+    p->cmd = (lua_CFunction)lua_touserdata(L, -1);
   }
 
   lua_pop(L, 2);                // Remove table and value
@@ -56,7 +56,7 @@ static Binding *get_binding(size_t key)
   return p;
 }
 
-static void bind_key(size_t key, Command cmd)
+static void bind_key(size_t key, lua_CFunction cmd)
 {
   lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
   lua_pushnumber(L, (lua_Number)key);
@@ -80,21 +80,24 @@ void init_bindings(void)
 void process_key(size_t key)
 {
   Binding *p = get_binding(key);
+  bool ok;
 
   if (key == KBD_NOKEY)
     return;
 
-  if (p)
-    p->cmd(list_new()); // FIXME: Don't leak this list!
-  else {
+  if (p) {
+    p->cmd(L);
+    ok = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+  } else {
     if (key == KBD_RET)
       key = '\n';
     else if (key == KBD_TAB)
       key = '\t';
 
-    if (key <= 255)
+    if (key <= 255) {
       CMDCALL_UINT(edit_insert_character, (int)key);
-    else
+    } else
       term_beep();
   }
 
@@ -116,9 +119,10 @@ chord.\
 
   ok = false;
 
-  if (list_length(l) > 1) {
-    key = strtochord(rblist_from_string(list_behead_string(l)));
-    name = rblist_from_string(list_behead_string(l));
+  if (lua_gettop(L) > 1) {
+    key = strtochord(rblist_from_string(lua_tostring(L, -2)));
+    name = rblist_from_string(lua_tostring(L, -1));
+    lua_pop(L, 2);
   } else {
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
@@ -126,9 +130,9 @@ chord.\
   }
 
   if (name) {
-    Command cmd;
+    lua_CFunction cmd;
 
-    if ((cmd = (Command)get_variable_blob(name))) {
+    if ((cmd = (lua_CFunction)get_variable_blob(name))) {
       if (key != KBD_NOKEY) {
         bind_key(key, cmd);
         ok = true;
@@ -148,9 +152,10 @@ Read key chord, and unbind it.\
 {
   size_t key = KBD_NOKEY;
 
-  if (list_length(l) > 0)
-    key = strtochord(rblist_from_string(list_behead_string(l)));
-  else {
+  if (lua_gettop(L) > 0) {
+    key = strtochord(rblist_from_string(lua_tostring(L, -1)));
+    lua_pop(L, 1);
+  } else {
     minibuf_write(rblist_from_string("Unbind key: "));
     key = getkey();
   }
@@ -159,7 +164,7 @@ Read key chord, and unbind it.\
 }
 END_DEF
 
-rblist command_to_binding(Command cmd)
+rblist command_to_binding(lua_CFunction cmd)
 {
   size_t n = 0;
   rbacc rba = rbacc_new();
@@ -167,7 +172,7 @@ rblist command_to_binding(Command cmd)
   lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
   lua_pushnil(L);               // first key
   while (lua_next(L, -2) != 0) {
-    if ((Command)lua_touserdata(L, -1) == cmd) {
+    if ((lua_CFunction)lua_touserdata(L, -1) == cmd) {
       if (n++ != 0)
         rbacc_add_string(rba, ", ");
       rbacc_add_rblist(rba, chordtostr((size_t)lua_tonumber(L, -2)));

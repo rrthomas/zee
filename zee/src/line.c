@@ -283,6 +283,7 @@ bool wrap_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
   size_t wrap_col = get_variable_number(rblist_from_string("wrap_column"));
+  bool ok;
 
   // If we're not beyond wrap_column, stop now.
   if (get_goalc() <= wrap_col)
@@ -402,9 +403,6 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
     adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(repl));
-    // FIXME: Surely the following is wrong?
-    for (size_t i = 0; i < rblist_nl_count(repl); i++)
-      CMDCALL(move_next_character);
   }
 
   return true;
@@ -455,9 +453,10 @@ Join lines if the character is a newline.\
 {
   buf->flags &= ~BFLAG_ANCHORED;
 
-  if (CMDCALL(move_previous_character))
+  CMDCALL(move_previous_character);
+  if (ok) {
     CMDCALL(edit_delete_next_character);
-  else {
+  } else {
     minibuf_error(rblist_from_string("Beginning of buffer"));
     ok = false;
   }
@@ -491,13 +490,17 @@ END_DEF
 static void previous_nonblank_goalc(void)
 {
   size_t cur_goalc = get_goalc();
+  bool ok = true;
 
   // Find previous non-blank line.
-  while (CMDCALL(move_previous_line) && is_blank_line());
+  do {
+    CMDCALL(move_previous_line);
+  } while (ok && is_blank_line());
 
   // Go to `cur_goalc' in that non-blank line.
-  while (!eolp() && get_goalc() < cur_goalc)
+  while (ok && !eolp() && get_goalc() < cur_goalc) {
     CMDCALL(move_next_character);
+  }
 }
 
 DEF(indent_relative,
@@ -537,9 +540,10 @@ Indent line or insert a tab.\
          target_goalc. */
       while (get_goalc() < target_goalc)
         insert_char(' ');
-    else
+    else {
       // If already at EOL on target line, insert a tab.
-      ok = CMDCALL(edit_insert_tab);
+      CMDCALL(edit_insert_tab);
+    }
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }
 }

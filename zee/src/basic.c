@@ -121,13 +121,13 @@ UINT(to_col, "Goto column: "))
 {
   if (ok) {
     if (buf->pt.o > to_col)
-      do
-        ok = CMDCALL(move_previous_character);
-      while (ok && buf->pt.o > to_col);
+      do {
+        CMDCALL(move_previous_character);
+      } while (ok && buf->pt.o > to_col);
     else if (buf->pt.o < to_col)
-      do
-        ok = CMDCALL(move_next_character);
-      while (ok && buf->pt.o < to_col);
+      do {
+        CMDCALL(move_next_character);
+      } while (ok && buf->pt.o < to_col);
   }
 }
 END_DEF
@@ -138,8 +138,9 @@ END_DEF
 bool goto_point(Point pt)
 {
   bool ok = goto_line(pt.n);
-  if (ok)
-    ok = CMDCALL_UINT(edit_goto_column, pt.o);
+  if (ok) {
+    CMDCALL_UINT(edit_goto_column, pt.o);
+  }
   return ok;
 }
 
@@ -151,14 +152,16 @@ bool goto_line(size_t to_line)
 {
   bool ok = true;
 
-  if (buf->pt.n > to_line)
-    do
-      ok = CMDCALL(move_previous_line);
-    while (ok && buf->pt.n > to_line);
-  else if (buf->pt.n < to_line)
-    do
-      ok = CMDCALL(move_next_line);
+  if (buf->pt.n > to_line) {
+    do {
+      CMDCALL(move_previous_line);
+    } while (ok && buf->pt.n > to_line);
+  } else if (buf->pt.n < to_line) {
+    do {
+      CMDCALL(move_next_line);
+    }
     while (ok && buf->pt.n < to_line);
+  }
 
   return ok;
 }

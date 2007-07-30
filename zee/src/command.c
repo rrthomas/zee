@@ -68,6 +68,7 @@ bool cmd_eval(rblist s, rblist source)
 {
   bool ok = true;
   size_t lineno = 1, pos = 0;
+  int top = lua_gettop(L);
 
   assert(s);
   minibuf_error_set_source(source);
@@ -78,21 +79,29 @@ bool cmd_eval(rblist s, rblist source)
     minibuf_error_set_lineno(lineno);
 
     // Get tokens until we run out or reach a new line
-    int l = list_new();
     while (tok && tok != rblist_empty) {
-      list_set_string(l, list_length(l) + 1, rblist_to_string(tok));
+      lua_pushstring(L, rblist_to_string(tok));
       tok = gettok(s, &pos);
     }
 
     // Execute the line
-    char *fname_s;
-    rblist fname;
-    Command cmd;
-    while ((fname_s = list_behead_string(l)) && (fname = rblist_from_string(fname_s)) &&
-           (cmd = (Command)get_variable_blob(fname)) &&
-           (ok &= cmd(l)))
-      ;
-    list_free(l);
+    rblist fname = NULL;
+    lua_CFunction cmd = NULL;
+    while (lua_gettop(L) > 0) {
+      const char *fname_s = lua_tostring(L, top + 1);
+      if (fname_s) {
+        fname = rblist_from_string(fname_s);
+        cmd = (lua_CFunction)get_variable_blob(fname);
+        if (cmd) {
+          assert(cmd(L) == 1);
+          ok = lua_toboolean(L, -1);
+          lua_pop(L, 1);
+        }          
+      }
+      lua_pop(L, 1);
+      if (!fname || !cmd || !ok)
+        break;
+    }
     if (fname && !cmd) {
       minibuf_error(rblist_fmt("No such command `%r'", fname));
       ok = false;
@@ -107,17 +116,16 @@ bool cmd_eval(rblist s, rblist source)
 
 /*
  * Set up command name to C function mapping
- * FIXME: Register the commands directly into Lua instead.
  */
 void init_commands(void)
 {
-#define X(cmd_name, doc) \
+#define X(cmd_name, doc)                                                \
   set_variable_blob(rblist_from_string(# cmd_name), (void *)F_ ## cmd_name);
 #include "tbl_funcs.h"
 #undef X
-#define X(cmd_name, doc) \
+#define X(cmd_name, doc)                            \
   lua_pushlightuserdata(L, (void *)F_ ## cmd_name); \
-  lua_pushstring(L, # cmd_name); \
+  lua_pushstring(L, # cmd_name);                    \
   lua_settable(L, LUA_GLOBALSINDEX);
 #include "tbl_funcs.h"
 #undef X
