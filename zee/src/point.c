@@ -42,9 +42,8 @@ Point make_point(size_t line, size_t offset)
  */
 ssize_t point_dist(Point pt1, Point pt2)
 {
-  // Subtract number of lines (== number of newlines)
   return rblist_line_to_start_pos(buf->lines, pt2.n) + pt2.o -
-    rblist_line_to_start_pos(buf->lines, pt1.n) - pt1.o - (pt2.n - pt1.n);
+    rblist_line_to_start_pos(buf->lines, pt1.n) - pt1.o;
 }
 
 /*
