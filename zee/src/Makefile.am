@@ -6,7 +6,7 @@ check_PROGRAMS = rblist rbacc
 TESTCPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
 
 rblist_CPPFLAGS = $(TESTCPPFLAGS)
-rblist_LDADD = zmalloc.o rbacc.o
+rblist_LDADD = zmalloc.o rbacc.o rbutil.o
 
 rbacc_CPPFLAGS = $(TESTCPPFLAGS)
 rbacc_LDADD = zmalloc.o rblist.o
