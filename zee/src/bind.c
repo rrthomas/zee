@@ -62,7 +62,6 @@ void init_bindings(void)
 {
   lua_newtable(L);
   bindings = luaL_ref(L, LUA_REGISTRYINDEX);
-  fprintf(stderr, "%s\n", PKGDATADIR "/cua_bindings");
   cmd_eval(file_read(rblist_from_string(PKGDATADIR "/cua_bindings")), NULL); // FIXME: Build this in using bin2c
 }
 

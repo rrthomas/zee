@@ -51,5 +51,5 @@ void init_commands(void)
 bool cmd_eval(rblist s, rblist source)
 {
   (void)source;
-  fprintf(stderr, "%d\n", luaL_dostring(L, rblist_to_string(s)) == 0);
+  return luaL_dostring(L, rblist_to_string(s)) == 0;
 }
