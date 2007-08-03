@@ -81,7 +81,7 @@ it specifies how to initialize Zee for you.
 @section File syntax
 
 The initialization file is a sequence of commands. The file is most
-commonly used to initialize variables and bind keys.
+commonly used to initialize variables and to bind keys.
 
 FIXME: add example file, and refer to Lua manual.
 
