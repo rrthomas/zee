@@ -6,6 +6,9 @@
  * The third column gives the variable's documentation.
  */
 
+// FIXME: Allow this and other files used to generate .texi source be
+// marked up with @foo{} groff markup.
+ 
 X("tab_display_width", "8", "Number of spaces displayed for a tab character.")
 X("indent_width", "2", "Number per indentation for `edit_insert_tab'.")
 X("wrap_mode", "false", "Whether wrap mode is automatically enabled.")

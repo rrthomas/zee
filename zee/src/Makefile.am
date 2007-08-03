@@ -16,6 +16,7 @@ bin_PROGRAMS = zee
 # FIXME: Only install beep.wav for Allegro build (but always
 # distribute it)
 dist_pkgdata_DATA = cua_bindings emacs_bindings beep.wav
+dist_sysconf_DATA = zeerc
 
 info_TEXINFOS = zee.texi
 
@@ -72,8 +73,7 @@ zee_LDADD = @LIBOBJS@
 
 EXTRA_DIST =  								\
 		lib.lua							\
-		mkfuncs.lua mkvars.lua mkopts.lua			\
-		cua_bindings emacs_bindings
+		mkfuncs.lua mkvars.lua mkopts.lua
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi
 

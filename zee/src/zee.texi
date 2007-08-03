@@ -15,8 +15,8 @@
 
 @titlepage
 @title The Zee Manual
-@subtitle for Zee version 0.6
-@subtitle July 2006
+@subtitle for Zee version 0.7
+@subtitle August 2007
 @author Reuben Thomas
 
 @page
@@ -48,9 +48,9 @@ Zee is an experimental editor and programming environment.
 @node Overview, Invoking Zee, Top, Top
 @chapter Overview
 
-Zee is an experimental editor and programming environment, hosted on
-SourceForge at http://sourceforge.net/projects/zee/. It is free
-software, licensed under the GNU GPL.
+Zee is an experimental editor, hosted on SourceForge at
+@uref{http://sourceforge.net/projects/zee/}. It is free software,
+licensed under the GNU GPL.
 
 Zee is written in ISO C99 for POSIX and requires the Boehm garbage
 collector (libgc), PCRE (the Perl-compatible regular expressions
@@ -70,8 +70,7 @@ The options are as follows:
 
 When Zee is started, it normally loads the @file{.zeerc} file in your
 home directory. We call this file your ``initialization file'' because
-it specifies how to initialize Zee for you. You can use the command
-line switch @samp{--no-init-file} to tell Zee not to load the initialization file.
+it specifies how to initialize Zee for you.
 
 @menu
 * File syntax::                 The initialization file syntax.
@@ -81,11 +80,10 @@ line switch @samp{--no-init-file} to tell Zee not to load the initialization fil
 @node File syntax, , Initialization file, Initialization file
 @section File syntax
 
-The initialization file is a sequence of commands.
-The file is most commonly used to initialize
-variables and bind keys.
+The initialization file is a sequence of commands. The file is most
+commonly used to initialize variables and bind keys.
 
-FIXME: add examples.
+FIXME: add example file, and refer to Lua manual.
 
 @c ---------------------------------------------------------------------------
 @node Key names, Commands, Initialization file, Top
@@ -131,8 +129,8 @@ key binding anyway).
 @chapter Variables
 
 This table contains the full list of available variables, that can be
-modified at run-time with the @samp{set_variable} command or set at start-up
-in the @file{.zeerc} initialization file.
+modified at run-time with the @samp{preferences_set_variable} command
+or set at start-up in the @file{.zeerc} initialization file.
 
 @include vars.texi
 
