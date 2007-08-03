@@ -16,11 +16,9 @@ bin_PROGRAMS = zee
 # FIXME: Only install beep.wav for Allegro build (but always
 # distribute it)
 dist_pkgdata_DATA = cua_bindings emacs_bindings beep.wav
-dist_sysconf_DATA = zeerc
+dist_sysconf_DATA = $(PACKAGE)rc
 
 info_TEXINFOS = zee.texi
-
-dist_sysconf_DATA = $(PACKAGE)rc
 
 zee_base_SOURCES =				\
 	rblist.c			        \
