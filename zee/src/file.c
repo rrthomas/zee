@@ -37,7 +37,7 @@
 
 /*
  * Get HOME directory.
- * If none, or invalid, return blank string.
+ * If none, or too long, return blank string.
  */
 rblist get_home_dir(void)
 {

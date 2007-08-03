@@ -49,29 +49,11 @@ void minibuf_write(rblist rbl)
   term_refresh();
 }
 
-static size_t minibuf_error_lineno;
-static rblist minibuf_error_source;
-
-void minibuf_error_set_lineno(size_t lineno)
-{
-  minibuf_error_lineno = lineno;
-}
-
-void minibuf_error_set_source(rblist rbl)
-{
-  minibuf_error_source = rbl;
-}
-
 /*
  * Write the specified error string in the minibuffer and beep.
  */
 void minibuf_error(rblist rbl)
 {
-  if (minibuf_error_source)
-    rbl = rblist_concat(rbl, rblist_fmt(" in %r", minibuf_error_source));
-  if (minibuf_error_lineno)
-    rbl = rblist_concat(rbl, rblist_fmt(" at line %d", minibuf_error_lineno));
-
   minibuf_write(rbl);
   term_beep();
 
@@ -338,4 +320,74 @@ rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, Hist
   term_refresh();
 
   return retval;
+}
+
+/*
+ * Read a command name from the minibuffer.
+ */
+rblist minibuf_read_command_name(rblist prompt)
+{
+  static History commands_history;
+  rblist ms;
+  Completion *cp = completion_new();
+  bool ok = false;
+  cp->completions = LUA_GLOBALSINDEX; // FIXME: Need to filter out commands
+
+  for (;;) {
+    ms = minibuf_read_completion(prompt, rblist_empty, cp, &commands_history);
+
+    if (ms == NULL)
+      return NULL;
+
+    if (rblist_length(ms) == 0) {
+      minibuf_error(rblist_from_string("No command name given"));
+      return NULL;
+    }
+
+    // Complete partial words if possible
+    if (completion_try(cp, ms))
+      ms = cp->match;
+
+    lua_getglobal(L, rblist_to_string(ms));
+    if (lua_iscfunction(L, -1)) {
+      add_history_element(&commands_history, ms);
+      minibuf_clear(); // Remove any error message
+      ok = true;
+    } else {
+      minibuf_error(rblist_fmt("Undefined command `%r'", ms));
+      waitkey(WAITKEY_DEFAULT);
+    }
+
+    lua_pop(L, -1);
+  }
+
+  return ms;
+}
+
+rblist minibuf_read_variable_name(rblist msg)
+{
+  rblist ms;
+  Completion *cp = completion_new();
+
+  cp->completions = LUA_GLOBALSINDEX; // FIXME: Need to filter out commands
+
+  for (;;) {
+    ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
+
+    if (ms == NULL)
+      return NULL;
+
+    if (rblist_length(ms) == 0) {
+      minibuf_error(rblist_from_string("No variable name given"));
+      return NULL;
+    } else if (get_variable_string(ms) == NULL) {
+      minibuf_error(rblist_fmt("There is no variable called `%r'", ms));
+      waitkey(WAITKEY_DEFAULT);
+    } else {
+      minibuf_clear();
+      break;
+    }
+  }
+
+  return ms;
 }

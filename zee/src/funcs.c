@@ -153,28 +153,6 @@ You may also type up to 3 octal digits, to insert a character with that code.\
 }
 END_DEF
 
-DEF_ARG(edit_repeat,
-"\
-Repeat a command a given number of times.\
-",
-UINT(reps, "Repeat count: ")
-COMMAND(name, "Command: "))
-{
-  if (ok) {
-    lua_CFunction cmd = get_variable_cfunction(name);
-    if (cmd) {
-      undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-      for (size_t i = 0; i < reps; i++) {
-        cmd(L);
-        ok = lua_toboolean(L, -1);
-        lua_pop(L, 1);
-      }
-      undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
-    }
-  }
-}
-END_DEF
-
 DEF(move_start_line_text,
 "\
 Move the cursor to the first non-whitespace character on this line.\
@@ -331,9 +309,27 @@ be set using set_wrap_column.\
 }
 END_DEF
 
+// FIXME: Better names for edit_repeat and execute_command.
+DEF_ARG(edit_repeat,
+"\
+Repeat a command a given number of times.\
+",
+UINT(reps, "Repeat count: ")
+COMMAND(name, "Command: "))
+{
+  if (ok) {
+    undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
+    for (size_t i = 0; ok && i < reps; i++) {
+      cmd_eval(name, NULL);
+    }
+    undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
+  }
+}
+END_DEF
+
 DEF(execute_command,
 "\
-Read command or macro name, then call it.\
+Read command or macro name, then run it.\
 ")
 {
   CMDCALL_UINT(edit_repeat, 1);

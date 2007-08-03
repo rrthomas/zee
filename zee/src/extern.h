@@ -25,8 +25,6 @@
 #include <unistd.h>
 #include <lua.h>
 
-#include "list.h"
-
 
 // basic.c ----------------------------------------------------------------
 size_t get_goalc(void);
@@ -34,10 +32,10 @@ bool goto_line(size_t to_line);
 bool goto_point(Point pt);
 
 // bind.c -----------------------------------------------------------------
-rblist command_to_binding(lua_CFunction f);
-rblist binding_to_command(size_t key);
 void process_key(size_t key);
 void init_bindings(void);
+rblist command_to_binding(rblist cmd);
+rblist binding_to_command(size_t key);
 
 // buffer.c ---------------------------------------------------------------
 void buffer_new(void);
@@ -49,9 +47,8 @@ size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
 // command.c --------------------------------------------------------------
-bool cmd_eval(rblist rbl, rblist source);
 void init_commands(void);
-rblist minibuf_read_command_name(rblist rbl);
+bool cmd_eval(rblist rbl, rblist source);
 
 // completion.c -----------------------------------------------------------
 Completion *completion_new(void);
@@ -116,12 +113,12 @@ extern int thisflag, lastflag;
 
 // minibuf.c --------------------------------------------------------------
 void minibuf_write(rblist rbl);
-void minibuf_error_set_lineno(size_t lineno);
-void minibuf_error_set_source(rblist rbl);
 void minibuf_error(rblist rbl);
 rblist minibuf_read(rblist rbl, rblist value);
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
+rblist minibuf_read_command_name(rblist rbl);
+rblist minibuf_read_variable_name(rblist msg);
 
 // point.c ----------------------------------------------------------------
 Point make_point(size_t lineno, size_t offset);
@@ -153,13 +150,11 @@ void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
 void set_variable(rblist var, rblist val);
-lua_CFunction get_variable_cfunction(rblist key);
 rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);
-rblist minibuf_read_variable_name(rblist msg);
 
-// External C functions for interactive commands --------------------------
+// C functions for interactive commands -----------------------------------
 #define X(cmd_name, doc) \
   int F_ ## cmd_name(lua_State *L);
 #include "tbl_funcs.h"

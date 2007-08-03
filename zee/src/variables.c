@@ -38,20 +38,6 @@ void set_variable(rblist key, rblist val)
   }
 }
 
-lua_CFunction get_variable_cfunction(rblist key)
-{
-  lua_CFunction ret = NULL;
-
-  if (key) {
-    lua_getglobal(L, rblist_to_string(key));
-    if (lua_iscfunction(L, -1))
-      ret = lua_tocfunction(L, -1);
-    lua_pop(L, 1);
-  }
-
-  return ret;
-}
-
 rblist get_variable_string(rblist key)
 {
   rblist ret = NULL;
@@ -76,6 +62,7 @@ int get_variable_number(rblist var)
   return 0;
 }
 
+// FIXME: Use Lua booleans
 bool get_variable_bool(rblist var)
 {
   rblist rbl = get_variable_string(var);
@@ -84,34 +71,6 @@ bool get_variable_bool(rblist var)
     return !rblist_compare(rbl, rblist_from_string("true"));
 
   return false;
-}
-
-rblist minibuf_read_variable_name(rblist msg)
-{
-  rblist ms;
-  Completion *cp = completion_new();
-
-  cp->completions = LUA_GLOBALSINDEX; // FIXME: Need to filter out commands
-
-  for (;;) {
-    ms = minibuf_read_completion(msg, rblist_empty, cp, NULL);
-
-    if (ms == NULL)
-      return NULL;
-
-    if (rblist_length(ms) == 0) {
-      minibuf_error(rblist_from_string("No variable name given"));
-      return NULL;
-    } else if (get_variable_string(ms) == NULL) {
-      minibuf_error(rblist_fmt("There is no variable called `%r'", ms));
-      waitkey(WAITKEY_DEFAULT);
-    } else {
-      minibuf_clear();
-      break;
-    }
-  }
-
-  return ms;
 }
 
 DEF(preferences_set_variable,

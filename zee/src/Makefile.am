@@ -72,14 +72,13 @@ zee_LDADD = @LIBOBJS@
 
 EXTRA_DIST =  								\
 		lib.lua							\
-		mkfuncs.lua mkvars.lua mkopts.lua mkbindings.lua	\
+		mkfuncs.lua mkvars.lua mkopts.lua			\
 		cua_bindings emacs_bindings
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi
 
 BUILT_SOURCES =								\
 		tbl_funcs.h 						\
-		default_bindings.c					\
 		$(PACKAGE)rc						\
 		$(BUILT_TEXI)
 
@@ -95,11 +94,6 @@ $(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkopts.lua $(top_srcdir)/src/tbl_opts.h
-
-default_bindings.c: mkbindings.lua cua_bindings
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkbindings.lua < $(top_srcdir)/src/cua_bindings
-
-bind.c: default_bindings.c
 
 loc:
 	cloc --no3 $(zee_base_SOURCES) term_*.c *.lua
