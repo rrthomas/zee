@@ -13,9 +13,7 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
-# FIXME: Only install beep.wav for Allegro build (but always
-# distribute it)
-dist_pkgdata_DATA = cua_bindings emacs_bindings beep.wav
+dist_pkgdata_DATA = cua_bindings emacs_bindings
 dist_sysconf_DATA = $(PACKAGE)rc
 
 info_TEXINFOS = zee.texi
@@ -59,19 +57,13 @@ zee_base_SOURCES =				\
 	undo.c					\
 	variables.c
 
-if ALLEGRO
-zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
-zee_LDFLAGS = `allegro-config --libs`
-else
-zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
-endif
-
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
+# beep.wav is here because it is not in dist_pkgdata_DATA for non-Allegro builds
 EXTRA_DIST =  								\
 		lib.lua							\
-		mkfuncs.lua mkvars.lua mkopts.lua
+		mkfuncs.lua mkvars.lua mkopts.lua beep.wav
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi
 
@@ -81,6 +73,14 @@ BUILT_SOURCES =								\
 		$(BUILT_TEXI)
 
 CLEANFILES = $(BUILT_SOURCES)
+
+if ALLEGRO
+zee_SOURCES = $(zee_base_SOURCES) term_allegro.c
+zee_LDFLAGS = `allegro-config --libs`
+dist_pkgdata_DATA += beep.wav
+else
+zee_SOURCES = $(zee_base_SOURCES) term_ncurses.c
+endif
 
 $(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
