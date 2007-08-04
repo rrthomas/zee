@@ -28,11 +28,20 @@ table.remove(arg, 1)
 h1 = io.open("funcs.texi", "w")
 assert(h1)
 
+h2 = io.open("tbl_funcs.h", "w")
+assert(h2)
+
 h3 = io.open("tbl_funcs.lua", "w")
 assert(h3)
 
 h1:write("@c Automatically generated file: DO NOT EDIT!\n")
 h1:write("@table @code\n")
+
+h2:write("/*\n")
+h2:write(" * Automatically generated file: DO NOT EDIT!\n")
+h2:write(" * Table of commands (name, doc)\n")
+h2:write(" */\n")
+h2:write("\n")
 
 h3:write("-- Automatically generated file: DO NOT EDIT!\n")
 h3:write("-- Docstrings for C commands\n")
@@ -71,6 +80,7 @@ for i in ipairs(arg) do
         end
 
         h1:write("@item " .. name .. "\n" .. doc)
+        h2:write("X(" .. name .. ",\n\"\\\n" .. doc .. "\")\n")
         h3:write("doc{" .. name .. " = function () end, \"" .. string.gsub(doc, "\\\n", "") .. "\"}\n")
       end
     end
@@ -79,5 +89,7 @@ end
 
 h1:write("@end table")
 h1:close()
+
+h2:close()
 
 h3:close()
