@@ -33,19 +33,18 @@ h1:write("@table @code\n")
 
 h2:write("# ." .. PACKAGE .. " configuration\n")
 
-for l in io.lines(arg[1]) do
-  if string.find(l, "^X%(") then
-    assert(loadstring(l))()
-    local name, defval, doc = unpack(xarg)
-    if doc == "" then
-      die("empty docstring for " .. name)
-    end
+assert(loadfile(arg[1]))()
 
-    h1:write("@item " .. name .. "\n" .. doc .. "\n")
-
-    h2:write("\n# " .. doc .. " [default: " .. defval .. "]\n")
-    h2:write("preferences_set_variable " .. name .. " " .. defval .. "\n")
+for name, doc in pairs(docstring) do
+  local defval = tostring(_G[name])
+  if doc == "" then
+    die("empty docstring for " .. name)
   end
+  
+  h1:write("@item " .. name .. "\n" .. doc .. "\n")
+  
+  h2:write("\n# " .. doc .. " [default: " .. defval .. "]\n")
+  h2:write("preferences_set_variable " .. name .. " " .. defval .. "\n")
 end
 
 h1:write("@end table")

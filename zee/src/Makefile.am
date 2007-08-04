@@ -13,7 +13,7 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
-dist_pkgdata_DATA = cua_bindings emacs_bindings
+dist_pkgdata_DATA = cua_bindings emacs_bindings lib.lua tbl_vars.lua tbl_funcs.lua
 dist_sysconf_DATA = $(PACKAGE)rc
 
 info_TEXINFOS = zee.texi
@@ -34,7 +34,6 @@ zee_base_SOURCES =				\
 	extern.h			        \
 	main.h					\
 	tbl_opts.h				\
-	tbl_vars.h				\
 	tbl_keys.h				\
 	basic.c					\
 	bind.c					\
@@ -61,16 +60,15 @@ zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
 # beep.wav is here because it is not in dist_pkgdata_DATA for non-Allegro builds
-EXTRA_DIST =  								\
-		lib.lua							\
-		mkfuncs.lua mkvars.lua mkopts.lua beep.wav
+EXTRA_DIST =  							\
+	mkfuncs.lua mkvars.lua mkopts.lua beep.wav
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi
 
-BUILT_SOURCES =								\
-		tbl_funcs.h 						\
-		$(PACKAGE)rc						\
-		$(BUILT_TEXI)
+BUILT_SOURCES =							\
+	tbl_funcs.h tbl_funcs.lua				\
+	$(PACKAGE)rc						\
+	$(BUILT_TEXI)
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -84,11 +82,11 @@ endif
 
 $(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
-tbl_funcs.h funcs.texi: $(zee_base_SOURCES) mkfuncs.lua
+tbl_funcs.h tbl_funcs.lua funcs.texi: $(zee_base_SOURCES) mkfuncs.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkfuncs.lua $(top_srcdir)/src $(zee_base_SOURCES)
 
-$(PACKAGE)rc vars.texi: tbl_vars.h mkvars.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkvars.lua $(top_srcdir)/src/tbl_vars.h
+$(PACKAGE)rc vars.texi: tbl_vars.lua mkvars.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkvars.lua $(top_srcdir)/src/tbl_vars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkopts.lua $(top_srcdir)/src/tbl_opts.h

@@ -34,12 +34,10 @@ static int bindings;            // Reference to bindings table
 
 static const char *get_binding(size_t key)
 {
-  const char *s = NULL;
-
   lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
   lua_pushnumber(L, (lua_Number)key);
   lua_gettable(L, -2);
-  s = lua_tostring(L, -1);
+  const char *s = lua_tostring(L, -1);
   lua_pop(L, 2); // Remove table and value
   
   return s;
@@ -116,7 +114,7 @@ chord.\
   } else {
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
-    name = minibuf_read_command_name(rblist_fmt("Bind key %r to command: ", chordtostr(key)));
+    name = minibuf_read_name(rblist_fmt("Bind key %r to command: ", chordtostr(key)));
   }
 
   if (name) {

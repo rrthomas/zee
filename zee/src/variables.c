@@ -30,14 +30,6 @@
 #include "extern.h"
 
 
-void set_variable(rblist key, rblist val)
-{
-  if (key && val) {
-    lua_pushstring(L, rblist_to_string(val));
-    lua_setglobal(L, rblist_to_string(key));
-  }
-}
-
 rblist get_variable_string(rblist key)
 {
   rblist ret = NULL;
@@ -84,12 +76,14 @@ Set a variable to the specified value.\
     var = rblist_from_string(lua_tostring(L, -2));
     val = rblist_from_string(lua_tostring(L, -1));
     lua_pop(L, 2);
-  } else if ((var = minibuf_read_variable_name(rblist_from_string("Set variable: "))))
+  } else if ((var = minibuf_read_name(rblist_from_string("Set variable: "))))
     val = minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty);
 
-  if (val)
-    set_variable(var, val);
-  else
+  if (var && val) {
+    lua_pushstring(L, rblist_to_string(val));
+    lua_setglobal(L, rblist_to_string(var));
+  } else {
     ok = false;
+  }
 }
 END_DEF

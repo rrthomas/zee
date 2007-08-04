@@ -320,7 +320,7 @@ COMMAND(name, "Command: "))
   if (ok) {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     for (size_t i = 0; ok && i < reps; i++) {
-      cmd_eval(name, NULL);
+      cmd_eval(rblist_fmt("%r()", name), NULL);
     }
     undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
   }

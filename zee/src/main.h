@@ -214,7 +214,6 @@ enum {
     name = rblist_from_string(lua_tostring(L, -1));                     \
     lua_pop(L, 1);                                                      \
   } else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) { \
-    CMDCALL(edit_select_off);                                           \
     ok = lua_toboolean(L, -1);                                          \
     lua_pop(L, 1);                                                      \
   }
@@ -225,8 +224,7 @@ enum {
   if (lua_gettop(L) > 0) {                                              \
     name = rblist_from_string(lua_tostring(L, -1));                     \
     lua_pop(L, 1);                                                      \
-  } else if ((name = minibuf_read_command_name(rblist_from_string(prompt))) == NULL) { \
-    CMDCALL(edit_select_off);                                           \
+  } else if ((name = minibuf_read_name(rblist_from_string(prompt))) == NULL) { \
     ok = lua_toboolean(L, -1);                                          \
     lua_pop(L, 1);                                                      \
   }
@@ -241,7 +239,6 @@ enum {
     do {                                                                \
       rblist ms;                                                        \
       if ((ms = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) { \
-        CMDCALL(edit_select_off);                                       \
         ok = lua_toboolean(L, -1);                                      \
         lua_pop(L, 1);                                                  \
         break;                                                          \

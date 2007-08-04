@@ -41,6 +41,7 @@
 #include "config.h"             // Re-include to override overridden
                                 // autotools macros
 #endif
+#include <lualib.h>
 
 #include "main.h"
 #include "term.h"
@@ -123,7 +124,10 @@ int main(int argc, char **argv)
 #endif
 
   L = luaL_newstate();
+  luaL_openlibs(L);
   init_kill_ring();
+  (void)luaL_dofile(L, PKGDATADIR "/lib.lua"); // FIXME: Build this in using bin2c
+  (void)luaL_dofile(L, PKGDATADIR "/tbl_vars.lua"); // FIXME: Build this in using bin2c
   init_commands();
   init_bindings();
 

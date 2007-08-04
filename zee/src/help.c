@@ -1,6 +1,6 @@
 /* Self documentation facility functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zee.
@@ -42,74 +42,34 @@ Show the version in the minibuffer.\
 }
 END_DEF
 
-struct {
-  const char *name;
-  const char *doc;
-} ftable [] = {
-#define X(name, doc) \
-	{# name, doc},
-#include "tbl_funcs.h"
-#undef X
-};
-#define fentries (sizeof(ftable) / sizeof(ftable[0]))
-
-DEF(help_command,
-"\
-Display the help for the given command.\
-")
+static const char *get_docstring(rblist name)
 {
-  rblist name;
-
-  ok = false;
-
-  if ((name = minibuf_read_command_name(rblist_from_string("Describe command: ")))) {
-    size_t i;
-    for (i = 0; i < fentries; i++)
-      if (!rblist_compare(rblist_from_string(ftable[i].name), name)) {
-        rblist bindings = command_to_binding(name), where = rblist_empty;
-        if (rblist_length(bindings) > 0)
-          where = rblist_fmt("\n\nBound to: %r", bindings);
-        popup_set(rblist_fmt("Help for command `%s':\n\n%s%r", ftable[i].name, ftable[i].doc, where));
-        ok = true;
-        break;
-      }
-  }
+  lua_getglobal(L, "docstring"); // docstring table
+  lua_pushstring(L, rblist_to_string(name));
+  lua_gettable(L, -2);
+  const char *s = lua_tostring(L, -1);
+  lua_pop(L, 2); // Remove table and value
+  
+  return s;
 }
-END_DEF
 
-static struct {
-  const char *name;
-  const char *defval;
-  const char *doc;
-} vtable[] = {
-#define X(name, defvalue, doc) \
-	{name, defvalue, doc},
-#include "tbl_vars.h"
-#undef X
-};
-#define ventries (sizeof(vtable) / sizeof(vtable[0]))
-
-DEF(help_variable,
+DEF(help_thing,
 "\
-Display the full documentation of VARIABLE (a symbol).\
+Display the help for the given thing.\
 ")
 {
   rblist name;
 
   ok = false;
 
-  if ((name = minibuf_read_variable_name(rblist_from_string("Describe variable: ")))) {
-    size_t i;
-    for (i = 0; i < ventries; i++)
-      if (!rblist_compare(rblist_from_string(vtable[i].name), name)) {
-        popup_set(rblist_fmt("Help for variable `%s':\n\n"
-                              "Default value: %s\n"
-                              "Current value: %r\n\n"
-                              "Documentation:\n%s",
-                              vtable[i].name, vtable[i].defval,
-                              get_variable_string(name), vtable[i].doc));
-        ok = true;
-      }
+  if ((name = minibuf_read_name(rblist_from_string("Describe thing: ")))) {
+    rblist rbl = get_variable_string(name);
+    rblist bindings = command_to_binding(name), where = rblist_empty;
+    if (rblist_length(bindings) > 0)
+      where = rblist_fmt("\n\nBound to: %r", bindings);
+    const char *doc = get_docstring(name);
+    popup_set(rblist_fmt("Help for `%r':\n\n%s%r", name, doc, where));
+    ok = true;
   }
 }
 END_DEF

@@ -117,8 +117,7 @@ void minibuf_error(rblist rbl);
 rblist minibuf_read(rblist rbl, rblist value);
 rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
-rblist minibuf_read_command_name(rblist rbl);
-rblist minibuf_read_variable_name(rblist msg);
+rblist minibuf_read_name(rblist rbl);
 
 // point.c ----------------------------------------------------------------
 Point make_point(size_t lineno, size_t offset);
@@ -149,7 +148,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
-void set_variable(rblist var, rblist val);
 rblist get_variable_string(rblist var);
 int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);
