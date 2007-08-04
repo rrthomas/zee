@@ -39,7 +39,7 @@ h1:write("@table @code\n")
 
 h2:write("/*\n")
 h2:write(" * Automatically generated file: DO NOT EDIT!\n")
-h2:write(" * Table of commands (name, doc)\n")
+h2:write(" * List of commands\n")
 h2:write(" */\n")
 h2:write("\n")
 
@@ -80,7 +80,7 @@ for i in ipairs(arg) do
         end
 
         h1:write("@item " .. name .. "\n" .. doc)
-        h2:write("X(" .. name .. ",\n\"\\\n" .. doc .. "\")\n")
+        h2:write("X(" .. name .. ")\n")
         h3:write("doc{" .. name .. " = function () end, \"" .. string.gsub(doc, "\\\n", "") .. "\"}\n")
       end
     end

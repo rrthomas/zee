@@ -33,7 +33,7 @@
 void init_commands(void)
 {
   static luaL_Reg cmds[] = {
-#define X(cmd_name, doc)                        \
+#define X(cmd_name) \
     {# cmd_name, F_ ## cmd_name},
 #include "tbl_funcs.h"
 #undef X

@@ -153,7 +153,7 @@ int get_variable_number(rblist var);
 bool get_variable_bool(rblist var);
 
 // C functions for interactive commands -----------------------------------
-#define X(cmd_name, doc) \
+#define X(cmd_name) \
   int F_ ## cmd_name(lua_State *L);
 #include "tbl_funcs.h"
 #undef X
