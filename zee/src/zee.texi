@@ -49,7 +49,7 @@ Zee is an experimental editor and programming environment.
 @chapter Overview
 
 Zee is an experimental editor, hosted on SourceForge at
-@uref{http://sourceforge.net/projects/zee/}. It is free software,
+@uref{http://sourceforge.net/projects/zee/}.  It is free software,
 licensed under the GNU GPL.
 
 Zee is written in ISO C99 for POSIX and requires the Boehm garbage
@@ -69,7 +69,7 @@ The options are as follows:
 @chapter Initialization file
 
 When Zee is started, it normally loads the @file{.zeerc} file in your
-home directory. We call this file your ``initialization file'' because
+home directory.  We call this file your ``initialization file'' because
 it specifies how to initialize Zee for you.
 
 @menu
@@ -80,7 +80,7 @@ it specifies how to initialize Zee for you.
 @node File syntax, , Initialization file, Initialization file
 @section File syntax
 
-The initialization file is a sequence of commands. The file is most
+The initialization file is a sequence of commands.  The file is most
 commonly used to initialize variables and to bind keys.
 
 FIXME: add example file, and refer to Lua manual.
@@ -111,7 +111,7 @@ Alt
 @end table
 
 In key combinations, like @kbd{Alt-G}, the @kbd{Alt-} prefix means
-hold the @key{ALT} key down while typing @kbd{g}. The combination
+hold the @key{ALT} key down while typing @kbd{g}.  The combination
 @kbd{Ctrl-X} means hold the @key{CTRL} key down while typing @kbd{x}.
 
 @c ---------------------------------------------------------------------------
