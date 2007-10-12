@@ -79,7 +79,9 @@ for i in ipairs(arg) do
           die("unterminated docstring for " .. name)
         end
 
-        h1:write("@item " .. name .. "\n" .. doc)
+        local infodoc = string.gsub(doc, "\\n", "")
+        infodoc = string.gsub(infodoc, "\\", "")
+        h1:write("@item " .. name .. "\n" .. infodoc)
         h2:write("X(" .. name .. ")\n")
         h3:write("doc{" .. name .. " = function () end, \"" .. string.gsub(doc, "\\\n", "") .. "\"}\n")
       end
