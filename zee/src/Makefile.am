@@ -3,7 +3,7 @@
 TESTS = rblist rbacc
 check_PROGRAMS = rblist rbacc
 
-TESTCPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src/\""
+TESTCPPFLAGS = -DTEST -DSRCPATH="\"$(srcdir)/\""
 
 rblist_CPPFLAGS = $(TESTCPPFLAGS)
 rblist_LDADD = zmalloc.o rbacc.o rbutil.o
@@ -87,19 +87,19 @@ endif
 $(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
 tbl_funcs.h tbl_funcs.lua funcs.texi: $(zee_base_SOURCES) mkfuncs.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkfuncs.lua $(top_srcdir)/src $(zee_base_SOURCES)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zee_base_SOURCES)
 
 $(PACKAGE)rc vars.texi: tbl_vars.lua mkvars.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkvars.lua $(top_srcdir)/src/tbl_vars.lua
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkopts.lua $(top_srcdir)/src/tbl_opts.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkopts.lua $(srcdir)/tbl_opts.h
 
 keys.texi: tbl_keys.h mkkeys.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkkeys.lua $(top_srcdir)/src/tbl_keys.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkkeys.lua $(srcdir)/tbl_keys.h
 
 copyright.texi: copyright.h mkcopyright.lua
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkcopyright.lua $(top_srcdir)/src/copyright.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
 
 loc:
 	cloc --no3 --force_lang=Make,am $(zee_base_SOURCES) term_*.c *.lua Makefile.am
