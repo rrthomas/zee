@@ -146,7 +146,7 @@ typedef size_t Font;
 
 // Named keys
 enum {
-#define X(key_sym, key_name, key_code) \
+#define X(key_sym, key_name, text_name, key_code)        \
 	key_sym = key_code,
 #include "tbl_keys.h"
 #undef X

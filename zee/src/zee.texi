@@ -21,10 +21,7 @@
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2003-2006 Reuben Thomas
-Copyright @copyright{} 2005 Alistair Turnbull
-Copyright @copyright{} 1997-2004 Sandro Sigala
-Copyright @copyright{} 2004 David A. Capello
+@include copyright.texi
 @end titlepage
 
 @c ---------------------------------------------------------------------------
@@ -69,19 +66,9 @@ The options are as follows:
 @chapter Initialization file
 
 When Zee is started, it normally loads the @file{.zeerc} file in your
-home directory.  We call this file your ``initialization file'' because
-it specifies how to initialize Zee for you.
-
-@menu
-* File syntax::                 The initialization file syntax.
-@end menu
-
-@c ---------------------------------------------------------------------------
-@node File syntax, , Initialization file, Initialization file
-@section File syntax
-
-The initialization file is a sequence of commands.  The file is most
-commonly used to initialize variables and to bind keys.
+home directory, called the ``initialization file''. The initialization
+file is a sequence of commands. The file is most commonly used to
+initialize variables and to bind keys.
 
 FIXME: add example file, and refer to Lua manual.
 
@@ -91,24 +78,7 @@ FIXME: add example file, and refer to Lua manual.
 
 This table contains the names of the keys that are used in Zee.
 
-@table @key
-@item SPC
-Space
-@item RET
-Return
-@item TAB
-Tab
-@item BS
-Backspace
-@item ESC
-Escape
-@item DEL
-Delete
-@item CTRL
-Control
-@item ALT
-Alt
-@end table
+@include keys.texi
 
 In key combinations, like @kbd{Alt-G}, the @kbd{Alt-} prefix means
 hold the @key{ALT} key down while typing @kbd{g}.  The combination
@@ -145,7 +115,3 @@ filed in the relevant tracker at @uref{http://sourceforge.net/projects/zee/}.
 @contents
 
 @bye
-
-Local Variables:
-compile-command: "texi2dvi zee.texi"
-End:

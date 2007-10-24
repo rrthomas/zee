@@ -35,8 +35,8 @@
 #include "term.h"
 
 // Font width and height
-#define FW		(8)	// font_length (font, ...)
-#define FH		(8)	// font_height (font)
+#define FW		8       // font_length (font, ...)
+#define FH		8       // font_height (font)
 
 // current position and color
 static size_t cur_x = 0;

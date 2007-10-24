@@ -46,12 +46,6 @@
 #include "extern.h"
 
 
-#define COPYRIGHT_STRING \
-  "Copyright (c) 2003-2007 Reuben Thomas <rrt@sc3d.org>\n"\
-  "Copyright (c) 2005-2007 Alistair Turbull <apt1002@mupsych.org>\n"\
-  "Copyright (c) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
-  "Copyright (c) 2004 David A. Capello <dacap@users.sourceforge.net>"
-
 Window win;                     // the window
 Buffer *buf = NULL;             // the buffer
 
@@ -153,7 +147,10 @@ int main(int argc, char **argv)
     case 5:
       fprintf(stderr,
               PACKAGE_STRING "\n"
-              COPYRIGHT_STRING "\n"
+#define X(name, email, years)                   \
+              "Copyright (c) " years " " name " <" email ">\n"
+#include "copyright.h"
+#undef X
               PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
               "You may redistribute copies of " PACKAGE_NAME "\n"
               "under the terms of the GNU General Public License.\n"

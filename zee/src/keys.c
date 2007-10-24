@@ -85,14 +85,14 @@ void ungetkey(size_t key)
 // Key code and name arrays
 
 static size_t keycode[] = {
-#define X(key_sym, key_name, key_code) \
+#define X(key_sym, key_name, text_name, key_code)        \
 	key_sym,
 #include "tbl_keys.h"
 #undef X
 };
 
 static const char *keyname[] = {
-#define X(key_sym, key_name, key_code) \
+#define X(key_sym, key_name, text_name, key_code)       \
 	key_name,
 #include "tbl_keys.h"
 #undef X

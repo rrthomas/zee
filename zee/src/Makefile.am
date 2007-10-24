@@ -63,9 +63,9 @@ zee_LDADD = @LIBOBJS@
 
 # beep.wav is here because it is not in dist_pkgdata_DATA for non-Allegro builds
 EXTRA_DIST =  							\
-	mkfuncs.lua mkvars.lua mkopts.lua beep.wav
+	mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua beep.wav
 
-BUILT_TEXI = funcs.texi vars.texi opts.texi
+BUILT_TEXI = funcs.texi vars.texi opts.texi keys.texi copyright.texi
 
 BUILT_SOURCES =							\
 	tbl_funcs.h tbl_funcs.lua				\
@@ -92,6 +92,12 @@ $(PACKAGE)rc vars.texi: tbl_vars.lua mkvars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkopts.lua $(top_srcdir)/src/tbl_opts.h
+
+keys.texi: tbl_keys.h mkkeys.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkkeys.lua $(top_srcdir)/src/tbl_keys.h
+
+copyright.texi: copyright.h mkcopyright.lua
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkcopyright.lua $(top_srcdir)/src/copyright.h
 
 loc:
 	cloc --no3 $(zee_base_SOURCES) term_*.c *.lua
