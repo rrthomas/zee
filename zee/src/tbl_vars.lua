@@ -1,7 +1,7 @@
 -- Built-in variables
 
--- FIXME: Allow this and other files used to generate .texi source be
--- marked up with @foo{} groff markup.
+-- FIXME: Allow this and other files used to generate .texi source to
+-- be marked up with @foo{} texinfo markup.
 
 doc{tab_display_width = 8,
   "Number of spaces displayed for a tab character."}

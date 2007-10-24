@@ -44,7 +44,7 @@ for name, doc in pairs(docstring) do
   h1:write("@item " .. name .. "\n" .. doc .. "\n")
   
   h2:write("\n# " .. doc .. " [default: " .. defval .. "]\n")
-  h2:write("preferences_set_variable " .. name .. " " .. defval .. "\n")
+  h2:write("preferences_set_variable(\"" .. name .. "\", \"" .. defval .. "\")\n")
 end
 
 h1:write("@end table")
