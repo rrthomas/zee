@@ -3,10 +3,19 @@
 
 To build and install Zee:
 
-0) If you're building from Subversion sources, make sure you have the
+-1) If you're building from Subversion sources, make sure you have the
    GNU autotools and makeinfo installed, and
 
 	autoreconf -i
+
+0) To build Zee, you need:
+
+   * a C99 compiler (GCC 4.0 or later should work; earlier versions may too)
+   * POSIX libraries
+   * the Boehm garbage collector (libgc)
+   * Lua
+   * PCRE (the Perl-compatible regular expressions library)
+   * a terminal library: either ncurses or Allegro
 
 1) Run configure:
 
