@@ -38,7 +38,7 @@ void buffer_new(void)
   buf = zmalloc(sizeof(Buffer));
   buf->lines = rblist_empty;
   buf->mark = marker_new(point_min(buf));
-  if (get_variable_bool(rblist_from_string("wrap_mode")))
+  if (get_variable_bool("wrap_mode"))
     buf->flags ^= BFLAG_AUTOFILL;
 }
 
@@ -105,7 +105,7 @@ bool calculate_the_region(Region *rp)
  */
 size_t tab_width(void)
 {
-  size_t t = get_variable_number(rblist_from_string("tab_width"));
+  size_t t = get_variable_number("tab_width");
   return t ? t : 8;
 }
 
@@ -114,7 +114,7 @@ size_t tab_width(void)
  */
 size_t indent_width(void)
 {
-  size_t t = get_variable_number(rblist_from_string("indent_width"));
+  size_t t = get_variable_number("indent_width");
   return t ? t : 1;
 }
 

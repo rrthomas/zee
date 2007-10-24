@@ -63,12 +63,6 @@ rblist file_read(rblist filename);
 void file_open(rblist filename);
 void die(int exitcode);
 
-// history.c --------------------------------------------------------------
-void add_history_element(History *hp, rblist string);
-void prepare_history(History *hp);
-rblist previous_history_element(History *hp);
-rblist next_history_element(History *hp);
-
 // keys.c -----------------------------------------------------------------
 size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
@@ -115,7 +109,6 @@ extern int thisflag, lastflag;
 void minibuf_write(rblist rbl);
 void minibuf_error(rblist rbl);
 rblist minibuf_read(rblist rbl, rblist value);
-rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, History *hp);
 void minibuf_clear(void);
 rblist minibuf_read_name(rblist rbl);
 
@@ -148,9 +141,9 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void undo_reset_unmodified(Undo *up);
 
 // variables.c ------------------------------------------------------------
-rblist get_variable_string(rblist var);
-int get_variable_number(rblist var);
-bool get_variable_bool(rblist var);
+const char *get_variable_string(const char *var);
+int get_variable_number(const char *var);
+bool get_variable_bool(const char *var);
 
 // C functions for interactive commands -----------------------------------
 #define X(cmd_name) \

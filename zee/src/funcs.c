@@ -296,7 +296,7 @@ be set using set_wrap_column.\
   }
 
   CMDCALL(move_end_line);
-  size_t wrap_col = (size_t)get_variable_number(rblist_from_string("wrap_column"));
+  size_t wrap_col = (size_t)get_variable_number("wrap_column");
   while (get_goalc() > wrap_col + 1 && wrap_break_line())
     ;
 

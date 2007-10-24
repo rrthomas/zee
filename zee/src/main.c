@@ -109,7 +109,7 @@ struct option longopts[] = {
     {longname, opt, NULL, 0},
 #include "tbl_opts.h"
 #undef X
-    {0, 0, 0, 0}
+    {0, 0, NULL, 0}
 };
 
 int main(int argc, char **argv)
@@ -123,11 +123,11 @@ int main(int argc, char **argv)
   GC_INIT();
 #endif
 
-  L = luaL_newstate();
-  luaL_openlibs(L);
+  CLUE_INIT;
   init_kill_ring();
-  (void)luaL_dofile(L, PKGDATADIR "/lib.lua"); // FIXME: Build this in using bin2c
-  (void)luaL_dofile(L, PKGDATADIR "/tbl_vars.lua"); // FIXME: Build this in using bin2c
+  assert(luaL_dofile(L, PKGDATADIR "/lib.lua") == 0); // FIXME: Build this in using bin2c
+  assert(luaL_dofile(L, PKGDATADIR "/tbl_vars.lua") == 0); // FIXME: Build this in using bin2c
+  assert(luaL_dofile(L, PKGDATADIR "/history.lua") == 0); // FIXME: Build this in using bin2c
   init_commands();
   init_bindings();
 

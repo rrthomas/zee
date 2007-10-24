@@ -44,7 +44,7 @@ static size_t find_substr(rblist rbl1, rblist rbl2, bool bol, bool eol, bool bac
   size_t ret = SIZE_MAX;
   int ovector[3], err_offset;
 
-  if ((pattern = pcre_compile(rblist_to_string(rbl2), get_variable_bool(rblist_from_string("caseless_search")) ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
+  if ((pattern = pcre_compile(rblist_to_string(rbl2), get_variable_bool("caseless_search") ? PCRE_CASELESS : 0, &find_err, &err_offset, NULL))) {
     int options = 0;
     int index = 0;
 
@@ -264,7 +264,7 @@ STR(find, "Replace string: ")
 STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
 {
   if (ok) {
-    bool find_no_upper = no_upper(find) && get_variable_bool(rblist_from_string("case_replace"));
+    bool find_no_upper = no_upper(find) && get_variable_bool("case_replace");
     if (search_forward(buf->pt, find)) {
       undo_save(UNDO_REPLACE_BLOCK,
                 make_point(buf->pt.n, buf->pt.o - rblist_length(find)),

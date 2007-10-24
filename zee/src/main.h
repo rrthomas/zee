@@ -32,6 +32,7 @@
 
 #include "nonstd.h"
 #include "zmalloc.h"
+#include "clue.h"
 #include "list.h"
 #include "rblist.h"
 #include "rbutil.h"
@@ -41,7 +42,7 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-lua_State *L;                   // The Lua state
+CLUE_DECLS;
 
 // Point and Marker
 typedef struct {
@@ -124,11 +125,6 @@ typedef struct {
   int matches;     // Lua reference (N.B.) to the list of matches
   rblist match;    // The current matched string
 } Completion;
-
-typedef struct {
-  int elements; // Reference to Lua list of elements (strings)
-  size_t sel; // Currently selected element (number of item in elements)
-} History;
 
 // Type of font attributes
 typedef size_t Font;

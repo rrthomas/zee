@@ -13,7 +13,10 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
-dist_pkgdata_DATA = cua_bindings emacs_bindings lib.lua tbl_vars.lua tbl_funcs.lua
+dist_pkgdata_DATA = 				\
+	cua_bindings emacs_bindings lib.lua 	\
+	tbl_vars.lua tbl_funcs.lua history.lua
+
 dist_sysconf_DATA = $(PACKAGE)rc
 
 info_TEXINFOS = zee.texi
@@ -43,7 +46,6 @@ zee_base_SOURCES =				\
 	file.c					\
 	funcs.c					\
 	help.c					\
-	history.c				\
 	keys.c					\
 	killring.c				\
 	line.c					\

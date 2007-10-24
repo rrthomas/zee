@@ -282,7 +282,7 @@ bool line_replace_text(size_t line, size_t offset, size_t oldlen,
 bool wrap_break_line(void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
-  size_t wrap_col = get_variable_number(rblist_from_string("wrap_column"));
+  size_t wrap_col = get_variable_number("wrap_column");
   bool ok;
 
   // If we're not beyond wrap_column, stop now.
@@ -339,7 +339,7 @@ Insert a newline, wrapping if in Wrap mode.\
 {
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
   if (buf->flags & BFLAG_AUTOFILL &&
-      get_goalc() > (size_t)get_variable_number(rblist_from_string("wrap_column")))
+      get_goalc() > (size_t)get_variable_number("wrap_column"))
     wrap_break_line();
   ok = insert_char('\n');
   undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
@@ -420,9 +420,9 @@ UINT(c, "Insert character: "))
 
     buf->flags &= ~BFLAG_ANCHORED;
 
-    if (c <= 255) {
+    if (c <= 0xff) {
       if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
-          get_goalc() > (size_t)get_variable_number(rblist_from_string("wrap_column")))
+          get_goalc() > (size_t)get_variable_number("wrap_column"))
         wrap_break_line();
       insert_char((int)c);
     } else {

@@ -83,7 +83,10 @@ void process_key(size_t key)
       key = '\t';
     }
 
-    if (key <= 255) {
+    /* FIXME: Make edit_insert_character bindable like
+       self_insert_command in Zile, and bind it; printable characters
+       should be bound to it by default. */
+    if (key <= 0xff) {
       CMDCALL_UINT(edit_insert_character, (int)key);
     } else {
       term_beep();
@@ -179,7 +182,7 @@ rblist binding_to_command(size_t key)
   rblist ret = NULL;
 
   if ((s = get_binding(key)) == NULL) {
-    if (key == KBD_RET || key == KBD_TAB || key <= 255) {
+    if (key == KBD_RET || key == KBD_TAB || key <= 0xff) {
       return rblist_from_string("edit_insert_character");
     }
   } else {

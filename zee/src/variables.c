@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <lua.h>
@@ -30,37 +31,50 @@
 #include "extern.h"
 
 
-rblist get_variable_string(rblist key)
+// const char *get_variable(const char *key)
+// {
+//   lua_obj ret;
+
+//   if (key) {
+//     lua_getglobal(L, key);
+//     ret.type = lua_type(L, -1);
+//     if (lua_isstring(L, -1))
+//       ret.string = lua_tostring(L, -1);
+//     else if (lua_isnumber(L, -1);
+//     else if (lua_isboolean(L, -1);
+//     lua_pop(L, 1);
+//   }
+
+//   return ret.string;
+// }
+
+const char *get_variable_string(const char *key)
 {
-  rblist ret = NULL;
+  const char *ret = NULL;
 
   if (key) {
-    lua_getglobal(L, rblist_to_string(key));
+    lua_getglobal(L, key);
     if (lua_isstring(L, -1))
-      ret = rblist_from_string(lua_tostring(L, -1));
+      ret = lua_tostring(L, -1);
     lua_pop(L, 1);
   }
 
   return ret;
 }
 
-int get_variable_number(rblist var)
+int get_variable_number(const char *var)
 {
-  rblist rbl = get_variable_string(var);
-
-  if (rbl)
-    return atoi(rblist_to_string(rbl));
-
-  return 0;
+  const char *s = get_variable_string(var);
+  return s ? atoi(s) : 0;
 }
 
 // FIXME: Use Lua booleans
-bool get_variable_bool(rblist var)
+bool get_variable_bool(const char *var)
 {
-  rblist rbl = get_variable_string(var);
+  const char *s = get_variable_string(var);
 
-  if (rbl)
-    return !rblist_compare(rbl, rblist_from_string("true"));
+  if (s)
+    return !strcmp(s, "true");
 
   return false;
 }
@@ -70,18 +84,18 @@ DEF(preferences_set_variable,
 Set a variable to the specified value.\
 ")
 {
-  rblist var, val = NULL;
+  const char *var, *val = NULL;
 
   if (lua_gettop(L) > 1) {
-    var = rblist_from_string(lua_tostring(L, -2));
-    val = rblist_from_string(lua_tostring(L, -1));
+    var = lua_tostring(L, -2);
+    val = lua_tostring(L, -1);
     lua_pop(L, 2);
-  } else if ((var = minibuf_read_name(rblist_from_string("Set variable: "))))
-    val = minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty);
+  } else if ((var = rblist_to_string(minibuf_read_name(rblist_from_string("Set variable: ")))))
+    val = rblist_to_string(minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty));
 
   if (var && val) {
-    lua_pushstring(L, rblist_to_string(val));
-    lua_setglobal(L, rblist_to_string(var));
+    lua_pushstring(L, val);
+    lua_setglobal(L, var);
   } else {
     ok = false;
   }
