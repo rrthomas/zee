@@ -11,6 +11,7 @@ AC_GNU_SOURCE
 
 dnl Find programs
 AC_PROG_CC
+AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_REPLACE_FUNCS(getopt_long_only)
 AC_HEADER_STDC
@@ -37,11 +38,11 @@ AC_ARG_ENABLE(debug,
         [AC_MSG_RESULT(no)])
 
 dnl ==================================================================
-dnl Extra stuff for GCC: add more compiler warnings, and set C99 mode
+dnl Extra stuff for GCC: add more compiler warnings
 dnl ==================================================================
 
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -std=c99 -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
 fi
 
 dnl ==================================================================
