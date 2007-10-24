@@ -33,6 +33,7 @@ Zee is an experimental editor.
 
 @menu
 * Overview::                    An overview of the Zee editor.
+* FAQ::                         Frequently Asked Questions.
 * Invoking Zee::                Command line options that you can give to Zee.
 * Initialization file::         The ``.zeerc'' initialization file.
 * Key names::                   How the keys are named.
@@ -42,7 +43,7 @@ Zee is an experimental editor.
 @end menu
 
 @c ---------------------------------------------------------------------------
-@node Overview, Invoking Zee, Top, Top
+@node Overview, FAQ, Top, Top
 @chapter Overview
 
 Zee is an experimental editor, hosted on SourceForge at
@@ -50,7 +51,42 @@ Zee is an experimental editor, hosted on SourceForge at
 licensed under the GNU GPL.
 
 @c ---------------------------------------------------------------------------
-@node Invoking Zee, Initialization file, Overview, Top
+@node FAQ, Invoking Zee, Overview, Top
+@chapter FAQ
+
+@section General questions
+@enumerate
+@item
+@emph{What does `Zee' mean?}
+Nothing.  It sounds like `Zi', which is the name I wanted, to show its
+descent from Zile (@uref{http://zile.sourceforge.net}).
+SourceForge doesn't allow two-letter names, so I
+chose `Zee' instead, which can be pronounced the same.
+@item
+@emph{Zee is weird!}
+Zee was written to be as small and simple as possible.  If you don't like
+it, it might be because it doesn't work the way you're used to, or it
+may have been badly designed.  If after trying it for a bit you still
+don't like the way it works, please tell us what you don't like (see Bug
+Reports for the address).
+@end enumerate
+
+@section Functionality
+@enumerate
+@item
+@emph{How do I return to the shell without leaving Zee?}
+Type `Alt-X file_suspend RETURN'.
+@item
+@emph{How do I undo the previous command?}
+Type Ctrl-Z (or `Alt-X edit_undo RETURN').
+@item
+@emph{How do I handle non-ASCII characters?}
+Zee uses the operating system's locale support; however, it only works
+with 8-bit locales at present.  Support for Unicode/UTF-8 is planned.
+@end enumerate
+
+@c ---------------------------------------------------------------------------
+@node Invoking Zee, Initialization file, FAQ, Top
 @chapter Invoking Zee
 
 The command-line options are as follows:

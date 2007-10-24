@@ -22,7 +22,7 @@ To build and install Zee:
 	./configure
 
 On many systems, you'll need to tell configure how to find Lua; the
-following works on Debian:
+following works on Debian 4.0 and later:
 
 	./configure --with-lua-includes=/usr/include/lua5.1 --with-lua-suffix=5.1
 

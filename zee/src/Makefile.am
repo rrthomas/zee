@@ -29,6 +29,7 @@ zee_base_SOURCES =				\
         rbutil.c				\
         rbutil.h				\
 	nonstd.h			        \
+	clue.h					\
 	list.c				        \
 	list.h				        \
 	zmalloc.h			        \
@@ -38,6 +39,7 @@ zee_base_SOURCES =				\
 	main.h					\
 	tbl_opts.h				\
 	tbl_keys.h				\
+	copyright.h				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
