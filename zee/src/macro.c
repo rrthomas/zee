@@ -122,7 +122,6 @@ DEF(macro_name,
 Assign a name to the last macro defined.\n\
 Argument SYMBOL is the name to define.\n\
 The symbol's command definition becomes the macro string.\n\
-FIXME: Such a command cannot be called at the moment!\
 ")
 {
   rblist ms;
@@ -140,8 +139,7 @@ FIXME: Such a command cannot be called at the moment!\
 }
 END_DEF
 
-// FIXME: Allow named commands to be run. In order to do this need to
-// be able to distinguish C functions from macros.
+// FIXME: Allow named commands to be run.
 void call_macro(const char *name)
 {
   lua_getglobal(L, name);
