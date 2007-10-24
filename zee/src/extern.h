@@ -49,6 +49,7 @@ rblist copy_text_block(Point start, size_t size);
 // command.c --------------------------------------------------------------
 void init_commands(void);
 bool cmd_eval(rblist rbl, rblist source);
+void require(char *s);
 
 // completion.c -----------------------------------------------------------
 Completion *completion_new(void);

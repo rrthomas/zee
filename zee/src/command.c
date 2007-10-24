@@ -53,3 +53,14 @@ bool cmd_eval(rblist s, rblist source)
   (void)source;
   return luaL_dostring(L, rblist_to_string(s)) == 0;
 }
+
+/*
+ * Load a file of Lua, aborting if not found.
+ */
+void require(char *s)
+{
+  if (luaL_dofile(L, s)) {
+    fprintf(stderr, PACKAGE_NAME " is not properly installed: could not load file `%s'", s);
+    die(1);
+  }
+}

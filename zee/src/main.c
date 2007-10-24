@@ -74,7 +74,7 @@ static void run(void)
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, PACKAGE_NAME " crashed. Please send a bug report to " PACKAGE_BUGREPORT "\r\n");
+  fprintf(stderr, PACKAGE_NAME " crashed; please send a bug report to " PACKAGE_BUGREPORT "\r\n");
   die(2);
 }
 
@@ -117,9 +117,9 @@ int main(int argc, char **argv)
 
   CLUE_INIT;
   init_kill_ring();
-  assert(luaL_dofile(L, PKGDATADIR "/lib.lua") == 0); // FIXME: Build this in using bin2c
-  assert(luaL_dofile(L, PKGDATADIR "/tbl_vars.lua") == 0); // FIXME: Build this in using bin2c
-  assert(luaL_dofile(L, PKGDATADIR "/history.lua") == 0); // FIXME: Build this in using bin2c
+  require(PKGDATADIR "/lib.lua");
+  require(PKGDATADIR "/tbl_vars.lua");
+  require(PKGDATADIR "/history.lua");
   init_commands();
   init_bindings();
 
