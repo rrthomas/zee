@@ -49,15 +49,11 @@ Zee is an experimental editor, hosted on SourceForge at
 @uref{http://sourceforge.net/projects/zee/}.  It is free software,
 licensed under the GNU GPL.
 
-Zee is written in ISO C99 for POSIX and requires the Boehm garbage
-collector (libgc), PCRE (the Perl-compatible regular expressions
-library), and a terminal library (either ncurses or Allegro).
-
 @c ---------------------------------------------------------------------------
 @node Invoking Zee, Initialization file, Overview, Top
 @chapter Invoking Zee
 
-The options are as follows:
+The command-line options are as follows:
 
 @include opts.texi
 
@@ -66,8 +62,8 @@ The options are as follows:
 @chapter Initialization file
 
 When Zee is started, it normally loads the @file{.zeerc} file in your
-home directory, called the ``initialization file''. The initialization
-file is a sequence of commands. The file is most commonly used to
+home directory, called the ``initialization file''.  The initialization
+file is a sequence of commands.  The file is most commonly used to
 initialize variables and to bind keys.
 
 FIXME: add example file, and refer to Lua manual.
@@ -108,9 +104,11 @@ or set at start-up in the @file{.zeerc} initialization file.
 @node Bug reports,  , Variables, Top
 @chapter Bug reports
 
+@c FIXME: Get the bug report address from PACKAGE_BUGREPORT.
 Any questions, comments, or bug reports should be sent to the
 developers at @email{zee-devel@@lists.sourceforge.net}, or even better,
 filed in the relevant tracker at @uref{http://sourceforge.net/projects/zee/}.
+@c FIXME: Configure the URL centrally (also occurs in README and NEWS).
 
 @contents
 
