@@ -1,4 +1,4 @@
-\input texinfo   @c -*-texinfo-*-
+\input texinfo @c -*- mode: texinfo; sentence-end-double-space: t; -*-
 @setfilename zee.info
 @settitle The Zee Manual
 
@@ -35,7 +35,7 @@ Zee is an experimental editor.
 * Overview::                    An overview of the Zee editor.
 * FAQ::                         Frequently Asked Questions.
 * Invoking Zee::                Command line options that you can give to Zee.
-* Initialization file::         The ``.zeerc'' initialization file.
+* Initialization files::        The @file{zeerc} initialization files.
 * Key names::                   How the keys are named.
 * Commands::                    The list of commands.
 * Variables::                   The list of variables.
@@ -86,7 +86,7 @@ with 8-bit locales at present.  Support for Unicode/UTF-8 is planned.
 @end enumerate
 
 @c ---------------------------------------------------------------------------
-@node Invoking Zee, Initialization file, FAQ, Top
+@node Invoking Zee, Initialization files, FAQ, Top
 @chapter Invoking Zee
 
 The command-line options are as follows:
@@ -94,18 +94,27 @@ The command-line options are as follows:
 @include opts.texi
 
 @c ---------------------------------------------------------------------------
-@node Initialization file, Key names, Invoking Zee, Top
+@node Initialization files, Key names, Invoking Zee, Top
 @chapter Initialization file
 
-When Zee is started, it normally loads the @file{.zeerc} file in your
-home directory, called the ``initialization file''.  The initialization
-file is a sequence of commands.  The file is most commonly used to
-initialize variables and to bind keys.
+@c FIXME: SYSCONFDIR "/" PACKAGE "rc"
+When Zee is started, it normally loads the system initialization file,
+typically installed somewhere like @file{/usr/local/share/zee/zeerc},
+followed by the user initialization file @file{.zeerc} file in your home
+directory.  The initialization files are written in the language Lua
+(see @uref{http://www.lua.org/manual/5.1/} for the Lua manual).  The
+user initialization file is most commonly used to initialize variables
+and to bind keys.
 
-FIXME: add example file, and refer to Lua manual.
+Here's the default system initialization file:
+
+@setfilename zeerc
+@example
+@include zeerc
+@end example
 
 @c ---------------------------------------------------------------------------
-@node Key names, Commands, Initialization file, Top
+@node Key names, Commands, Initialization files, Top
 @chapter Key names
 
 This table contains the names of the keys that are used in Zee.
