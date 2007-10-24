@@ -300,7 +300,7 @@ be set using set_wrap_column.\
   while (get_goalc() > wrap_col + 1 && wrap_break_line())
     ;
 
-  thisflag &= ~FLAG_DONE_CPCN;
+  thisflag &= ~FLAG_DONE_UPDOWN;
 
   buf->pt = m->pt;
   remove_marker(m);

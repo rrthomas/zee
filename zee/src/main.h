@@ -157,14 +157,10 @@ enum {
  * Global flags.
  *--------------------------------------------------------------------------*/
 
-// The last command was a C-p or a C-n
-#define FLAG_DONE_CPCN                  0x0001
-// The last command was a kill
-#define FLAG_DONE_KILL                  0x0002
-// Quit the editor as soon as possible
-#define FLAG_QUIT                       0x0004
-// We are defining a macro
-#define FLAG_DEFINING_MACRO             0x0008
+#define FLAG_DONE_UPDOWN                0x0001 // Last command was move up/down
+#define FLAG_DONE_KILL                  0x0002 // Last command was a kill
+#define FLAG_QUIT                       0x0004 // Quit the editor as soon as possible
+#define FLAG_DEFINING_MACRO             0x0008 // We are defining a macro
 
 /*--------------------------------------------------------------------------
  * Commands.

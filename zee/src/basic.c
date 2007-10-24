@@ -42,7 +42,7 @@ Move the cursor to the beginning of the line.\
 
   /* Set goalc to the beginning of line for next
      `move_next/previous_line' call. */
-  thisflag |= FLAG_DONE_CPCN;
+  thisflag |= FLAG_DONE_UPDOWN;
   cur_goalc = 0;
 }
 END_DEF
@@ -56,7 +56,7 @@ Move the cursor to the end of the line.\
 
   /* Change the `goalc' to the end of line for next
      `edit_move_next/previous_line' calls.  */
-  thisflag |= FLAG_DONE_CPCN;
+  thisflag |= FLAG_DONE_UPDOWN;
   cur_goalc = SIZE_MAX;
 }
 END_DEF
@@ -80,9 +80,9 @@ column, or at the end of the line if it is not long enough.\
   if (buf->pt.n == 0)
     ok = false;
   else {
-    thisflag |= FLAG_DONE_CPCN;
+    thisflag |= FLAG_DONE_UPDOWN;
 
-    if (!(lastflag & FLAG_DONE_CPCN))
+    if (!(lastflag & FLAG_DONE_UPDOWN))
       cur_goalc = get_goalc();
 
     buf->pt.n--;
@@ -102,9 +102,9 @@ column, or at the end of the line if it is not long enough.\
   if (buf->pt.n == rblist_nl_count(buf->lines) - 1)
     ok = false;
   else {
-    thisflag |= FLAG_DONE_CPCN;
+    thisflag |= FLAG_DONE_UPDOWN;
 
-    if (!(lastflag & FLAG_DONE_CPCN))
+    if (!(lastflag & FLAG_DONE_UPDOWN))
       cur_goalc = get_goalc();
 
     buf->pt.n++;
@@ -186,7 +186,7 @@ Move the cursor to the beginning of the file.\
 ")
 {
   buf->pt = point_min(buf);
-  thisflag |= FLAG_DONE_CPCN;
+  thisflag |= FLAG_DONE_UPDOWN;
 }
 END_DEF
 
@@ -196,7 +196,7 @@ Move the cursor to the end of the file.\
 ")
 {
   buf->pt = point_max(buf);
-  thisflag |= FLAG_DONE_CPCN;
+  thisflag |= FLAG_DONE_UPDOWN;
 }
 END_DEF
 
