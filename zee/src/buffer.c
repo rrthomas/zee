@@ -28,18 +28,16 @@
 
 
 /*
- * Allocate a new buffer structure and set the default local
- * variable values.
- * The allocation of the first empty line is done here to simplify
- * the code.
+ * Allocate and initialize new buffer structure.
  */
 void buffer_new(void)
 {
   buf = zmalloc(sizeof(Buffer));
   buf->lines = rblist_empty;
   buf->mark = marker_new(point_min(buf));
-  if (get_variable_bool("wrap_mode"))
+  if (get_variable_bool("wrap_mode")) {
     buf->flags ^= BFLAG_AUTOFILL;
+  }
 }
 
 /*
@@ -51,8 +49,9 @@ bool warn_if_readonly_buffer(void)
   if (buf->flags & BFLAG_READONLY) {
     minibuf_error(rblist_from_string("Buffer is readonly"));
     return true;
-  } else
-  return false;
+  } else {
+    return false;
+  }
 }
 
 /*
@@ -65,8 +64,9 @@ bool warn_if_no_mark(void)
   if (!(buf->flags & BFLAG_ANCHORED)) {
     minibuf_error(rblist_from_string("The mark is not active now"));
     return true;
-  } else
+  } else {
     return false;
+  }
 }
 
 /*
@@ -74,12 +74,10 @@ bool warn_if_no_mark(void)
  */
 static void region_size(Region *rp, Point from, Point to)
 {
-  if (point_dist(from, to) < 0) {
-    // The point is before the mark.
+  if (point_dist(from, to) < 0) { // point before mark
     rp->start = from;
     rp->end = to;
-  } else {
-    // The mark is before the point.
+  } else { // mark before point
     rp->start = to;
     rp->end = from;
   }
@@ -93,8 +91,9 @@ static void region_size(Region *rp, Point from, Point to)
  */
 bool calculate_the_region(Region *rp)
 {
-  if (!(buf->flags & BFLAG_ANCHORED))
+  if (!(buf->flags & BFLAG_ANCHORED)) {
     return false;
+  }
 
   region_size(rp, buf->pt, buf->mark->pt);
   return true;
