@@ -297,7 +297,7 @@ static void draw_window(void)
   for (size_t i = 0; i < win.eheight; ++i, ++line) {
     term_move(i, 0);
     term_clrtoeol();
-    if (line < rblist_nl_count(buf->lines))
+    if (line <= rblist_nl_count(buf->lines))
       draw_line(i, line, tab);
   }
 }

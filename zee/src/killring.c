@@ -58,7 +58,7 @@ Delete the current line.\
       thisflag |= FLAG_DONE_KILL;
     }
 
-    if (buf->pt.n != rblist_nl_count(buf->lines) - 1) {
+    if (buf->pt.n != rblist_nl_count(buf->lines)) {
       killed_text = rblist_concat(killed_text, rblist_from_string("\n"));
       CMDCALL(edit_delete_next_character);
       assert(ok);

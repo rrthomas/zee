@@ -163,7 +163,7 @@ bool bobp(void)
  */
 bool eobp(void)
 {
-  return (eolp() && buf->pt.n == rblist_nl_count(buf->lines) - 1);
+  return (eolp() && buf->pt.n == rblist_nl_count(buf->lines));
 }
 
 /*

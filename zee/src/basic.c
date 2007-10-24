@@ -99,7 +99,7 @@ the cursor is positioned after the character in that line which spans this\n\
 column, or at the end of the line if it is not long enough.\
 ")
 {
-  if (buf->pt.n == rblist_nl_count(buf->lines) - 1)
+  if (buf->pt.n == rblist_nl_count(buf->lines))
     ok = false;
   else {
     thisflag |= FLAG_DONE_UPDOWN;
