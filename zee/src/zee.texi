@@ -29,7 +29,7 @@
 
 This is the @emph{Zee} manual.
 
-Zee is an experimental editor and programming environment.
+Zee is an experimental editor.
 
 @menu
 * Overview::                    An overview of the Zee editor.
