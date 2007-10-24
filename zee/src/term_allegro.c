@@ -29,9 +29,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <allegro.h>
-#include <allegro/internal/aintern.h>
-#include "config.h"             // Re-include to override overridden
-                                // autotools macros
 
 #include "main.h"
 #include "extern.h"
