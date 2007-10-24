@@ -1,83 +1,83 @@
 -- CUA key bindings
 
 -- Command execution
-key_bind("M-x", "execute_command")
-key_bind("C-u", "edit_repeat")
-key_bind("M-!", "edit_shell_command")
+key_bind("Alt-x", "execute_command")
+key_bind("Ctrl-u", "edit_repeat")
+key_bind("Alt-!", "edit_shell_command")
 
 -- Navigation. Mostly arrows and things.
 
 -- Character/line
 key_bind("LEFT", "move_previous_character")
-key_bind("C-b", "move_previous_character")
+key_bind("Ctrl-b", "move_previous_character")
 key_bind("RIGHT", "move_next_character")
-key_bind("C-f", "move_next_character")
+key_bind("Ctrl-f", "move_next_character")
 key_bind("UP", "move_previous_line")
-key_bind("C-p", "move_previous_line")
+key_bind("Ctrl-p", "move_previous_line")
 key_bind("DOWN", "move_next_line")
-key_bind("C-n", "move_next_line")
+key_bind("Ctrl-n", "move_next_line")
 -- Word/paragraph
-key_bind("C-LEFT", "move_previous_word")
-key_bind("M-b", "move_previous_word")
-key_bind("C-RIGHT", "move_next_word")
-key_bind("M-f", "move_next_word")
+key_bind("Ctrl-LEFT", "move_previous_word")
+key_bind("Alt-b", "move_previous_word")
+key_bind("Ctrl-RIGHT", "move_next_word")
+key_bind("Alt-f", "move_next_word")
 -- Line/page
 key_bind("HOME", "move_start_line")
-key_bind("C-a", "move_start_line")
+key_bind("Ctrl-a", "move_start_line")
 key_bind("END", "move_end_line")
-key_bind("C-e", "move_end_line")
+key_bind("Ctrl-e", "move_end_line")
 key_bind("PGUP", "move_previous_page")
-key_bind("M-v", "move_previous_page")
+key_bind("Alt-v", "move_previous_page")
 key_bind("PGDN", "move_next_page")
-key_bind("C-v", "move_next_page")
+key_bind("Ctrl-v", "move_next_page")
 -- Whole buffer
-key_bind("C-HOME", "move_start_file")
-key_bind("M-<", "move_start_file")
-key_bind("C-END", "move_end_file")
-key_bind("M->," "move_end_file")
+key_bind("Ctrl-HOME", "move_start_file")
+key_bind("Alt-<", "move_start_file")
+key_bind("Ctrl-END", "move_end_file")
+key_bind("Alt->," "move_end_file")
 -- Window
-key_bind("C-l", "move_redraw")
+key_bind("Ctrl-l", "move_redraw")
 
 -- Absolute navigation. These are like navigation commands but they
 -- don't become selection commands when combined with SHIFT.
-key_bind("C-M-g", "edit_goto_column")
-key_bind("M-g", "edit_goto_line")
+key_bind("Ctrl-Alt-g", "edit_goto_column")
+key_bind("Alt-g", "edit_goto_line")
 
 -- Save
-key_bind("M-s", "file_save")
+key_bind("Alt-s", "file_save")
 -- Suspend
-key_bind("C-z", "file_suspend")
+key_bind("Ctrl-z", "file_suspend")
 -- Quit
-key_bind("C-M-q", "file_quit")
+key_bind("Ctrl-Alt-q", "file_quit")
 
 -- Undo
-key_bind("C-_", "edit_undo")
+key_bind("Ctrl-_", "edit_undo")
 -- Cut selection to clipboard
-key_bind("C-k", "edit_kill_selection")
-key_bind("M-d", "edit_kill_word")
+key_bind("Ctrl-k", "edit_kill_selection")
+key_bind("Alt-d", "edit_kill_word")
 -- Copy selection to clipboard
-key_bind("M-w", "edit_copy")
+key_bind("Alt-w", "edit_copy")
 -- Delete without modifying clipboard
-key_bind("C-d", "edit_delete_next_character")
+key_bind("Ctrl-d", "edit_delete_next_character")
 -- Paste
-key_bind("C-y", "edit_paste")
+key_bind("Ctrl-y", "edit_paste")
 
 -- Search
-key_bind("C-s", "edit_find")
-key_bind("C-r", "edit_find_backward")
-key_bind("M-%", "edit_replace")
+key_bind("Ctrl-s", "edit_find")
+key_bind("Ctrl-r", "edit_find_backward")
+key_bind("Alt-%", "edit_replace")
 
 -- Insert special characters
-key_bind("C-RET", "edit_insert_newline")
+key_bind("Ctrl-RET", "edit_insert_newline")
 key_bind("RET", "edit_insert_newline_and_indent")
 key_bind("TAB", "indent_relative")
-key_bind("C-q", "edit_insert_quoted")
-key_bind("M-i", "edit_insert_tab")
+key_bind("Ctrl-q", "edit_insert_quoted")
+key_bind("Alt-i", "edit_insert_tab")
 
 -- Macros
-key_bind("M-(", "macro_record")
-key_bind("M-)", "macro_stop")
-key_bind("M-e", "macro_play")
+key_bind("Alt-(", "macro_record")
+key_bind("Alt-)", "macro_stop")
+key_bind("Alt-e", "macro_play")
 
 -- Wrap
-key_bind("M-q", "edit_wrap_paragraph")
+key_bind("Alt-q", "edit_wrap_paragraph")

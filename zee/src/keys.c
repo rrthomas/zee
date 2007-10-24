@@ -107,9 +107,9 @@ rblist chordtostr(size_t key)
   rbacc rba = rbacc_new();
 
   if (key & KBD_CTRL)
-    rbacc_add_string(rba, "C-");
+    rbacc_add_string(rba, "Ctrl-");
   if (key & KBD_META)
-    rbacc_add_string(rba, "M-");
+    rbacc_add_string(rba, "Alt-");
   key &= ~(KBD_CTRL | KBD_META);
 
   bool found = false;
