@@ -122,7 +122,6 @@ static size_t common_prefix_length(rblist rbl1, rblist rbl2)
  * after this method. You may want to call completion_remove_suffix and/or
  * completion_remove_prefix in between to keep the list manageable.
  */
-// FIXME: Callers must destroy the list
 bool completion_try(Completion *cp, rblist search)
 {
   size_t fullmatches = 0;
