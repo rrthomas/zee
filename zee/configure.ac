@@ -211,7 +211,7 @@ dnl ==================================================================
 dnl Allegro
 dnl ==================================================================
 
-AC_MSG_CHECKING([use allegro library])
+AC_MSG_CHECKING([whether to use allegro])
 AC_ARG_ENABLE(allegro,
               AS_HELP_STRING([--enable-allegro], [use allegro interface]),
               [
@@ -237,7 +237,7 @@ dnl ==================================================================
 
 AC_DEFUN([CHECK_CURSES],
 [
-        AC_MSG_CHECKING([use curses])
+        AC_MSG_CHECKING([whether to use curses])
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
         AC_CHECK_HEADER(ncurses.h, AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
