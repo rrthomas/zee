@@ -38,8 +38,6 @@
 #endif
 #ifdef ALLEGRO
 #include <allegro.h>
-#include "config.h"             // Re-include to override overridden
-                                // autotools macros
 #endif
 #include <lualib.h>
 
