@@ -102,4 +102,4 @@ copyright.texi: copyright.h mkcopyright.lua
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(top_srcdir)/src/mkcopyright.lua $(top_srcdir)/src/copyright.h
 
 loc:
-	cloc --no3 $(zee_base_SOURCES) term_*.c *.lua
+	cloc --no3 --force_lang=Make,am $(zee_base_SOURCES) term_*.c *.lua Makefile.am
