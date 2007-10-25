@@ -82,11 +82,11 @@ typedef struct {
 
 // Buffer flags or minor modes
 
-#define BFLAG_MODIFIED  (0x0001) // The buffer has been modified
-#define BFLAG_READONLY  (0x0002) // The buffer cannot be modified
-#define BFLAG_WRAP_MODE (0x0004) // The buffer is in Wrap mode
-#define BFLAG_ISEARCH   (0x0008) // The buffer is in Isearch loop
-#define BFLAG_ANCHORED  (0x0010) // The mark is anchored
+#define BFLAG_MODIFIED  0x0001  // The buffer has been modified
+#define BFLAG_READONLY  0x0002  // The buffer cannot be modified
+#define BFLAG_WRAP_MODE 0x0004  // The buffer is in Wrap mode
+#define BFLAG_ISEARCH   0x0008  // The buffer is in Isearch loop
+#define BFLAG_ANCHORED  0x0010  // The mark is anchored
 
 /*
  * Represents a buffer.
