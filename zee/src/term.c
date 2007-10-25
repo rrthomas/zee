@@ -344,7 +344,7 @@ static void draw_status_line(size_t line)
 
   term_print(rblist_from_string("-("));
   if (buf->flags & BFLAG_WRAP_MODE) {
-    term_print(rblist_from_string("Fill"));
+    term_print(rblist_from_string("Wrap"));
     someflag = true;
   }
   if (thisflag & FLAG_DEFINING_MACRO) {
