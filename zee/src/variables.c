@@ -31,52 +31,52 @@
 #include "extern.h"
 
 
-// const char *get_variable(const char *key)
-// {
-//   lua_obj ret;
+typedef struct {
+  int type;
+  union {
+    lua_Number number;
+    const char *string;
+    bool boolean;
+  } v;
+} lua_obj;
 
-//   if (key) {
-//     lua_getglobal(L, key);
-//     ret.type = lua_type(L, -1);
-//     if (lua_isstring(L, -1))
-//       ret.string = lua_tostring(L, -1);
-//     else if (lua_isnumber(L, -1);
-//     else if (lua_isboolean(L, -1);
-//     lua_pop(L, 1);
-//   }
-
-//   return ret.string;
-// }
-
-const char *get_variable_string(const char *key)
+static lua_obj get_variable(const char *key)
 {
-  const char *ret = NULL;
+  lua_obj ret;
+  ret.type = LUA_TNIL;
 
   if (key) {
     lua_getglobal(L, key);
-    if (lua_isstring(L, -1))
-      ret = lua_tostring(L, -1);
+    ret.type = lua_type(L, -1);
+    if (lua_isstring(L, -1)) {
+      ret.v.string = lua_tostring(L, -1);
+    } else if (lua_isnumber(L, -1)) {
+      ret.v.number = lua_tonumber(L, -1);
+    } else if (lua_isboolean(L, -1)) {
+      ret.v.boolean = lua_toboolean(L, -1);
+    }
     lua_pop(L, 1);
   }
 
   return ret;
 }
 
-int get_variable_number(const char *var)
+const char *get_variable_string(const char *key)
 {
-  const char *s = get_variable_string(var);
-  return s ? atoi(s) : 0;
+  lua_obj o = get_variable(key);
+  return o.type == LUA_TSTRING ? o.v.string : NULL;
 }
 
-// FIXME: Use Lua booleans
+int get_variable_number(const char *var)
+{
+  lua_obj o = get_variable(var);
+  return o.type == LUA_TNUMBER ? (int)o.v.number : 0;
+}
+
 bool get_variable_bool(const char *var)
 {
-  const char *s = get_variable_string(var);
-
-  if (s)
-    return !strcmp(s, "true");
-
-  return false;
+  lua_obj o = get_variable(var);
+  return o.type == LUA_TBOOLEAN ? o.v.boolean : false;
 }
 
 DEF(preferences_set_variable,
@@ -94,8 +94,7 @@ Set a variable to the specified value.\
     val = rblist_to_string(minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty));
 
   if (var && val) {
-    lua_pushstring(L, val);
-    lua_setglobal(L, var);
+    (void)CLUE_DO(rblist_to_string(rblist_fmt("%s = %s", var, val)));
   } else {
     ok = false;
   }

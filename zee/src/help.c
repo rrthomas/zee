@@ -63,7 +63,6 @@ Display the help for the given thing.\
   ok = false;
 
   if ((name = minibuf_read_name(rblist_from_string("Describe thing: ")))) {
-    rblist rbl = get_variable_string(rblist_to_string(name));
     rblist bindings = command_to_binding(name), where = rblist_empty;
     if (rblist_length(bindings) > 0)
       where = rblist_fmt("\n\nBound to: %r", bindings);

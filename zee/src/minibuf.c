@@ -36,7 +36,7 @@ static rblist previous_history_element(list hp)
   const char *s;
 
   CLUE_IMPORT_REF(hp);
-  CLUE_DO("s = previous_history_element(hp)");
+  (void)CLUE_DO("s = previous_history_element(hp)");
   CLUE_EXPORT(s, string);
   return rblist_from_string(s);
 }
@@ -46,7 +46,7 @@ static rblist next_history_element(list hp)
   const char *s;
 
   CLUE_IMPORT_REF(hp);
-  CLUE_DO("s = next_history_element(hp)");
+  (void)CLUE_DO("s = next_history_element(hp)");
   CLUE_EXPORT(s, string);
   return rblist_from_string(s);
 }
@@ -54,7 +54,7 @@ static rblist next_history_element(list hp)
 static void history_prepare(list hp)
 {
   CLUE_IMPORT_REF(hp);
-  CLUE_DO("history_prepare(hp)");
+  (void)CLUE_DO("history_prepare(hp)");
 }
 
 static void add_history_element(list hp, rblist ms)
@@ -62,7 +62,7 @@ static void add_history_element(list hp, rblist ms)
   CLUE_IMPORT_REF(hp);
   const char *s = rblist_to_string(ms);
   CLUE_IMPORT(s, string);
-  CLUE_DO("add_history_element(hp, s)");
+  (void)CLUE_DO("add_history_element(hp, s)");
 }
 
 
@@ -346,7 +346,7 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, Completion *c
  */
 rblist minibuf_read(rblist rbl, rblist value)
 {
-  return minibuf_read_completion(rbl, value, NULL, NULL);
+  return minibuf_read_completion(rbl, value, NULL, 0);
 }
 
 /*

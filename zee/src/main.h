@@ -206,8 +206,7 @@ enum {
     name = rblist_from_string(lua_tostring(L, -1));                     \
     lua_pop(L, 1);                                                      \
   } else if ((name = minibuf_read(rblist_from_string(prompt), rblist_empty)) == NULL) { \
-    ok = lua_toboolean(L, -1);                                          \
-    lua_pop(L, 1);                                                      \
+    ok = false;                                                         \
   }
 
 // Declare a command name argument, with prompt.
@@ -217,8 +216,7 @@ enum {
     name = rblist_from_string(lua_tostring(L, -1));                     \
     lua_pop(L, 1);                                                      \
   } else if ((name = minibuf_read_name(rblist_from_string(prompt))) == NULL) { \
-    ok = lua_toboolean(L, -1);                                          \
-    lua_pop(L, 1);                                                      \
+    ok = false;                                                         \
   }
 
 // Declare an unsigned integer argument, with prompt.
@@ -231,8 +229,7 @@ enum {
     do {                                                                \
       rblist ms;                                                        \
       if ((ms = minibuf_read(rblist_from_string(prompt), rblist_from_string(""))) == NULL) { \
-        ok = lua_toboolean(L, -1);                                      \
-        lua_pop(L, 1);                                                  \
+        ok = false;                                                     \
         break;                                                          \
       }                                                                 \
       if ((num = strtoul(rblist_to_string(ms), NULL, 10)) == ULONG_MAX) \
