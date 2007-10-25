@@ -43,7 +43,6 @@ zee_base_SOURCES =				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
-	command.c				\
 	completion.c				\
 	file.c					\
 	funcs.c					\
@@ -51,14 +50,14 @@ zee_base_SOURCES =				\
 	keys.c					\
 	killring.c				\
 	line.c					\
+	lua.c					\
 	macro.c					\
 	main.c					\
 	minibuf.c				\
 	point.c					\
 	search.c				\
 	term.c					\
-	undo.c					\
-	variables.c
+	undo.c
 
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@

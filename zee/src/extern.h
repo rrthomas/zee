@@ -47,9 +47,6 @@ size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
 // command.c --------------------------------------------------------------
-void init_commands(void);
-bool cmd_eval(rblist rbl, rblist source);
-void require(char *s);
 
 // completion.c -----------------------------------------------------------
 Completion *completion_new(void);
@@ -94,6 +91,14 @@ bool line_replace_text(size_t line, size_t offset, size_t oldlen, rblist newtext
 bool insert_char(int c);
 bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
+
+// lua.c ------------------------------------------------------------------
+const char *get_variable_string(const char *var);
+int get_variable_number(const char *var);
+bool get_variable_bool(const char *var);
+void init_commands(void);
+bool cmd_eval(rblist rbl, rblist source);
+void require(char *s);
 
 // macro.c ----------------------------------------------------------------
 void cancel_macro_definition(void);
@@ -140,11 +145,6 @@ void term_beep(void);
 // undo.c -----------------------------------------------------------------
 void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 void undo_reset_unmodified(Undo *up);
-
-// variables.c ------------------------------------------------------------
-const char *get_variable_string(const char *var);
-int get_variable_number(const char *var);
-bool get_variable_bool(const char *var);
 
 // C functions for interactive commands -----------------------------------
 #define X(cmd_name) \

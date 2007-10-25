@@ -1,4 +1,4 @@
-/* Variables functions
+/* Lua to Zee bindings
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
@@ -22,9 +22,7 @@
 
 #include "config.h"
 
-#include <string.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <lua.h>
 
 #include "main.h"
@@ -103,3 +101,41 @@ Set a variable to the specified value.\
   }
 }
 END_DEF
+
+/*
+ * Register C functions in Lua.
+ */
+void init_commands(void)
+{
+  static luaL_Reg cmds[] = {
+#define X(cmd_name) \
+    {# cmd_name, F_ ## cmd_name},
+#include "tbl_funcs.h"
+#undef X
+    {NULL, NULL}
+  };
+
+  lua_pushvalue(L, LUA_GLOBALSINDEX);
+  luaL_register(L, NULL, cmds);
+}
+
+/*
+ * Execute a string as commands
+ */
+// FIXME: Make a better error message.
+bool cmd_eval(rblist s, rblist source)
+{
+  (void)source;
+  return luaL_dostring(L, rblist_to_string(s)) == 0;
+}
+
+/*
+ * Load a file of Lua, aborting if not found.
+ */
+void require(char *s)
+{
+  if (luaL_dofile(L, s)) {
+    fprintf(stderr, PACKAGE_NAME " is not properly installed: could not load file `%s'", s);
+    die(1);
+  }
+}
