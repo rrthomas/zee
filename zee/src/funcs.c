@@ -61,7 +61,7 @@ In Wrap mode, inserting a space or newline at a column beyond\n\
 Paragraphs can also be wrapped using the `wrap_paragraph'.\
 ")
 {
-  buf->flags ^= BFLAG_AUTOFILL;
+  buf->flags ^= BFLAG_WRAP_MODE;
 }
 END_DEF
 

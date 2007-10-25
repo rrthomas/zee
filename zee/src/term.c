@@ -343,7 +343,7 @@ static void draw_status_line(size_t line)
     term_print(rblist_from_string("--"));
 
   term_print(rblist_from_string("-("));
-  if (buf->flags & BFLAG_AUTOFILL) {
+  if (buf->flags & BFLAG_WRAP_MODE) {
     term_print(rblist_from_string("Fill"));
     someflag = true;
   }

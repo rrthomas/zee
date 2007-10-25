@@ -338,7 +338,7 @@ Insert a newline, wrapping if in Wrap mode.\
 ")
 {
   undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-  if (buf->flags & BFLAG_AUTOFILL &&
+  if (buf->flags & BFLAG_WRAP_MODE &&
       get_goalc() > (size_t)get_variable_number("wrap_column"))
     wrap_break_line();
   ok = insert_char('\n');
@@ -421,7 +421,7 @@ UINT(c, "Insert character: "))
     buf->flags &= ~BFLAG_ANCHORED;
 
     if (c <= 0xff) {
-      if (isspace(c) && buf->flags & BFLAG_AUTOFILL &&
+      if (isspace(c) && buf->flags & BFLAG_WRAP_MODE &&
           get_goalc() > (size_t)get_variable_number("wrap_column"))
         wrap_break_line();
       insert_char((int)c);

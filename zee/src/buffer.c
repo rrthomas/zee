@@ -36,7 +36,7 @@ void buffer_new(void)
   buf->lines = rblist_empty;
   buf->mark = marker_new(point_min(buf));
   if (get_variable_bool("wrap_mode")) {
-    buf->flags ^= BFLAG_AUTOFILL;
+    buf->flags ^= BFLAG_WRAP_MODE;
   }
 }
 
