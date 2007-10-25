@@ -47,13 +47,16 @@ static lua_obj get_variable(const char *key)
 
   if (key) {
     lua_getglobal(L, key);
-    ret.type = lua_type(L, -1);
-    if (lua_isstring(L, -1)) {
+    switch ((ret.type = lua_type(L, -1))) {
+    case LUA_TSTRING:
       ret.v.string = lua_tostring(L, -1);
-    } else if (lua_isnumber(L, -1)) {
+      break;
+    case LUA_TNUMBER:
       ret.v.number = lua_tonumber(L, -1);
-    } else if (lua_isboolean(L, -1)) {
+      break;
+    case LUA_TBOOLEAN:
       ret.v.boolean = lua_toboolean(L, -1);
+      break;
     }
     lua_pop(L, 1);
   }
