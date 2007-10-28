@@ -30,22 +30,22 @@
   assert(L = luaL_newstate());                  \
   luaL_openlibs(L)
   
-#define CLUE_IMPORT(var, ty)                    \
+#define CLUE_IMPORT(cexp, lvar, ty)             \
   do {                                          \
-    lua_push ## ty(L, var);                     \
-    lua_setglobal(L, #var);                     \
+    lua_push ## ty(L, cexp);                    \
+    lua_setglobal(L, #lvar);                    \
   } while (0)
 
-#define CLUE_IMPORT_REF(var)                    \
+#define CLUE_IMPORT_REF(cexp, lvar)             \
   do {                                          \
-    lua_rawgeti(L, LUA_REGISTRYINDEX, var);     \
-    lua_setglobal(L, #var);                     \
+    lua_rawgeti(L, LUA_REGISTRYINDEX, cexp);    \
+    lua_setglobal(L, #lvar);                    \
   } while (0)
 
-#define CLUE_EXPORT(var, ty)                    \
+#define CLUE_EXPORT(cvar, lvar, ty)             \
   do {                                          \
-    lua_getglobal(L, #var);                     \
-    var = lua_to ## ty(L, -1);                  \
+    lua_getglobal(L, #lvar);                    \
+    cvar = lua_to ## ty(L, -1);                 \
     lua_pop(L, 1);                              \
   } while (0)
 

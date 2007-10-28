@@ -31,13 +31,15 @@
 #include "extern.h"
 
 
+// Bindings to Lua history functions
+
 static rblist previous_history_element(list hp)
 {
   const char *s;
 
-  CLUE_IMPORT_REF(hp);
+  CLUE_IMPORT_REF(hp, hp);
   (void)CLUE_DO("s = previous_history_element(hp)");
-  CLUE_EXPORT(s, string);
+  CLUE_EXPORT(s, s, string);
   return rblist_from_string(s);
 }
 
@@ -45,24 +47,52 @@ static rblist next_history_element(list hp)
 {
   const char *s;
 
-  CLUE_IMPORT_REF(hp);
+  CLUE_IMPORT_REF(hp, hp);
   (void)CLUE_DO("s = next_history_element(hp)");
-  CLUE_EXPORT(s, string);
+  CLUE_EXPORT(s, s, string);
   return rblist_from_string(s);
 }
 
 static void history_prepare(list hp)
 {
-  CLUE_IMPORT_REF(hp);
+  CLUE_IMPORT_REF(hp, hp);
   (void)CLUE_DO("history_prepare(hp)");
 }
 
 static void add_history_element(list hp, rblist ms)
 {
-  CLUE_IMPORT_REF(hp);
+  CLUE_IMPORT_REF(hp, hp);
   const char *s = rblist_to_string(ms);
-  CLUE_IMPORT(s, string);
+  CLUE_IMPORT(s, s, string);
   (void)CLUE_DO("add_history_element(hp, s)");
+}
+
+
+// Bindings to Lua completion functions
+static bool completion_try(list cp, rblist search)
+{
+  CLUE_IMPORT_REF(cp, cp);
+  CLUE_IMPORT(rblist_to_string(search), search, string);
+  (void)CLUE_DO("b = completion_try(cp, search)");
+  bool b;
+  CLUE_EXPORT(b, b, boolean);
+  return b;
+}
+
+static void completion_remove_suffix(list cp)
+{
+  CLUE_IMPORT_REF(cp, cp);
+  (void)CLUE_DO("completion_remove_suffix(cp)");
+}
+
+static size_t completion_remove_prefix(list cp, rblist search)
+{
+  CLUE_IMPORT_REF(cp, cp);
+  CLUE_IMPORT(rblist_to_string(search), search, string);
+  (void)CLUE_DO("pos = completion_try(cp, search)");
+  size_t pos;
+  CLUE_EXPORT(pos, pos, number);
+  return pos;
 }
 
 
@@ -219,10 +249,28 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
   term_refresh();
 }
 
+static rblist get_match(list cp)
+{
+  CLUE_IMPORT_REF(cp, cp);
+  (void)CLUE_DO("ms = cp.match");
+  const char *s;
+  CLUE_EXPORT(s, ms, string);
+  return rblist_from_string(s);
+}
+
+static size_t get_matches(list cp)
+{
+  CLUE_IMPORT_REF(cp, cp);
+  (void)CLUE_DO("m = #(cp.matches)");
+  size_t matches;
+  CLUE_EXPORT(matches, m, number);
+  return matches;
+}
+
 /*
  * Read a string from the minibuffer using a completion.
  */
-static rblist minibuf_read_completion(rblist prompt, rblist value, Completion *cp, list hp)
+static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list hp)
 {
   int c;
   bool ret = false, ok = true;
@@ -235,12 +283,18 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, Completion *c
   rblist old_as = NULL;
 
   for (i = rblist_length(rbl);;) {
-    if (cp != NULL && (!old_as || rblist_compare(old_as, rbl))) {
+    if (cp != 0 && (!old_as || rblist_compare(old_as, rbl))) {
       // Using completions and `rbl' has changed, so display new completions.
       completion_try(cp, rbl);
       completion_remove_suffix(cp);
       completion_remove_prefix(cp, rbl);
-      completion_popup(cp);
+      const char *s;
+      CLUE_IMPORT_REF(cp, cp);
+      (void)CLUE_DO(rblist_to_string(rblist_fmt("s = completion_write(cp, %d)", win.ewidth)));
+      CLUE_EXPORT(s, s, string);
+      rblist rbl = rblist_from_string(s);
+      popup_set(rbl);
+      term_display();
       old_as = rbl;
     }
     draw_minibuf_read(prompt, rbl, (size_t)i);
@@ -289,14 +343,14 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, Completion *c
       break;
     case KBD_META | 'v':
     case KBD_PGUP:
-      if (cp == NULL)
+      if (cp == 0)
         term_beep();
       else
         popup_scroll_up();
       break;
     case KBD_CTRL | 'v':
     case KBD_PGDN:
-      if (cp == NULL)
+      if (cp == 0)
         term_beep();
       else
         popup_scroll_down();
@@ -310,11 +364,11 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, Completion *c
       mb_next_history(hp, &rbl, &i, &saved);
       break;
     case KBD_TAB:
-      if (cp == NULL || list_length(cp->matches) == 0)
+      if (cp == 0 || get_matches(cp) == 0)
         term_beep();
       else {
-        if (rblist_compare(rbl, cp->match) != 0) {
-          rbl = cp->match;
+        if (rblist_compare(rbl, get_match(cp)) != 0) {
+          rbl = get_match(cp);
           i = rblist_length(rbl);
         } else
           popup_scroll_down_and_loop();
@@ -365,9 +419,10 @@ rblist minibuf_read_name(rblist prompt)
 {
   static list commands_history = 0;
   rblist ms;
-  Completion *cp = completion_new();
+  list cp = list_new();
   bool ok = false;
-  cp->completions = LUA_GLOBALSINDEX;
+  CLUE_IMPORT_REF(cp, cp);
+  (void)CLUE_DO("cp.completions = _G");
 
   if (commands_history == 0) {
     commands_history = list_new();
@@ -386,8 +441,9 @@ rblist minibuf_read_name(rblist prompt)
     }
 
     // Complete partial words if possible
-    if (completion_try(cp, ms))
-      ms = cp->match;
+    if (completion_try(cp, ms)) {
+      ms = get_match(cp);
+    }
 
     lua_getglobal(L, rblist_to_string(ms));
     if (!lua_isnil(L, -1)) {

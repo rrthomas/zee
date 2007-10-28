@@ -15,7 +15,8 @@ bin_PROGRAMS = zee
 
 dist_pkgdata_DATA = 				\
 	cua_bindings emacs_bindings lib.lua 	\
-	tbl_vars.lua tbl_funcs.lua history.lua
+	tbl_vars.lua tbl_funcs.lua history.lua  \
+	completion.lua
 
 dist_sysconf_DATA = $(PACKAGE)rc
 
@@ -43,7 +44,6 @@ zee_base_SOURCES =				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
-	completion.c				\
 	file.c					\
 	funcs.c					\
 	help.c					\
@@ -101,4 +101,4 @@ copyright.texi: copyright.h mkcopyright.lua
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
 
 loc:
-	cloc --no3 --force_lang=Make,am $(zee_base_SOURCES) term_*.c *.lua Makefile.am
+	cloc --no3 --force_lang=m4,ac --force_lang=Make,am $(zee_base_SOURCES) term_*.c *.lua Makefile.am ../Makefile.am ../configure.ac

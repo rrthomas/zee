@@ -120,6 +120,7 @@ int main(int argc, char **argv)
   require(PKGDATADIR "/lib.lua");
   require(PKGDATADIR "/tbl_vars.lua");
   require(PKGDATADIR "/history.lua");
+  require(PKGDATADIR "/completion.lua");
   init_commands();
   init_bindings();
 

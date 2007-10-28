@@ -46,15 +46,6 @@ size_t tab_width(void);
 size_t indent_width(void);
 rblist copy_text_block(Point start, size_t size);
 
-// command.c --------------------------------------------------------------
-
-// completion.c -----------------------------------------------------------
-Completion *completion_new(void);
-void completion_popup(Completion *cp);
-bool completion_try(Completion *cp, rblist search);
-void completion_remove_suffix(Completion *cp);
-size_t completion_remove_prefix(Completion *cp, rblist search);
-
 // file.c -----------------------------------------------------------------
 rblist get_home_dir(void);
 rblist file_read(rblist filename);

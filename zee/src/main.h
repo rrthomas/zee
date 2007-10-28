@@ -120,12 +120,6 @@ typedef struct {
                              window (space available for buffer display). */
 } Window;
 
-typedef struct {
-  int completions; // Lua stack index (N.B.) of list of completion strings
-  int matches;     // Lua reference (N.B.) to the list of matches
-  rblist match;    // The current matched string
-} Completion;
-
 // Type of font attributes
 typedef size_t Font;
 
