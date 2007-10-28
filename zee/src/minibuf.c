@@ -400,7 +400,7 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list
  */
 rblist minibuf_read(rblist rbl, rblist value)
 {
-  return minibuf_read_completion(rbl, value, NULL, 0);
+  return minibuf_read_completion(rbl, value, 0, 0);
 }
 
 /*
