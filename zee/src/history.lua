@@ -47,7 +47,7 @@ function previous_history_element(self)
     s = self[self.sel]
   end
 
-  return s
+  return s or ""
 end
 
 function next_history_element(self)
@@ -63,5 +63,5 @@ function next_history_element(self)
     end
   end
 
-  return s
+  return s or ""
 end
