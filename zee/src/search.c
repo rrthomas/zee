@@ -81,12 +81,15 @@ static bool search_forward(Point start, rblist rbl)
   if (rblist_length(rbl) > 0) {
     size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), rbl, start.o == 0, true, false);
     if (off != SIZE_MAX) {
+      bool ok = true;
       size_t n = rblist_pos_to_line(buf->lines, off);
-      while (buf->pt.n != n) {
+      while (ok && buf->pt.n != n) {
         CMDCALL(move_next_line);
       }
-      buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
-      return true;
+      if (ok) {
+        buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
+      }
+      return ok;
     }
   }
 
@@ -98,11 +101,15 @@ static bool search_backward(Point start, rblist rbl)
   if (rblist_length(rbl) > 0) {
     size_t off = find_substr(rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, start.n) + start.o, rblist_length(buf->lines)), rbl, true, start.o == rblist_line_length(buf->lines, start.n), true);
     if (off != SIZE_MAX) {
+      bool ok = true;
       size_t n = rblist_pos_to_line(buf->lines, off);
-      while (buf->pt.n != n)
+      while (ok && buf->pt.n != n) {
         CMDCALL(move_previous_line);
-      buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
-      return true;
+      }
+      if (ok) {
+        buf->pt.o = off - rblist_line_to_start_pos(buf->lines, n);
+      }
+      return ok;
     }
   }
 
