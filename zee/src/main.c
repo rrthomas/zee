@@ -71,6 +71,7 @@ static void run(void)
   }
 }
 
+// FIXME: Reset the terminal?
 static void segv_sig_handler(int signo)
 {
   (void)signo;
@@ -78,6 +79,7 @@ static void segv_sig_handler(int signo)
   die(2);
 }
 
+// FIXME: Reset the terminal?
 static void other_sig_handler(int signo)
 {
   (void)signo;
@@ -118,7 +120,8 @@ int main(int argc, char **argv)
   CLUE_INIT;
   init_kill_ring();
   require(PKGDATADIR "/lib.lua");
-  require(PKGDATADIR "/tbl_vars.lua");
+  require(PKGDATADIR "/texinfo.lua");
+  require(PKGDATADIR "/tbl_vars.lua"); // FIXME: interpret the texinfo commands
   require(PKGDATADIR "/history.lua");
   require(PKGDATADIR "/completion.lua");
   // FIXME: Load last for now because of its effect on the global environment

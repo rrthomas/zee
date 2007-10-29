@@ -44,12 +44,9 @@ END_DEF
 
 static const char *get_docstring(rblist name)
 {
-  lua_getglobal(L, "docstring"); // docstring table
-  lua_pushstring(L, rblist_to_string(name));
-  lua_gettable(L, -2);
-  const char *s = lua_tostring(L, -1);
-  lua_pop(L, 2); // Remove table and value
-  
+  (void)CLUE_DO(rblist_to_string(rblist_fmt("s = docstring[\"%r\"]", name)));
+  const char *s;
+  CLUE_EXPORT(s, s, string);
   return s;
 }
 
@@ -67,6 +64,9 @@ Display the help for the given thing.\
     if (rblist_length(bindings) > 0)
       where = rblist_fmt("\n\nBound to: %r", bindings);
     const char *doc = get_docstring(name);
+    if (doc == NULL) {
+      doc = "No help available";
+    }
     popup_set(rblist_fmt("Help for `%r':\n\n%s%r", name, doc, where));
     ok = true;
   }
