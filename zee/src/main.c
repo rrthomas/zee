@@ -122,6 +122,7 @@ int main(int argc, char **argv)
   require(PKGDATADIR "/lib.lua");
   require(PKGDATADIR "/texinfo.lua");
   require(PKGDATADIR "/tbl_vars.lua"); // FIXME: interpret the texinfo commands
+  require(PKGDATADIR "/tbl_funcs.lua");
   require(PKGDATADIR "/history.lua");
   require(PKGDATADIR "/completion.lua");
   // FIXME: Load last for now because of its effect on the global environment
