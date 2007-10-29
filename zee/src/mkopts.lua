@@ -18,9 +18,12 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-NAME="mkopts"
+prog = {
+  name = "mkopts"
+}
 
 require "lib"
+require "std"
 
 h = io.open("opts.texi", "w")
 assert(h)

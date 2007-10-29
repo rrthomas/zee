@@ -280,6 +280,9 @@ STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
 }
 END_DEF
 
+// FIXME: Translate this into Lua, adding Lua versions of argument
+// declarations for interactive functions. Then can start rewriting
+// Zee commands piecemeal in Lua.
 DEF_ARG(edit_replace_all,
 "\
 Replace all occurrences of a regexp with other text from the cursor\n\

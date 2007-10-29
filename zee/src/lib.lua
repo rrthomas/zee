@@ -1,8 +1,4 @@
--- Library functions for Lua scripts
-
-function die(s)
-  error(NAME .. ": " .. s)
-end
+-- Library functions for Lua mk* scripts
 
 -- Utility function for parsing tbl_*.h
 function X(...)

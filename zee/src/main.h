@@ -33,10 +33,11 @@
 #include "nonstd.h"
 #include "zmalloc.h"
 #include "clue.h"
-#include "list.h"
 #include "rblist.h"
 #include "rbutil.h"
 
+
+typedef int list;
 
 /*--------------------------------------------------------------------------
  * Main editor structures.

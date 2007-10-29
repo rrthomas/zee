@@ -145,7 +145,6 @@ end
 
 --  Finds the longest prefix of `search' that ends in an underscore, and removes
 --  it from all `cp->matches'. Does nothing if there is no such prefix.
---  Returns the length of the removed prefix.
 function completion_remove_prefix(cp, search)
   local pos = last_occurrence(search, #search, '_')
   if pos > 0 then
@@ -153,5 +152,4 @@ function completion_remove_prefix(cp, search)
       cp.matches[i] = string.sub(v, pos)
     end
   end
-  return pos
 end

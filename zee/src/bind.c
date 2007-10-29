@@ -66,7 +66,7 @@ void init_bindings(void)
 void process_key(size_t key)
 {
   const char *s = get_binding(key);
-  bool ok; // FIXME: Use this value
+  bool ok;
 
   if (key == KBD_NOKEY) {
     return;
@@ -95,7 +95,7 @@ void process_key(size_t key)
 
   /* Only add keystrokes if we're already in macro defining mode
      before the command call, to cope with macro_record */
-  if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO) {
+  if (ok && lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO) {
     add_cmd_to_macro();
   }
 }

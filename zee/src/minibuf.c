@@ -31,43 +31,6 @@
 #include "extern.h"
 
 
-// Bindings to Lua history functions
-
-static rblist previous_history_element(list hp)
-{
-  const char *s;
-
-  CLUE_IMPORT_REF(hp, hp);
-  (void)CLUE_DO("s = previous_history_element(hp)");
-  CLUE_EXPORT(s, s, string);
-  return rblist_from_string(s);
-}
-
-static rblist next_history_element(list hp)
-{
-  const char *s;
-
-  CLUE_IMPORT_REF(hp, hp);
-  (void)CLUE_DO("s = next_history_element(hp)");
-  CLUE_EXPORT(s, s, string);
-  return rblist_from_string(s);
-}
-
-static void history_prepare(list hp)
-{
-  CLUE_IMPORT_REF(hp, hp);
-  (void)CLUE_DO("history_prepare(hp)");
-}
-
-static void add_history_element(list hp, rblist ms)
-{
-  CLUE_IMPORT_REF(hp, hp);
-  const char *s = rblist_to_string(ms);
-  CLUE_IMPORT(s, s, string);
-  (void)CLUE_DO("add_history_element(hp, s)");
-}
-
-
 // Bindings to Lua completion functions
 static bool completion_try(list cp, rblist search)
 {
@@ -77,22 +40,6 @@ static bool completion_try(list cp, rblist search)
   bool b;
   CLUE_EXPORT(b, b, boolean);
   return b;
-}
-
-static void completion_remove_suffix(list cp)
-{
-  CLUE_IMPORT_REF(cp, cp);
-  (void)CLUE_DO("completion_remove_suffix(cp)");
-}
-
-static size_t completion_remove_prefix(list cp, rblist search)
-{
-  CLUE_IMPORT_REF(cp, cp);
-  CLUE_IMPORT(rblist_to_string(search), search, string);
-  (void)CLUE_DO("pos = completion_try(cp, search)");
-  size_t pos;
-  CLUE_EXPORT(pos, pos, number);
-  return pos;
 }
 
 
@@ -171,40 +118,36 @@ static void mb_delete_char(size_t i, rblist *as)
     term_beep();
 }
 
-static void mb_prev_history(list hp, rblist *as, size_t *_i, rblist *_saved)
+static void mb_prev_history(const char *history, rblist *as, size_t *i, rblist *saved)
 {
-  size_t i = *_i;
-  rblist saved = *_saved;
-  if (hp) {
-    rblist elem = previous_history_element(hp);
-    if (elem) {
-      if (!saved)
-        saved = *as;
-
-      i = rblist_length(elem);
-      *as = elem;
+  if (history) {
+    (void)CLUE_DO(rblist_to_string(rblist_fmt("s = previous_history_element(%s)", history)));
+    const char *s;
+    CLUE_EXPORT(s, s, string);
+    if (s) {
+      if (!*saved) {
+        *saved = *as;
+      }
+      *i = strlen(s);
+      *as = rblist_from_string(s);
     }
   }
-  *_i = i;
-  *_saved = saved;
 }
 
-static void mb_next_history(list hp, rblist *as, size_t *_i, rblist *_saved)
+static void mb_next_history(const char *history, rblist *as, size_t *i, rblist *saved)
 {
-  size_t i = *_i;
-  rblist saved = *_saved;
-  if (hp) {
-    rblist elem = next_history_element(hp);
-    if (elem)
-      *as = elem;
-    else if (saved) {
-      i = rblist_length(saved);
-      *as = saved;
-      saved = NULL;
+  if (history) {
+    (void)CLUE_DO(rblist_to_string(rblist_fmt("s = next_history_element(%s)", history)));
+    const char *s;
+    CLUE_EXPORT(s, s, string);
+    if (s) {
+      *as = rblist_from_string(s);
+    } else if (*saved) {
+      *i = rblist_length(*saved);
+      *as = *saved;
+      *saved = NULL;
     }
   }
-  *_i = i;
-  *_saved = saved;
 }
 
 /*--------------------------------------------------------------------------
@@ -270,15 +213,16 @@ static size_t get_matches(list cp)
 /*
  * Read a string from the minibuffer using a completion.
  */
-static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list hp)
+static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, const char *history)
 {
   int c;
   bool ret = false, ok = true;
   size_t i;
   rblist rbl = value, retval = NULL, saved = NULL;
 
-  if (hp)
-    history_prepare(hp);
+  if (history) {
+    (void)CLUE_DO(rblist_to_string(rblist_fmt("history_prepare(%s)", history)));
+  }
 
   rblist old_as = NULL;
 
@@ -286,11 +230,12 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list
     if (cp != 0 && (!old_as || rblist_compare(old_as, rbl))) {
       // Using completions and `rbl' has changed, so display new completions.
       completion_try(cp, rbl);
-      completion_remove_suffix(cp);
-      completion_remove_prefix(cp, rbl);
-      const char *s;
       CLUE_IMPORT_REF(cp, cp);
+      CLUE_IMPORT(rblist_to_string(rbl), search, string);
+      (void)CLUE_DO("completion_remove_suffix(cp)");
+      (void)CLUE_DO("completion_remove_prefix(cp, search)");
       (void)CLUE_DO(rblist_to_string(rblist_fmt("s = completion_write(cp, %d)", win.ewidth)));
+      const char *s;
       CLUE_EXPORT(s, s, string);
       rblist rbl = rblist_from_string(s);
       popup_set(rbl);
@@ -357,11 +302,11 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list
       break;
     case KBD_UP:
     case KBD_META | 'p':
-      mb_prev_history(hp, &rbl, &i, &saved);
+      mb_prev_history(history, &rbl, &i, &saved);
       break;
     case KBD_DOWN:
     case KBD_META | 'n':
-      mb_next_history(hp, &rbl, &i, &saved);
+      mb_next_history(history, &rbl, &i, &saved);
       break;
     case KBD_TAB:
       if (cp == 0 || get_matches(cp) == 0)
@@ -400,7 +345,7 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, list
  */
 rblist minibuf_read(rblist rbl, rblist value)
 {
-  return minibuf_read_completion(rbl, value, 0, 0);
+  return minibuf_read_completion(rbl, value, 0, NULL);
 }
 
 /*
@@ -417,19 +362,16 @@ void minibuf_clear(void)
  */
 rblist minibuf_read_name(rblist prompt)
 {
-  static list commands_history = 0;
   rblist ms;
-  list cp = list_new();
+  lua_newtable(L);
+  list cp = luaL_ref(L, LUA_REGISTRYINDEX);
   bool ok = false;
   CLUE_IMPORT_REF(cp, cp);
   (void)CLUE_DO("cp.completions = _G");
-
-  if (commands_history == 0) {
-    commands_history = list_new();
-  }
+  (void)CLUE_DO("if commands_history == nil then commands_history = {} end");
 
   for (;;) {
-    ms = minibuf_read_completion(prompt, rblist_empty, cp, commands_history);
+    ms = minibuf_read_completion(prompt, rblist_empty, cp, "commands_history");
 
     if (ms == NULL) {
       return NULL;
@@ -447,7 +389,7 @@ rblist minibuf_read_name(rblist prompt)
 
     lua_getglobal(L, rblist_to_string(ms));
     if (!lua_isnil(L, -1)) {
-      add_history_element(commands_history, ms);
+      (void)CLUE_DO(rblist_to_string(rblist_fmt("add_history_element(commands_history, %r)", ms)));
       minibuf_clear(); // Remove any error message
       ok = true;
       break;

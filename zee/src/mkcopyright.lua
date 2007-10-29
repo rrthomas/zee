@@ -18,9 +18,12 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-NAME="mkcopyright"
+prog = {
+  name = "mkcopyright"
+}
 
 require "lib"
+require "std"
 
 h = io.open("copyright.texi", "w")
 assert(h)

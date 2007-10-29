@@ -18,9 +18,14 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-NAME="mkfuncs"
+-- FIXME: Allow docstrings to be marked up with @foo{} texinfo markup.
+
+prog = {
+  name = "mkfuncs"
+}
 
 require "lib"
+require "std"
 
 dir = arg[1]
 table.remove(arg, 1)

@@ -1,4 +1,4 @@
--- Produce keys.texi
+-- Turn texinfo markup into plain text
 -- Copyright (c) 2007 Reuben Thomas.  All rights reserved.
 --
 -- This file is part of Zee.
@@ -18,26 +18,6 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-prog = {
-  name = "mkkeys"
-}
-
-require "lib"
-require "std"
-
-h = io.open("keys.texi", "w")
-assert(h)
-
-h:write("@c Automatically generated file: DO NOT EDIT!\n")
-h:write("@table @key\n")
-
-for l in io.lines(arg[1]) do
-  if string.find(l, "^X%(") then
-    assert(loadstring(l))()
-    local key_sym, key_name, text_name, key_code = unpack(xarg)
-    h:write("@item " .. key_name .. "\n" .. text_name .. "\n")
-  end
+function texi(s)
+  return string.gsub(s, "@samp{([^}]+)}", "`%1'")
 end
-
-h:write("@end table")
-h:close()

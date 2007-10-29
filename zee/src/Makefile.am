@@ -13,10 +13,20 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
+LUA_RUNTIME = 					\
+	lib.lua					\
+	tbl_vars.lua				\
+	tbl_funcs.lua				\
+	history.lua				\
+	completion.lua 				\
+	texinfo.lua
+
+LUA_RUNTIME_EXTRA = std.lua
+
 dist_pkgdata_DATA = 				\
-	cua_bindings emacs_bindings lib.lua 	\
-	tbl_vars.lua tbl_funcs.lua history.lua  \
-	completion.lua
+	$(LUA_RUNTIME)				\
+	$(LUA_RUNTIME_EXTRA)			\
+	cua_bindings emacs_bindings
 
 dist_sysconf_DATA = $(PACKAGE)rc
 
@@ -31,8 +41,6 @@ zee_base_SOURCES =				\
         rbutil.h				\
 	nonstd.h			        \
 	clue.h					\
-	list.c				        \
-	list.h				        \
 	zmalloc.h			        \
 	zmalloc.c			        \
 	term.h				        \
@@ -62,9 +70,10 @@ zee_base_SOURCES =				\
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
 zee_LDADD = @LIBOBJS@
 
+LUA_BUILDTIME = mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua
+
 # beep.wav is here because it is not in dist_pkgdata_DATA for non-Allegro builds
-EXTRA_DIST =  							\
-	mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua beep.wav
+EXTRA_DIST = $(LUA_BUILDTIME) beep.wav
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi keys.texi copyright.texi
 
@@ -101,4 +110,5 @@ copyright.texi: copyright.h mkcopyright.lua
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
 
 loc:
-	cloc --no3 --force_lang=m4,ac --force_lang=Make,am $(zee_base_SOURCES) term_*.c *.lua Makefile.am ../Makefile.am ../configure.ac
+	cloc --no3 --force_lang=m4,ac --force_lang=Make,am $(zee_base_SOURCES) term_*.c Makefile.am ../Makefile.am ../configure.ac \
+		$(LUA_BUILDTIME) $(LUA_RUNTIME)

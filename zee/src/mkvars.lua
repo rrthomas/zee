@@ -18,9 +18,13 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-NAME="mkvars"
+prog = {
+  name = "mkvars"
+}
 
 require "lib"
+require "texinfo"
+require "std"
 
 h1 = io.open("vars.texi", "w")
 assert(h1)
@@ -43,7 +47,7 @@ for name, doc in pairs(docstring) do
   
   h1:write("@item " .. name .. "\n" .. doc .. "\n")
   
-  h2:write("\n# " .. doc .. " [default: " .. defval .. "]\n")
+  h2:write("\n# " .. texi(doc) .. " [default: " .. defval .. "]\n")
   h2:write("preferences_set_variable(\"" .. name .. "\", \"" .. defval .. "\")\n")
 end
 

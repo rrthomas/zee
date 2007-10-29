@@ -121,6 +121,8 @@ int main(int argc, char **argv)
   require(PKGDATADIR "/tbl_vars.lua");
   require(PKGDATADIR "/history.lua");
   require(PKGDATADIR "/completion.lua");
+  // FIXME: Load last for now because of its effect on the global environment
+  require(PKGDATADIR "/std.lua");
   init_commands();
   init_bindings();
 
