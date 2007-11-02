@@ -49,5 +49,5 @@
     lua_pop(L, 1);                              \
   } while (0)
 
-#define CLUE_DO(code) \
+#define CLUE_DO(code)                           \
   luaL_dostring(L, code)
