@@ -44,9 +44,9 @@ END_DEF
 
 static const char *get_docstring(rblist name)
 {
-  (void)CLUE_DO(rblist_to_string(rblist_fmt("s = docstring[\"%r\"]", name)));
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = docstring[\"%r\"]", name)));
   const char *s;
-  CLUE_EXPORT(s, s, string);
+  CLUE_EXPORT(L, s, s, string);
   return s;
 }
 

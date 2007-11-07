@@ -84,6 +84,7 @@ bool wrap_break_line(void);
 bool replace_nstring(size_t size, rblist *as, rblist bs);
 
 // lua.c ------------------------------------------------------------------
+lua_obj get_variable(const char *key);
 const char *get_variable_string(const char *var);
 int get_variable_number(const char *var);
 bool get_variable_bool(const char *var);

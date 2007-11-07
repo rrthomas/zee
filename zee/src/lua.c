@@ -29,16 +29,7 @@
 #include "extern.h"
 
 
-typedef struct {
-  int type;
-  union {
-    lua_Number number;
-    const char *string;
-    bool boolean;
-  } v;
-} lua_obj;
-
-static lua_obj get_variable(const char *key)
+lua_obj get_variable(const char *key)
 {
   lua_obj ret;
   ret.type = LUA_TNIL;
@@ -95,7 +86,7 @@ Set a variable to the specified value.\
     val = rblist_to_string(minibuf_read(rblist_fmt("Set %r to value: ", var), rblist_empty));
 
   if (var && val) {
-    (void)CLUE_DO(rblist_to_string(rblist_fmt("%s = %s", var, val)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("%s = %s", var, val)));
   } else {
     ok = false;
   }

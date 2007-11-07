@@ -30,36 +30,24 @@
 #include "rbacc.h"
 
 
-static int bindings;            // Reference to bindings table
-
 static const char *get_binding(size_t key)
 {
-  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
-  lua_pushnumber(L, (lua_Number)key);
-  lua_gettable(L, -2);
-  const char *s = lua_tostring(L, -1);
-  lua_pop(L, 2); // Remove table and value
-  
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = _bindings[%d]", key)));
+  const char *s;
+  CLUE_EXPORT(L, s, s, string);
   return s;
 }
 
 static void bind_key(size_t key, rblist cmd)
 {
-  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
-  lua_pushnumber(L, (lua_Number)key);
-  if (cmd) {
-    lua_pushstring(L, rblist_to_string(cmd));
-  } else {
-    lua_pushnil(L);
-  }
-  lua_settable(L, -3);
-  lua_pop(L, 1); // Remove table
+  CLUE_IMPORT(L, (lua_Number)key, key, number);
+  CLUE_IMPORT(L, rblist_to_string(cmd), cmd, string);
+  (void)CLUE_DO(L, "_bindings[key] = cmd");
 }
 
 void init_bindings(void)
 {
-  lua_newtable(L);
-  bindings = luaL_ref(L, LUA_REGISTRYINDEX);
+  (void)CLUE_DO(L, "_bindings = {}");
   require(PKGDATADIR "/cua_bindings");
 }
 
@@ -158,22 +146,22 @@ END_DEF
 
 rblist command_to_binding(rblist cmd)
 {
-  size_t n = 0;
-  rbacc rba = rbacc_new();
-
-  lua_rawgeti(L, LUA_REGISTRYINDEX, bindings);
-  lua_pushnil(L); // first key
-  while (lua_next(L, -2) != 0) {
-    if (lua_isstring(L, -1) && (rblist_compare(rblist_from_string(lua_tostring(L, -1)), cmd) == 0)) {
-      if (n++ != 0)
-        rbacc_add_string(rba, ", ");
-      rbacc_add_rblist(rba, chordtostr((size_t)lua_tonumber(L, -2)));
-    }
-    lua_pop(L, 1); // remove value; keep key for next iteration
-  }
-  lua_pop(L, 1); // pop table
-
-  return rbacc_to_rblist(rba);
+  CLUE_IMPORT(L, rblist_to_string(cmd), cmd, string);
+  // FIXME: This could be simplified with table.concat
+  (void)CLUE_DO(L, "local n = false\
+                 for i, v in pairs(_bindings) do\
+                   if v == cmd then\
+                     if n then\
+                       s = s .. \", \"\
+                     else\
+                       n = true\
+                     end\
+                     s = s .. chordtostr(i)\
+                   end\
+                 end");
+  const char *s;
+  CLUE_EXPORT(L, s, s, string);
+  return rblist_from_string(s);
 }
 
 rblist binding_to_command(size_t key)

@@ -122,7 +122,7 @@ rblist chordtostr(size_t key)
 
   if (found == false) {
     if (isgraph(key))
-      rbacc_add_char(rba, (int)(key & 0xff));
+      rbacc_add_char(rba, key);
     else
       rbacc_add_rblist(rba, rblist_fmt("<%x>", key));
   }

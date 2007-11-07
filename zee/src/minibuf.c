@@ -32,13 +32,12 @@
 
 
 // Bindings to Lua completion functions
-static bool completion_try(list cp, rblist search)
+static bool completion_try(rblist search)
 {
-  CLUE_IMPORT_REF(cp, cp);
-  CLUE_IMPORT(rblist_to_string(search), search, string);
-  (void)CLUE_DO("b = completion_try(cp, search)");
+  CLUE_IMPORT(L, rblist_to_string(search), search, string);
+  (void)CLUE_DO(L, "b = completion_try(cp, search)");
   bool b;
-  CLUE_EXPORT(b, b, boolean);
+  CLUE_EXPORT(L, b, b, boolean);
   return b;
 }
 
@@ -121,9 +120,9 @@ static void mb_delete_char(size_t i, rblist *as)
 static void mb_prev_history(const char *history, rblist *as, size_t *i, rblist *saved)
 {
   if (history) {
-    (void)CLUE_DO(rblist_to_string(rblist_fmt("s = previous_history_element(%s)", history)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = previous_history_element(%s)", history)));
     const char *s;
-    CLUE_EXPORT(s, s, string);
+    CLUE_EXPORT(L, s, s, string);
     if (s) {
       if (!*saved) {
         *saved = *as;
@@ -137,9 +136,9 @@ static void mb_prev_history(const char *history, rblist *as, size_t *i, rblist *
 static void mb_next_history(const char *history, rblist *as, size_t *i, rblist *saved)
 {
   if (history) {
-    (void)CLUE_DO(rblist_to_string(rblist_fmt("s = next_history_element(%s)", history)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = next_history_element(%s)", history)));
     const char *s;
-    CLUE_EXPORT(s, s, string);
+    CLUE_EXPORT(L, s, s, string);
     if (s) {
       *as = rblist_from_string(s);
     } else if (*saved) {
@@ -192,28 +191,26 @@ static void draw_minibuf_read(rblist prompt, rblist value, size_t offset)
   term_refresh();
 }
 
-static rblist get_match(list cp)
+static rblist get_match(void)
 {
-  CLUE_IMPORT_REF(cp, cp);
-  (void)CLUE_DO("ms = cp.match");
+  (void)CLUE_DO(L, "ms = cp.match");
   const char *s;
-  CLUE_EXPORT(s, ms, string);
+  CLUE_EXPORT(L, s, ms, string);
   return rblist_from_string(s);
 }
 
-static size_t get_matches(list cp)
+static size_t get_matches(void)
 {
-  CLUE_IMPORT_REF(cp, cp);
-  (void)CLUE_DO("m = #(cp.matches)");
+  (void)CLUE_DO(L, "m = #(cp.matches)");
   size_t matches;
-  CLUE_EXPORT(matches, m, number);
+  CLUE_EXPORT(L, matches, m, number);
   return matches;
 }
 
 /*
  * Read a string from the minibuffer using a completion.
  */
-static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, const char *history)
+static rblist minibuf_read_completion(rblist prompt, rblist value, const char *cp, const char *history)
 {
   int c;
   bool ret = false, ok = true;
@@ -221,22 +218,21 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, cons
   rblist rbl = value, retval = NULL, saved = NULL;
 
   if (history) {
-    (void)CLUE_DO(rblist_to_string(rblist_fmt("history_prepare(%s)", history)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("history_prepare(%s)", history)));
   }
 
   rblist old_as = NULL;
 
   for (i = rblist_length(rbl);;) {
-    if (cp != 0 && (!old_as || rblist_compare(old_as, rbl))) {
+    if (cp != NULL && (!old_as || rblist_compare(old_as, rbl))) {
       // Using completions and `rbl' has changed, so display new completions.
-      completion_try(cp, rbl);
-      CLUE_IMPORT_REF(cp, cp);
-      CLUE_IMPORT(rblist_to_string(rbl), search, string);
-      (void)CLUE_DO("completion_remove_suffix(cp)");
-      (void)CLUE_DO("completion_remove_prefix(cp, search)");
-      (void)CLUE_DO(rblist_to_string(rblist_fmt("s = completion_write(cp, %d)", win.ewidth)));
+      completion_try(rbl);
+      CLUE_IMPORT(L, rblist_to_string(rbl), search, string);
+      (void)CLUE_DO(L, "completion_remove_suffix(cp)");
+      (void)CLUE_DO(L, "completion_remove_prefix(cp, search)");
+      (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = completion_write(cp, %d)", win.ewidth)));
       const char *s;
-      CLUE_EXPORT(s, s, string);
+      CLUE_EXPORT(L, s, s, string);
       rblist rbl = rblist_from_string(s);
       popup_set(rbl);
       term_display();
@@ -309,11 +305,11 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, cons
       mb_next_history(history, &rbl, &i, &saved);
       break;
     case KBD_TAB:
-      if (cp == 0 || get_matches(cp) == 0)
+      if (cp == NULL || get_matches() == 0)
         term_beep();
       else {
-        if (rblist_compare(rbl, get_match(cp)) != 0) {
-          rbl = get_match(cp);
+        if (rblist_compare(rbl, get_match()) != 0) {
+          rbl = get_match();
           i = rblist_length(rbl);
         } else
           popup_scroll_down_and_loop();
@@ -345,7 +341,7 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, list cp, cons
  */
 rblist minibuf_read(rblist rbl, rblist value)
 {
-  return minibuf_read_completion(rbl, value, 0, NULL);
+  return minibuf_read_completion(rbl, value, NULL, NULL);
 }
 
 /*
@@ -363,15 +359,13 @@ void minibuf_clear(void)
 rblist minibuf_read_name(rblist prompt)
 {
   rblist ms;
-  lua_newtable(L);
-  list cp = luaL_ref(L, LUA_REGISTRYINDEX);
   bool ok = false;
-  CLUE_IMPORT_REF(cp, cp);
-  (void)CLUE_DO("cp.completions = _G");
-  (void)CLUE_DO("if commands_history == nil then commands_history = {} end");
+  (void)CLUE_DO(L, "cp = {}");
+  (void)CLUE_DO(L, "cp.completions = _G");
+  (void)CLUE_DO(L, "if commands_history == nil then commands_history = {} end");
 
   for (;;) {
-    ms = minibuf_read_completion(prompt, rblist_empty, cp, "commands_history");
+    ms = minibuf_read_completion(prompt, rblist_empty, "cp", "commands_history");
 
     if (ms == NULL) {
       return NULL;
@@ -383,13 +377,12 @@ rblist minibuf_read_name(rblist prompt)
     }
 
     // Complete partial words if possible
-    if (completion_try(cp, ms)) {
-      ms = get_match(cp);
+    if (completion_try(ms)) {
+      ms = get_match();
     }
 
-    lua_getglobal(L, rblist_to_string(ms));
-    if (!lua_isnil(L, -1)) {
-      (void)CLUE_DO(rblist_to_string(rblist_fmt("add_history_element(commands_history, %r)", ms)));
+    if (get_variable(rblist_to_string(ms)).type == LUA_TFUNCTION) {
+      (void)CLUE_DO(L, rblist_to_string(rblist_fmt("add_history_element(commands_history, %r)", ms)));
       minibuf_clear(); // Remove any error message
       ok = true;
       break;
@@ -397,8 +390,6 @@ rblist minibuf_read_name(rblist prompt)
       minibuf_error(rblist_fmt("There is nothing called `%r'", ms));
       waitkey(WAITKEY_DEFAULT);
     }
-
-    lua_pop(L, -1);
   }
 
   return ms;

@@ -37,13 +37,26 @@
 #include "rbutil.h"
 
 
-typedef int list;
+
+/*--------------------------------------------------------------------------
+ * Lua API.
+ *--------------------------------------------------------------------------*/
+
+CLUE_DECLS(L);
+
+typedef struct {
+  int type;
+  union {
+    lua_Number number;
+    const char *string;
+    bool boolean;
+  } v;
+} lua_obj;
+
 
 /*--------------------------------------------------------------------------
  * Main editor structures.
  *--------------------------------------------------------------------------*/
-
-CLUE_DECLS;
 
 // Point and Marker
 typedef struct {

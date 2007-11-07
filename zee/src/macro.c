@@ -35,18 +35,18 @@ static bool cmd_started = false, macro_defined = false;
 void add_cmd_to_macro(void)
 {
   assert(cmd_started);
-  (void)CLUE_DO("_macro = list.concat(_macro, _cmd)");
+  (void)CLUE_DO(L, "_macro = list.concat(_macro, _cmd)");
   cmd_started = false;
 }
 
 void add_key_to_cmd(size_t key)
 {
   if (!cmd_started) {
-    (void)CLUE_DO("_cmd = {}");
+    (void)CLUE_DO(L, "_cmd = {}");
     cmd_started = true;
   }
 
-  (void)CLUE_DO(rblist_to_string(rblist_fmt("table.insert(_cmd, %r)", binding_to_command(key))));
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("table.insert(_cmd, %r)", binding_to_command(key))));
   macro_defined = true;
 }
 
@@ -73,7 +73,7 @@ Use macro_name to give it a permanent name.\
 
     minibuf_write(rblist_from_string("Defining macro..."));
     thisflag |= FLAG_DEFINING_MACRO;
-    (void)CLUE_DO("_macro = {}");
+    (void)CLUE_DO(L, "_macro = {}");
   }
 }
 END_DEF
@@ -108,14 +108,14 @@ The symbol's command definition becomes the macro string.\n\
     minibuf_error(rblist_from_string("No macro defined"));
     ok = false;
   } else {
-    (void)CLUE_DO(rblist_to_string(rblist_fmt("_macro = %r", ms)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_macro = %r", ms)));
   }
 }
 END_DEF
 
 void call_macro(const char *name)
 {
-  (void)CLUE_DO(rblist_to_string(rblist_fmt("for i, v in ipairs(%s) do v() end", name)));
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("for i, v in ipairs(%s) do v() end", name)));
 }
 
 DEF(macro_play,
