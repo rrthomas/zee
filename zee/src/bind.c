@@ -30,12 +30,12 @@
 #include "rbacc.h"
 
 
-static const char *get_binding(size_t key)
+rblist binding_to_command(size_t key)
 {
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = _bindings[%d]", key)));
   const char *s;
   CLUE_EXPORT(L, s, s, string);
-  return s;
+  return rblist_from_string(s);
 }
 
 static void bind_key(size_t key, rblist cmd)
@@ -53,15 +53,14 @@ void init_bindings(void)
 
 void process_key(size_t key)
 {
-  const char *s = get_binding(key);
-  bool ok;
-
   if (key == KBD_NOKEY) {
     return;
   }
 
-  if (s) {
-    lua_getglobal(L, s);
+  bool ok = true;
+  rblist rbl = binding_to_command(key);
+  if (rbl) {
+    lua_getglobal(L, rblist_to_string(rbl));
     ok = lua_pcall(L, 0, 1, 0) && lua_toboolean(L, -1);
     lua_pop(L, 1);
   } else {
@@ -162,20 +161,4 @@ rblist command_to_binding(rblist cmd)
   const char *s;
   CLUE_EXPORT(L, s, s, string);
   return rblist_from_string(s);
-}
-
-rblist binding_to_command(size_t key)
-{
-  const char *s;
-  rblist ret = NULL;
-
-  if ((s = get_binding(key)) == NULL) {
-    if (key == KBD_RET || key == KBD_TAB || key <= 0xff) {
-      return rblist_from_string("edit_insert_character");
-    }
-  } else {
-    ret = rblist_from_string(s);
-  }
-
-  return ret;
 }
