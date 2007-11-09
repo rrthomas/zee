@@ -118,14 +118,24 @@ int main(int argc, char **argv)
 #endif
 
   CLUE_INIT(L);
+  luaopen_bit(L);
   assert(L);
   init_kill_ring();
+  // FIXME: Generate the list of files to load
   require(PKGDATADIR "/lib.lua");
   require(PKGDATADIR "/texinfo.lua");
   require(PKGDATADIR "/tbl_vars.lua"); // FIXME: interpret the texinfo commands
   require(PKGDATADIR "/tbl_funcs.lua");
-  require(PKGDATADIR "/history.lua");
+  require(PKGDATADIR "/bind.lua");
   require(PKGDATADIR "/completion.lua");
+  require(PKGDATADIR "/history.lua");
+  fprintf(stderr, "loading key_tbl\n");
+  rblist key_tbl = file_read(rblist_from_string(PKGDATADIR "/tbl_keys.h"));
+  fprintf(stderr, "importing key_tbl\n");
+  CLUE_IMPORT(L, key_tbl, key_tbl, string);
+  fprintf(stderr, "running key_tbl\n");
+  require(PKGDATADIR "/keys.lua");
+  fprintf(stderr, "run key_tbl\n");
   // FIXME: Load last for now because of its effect on the global environment
   require(PKGDATADIR "/std.lua");
   init_commands();

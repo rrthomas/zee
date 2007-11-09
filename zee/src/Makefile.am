@@ -17,8 +17,11 @@ LUA_RUNTIME = 					\
 	lib.lua					\
 	tbl_vars.lua				\
 	tbl_funcs.lua				\
-	history.lua				\
+	tbl_keys.h				\
+	bind.lua				\
 	completion.lua 				\
+	history.lua				\
+	keys.lua				\
 	texinfo.lua
 
 LUA_RUNTIME_EXTRA = std.lua
@@ -67,7 +70,7 @@ zee_base_SOURCES =				\
 	undo.c
 
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
-zee_LDADD = @LIBOBJS@
+zee_LDADD = @LIBOBJS@ ../bitlib/liblua-bit.la
 
 LUA_BUILDTIME = mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua
 

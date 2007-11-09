@@ -15,6 +15,7 @@ AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_REPLACE_FUNCS(getopt_long_only)
 AC_HEADER_STDC
+AC_PROG_LIBTOOL
 
 dnl ==================================================================
 dnl Debugging
@@ -260,5 +261,6 @@ dnl ==================================================================
 dnl Generate makefiles
 dnl ==================================================================
 
+AC_CONFIG_SUBDIRS(bitlib)
 AC_CONFIG_FILES(Makefile src/Makefile)
 AC_OUTPUT
