@@ -40,7 +40,6 @@ zee_base_SOURCES =				\
         rbutil.c				\
         rbutil.h				\
 	nonstd.h			        \
-	clue.h					\
 	zmalloc.h			        \
 	zmalloc.c			        \
 	term.h				        \
@@ -73,7 +72,7 @@ zee_LDADD = @LIBOBJS@
 LUA_BUILDTIME = mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua
 
 # beep.wav is here because it is not in dist_pkgdata_DATA for non-Allegro builds
-EXTRA_DIST = $(LUA_BUILDTIME) beep.wav
+EXTRA_DIST = $(LUA_BUILDTIME) beep.wav clue.h
 
 BUILT_TEXI = funcs.texi vars.texi opts.texi keys.texi copyright.texi
 
