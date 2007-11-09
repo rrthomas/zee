@@ -118,6 +118,7 @@ int main(int argc, char **argv)
 #endif
 
   CLUE_INIT(L);
+  assert(L);
   init_kill_ring();
   require(PKGDATADIR "/lib.lua");
   require(PKGDATADIR "/texinfo.lua");
