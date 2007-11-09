@@ -143,8 +143,9 @@ rbacc rbacc_add_file(rbacc rba, FILE *fp)
   int c;
 
   // FIXME: Read BUFSIZ bytes at a time
-  while ((c = getc(fp)) != EOF)
+  while ((c = getc(fp)) != EOF) {
     rbacc_add_char(rba, c);
+  }
 
   return rba;
 }
