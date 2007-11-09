@@ -42,8 +42,8 @@
 #define CLUE_DECLS(L)                           \
   lua_State *L
 
-/* Call this macro before using the others, and check its return
-   value is non-NULL. */
+/* Call this macro before using the others, and check L is
+   non-NULL on return. */
 #define CLUE_INIT(L)                                    \
   do {                                                  \
     if ((L = luaL_newstate()))                          \
