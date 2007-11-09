@@ -22,13 +22,13 @@ keycode = {}
 function X(key_sym, key_name, text_name, key_code)
   table.insert(keycode, key_sym)
 end
-eval(key_tbl)
+loadstring(key_tbl)()
 
 keyname = {}
 function X(key_sym, key_name, text_name, key_code)
   table.insert(keycode, key_name)
 end
-eval(key_tbl)
+loadstring(key_tbl)()
 
 -- Convert a key chord into its ASCII representation
 function chordtostr(key)
