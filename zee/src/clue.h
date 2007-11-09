@@ -1,5 +1,7 @@
 /* Clue: minimal C-Lua integration
 
+   release 2
+
    Copyright (c) 2007 Reuben Thomas.
 
    Permission is hereby granted, free of charge, to any person
@@ -23,9 +25,13 @@
    SOFTWARE. */
 
 
-#include <assert.h>
+#include <string.h>
 #include <lua.h>
 #include <lauxlib.h>
+
+
+/* Error checking: Clue catches errors other than out of memory.
+   Out of memory errors are thrown as normal. */
 
 
 /* Before using Clue:
@@ -36,15 +42,15 @@
 #define CLUE_DECLS(L)                           \
   lua_State *L
 
-/* Call this macro before using the others */
-#define CLUE_INIT(L)                            \
-  do {                                          \
-    L = luaL_newstate();                        \
-    assert(L);                                  \
-    luaL_openlibs(L);                           \
+/* Call this macro before using the others, and check its return
+   value is non-NULL. */
+#define CLUE_INIT(L)                                    \
+  do {                                                  \
+    if ((L = luaL_newstate()))                          \
+      luaL_openlibs(L);                                 \
   } while (0)
 
-/* Call this macro after last use of Clue */
+/* Call this macro after last use of Clue. */
 #define CLUE_CLOSE(L)                           \
   lua_close(L)
 
@@ -52,15 +58,19 @@
    `lty'. */
 #define CLUE_IMPORT(L, cexp, lvar, lty)         \
   do {                                          \
+    lua_checkstack(L, 2);                       \
+    lua_pushstring(L, #lvar);                   \
     lua_push ## lty(L, cexp);                   \
-    lua_setglobal(L, #lvar);                    \
+    lua_rawset(L, LUA_GLOBALSINDEX);            \
   } while (0)
 
-/* Export a Lua variable `lvar' of Lua type `lty' to a C variable
-   `cvar'. */
+/* Export a Lua global `lvar' of Lua whose value is of type `lty' to a
+   C variable `cvar'. */
 #define CLUE_EXPORT(L, cvar, lvar, lty)         \
   do {                                          \
-    lua_getglobal(L, #lvar);                    \
+    lua_checkstack(L, 1);                       \
+    lua_pushstring(L, #lvar);                   \
+    lua_rawget(L, LUA_GLOBALSINDEX);            \
     cvar = lua_to ## lty(L, -1);                \
     lua_pop(L, 1);                              \
   } while (0)
