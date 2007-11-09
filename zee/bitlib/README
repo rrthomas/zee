@@ -1,0 +1,66 @@
+                          bitlib release 22
+                          -----------------
+
+                   by Reuben Thomas <rrt@sc3d.org>
+                 http://luaforge.net/projects/bitlib
+
+
+bitlib is a C library for Lua 5.x that provides bitwise operations. It
+is copyright Reuben Thomas 2000-2007, and is released under the MIT
+license, like Lua (see http://www.lua.org/copyright.html; it's
+basically the same as the BSD license). There is no warranty.
+
+Please report bugs and make suggestions to the email address above, or
+use the LuaForge trackers.
+
+Thanks to John Passaniti for his bitwise operations library, some of
+whose ideas I used, to Thatcher Ulrich for portability fixes, and to
+John Stiles for suggesting a bug fix.
+
+
+Installation
+------------
+
+As normal:
+
+    ./configure && make (&& make install)
+
+The following options may be of interest if you have Lua installed on
+non-default paths (as you are likely to on any system supporting more
+than one version of Lua):
+
+  --with-lua-prefix=DIR   Lua files are in DIR
+  --with-lua-includes=DIR Lua include files are in DIR
+  --with-lua-libraries=DIR
+                          Lua library files are in DIR
+  --with-lua-suffix=ARG   Lua binary and library files are suffixed with ARG
+
+
+Use
+---
+
+Make sure the library is installed on your LUA_CPATH, and require it.
+
+Lua functions provided:
+
+bit.bnot(a)       returns the one's complement of a
+bit.band(w1,...)  returns the bitwise and of the w's
+bit.bor(w1,...)   returns the bitwise or of the w's
+bit.bxor(w1,...)  returns the bitwise exclusive or of the w's
+bit.lshift(a,b)   returns a shifted left b places
+bit.rshift(a,b)   returns a shifted logically right b places
+bit.arshift(a,b)  returns a shifted arithmetically right b places
+bit.mod(a,b)      returns the integer remainder of a divided by b
+
+All function arguments should be integers. The number of bits is the
+lesser of the number of bits in uintmax_t and the number in the
+mantissa of lua_Number (assuming it is floating point, otherwise just
+the number of bits in lua_Number). lua_Number is typically a 64-byte
+IEEE float, which give 53 bits (the size of the mantissa), and
+uintmax_t is typically 64 bits. If you use a number too large for
+lua_Number, you certainly lose the extra bits, and you may even find
+that your compiler clamps values to UINTMAX_MAX.
+
+The logical operations start with "b" for "bit" to avoid clashing with
+reserved words; although "xor" isn't a reserved word, it seemed better
+to use "bxor" for consistency.
