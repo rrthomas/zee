@@ -139,7 +139,7 @@ static bool kill_helper(const char *cmd)
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     CMDCALL(edit_select_on);
-    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %s", cmd)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %s()", cmd)));
     CLUE_EXPORT(L, ok, _ok, boolean);
     if (ok) {
       CMDCALL(edit_kill_selection);
