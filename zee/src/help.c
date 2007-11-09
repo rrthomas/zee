@@ -33,12 +33,13 @@ DEF(help_about,
 Show the version in the minibuffer.\
 ")
 {
-  rblist quitstr = command_to_binding(rblist_from_string("file_quit"));
+  fprintf(stderr, "%d\n", CLUE_DO(L, "s = command_to_binding(\"file_quit\")"));
+  const char *quitstr;
+  CLUE_EXPORT(L, quitstr, s, string);
+  if (quitstr == NULL)
+    quitstr = "Alt-x, `file_quit', RETURN";
 
-  if (!rblist_compare(quitstr, rblist_empty))
-    quitstr = rblist_from_string("Alt-x, `file_quit', RETURN");
-
-  minibuf_write(rblist_fmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %r.", quitstr));
+  minibuf_write(rblist_fmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %s.", quitstr));
 }
 END_DEF
 
@@ -60,9 +61,12 @@ Display the help for the given thing.\
   ok = false;
 
   if ((name = minibuf_read_name(rblist_from_string("Describe thing: ")))) {
-    rblist bindings = command_to_binding(name), where = rblist_empty;
-    if (rblist_length(bindings) > 0)
-      where = rblist_fmt("\n\nBound to: %r", bindings);
+    rblist where = rblist_empty;
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = command_to_binding(\"%r\")", name)));
+    const char *bindings;
+    CLUE_EXPORT(L, bindings, s, string);
+    if (bindings)
+      where = rblist_fmt("\n\nBound to: %s", bindings);
     const char *doc = get_docstring(name);
     if (doc == NULL) {
       doc = "No help available";
