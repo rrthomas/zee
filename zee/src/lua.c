@@ -126,7 +126,7 @@ bool cmd_eval(rblist s, rblist source)
 void require(char *s)
 {
   if (luaL_dofile(L, s)) {
-    fprintf(stderr, PACKAGE_NAME " is not properly installed: could not load file `%s'", s);
+    fprintf(stderr, PACKAGE_NAME " is not properly installed: could not load file `%s'\n%s\n", s, lua_tostring(L, -1));
     die(1);
   }
 }
