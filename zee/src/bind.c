@@ -41,7 +41,7 @@ static const char *get_binding(size_t key)
 static void bind_key(size_t key, rblist cmd)
 {
   CLUE_IMPORT(L, (lua_Number)key, key, number);
-  CLUE_IMPORT(L, rblist_to_string(cmd), cmd, string);
+  CLUE_IMPORT(L, cmd ? rblist_to_string(cmd) : "nil", cmd, string);
   (void)CLUE_DO(L, "_bindings[key] = cmd");
 }
 
