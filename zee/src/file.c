@@ -56,9 +56,9 @@ rblist get_home_dir(void)
 rblist file_read(rblist filename)
 {
   FILE *fp;
-  if ((fp = fopen(rblist_to_string(filename), "r")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "r")) == NULL) {
     return NULL;
-  else {
+  } else {
     rbacc rba = rbacc_add_file(rbacc_new(), fp);
     fclose(fp);
     return rbacc_to_rblist(rba);
@@ -75,11 +75,12 @@ void file_open(rblist filename)
   buf->filename = filename;
 
   rblist rbl;
-  if ((rbl = file_read(buf->filename)) != NULL)
+  if ((rbl = file_read(buf->filename)) != NULL) {
     // Add lines to buffer
     buf->lines = rbl;
-  else if (errno != ENOENT)
+  } else if (errno != ENOENT) {
     buf->flags |= BFLAG_READONLY;
+  }
 }
 
 /*
@@ -95,8 +96,9 @@ static bool buffer_write(Buffer *bp, rblist filename)
 
   assert(bp);
 
-  if ((fp = fopen(rblist_to_string(filename), "w")) == NULL)
+  if ((fp = fopen(rblist_to_string(filename), "w")) == NULL) {
     return false;
+  }
 
   // Save all the lines.
   if (fwrite(rblist_to_string(buf->lines), sizeof(char), len, fp) < len) {
