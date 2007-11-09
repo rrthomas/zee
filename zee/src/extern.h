@@ -34,7 +34,6 @@ bool goto_point(Point pt);
 // bind.c -----------------------------------------------------------------
 void process_key(size_t key);
 void init_bindings(void);
-rblist command_to_binding(rblist cmd);
 rblist binding_to_command(size_t key);
 
 // buffer.c ---------------------------------------------------------------
