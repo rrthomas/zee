@@ -141,23 +141,3 @@ Read key chord, and unbind it.\
   }
 }
 END_DEF
-
-rblist command_to_binding(rblist cmd)
-{
-  CLUE_IMPORT(L, rblist_to_string(cmd), cmd, string);
-  // FIXME: This could be simplified with table.concat
-  (void)CLUE_DO(L, "local n = false\
-                 for i, v in pairs(_bindings) do\
-                   if v == cmd then\
-                     if n then\
-                       s = s .. \", \"\
-                     else\
-                       n = true\
-                     end\
-                     s = s .. chordtostr(i)\
-                   end\
-                 end");
-  const char *s;
-  CLUE_EXPORT(L, s, s, string);
-  return rblist_from_string(s);
-}
