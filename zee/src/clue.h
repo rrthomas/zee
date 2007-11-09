@@ -65,7 +65,8 @@
   } while (0)
 
 /* Export a Lua global `lvar' of Lua whose value is of type `lty' to a
-   C variable `cvar'. */
+   C variable `cvar'. Exported strings should be copied if their
+   value is required after further Clue calls. */
 #define CLUE_EXPORT(L, cvar, lvar, lty)         \
   do {                                          \
     lua_checkstack(L, 1);                       \
