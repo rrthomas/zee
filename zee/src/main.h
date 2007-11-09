@@ -245,15 +245,12 @@ enum {
     } while (num == ULONG_MAX);
 
 #define CMDCALL(name)                                                   \
-  assert(F_ ## name(L) == 1);                                           \
-  ok = lua_toboolean(L, -1);                                            \
-  lua_pop(L, 1)
+  (void)CLUE_DO(L, "_ok = " #name "()");                                \
+  CLUE_EXPORT(L, ok, _ok, boolean)
 
 // Call a command with an integer argument
 #define CMDCALL_UINT(name, arg)                                         \
-  lua_pushnumber(L, (lua_Number)arg);                                   \
-  assert(F_ ## name(L) == 1);                                           \
-  ok = lua_toboolean(L, -1);                                            \
-  lua_pop(L, 1)
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = " #name "(%d)", arg))); \
+  CLUE_EXPORT(L, ok, _ok, boolean)
 
 #endif // !MAIN_H
