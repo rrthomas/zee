@@ -35,7 +35,7 @@ rblist binding_to_command(size_t key)
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = _bindings[%d]", key)));
   const char *s;
   CLUE_EXPORT(L, s, s, string);
-  return rblist_from_string(s);
+  return s ? rblist_from_string(s) : NULL;
 }
 
 static void bind_key(size_t key, rblist cmd)
@@ -60,9 +60,8 @@ void process_key(size_t key)
   bool ok = true;
   rblist rbl = binding_to_command(key);
   if (rbl) {
-    lua_getglobal(L, rblist_to_string(rbl));
-    ok = lua_pcall(L, 0, 1, 0) && lua_toboolean(L, -1);
-    lua_pop(L, 1);
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %r()", rbl)));
+    CLUE_EXPORT(L, ok, _ok, boolean);
   } else {
     if (key == KBD_RET) {
       key = '\n';
