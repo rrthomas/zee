@@ -126,7 +126,7 @@ Copy the region to the kill buffer.\
 }
 END_DEF
 
-static bool kill_helper(lua_CFunction cmd)
+static bool kill_helper(const char *cmd)
 {
   bool ok;
 
@@ -139,9 +139,8 @@ static bool kill_helper(lua_CFunction cmd)
     Marker *m = get_mark();
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
     CMDCALL(edit_select_on);
-    assert(cmd(0) == 1);
-    ok = lua_toboolean(L, -1);
-    lua_pop(L, 1);
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %s", cmd)));
+    CLUE_EXPORT(L, ok, _ok, boolean);
     if (ok) {
       CMDCALL(edit_kill_selection);
     }
@@ -162,7 +161,7 @@ DEF(edit_kill_word,
 Kill characters forward until encountering the end of a word.\
 ")
 {
-  ok = kill_helper(F_move_next_word);
+  ok = kill_helper("move_next_word");
 }
 END_DEF
 
@@ -171,7 +170,7 @@ DEF(edit_kill_word_backward,
 Kill characters backward until encountering the end of a word.\
 ")
 {
-  ok = kill_helper(F_move_previous_word);
+  ok = kill_helper("move_previous_word");
 }
 END_DEF
 
