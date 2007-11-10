@@ -6,8 +6,8 @@
 #include <lauxlib.h>
 #include <lua.h>
 
-typedef uintmax_t Integer;
-typedef intmax_t UInteger;
+typedef int32_t Integer;
+typedef uint32_t UInteger;
 
 #define checkUInteger(L, n) ((UInteger)luaL_checknumber((L), (n)))
 
@@ -40,7 +40,6 @@ VARIADIC(bxor,   ^=, Integer)
 TDYADIC(lshift,  <<, Integer, UInteger)
 TDYADIC(rshift,  >>, UInteger, UInteger)
 TDYADIC(arshift, >>, Integer, UInteger)
-TDYADIC(mod,     %,  Integer, Integer)
 
 static const struct luaL_reg bitlib[] = {
   {"bnot",    bit_bnot},
@@ -50,7 +49,6 @@ static const struct luaL_reg bitlib[] = {
   {"lshift",  bit_lshift},
   {"rshift",  bit_rshift},
   {"arshift", bit_arshift},
-  {"mod",     bit_mod},
   {NULL, NULL}
 };
 

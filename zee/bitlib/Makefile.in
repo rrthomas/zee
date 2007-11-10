@@ -54,9 +54,12 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-liblua_bit_la_LIBADD =
-am_liblua_bit_la_OBJECTS = lbitlib.lo
-liblua_bit_la_OBJECTS = $(am_liblua_bit_la_OBJECTS)
+bit_la_LIBADD =
+am_bit_la_OBJECTS = lbitlib.lo
+bit_la_OBJECTS = $(am_bit_la_OBJECTS)
+bit_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(bit_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -69,8 +72,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(liblua_bit_la_SOURCES)
-DIST_SOURCES = $(liblua_bit_la_SOURCES)
+SOURCES = $(bit_la_SOURCES)
+DIST_SOURCES = $(bit_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -193,8 +196,9 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-lib_LTLIBRARIES = liblua-bit.la
-liblua_bit_la_SOURCES = lbitlib.c
+lib_LTLIBRARIES = bit.la
+bit_la_SOURCES = lbitlib.c
+bit_la_LDFLAGS = -module
 all: all-am
 
 .SUFFIXES:
@@ -259,8 +263,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-liblua-bit.la: $(liblua_bit_la_OBJECTS) $(liblua_bit_la_DEPENDENCIES) 
-	$(LINK) -rpath $(libdir) $(liblua_bit_la_OBJECTS) $(liblua_bit_la_LIBADD) $(LIBS)
+bit.la: $(bit_la_OBJECTS) $(bit_la_DEPENDENCIES) 
+	$(bit_la_LINK) -rpath $(libdir) $(bit_la_OBJECTS) $(bit_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -585,7 +589,7 @@ uninstall-am: uninstall-libLTLIBRARIES
 	tags uninstall uninstall-am uninstall-libLTLIBRARIES
 
 
-all: liblua-bit.la
+all: bit.la
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
