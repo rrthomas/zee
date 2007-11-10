@@ -77,4 +77,4 @@
 
 /* Run some Lua code `code'. */
 #define CLUE_DO(L, code)                        \
-  (luaL_loadstring(L, str) || lua_pcall(L, 0, 0, 0))
+  (luaL_loadstring(L, code) || lua_pcall(L, 0, 0, 0))
