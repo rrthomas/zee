@@ -86,7 +86,7 @@ void ungetkey(size_t key)
 
 static size_t keycode[] = {
 #define X(key_sym, key_name, text_name, key_code)        \
-	key_sym,
+	key_code,
 #include "tbl_keys.h"
 #undef X
 };
