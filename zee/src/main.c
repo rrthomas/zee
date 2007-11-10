@@ -130,7 +130,7 @@ int main(int argc, char **argv)
   require(PKGDATADIR "/completion.lua");
   require(PKGDATADIR "/history.lua");
   rblist key_tbl = file_read(rblist_from_string(PKGDATADIR "/tbl_keys.h"));
-  CLUE_IMPORT(L, rblist_to_string(key_tbl), key_tbl, string);
+  CLUE_SET(L, key_tbl, string, rblist_to_string(key_tbl));
   require(PKGDATADIR "/keys.lua");
   // FIXME: Load last for now because of its effect on the global environment
   require(PKGDATADIR "/std.lua");

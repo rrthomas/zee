@@ -34,14 +34,14 @@ rblist binding_to_command(size_t key)
 {
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = _bindings[%d]", key)));
   const char *s;
-  CLUE_EXPORT(L, s, s, string);
+  CLUE_GET(L, s, string, s);
   return s ? rblist_from_string(s) : NULL;
 }
 
 static void bind_key(size_t key, rblist cmd)
 {
-  CLUE_IMPORT(L, (lua_Number)key, key, number);
-  CLUE_IMPORT(L, cmd ? rblist_to_string(cmd) : "nil", cmd, string);
+  CLUE_SET(L, key, number, (lua_Number)key);
+  CLUE_SET(L, cmd, string, cmd ? rblist_to_string(cmd) : "nil");
   (void)CLUE_DO(L, "_bindings[key] = cmd");
 }
 
@@ -61,7 +61,7 @@ void process_key(size_t key)
   rblist rbl = binding_to_command(key);
   if (rbl) {
     (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %r()", rbl)));
-    CLUE_EXPORT(L, ok, _ok, boolean);
+    CLUE_GET(L, _ok, boolean, ok);
   } else {
     if (key == KBD_RET) {
       key = '\n';

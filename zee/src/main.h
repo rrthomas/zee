@@ -246,11 +246,11 @@ enum {
 
 #define CMDCALL(name)                                                   \
   (void)CLUE_DO(L, "_ok = " #name "()");                                \
-  CLUE_EXPORT(L, ok, _ok, boolean)
+  CLUE_GET(L, _ok, boolean, ok)
 
 // Call a command with an integer argument
 #define CMDCALL_UINT(name, arg)                                         \
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = " #name "(%d)", arg))); \
-  CLUE_EXPORT(L, ok, _ok, boolean)
+  CLUE_GET(L, _ok, boolean, ok)
 
 #endif // !MAIN_H

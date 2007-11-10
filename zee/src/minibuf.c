@@ -34,10 +34,10 @@
 // Bindings to Lua completion functions
 static bool completion_try(rblist search)
 {
-  CLUE_IMPORT(L, rblist_to_string(search), search, string);
+  CLUE_SET(L, search, string, rblist_to_string(search));
   (void)CLUE_DO(L, "b = completion_try(cp, search)");
   bool b;
-  CLUE_EXPORT(L, b, b, boolean);
+  CLUE_GET(L, b, boolean, b);
   return b;
 }
 
@@ -122,7 +122,7 @@ static void mb_prev_history(const char *history, rblist *as, size_t *i, rblist *
   if (history) {
     (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = previous_history_element(%s)", history)));
     const char *s;
-    CLUE_EXPORT(L, s, s, string);
+    CLUE_GET(L, s, string, s);
     if (s) {
       if (!*saved) {
         *saved = *as;
@@ -138,7 +138,7 @@ static void mb_next_history(const char *history, rblist *as, size_t *i, rblist *
   if (history) {
     (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = next_history_element(%s)", history)));
     const char *s;
-    CLUE_EXPORT(L, s, s, string);
+    CLUE_GET(L, s, string, s);
     if (s) {
       *as = rblist_from_string(s);
     } else if (*saved) {
@@ -195,7 +195,7 @@ static rblist get_match(void)
 {
   (void)CLUE_DO(L, "ms = cp.match");
   const char *s;
-  CLUE_EXPORT(L, s, ms, string);
+  CLUE_GET(L, ms, string, s);
   return rblist_from_string(s);
 }
 
@@ -203,7 +203,7 @@ static size_t get_matches(void)
 {
   (void)CLUE_DO(L, "m = #(cp.matches)");
   size_t matches;
-  CLUE_EXPORT(L, matches, m, number);
+  CLUE_GET(L, m, number, matches);
   return matches;
 }
 
@@ -227,12 +227,12 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, const char *c
     if (cp != NULL && (!old_as || rblist_compare(old_as, rbl))) {
       // Using completions and `rbl' has changed, so display new completions.
       completion_try(rbl);
-      CLUE_IMPORT(L, rblist_to_string(rbl), search, string);
+      CLUE_SET(L, search, string, rblist_to_string(rbl));
       (void)CLUE_DO(L, "completion_remove_suffix(cp)");
       (void)CLUE_DO(L, "completion_remove_prefix(cp, search)");
       (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = completion_write(cp, %d)", win.ewidth)));
       const char *s;
-      CLUE_EXPORT(L, s, s, string);
+      CLUE_GET(L, s, string, s);
       rblist rbl = rblist_from_string(s);
       popup_set(rbl);
       term_display();

@@ -35,7 +35,7 @@ Show the version in the minibuffer.\
 {
   (void)CLUE_DO(L, "s = command_to_binding(\"file_quit\")");
   const char *quitstr;
-  CLUE_EXPORT(L, quitstr, s, string);
+  CLUE_GET(L, s, string, quitstr);
   if (quitstr == NULL)
     quitstr = "Alt-x, `file_quit', RETURN";
 
@@ -47,7 +47,7 @@ static const char *get_docstring(rblist name)
 {
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = docstring[\"%r\"]", name)));
   const char *s;
-  CLUE_EXPORT(L, s, s, string);
+  CLUE_GET(L, s, string, s);
   return s;
 }
 
@@ -64,7 +64,7 @@ Display the help for the given thing.\
     rblist where = rblist_empty;
     (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = command_to_binding(\"%r\")", name)));
     const char *bindings;
-    CLUE_EXPORT(L, bindings, s, string);
+    CLUE_GET(L, s, string, bindings);
     if (bindings)
       where = rblist_fmt("\n\nBound to: %s", bindings);
     const char *doc = get_docstring(name);
