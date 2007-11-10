@@ -1,6 +1,6 @@
 /* Clue: minimal C-Lua integration
 
-   release 2
+   release 3
 
    Copyright (c) 2007 Reuben Thomas.
 
@@ -54,9 +54,8 @@
 #define CLUE_CLOSE(L)                           \
   lua_close(L)
 
-/* Import a C value `cexp' into a Lua global `lvar', as Lua type
-   `lty'. */
-#define CLUE_IMPORT(L, cexp, lvar, lty)         \
+/* Set a Lua variable `lvar' of type 'lty' to C value `cexp'. */
+#define CLUE_SET(L, lvar, lty, cexp)            \
   do {                                          \
     lua_checkstack(L, 2);                       \
     lua_pushstring(L, #lvar);                   \
@@ -64,10 +63,10 @@
     lua_rawset(L, LUA_GLOBALSINDEX);            \
   } while (0)
 
-/* Export a Lua global `lvar' of Lua whose value is of type `lty' to a
-   C variable `cvar'. Exported strings should be copied if their
-   value is required after further Clue calls. */
-#define CLUE_EXPORT(L, cvar, lvar, lty)         \
+/* Read a value of type `lty' from Lua global `lvar' into C variable
+   `cvar'. Strings should be copied if their value is required after
+   further Clue calls. */
+#define CLUE_GET(L, lvar, lty, cvar)            \
   do {                                          \
     lua_checkstack(L, 1);                       \
     lua_pushstring(L, #lvar);                   \
@@ -78,4 +77,4 @@
 
 /* Run some Lua code `code'. */
 #define CLUE_DO(L, code)                        \
-  luaL_dostring(L, code)
+  (luaL_loadstring(L, str) || lua_pcall(L, 0, 0, 0))
