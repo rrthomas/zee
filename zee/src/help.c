@@ -33,7 +33,7 @@ DEF(help_about,
 Show the version in the minibuffer.\
 ")
 {
-  fprintf(stderr, "%d\n", CLUE_DO(L, "s = command_to_binding(\"file_quit\")"));
+  (void)CLUE_DO(L, "s = command_to_binding(\"file_quit\")");
   const char *quitstr;
   CLUE_EXPORT(L, quitstr, s, string);
   if (quitstr == NULL)
