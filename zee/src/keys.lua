@@ -18,15 +18,15 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
-keycode = {}
+keyname = {}
 function X(key_sym, key_name, text_name, key_code)
-  table.insert(keycode, key_sym)
+  keyname[key_code] = key_name
 end
 loadstring(key_tbl)()
 
-keyname = {}
+keycode = {}
 function X(key_sym, key_name, text_name, key_code)
-  table.insert(keycode, key_name)
+  keycode[key_name] = key_code
 end
 loadstring(key_tbl)()
 
@@ -35,24 +35,17 @@ function chordtostr(key)
   local i
   local s = ""
 
-  if bit.band(key, KBD_CTRL) then
+  if bit.band(key, keycode["Ctrl-"]) then
     s = s .. "Ctrl-"
   end
-  if bit.band(key, KBD_META) then
+  if bit.band(key, keycode["Alt-"]) then
     s = s .. "Alt-"
   end
-  key = bit.band(key, bit.bnot(bit.bor(KBD_CTRL, KBD_META)))
+  key = bit.band(key, bit.bnot(bit.bor(keycode["Ctrl-"], keycode["Alt-"])))
 
-  local found = false
-  for i, v in ipairs(keycode) do
-    if v == key then
-      s = s .. keyname[i]
-      found = true
-      break
-    end
-  end
-
-  if not found then
+  if keyname[key] then
+    s = s .. keyname[key]
+  else
     if string.match(string.char(key), "%C") then
       s = s .. string.char(key);
     else
