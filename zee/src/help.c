@@ -82,17 +82,18 @@ DEF(help_key,
 Display the command invoked by a key sequence.\
 ")
 {
-  size_t key;
-  rblist keyname, cmd;
-
   minibuf_write(rblist_from_string("Describe key:"));
-  key = getkey();
-  keyname = chordtostr(key);
+  size_t key = getkey();
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_key = chordtostr(%d)", key)));
+  const char *keyname;
+  CLUE_GET(L, _key, string, keyname);
 
+  rblist cmd;
   if ((cmd = binding_to_command(key)) == NULL) {
-    minibuf_error(rblist_fmt("%r is unbound", keyname));
+    minibuf_error(rblist_fmt("%s is unbound", keyname));
     ok = false;
-  } else
-    minibuf_write(rblist_fmt("%r runs the command `%r'", keyname, cmd));
+  } else {
+    minibuf_write(rblist_fmt("%s runs the command `%r'", keyname, cmd));
+  }
 }
 END_DEF

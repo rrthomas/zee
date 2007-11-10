@@ -97,13 +97,17 @@ chord.\
   rblist name = NULL;
 
   if (lua_gettop(L) > 1) {
-    key = strtochord(rblist_from_string(lua_tostring(L, -2)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_key = strtochord(\"%s\")", lua_tostring(L, -2))));
+    CLUE_GET(L, _key, number, key);
     name = rblist_from_string(lua_tostring(L, -1));
     lua_pop(L, 2);
   } else {
     minibuf_write(rblist_from_string("Bind key: "));
     key = getkey();
-    name = minibuf_read_name(rblist_fmt("Bind key %r to command: ", chordtostr(key)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_key = chordtostr(%d)", key)));
+    const char *key_name;
+    CLUE_GET(L, _key, string, key_name);
+    name = minibuf_read_name(rblist_fmt("Bind key %s to command: ", key_name));
   }
 
   if (name) {
@@ -126,7 +130,8 @@ Read key chord, and unbind it.\
   size_t key = KBD_NOKEY;
 
   if (lua_gettop(L) > 0) {
-    key = strtochord(rblist_from_string(lua_tostring(L, -1)));
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_key = strtochord(\"%s\")", lua_tostring(L, -1))));
+    CLUE_GET(L, _key, number, key);
     lua_pop(L, 1);
   } else {
     minibuf_write(rblist_from_string("Unbind key: "));

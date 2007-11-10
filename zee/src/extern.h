@@ -56,8 +56,6 @@ size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t timeout);
 void ungetkey(size_t key);
-rblist chordtostr(size_t key);
-size_t strtochord(rblist chord);
 
 // killring.c -------------------------------------------------------------
 void init_kill_ring(void);

@@ -70,7 +70,7 @@ zee_base_SOURCES =				\
 	undo.c
 
 zee_CPPFLAGS = -DPKGDATADIR="\"$(pkgdatadir)\"" -DSYSCONFDIR="\"$(sysconfdir)\""
-zee_LDADD = @LIBOBJS@ ../bitlib/liblua-bit.la
+zee_LDADD = @LIBOBJS@ ../bitlib/bit.la
 
 LUA_BUILDTIME = mkfuncs.lua mkvars.lua mkopts.lua mkkeys.lua mkcopyright.lua
 
