@@ -47,7 +47,6 @@ static void bind_key(size_t key, rblist cmd)
 
 void init_bindings(void)
 {
-  (void)CLUE_DO(L, "_bindings = {}");
   require(PKGDATADIR "/cua_bindings");
 }
 

@@ -49,7 +49,7 @@ h2:write(" */\n")
 h2:write("\n")
 
 h3:write("-- Automatically generated file: DO NOT EDIT!\n")
-h3:write("-- Docstrings for C commands\n")
+h3:write("-- Docstrings for user commands\n")
 h3:write("\n")
 
 for i in ipairs(arg) do

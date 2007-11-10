@@ -18,6 +18,8 @@
 -- Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 -- 02111-1301, USA.
 
+_bindings = {}
+
 function command_to_binding(cmd)
   -- FIXME: This could be simplified with table.concat
   local s = ""
