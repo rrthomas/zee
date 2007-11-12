@@ -49,7 +49,7 @@ h2:write(" */\n")
 h2:write("\n")
 
 h3:write("-- Automatically generated file: DO NOT EDIT!\n")
-h3:write("-- Docstrings for user commands\n")
+h3:write("-- Stubs with docstrings for user commands implemented in C\n")
 h3:write("\n")
 
 for i in ipairs(arg) do
@@ -88,7 +88,7 @@ for i in ipairs(arg) do
         infodoc = string.gsub(infodoc, "\\", "")
         h1:write("@item " .. name .. "\n" .. infodoc)
         h2:write("X(" .. name .. ")\n")
-        h3:write("doc{" .. name .. " = function () end, \"" .. string.gsub(doc, "\\\n", "") .. "\"}\n")
+        h3:write("def{" .. name .. " = function () end, \"" .. string.gsub(doc, "\\\n", "") .. "\"}\n")
       end
     end
   end

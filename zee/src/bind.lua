@@ -20,19 +20,20 @@
 
 _bindings = {}
 
+function bind_key(key, cmd)
+  _bindings[key] = cmd
+end
+
 function command_to_binding(cmd)
-  -- FIXME: This could be simplified with table.concat
-  local s = ""
-  local n = false
+  local t = {}
   for i, v in pairs(_bindings) do
     if v == cmd then
-      if n then
-        s = s .. ", "
-      else
-        n = true
-      end
-      s = s .. chordtostr(i)
+      table.insert(t, chordtostr(i))
     end
   end
-  return s
+  return table.concat(t, ", ")
+end
+
+function binding_to_command(key)
+  return _bindings[key]
 end

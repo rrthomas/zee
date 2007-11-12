@@ -1,15 +1,15 @@
--- Library functions for Lua mk* scripts
+-- Zee-specific library functions
 
--- Utility function for parsing tbl_*.h
+-- Parse re-usable C headers
 function X(...)
   xarg = {...}
 end
 
--- Utility function for parsing doc-stringed definitions
+-- Extract the docstrings from tbl_funcs.lua
 docstring = {}
-function doc(t)
+function def(t)
   local name, s
-  for i, v in pairs (t) do
+  for i, v in pairs(t) do
     if type(i) == "string" then
       name = i
       _G[name] = v

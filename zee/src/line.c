@@ -408,18 +408,18 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
   return true;
 }
 
-DEF_ARG(edit_insert_character,
+DEF(edit_insert_character,
 "\
 Insert the character you type.\n\
 Whichever character you type to run this command is inserted.\
-",
-UINT(c, "Insert character: "))
+")
 {
   if (ok) {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
     buf->flags &= ~BFLAG_ANCHORED;
 
+    int c = lastkey() & ~KBD_CTRL;
     if (c <= 0xff) {
       if (isspace(c) && buf->flags & BFLAG_WRAP_MODE &&
           get_goalc() > (size_t)get_variable_number("wrap_column"))

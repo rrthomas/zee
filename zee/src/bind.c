@@ -30,23 +30,15 @@
 #include "rbacc.h"
 
 
-rblist binding_to_command(size_t key)
-{
-  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = _bindings[%d]", key)));
-  const char *s;
-  CLUE_GET(L, s, string, s);
-  return s ? rblist_from_string(s) : NULL;
-}
-
-static void bind_key(size_t key, rblist cmd)
-{
-  CLUE_SET(L, key, number, (lua_Number)key);
-  CLUE_SET(L, cmd, string, cmd ? rblist_to_string(cmd) : "nil");
-  (void)CLUE_DO(L, "_bindings[key] = cmd");
-}
-
 void init_bindings(void)
 {
+  /* Bind all printing keys to self_insert_command */
+  for (size_t i = 0; i <= 0xff; i++) {
+    if (isprint(i)) {
+      (void)CLUE_DO(L, rblist_to_string(rblist_fmt("bind_key(%d, \"edit_insert_character\")", i)));
+    }
+  }
+
   require(PKGDATADIR "/cua_bindings");
 }
 
@@ -57,25 +49,14 @@ void process_key(size_t key)
   }
 
   bool ok = true;
-  rblist rbl = binding_to_command(key);
-  if (rbl) {
-    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %r()", rbl)));
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = binding_to_command(%d)", key)));
+  const char *s;
+  CLUE_GET(L, s, string, s);
+  if (s) {
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_ok = %s()", s)));
     CLUE_GET(L, _ok, boolean, ok);
   } else {
-    if (key == KBD_RET) {
-      key = '\n';
-    } else if (key == KBD_TAB) {
-      key = '\t';
-    }
-
-    /* FIXME: Make edit_insert_character bindable like
-       self_insert_command in Zile, and bind it; printable characters
-       should be bound to it by default. */
-    if (key <= 0xff) {
-      CMDCALL_UINT(edit_insert_character, (int)key);
-    } else {
-      term_beep();
-    }
+    term_beep();
   }
 
   /* Only add keystrokes if we're already in macro defining mode
@@ -111,7 +92,7 @@ chord.\
 
   if (name) {
     if (key != KBD_NOKEY) {
-      bind_key(key, name);
+      (void)CLUE_DO(L, rblist_to_string(rblist_fmt("bind_key(%d, \"%r\")", key, name)));
     } else {
       minibuf_error(rblist_from_string("Invalid key"));
       ok = false;
@@ -138,7 +119,7 @@ Read key chord, and unbind it.\
   }
 
   if (key != KBD_NOKEY) {
-    bind_key(key, NULL);
+    (void)CLUE_DO(L, rblist_to_string(rblist_fmt("bind_key(%d, nil)", key)));
   } else {
     minibuf_error(rblist_from_string("Invalid key"));
     ok = false;

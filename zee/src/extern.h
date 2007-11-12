@@ -34,7 +34,6 @@ bool goto_point(Point pt);
 // bind.c -----------------------------------------------------------------
 void process_key(size_t key);
 void init_bindings(void);
-rblist binding_to_command(size_t key);
 
 // buffer.c ---------------------------------------------------------------
 void buffer_new(void);
@@ -52,6 +51,7 @@ void file_open(rblist filename);
 void die(int exitcode);
 
 // keys.c -----------------------------------------------------------------
+size_t lastkey(void);
 size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t timeout);

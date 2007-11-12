@@ -46,7 +46,7 @@ void add_key_to_cmd(size_t key)
     cmd_started = true;
   }
 
-  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("table.insert(_cmd, %r)", binding_to_command(key))));
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("table.insert(_cmd, binding_to_command(%d))", key)));
   macro_defined = true;
 }
 

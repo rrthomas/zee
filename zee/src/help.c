@@ -88,12 +88,14 @@ Display the command invoked by a key sequence.\
   const char *keyname;
   CLUE_GET(L, _key, string, keyname);
 
-  rblist cmd;
-  if ((cmd = binding_to_command(key)) == NULL) {
+  (void)CLUE_DO(L, rblist_to_string(rblist_fmt("s = binding_to_command(%d)", key)));
+  const char *cmd;
+  CLUE_GET(L, s, string, cmd);
+  if (cmd == NULL) {
     minibuf_error(rblist_fmt("%s is unbound", keyname));
     ok = false;
   } else {
-    minibuf_write(rblist_fmt("%s runs the command `%r'", keyname, cmd));
+    minibuf_write(rblist_fmt("%s runs the command `%s'", keyname, cmd));
   }
 }
 END_DEF
