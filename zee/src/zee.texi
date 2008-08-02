@@ -2,7 +2,7 @@
 @setfilename zee.info
 @settitle The Zee Manual
 
-@dircategory Text editors
+@dircategory Editors
 @direntry
 * Zee: (zee).                 Zee text editor.
 @end direntry
