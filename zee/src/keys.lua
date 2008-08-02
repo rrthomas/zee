@@ -85,3 +85,9 @@ function strtochord(chord)
 
   return key
 end
+
+-- Wait for a keystroke indefinitely, and return the
+-- corresponding keycode.
+function getkey()
+  return xgetkey(0, 0)
+end
