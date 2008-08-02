@@ -23,6 +23,8 @@
 #ifndef RBLIST_H
 #define RBLIST_H
 
+#include <stddef.h>
+
 /*
  * The type of lists. This is a pointer type. The structure it points
  * to is opaque. You may assume the structure is immutable (const). No
