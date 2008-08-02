@@ -71,7 +71,7 @@ Start selecting text.\
 ")
 {
   set_mark_to_point();
-  minibuf_write(rblist_from_string("Mark set"));
+  minibuf_write("Mark set");
   buf->flags |= BFLAG_ANCHORED;
 }
 END_DEF
@@ -82,7 +82,7 @@ Stop selecting text.\
 ")
 {
   buf->flags &= ~BFLAG_ANCHORED;
-  minibuf_write(rblist_empty);
+  minibuf_write("");
   ok = false;
 }
 END_DEF
@@ -111,45 +111,33 @@ When selecting text, move the cursor to the other end of the selection.\
 }
 END_DEF
 
-static void quoted_insert_octal(int c1)
-{
-  int c2, c3;
-  minibuf_write(rblist_fmt("Insert octal character %d-", c1 - '0'));
-  c2 = getkey();
-
-  if (!isdigit(c2) || c2 - '0' >= 8) {
-    insert_char(c1 - '0');
-    insert_char(c2);
-  } else {
-    minibuf_write(rblist_fmt("Insert octal character %d %d-", c1 - '0', c2 - '0'));
-    c3 = getkey();
-    
-    if (!isdigit(c3) || c3 - '0' >= 8) {
-      insert_char((c1 - '0') * 8 + (c2 - '0'));
-      insert_char(c3);
-    } else
-      insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
-  }
-}
+#define HEX_TO_DECIMAL(x) \
+  (((x) > '0' && (x) < '9') ? (x) - '0' : x + 10 - 'A')
 
 DEF(edit_insert_quoted,
 "\
 Read next input character and insert it.\n\
 This is useful for inserting control characters.\n\
-You may also type up to 3 octal digits, to insert a character with that code.\
+You may also type 2 hex digits, to insert a character with that code.\
 ")
 {
-  int c;
+  minibuf_write("Insert literal character: ");
+  size_t key = xgetkey(GETKEY_UNFILTERED, 0);
+  int c1 = key & 0xff;
 
-  minibuf_write(rblist_from_string("Insert literal character: "));
-  c = xgetkey(GETKEY_UNFILTERED, 0);
-
-  if (isdigit(c) && c - '0' < 8)
-    quoted_insert_octal(c);
-  else
-    insert_char(c);
-
-  minibuf_clear();
+  if (key == (key & 0xff) && isxdigit(c1)) {
+    minibuf_write(rblist_to_string(rblist_fmt("Insert hex character %d-", HEX_TO_DECIMAL(c1))));
+    key = getkey();
+    int c2 = key & 0xff;
+    if (key == (key & 0xff) && isxdigit(c2)) {
+      minibuf_clear();
+      insert_char(HEX_TO_DECIMAL(c1) * 16 + (HEX_TO_DECIMAL(c2)));
+    } else {
+      minibuf_error("Invalid hex digit");
+    }
+  } else {
+    insert_char(c1);
+  }
 }
 END_DEF
 
@@ -355,7 +343,7 @@ file, replacing the selection if any.\n\
     int fd = mkstemp(tempfile);
 
     if (fd == -1) {
-      minibuf_error(rblist_from_string("Cannot open temporary file"));
+      minibuf_error("Cannot open temporary file");
       ok = false;
     } else {
       if (!(buf->flags & BFLAG_ANCHORED))
@@ -371,7 +359,7 @@ file, replacing the selection if any.\n\
 
       FILE *pipe;
       if ((pipe = popen(rblist_to_string(cmd), "r")) == NULL) {
-        minibuf_error(rblist_from_string("Cannot open pipe to process"));
+        minibuf_error("Cannot open pipe to process");
         ok = false;
       } else {
         rblist out = rbacc_to_rblist(rbacc_add_file(rbacc_new(), pipe));

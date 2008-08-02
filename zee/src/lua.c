@@ -93,9 +93,24 @@ Set a variable to the specified value.\
 }
 END_DEF
 
-/*
- * Register C functions in Lua.
- */
+// Miscellaneous bindings
+static int lua_xgetkey(lua_State *L)
+{
+  int mode = (int)luaL_checknumber(L, 1);
+  size_t timeout = (size_t)luaL_checknumber(L, 2);
+  lua_pushnumber(L, (lua_Number)xgetkey(mode, timeout));
+  return 1;
+}
+
+static int lua_minibuf_read_name(lua_State *L)
+{
+  const char *s = luaL_checkstring(L, 1);
+  rblist name = minibuf_read_name(rblist_from_string(s));
+  lua_pushstring(L, rblist_to_string(name));
+  return 1;
+}
+
+// Register C functions in Lua.
 void init_commands(void)
 {
   static luaL_Reg cmds[] = {
@@ -103,6 +118,10 @@ void init_commands(void)
     {# cmd_name, F_ ## cmd_name},
 #include "tbl_funcs.h"
 #undef X
+    {"minibuf_error", minibuf_error},
+    {"minibuf_write", minibuf_write},
+    {"xgetkey", lua_xgetkey},
+    {"minibuf_read_name", lua_minibuf_read_name},
     {NULL, NULL}
   };
 

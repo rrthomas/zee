@@ -101,8 +101,8 @@ extern Buffer *buf;
 extern int thisflag, lastflag;
 
 // minibuf.c --------------------------------------------------------------
-void minibuf_write(rblist rbl);
-void minibuf_error(rblist rbl);
+int minibuf_write(const char *s);
+int minibuf_error(const char *s);
 rblist minibuf_read(rblist rbl, rblist value);
 void minibuf_clear(void);
 rblist minibuf_read_name(rblist rbl);

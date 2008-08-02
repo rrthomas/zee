@@ -115,9 +115,9 @@ Save buffer in visited file.\
 ")
 {
   if (buffer_write(buf, buf->filename) == false) {
-    minibuf_error(rblist_fmt("%s: %s", buf->filename, strerror(errno)));
+    minibuf_error(rblist_to_string(rblist_fmt("%s: %s", buf->filename, strerror(errno))));
   } else {
-    minibuf_write(rblist_fmt("Wrote `%r'", buf->filename));
+    minibuf_write(rblist_to_string(rblist_fmt("Wrote `%r'", buf->filename)));
     buf->flags &= ~BFLAG_MODIFIED;
 
     if (buf->last_undop)
@@ -132,7 +132,7 @@ Quit, unless there are unsaved changes.\
 ")
 {
   if (buf->flags & BFLAG_MODIFIED) {
-    minibuf_error(rblist_from_string("Unsaved changes; use `file_save' or `edit_revert'"));
+    minibuf_error("Unsaved changes; use `file_save' or `edit_revert'");
     ok = false;
   }
 
@@ -145,6 +145,7 @@ END_DEF
  * Function called on unexpected error or crash (SIGSEGV).
  * Attempts to save buffer if modified.
  */
+// FIXME: Reset the terminal?
 void die(int exitcode)
 {
   static bool already_dying = 0;

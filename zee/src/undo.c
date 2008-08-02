@@ -105,11 +105,11 @@ Undo the last change.\n\
 
   if (!warn_if_readonly_buffer()) {
     if (buf->next_undop == NULL) {
-      minibuf_error(rblist_from_string("No further undo information"));
+      minibuf_error("No further undo information");
       buf->next_undop = buf->last_undop;
     } else {
       buf->next_undop = revert_action(buf->next_undop);
-      minibuf_write(rblist_from_string("Undo!"));
+      minibuf_write("Undo!");
       ok = true;
     }
   }

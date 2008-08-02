@@ -20,6 +20,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+// FIXME: Upgrade to GPL 3
+
 #include "config.h"
 
 #include <limits.h>
@@ -71,7 +73,6 @@ static void run(void)
   }
 }
 
-// FIXME: Reset the terminal?
 static void segv_sig_handler(int signo)
 {
   (void)signo;
@@ -79,7 +80,6 @@ static void segv_sig_handler(int signo)
   die(2);
 }
 
-// FIXME: Reset the terminal?
 static void other_sig_handler(int signo)
 {
   (void)signo;
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
   // FIXME: Generate the list of files to load
   require(PKGDATADIR "/lib.lua");
   require(PKGDATADIR "/texinfo.lua");
-  require(PKGDATADIR "/tbl_vars.lua"); // FIXME: interpret the texinfo commands
+  require(PKGDATADIR "/tbl_vars.lua");
   require(PKGDATADIR "/tbl_funcs.lua");
   require(PKGDATADIR "/bind.lua");
   require(PKGDATADIR "/completion.lua");
@@ -132,12 +132,13 @@ int main(int argc, char **argv)
   rblist key_tbl = file_read(rblist_from_string(PKGDATADIR "/tbl_keys.h"));
   CLUE_SET(L, key_tbl, string, rblist_to_string(key_tbl));
   require(PKGDATADIR "/keys.lua");
+  require(PKGDATADIR "/minibuf.lua");
   // FIXME: Load last for now because of its effect on the global environment
   require(PKGDATADIR "/std.lua");
   init_commands();
   init_bindings();
 
-  while (getopt_long_only(argc, argv, "", longopts, &longopt) != -1)
+  while (getopt_long_only(argc, argv, "", longopts, &longopt) != -1) {
     switch (longopt) {
     case 0:
       bflag = true;
@@ -159,19 +160,22 @@ int main(int argc, char **argv)
       hflag = true;
       break;
     case 5:
-      fprintf(stderr,
-              PACKAGE_STRING "\n"
-#define X(name, email, years)                   \
-              "Copyright (c) " years " " name " <" email ">\n"
+      {
+#define X(name, email, years)                                   \
+        "Copyright (c) " years " " name " <" email ">\n"
+        static const char *copyright_notice =
+          PACKAGE_STRING "\n"
 #include "copyright.h"
+          PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+          "You may redistribute copies of " PACKAGE_NAME "\n"
+          "under the terms of the GNU General Public License.\n"
+          "For more information about these matters, see the file named COPYING.\n";
 #undef X
-              PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of " PACKAGE_NAME "\n"
-              "under the terms of the GNU General Public License.\n"
-              "For more information about these matters, see the file named COPYING.\n"
-              );
-      return 0;
+        fprintf(stderr, copyright_notice);
+        return 0;
+      }
     }
+  }
   argc -= optind;
   argv += optind;
 

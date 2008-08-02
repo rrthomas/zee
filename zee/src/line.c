@@ -392,7 +392,7 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
       *ret = rbacc_to_rblist(rba);
 
     if (eobp()) {
-      minibuf_error(rblist_from_string("End of buffer"));
+      minibuf_error("End of buffer");
       return false;
     }
   }
@@ -457,7 +457,7 @@ Join lines if the character is a newline.\
   if (ok) {
     CMDCALL(edit_delete_next_character);
   } else {
-    minibuf_error(rblist_from_string("Beginning of buffer"));
+    minibuf_error("Beginning of buffer");
     ok = false;
   }
 }

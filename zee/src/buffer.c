@@ -47,7 +47,7 @@ void buffer_new(void)
 bool warn_if_readonly_buffer(void)
 {
   if (buf->flags & BFLAG_READONLY) {
-    minibuf_error(rblist_from_string("Buffer is readonly"));
+    minibuf_error("Buffer is readonly");
     return true;
   } else {
     return false;
@@ -62,7 +62,7 @@ bool warn_if_no_mark(void)
 {
   assert(buf->mark);
   if (!(buf->flags & BFLAG_ANCHORED)) {
-    minibuf_error(rblist_from_string("The mark is not active now"));
+    minibuf_error("The mark is not active now");
     return true;
   } else {
     return false;

@@ -22,6 +22,7 @@ LUA_RUNTIME = 					\
 	completion.lua 				\
 	history.lua				\
 	keys.lua				\
+	minibuf.lua				\
 	texinfo.lua
 
 LUA_RUNTIME_EXTRA = std.lua
@@ -97,19 +98,19 @@ endif
 $(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
 tbl_funcs.h tbl_funcs.lua funcs.texi: $(zee_base_SOURCES) mkfuncs.lua
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zee_base_SOURCES)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zee_base_SOURCES)
 
 $(PACKAGE)rc vars.texi: tbl_vars.lua mkvars.lua
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.lua
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.lua
 
 opts.texi: tbl_opts.h mkopts.lua
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkopts.lua $(srcdir)/tbl_opts.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkopts.lua $(srcdir)/tbl_opts.h
 
 keys.texi: tbl_keys.h mkkeys.lua
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkkeys.lua $(srcdir)/tbl_keys.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkkeys.lua $(srcdir)/tbl_keys.h
 
 copyright.texi: copyright.h mkcopyright.lua
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
 
 loc:
 	cloc --no3 --force_lang=m4,ac --force_lang=Make,am $(zee_base_SOURCES) term_*.c Makefile.am ../Makefile.am ../configure.ac \

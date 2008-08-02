@@ -1,5 +1,6 @@
 -- Built-in variables
 
+-- FIXME: interpret the texinfo commands
 def{tab_display_width = 8,
     "Number of spaces displayed for a tab character."}
 def{indent_width = 2,

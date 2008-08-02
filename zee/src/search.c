@@ -154,7 +154,7 @@ static bool isearch(int dir)
       find_err = NULL;
     }
 
-    minibuf_write(rbl);
+    minibuf_write(rblist_to_string(rbl));
 
     int c = getkey();
     if (c == (KBD_CTRL | 'g')) {
@@ -195,7 +195,7 @@ static bool isearch(int dir)
         last_search = pattern;
 
         buf->mark->pt = start;
-        minibuf_write(rblist_from_string("Mark saved when search started"));
+        minibuf_write("Mark saved when search started");
       } else
         minibuf_clear();
       break;

@@ -65,13 +65,13 @@ Use macro_name to give it a permanent name.\
 ")
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
-    minibuf_error(rblist_from_string("Already defining a macro"));
+    minibuf_error("Already defining a macro");
     ok = false;
   } else {
     if (macro_defined)
       cancel_macro_definition();
 
-    minibuf_write(rblist_from_string("Defining macro..."));
+    minibuf_write("Defining macro...");
     thisflag |= FLAG_DEFINING_MACRO;
     (void)CLUE_DO(L, "_macro = {}");
   }
@@ -84,7 +84,7 @@ Finish defining a macro.\
 ")
 {
   if (!(thisflag & FLAG_DEFINING_MACRO)) {
-    minibuf_error(rblist_from_string("Not defining a macro"));
+    minibuf_error("Not defining a macro");
     ok = false;
   } else
     thisflag &= ~FLAG_DEFINING_MACRO;
@@ -102,10 +102,10 @@ The symbol's command definition becomes the macro string.\n\
   rblist ms;
 
   if ((ms = minibuf_read(rblist_from_string("Name for last macro: "), rblist_empty)) == NULL) {
-    minibuf_error(rblist_from_string("No command name given"));
+    minibuf_error("No command name given");
     ok = false;
   } else if (!macro_defined) {
-    minibuf_error(rblist_from_string("No macro defined"));
+    minibuf_error("No macro defined");
     ok = false;
   } else {
     (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_macro = %r", ms)));
@@ -126,7 +126,7 @@ macro_name.\
 ")
 {
   if (!macro_defined) {
-    minibuf_error(rblist_from_string("No macro has been defined"));
+    minibuf_error("No macro has been defined");
     ok = false;
   } else {
     call_macro("_macro");

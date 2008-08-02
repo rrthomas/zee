@@ -238,7 +238,7 @@ Scroll text of window downward near full screen.\
   if (buf->pt.n > 0)
     ok = goto_line(buf->pt.n > win.eheight ? buf->pt.n - win.eheight : 0) ? true : false;
   else {
-    minibuf_error(rblist_from_string("Beginning of buffer"));
+    minibuf_error("Beginning of buffer");
     ok = false;
   }
 }
@@ -252,7 +252,7 @@ Scroll text of window upward near full screen.\
   if (buf->pt.n < rblist_nl_count(buf->lines))
     ok = goto_line(buf->pt.n + win.eheight) ? true : false;
   else {
-    minibuf_error(rblist_from_string("End of buffer"));
+    minibuf_error("End of buffer");
     ok = false;
   }
 }

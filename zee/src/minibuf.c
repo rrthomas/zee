@@ -52,25 +52,36 @@ static void minibuf_draw(rblist rbl)
 /*
  * Write the specified string in the minibuffer.
  */
-void minibuf_write(rblist rbl)
+int minibuf_write(const char *s)
 {
-  minibuf_draw(rbl);
+  // FIXME: Hack to make it work from Lua
+  if ((lua_State *)s == L) {
+    s = lua_tostring(L, -1);
+    lua_pop(L, 1);
+  }
+  minibuf_draw(rblist_from_string(s));
 
   // Redisplay (and leave the cursor in the correct position).
   term_display();
   term_refresh();
+
+  // FIXME: Hack to make it work from Lua
+  return 0;
 }
 
 /*
  * Write the specified error string in the minibuffer and beep.
  */
-void minibuf_error(rblist rbl)
+int minibuf_error(const char *s)
 {
-  minibuf_write(rbl);
+  minibuf_write(s);
   term_beep();
 
   if (thisflag & FLAG_DEFINING_MACRO)
     cancel_macro_definition();
+
+  // FIXME: Hack to make it work from Lua
+  return 0;
 }
 
 static size_t mb_backward_char(size_t i)
@@ -372,7 +383,7 @@ rblist minibuf_read_name(rblist prompt)
     }
 
     if (rblist_length(ms) == 0) {
-      minibuf_error(rblist_from_string("No name given"));
+      minibuf_error("No name given");
       return NULL;
     }
 
@@ -387,7 +398,7 @@ rblist minibuf_read_name(rblist prompt)
       ok = true;
       break;
     } else {
-      minibuf_error(rblist_fmt("There is nothing called `%r'", ms));
+      minibuf_error(rblist_to_string(rblist_fmt("There is nothing called `%r'", ms)));
       waitkey(WAITKEY_DEFAULT);
     }
   }

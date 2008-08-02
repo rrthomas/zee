@@ -39,7 +39,7 @@ Show the version in the minibuffer.\
   if (quitstr == NULL)
     quitstr = "Alt-x, `file_quit', RETURN";
 
-  minibuf_write(rblist_fmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %s.", quitstr));
+  minibuf_write(rblist_to_string(rblist_fmt(PACKAGE_STRING ". For a menu type Alt-x. To quit, type %s.", quitstr)));
 }
 END_DEF
 
@@ -82,7 +82,7 @@ DEF(help_key,
 Display the command invoked by a key sequence.\
 ")
 {
-  minibuf_write(rblist_from_string("Describe key:"));
+  minibuf_write("Describe key:");
   size_t key = getkey();
   (void)CLUE_DO(L, rblist_to_string(rblist_fmt("_key = chordtostr(%d)", key)));
   const char *keyname;
@@ -92,10 +92,10 @@ Display the command invoked by a key sequence.\
   const char *cmd;
   CLUE_GET(L, s, string, cmd);
   if (cmd == NULL) {
-    minibuf_error(rblist_fmt("%s is unbound", keyname));
+    minibuf_error(rblist_to_string(rblist_fmt("%s is unbound", keyname)));
     ok = false;
   } else {
-    minibuf_write(rblist_fmt("%s runs the command `%s'", keyname, cmd));
+    minibuf_write(rblist_to_string(rblist_fmt("%s runs the command `%s'", keyname, cmd)));
   }
 }
 END_DEF

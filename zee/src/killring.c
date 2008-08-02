@@ -181,7 +181,7 @@ Set mark at beginning, and put point at end.\
 ")
 {
   if (rblist_length(killed_text) == 0) {
-    minibuf_error(rblist_from_string("Clipboard is empty"));
+    minibuf_error("Nothing to paste");
     ok = false;
   } else if (!warn_if_readonly_buffer()) {
     CMDCALL(edit_select_on);
