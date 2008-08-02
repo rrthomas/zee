@@ -21,3 +21,12 @@ function def(t)
     docstring[name] = s
   end
 end
+
+-- Load a file of Lua, aborting if not found.
+function require(f)
+  local ok, err = pcall(dofile, f .. ".lua")
+  if not ok then
+    io.stderr:write(string.format(PACKAGE_NAME .. " is not properly installed: could not load file `%s'\n%s\n", f, err))
+    die(1)
+  end
+end
