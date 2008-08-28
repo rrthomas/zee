@@ -16,7 +16,6 @@ bin_PROGRAMS = zee
 LUA_RUNTIME = 					\
 	lib.lua					\
 	tbl_vars.lua				\
-	tbl_funcs.lua				\
 	tbl_keys.h				\
 	bind.lua				\
 	completion.lua 				\
@@ -25,7 +24,9 @@ LUA_RUNTIME = 					\
 	minibuf.lua				\
 	texinfo.lua
 
-LUA_RUNTIME_EXTRA = std.lua
+LUA_RUNTIME_EXTRA = 				\
+	std.lua					\
+	tbl_funcs.lua
 
 dist_pkgdata_DATA = 				\
 	$(LUA_RUNTIME)				\
@@ -39,7 +40,7 @@ info_TEXINFOS = zee.texi
 zee_base_SOURCES =				\
 	rblist.c			        \
 	rblist.h			        \
-	rbacc.c			        	\
+	rbacc.c					\
 	rbacc.h					\
         rbutil.c				\
         rbutil.h				\
@@ -50,7 +51,6 @@ zee_base_SOURCES =				\
 	extern.h			        \
 	main.h					\
 	tbl_opts.h				\
-	tbl_keys.h				\
 	copyright.h				\
 	basic.c					\
 	bind.c					\
