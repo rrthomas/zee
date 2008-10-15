@@ -66,16 +66,16 @@ Marker *point_marker(void)
   return marker_new(buf->pt);
 }
 
-static void adjust_markers(size_t line, size_t pointo, ssize_t offset)
+static void adjust_markers(ssize_t offset)
 {
-  Marker *m = point_marker(), *marker;
+  Marker *cur_pt = point_marker(), *m;
 
-  for (marker = buf->markers; marker; marker = marker->next)
-    if (marker->pt.n == line && (marker->pt.o >= pointo + (offset < 0)))
-      marker->pt.o += offset;
+  for (m = buf->markers; m != NULL; m = m->next)
+    if (m->pt.n == buf->pt.n && (m->pt.o >= buf->pt.o + (offset < 0)))
+      m->pt.o += offset;
 
-  buf->pt = m->pt;
-  remove_marker(m);
+  buf->pt = cur_pt->pt;
+  remove_marker(cur_pt);
 }
 
 /*
@@ -384,7 +384,7 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
       buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
                                  rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
                                                           rblist_length(buf->lines)));
-      adjust_markers(buf->pt.n, buf->pt.o, -1);
+      adjust_markers(-1);
       buf->flags |= BFLAG_MODIFIED;
     }
 
@@ -402,7 +402,7 @@ bool replace_nstring(size_t size, rblist *ret, rblist repl)
     buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), repl),
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
     buf->flags |= BFLAG_MODIFIED;
-    adjust_markers(buf->pt.n, buf->pt.o, (ssize_t)rblist_length(repl));
+    adjust_markers((ssize_t)rblist_length(repl));
   }
 
   return true;
