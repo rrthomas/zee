@@ -44,9 +44,9 @@ Delete the current line.\
   if (!(lastflag & FLAG_DONE_KILL))
     clear_kill_buffer();
 
-  if (warn_if_readonly_buffer())
+  if (warn_if_readonly_buffer()) {
     ok = false;
-  else {
+  } else {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
 
     if (!eolp()) {
@@ -54,7 +54,7 @@ Delete the current line.\
       killed_text = rblist_concat(killed_text,
                                   rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n),
                                              rblist_line_length(buf->lines, buf->pt.n)));
-      ok = replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &rbl, rblist_empty);
+      replace_nstring(rblist_line_length(buf->lines, buf->pt.n), &rbl, rblist_empty);
       thisflag |= FLAG_DONE_KILL;
     }
 
@@ -102,16 +102,14 @@ If the previous command was also a kill command,\n\
 the text killed this time appends to the text killed last time.\
 ")
 {
-  if (copy_selection()) {
-    if (buf->flags & BFLAG_READONLY)
-      warn_if_readonly_buffer();
-    else {
-      Region r;
-      assert(calculate_the_region(&r));
-      if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
-        CMDCALL(edit_select_other_end);
-      ok = replace_nstring(r.size, NULL, rblist_empty);
-    }
+  if (copy_selection() && !warn_if_readonly_buffer()) {
+    Region r;
+    assert(calculate_the_region(&r));
+    if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
+      CMDCALL(edit_select_other_end);
+    replace_nstring(r.size, NULL, rblist_empty);
+  } else {
+    ok = false;
   }
 }
 END_DEF
@@ -183,10 +181,13 @@ Set mark at beginning, and put point at end.\
   if (rblist_length(killed_text) == 0) {
     minibuf_error("Nothing to paste");
     ok = false;
-  } else if (!warn_if_readonly_buffer()) {
-    CMDCALL(edit_select_on);
-    ok = replace_nstring(0, NULL, killed_text);
-    buf->flags &= ~BFLAG_ANCHORED;
+  } else {
+    ok = warn_if_readonly_buffer();
+    if (ok) {
+      CMDCALL(edit_select_on);
+      replace_nstring(0, NULL, killed_text);
+      buf->flags &= ~BFLAG_ANCHORED;
+    }
   }
 }
 END_DEF

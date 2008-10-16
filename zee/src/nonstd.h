@@ -18,6 +18,8 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
+/* FIXME: Use gnulib's minmax module */
+   
 #ifndef NONSTD_H
 
 #undef min

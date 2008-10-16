@@ -373,9 +373,13 @@ file, replacing the selection if any.\n\
 #endif
 
         undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);
-        if (buf->pt.n != r.start.n || r.start.o != buf->pt.o)
+        if (buf->pt.n != r.start.n || r.start.o != buf->pt.o) {
           CMDCALL(edit_select_other_end);
-        ok = replace_nstring(r.size, NULL, out);
+        }
+        ok = warn_if_readonly_buffer();
+        if (ok) {
+          replace_nstring(r.size, NULL, out);
+        }
         undo_save(UNDO_END_SEQUENCE, buf->pt, 0, 0);
         buf->flags &= ~BFLAG_ANCHORED;
       }

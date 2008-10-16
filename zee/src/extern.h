@@ -78,7 +78,7 @@ bool eolp(void);
 bool line_replace_text(size_t line, size_t offset, size_t oldlen, rblist newtext, bool replace_case);
 bool insert_char(int c);
 bool wrap_break_line(void);
-bool replace_nstring(size_t size, rblist *as, rblist bs);
+void replace_nstring(size_t size, rblist *as, rblist bs);
 
 // lua.c ------------------------------------------------------------------
 lua_obj get_variable(const char *key);

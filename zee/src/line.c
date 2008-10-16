@@ -71,7 +71,7 @@ static void adjust_markers(ssize_t offset)
   Marker *cur_pt = point_marker(), *m;
 
   for (m = buf->markers; m != NULL; m = m->next)
-    if (m->pt.n == buf->pt.n && (m->pt.o >= buf->pt.o + (offset < 0)))
+    if (m->pt.n == buf->pt.n && m->pt.o > buf->pt.o)
       m->pt.o += offset;
 
   buf->pt = cur_pt->pt;
@@ -187,7 +187,12 @@ bool eolp(void)
  */
 bool insert_char(int c)
 {
-  return replace_nstring(0, NULL, rblist_from_char(c));
+  if (!warn_if_readonly_buffer()) {
+    return false;
+  }
+
+  replace_nstring(0, NULL, rblist_from_char(c));
+  return true;
 }
 
 DEF(edit_insert_tab,
@@ -349,63 +354,36 @@ END_DEF
 /*
  * Replace `size' characters at point with the string `repl'.
  * If `ret' is non-NULL, return the characters replaced in it.
- * Return true if the replacement is performed without incident, or
- * false if the buffer is read-only or if there are fewer than
- * `size' characters after point (in which case nothing is inserted).
  */
-// FIXME: check behaviour when there are not `size' characters to delete.
-// Is documentation correct? Is specification sensible?
-bool replace_nstring(size_t size, rblist *ret, rblist repl)
+void replace_nstring(size_t size, rblist *ret, rblist repl)
 {
-  rbacc rba = rbacc_new();
-
   assert(repl);
 
-  if (warn_if_readonly_buffer())
-    return false;
-
-  if (size || rblist_length(repl))
+  if (size || rblist_length(repl)) {
+    buf->flags |= BFLAG_MODIFIED;
     undo_save(UNDO_REPLACE_BLOCK, buf->pt, size, rblist_length(repl));
+  }
 
+  // Remove string.
   if (size) {
     buf->flags &= ~BFLAG_ANCHORED;
 
-    while (size--) {
-      if (ret) {
-        if (!eolp())
-          rbacc_add_char(rba, following_char());
-        else
-          rbacc_add_char(rba, '\n');
-      }
-
-      if (eobp())
-        break;
-
-      buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
-                                 rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + 1,
-                                                          rblist_length(buf->lines)));
-      adjust_markers(-1);
-      buf->flags |= BFLAG_MODIFIED;
-    }
-
     if (ret)
-      *ret = rbacc_to_rblist(rba);
+      *ret = rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o,
+                        rblist_line_to_end_pos(buf->lines, buf->pt.n));
 
-    if (eobp()) {
-      minibuf_error("End of buffer");
-      return false;
-    }
+    buf->lines = rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o),
+                               rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o + size,
+                                          rblist_length(buf->lines)));
   }
 
   // Insert string.
-  if (repl && rblist_length(repl)) {
+  if (rblist_length(repl)) {
     buf->lines = rblist_concat(rblist_concat(rblist_sub(buf->lines, 0, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o), repl),
                                rblist_sub(buf->lines, rblist_line_to_start_pos(buf->lines, buf->pt.n) + buf->pt.o, rblist_length(buf->lines)));
-    buf->flags |= BFLAG_MODIFIED;
-    adjust_markers((ssize_t)rblist_length(repl));
   }
 
-  return true;
+  adjust_markers((ssize_t)rblist_length(repl) - (ssize_t)size);
 }
 
 DEF(edit_insert_character,
@@ -441,7 +419,14 @@ Delete the following character.\n\
 Join lines if the character is a newline.\
 ")
 {
-  ok = replace_nstring(1, NULL, rblist_empty);
+  if (eobp()) {
+    minibuf_error("End of buffer");
+    ok = false;
+  } else if (warn_if_readonly_buffer()) {
+    ok = false;
+  } else {
+    replace_nstring(1, NULL, rblist_empty);
+  }
 }
 END_DEF
 
