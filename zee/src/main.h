@@ -155,7 +155,7 @@ typedef size_t Font;
 // Named keys
 enum {
 #define X(key_sym, key_name, text_name, key_code)        \
-	key_sym = key_code,
+        key_sym = key_code,
 #include "tbl_keys.h"
 #undef X
   KBD_NOKEY = INT_MAX
@@ -194,12 +194,6 @@ enum {
   int F_ ## name(lua_State *L)                          \
   {                                                     \
     bool ok = true;
-
-/* Declare a command that takes arguments.
-   `args' is a comma-separated list. */
-#define DEF_ARG(name, doc, args)                        \
-  DEF(name, doc)                                        \
-  args
 
 // End a command definition.
 #define END_DEF                                 \

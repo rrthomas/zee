@@ -157,7 +157,7 @@ END_DEF
 
 
 /***********************************************************************
-			  Move through words
+                          Move through words
 ***********************************************************************/
 
 DEF(move_previous_word,
@@ -298,12 +298,12 @@ be set using set_wrap_column.\
 END_DEF
 
 // FIXME: Better names for edit_repeat and execute_command.
-DEF_ARG(edit_repeat,
+DEF(edit_repeat,
 "\
 Repeat a command a given number of times.\
-",
+")
 UINT(reps, "Repeat count: ")
-COMMAND(name, "Command: "))
+COMMAND(name, "Command: ")
 {
   if (ok) {
     undo_save(UNDO_START_SEQUENCE, buf->pt, 0, 0);

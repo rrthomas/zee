@@ -113,11 +113,11 @@ column, or at the end of the line if it is not long enough.\
 }
 END_DEF
 
-DEF_ARG(edit_goto_column,
+DEF(edit_goto_column,
 "\
 Read a number N and move the cursor to column number N.\n\
-",
-UINT(to_col, "Goto column: "))
+")
+UINT(to_col, "Goto column: ")
 {
   if (ok) {
     if (buf->pt.o > to_col)
@@ -166,12 +166,12 @@ bool goto_line(size_t to_line)
   return ok;
 }
 
-DEF_ARG(edit_goto_line,
+DEF(edit_goto_line,
 "\
 Move the cursor to the beginning of the specified line.\n\
 Line 1 is the beginning of the buffer.\
-",
-UINT(to_line, "Goto line: "))
+")
+UINT(to_line, "Goto line: ")
 {
   if (ok && to_line > 0) {
     goto_line(to_line - 1);

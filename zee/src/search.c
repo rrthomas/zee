@@ -62,7 +62,7 @@ static size_t find_substr(rblist rbl1, rblist rbl2, bool bol, bool eol, bool bac
                           options | PCRE_ANCHORED, ovector, 3);
       }
     }
-    
+
     if (index >= 0) {
       if (!backward)
         ret = ovector[1];
@@ -259,12 +259,12 @@ static bool no_upper(rblist rbl)
 }
 
 // FIXME: Make edit_replace run on selection.
-DEF_ARG(edit_replace,
+DEF(edit_replace,
 "\
 Replace the next occurrence of a regexp with other text.\n\
-",
+")
 STR(find, "Replace string: ")
-STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find)))
 {
   if (ok) {
     bool find_no_upper = no_upper(find) && get_variable_bool("case_replace");
@@ -283,13 +283,13 @@ END_DEF
 // FIXME: Translate this into Lua, adding Lua versions of argument
 // declarations for interactive functions. Then can start rewriting
 // Zee commands piecemeal in Lua.
-DEF_ARG(edit_replace_all,
+DEF(edit_replace_all,
 "\
 Replace all occurrences of a regexp with other text from the cursor\n\
 to end of the buffer.\n\
-",
+")
 STR(find, "Replace string: ")
-STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find))))
+STR(repl, rblist_to_string(rblist_fmt("Replace `%r' with: ", find)))
 {
   if (ok) {
     lua_pushstring(L, rblist_to_string(find));
