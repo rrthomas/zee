@@ -1,3 +1,8 @@
+Release 2.3.22
+
+This release fixes a bug in forward regex isearch introduced recently,
+and makes the build system use silent rules by default.
+
 Release 2.3.21
 
 This release fixes a bug that caused build failure on non-GNU systems,
