@@ -23,13 +23,14 @@ SUBDIRS = src
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = BUGS m4/gnulib-cache.m4
+EXTRA_DIST = BUGS GNUmakefile maint.mk m4/gnulib-cache.m4
 
 dist_pkgdata_DATA = FAQ
 
 ChangeLog:
 	git2cl > ChangeLog
 
+# FIXME:
 # Announcement follows:
 # I am happy to announce the release of $package_name $version,
 # $description.
