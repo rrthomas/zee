@@ -37,7 +37,7 @@ local re_flags = rex_gnu.flags ()
 local re_find_err
 
 local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
-  local ret = -1
+  local ret
   local cf = 0
 
   if not regex then
@@ -47,8 +47,8 @@ local function find_substr (as, s, from, to, forward, notbol, noteol, regex, ica
     cf = bit.bor (cf, re_flags.ICASE)
   end
 
-  local r, re_find_err = rex_gnu.new (s, cf)
-  if r then
+  local ok, r = pcall (rex_gnu.new, s, cf)
+  if ok then
     local ef = 0
     if notbol then
       ef = bit.bor (ef, re_flags.not_bol)
@@ -59,10 +59,16 @@ local function find_substr (as, s, from, to, forward, notbol, noteol, regex, ica
     if not forward then
       ef = bit.bor (ef, re_flags.backward)
     end
-    ret = r:find (string.sub (as, from + 1, to), nil, ef)
-    if ret then
-      ret = ret + from
+    local match_from, match_to = r:find (string.sub (as, from + 1, to), nil, ef)
+    if match_from then
+      if forward then
+        ret = match_to + from + 1
+      else
+        ret = match_from + from
+      end
     end
+  else
+    re_find_err = r
   end
 
   return ret
@@ -110,7 +116,7 @@ local function search (pt, s, forward, regexp)
       previous_line ()
     end
   end
-  cur_bp.pt.o = pos + (forward and #s or 0) - 1
+  cur_bp.pt.o = pos - 1
   thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
   return true
 end
@@ -362,7 +368,7 @@ is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 ]],
   true,
   function ()
-    return isearch (false, bit.band (lastflag, FLAG_SET_UNIARG) ~= 0)
+    return isearch (false, bit.band (lastflag, FLAG_SET_UNIARG) == 0)
   end
 )
 
