@@ -91,7 +91,7 @@ zile: zile.lua Makefile
 
 install-exec-hook:
 	$(install_edit) '$(builddir)/zile.lua' >$@.tmp
-	$(INSTALL_SCRIPT) $@.tmp $(bindir)/zile
+	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
 zile.1: zile zile.1.in Makefile
@@ -99,14 +99,14 @@ zile.1: zile zile.1.in Makefile
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-zile.1.in: zile man-extras zile-help2man-wrapper
+zile.1.in: main.lua man-extras zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_man_MANS = zile.1
 
 CLEANFILES = zile
 DISTCLEANFILES = zile.1
-MAINTAINERCLEANFILES = loadlua.lua
+MAINTAINERCLEANFILES = loadlua.lua zile.1.in
 
 TESTSOURCES = $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) $(TESTSCRIPTS)
 ALLSOURCES = $(TESTSOURCES) $(PRODUCTIONSOURCES)
