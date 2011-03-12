@@ -307,7 +307,9 @@ Move point to the beginning of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    set_mark_interactive ()
+    if not get_variable_bool ("transient-mark-mode") then
+      set_mark_interactive ()
+    end
     gotobob ()
   end
 )
@@ -325,7 +327,9 @@ Move point to the end of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    set_mark_interactive ()
+    if not get_variable_bool ("transient-mark-mode") then
+      set_mark_interactive ()
+    end
     gotoeob ()
   end
 )
