@@ -1,3 +1,9 @@
+Release 2.4.0alpha1
+
+This release is completely rewritten in Lua. No doubt it introduces
+lots of bugs, but it is intended to be functionally identical to
+2.3.22.
+
 Release 2.3.22
 
 This release fixes a bug in forward regex isearch introduced recently,
