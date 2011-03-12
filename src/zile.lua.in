@@ -34,5 +34,5 @@ CONFIGURE_HOST = "@CONFIGURE_HOST@"
 PATH_DATA = "@pkgdatadir@"
 
 package.path = PATH_DATA .. "/?.lua"
-require ("loadlua")
+require "loadlua"
 main ()
