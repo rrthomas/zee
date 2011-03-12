@@ -85,12 +85,12 @@ inplace_edit = sed \
 
 zile: zile.lua Makefile
 	rm -f $@ $@.tmp
-	$(inplace_edit) '$(srcdir)/$@.lua' >$@.tmp
+	$(inplace_edit) '$(builddir)/$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
 
 install-exec-hook:
-	$(install_edit) '$(srcdir)/zile.lua' >$@.tmp
+	$(install_edit) '$(builddir)/zile.lua' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(bindir)/zile
 	rm -f $@.tmp
 
