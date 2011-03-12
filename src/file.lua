@@ -709,7 +709,7 @@ local function read_file (filename)
   local first_eol = true
   local this_eol_type
   local eol_len, total_eols = 0, 0
-  local buf = h:read (posix.BUFSIZ)
+  local buf = h:read (posix.BUFSIZ) or ""
   if #buf > 0 then
     local i = 1
     while i <= #buf and total_eols < max_eol_check_count do
