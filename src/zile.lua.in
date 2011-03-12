@@ -1,7 +1,9 @@
-#!/usr/bin/env lua
+#!/bin/sh
+A=--[[ LUA_INIT= LUA_PATH= exec @LUA@ "$0" "$@"  # -*- mode: lua; -*- ]]A
+--
 -- Program initialisation
 --
--- Copyright (c) 2010 Free Software Foundation, Inc.
+-- Copyright (c) 2010, 2011 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
