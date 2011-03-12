@@ -106,7 +106,7 @@ thisflag = 0
 lastflag = 0
 
 
-ZILE_COPYRIGHT_STRING = "Copyright (C) 2010 Free Software Foundation, Inc."
+ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc."
 
 local about_minibuf_str = "Welcome to " .. PACKAGE_NAME .. "!"
 
