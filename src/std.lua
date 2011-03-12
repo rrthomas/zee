@@ -1,6 +1,6 @@
 -- Lua stdlib
 --
--- Copyright (c) 2000-2010 stdlib authors
+-- Copyright (c) 2000-2011 stdlib authors
 --
 -- See http://luaforge.net/projects/stdlib/ for more information.
 --
@@ -25,6 +25,9 @@
 local function require (f)
   package.loaded[f] = true
 end
+-- Debugging is off by default
+_G._DEBUG = false
+
 --
 -- strict.lua
 -- checks uses of undeclared global variables
@@ -542,17 +545,25 @@ _G.op["~="] =
     return a ~= b
   end
 
+-- Package
+
+module ("package", package.seeall)
+
+
+-- Reflect package.config (undocumented in 5.1; see luaconf.h for C
+-- equivalents)
+dirsep, pathsep, path_mark, execdir, igmark =
+  string.match (package.config, "^([^\n]+)\n([^\n]+)\n([^\n]+)\n([^\n]+)\n([^\n]+)")
+
 -- @module debug
 
 -- Adds to the existing debug module
 
 module ("debug", package.seeall)
 
+require "debug_init"
 require "io_ext"
 require "string_ext"
-
--- Debugging is off by default
-_G._DEBUG = nil
 
 -- To activate debugging set _DEBUG either to any true value
 -- (equivalent to {level = 1}), or a table with the following members:
@@ -715,7 +726,7 @@ function rearrange (m, t)
 end
 
 -- @func clone: Make a shallow copy of a table, including any
--- metatable
+-- metatable (for a deep copy, use tree.clone)
 --   @param t: table
 --   @param nometa: if non-nil don't copy metatable
 -- @returns
@@ -895,20 +906,20 @@ function foldr (f, e, l)
 end
 
 -- @func cons: Prepend an item to a list
---   @param x: item
 --   @param l: list
+--   @param x: item
 -- @returns
 --   @param r: {x, unpack (l)}
-function cons (x, l)
+function cons (l, x)
   return {x, unpack (l)}
 end
 
 -- @func append: Append an item to a list
---   @param x: item
 --   @param l: list
+--   @param x: item
 -- @returns
 --   @param r: {l[1], ..., l[#l], x}
-function append (x, l)
+function append (l, x)
   local r = {unpack (l)}
   table.insert (r, x)
   return r
@@ -930,11 +941,11 @@ function concat (...)
 end
 
 -- @func rep: Repeat a list
---   @param n: number of times to repeat
 --   @param l: list
+--   @param n: number of times to repeat
 -- @returns
 --   @param r: n copies of l appended together
-function rep (n, l)
+function rep (l, n)
   local r = {}
   for i = 1, n do
     r = list.concat (r, l)
@@ -1122,17 +1133,7 @@ permuteOn = indexValue
 metatable = {
   -- list .. table = list.concat
   __concat = list.concat,
-  -- @func append metamethod
-  --   @param l: list
-  --   @param e: list element
-  -- @returns
-  --   @param l_: {l[1], ..., l[#l], e}
-  __append =
-    function (l, e)
-      local l_ = table.clone (l)
-      table.insert (l_, e)
-      return l_
-    end,
+  __append = list.append,
 }
 
 -- @func new: List constructor
@@ -1227,56 +1228,6 @@ function clone (t, nometa)
   return copy (r, t)
 end
 
--- Prototype-based objects
-
-module ("object", package.seeall)
-
-require "table_ext"
-
-
--- Usage:
-
--- Create an object/class:
---   object/class = prototype {value, ...; field = value ...}
---   An object's metatable is itself.
---   In the initialiser, unnamed values are assigned to the fields
---   given by _init (assuming the default _clone).
---   Private fields and methods start with "_"
-
--- Access an object field: object.field
--- Call an object method: object:method (...)
--- Call a class method: Class.method (object, ...)
-
--- Add a field: object.field = x
--- Add a method: function object:method (...) ... end
-
-
--- Root object
-_G.Object = {
-  -- List of fields to be initialised by the
-  -- constructor: assuming the default _clone, the
-  -- numbered values in an object constructor are
-  -- assigned to the fields given in _init
-  _init = {},
-
-  -- @func _clone: Object constructor
-  --   @param values: initial values for fields in
-  --   _init
-  -- @returns
-  --   @param object: new object
-  _clone = function (self, values)
-             local object = table.merge (self, table.rearrange (self._init, values))
-             return setmetatable (object, object)
-           end,
-
-  -- @func __call: Sugar instance creation
-  __call = function (...)
-             -- First (...) gets first element of list
-             return (...)._clone (...)
-           end,
-}
-setmetatable (Object, Object)
-
 -- String
 
 module ("string", package.seeall)
@@ -1311,19 +1262,21 @@ module ("string", package.seeall)
 
 -- @func __index: Give strings a subscription operator
 --   @param s: string
---   @param n: index
+--   @param i: index
 -- @returns
---   @param s_: string.sub (s, n, n)
-local oldmeta = getmetatable ("").__index
+--   @param s_: string.sub (s, i, i) if i is a number,
+--     or falls back to any previous metamethod (by default, string
+--     methods)
+local old__index = getmetatable ("").__index
 getmetatable ("").__index =
-  function (s, n)
-    if type (n) == "number" then
-      return sub (s, n, n)
+  function (s, i)
+    if type (i) == "number" then
+      return sub (s, i, i)
     -- Fall back to old metamethods
-    elseif type (oldmeta) == "function" then
-      return oldmeta (s, n)
+    elseif type (old__index) == "function" then
+      return old__index (s, i)
     else
-      return oldmeta[n]
+      return old__index[i]
     end
   end
 
@@ -1416,9 +1369,9 @@ end
 -- @returns
 --   s_: justified string
 function pad (s, w, p)
-  p = rep (p or " ", abs (w))
+  p = rep (p or " ", math.abs (w))
   if w < 0 then
-    return sub (p .. s, -w)
+    return sub (p .. s, w)
   end
   return sub (s .. p, 1, w)
 end
@@ -1543,11 +1496,11 @@ end
 
 -- FIXME: Consider Perl and Python versions.
 -- @func split: Split a string at a given separator
---   @param sep: separator regex
 --   @param s: string to split
+--   @param sep: separator regex
 -- @returns
 --   @param l: list of strings
-function split (sep, s)
+function split (s, sep)
   -- finds gets a list of {from, to, capt = {}} lists; we then
   -- flatten the result, discarding the captures, and prepend 0 (1
   -- before the first character) and append 0 (1 after the last
@@ -1561,65 +1514,32 @@ function split (sep, s)
 end
 
 -- @func ltrim: Remove leading matter from a string
---   @param [r]: leading regex ["%s+"]
 --   @param s: string
+--   @param [r]: leading regex ["%s+"]
 -- @returns
 --   @param s_: string without leading r
-function ltrim (r, s)
-  if s == nil then
-    s, r = r, "%s+"
-  end
-  return (r.gsub (s, "^" .. r, ""))
+function ltrim (s, r)
+  r = r or "%s+"
+  return (gsub (s, "^" .. r, ""))
 end
 
 -- @func rtrim: Remove trailing matter from a string
---   @param [r]: trailing regex ["%s+"]
 --   @param s: string
+--   @param [r]: trailing regex ["%s+"]
 -- @returns
 --   @param s_: string without trailing r
-function rtrim (r, s)
-  if s == nil then
-    s, r = r, "%s+"
-  end
-  return (r.gsub (s, r .. "$", ""))
+function rtrim (s, r)
+  r = r or "%s+"
+  return (gsub (s, r .. "$", ""))
 end
 
 -- @func trim: Remove leading and trailing matter from a string
---   @param [r]: leading/trailing regex ["%s+"]
 --   @param s: string
+--   @param [r]: leading/trailing regex ["%s+"]
 -- @returns
 --   @param s_: string without leading/trailing r
-function trim (r, s)
-  return ltrim (rtrim (r, s))
-end
-
--- Math
-
--- Adds to the existing math module
-
-module ("math", package.seeall)
-
-
-local _floor = floor
-
--- @func floor: Extend to take the number of decimal places
---   @param n: number
---   @param [p]: number of decimal places to truncate to [0]
--- @returns
---   @param r: n truncated to p decimal places
-function floor (n, p)
-  local e = 10 ^ (p or 0)
-  return _floor (n * e) / e
-end
-
--- @func round: Round a number to p decimal places
---   @param n: number
---   @param [p]: number of decimal places to truncate to [0]
--- @returns
---   @param r: n to p decimal places
-function round (n, p)
-  local e = 10 ^ (p or 0)
-  return _floor (n * e + 0.5) / e
+function trim (s, r)
+  return rtrim (ltrim (s, r), r)
 end
 
 -- I/O
@@ -1627,6 +1547,7 @@ end
 module ("io", package.seeall)
 
 require "base"
+require "package_ext"
 
 
 -- @func readLines: Read a file into a list of lines and close it
@@ -1667,7 +1588,7 @@ end
 -- @returns
 --   @param: path1, ..., pathn: path components
 function splitdir (path)
-  return string.split ("/", path)
+  return string.split (package.dirsep, path)
 end
 
 -- @func catfile: concatenate directories into a path
@@ -1676,7 +1597,7 @@ end
 -- @returns
 --   @param path: path
 function catfile (...)
-  return table.concat ({...}, "/")
+  return table.concat ({...}, package.dirsep)
 end
 
 -- @func catdir: concatenate directories into a path
@@ -1685,7 +1606,7 @@ end
 -- @returns
 --   @param path: path
 function catdir (...)
-  return (string.gsub (catfile (...), "^$", "/"))
+  return (string.gsub (catfile (...), "^$", package.dirsep))
 end
 
 -- @func shell: Perform a shell command and return its output
@@ -1724,340 +1645,6 @@ function processFiles (f)
   end
 end
 
--- POSIX
-
-module ("posix", package.seeall)
-
-
--- @func system
---   @param file: filename of program to run
---   @param ...: arguments to the program
--- @returns
---   @param status: exit code, or nil if fork or wait fails
---   [@param reason]: error message, or exit type if wait succeeds
-function system (file, ...)
-  local pid = posix.fork ()
-  if pid == 0 then
-    return posix.execp (file, ...)
-  else
-    local pid, reason, status = posix.wait (pid)
-    return status, reason -- If wait failed, status is nil & reason is error
-  end
-end
-
--- getopt
--- Simplified getopt, based on Svenne Panne's Haskell GetOpt
-
-module ("getopt", package.seeall)
-
-require "base"
-require "list"
-require "string_ext"
-require "object"
-require "io_ext"
-
-
--- TODO: Sort out the packaging. getopt.Option is tedious to type, but
--- surely Option shouldn't be in the root namespace?
--- TODO: Wrap all messages; do all wrapping in processArgs, not
--- usageInfo; use sdoc-like library (see string.format todos)
--- TODO: Don't require name to be repeated in banner.
--- TODO: Store version separately (construct banner?).
-
-
--- Usage:
-
--- options = Options {Option {...} ...}
--- getopt.processArgs ()
-
--- Assumes prog = {name[, banner] [, purpose] [, notes] [, usage]}
-
--- options take a single dash, but may have a double dash
--- arguments may be given as -opt=arg or -opt arg
--- if an option taking an argument is given multiple times, only the
--- last value is returned; missing arguments are returned as 1
-
--- getOpt, usageInfo and dieWithUsage can be called directly (see
--- below, and the example at the end). Set _DEBUG.std to a non-nil
--- value to run the example.
-
-
--- @func getOpt: perform argument processing
---   @param argIn: list of command-line args
---   @param options: options table
--- @returns
---   @param argOut: table of remaining non-options
---   @param optOut: table of option key-value list pairs
---   @param errors: table of error messages
-function getOpt (argIn, options)
-  local noProcess = nil
-  local argOut, optOut, errors = {[0] = argIn[0]}, {}, {}
-  -- get an argument for option opt
-  local function getArg (o, opt, arg, oldarg)
-    if o.type == nil then
-      if arg ~= nil then
-        table.insert (errors, getopt.errNoArg (opt))
-      end
-    else
-      if arg == nil and argIn[1] and
-        string.sub (argIn[1], 1, 1) ~= "-" then
-        arg = argIn[1]
-        table.remove (argIn, 1)
-      end
-      if arg == nil and o.type == "Req" then
-        table.insert (errors, getopt.errReqArg (opt, o.var))
-        return nil
-      end
-    end
-    if o.func then
-      return o.func (arg, oldarg)
-    end
-    return arg or 1 -- make sure arg has a value
-  end
-  -- parse an option
-  local function parseOpt (opt, arg)
-    local o = options.name[opt]
-    if o ~= nil then
-      optOut[o.name[1]] = getArg (o, opt, arg, optOut[o.name[1]])
-    else
-      table.insert (errors, getopt.errUnrec (opt))
-    end
-  end
-  while argIn[1] do
-    local v = argIn[1]
-    table.remove (argIn, 1)
-    local _, _, dash, opt = string.find (v, "^(%-%-?)([^=-][^=]*)")
-    local _, _, arg = string.find (v, "=(.*)$")
-    if v == "--" then
-      noProcess = 1
-    elseif dash == nil or noProcess then -- non-option
-      table.insert (argOut, v)
-    else -- option
-      parseOpt (opt, arg)
-    end
-  end
-  return argOut, optOut, errors
-end
-
-
--- Options table type
-
-_G.Option = Object {_init = {
-    "name", -- list of names
-    "desc", -- description of this option
-    "type", -- type of argument (if any): Req (uired), Opt (ional)
-    "var",  -- descriptive name for the argument
-    "func"  -- optional function (newarg, oldarg) to convert argument
-    -- into actual argument, (if omitted, argument is left as it
-    -- is)
-}}
-
--- Options table constructor: adds lookup tables for the option names
-function _G.Options (t)
-  local name = {}
-  for _, v in ipairs (t) do
-    for j, s in pairs (v.name) do
-      if name[s] then
-        warn ("duplicate option '%s'", s)
-      end
-      name[s] = v
-    end
-  end
-  t.name = name
-  return t
-end
-
-
--- Error and usage information formatting
-
--- @func errNoArg: argument when there shouldn't be one
---   @paramoptStr: option string
--- @returns
---   @param err: option error
-function errNoArg (optStr)
-  return "option `" .. optStr .. "' doesn't take an argument"
-end
-
--- @func errReqArg: required argument missing
---   @param optStr: option string
---   @param desc: argument description
--- @returns
---   @param err: option error
-function errReqArg (optStr, desc)
-  return "option `" .. optStr .. "' requires an argument `" .. desc ..
-    "'"
-end
-
--- @func errUnrec: unrecognized option
---   @param optStr: option string
--- @returns
---   @param err: option error
-function errUnrec (optStr)
-  return "unrecognized option `-" .. optStr .. "'"
-end
-
-
--- @func usageInfo: produce usage info for the given options
---   @param header: header string
---   @param optDesc: option descriptors
---   @param pageWidth: width to format to [78]
--- @returns
---   @param mess: formatted string
-function usageInfo (header, optDesc, pageWidth)
-  pageWidth = pageWidth or 78
-  -- @func formatOpt: format the usage info for a single option
-  --   @param opt: the Option table
-  -- @returns
-  --   @param opts: options
-  --   @param desc: description
-  local function fmtOpt (opt)
-    local function fmtName (o)
-      return "-" .. o
-    end
-    local function fmtArg ()
-      if opt.type == nil then
-        return ""
-      elseif opt.type == "Req" then
-        return "=" .. opt.var
-      else
-        return "[=" .. opt.var .. "]"
-      end
-    end
-    local textName = list.map (fmtName, opt.name)
-    textName[1] = textName[1] .. fmtArg ()
-    return {table.concat ({table.concat (textName, ", ")}, ", "),
-      opt.desc}
-  end
-  local function sameLen (xs)
-    local n = math.max (unpack (list.map (string.len, xs)))
-    for i, v in pairs (xs) do
-      xs[i] = string.sub (v .. string.rep (" ", n), 1, n)
-    end
-    return xs, n
-  end
-  local function paste (x, y)
-    return "  " .. x .. "  " .. y
-  end
-  local function wrapper (w, i)
-    return function (s)
-             return string.wrap (s, w, i, 0)
-           end
-  end
-  local optText = ""
-  if #optDesc > 0 then
-    local cols = list.transpose (list.map (fmtOpt, optDesc))
-    local width
-    cols[1], width = sameLen (cols[1])
-    cols[2] = list.map (wrapper (pageWidth, width + 4), cols[2])
-    optText = "\n\n" ..
-      table.concat (list.mapWith (paste,
-                                  list.transpose ({sameLen (cols[1]),
-                                                    cols[2]})),
-                    "\n")
-  end
-  return header .. optText
-end
-
--- @func dieWithUsage: die emitting a usage message
-function dieWithUsage ()
-  local name = prog.name
-  prog.name = nil
-  local usage, purpose, notes = "[OPTION...] FILE...", "", ""
-  if prog.usage then
-    usage = prog.usage
-  end
-  if prog.purpose then
-    purpose = "\n" .. prog.purpose
-  end
-  if prog.notes then
-    notes = "\n\n"
-    if not string.find (prog.notes, "\n") then
-      notes = notes .. string.wrap (prog.notes)
-    else
-      notes = notes .. prog.notes
-    end
-  end
-  die (getopt.usageInfo ("Usage: " .. name .. " " .. usage .. purpose,
-                         options)
-         .. notes)
-end
-
-
--- @func processArgs: simple getOpt wrapper
--- adds -version/-v and -help/-h/-? automatically; stops program
--- if there was an error or -help was used
-_G.options = nil
-function processArgs ()
-  local totArgs = #arg
-  options = Options (list.concat (options or {},
-                                  {Option {{"version", "v"},
-                                      "show program version"},
-                                    Option {{"help", "h", "?"},
-                                      "show this help"}}
-                              ))
-  local errors
-  _G.arg, opt, errors = getopt.getOpt (arg, options)
-  if (opt.version or opt.help) and prog.banner then
-    io.stderr:write (prog.banner .. "\n")
-  end
-  if #errors > 0 or opt.help then
-    local name = prog.name
-    prog.name = nil
-    if #errors > 0 then
-      warn (table.concat (errors, "\n") .. "\n")
-    end
-    prog.name = name
-    getopt.dieWithUsage ()
-  elseif opt.version and #arg == 0 then
-    os.exit ()
-  end
-end
-
-
--- A small and hopefully enlightening example:
-if type (_DEBUG) == "table" and _DEBUG.std then
-
-  function out (o)
-    return o or io.stdout
-  end
-
-  options = Options {
-    Option {{"verbose", "v"}, "verbosely list files"},
-    Option {{"version", "release", "V", "?"}, "show version info"},
-    Option {{"output", "o"}, "dump to FILE", "Opt", "FILE", out},
-    Option {{"name", "n"}, "only dump USER's files", "Req", "USER"},
-  }
-
-  function test (cmdLine)
-    local nonOpts, opts, errors = getopt.getOpt (cmdLine, options)
-    if #errors == 0 then
-      print ("options=" .. tostring (opts) ..
-             "  args=" .. tostring (nonOpts) .. "\n")
-    else
-      print (table.concat (errors, "\n") .. "\n" ..
-             getopt.usageInfo ("Usage: foobar [OPTION...] FILE...",
-                               options))
-    end
-  end
-
-  prog = {name = "foobar"} -- in case of errors
-  -- example runs:
-  test {"foo", "-v"}
-  -- options={verbose=1}  args={1=foo,n=1}
-  test {"foo", "--", "-v"}
-  -- options={}  args={1=foo,2=-v,n=2}
-  test {"-o", "-?", "-name", "bar", "--name=baz"}
-  -- options={output=userdata(?): 0x????????,version=1,name=baz}  args={}
-  test {"-foo"}
-  -- unrecognized option `foo'
-  -- Usage: foobar [OPTION...] FILE...
-  --   -verbose, -v                verbosely list files
-  --   -version, -release, -V, -?  show version info
-  --   -output[=FILE], -o          dump to FILE
-  --   -name=USER, -n              only dump USER's files
-
-end
-
 -- @module set
 
 module ("set", package.seeall)
@@ -2074,14 +1661,21 @@ module ("set", package.seeall)
 -- @returns
 --   @param f: true if e is in set, false otherwise
 function member (s, e)
-  return s[e] == true
+  return rawget (s, e) == true
 end
 
--- @func insert: Insert an element to a set
+-- @func insert: Insert an element into a set
 --   @param s: set
 --   @param e: element
 function insert (s, e)
-  s[e] = true
+  rawset (s, e, true)
+end
+
+-- @func delete: Delete an element from a set
+--   @param s: set
+--   @param e: element
+function delete (s, e)
+  rawset (s, e, nil)
 end
 
 -- @func new: Make a list into a set
@@ -2186,6 +1780,8 @@ function equal (s, t)
 end
 
 -- @head Metamethods for sets
+-- set:method ()
+metatable.__index = _M
 -- set + table = union
 metatable.__add = union
 -- set - table = set difference
@@ -2198,3 +1794,75 @@ metatable.__div = symmetric_difference
 metatable.__le = subset
 -- set < table = proper subset
 metatable.__lt = propersubset
+
+-- POSIX
+
+module ("posix", package.seeall)
+
+
+-- @func system: Run a program like os.system, but without a shell
+--   @param file: filename of program to run
+--   @param ...: arguments to the program
+-- @returns
+--   @param status: exit code, or nil if fork or wait fails
+--   [@param reason]: error message, or exit type if wait succeeds
+function system (file, ...)
+  local pid = fork ()
+  if pid == 0 then
+    return execp (file, ...)
+  else
+    local pid, reason, status = wait (pid)
+    return status, reason -- If wait failed, status is nil & reason is error
+  end
+end
+
+-- @func euidaccess: Check permissions like access, but for euid
+-- Based on the glibc function of the same name. Does not always check
+-- for read-only file system, text busy, etc., and does not work with
+-- ACLs &c.
+--   @param file: file to check
+--   @param mode: checks to perform (as for access)
+-- @returns
+--   @param ret: 0 if access allowed; -1 otherwise (and errno is set)
+function euidaccess (file, mode)
+  local pid = getpid ()
+
+  if pid.uid == pid.euid and pid.gid == pid.egid then
+    -- If we are not set-uid or set-gid, access does the same.
+    return access (file, mode)
+  end
+
+  local stats = stat (file)
+  if not stats then
+    return -1
+  end
+
+  -- The super-user can read and write any file, and execute any file
+  -- that anyone can execute.
+  if pid.euid == 0 and ((not string.match (mode, "x")) or
+                      string.match (stats.st_mode, "x")) then
+    return 0
+  end
+
+  -- Convert to simple list of modes.
+  mode = string.gsub (mode, "[^rwx]", "")
+
+  if mode == "" then
+    return 0 -- The file exists.
+  end
+
+  -- Get the modes we need.
+  local granted = stats.st_mode:sub (1, 3)
+  if pid.euid == stats.st_uid then
+    granted = stats.st_mode:sub (7, 9)
+  elseif pid.egid == stats.st_gid or set.new (getgroups ()):member(stats.st_gid) then
+    granted = stats.st_mode:sub (4, 6)
+  end
+  granted = string.gsub (granted, "[^rwx]", "")
+
+  if string.gsub ("[^" .. granted .. "]", mode) == "" then
+    return 0
+  end
+  set_errno (EACCESS)
+  return -1
+end
