@@ -97,7 +97,7 @@ With argument @i{arg}, do this that many times.
 ]],
   true,
   function (arg)
-    return kill_text (-arg, "mark-word")
+    return kill_text (-(arg or 1), "mark-word")
   end
 )
 
