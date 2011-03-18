@@ -131,12 +131,14 @@ function term_init ()
 end
 
 function term_close ()
-  -- Clear last line.
-  term_move (curses.lines () - 1, 0)
-  term_clrtoeol ()
-  term_refresh ()
-  -- Finish with curses.
   curses.endwin ()
+end
+
+function term_reopen ()
+  curses.flushinp ()
+  -- FIXME: implement def_shell_mode in lcurses
+  --curses.def_shell_mode ()
+  curses.doupdate ()
 end
 
 local function codetokey (c)

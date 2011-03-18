@@ -57,6 +57,8 @@ zile_LUA =						\
 
 LUA_RUNTIME =						\
 	std.lua						\
+	ldb.lua						\
+	ldb-config.lua					\
 	$(zile_LUA)
 
 dist_pkgdata_DATA =					\
@@ -68,6 +70,7 @@ dist_pkgdata_DATA =					\
 PRODUCTIONSOURCES =					\
 	$(zile_SOURCES)					\
 	$(zile_LUA)					\
+	ldb-config.lua					\
 	Makefile.am ../Makefile.am ../configure.ac	\
 	*.el
 
@@ -144,9 +147,8 @@ LISP_TESTS = $(srcdir)/lisp-tests/*.el
 LISP_TESTS_OUTPUTS = $(srcdir)/lisp-tests/*.output $(srcdir)/lisp-tests/zile-only/*.output
 
 EXTRA_DIST =						\
-	$(zile_LUA)					\
+	$(LUA_RUNTIME)					\
 	zile.lua.in					\
-	std.lua						\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_ZILE_ONLY)				\
 	$(LISP_TESTS_OUTPUTS)				\

@@ -35,4 +35,5 @@ PATH_DATA = "@pkgdatadir@"
 
 package.path = PATH_DATA .. "/?.lua"
 require "loadlua"
+ldb = require "ldb"
 main ()
