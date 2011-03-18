@@ -691,8 +691,9 @@ local max_eol_check_count = 3
 local function read_file (filename)
   local h, err = io.open (filename, "r")
   if h == nil then
-    if posix.errno () ~= posix.ENOENT then
-      minibuf_write (string.format ("%s: %s", filename, err))
+    local _, err = posix.errno ()
+    if err ~= posix.ENOENT then
+      minibuf_write (string.format ("%s %s", err, posix.errno ()))
       cur_bp.readonly = true
     end
     return
