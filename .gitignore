@@ -1,8 +1,10 @@
 *~
+.sc-start*
 Makefile
 Makefile.in
 /aclocal.m4
 /autom4te.cache
+/build-aux
 /config.cache
 /config.log
 /config.status
@@ -13,8 +15,6 @@ Makefile.in
 /zile*.tar.gz
 /zile*.tar.gz.sig
 /zile*.tar.gz.directive*
-/release-notes
 /GNUmakefile
 /maint.mk
 /build-aux
-/.sc-start*

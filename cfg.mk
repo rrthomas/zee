@@ -1,6 +1,6 @@
-# Top-level Makefile.am
+# Configuration for maintainer-makefile
 #
-# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+# Copyright (c) 2011 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -19,18 +19,22 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-SUBDIRS = src
+gnulib_dir = $(GNULIB_SRCDIR)
 
-ACLOCAL_AMFLAGS = -I m4
+# Set format of NEWS
+old_NEWS_hash := 369bb8fbd9477b007c030a0453449e30
 
-EXTRA_DIST = BUGS GNUmakefile maint.mk m4/gnulib-cache.m4
+# Don't check test outputs or diff patches
+VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
-dist_pkgdata_DATA = FAQ
+local-checks-to-skip = \
+	sc_cast_of_argument_to_free \
+	sc_bindtextdomain \
+	sc_error_message_period \
+	sc_error_message_uppercase
 
-ChangeLog:
-	git2cl > ChangeLog
-
-release:
-	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
-	woger freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
-	rm -f release-notes
+# Rationale:
+#
+# sc_cast_of_argument_to_free: other warnings of this sort are useful
+# sc_bindtextdomain: Emacs isn't internationalised
+# sc_error_message_{period,uppercase}: Emacs does these

@@ -1,10 +1,26 @@
-Release 2.4.0alpha1
+* Noteworthy changes in release ?.? (????-??-??) [?]
 
-This release is completely rewritten in Lua. No doubt it introduces
-lots of bugs, but it is intended to be functionally identical to
-2.3.22.
+* Noteworthy changes in release 2.4.0alpha1 (2011-03-18) [alpha]
 
-Release 2.3.22
+** Major changes
+
+  This release is completely rewritten in Lua. No doubt it introduces
+  lots of bugs, but it is intended to be functionally identical to the
+  C version.
+
+* Noteworthy changes in release 2.3.23 (2011-03-14) [stable]
+
+** Bug fixes
+
+  {beginning,end}-of-buffer now take account of transient-mark-mode
+  (bug present since “forever”).
+
+** Build-related
+
+  Turn on more compiler and build system, and run-time checks (thanks,
+  gnulib!).
+
+* Noteworthy changes in release 2.3.22 (2011-03-03)
 
 This release fixes a bug in forward regex isearch introduced recently,
 and makes the build system use silent rules by default.
