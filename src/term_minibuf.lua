@@ -75,7 +75,7 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
     local c = getkey ()
     if c == KBD_NOKEY then
     elseif c == bit.bor (KBD_CTRL, string.byte ('z')) then
-      execute_function ("suspend_emacs")
+      execute_function ("suspend-emacs")
     elseif c == KBD_RET then
       term_move (term_height () - 1, 0)
       term_clrtoeol ()
