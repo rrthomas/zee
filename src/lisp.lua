@@ -328,9 +328,9 @@ Read function name, then read its arguments and call it.
     if bit.band (lastflag, FLAG_SET_UNIARG) ~= 0 then
       if bit.band (lastflag, FLAG_UNIARG_EMPTY) ~= 0 then
         msg = "C-u "
+      else
+        msg = string.format ("%d ", get_variable_number ("current-prefix-arg"))
       end
-    else
-      msg = string.format ("%d ", get_variable_number ("current-prefix-arg"))
     end
     msg = msg .. "M-x "
 
