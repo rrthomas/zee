@@ -30,8 +30,8 @@
 -- }
 
 -- Make a new completions table
-function completion_new ()
-  return {completions = {}, matches = {}}
+function completion_new (filename)
+  return {completions = {}, matches = {}, filename = filename}
 end
 
 -- Write the matches in `l' in a set of columns. The width of the

@@ -114,7 +114,7 @@ function minibuf_read_filename (fmt, value, file)
     if file then
       pos  = pos - #file
     end
-    p = term_minibuf_read (fmt, as, pos, completion_new (), files_history)
+    p = term_minibuf_read (fmt, as, pos, completion_new (true), files_history)
 
     if p then
       local as = p
