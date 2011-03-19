@@ -52,34 +52,26 @@ end
 -- Returns normalized path, or nil if a password entry could not be
 -- read
 function normalize_path (path)
-  -- Prepend cwd if path is relative, and ensure trailing `/'
-  if path[1] ~= "/" and path[1] ~= "~" then
-    path = (posix.getcwd () or "") .. path
-    path = string.gsub (path, "([^/])$", "%1/")
-  end
-
-  -- `//'
-  path = string.gsub (path, "^.*//+", "/")
-
-  -- Deal with `~', `~user', `..', `.'
   local comp = io.splitdir (path)
   local ncomp = {}
-  for _, v in ipairs (comp) do
-    if v == ".." then -- `..'
+
+  -- Prepend cwd if path is relative
+  if comp[1] ~= "" then
+    comp = list.concat (io.splitdir (posix.getcwd () or ""), comp)
+  end
+
+  -- Deal with `~[user]', `..', `.', `//'
+  for i, v in ipairs (comp) do
+    if v == "" and i > 1 and i < #comp then -- `//'
+      ncomp = {}
+    elseif v == ".." then -- `..'
       table.remove (ncomp)
-    else
-      if v == "~" then -- `~'
-        v = posix.getpasswd (nil, "dir")
+    elseif v ~= "." then -- not `.'
+      if v[1] == "~" then -- `~[user]'
+        ncomp = {}
+        v = posix.getpasswd (string.match (v, "^~(.+)$"), "dir")
         if v == nil then
           return nil
-        end
-      elseif v ~= "." then -- not `.'
-        local user = string.match (v, "^~(.+)$")
-        if user ~= nil then -- `~user'
-          v = posix.getpasswd (user, "dir")
-          if v == nil then
-            return nil
-          end
         end
       end
       table.insert (ncomp, v)
