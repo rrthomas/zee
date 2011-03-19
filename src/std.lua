@@ -1588,7 +1588,7 @@ end
 -- @returns
 --   @param: path1, ..., pathn: path components
 function splitdir (path)
-  return string.split (package.dirsep, path)
+  return string.split (path, package.dirsep)
 end
 
 -- @func catfile: concatenate directories into a path
