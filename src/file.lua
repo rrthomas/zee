@@ -65,37 +65,28 @@ function normalize_path (path)
   local comp = io.splitdir (path)
   local ncomp = {}
   for _, v in ipairs (comp) do
-    if v == "~" then -- `~'
-      local home = posix.getpasswd (nil, "dir")
-      if home ~= nil then
-        table.insert (ncomp, home)
-      else
-        return nil
-      end
+    if v == ".." then -- `..'
+      table.remove (ncomp)
     else
-      local user = string.match (v, "^~(.+)$")
-      if user ~= nil then -- `~user'
-        local home = posix.getpasswd (user, "dir")
-        if passwd ~= nil then
-          table.insert (ncomp, home)
-        else
+      if v == "~" then -- `~'
+        v = posix.getpasswd (nil, "dir")
+        if v == nil then
           return nil
         end
-      elseif v == ".." then -- `..'
-        table.remove (ncomp)
       elseif v ~= "." then -- not `.'
-        table.insert (ncomp, v)
+        local user = string.match (v, "^~(.+)$")
+        if user ~= nil then -- `~user'
+          v = posix.getpasswd (user, "dir")
+          if v == nil then
+            return nil
+          end
+        end
       end
+      table.insert (ncomp, v)
     end
   end
 
-  local npath = io.catdir (unpack (ncomp))
-  -- Add back trailing slash if there was one originally and it would
-  -- not be redundant (i.e. path is not "/")
-  if path[-1] == "/" and npath ~= "/" then
-    npath = npath .. "/"
-  end
-  return npath
+  return io.catdir (unpack (ncomp))
 end
 
 -- Return a `~/foo' like path if the user is under his home directory,
