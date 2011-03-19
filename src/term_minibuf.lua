@@ -219,7 +219,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
 
   local old_wp = cur_wp
   local wp = find_window ("*Completions*")
-  if cp and cp.popped_up and wp then
+  if cp and cp.poppedup and wp then
     set_current_window (wp)
     if cp.close then
       execute_function ("delete-window")
