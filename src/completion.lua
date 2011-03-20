@@ -28,6 +28,8 @@
 --   poppedup: true if the completion is currently displayed
 --   close: true if the completion window should be closed
 -- }
+-- FIXME: Use Objects here and elsewhere, and add an __index
+-- metamethod that works like strict.lua.
 
 -- Make a new completions table
 function completion_new (filename)
