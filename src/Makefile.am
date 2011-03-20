@@ -19,7 +19,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-LUA_ENV = LUA_INIT= LUA_PATH="$(srcdir)/?.lua"
+LUA_ENV = LUA_INIT= LUA_PATH="$(srcdir)/?.lua;;"
 
 bin_SCRIPTS = zile
 
