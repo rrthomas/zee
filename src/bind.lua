@@ -79,7 +79,7 @@ function process_command ()
   end
 
   if bit.band (thisflag, FLAG_SET_UNIARG) == 0 then
-    set_variable ("current-prefix-arg", tostring (1))
+    set_variable ("current-prefix-arg", "nil")
   end
 
   if _last_command ~= "undo" then

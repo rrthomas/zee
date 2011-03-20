@@ -122,7 +122,7 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
     if not n and bit.band (lastflag, FLAG_SET_UNIARG) == 0 then
       set_variable ("transient-mark-mode", get_variable_bool ("transient-mark-mode") and "nil" or "t")
     elseif not n then
-      n = get_variable ("current-prefix-arg")
+      n = get_variable_number ("current-prefix-arg")
     end
     if n then
       set_variable ("transient-mark-mode", n > 0 and "t" or "nil")

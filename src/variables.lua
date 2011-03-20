@@ -28,7 +28,7 @@ function get_variable_bp (bp, var)
 end
 
 function get_variable_number_bp (bp, var)
-  return tonumber (get_variable_bp (bp, var), 10) or 0
+  return tonumber (get_variable_bp (bp, var), 10)
   -- FIXME: Check result and signal error.
 end
 
@@ -89,4 +89,4 @@ Set a variable value to the user-specified value.
 )
 
 -- Initialise prefix arg
-set_variable ("current-prefix-arg", "1")
+set_variable ("current-prefix-arg", "nil")
