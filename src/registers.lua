@@ -93,7 +93,7 @@ Puts point before and mark after the inserted text.
       else
         set_mark_interactive ()
         regnum = reg
-        execute_with_uniarg (true, get_variable_number ("current-prefix-arg"), insert_register)
+        execute_with_uniarg (true, current_prefix_arg, insert_register)
         execute_function ("exchange_point_and_mark")
         deactivate_mark ()
       end

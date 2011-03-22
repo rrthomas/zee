@@ -178,7 +178,7 @@ local function get_char ()
 
   if #key_buf > 0 then
     c = key_buf[#key_buf]
-    table.remove (key_buf, #key_buf)
+    table.remove (key_buf)
   else
     c = curses.stdscr ():getch ()
   end

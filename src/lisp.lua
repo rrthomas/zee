@@ -26,6 +26,9 @@ leNIL = {data = "nil"}
 -- User commands
 usercmd = {}
 
+-- Initialise prefix arg
+prefix_arg = false -- Not nil, so it is picked up in environment table
+
 function Defun (name, argtypes, doc, interactive, func)
   usercmd[name] = {
     doc = texi (doc),
@@ -47,6 +50,9 @@ function Defun (name, argtypes, doc, interactive, func)
                arglist = arglist.next
                i = i + 1
              end
+             setfenv (func, setmetatable ({current_prefix_arg = prefix_arg},
+                                          {__index = _G, __newindex = _G}))
+             prefix_arg = false
              local ret = func (unpack (args))
              if not ret then
                return leNIL
@@ -178,14 +184,10 @@ end
 
 function execute_function (name, uniarg, is_uniarg, list)
   if is_uniarg then
-    list = { next = { data = uniarg and tostring (uniarg) or nil }}
+    list = {next = {data = uniarg and tostring (uniarg) or nil}}
   end
   if usercmd[name] and usercmd[name].func then
-    if type (usercmd[name].func) == "function" then
-      return usercmd[name].func (list)
-    else
-      return call_zile_c_command (name, is_uniarg, list)
-    end
+    return usercmd[name].func (list)
   else
     if macros[name] then
       process_keys (macros[name])
@@ -302,7 +304,7 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
     undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
   end
   local ret = true
-  for uni = 1, uniarg do
+  for _ = 1, uniarg do
     ret = func ()
     if not ret then
       break
@@ -329,7 +331,7 @@ Read function name, then read its arguments and call it.
       if bit.band (lastflag, FLAG_UNIARG_EMPTY) ~= 0 then
         msg = "C-u "
       else
-        msg = string.format ("%d ", get_variable_number ("current-prefix-arg"))
+        msg = string.format ("%d ", current_prefix_arg)
       end
     end
     msg = msg .. "M-x "

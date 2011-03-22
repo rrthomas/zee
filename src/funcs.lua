@@ -122,7 +122,7 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
     if not n and bit.band (lastflag, FLAG_SET_UNIARG) == 0 then
       set_variable ("transient-mark-mode", get_variable_bool ("transient-mark-mode") and "nil" or "t")
     elseif not n then
-      n = get_variable_number ("current-prefix-arg")
+      n = current_prefix_arg
     end
     if n then
       set_variable ("transient-mark-mode", n > 0 and "t" or "nil")
@@ -253,7 +253,7 @@ by 4 each time.
     end
 
     if ok == leT then
-      set_variable ("current-prefix-arg", tostring (arg * sgn))
+      prefix_arg = arg * sgn
       thisflag = bit.bor (thisflag, FLAG_SET_UNIARG)
       minibuf_clear ()
     end
@@ -354,7 +354,7 @@ Just C-u as argument means to use the current column.
   function (n)
     if not n and interactive then
       if bit.band (lastflag, FLAG_SET_UNIARG) ~= 0 then
-        n = get_variable_number ("current-prefix-arg")
+        n = current_prefix_arg
       else
         n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", cur_bp.pt.o))
         if not n then -- cancelled
@@ -674,7 +674,7 @@ Precisely, if point is on line I, move to the start of line I + N.
 ]],
   true,
   function (n)
-    n = n or get_variable_number ("current-prefix-arg")
+    n = n or current_prefix_arg
     if n ~= 0 then
       execute_function ("beginning-of-line")
       return execute_with_uniarg (false, n, next_line, previous_line)

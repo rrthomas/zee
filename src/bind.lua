@@ -48,7 +48,7 @@ Whichever character you type to run this command is inserted.
 ]],
   true,
   function ()
-    return execute_with_uniarg (true, get_variable_number ("current-prefix-arg"), self_insert_command);
+    return execute_with_uniarg (true, current_prefix_arg, self_insert_command)
   end
 )
 
@@ -65,7 +65,7 @@ function process_command ()
   if function_exists (name) then
     _this_command = name
     interactive = true
-    execute_function (name, get_variable_number ("current-prefix-arg") or 1, bit.band (lastflag, FLAG_SET_UNIARG) ~= 0)
+    execute_function (name, prefix_arg or 1, bit.band (lastflag, FLAG_SET_UNIARG) ~= 0)
     interactive = false
     _last_command = _this_command
   else
@@ -76,10 +76,6 @@ function process_command ()
   -- before the function call, to cope with start-kbd-macro.
   if bit.band (lastflag, FLAG_DEFINING_MACRO) ~= 0 and bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
     add_cmd_to_macro ()
-  end
-
-  if bit.band (thisflag, FLAG_SET_UNIARG) == 0 then
-    set_variable ("current-prefix-arg", "nil")
   end
 
   if _last_command ~= "undo" then
@@ -119,7 +115,7 @@ function do_binding_completion (as)
   local bs = ""
 
   if bit.band (lastflag, FLAG_SET_UNIARG) ~= 0 then
-    local arg = get_variable_number ("current-prefix-arg")
+    local arg = prefix_arg
 
     if arg < 0 then
       bs = bs .. "- "

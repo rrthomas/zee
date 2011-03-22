@@ -26,7 +26,7 @@ Move point to beginning of current line.
 ]],
   true,
   function ()
-    cur_bp.pt = line_beginning_position (get_variable_number ("current-prefix-arg") or 1)
+    cur_bp.pt = line_beginning_position (current_prefix_arg or 1)
     cur_bp.goalc = 0
   end
 )
@@ -38,7 +38,7 @@ Move point to end of current line.
 ]],
   true,
   function ()
-    cur_bp.pt = line_end_position (get_variable_number ("current-prefix-arg") or 1)
+    cur_bp.pt = line_end_position (current_prefix_arg or 1)
     cur_bp.goalc = 1e100 -- FIXME: Use a constant
   end
 )
@@ -203,7 +203,7 @@ Position 1 is the beginning of the buffer.
           ok = execute_function ("keyboard-quit")
           break
         end
-        n = tonumber (ms, 10);
+        n = tonumber (ms, 10)
         if not n then
           ding ()
         end
@@ -228,7 +228,7 @@ Goto line arg, counting from line 1 at beginning of buffer.
 ]],
   true,
   function (n)
-    n = n or get_variable_number ("current-prefix-arg")
+    n = n or current_prefix_arg
     if not n and interactive then
       n = minibuf_read_number ("Goto line: ")
       if n == "" then
@@ -263,7 +263,7 @@ column, or at the end of the line if it is not long enough.
   true,
   function (n)
     local ok = leT
-    n = n or get_variable_number ("current-prefix-arg") or 1
+    n = n or current_prefix_arg or 1
     if n < 0 or not bobp () then
       ok = execute_with_uniarg (false, n, previous_line, next_line)
     end
@@ -284,7 +284,7 @@ column, or at the end of the line if it is not long enough.
   true,
   function (n)
     local ok = leT
-    n = n or get_variable_number ("current-prefix-arg") or 1
+    n = n or current_prefix_arg or 1
     if n < 0 or not eobp () then
       ok = execute_with_uniarg (false, n, next_line, previous_line)
     end

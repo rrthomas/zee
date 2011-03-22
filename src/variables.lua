@@ -87,6 +87,3 @@ Set a variable value to the user-specified value.
     return ok
   end
 )
-
--- Initialise prefix arg
-set_variable ("current-prefix-arg", "nil")

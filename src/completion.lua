@@ -206,7 +206,7 @@ function minibuf_read_variable_name (fmt)
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No variable name given",
-                                   "Undefined variable name `%s'");
+                                   "Undefined variable name `%s'")
 end
 
 function make_buffer_completion ()

@@ -137,7 +137,7 @@ defining others, use @kbd{M-x name-last-kbd-macro}.
     end
 
     undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-    for _ = 1, get_variable_number ("current-prefix-arg") or 1 do
+    for _ = 1, current_prefix_arg or 1 do
       process_keys (cur_mp)
     end
     undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
