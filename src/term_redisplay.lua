@@ -283,9 +283,7 @@ local function draw_status_line (line, wp)
   local pt = window_pt (wp)
   term_attrset (FONT_REVERSE)
   term_move (line, 0)
-  for i = 1, wp.ewidth do
-    term_addstr ('-')
-  end
+  term_addstr (string.rep ('-', wp.ewidth))
 
   local eol_type
   if cur_bp.eol == coding_eol_cr then
