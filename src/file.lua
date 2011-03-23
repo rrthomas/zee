@@ -640,7 +640,8 @@ Puts mark after the inserted text.
 
     if not buffer then
       local cp = make_buffer_completion ()
-      buffer = minibuf_read_completion (string.format ("Insert buffer (default %s): ", def_bp.name), "", cp)
+      buffer = minibuf_read (string.format ("Insert buffer (default %s): ", def_bp.name),
+                             "", cp, buffer_name_history)
       if not buffer then
         ok = execute_function ("keyboard-quit")
       end

@@ -19,6 +19,9 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+buffer_name_history = history_new ()
+
+
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
 -- The allocation of the first empty line is done here to simplify
@@ -419,7 +422,8 @@ With a nil argument, kill the current buffer.
 
     if not buffer then
       local cp = make_buffer_completion ()
-      buffer = minibuf_read_completion (string.format ("Kill buffer (default %s): ", cur_bp.name), "", cp)
+      buffer = minibuf_read (string.format ("Kill buffer (default %s): ", cur_bp.name),
+                             "", cp, buffer_name_history)
       if not buffer then
         ok = execute_command ("keyboard-quit")
       end
@@ -460,7 +464,8 @@ Select buffer @i{buffer} in the current window.
 
     if not buffer then
       local cp = make_buffer_completion ()
-      buffer = minibuf_read_completion (string.format ("Switch to buffer (default %s): ", bp.name), "", cp)
+      buffer = minibuf_read (string.format ("Switch to buffer (default %s): ", bp.name),
+                             "", cp, buffer_name_history)
 
       if not buffer then
         ok = execute_function ("keyboard-quit")

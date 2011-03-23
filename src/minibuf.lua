@@ -163,8 +163,8 @@ function minibuf_read_yn (fmt)
 end
 
 -- Read a string from the minibuffer.
-function minibuf_read (fmt, value)
-  return term_minibuf_read (fmt, value or "", -1)
+function minibuf_read (fmt, value, cp, hp)
+  return term_minibuf_read (fmt, value, -1, cp, hp)
 end
 
 -- Read a non-negative number from the minibuffer.
@@ -186,9 +186,4 @@ function minibuf_read_number (fmt)
   until n
 
   return n
-end
-
--- FIXME: Make all callers use history
-function minibuf_read_completion (fmt, value, cp, hp)
-  return term_minibuf_read (fmt, value, -1, cp, hp)
 end
