@@ -22,7 +22,7 @@
 
 -- Marker datatype
 
-function marker_new ()
+local function marker_new ()
   return {}
 end
 
