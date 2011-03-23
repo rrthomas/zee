@@ -39,7 +39,7 @@ end
 function cancel_kbd_macro ()
   cmd_mp = {}
   cur_mp = {}
-  thisflag = bit.band (thisflag, bit.bnot (FLAG_DEFINING_MACRO))
+  thisflag.defining_macro = false
 end
 
 -- Add macro names to a list.
@@ -59,7 +59,7 @@ Use @kbd{M-x name-last-kbd-macro} to give it a permanent name.
 ]],
   true,
   function ()
-    if bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
+    if thisflag.defining_macro then
       minibuf_error ("Already defining a keyboard macro")
       return leNIL
     end
@@ -70,7 +70,7 @@ Use @kbd{M-x name-last-kbd-macro} to give it a permanent name.
 
     minibuf_write ("Defining keyboard macro...")
 
-    thisflag = bit.bor (thisflag, FLAG_DEFINING_MACRO)
+    thisflag.defining_macro = true
     cur_mp = {}
   end
 )
@@ -84,12 +84,12 @@ The macro is now available for use via @kbd{C-x e}.
 ]],
   true,
   function ()
-    if bit.band (thisflag, FLAG_DEFINING_MACRO) == 0 then
+    if not thisflag.defining_macro then
       minibuf_error ("Not defining a keyboard macro")
       return leNIL
     end
 
-    thisflag = bit.band (thisflag, bit.bnot (FLAG_DEFINING_MACRO))
+    thisflag.defining_macro = false
   end
 )
 

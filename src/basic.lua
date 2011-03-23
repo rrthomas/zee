@@ -48,7 +48,7 @@ local function move_char (dir)
     cur_bp.pt.o = cur_bp.pt.o + dir
     return true
   elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
-    thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+    thisflag.need_resync = true
     if dir > 0 then
       cur_bp.pt.p = cur_bp.pt.p.next
     else
@@ -181,7 +181,7 @@ local function move_line (n)
   end
   goto_goalc ()
 
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 
   return ok
 end
@@ -297,7 +297,7 @@ column, or at the end of the line if it is not long enough.
 -- Move point to the beginning of the buffer; do not touch the mark.
 function gotobob ()
   cur_bp.pt = point_min ()
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 end
 
 Defun ("beginning-of-buffer",
@@ -317,7 +317,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 -- Move point to the end of the buffer; do not touch the mark.
 function gotoeob ()
   cur_bp.pt = point_max ()
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 end
 
 Defun ("end-of-buffer",

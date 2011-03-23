@@ -308,7 +308,7 @@ local function draw_status_line (line, wp)
   if wp.bp.overwrite then
     as = as .. " Ovwrt"
   end
-  if bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
+  if thisflag.defining_macro then
     as = as .. " Def"
   end
   if wp.bp.isearch then

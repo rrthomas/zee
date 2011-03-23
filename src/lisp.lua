@@ -327,8 +327,8 @@ Read function name, then read its arguments and call it.
     local name
     local msg = ""
 
-    if bit.band (lastflag, FLAG_SET_UNIARG) ~= 0 then
-      if bit.band (lastflag, FLAG_UNIARG_EMPTY) ~= 0 then
+    if lastflag.set_uniarg then
+      if lastflag.uniarg_empty then
         msg = "C-u "
       else
         msg = string.format ("%d ", current_prefix_arg)

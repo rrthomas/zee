@@ -32,7 +32,7 @@ end
 function xgetkey (mode, timeout)
   _last_key = term_xgetkey (mode, timeout)
 
-  if bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
+  if thisflag.defining_macro then
     add_key_to_cmd (_last_key)
   end
 
@@ -54,7 +54,7 @@ end
 function ungetkey (key)
   pushkey (key)
 
-  if bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
+  if thisflag.defining_macro then
     remove_key_from_cmd ()
   end
 end

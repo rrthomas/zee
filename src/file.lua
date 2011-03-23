@@ -460,7 +460,7 @@ Interactively, confirmation is required unless you supply a prefix argument.
   true,
   function ()
     return write_buffer (cur_bp, true,
-                         arglist ~= nil and bit.band (lastflag, FLAG_SET_UNIARG) == 0,
+                         arglist ~= nil and not lastflag.set_uniarg,
                          nil, "Write file: ")
   end
 )
@@ -556,7 +556,7 @@ Offer to save each buffer, then kill this Zile process.
       bp = bp.next
     end
 
-    thisflag = bit.bor (thisflag, FLAG_QUIT)
+    thisflag.quit = true
   end
 )
 
@@ -765,7 +765,7 @@ function find_file (filename)
   switch_to_buffer (bp)
   read_file (filename)
 
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 
   return true
 end

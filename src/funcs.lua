@@ -107,7 +107,7 @@ Put the mark where point is now, and point where the mark is now.
       activate_mark ()
     end
 
-    thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+    thisflag.need_resync = true
   end
 )
 
@@ -119,7 +119,7 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
 ]],
   true,
   function (n)
-    if not n and bit.band (lastflag, FLAG_SET_UNIARG) == 0 then
+    if not n and not lastflag.set_uniarg then
       set_variable ("transient-mark-mode", get_variable_bool ("transient-mark-mode") and "nil" or "t")
     elseif not n then
       n = current_prefix_arg
@@ -198,7 +198,7 @@ by 4 each time.
     -- Need to process key used to invoke universal-argument.
     pushkey (lastkey ())
 
-    thisflag = bit.bor (thisflag, FLAG_UNIARG_EMPTY)
+    thisflag.uniarg_empty = true
 
     local i = 0
     local arg = 1
@@ -216,7 +216,7 @@ by 4 each time.
       -- Digit pressed.
       elseif string.match (string.char (bit.band (key, 0xff)), "%d") then
         local digit = bit.band (key, 0xff) - string.byte ('0')
-        thisflag = bit.band (thisflag, bit.bnot (FLAG_UNIARG_EMPTY))
+        thisflag.uniarg_empty = false
 
         if bit.band (key, KBD_META) ~= 0 then
           as = as .. "ESC"
@@ -244,7 +244,7 @@ by 4 each time.
           as = as .. " -"
           -- The default negative arg is -1, not -4.
           arg = 1
-          thisflag = bit.band (thisflag, bit.bnot (FLAG_UNIARG_EMPTY))
+          thisflag.uniarg_empty = false
         end
       else
         ungetkey (key)
@@ -254,7 +254,7 @@ by 4 each time.
 
     if ok == leT then
       prefix_arg = arg * sgn
-      thisflag = bit.bor (thisflag, FLAG_SET_UNIARG)
+      thisflag.set_uniarg = true
       minibuf_clear ()
     end
 
@@ -353,7 +353,7 @@ Just C-u as argument means to use the current column.
   true,
   function (n)
     if not n and interactive then
-      if bit.band (lastflag, FLAG_SET_UNIARG) ~= 0 then
+      if lastflag.set_uniarg then
         n = current_prefix_arg
       else
         n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", cur_bp.pt.o))
@@ -505,7 +505,7 @@ says to insert the output in the current buffer.
       cmd = minibuf_read_shell_command ()
     end
     if not insert then
-      insert = bit.band (lastflag, FLAG_SET_UNIARG)
+      insert = lastflag.set_uniarg
     end
 
     if cmd then
@@ -539,7 +539,7 @@ The output is available in that buffer in both cases.
       cmd = minibuf_read_shell_command ()
     end
     if not insert then
-      insert = bit.band (lastflag, FLAG_SET_UNIARG)
+      insert = lastflag.set_uniarg
     end
 
     if cmd then

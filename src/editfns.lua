@@ -53,7 +53,7 @@ end
 
 -- Signal an error, and abort any ongoing macro definition.
 function ding ()
-  if bit.band (thisflag, FLAG_DEFINING_MACRO) ~= 0 then
+  if thisflag.defining_macro then
     cancel_kbd_macro ()
   end
 

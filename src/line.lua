@@ -225,7 +225,7 @@ local function intercalate_newline ()
   adjust_markers (cur_bp.pt.p.next, cur_bp.pt.p, cur_bp.pt.o, 1, 0)
 
   cur_bp.modified = true
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 
   return true
 end
@@ -288,7 +288,7 @@ function delete_char ()
 
     adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
     cur_bp.last_line = cur_bp.last_line - 1
-    thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+    thisflag.need_resync = true
   else
     local as = cur_bp.pt.p.text
     as = string.sub (as, 1, cur_bp.pt.o) .. string.sub (as, cur_bp.pt.o + 2)

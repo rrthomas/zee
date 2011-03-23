@@ -227,7 +227,7 @@ function switch_to_buffer (bp)
   -- Move the buffer to head.
   move_buffer_to_head (bp)
 
-  thisflag = bit.bor (thisflag, FLAG_NEED_RESYNC)
+  thisflag.need_resync = true
 end
 
 -- Create a buffer name using the file name.
