@@ -80,9 +80,9 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
     else
       -- Complete partial words if possible.
       local comp = completion_try (cp, ms)
-      if comp == COMPLETION_MATCHED then
+      if comp == "match" then
         ms = cp.match
-      elseif comp == COMPLETION_NONUNIQUE then
+      elseif comp == "incomplete" then
         popup_completion (cp)
       end
 

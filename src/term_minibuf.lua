@@ -58,11 +58,11 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
 
   while true do
     local s
-    if lasttab == COMPLETION_MATCHEDNONUNIQUE then
+    if lasttab == "matches" then
       s = " [Complete, but not unique]"
-    elseif lasttab == COMPLETION_NOTMATCHED then
+    elseif lasttab == "no match" then
       s = " [No match]"
-    elseif lasttab == COMPLETION_MATCHED then
+    elseif lasttab == "match" then
       s = " [Sole completion]"
     else
       s = ""
@@ -162,15 +162,15 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
       if not cp then
         ding ()
       else
-        if lasttab ~= -1 and lasttab ~= COMPLETION_NOTMATCHED and cp.poppedup then
+        if lasttab ~= -1 and lasttab ~= "no match" and cp.poppedup then
           completion_scroll_up ()
           thistab = lasttab
         else
           thistab = completion_try (cp, as)
-          if thistab == COMPLETION_NONUNIQUE or thistab == COMPLETION_MATCHEDNONUNIQUE then
+          if thistab == "incomplete" or thistab == "matches" then
             popup_completion (cp)
           end
-          if thistab == COMPLETION_NONUNIQUE or thistab == COMPLETION_MATCHEDNONUNIQUE or thistab == COMPLETION_MATCHED then
+          if thistab == "incomplete" or thistab == "matches" or thistab == "match" then
             local bs = ""
             if cp.filename then
               bs = bs .. cp.path .. string.sub (cp.match, 1, cp.matchsize)
@@ -180,7 +180,7 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
               as = bs
               pos = #as
             end
-          elseif thistab == COMPLETION_NOTMATCHED then
+          elseif thistab == "no match" then
             ding ()
           end
         end

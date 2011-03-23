@@ -133,10 +133,6 @@ end
 --
 -- To format the completions for a popup, call completion_write
 -- after this function.
-COMPLETION_NOTMATCHED = 0
-COMPLETION_MATCHED = 1
-COMPLETION_MATCHEDNONUNIQUE = 2
-COMPLETION_NONUNIQUE = 3
 
 function completion_try (cp, search)
   cp.matches = {}
@@ -163,15 +159,15 @@ function completion_try (cp, search)
   cp.match = string.sub (match, 1, prefix_len)
   cp.matchsize = prefix_len
 
-  local ret = COMPLETION_NONUNIQUE
+  local ret = "incomplete"
   if #cp.matches == 0 then
-    ret = COMPLETION_NOTMATCHED
+    ret = "no match"
   elseif #cp.matches == 1 then
-    ret = COMPLETION_MATCHED
+    ret = "match"
   elseif #cp.matches > 1 then
     local len = math.min (#search, #cp.match)
     if len > 0 and string.sub (cp.match, 1, len) == string.sub (search, 1, len) then
-      ret = COMPLETION_MATCHEDNONUNIQUE
+      ret = "matches"
     end
   end
 
