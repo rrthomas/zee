@@ -99,7 +99,7 @@ local function outch (c, font, x)
 
   if c == string.byte ('\t') then
     for w = cur_tab_width - x % cur_tab_width, 1, -1 do
-      term_addch (string.byte (' '))
+      term_addstr (' ')
       x = x + 1
       if x >= tw then
         break
@@ -128,7 +128,7 @@ end
 local function draw_end_of_line (line, wp, lineno, rp, highlight, x, i)
   if x >= term_width () then
     term_move (line, term_width () - 1)
-    term_addch (string.byte ('$'))
+    term_addstr ('$')
   elseif highlight == true then
     while x < wp.ewidth do
       if in_region (lineno, i, rp) then
@@ -206,7 +206,7 @@ local function draw_window (topline, wp)
 
       if wp.start_column > 0 then
         term_move (i, 0)
-        term_addch (string.byte ('$'))
+        term_addstr ('$')
       end
 
       lp = lp.next
@@ -284,7 +284,7 @@ local function draw_status_line (line, wp)
   term_attrset (FONT_REVERSE)
   term_move (line, 0)
   for i = 1, wp.ewidth do
-    term_addch (string.byte ('-'))
+    term_addstr ('-')
   end
 
   local eol_type

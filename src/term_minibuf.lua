@@ -28,7 +28,7 @@ local function draw_minibuf_read (prompt, value, match, pointo)
 
   if #prompt + pointo + 1 >= w then
     margin = margin + 1
-    term_addch (string.byte ("$"))
+    term_addstr ('$')
     n = pointo - pointo % (w - #prompt - 2)
   end
 
@@ -37,7 +37,7 @@ local function draw_minibuf_read (prompt, value, match, pointo)
 
   if #value - n >= w - #prompt - margin then
     term_move (h - 1, w - 1)
-    term_addch (string.byte ("$"))
+    term_addstr ('$')
   end
 
   term_move (h - 1, #prompt + margin - 1 + pointo % (w - #prompt - margin))
@@ -202,10 +202,7 @@ end
 function term_minibuf_write (s)
   term_move (term_height () - 1, 0)
   term_clrtoeol ()
-
-  for i = 1, math.min (#s, term_width ()) do
-    term_addch (string.byte (s, i))
-  end
+  term_addstr (string.sub (s, 1, math.min (#s, term_width ())))
 end
 
 function term_minibuf_read (prompt, value, pos, cp, hp)
