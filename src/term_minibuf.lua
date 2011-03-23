@@ -171,15 +171,13 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
             popup_completion (cp)
           end
           if thistab == "incomplete" or thistab == "matches" or thistab == "match" then
-            local bs = ""
-            if cp.filename then
-              bs = bs .. cp.path .. string.sub (cp.match, 1, cp.matchsize)
-              if string.sub (as, 1, #bs) ~= bs then
-                thistab = -1
-              end
-              as = bs
-              pos = #as
+            local bs = cp.filename and cp.path or ""
+            bs = bs .. cp.match
+            if string.sub (as, 1, #bs) ~= bs then
+              thistab = -1
             end
+            as = bs
+            pos = #as
           elseif thistab == "no match" then
             ding ()
           end
