@@ -45,12 +45,11 @@ local function move_marker (marker, bp, pt)
 end
 
 function copy_marker (m)
-  local marker
   if m then
-    marker = marker_new ()
+    local marker = marker_new ()
     move_marker (marker, m.bp, m.pt)
+    return marker
   end
-  return marker
 end
 
 function point_marker ()
