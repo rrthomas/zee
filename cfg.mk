@@ -27,8 +27,9 @@ old_NEWS_hash := 4c761b26796253ccca6617431ead33bc
 # Don't check test outputs or diff patches
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
+exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
+
 local-checks-to-skip = \
-	sc_cast_of_argument_to_free \
 	sc_bindtextdomain \
 	sc_error_message_period \
 	sc_error_message_uppercase
