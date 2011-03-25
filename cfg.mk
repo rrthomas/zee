@@ -24,9 +24,10 @@ gnulib_dir = $(GNULIB_SRCDIR)
 # Set format of NEWS
 old_NEWS_hash := 4c761b26796253ccca6617431ead33bc
 
-# Don't check test outputs or diff patches
+# Don't check test outputs
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.output$$
 
+# Lua-ish, not GNU-ish, error messages in some internal files
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
 
 local-checks-to-skip = \
