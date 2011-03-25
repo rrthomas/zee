@@ -30,7 +30,21 @@ dist_pkgdata_DATA = FAQ
 ChangeLog:
 	git2cl > ChangeLog
 
+# FIXME: Re-integrate woger's gnu method and the following with output of make {alpha,beta,stable}
+
+# Wait for a URL to become available:
+#   u=http://ftp.gnu.org/gnu/vc-dwim/vc-dwim-1.4.tar
+#   for i in $(seq 100); do echo $i;
+#     wget -O - $u.xz.sig > /dev/null && break; sleep 10
+#   done
+
+# Here's a snippet to download and verify xz and gz signatures:
+#   u=http://ftp.gnu.org/gnu/vc-dwim/vc-dwim-1.4.tar
+#   for i in xz gz xz.sig gz.sig; do
+#     wget --quiet $u.$i || break
+#     case $i in *.sig) gpg --verify $(basename $u).$i;; esac
+#   done
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
-	woger freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
+	woger freshmeat,gnu $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
