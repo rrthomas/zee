@@ -126,7 +126,7 @@ creating one if none already exists.
 
     if not ms then
       ok = execute_function ("keyboard-quit")
-    elseif ms == "" then
+    elseif ms ~= "" then
       ok = bool_to_lisp (find_file (ms))
     end
 
