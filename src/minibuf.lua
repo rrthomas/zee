@@ -103,30 +103,26 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
 end
 
 -- Read a filename from the minibuffer.
-function minibuf_read_filename (fmt, value, file)
-  local p
+function minibuf_read_filename (fmt, name, file)
+  name = normalize_path (name)
+  if name then
+    name = compact_path (name)
 
-  local as = value
-  if normalize_path (as) then
-    as = compact_path (as)
-
-    local pos = #as
+    local pos = #name
     if file then
       pos  = pos - #file
     end
-    p = term_minibuf_read (fmt, as, pos, completion_new (true), files_history)
+    name = term_minibuf_read (fmt, name, pos, completion_new (true), files_history)
 
-    if p then
-      local as = p
-      if normalize_path (as) then
-        add_history_element (files_history, p)
-      else
-        p = nil
+    if name then
+      name = normalize_path (name)
+      if name then
+        add_history_element (files_history, name)
       end
     end
   end
 
-  return p
+  return name
 end
 
 function minibuf_read_yesno (fmt)
