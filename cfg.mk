@@ -25,7 +25,7 @@ gnulib_dir = $(GNULIB_SRCDIR)
 old_NEWS_hash := 4c761b26796253ccca6617431ead33bc
 
 # Don't check test outputs or diff patches
-VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
+VC_LIST_ALWAYS_EXCLUDE_REGEX = \.output$$
 
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
 
@@ -36,6 +36,5 @@ local-checks-to-skip = \
 
 # Rationale:
 #
-# sc_cast_of_argument_to_free: other warnings of this sort are useful
 # sc_bindtextdomain: Emacs isn't internationalised
 # sc_error_message_{period,uppercase}: Emacs does these
