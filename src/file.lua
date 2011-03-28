@@ -19,6 +19,8 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+-- FIXME: Warn when file changes on disk
+
 
 -- Formats of end-of-line
 coding_eol_lf = "\n"
@@ -242,7 +244,7 @@ Set mark after the inserted text.
 -- Write buffer to given file name with given mode.
 local function raw_write_to_disk (bp, filename, mode)
   local ret = true
-  local h = io.open (filename, "w") -- FIXME: mode
+  local h = io.open (filename, "w") -- FIXME: use posix.open, and use mode
 
   if not h then
     return false
