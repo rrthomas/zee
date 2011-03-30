@@ -306,12 +306,12 @@ Defun ("list-buffers",
 [[
 Display a list of names of existing buffers.
 The list is displayed in a buffer named `*Buffer List*'.
-Note that buffers with names starting with spaces are omitted.
 
-@itemize -
-The @samp{M} column contains a @samp{*} for buffers that are modified.
-The @samp{R} column contains a @samp{%} for buffers that are read-only.
-@end itemize
+The C column has a `.' for the buffer from which you came.
+The R column has a `%' if the buffer is read-only.
+The M column has a `*' if it is modified.
+After this come the buffer name, its size in characters,
+its major mode, and the visited file name (if any).
 ]],
   true,
   function ()
