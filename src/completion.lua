@@ -205,10 +205,8 @@ end
 
 function make_buffer_completion ()
   local cp = completion_new ()
-  local bp = head_bp
-  while bp do
+  for _, bp in ipairs (buffers) do
     table.insert (cp.completions, bp.buffer_name)
-    bp = bp.next
   end
 
   return cp

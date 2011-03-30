@@ -283,18 +283,22 @@ local function write_buffers_list (old_wp)
   insert_string ("CRM Buffer                Size  Mode             File\n")
   insert_string ("--- ------                ----  ----             ----\n")
 
+  -- Rotate buffer list to get current buffer at head.
+  local bufs = table.clone (buffers)
+  for i = #buffers, 1, -1 do
+    if buffers[i] == old_wp.bp then
+      break
+    end
+    table.insert (bufs, 1, table.remove (bufs))
+  end
+
   -- Print buffers.
-  local bp = old_wp.bp
-  repeat
+  for _, bp in ripairs (bufs) do
     -- Print all buffers except this one (the *Buffer List*).
     if cur_bp ~= bp then
       print_buf (old_wp.bp, bp)
     end
-    bp = bp.next
-    if not bp then
-      bp = head_bp
-    end
-  until bp == old_wp.bp
+  end
 end
 
 Defun ("list-buffers",

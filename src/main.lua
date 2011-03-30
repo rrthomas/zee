@@ -98,8 +98,6 @@ head_wp = nil
 
 -- The current buffer
 cur_bp = nil
--- The first buffer in list
-head_bp = nil
 
 -- The global editor flags.
 thisflag = {}
@@ -135,25 +133,12 @@ local function about_screen ()
 end
 
 local function setup_main_screen ()
-  local last_bp
-  local c = 0
-
-  local bp = head_bp
-  while bp do
-    -- Last buffer that isn't *scratch*.
-    if bp.next and bp.next.next == nil then
-      last_bp = bp
-    end
-    c = c + 1
-    bp = bp.next
-  end
-
   -- *scratch* and two files.
-  if c == 3 then
+  if #buffers == 3 then
     execute_function ("split-window")
-    switch_to_buffer (last_bp)
+    switch_to_buffer (buffers[2])
     execute_function ("other-window")
-  elseif c > 3 then
+  elseif #buffers > 3 then
     -- More than two files.
     execute_function ("list-buffers")
   end
