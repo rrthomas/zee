@@ -22,24 +22,24 @@
 
 -- Marker datatype
 
-function unchain_marker (marker)
-  if marker.bp then
-    marker.bp.markers[marker] = nil
-  end
-end
-
 local function marker_new (bp, pt)
   local marker = {bp = bp, pt = table.clone (pt)}
   bp.markers[marker] = true
   return marker
 end
 
-function copy_marker (m)
+local function copy_marker (m)
   return marker_new (m.bp, m.pt)
 end
 
 function point_marker ()
   return marker_new (cur_bp, cur_bp.pt)
+end
+
+function unchain_marker (marker)
+  if marker.bp then
+    marker.bp.markers[marker] = nil
+  end
 end
 
 
