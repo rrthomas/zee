@@ -407,6 +407,19 @@ With a nil argument, kill the current buffer.
   end
 )
 
+local function buffer_next (this_bp)
+  for i, bp in ipairs (buffers) do
+    if bp == this_bp then
+      if i > 1 then
+        return buffers[i - 1]
+      else
+        return buffers[#buffers]
+      end
+      break
+    end
+  end
+end
+
 Defun ("switch-to-buffer",
        {"string"},
 [[
@@ -415,7 +428,7 @@ Select buffer @i{buffer} in the current window.
   true,
   function (buffer)
     local ok = leT
-    local bp = cur_bp.next or buffers[#buffers]
+    local bp = buffer_next (cur_bp)
 
     if not buffer then
       local cp = make_buffer_completion ()
