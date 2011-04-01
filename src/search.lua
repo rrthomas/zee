@@ -199,9 +199,13 @@ local function isearch (forward, regexp)
   local last = true
   local buf = ""
   local pattern = ""
-  local old_mark = copy_marker (cur_wp.bp.mark)
   local start = table.clone (cur_bp.pt)
   local cur = table.clone (start)
+
+  local old_mark
+  if cur_wp.bp.mark then
+    old_mark = marker_copy (cur_wp.bp.mark)
+  end
 
   -- I-search mode.
   cur_wp.bp.isearch = true

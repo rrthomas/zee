@@ -1,6 +1,6 @@
 -- Marker facility functions
 --
--- Copyright (c) 2010 Free Software Foundation, Inc.
+-- Copyright (c) 2010, 2011 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -22,40 +22,24 @@
 
 -- Marker datatype
 
-local function marker_new ()
-  return {}
-end
-
 function unchain_marker (marker)
-  if not marker.bp then
-    return
+  if marker.bp then
+    marker.bp.markers[marker] = nil
   end
-
-  marker.bp.markers[marker] = nil
 end
 
-local function move_marker (marker, bp, pt)
-  -- Switch marker's buffer.
-  unchain_marker (marker)
-  marker.bp = bp
+local function marker_new (bp, pt)
+  local marker = {bp = bp, pt = table.clone (pt)}
   bp.markers[marker] = true
-
-  -- Change the point.
-  marker.pt = table.clone (pt)
+  return marker
 end
 
 function copy_marker (m)
-  if m then
-    local marker = marker_new ()
-    move_marker (marker, m.bp, m.pt)
-    return marker
-  end
+  return marker_new (m.bp, m.pt)
 end
 
 function point_marker ()
-  local marker = marker_new ()
-  move_marker (marker, cur_bp, table.clone (cur_bp.pt))
-  return marker
+  return marker_new (cur_bp, cur_bp.pt)
 end
 
 
@@ -70,8 +54,7 @@ function push_mark ()
     table.insert (mark_ring, copy_marker (cur_bp.mark))
   else
     -- Save an invalid mark.
-    local m = marker_new ()
-    move_marker (m, cur_bp, point_min ())
+    local m = marker_new (cur_bp, point_min ())
     m.pt.p = nil
     table.insert (mark_ring, m)
   end
@@ -85,7 +68,6 @@ function pop_mark ()
   if m.bp.mark then
     unchain_marker (m.bp.mark)
   end
-
   m.bp.mark = copy_marker (m)
 
   table.remove (mark_ring, #mark_ring)
@@ -94,9 +76,8 @@ end
 
 -- Set the mark to point.
 function set_mark ()
-  if cur_bp.mark == nil then
-    cur_bp.mark = point_marker ()
-  else
-    move_marker (cur_bp.mark, cur_bp, table.clone (cur_bp.pt))
+  if cur_bp.mark then
+    unchain_marker (cur_bp.mark)
   end
+  cur_bp.mark = point_marker ()
 end
