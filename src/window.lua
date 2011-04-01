@@ -237,7 +237,7 @@ This command selects the window one step away in that order.
 ]],
   true,
   function ()
-    set_current_window (window_next (wp))
+    set_current_window (window_next (cur_wp))
   end
 )
 
