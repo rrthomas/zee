@@ -179,7 +179,7 @@ end
 -- Popup the completion window.
 function popup_completion (cp)
   cp.poppedup = true
-  if head_wp.next == nil then
+  if #windows == 1 then
     cp.close = true
   end
 

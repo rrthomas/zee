@@ -327,8 +327,7 @@ function term_redisplay ()
 
   calculate_start_column (cur_wp)
 
-  local wp = head_wp
-  while wp do
+  for _, wp in ipairs (windows) do
     if wp == cur_wp then
       cur_topline = topline
     end
@@ -342,7 +341,6 @@ function term_redisplay ()
     end
 
     topline = topline + wp.fheight
-    wp = wp.next
   end
 
   -- Redraw cursor.

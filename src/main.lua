@@ -93,8 +93,6 @@ WAITKEY_DEFAULT = 20
 
 -- The current window
 cur_wp = nil
--- The first window in list
-head_wp = nil
 
 -- The current buffer
 cur_bp = nil

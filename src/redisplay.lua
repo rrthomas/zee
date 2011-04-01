@@ -47,56 +47,51 @@ function resize_windows ()
   local wp
 
   -- Resize windows horizontally.
-  wp = head_wp
-  while wp ~= nil do
-    local w = term_width ()
-    wp.fwidth = w
+  for _, wp in ipairs (windows) do
+    wp.fwidth = term_width ()
     wp.ewidth = wp.fwidth
-    wp = wp.next
   end
 
   -- Work out difference in window height; windows may be taller than
   -- terminal if the terminal was very short.
   local hdelta = term_height () - 1
-  wp = head_wp
-  while wp ~= nil do
+  for _, wp in ipairs (windows) do
     hdelta = hdelta - wp.fheight
-    wp = wp.next
   end
 
   -- Resize windows vertically.
   if hdelta > 0 then
     -- Increase windows height.
-    wp = head_wp
+    local w = #windows
     while hdelta > 0 do
-      if wp == nil then
-        wp = head_wp
-      end
-      wp.fheight = wp.fheight + 1
-      wp.eheight = wp.eheight + 1
+      windows[w].fheight = windows[w].fheight + 1
+      windows[w].eheight = windows[w].eheight + 1
       hdelta = hdelta - 1
-      wp = wp.next
+      w = w - 1
+      if w == 0 then
+        w = #windows
+      end
     end
   else
     -- Decrease windows' height, and close windows if necessary.
     local decreased
     repeat
       decreased = false
-      wp = head_wp
-      while wp and hdelta < 0 do
+      w = windows[#windows]
+      while w > 0 and hdelta < 0 do
+        local wp = windows[w]
         if wp.fheight > 2 then
           wp.fheight = wp.fheight - 1
           wp.eheight = wp.eheight - 1
           hdelta = hdelta + 1
           decreased = true
-        elseif cur_wp ~= head_wp or cur_wp.next then
-          local new_wp = wp.next
+        elseif #windows > 1 then
           delete_window (wp)
-          wp = new_wp
+          w = w - 1
           decreased = true
         end
       end
-      wp = wp.next
+      w = w - 1
     until decreased == false
   end
 

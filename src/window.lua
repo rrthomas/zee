@@ -1,6 +1,6 @@
 -- Window handling functions
 --
--- Copyright (c) 2010 Free Software Foundation, Inc.
+-- Copyright (c) 2010, 2011 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -18,6 +18,9 @@
 -- along with GNU Zile; see the file COPYING.  If not, write to the
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
+
+-- The window list
+windows = {}
 
 -- Window table:
 -- {
@@ -60,12 +63,10 @@ function set_current_window (wp)
 end
 
 function find_window (name)
-  local wp = head_wp
-  while wp do
+  for _, wp in ipairs (windows) do
     if wp.bp.name == name then
       return wp
     end
-    wp = wp.next
   end
 end
 
@@ -89,26 +90,47 @@ function window_pt (wp)
   end
 end
 
-function delete_window (del_wp)
-  local wp
-  if del_wp == head_wp then
-    wp = head_wp.next
-    head_wp = head_wp.next
-  else
-    wp = head_wp
-    while wp do
-      if wp.next == del_wp then
-        wp.next = wp.next.next
-        break
+local function window_prev (this_wp)
+  for i, wp in ipairs (windows) do
+    if wp == this_wp then
+      if i < #windows then
+        return windows[i + 1]
+      elseif i > 1 then
+        return windows[i - 1]
       end
-      wp = wp.next
+      break
     end
   end
+  return windows[1]
+end
 
-  if wp then
-    wp.fheight = wp.fheight + del_wp.fheight
-    wp.eheight = wp.eheight + del_wp.eheight + 1
-    set_current_window (wp)
+local function window_next (this_wp)
+  for i, wp in ipairs (windows) do
+    if wp == this_wp then
+      if i > 1 then
+        return windows[i - 1]
+      elseif i < #windows then
+        return windows[i + 1]
+      end
+      break
+    end
+  end
+  return windows[1]
+end
+
+function delete_window (del_wp)
+  for i = 1, #windows do
+    local wp = windows[i]
+    if wp == del_wp then
+      local next_wp = window_prev (wp)
+      table.remove (windows, i)
+      if next_wp then
+        next_wp.fheight = next_wp.fheight + del_wp.fheight
+        next_wp.eheight = next_wp.eheight + del_wp.eheight + 1
+        set_current_window (next_wp)
+      end
+      break
+    end
   end
 
   if del_wp.saved_pt then
@@ -123,7 +145,7 @@ Remove the current window from the screen.
 ]],
   true,
   function ()
-    if cur_wp == head_wp and not cur_wp.next then
+    if #windows == 1 then
       minibuf_error ("Attempt to delete sole ordinary window")
       return leNIL
     end
@@ -139,24 +161,22 @@ Make current window one line bigger.
 ]],
   true,
   function ()
-    if cur_wp == head_wp and not cur_wp.next then
+    if #windows == 1 then
       return leNIL
     end
 
     local wp = cur_wp.next
     if not wp or wp.fheight < 3 then
-      wp = head_wp
-      while wp do
+      for _, wp in ipairs (windows) do
         if wp.next == cur_wp then
           if wp.fheight < 3 then
             return leNIL
           end
           break
         end
-        wp = wp.next
       end
 
-      if cur_wp == head_wp and cur_wp.next.fheight < 3 then
+      if cur_wp == windows[#windows] and cur_wp.next.fheight < 3 then
         return leNIL
       end
 
@@ -178,24 +198,17 @@ Make current window one line smaller.
 ]],
   true,
   function ()
-    if (cur_wp == head_wp and not cur_wp.next) or cur_wp.fheight < 3 then
+    if #windows == 1 or cur_wp.fheight < 3 then
       return leNIL
     end
 
-    local wp = cur_wp.next
-    if not wp then
-      wp = head_wp
-      while wp and wp.next ~= cur_wp do
-        wp = wp.next
-      end
-    end
-
-    wp.fheight = wp.fheight + 1
-    wp.eheight = wp.eheight + 1
+    local next_wp = window_next (cur_wp)
+    next_wp.fheight = next_wp.fheight + 1
+    next_wp.eheight = next_wp.eheight + 1
     cur_wp.fheight = cur_wp.fheight - 1
     cur_wp.eheight = cur_wp.eheight - 1
     if cur_wp.topdelta >= cur_wp.eheight then
-      recenter (wp)
+      recenter (next_wp)
     end
   end
 )
@@ -207,13 +220,10 @@ Make the selected window fill the screen.
 ]],
   true,
   function ()
-    local wp = head_wp
-    while wp do
-      local nextwp = wp.next
+    for _, wp in ipairs (table.clone (windows)) do
       if wp ~= cur_wp then
         delete_window (wp)
       end
-      wp = nextwp
     end
   end
 )
@@ -227,7 +237,7 @@ This command selects the window one step away in that order.
 ]],
   true,
   function ()
-    set_current_window (cur_wp.next or head_wp)
+    set_current_window (window_next (wp))
   end
 )
 
@@ -271,19 +281,12 @@ function window_bottom_visible (wp)
 end
 
 function popup_window ()
-  if head_wp.next == nil then
+  if #windows == 1 then
     -- There is only one window on the screen, so split it.
     execute_function ("split-window")
-    return cur_wp.next
   end
 
-  -- Use the window after the current one.
-  if cur_wp.next then
-    return cur_wp.next
-  end
-
-  -- Use the first window.
-  return head_wp
+  return window_next (cur_wp)
 end
 
 Defun ("split-window",
@@ -301,6 +304,7 @@ Both windows display the same buffer now current.
     end
 
     local newwp = window_new ()
+    table.insert (windows, newwp)
     newwp.fwidth = cur_wp.fwidth
     newwp.ewidth = cur_wp.ewidth
     newwp.fheight = math.floor (cur_wp.fheight / 2) + cur_wp.fheight % 2
@@ -327,7 +331,7 @@ function create_scratch_window ()
   local w, h = term_width (), term_height ()
   local wp = window_new ()
   cur_wp = wp
-  head_wp = wp
+  table.insert (windows, wp)
   wp.fwidth = w
   wp.ewidth = w
   -- Save space for minibuffer.

@@ -266,13 +266,11 @@ end
 -- Recreate the scratch buffer when required.
 function kill_buffer (kill_bp)
   -- Search for windows displaying the buffer to kill.
-  local wp = head_wp
-  while wp do
+  for _, wp in ipairs (windows) do
     if wp.bp == kill_bp then
       wp.topdelta = 0
       wp.saved_pt = nil
     end
-    wp = wp.next
   end
 
   -- Remove the buffer from the buffer list.
@@ -293,21 +291,17 @@ function kill_buffer (kill_bp)
   if #buffers == 0 then
     table.insert (buffers, create_scratch_buffer ())
     cur_bp = buffers[1]
-    local wp = head_wp
-    while wp do
+    for _, wp in ipairs (windows) do
       wp.bp = cur_bp
-      wp = wp.next
     end
   end
 
   -- Resync windows that need it.
-  local wp = head_wp
-  while wp do
+  for _, wp in ipairs (windows) do
     if wp.bp == kill_bp then
       wp.bp = next_bp
       resync_redisplay (wp)
     end
-    wp = wp.next
   end
 end
 
