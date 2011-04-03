@@ -11,8 +11,12 @@
 Building from a release tarball
 -------------------------------
 
-Prerequisites: Lua 5.1, lrexlib >= 2.5.0, lcurses >= 4, luaposix >=
-5.1.9.
+Prerequisites: Lua 5.1 and the following libraries:
+
+   luabitop >= 1.0.0 (http://bitop.luajit.org/)
+   lrexlib >= 2.5.0 (http://luaforge.net/projects/lrexlib)
+   lcurses >= 4 (http://luaforge.net/projects/lcurses)
+   luaposix >= 5.1.9 (http://luaforge.net/projects/luaposix)
 
 1) Run configure:
 
