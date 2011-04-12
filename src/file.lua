@@ -42,7 +42,8 @@ end
 
 -- Return nonzero if file exists and can be written.
 local function check_writable (filename)
-  return posix.euidaccess (filename, "w") >= 0
+  local ok = posix.euidaccess (filename, "w")
+  return ok and ok >= 0
 end
 
 -- This functions makes the passed path an absolute path:
