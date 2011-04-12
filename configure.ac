@@ -23,7 +23,8 @@ dnl Initialise autoconf and automake
 AC_INIT(Zile, 2.4.0alpha1, bug-zile@gnu.org)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options check-news])
-AM_SILENT_RULES([yes])
+
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Set up gnulib
 gl_EARLY
