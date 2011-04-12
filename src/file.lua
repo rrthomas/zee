@@ -366,7 +366,7 @@ local function write_to_disk (bp, filename)
       if bfilename and copy_file (filename, bfilename) then
         bp.backup = true
       else
-        minibuf_error ("Cannot make backup file: %s", strerror (errno))
+        minibuf_error ("Cannot make backup file: %s", posix.errno ())
         waitkey (WAITKEY_DEFAULT)
       end
     end
@@ -581,7 +581,7 @@ directory.
         return leNIL
       end
       if posix.chdir (ms) == -1 then
-        minibuf_write ("%s: %s", ms, strerror (errno))
+        minibuf_write ("%s: %s", ms, posix.errno ())
         return leNIL
       end
       return leT
@@ -680,9 +680,9 @@ local max_eol_check_count = 3
 local function read_file (filename)
   local h, err = io.open (filename, "r")
   if h == nil then
-    local _, err = posix.errno ()
+    local msg, err = posix.errno ()
     if err ~= posix.ENOENT then
-      minibuf_write (string.format ("%s %s", err, posix.errno ()))
+      minibuf_write (string.format ("%s: %s", err, errmsg))
       cur_bp.readonly = true
     end
     return
