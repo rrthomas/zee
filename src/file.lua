@@ -337,7 +337,7 @@ local function copy_file (source, dest)
     if not ok then
       minibuf_error (string.format ("Cannot rename temporary file `%s'", err))
       os.remove (tname)
-      stat = nil
+      st = nil
     end
   elseif unlink (tname) == -1 then
     minibuf_error (string.format ("Cannot remove temporary file `%s'", err))
