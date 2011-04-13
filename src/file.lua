@@ -192,7 +192,7 @@ local function insert_file (filename)
 
   local h, err = io.open (filename, "r")
   if not h then
-    minibuf_write ("%s: %s", filename, err)
+    minibuf_write (string.format ("%s: %s", filename, err))
     return false
   end
 
@@ -366,7 +366,7 @@ local function write_to_disk (bp, filename)
       if bfilename and copy_file (filename, bfilename) then
         bp.backup = true
       else
-        minibuf_error ("Cannot make backup file: %s", posix.errno ())
+        minibuf_error (string.format ("Cannot make backup file: %s", posix.errno ()))
         waitkey (WAITKEY_DEFAULT)
       end
     end
@@ -581,7 +581,7 @@ directory.
         return leNIL
       end
       if posix.chdir (ms) == -1 then
-        minibuf_write ("%s: %s", ms, posix.errno ())
+        minibuf_write (string.format ("%s: %s", ms, posix.errno ()))
         return leNIL
       end
       return leT
