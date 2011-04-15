@@ -189,7 +189,7 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = cur_bp.pt.o, #cur_bp.pt.p.text do
+    for i = cur_bp.pt.o + 1, #cur_bp.pt.p.text do
       local c = cur_bp.pt.p.text[i]
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
