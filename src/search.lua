@@ -204,7 +204,7 @@ local function isearch (forward, regexp)
 
   local old_mark
   if cur_wp.bp.mark then
-    old_mark = marker_copy (cur_wp.bp.mark)
+    old_mark = copy_marker (cur_wp.bp.mark)
   end
 
   -- I-search mode.

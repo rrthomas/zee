@@ -28,7 +28,7 @@ local function marker_new (bp, pt)
   return marker
 end
 
-local function copy_marker (m)
+function copy_marker (m)
   return marker_new (m.bp, m.pt)
 end
 
