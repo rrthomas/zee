@@ -232,7 +232,7 @@ local function make_buffer_name (filename)
   else
     local i = 2
     while true do
-      local name = string.format ("%s<%ld>", p, i)
+      local name = string.format ("%s<%ld>", s, i)
       if not find_buffer (name) then
         return name
       end
