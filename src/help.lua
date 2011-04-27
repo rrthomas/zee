@@ -118,7 +118,8 @@ Display documentation of the command invoked by a key sequence.
       binding = keyvectostr (keys)
     else
       minibuf_write ("Describe key:")
-      keys, name = get_key_sequence ()
+      keys = get_key_sequence ()
+      name = get_function_by_keys (keys)
       binding = keyvectostr (keys)
 
       if not name then

@@ -57,7 +57,8 @@ _this_command = nil
 interactive = false
 
 function process_command ()
-  local keys, name = get_key_sequence ()
+  local keys = get_key_sequence ()
+  local name = get_function_by_keys (keys)
 
   thisflag = {defining_macro = lastflag.defining_macro}
   minibuf_clear ()
@@ -174,7 +175,7 @@ function get_key_sequence ()
     table.insert (keys, do_binding_completion (s))
   end
 
-  return keys, func
+  return keys
 end
 
 function get_function_by_keys (keys)
