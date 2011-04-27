@@ -307,13 +307,13 @@ local function copy_file (source, dest)
     return false
   end
 
-  local tname = os.tmpname ()
-  local ofd = io.open (tname, "w")
+  local ofd, tname = posix.mkstemp (dest)
   if not ofd then
     ifd:close ()
     minibuf_error (string.format ("%s: unable to create backup", dest))
     return false
   end
+  ofd = posix.fdopen (ofd, "w") -- FIXME: Implement and use posix.write
 
   local written = ofd:write (ifd:read ("*a"))
   ifd:close ()
