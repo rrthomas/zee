@@ -131,7 +131,7 @@ function do_binding_completion (as)
   end
 
   minibuf_write (((lastflag.set_uniarg or lastflag.uniarg_empty) and "C-u " or "") ..
-                 bs .. as)
+                 bs .. as .. "-")
   key = getkey ()
   minibuf_clear ()
 
@@ -171,7 +171,7 @@ function get_key_sequence ()
     if type (func) ~= "table" then
       break
     end
-    local s = keyvectostr (keys) .. '-'
+    local s = keyvectostr (keys)
     table.insert (keys, do_binding_completion (s))
   end
 

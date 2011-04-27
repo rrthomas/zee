@@ -205,9 +205,7 @@ by 4 each time.
     local sgn = 1
     local as = ""
     while true do
-      as = as .. '-' -- Add the `-' character.
       local key = do_binding_completion (as)
-      as = string.sub (as, 1, -2) -- Remove the `-' character.
 
       -- Cancelled.
       if key == KBD_CANCEL then
