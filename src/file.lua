@@ -307,7 +307,7 @@ local function copy_file (source, dest)
     return false
   end
 
-  local ofd, tname = posix.mkstemp (dest)
+  local ofd, tname = posix.mkstemp (dest .. "XXXXXX")
   if not ofd then
     ifd:close ()
     minibuf_error (string.format ("%s: unable to create backup", dest))
