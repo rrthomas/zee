@@ -19,13 +19,13 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-SUBDIRS = src
-
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = BUGS GNUmakefile maint.mk m4/gnulib-cache.m4
 
 dist_pkgdata_DATA = FAQ
+
+include src/Makefile.am
 
 ChangeLog:
 	git2cl > ChangeLog
