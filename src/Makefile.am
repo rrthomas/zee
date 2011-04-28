@@ -73,8 +73,9 @@ PRODUCTIONSOURCES =					\
 	$(zile_SOURCES)					\
 	$(src_zile_LUA)					\
 	ldb-config.lua					\
-	Makefile.am ../Makefile.am ../configure.ac	\
-	*.el
+	$(abs_srcdir)/src/Makefile.am 			\
+	$(abs_srcdir)/src/*.el				\
+	Makefile.am configure.ac
 
 LUA_CLIBS = posix curses bit rex_gnu
 
