@@ -44,6 +44,8 @@ ChangeLog:
 #     wget --quiet $u.$i || break
 #     case $i in *.sig) gpg --verify $(basename $u).$i;; esac
 #   done
+
+# FIXME: Use gnulib's do-release-commit-and-tag; add README-release
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger freshmeat,gnu $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
