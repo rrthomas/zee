@@ -179,15 +179,15 @@ function evaluateBranch (branch)
   if branch == nil or branch.data == nil then
     return nil
   end
-  return execute_function (branch.data, false, branch)
+  return execute_function (branch.data, branch)
 end
 
-function execute_function (name, uniarg, list)
-  if uniarg then
-    list = {next = {data = uniarg and tostring (uniarg) or nil}}
+function execute_function (name, uniarg)
+  if type (uniarg) ~= "table" then
+    uniarg = {next = {data = uniarg and tostring (uniarg) or nil}}
   end
   if usercmd[name] and usercmd[name].func then
-    return usercmd[name].func (list)
+    return usercmd[name].func (uniarg)
   else
     if macros[name] then
       process_keys (macros[name])
