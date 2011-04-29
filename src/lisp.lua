@@ -179,11 +179,11 @@ function evaluateBranch (branch)
   if branch == nil or branch.data == nil then
     return nil
   end
-  return execute_function (branch.data, 1, false, branch)
+  return execute_function (branch.data, false, branch)
 end
 
-function execute_function (name, uniarg, is_uniarg, list)
-  if is_uniarg then
+function execute_function (name, uniarg, list)
+  if uniarg then
     list = {next = {data = uniarg and tostring (uniarg) or nil}}
   end
   if usercmd[name] and usercmd[name].func then
@@ -338,7 +338,7 @@ Read function name, then read its arguments and call it.
 
     name = minibuf_read_function_name (msg)
     if name then
-      return execute_function (name, n, true)
+      return execute_function (name, n)
     end
   end
 )

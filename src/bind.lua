@@ -66,7 +66,7 @@ function process_command ()
   if function_exists (name) then
     _this_command = name
     interactive = true
-    execute_function (name, prefix_arg or 1, lastflag.set_uniarg)
+    execute_function (name, lastflag.set_uniarg and (prefix_arg or 1))
     interactive = false
     _last_command = _this_command
   else

@@ -631,7 +631,7 @@ On nonblank line, delete any immediately following blank lines.
       set_mark ()
       activate_mark ()
       repeat
-        if not execute_function ("forward-line", -1, true) then
+        if not execute_function ("forward-line", -1) then
           forward = false
           break
         end
@@ -702,7 +702,7 @@ local function move_paragraph (uniarg, forward, backward, line_extremum)
   if is_empty_line () then
     execute_function ("beginning-of-line")
   else
-    execute_function (line_extremum, false)
+    execute_function (line_extremum)
   end
   return leT
 end
@@ -868,7 +868,7 @@ move forward across N balanced expressions.
 
 local function mark (uniarg, func)
   execute_function ("set-mark")
-  local ret = execute_function (func, uniarg, true)
+  local ret = execute_function (func, uniarg)
   if ret == leT then
     execute_function ("exchange-point-and-mark")
   end

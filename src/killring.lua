@@ -67,7 +67,7 @@ local function kill_text (uniarg, mark_func)
 
   push_mark ()
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-  execute_function (mark_func, uniarg, true)
+  execute_function (mark_func, uniarg)
   execute_function ("kill-region")
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
   pop_mark ()

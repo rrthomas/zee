@@ -341,7 +341,7 @@ local function previous_nonblank_goalc ()
   local cur_goalc = get_goalc ()
 
   -- Find previous non-blank line.
-  while execute_function ("forward-line", -1, true) == leT and is_blank_line () do
+  while execute_function ("forward-line", -1) == leT and is_blank_line () do
   end
 
   -- Go to `cur_goalc' in that non-blank line.
