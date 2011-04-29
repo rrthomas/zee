@@ -203,9 +203,10 @@ by 4 each time.
     local i = 0
     local arg = 1
     local sgn = 1
-    local as = ""
+    local keys = {}
     while true do
-      local key = do_binding_completion (as)
+      local as = ""
+      local key = do_binding_completion (table.concat (keys, " "))
 
       -- Cancelled.
       if key == KBD_CANCEL then
@@ -217,7 +218,7 @@ by 4 each time.
         thisflag.uniarg_empty = false
 
         if bit.band (key, KBD_META) ~= 0 then
-          as = as .. "ESC"
+          as = "ESC"
         end
 
         as = as .. string.format (" %d", digit)
@@ -248,6 +249,8 @@ by 4 each time.
         ungetkey (key)
         break
       end
+
+      table.insert (keys, as)
     end
 
     if ok == leT then
