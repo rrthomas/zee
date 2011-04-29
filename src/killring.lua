@@ -21,7 +21,7 @@
 
 local kill_ring_text
 
-function maybe_free_kill_ring ()
+local function maybe_free_kill_ring ()
   if _last_command ~= "kill-region" then
     kill_ring_text = nil
   end
@@ -32,7 +32,6 @@ local function kill_ring_push (s)
 end
 
 local function copy_or_kill_region (kill, rp)
-  maybe_free_kill_ring ()
   kill_ring_push (copy_text_block (rp.start, rp.size))
 
   if kill then
