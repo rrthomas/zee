@@ -34,7 +34,8 @@ INDEX
 1.1. What does `Zile' mean?
 
     It stands for `Zile Is Lossy Emacs'. It is just another recursive
-    acronym like `GNU'.
+    acronym like `GNU'.  The reason that it's not written in all caps
+    is because Emacs (which is also an acronym) isn't either.
 
 1.2. Why another clone of Emacs?  Why not just use Emacs?
 
