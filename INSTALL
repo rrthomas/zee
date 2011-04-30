@@ -16,7 +16,7 @@ Prerequisites: Lua 5.1 and the following libraries:
    luabitop >= 1.0.0 (http://bitop.luajit.org/)
    lrexlib >= 2.5.0 (http://luaforge.net/projects/lrexlib)
    lcurses >= 4 (http://luaforge.net/projects/lcurses)
-   luaposix >= 5.1.9 (http://luaforge.net/projects/luaposix)
+   luaposix >= 5.1.11 (http://luaforge.net/projects/luaposix)
 
 1) Run configure:
 
