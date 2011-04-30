@@ -1,6 +1,6 @@
 -- Zile variables handling functions
 --
--- Copyright (c) 2010, 2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2011 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
