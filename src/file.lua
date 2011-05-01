@@ -98,22 +98,6 @@ function compact_path (path)
   return string.gsub (path, "^" .. home, "~")
 end
 
--- Return the current directory for the buffer.
-local function get_buffer_dir ()
-  local ret = ""
-  if cur_bp.filename then
-    -- If the current buffer has a filename, get the current directory
-    -- name from it.
-    ret = posix.dirname (cur_bp.filename)
-  else -- Get the current directory name from the system.
-    ret = posix.getcwd ()
-  end
-  if string.sub (ret, -1) ~= "/" then
-    ret = ret .. "/"
-  end
-  return ret
-end
-
 Defun ("find-file",
        {},
 [[
@@ -123,8 +107,7 @@ creating one if none already exists.
 ]],
   true,
   function ()
-    local buf = get_buffer_dir ()
-    local ms = minibuf_read_filename ("Find file: ", buf)
+    local ms = minibuf_read_filename ("Find file: ", cur_bp.dir)
     local ok = leNIL
 
     if not ms then
@@ -146,7 +129,7 @@ Use @kbd{M-x toggle-read-only} to permit editing.
 ]],
   true,
   function ()
-    local ok = excecute_function (find_file)
+    local ok = excecute_function ("find-file")
     if ok == leT then
       cur_bp.readonly = true
     end
@@ -166,11 +149,11 @@ If the current buffer now contains an empty file that you just visited
     local base, ms, as
 
     if not buf then
-      buf = get_buffer_dir ()
+      buf = cur_bp.dir
     else
       base = posix.basename (buf)
-      ms = minibuf_read_filename ("Find alternate: ", buf, base)
     end
+    ms = minibuf_read_filename ("Find alternate: ", buf, base)
 
     local ok = leNIL
     if not ms then
@@ -225,8 +208,7 @@ Set mark after the inserted text.
     end
 
     if not file then
-      local buf = get_buffer_dir ()
-      file = minibuf_read_filename ("Insert file: ", buf)
+      file = minibuf_read_filename ("Insert file: ", cur_bp.dir)
       if not file then
         ok = execute_function ("keyboard-quit")
       end
@@ -463,7 +445,7 @@ Interactively, confirmation is required unless you supply a prefix argument.
   true,
   function ()
     return write_buffer (cur_bp, true,
-                         arglist ~= nil and not lastflag.set_uniarg,
+                         interactive and not lastflag.set_uniarg,
                          nil, "Write file: ")
   end
 )
@@ -560,34 +542,31 @@ Offer to save each buffer, then kill this Zile process.
 )
 
 Defun ("cd",
-       {},
+       {"string"},
 [[
-Make the user specified directory become the current buffer's default
-directory.
+Make DIR become the current buffer's default directory.
 ]],
   true,
-  function ()
-    local buf = get_buffer_dir ()
-    local ms = minibuf_read_filename ("Change default directory: ", buf)
+  function (dir)
+    if not dir and interactive then
+      dir = minibuf_read_filename ("Change default directory: ", cur_bp.dir)
+    end
 
-    if not ms then
+    if not dir then
       return execute_function ("keyboard-quit")
     end
 
-    if ms ~= "" then
-      local st = posix.stat (ms)
+    if dir ~= "" then
+      local st = posix.stat (dir)
       if not s or not s.type == "directory" then
-        minibuf_error (string.format ("`%s' is not a directory", ms))
-        return leNIL
+        minibuf_error (string.format ("`%s' is not a directory", dir))
+      elseif posix.chdir (dir) == -1 then
+        minibuf_write (string.format ("%s: %s", dir, posix.errno ()))
+      else
+        cur_bp.dir = dir
+        return true
       end
-      if posix.chdir (ms) == -1 then
-        minibuf_write (string.format ("%s: %s", ms, posix.errno ()))
-        return leNIL
-      end
-      return leT
     end
-
-    return leNIL
   end
 )
 
@@ -746,6 +725,7 @@ local function read_file (filename)
   lp.next = cur_bp.lines
   cur_bp.lines.prev = lp
   cur_bp.lines.next.p = cur_bp.pt
+  cur_bp.dir = posix.dirname (filename)
 
   h:close ()
 end
@@ -768,6 +748,8 @@ function find_file (filename)
 
   switch_to_buffer (bp)
   read_file (filename)
+  bp.dir = posix.dirname (filename)
+  posix.chdir (bp.dir) -- FIXME: Call cd instead of last two lines
 
   thisflag.need_resync = true
 

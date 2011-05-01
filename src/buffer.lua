@@ -53,6 +53,9 @@ function buffer_new ()
   -- Set default EOL string.
   bp.eol = coding_eol_lf
 
+  -- Set directory.
+  bp.dir = posix.getcwd () or ""
+
   -- Insert into buffer list.
   table.insert (buffers, bp)
 
@@ -219,6 +222,9 @@ function switch_to_buffer (bp)
       break
     end
   end
+
+  -- Change to buffer's default directory
+  posix.chdir (bp.dir)
 
   thisflag.need_resync = true
 end

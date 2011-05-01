@@ -46,7 +46,7 @@ for _, name in ipairs (arg) do
   local test = string.gsub (name, "%.el$", "")
   name = posix.basename (test)
   local edit_file = io.catfile (builddir, name .. ".input")
-  local args = {"--no-init-file", edit_file, "--load", test .. ".el"}
+  local args = {"--no-init-file", edit_file, "--load", (string.gsub (test .. ".el", "^" .. srcdir .. "/", ""))}
   local input = io.catfile (srcdir, "lisp-tests", "test.input")
 
   if EMACS ~= "" then

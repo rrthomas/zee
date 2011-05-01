@@ -104,6 +104,9 @@ end
 
 -- Read a filename from the minibuffer.
 function minibuf_read_filename (fmt, name, file)
+  if not file and name[-1] ~= '/' then
+    name = name .. '/'
+  end
   name = normalize_path (name)
   if name then
     name = compact_path (name)
