@@ -1,6 +1,17 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
 
+* Noteworthy changes in release 2.4.0alpha2 (2011-05-03) [alpha]
+
+** Bug fixes
+
+  Many bugs have been fixed.
+
+** Build-related
+
+  The build system is now non-recursive (thanks to Gary Vaughan).
+
+
 * Noteworthy changes in release 2.3.24 (2011-04-29) [stable]
 
 ** Bug fixes
