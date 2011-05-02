@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-libtool --macro-prefix=gl announce-gen gnupload maintainer-makefile
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-libtool --macro-prefix=gl announce-gen gnupload maintainer-makefile readme-release
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -23,6 +23,7 @@ gl_MODULES([
   announce-gen
   gnupload
   maintainer-makefile
+  readme-release
 ])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])

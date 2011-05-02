@@ -18,3 +18,4 @@ Makefile.in
 /GNUmakefile
 /maint.mk
 /build-aux
+/README-release
