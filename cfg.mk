@@ -30,6 +30,9 @@ VC_LIST_ALWAYS_EXCLUDE_REGEX = \.output$$
 # Lua-ish, not GNU-ish, error messages in some internal files
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
 
+# Pig & Whistle
+exclude_file_name_regexp--sc_prohibit_doubled_word = \.lua$$
+
 local-checks-to-skip = \
 	sc_bindtextdomain \
 	sc_error_message_period \
