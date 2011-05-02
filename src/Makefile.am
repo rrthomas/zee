@@ -73,7 +73,7 @@ PRODUCTIONSOURCES =					\
 	$(zile_SOURCES)					\
 	$(src_zile_LUA)					\
 	$(abs_srcdir)/src/ldb-config.lua		\
-	$(abs_srcdir)/src/Makefile.am 			\
+	$(abs_srcdir)/src/Makefile.am			\
 	$(abs_srcdir)/src/*.el				\
 	$(abs_srcdir)/Makefile.am $(abs_srcdir)/configure.ac
 
