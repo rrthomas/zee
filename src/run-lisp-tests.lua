@@ -27,6 +27,7 @@ require "std"
 
 -- srcdir and builddir are defined in the environment for a build
 local srcdir = os.getenv ("srcdir") or "."
+local abs_srcdir = os.getenv ("abs_srcdir") or "."
 local builddir = os.getenv ("builddir") or "."
 
 local zile_pass = 0
@@ -46,7 +47,7 @@ for _, name in ipairs (arg) do
   local test = string.gsub (name, "%.el$", "")
   name = posix.basename (test)
   local edit_file = io.catfile (builddir, name .. ".input")
-  local args = {"--no-init-file", edit_file, "--load", (string.gsub (test .. ".el", "^" .. srcdir .. "/", ""))}
+  local args = {"--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
   local input = io.catfile (srcdir, "lisp-tests", "test.input")
 
   if EMACS ~= "" then

@@ -129,7 +129,7 @@ loc-tests:
 loc-all:
 	$(CLOC) $(ALLSOURCES)
 
-TESTS_VARS = srcdir=$(top_srcdir)/src builddir=$(builddir)/src
+TESTS_VARS = srcdir=$(top_srcdir)/src abs_srcdir=$(abs_top_srcdir)/src builddir=$(builddir)/src
 TESTS_ENVIRONMENT = $(TESTS_VARS)
 
 check-local:
