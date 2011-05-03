@@ -492,7 +492,7 @@ function _G.warn (...)
   if prog.name or prog.file or prog.line then
     io.stderr:write (" ")
   end
-  io.writeLine (io.stderr, string.format (...))
+  io.writeline (io.stderr, string.format (...))
 end
 
 -- @func die: Die with error
@@ -587,7 +587,7 @@ function say (...)
     ((type (_DEBUG) == "table" and type (_DEBUG.level) == "number" and
       _DEBUG.level >= level)
        or level <= 1) then
-    io.writeLine (io.stderr, table.concat (list.map (tostring, arg), "\t"))
+    io.writeline (io.stderr, table.concat (list.map (tostring, arg), "\t"))
   end
 end
 
@@ -626,7 +626,7 @@ function trace (event)
   else
     s = s .. event .. " " .. (t.name or "(C)") .. " [" .. t.what .. "]"
   end
-  io.writeLine (io.stderr, s)
+  io.writeline (io.stderr, s)
 end
 
 -- Set hooks according to _DEBUG
@@ -1550,7 +1550,11 @@ require "base"
 require "package_ext"
 
 
--- @func readLines: Read a file into a list of lines and close it
+-- Get file handle metatable
+local file_metatable = getmetatable (io.stdin)
+
+
+-- @func readlines: Read a file into a list of lines and close it
 --   @param [h]: file handle or name [io.input ()]
 -- @returns
 --   @param l: list of lines
@@ -1567,8 +1571,9 @@ function readlines (h)
   h:close ()
   return l
 end
+file_metatable.readlines = readlines
 
--- @func writeLine: Write values adding a newline after each
+-- @func writeline: Write values adding a newline after each
 --   @param [h]: file handle [io.output ()]
 --   @param ...: values to write (as for write)
 function writeline (h, ...)
@@ -1580,6 +1585,7 @@ function writeline (h, ...)
     h:write (v, "\n")
   end
 end
+file_metatable.writeline = writeline
 
 -- @func splitdir: split a directory path into components
 -- Empty components are retained: the root directory becomes {"", ""}.
