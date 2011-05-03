@@ -299,7 +299,7 @@ function main ()
 
   -- Show the splash screen only if no files, function or load file is
   -- specified on the command line, and there has been no error.
-  if not zarg and not minibuf_contents then
+  if #zarg == 0 and not minibuf_contents then
     about_screen ()
   end
   setup_main_screen ()
