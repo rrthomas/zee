@@ -140,7 +140,7 @@ TESTSCRIPTS =						\
 	src/run-lisp-tests.lua				\
 	src/test-bad-argument
 
-# FIXME: Find a way of making these work
+# FIXME: Find a way of making these work (screen-dependent tests by setting TERM and/or COLUMNS and LINES?)
 #	lisp-tests/disabled/*.el
 
 # FIXME: Make these work in Emacs too
