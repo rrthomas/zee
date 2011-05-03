@@ -183,9 +183,9 @@ function process_args ()
   -- Leading `-' means process all arguments in order, treating
   -- non-options as arguments to an option with code 1
   -- Leading `:' so as to return ':' for a missing arg, not '?'
+  local line = 1
   for c, longindex, optind, optarg in posix.getopt_long (arg, "-:f:l:q", longopts) do
     local this_optind = optind > 0 and optind or 1
-    local line = 1
 
     if c == 1 then -- Non-option (assume file name)
       longindex = 5
