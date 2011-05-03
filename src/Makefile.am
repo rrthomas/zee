@@ -100,7 +100,7 @@ install-exec-hook:
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
-$(top_srcdir)/src/zile.1: $(top_srcdir)/src/zile $(top_srcdir)/src/zile.1.in Makefile
+$(top_builddir)/src/zile.1: $(top_srcdir)/src/zile $(top_srcdir)/src/zile.1.in Makefile
 	rm -f $@ $@.tmp
 	$(install_edit) '$(top_srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
