@@ -19,7 +19,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-LUA_ENV = LUA_INIT= LUA_PATH="$(abs_srcdir)/src/?.lua;;"
+LUA_ENV = LUA_INIT= LUA_PATH="$(abs_top_srcdir)/src/?.lua;;"
 
 bin_SCRIPTS = src/zile
 
@@ -72,10 +72,10 @@ dist_pkgdata_DATA +=					\
 PRODUCTIONSOURCES =					\
 	$(zile_SOURCES)					\
 	$(src_zile_LUA)					\
-	$(abs_srcdir)/src/ldb-config.lua		\
-	$(abs_srcdir)/src/Makefile.am			\
-	$(abs_srcdir)/src/*.el				\
-	$(abs_srcdir)/Makefile.am $(abs_srcdir)/configure.ac
+	$(top_srcdir)/src/ldb-config.lua		\
+	$(top_srcdir)/src/Makefile.am			\
+	$(top_srcdir)/src/*.el				\
+	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
 LUA_CLIBS = posix curses bit rex_gnu
 
@@ -87,7 +87,7 @@ install_edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
 inplace_edit = sed \
-	-e 's|@pkgdatadir[@]|$(abs_srcdir)/src|g'
+	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g'
 
 src/zile: src/zile.lua Makefile
 	rm -f $@ $@.tmp
@@ -100,14 +100,14 @@ install-exec-hook:
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
-$(abs_srcdir)/src/zile.1: $(abs_srcdir)/src/zile $(abs_srcdir)/src/zile.1.in Makefile
+$(top_srcdir)/src/zile.1: $(top_srcdir)/src/zile $(top_srcdir)/src/zile.1.in Makefile
 	rm -f $@ $@.tmp
-	$(install_edit) '$(abs_srcdir)/$@.in' >$@.tmp
+	$(install_edit) '$(top_srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-$(abs_srcdir)/src/zile.1.in: $(abs_srcdir)/src/main.lua $(abs_srcdir)/src/man-extras $(abs_srcdir)/src/zile-help2man-wrapper
+$(top_srcdir)/src/zile.1.in: $(top_srcdir)/src/main.lua $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
 	cd src && \
-	builddir=$(builddir) $(HELP2MAN) --output=zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(abs_srcdir)/src/man-extras $(abs_srcdir)/zile-help2man-wrapper
+	builddir=$(builddir) $(HELP2MAN) --output=zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/zile-help2man-wrapper
 
 dist_man_MANS = src/zile.1
 
@@ -129,12 +129,12 @@ loc-tests:
 loc-all:
 	$(CLOC) $(ALLSOURCES)
 
-TESTS_VARS = srcdir=$(abs_srcdir)/src builddir=$(builddir)/src
+TESTS_VARS = srcdir=$(top_srcdir)/src builddir=$(builddir)/src
 TESTS_ENVIRONMENT = $(TESTS_VARS)
 
 check-local:
-	echo $(LISP_TESTS) | $(LUA_ENV) $(TESTS_VARS) EMACS="$(EMACS)" xargs $(LUA) "$(abs_srcdir)/src/run-lisp-tests.lua"
-	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) $(TESTS_VARS) EMACS= xargs $(LUA) "$(abs_srcdir)/src/run-lisp-tests.lua"
+	echo $(LISP_TESTS) | $(LUA_ENV) $(TESTS_VARS) EMACS="$(EMACS)" xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
+	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) $(TESTS_VARS) EMACS= xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
 
 TESTSCRIPTS =						\
 	src/run-lisp-tests.lua				\
@@ -144,11 +144,11 @@ TESTSCRIPTS =						\
 #	lisp-tests/disabled/*.el
 
 # FIXME: Make these work in Emacs too
-LISP_TESTS_ZILE_ONLY = $(abs_srcdir)/src/lisp-tests/zile-only/*.el
+LISP_TESTS_ZILE_ONLY = $(top_srcdir)/src/lisp-tests/zile-only/*.el
 
-LISP_TESTS = $(abs_srcdir)/src/lisp-tests/*.el
+LISP_TESTS = $(top_srcdir)/src/lisp-tests/*.el
 
-LISP_TESTS_OUTPUTS = $(abs_srcdir)/src/lisp-tests/*.output $(abs_srcdir)/src/lisp-tests/zile-only/*.output
+LISP_TESTS_OUTPUTS = $(top_srcdir)/src/lisp-tests/*.output $(top_srcdir)/src/lisp-tests/zile-only/*.output
 
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
