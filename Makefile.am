@@ -31,7 +31,6 @@ ChangeLog:
 	git2cl > ChangeLog
 
 release:
-	./build-aux/do-release-commit-and-tag && \
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger freshmeat,gnu $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
