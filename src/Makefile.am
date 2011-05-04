@@ -89,14 +89,14 @@ install_edit = sed \
 inplace_edit = sed \
 	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g'
 
-src/zile: src/zile.lua Makefile
+$(top_builddir)/src/zile: $(top_builddir)/src/zile.lua Makefile
 	rm -f $@ $@.tmp
-	$(inplace_edit) '$(builddir)/$@.lua' >$@.tmp
+	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
 
 install-exec-hook:
-	$(install_edit) '$(builddir)/src/zile.lua' >$@.tmp
+	$(install_edit) '$(top_builddir)/src/zile.lua' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
@@ -106,8 +106,7 @@ $(top_builddir)/src/zile.1: $(top_srcdir)/src/zile $(top_srcdir)/src/zile.1.in M
 	mv $@.tmp $@
 
 $(top_srcdir)/src/zile.1.in: $(top_srcdir)/src/main.lua $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
-	cd src && \
-	builddir=$(builddir) $(HELP2MAN) --output=zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/zile-help2man-wrapper
+	builddir=$(top_builddir) $(HELP2MAN) --output=zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/zile-help2man-wrapper
 
 dist_man_MANS = src/zile.1
 
@@ -129,7 +128,7 @@ loc-tests:
 loc-all:
 	$(CLOC) $(ALLSOURCES)
 
-TESTS_VARS = srcdir=$(top_srcdir)/src abs_srcdir=$(abs_top_srcdir)/src builddir=$(builddir)/src
+TESTS_VARS = srcdir=$(top_srcdir)/src abs_srcdir=$(abs_top_srcdir)/src builddir=$(top_builddir)/src
 TESTS_ENVIRONMENT = $(TESTS_VARS)
 
 check-local:
