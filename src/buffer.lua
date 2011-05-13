@@ -380,7 +380,7 @@ With a nil argument, kill the current buffer.
       buffer = minibuf_read (string.format ("Kill buffer (default %s): ", cur_bp.name),
                              "", cp, buffer_name_history)
       if not buffer then
-        ok = execute_command ("keyboard-quit")
+        ok = execute_function ("keyboard-quit")
       end
     end
 
