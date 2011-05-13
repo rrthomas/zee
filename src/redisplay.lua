@@ -76,8 +76,8 @@ function resize_windows ()
     -- Decrease windows' height, and close windows if necessary.
     local decreased
     repeat
+      local w = #windows
       decreased = false
-      w = windows[#windows]
       while w > 0 and hdelta < 0 do
         local wp = windows[w]
         if wp.fheight > 2 then
@@ -91,7 +91,6 @@ function resize_windows ()
           decreased = true
         end
       end
-      w = w - 1
     until decreased == false
   end
 
