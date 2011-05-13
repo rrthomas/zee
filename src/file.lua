@@ -295,7 +295,7 @@ local function copy_file (source, dest)
     minibuf_error (string.format ("%s: unable to create backup", dest))
     return false
   end
-  ofd = posix.fdopen (ofd, "w") -- FIXME: Implement and use posix.write
+  ofd = posix.fdopen (ofd, "w") -- FIXME: Implement and use posix.{read,write,close,open}
 
   local written = ofd:write (ifd:read ("*a"))
   ifd:close ()
