@@ -183,7 +183,7 @@ function evaluateBranch (branch)
 end
 
 function execute_function (name, uniarg)
-  if type (uniarg) ~= "table" then
+  if uniarg ~= nil and type (uniarg) ~= "table" then
     uniarg = {next = {data = uniarg and tostring (uniarg) or nil}}
   end
   if usercmd[name] and usercmd[name].func then
