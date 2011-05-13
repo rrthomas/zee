@@ -218,10 +218,10 @@ by 4 each time.
         thisflag.uniarg_empty = false
 
         if bit.band (key, KBD_META) ~= 0 then
-          as = "ESC"
+          as = "ESC "
         end
 
-        as = as .. string.format (" %d", digit)
+        as = as .. string.format ("%d", digit)
 
         if i == 0 then
           arg = digit
@@ -240,7 +240,7 @@ by 4 each time.
       elseif key == string.byte ('-') and i == 0 then
         if sgn > 0 then
           sgn = -sgn
-          as = as .. " -"
+          as = as .. "-"
           -- The default negative arg is -1, not -4.
           arg = 1
           thisflag.uniarg_empty = false
