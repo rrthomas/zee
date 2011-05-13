@@ -30,6 +30,9 @@ VC_LIST_ALWAYS_EXCLUDE_REGEX = \.output$$
 # Lua-ish, not GNU-ish, error messages in some internal files
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
 
+# We aren't internationalised
+translation_project_ = ""
+
 # Pig & Whistle
 exclude_file_name_regexp--sc_prohibit_doubled_word = \.lua$$
 
