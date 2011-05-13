@@ -100,13 +100,13 @@ install-exec-hook:
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
-$(top_builddir)/src/zile.1: $(top_srcdir)/src/zile $(top_srcdir)/src/zile.1.in Makefile
+$(top_builddir)/src/zile.1: $(top_srcdir)/src/zile $(top_builddir)/src/zile.1.in Makefile
 	rm -f $@ $@.tmp
 	$(install_edit) '$(top_srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-$(top_srcdir)/src/zile.1.in: $(top_srcdir)/src/main.lua $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
-	builddir=$(top_builddir) $(HELP2MAN) --output=zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/zile-help2man-wrapper
+$(top_builddir)/src/zile.1.in: $(top_srcdir)/src/main.lua $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
+	builddir=$(top_builddir)/src $(HELP2MAN) --output=$(top_builddir)/src/zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
 
 dist_man_MANS = src/zile.1
 
