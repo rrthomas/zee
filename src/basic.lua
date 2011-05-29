@@ -39,7 +39,7 @@ Move point to end of current line.
   true,
   function ()
     cur_bp.pt = line_end_position (current_prefix_arg or 1)
-    cur_bp.goalc = 1e100 -- FIXME: Use a constant
+    cur_bp.goalc = math.huge
   end
 )
 
