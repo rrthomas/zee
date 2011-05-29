@@ -240,7 +240,7 @@ function process_args ()
       os.exit (0)
     elseif longindex == 5 then
       if optarg[1] == '+' then
-        line = tonumber (optarg + 1, 10)
+        line = tonumber (optarg, 10)
       else
         table.insert (zarg, {'file', optarg, line})
         line = 1
