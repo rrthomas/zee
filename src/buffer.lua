@@ -284,7 +284,7 @@ function kill_buffer (kill_bp)
   for i = 1, #buffers do
     if buffers[i] == kill_bp then
       table.remove (buffers, i)
-      next_bp = buffers[i - 1]
+      next_bp = buffers[i > 1 and i - 1 or #buffers]
       if cur_bp == kill_bp then
         cur_bp = next_bp
       end
