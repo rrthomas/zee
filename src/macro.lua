@@ -21,7 +21,6 @@
 
 cmd_mp = {}
 cur_mp = {}
-macros = {}
 
 function add_cmd_to_macro ()
   cur_mp = list.concat (cur_mp, cmd_mp)
@@ -42,20 +41,12 @@ function cancel_kbd_macro ()
   thisflag.defining_macro = false
 end
 
--- Add macro names to a list.
-function add_macros_to_list (cp)
-  for name in pairs (macros) do
-    table.insert (cp.completions, name)
-  end
-end
-
 Defun ("start-kbd-macro",
        {},
 [[
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
 Use @kbd{C-x )} to finish recording and make the macro available.
-Use @kbd{M-x name-last-kbd-macro} to give it a permanent name.
 ]],
   true,
   function ()
@@ -93,41 +84,11 @@ The macro is now available for use via @kbd{C-x e}.
   end
 )
 
-Defun ("name-last-kbd-macro",
-       {},
-[[
-Assign a name to the last keyboard macro defined.
-Argument SYMBOL is the name to define.
-The symbol's function definition becomes the keyboard macro string.
-Such a \"function\" cannot be called from Lisp, but it is a valid editor command.
-]],
-  true,
-  function ()
-    local name = minibuf_read ("Name for last kbd macro: ", "")
-
-    if not name then
-      minibuf_error ("No command name given")
-      return leNIL
-    end
-
-    if cur_mp == nil then
-      minibuf_error ("No keyboard macro defined")
-      return leNIL
-    end
-
-    -- Copy the keystrokes from cur_mp.
-    macros[name] = table.clone (cur_mp)
-  end
-)
-
 Defun ("call-last-kbd-macro",
        {},
 [[
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.
-
-To make a macro permanent so you can call it even after
-defining others, use @kbd{M-x name-last-kbd-macro}.
 ]],
   true,
   function ()

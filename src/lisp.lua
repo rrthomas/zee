@@ -189,10 +189,6 @@ function execute_function (name, uniarg)
   if usercmd[name] and usercmd[name].func then
     return usercmd[name].func (uniarg)
   else
-    if macros[name] then
-      process_keys (macros[name])
-      return leT
-    end
     return leNIL
   end
 end
@@ -285,7 +281,6 @@ function minibuf_read_function_name (s)
       table.insert (cp.completions, name)
     end
   end
-  add_macros_to_list (cp)
 
   return minibuf_vread_completion (s, "", cp, functions_history,
                                    "No function name given",
@@ -352,7 +347,6 @@ function minibuf_read_function_name (fmt)
       table.insert (cp.completions, name)
     end
   end
-  add_macros_to_list (cp)
 
   return minibuf_vread_completion (fmt, "", cp, functions_history,
                                    "No function name given",
