@@ -21,17 +21,6 @@
 
 -- FIXME: Add apropos
 
-Defun ("zile-version",
-       {},
-[[
-Show the version of Zile that is running.
-]],
-  true,
-  function ()
-    minibuf_write (string.format ("%s of %s on %s", ZILE_VERSION_STRING, CONFIGURE_DATE, CONFIGURE_HOST))
-  end
-)
-
 local function show_file (filename)
   if not exist_file (filename) then
     minibuf_error (string.format ("Unable to read file `%s'", filename))
