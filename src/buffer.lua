@@ -162,7 +162,7 @@ local function warn_if_no_mark ()
   if not cur_bp.mark then
     minibuf_error ("The mark is not set now")
     return true
-  elseif not cur_bp.mark_active and get_variable_bool ("transient-mark-mode") then
+  elseif not cur_bp.mark_active then
     minibuf_error ("The mark is not active now")
     return true
   end

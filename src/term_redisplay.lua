@@ -162,8 +162,7 @@ end
 local function calculate_highlight_region (wp, rp)
   if (wp ~= cur_wp and not get_variable_bool ("highlight-nonselected-windows"))
     or (wp.bp.mark == nil)
-    or (not get_variable_bool ("transient-mark-mode"))
-    or (get_variable_bool ("transient-mark-mode") and not wp.bp.mark_active) then
+    or not wp.bp.mark_active) then
     return false
   end
 

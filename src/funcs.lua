@@ -101,34 +101,8 @@ Put the mark where point is now, and point where the mark is now.
     local tmp = table.clone (cur_bp.pt)
     cur_bp.pt = table.clone (cur_bp.mark.pt)
     cur_bp.mark.pt = tmp
-
-    -- In transient-mark-mode we must reactivate the mark.
-    if get_variable_bool ("transient-mark-mode") then
-      activate_mark ()
-    end
-
-    thisflag.need_resync = true
-  end
-)
-
-Defun ("transient-mark-mode",
-       {"number"},
-[[
-Toggle Transient Mark mode.
-With arg, turn Transient Mark mode on if arg is positive, off otherwise.
-]],
-  true,
-  function (n)
-    if not n and not lastflag.set_uniarg then
-      set_variable ("transient-mark-mode", get_variable_bool ("transient-mark-mode") and "nil" or "t")
-    elseif not n then
-      n = current_prefix_arg
-    end
-    if n then
-      set_variable ("transient-mark-mode", n > 0 and "t" or "nil")
-    end
-
     activate_mark ()
+    thisflag.need_resync = true
   end
 )
 
