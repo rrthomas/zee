@@ -21,39 +21,6 @@
 
 -- FIXME: Add apropos
 
-local function show_file (filename)
-  if not exist_file (filename) then
-    minibuf_error (string.format ("Unable to read file `%s'", filename))
-    return leNIL
-  end
-
-  find_file (filename)
-  cur_bp.readonly = true
-  cur_bp.noundo = true
-  cur_bp.needname = true
-  cur_bp.nosave = true
-
-  return leT
-end
-
-Defun ("view-emacs-FAQ",
-       {},
-[[
-Display the Zile Frequently Asked Questions (FAQ) file.
-]],
-  true,
-  function ()
-    return show_file (PATH_DATA .. "/FAQ")
-  end
-)
-
-local function write_function_description (name, doc)
-  insert_string (string.format ("%s is %s built-in function in `C source code'.\n\n%s",
-                                name,
-                                get_function_interactive (name) and "an interactive" or "a",
-                                doc))
-end
-
 Defun ("describe-function",
        {"string"},
 [[

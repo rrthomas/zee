@@ -21,9 +21,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = BUGS GNUmakefile maint.mk m4/gnulib-cache.m4
-
-dist_pkgdata_DATA = FAQ
+EXTRA_DIST = BUGS FAQ GNUmakefile maint.mk m4/gnulib-cache.m4
 
 include src/Makefile.am
 

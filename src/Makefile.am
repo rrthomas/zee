@@ -63,7 +63,7 @@ LUA_RUNTIME =						\
 	src/ldb-config.lua				\
 	$(src_zile_LUA)
 
-dist_pkgdata_DATA +=					\
+dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
 	src/loadlua.lua					\
 	src/default-bindings.el				\
