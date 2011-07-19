@@ -262,14 +262,7 @@ column, or at the end of the line if it is not long enough.
 ]],
   true,
   function (n)
-    local ok = leT
-    n = n or current_prefix_arg or 1
-    if n < 0 or not bobp () then
-      ok = execute_with_uniarg (false, n, previous_line, next_line)
-    end
-    if ok == leNIL then
-      execute_function ("beginning-of-line")
-    end
+    return execute_with_uniarg (false, n or current_prefix_arg or 1, previous_line, next_line)
   end
 )
 
@@ -283,14 +276,7 @@ column, or at the end of the line if it is not long enough.
 ]],
   true,
   function (n)
-    local ok = leT
-    n = n or current_prefix_arg or 1
-    if n < 0 or not eobp () then
-      ok = execute_with_uniarg (false, n, next_line, previous_line)
-    end
-    if ok == leNIL then
-      execute_function ("end-of-line")
-    end
+    return execute_with_uniarg (false, n or current_prefix_arg or 1, next_line, previous_line)
   end
 )
 
