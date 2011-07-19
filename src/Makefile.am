@@ -132,8 +132,8 @@ TESTS_VARS = srcdir=$(top_srcdir)/src abs_srcdir=$(abs_top_srcdir)/src builddir=
 TESTS_ENVIRONMENT = $(TESTS_VARS)
 
 check-local:
-	echo $(LISP_TESTS) | $(LUA_ENV) $(TESTS_VARS) EMACS="$(EMACS)" xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
-	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) $(TESTS_VARS) EMACS= xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
+	echo $(LISP_TESTS) | $(LUA_ENV) $(TESTS_VARS) EMACSPROG="$(EMACSPROG)" xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
+	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) $(TESTS_VARS) EMACSPROG= xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
 
 TESTSCRIPTS =						\
 	src/run-lisp-tests.lua				\

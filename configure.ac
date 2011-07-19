@@ -36,15 +36,15 @@ dnl help2man
 AX_WITH_PROG(HELP2MAN, help2man, false)
 
 dnl Emacs >= 23.1 (optional)
-AX_WITH_PROG(EMACS, emacs)
-if test -n "$EMACS"; then
+AX_WITH_PROG(EMACSPROG, emacs)
+if test -n "$EMACSPROG"; then
   emacs_min_version=23.1
-  emacs_version=$($EMACS --version 2>&1 | head -n 1 | cut -d' ' -f3)
+  emacs_version=$($EMACSPROG --version 2>&1 | head -n 1 | cut -d' ' -f3)
   AC_MSG_CHECKING([Emacs version $emacs_version >= $emacs_min_version])
   AX_COMPARE_VERSION($emacs_version, ge, $emacs_min_version,
     AC_MSG_RESULT([yes]),
     [AC_MSG_RESULT([no])
-    unset EMACS])
+    unset EMACSPROG])
 fi
 
 dnl Extra definitions

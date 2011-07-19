@@ -41,7 +41,7 @@ if not TERM or TERM == "unknown" then
   os.setenv ("TERM", "vt100")
 end
 
-local EMACS = os.getenv ("EMACS") or ""
+local EMACSPROG = os.getenv ("EMACSPROG") or ""
 
 for _, name in ipairs (arg) do
   local test = string.gsub (name, "%.el$", "")
@@ -50,10 +50,10 @@ for _, name in ipairs (arg) do
   local args = {"--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
   local input = io.catfile (srcdir, "lisp-tests", "test.input")
 
-  if EMACS ~= "" then
+  if EMACSPROG ~= "" then
     posix.system ("cp", input, edit_file)
     posix.system ("chmod", "+w", edit_file)
-    local status = posix.system (EMACS, "--quick", "--batch", unpack (args))
+    local status = posix.system (EMACSPROG, "--quick", "--batch", unpack (args))
     if status == 0 then
       if posix.system ("diff", test .. ".output", edit_file) == 0 then
         emacs_pass = emacs_pass + 1
