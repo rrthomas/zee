@@ -110,7 +110,9 @@ local about_splash_str = ZILE_VERSION_STRING .. [[
 
 ]] .. ZILE_COPYRIGHT_STRING .. [[
 
+
 Type `C-x C-c' to exit ]] .. PACKAGE_NAME .. [[
+
 Type `C-x u' to undo changes.
 Type `C-g' at any time to quit the current operation.
 
