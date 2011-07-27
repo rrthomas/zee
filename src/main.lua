@@ -102,35 +102,30 @@ thisflag = {}
 lastflag = {}
 
 
-ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc."
+local ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc."
 
-local about_minibuf_str = "Welcome to " .. PACKAGE_NAME .. "!"
+local ZILE_COPYRIGHT_NOTICE = [[
+GNU Zile comes with ABSOLUTELY NO WARRANTY.
+Zile is Free Software--Free as in Freedom--so you can redistribute copies 
+of Zile and modify it; see the file COPYING. Otherwise, a copy can be 
+downloaded from http://www.gnu.org/licenses/gpl.html.
+]]
 
-local about_splash_str = ZILE_VERSION_STRING .. [[
+local splash_str = "Welcome to GNU " .. PACKAGE_NAME .. [[.
+
+Visit new file	C-x C-f
+Undo changes	C-x u
+Exit ]] .. PACKAGE_NAME .. [[	C-x C-c
+(`C-' means use the CTRL key.  `M-' means hold the META (or ALT) key.
+If you have no META key, you may type ESC followed by the character.)
+
+]] .. ZILE_VERSION_STRING .. [[
 
 ]] .. ZILE_COPYRIGHT_STRING .. [[
 
 
-Type `C-x C-c' to exit ]] .. PACKAGE_NAME .. [[
+]] .. ZILE_COPYRIGHT_NOTICE
 
-Type `C-x u' to undo changes.
-Type `C-g' at any time to quit the current operation.
-
-`C-x' means hold the CTRL key while typing the character `x'.
-`M-x' means hold the META or ALT key down while typing `x'.
-If there is no META or ALT key, instead press and release
-the ESC key and then type `x'.
-Combinations like `C-x u' mean first press `C-x', then `u'.
-]]
-
-local function about_screen ()
-  minibuf_write (about_minibuf_str)
-  if not get_variable_bool ("inhibit-splash-screen") then
-    show_splash_screen (about_splash_str)
-    term_refresh ()
-    waitkey (20 * 10)
-  end
-end
 
 local function setup_main_screen ()
   -- *scratch* and two files.
@@ -299,10 +294,15 @@ function main ()
     end
   end
 
-  -- Show the splash screen only if no files, function or load file is
-  -- specified on the command line, and there has been no error.
-  if #zarg == 0 and not minibuf_contents then
-    about_screen ()
+  -- Create the splash buffer & message only if no files, function or
+  -- load file is specified on the command line, and there has been no
+  -- error.
+  if #zarg == 0 and not minibuf_contents and not get_variable_bool ("inhibit-splash-screen") then
+    local bp = create_auto_buffer ("*GNU " .. PACKAGE_NAME .. "*")
+    switch_to_buffer (bp)
+    insert_string (splash_str)
+    cur_bp.readonly = true
+    execute_function ("beginning-of-buffer")
   end
   setup_main_screen ()
 

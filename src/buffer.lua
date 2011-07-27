@@ -458,11 +458,15 @@ Select buffer @i{buffer} in the current window.
   end
 )
 
-function create_scratch_buffer ()
+function create_auto_buffer (name)
   local bp = buffer_new ()
-  bp.name = "*scratch*"
+  bp.name = name
   bp.needname = true
   bp.temporary = true
   bp.nosave = true
   return bp
+end
+
+function create_scratch_buffer ()
+  return create_auto_buffer ("*scratch*")
 end
