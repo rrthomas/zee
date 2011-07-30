@@ -558,7 +558,7 @@ Make DIR become the current buffer's default directory.
 
     if dir ~= "" then
       local st = posix.stat (dir)
-      if not s or not s.type == "directory" then
+      if not st or not st.type == "directory" then
         minibuf_error (string.format ("`%s' is not a directory", dir))
       elseif posix.chdir (dir) == -1 then
         minibuf_write (string.format ("%s: %s", dir, posix.errno ()))
