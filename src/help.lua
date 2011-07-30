@@ -21,6 +21,13 @@
 
 -- FIXME: Add apropos
 
+local function write_function_description (name, doc)
+  insert_string (string.format ("%s is %s built-in function in `C source code'.\n\n%s",
+                                name,
+                                get_function_interactive (name) and "an interactive" or "a",
+                                doc))
+end
+
 Defun ("describe-function",
        {"string"},
 [[
