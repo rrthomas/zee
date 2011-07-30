@@ -271,22 +271,6 @@ function function_exists (f)
   return usercmd[f] ~= nil
 end
 
--- Read a function name from the minibuffer.
-local functions_history = history_new ()
-function minibuf_read_function_name (s)
-  local cp = completion_new ()
-
-  for name, func in pairs (usercmd) do
-    if func.interactive then
-      table.insert (cp.completions, name)
-    end
-  end
-
-  return minibuf_vread_completion (s, "", cp, functions_history,
-                                   "No function name given",
-                                   "Undefined function name `%s'")
-end
-
 function execute_with_uniarg (undo, uniarg, forward, backward)
   local func = forward
   uniarg = uniarg or 1
@@ -339,6 +323,7 @@ Read function name, then read its arguments and call it.
 )
 
 -- Read a function name from the minibuffer.
+local functions_history = history_new ()
 function minibuf_read_function_name (fmt)
   local cp = completion_new ()
 
