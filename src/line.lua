@@ -278,8 +278,8 @@ function delete_char ()
     local bs = oldlp.text
     as = as .. bs
     cur_bp.pt.p.text = as
-    l.prev.next = l.next
-    l.next.prev = l.prev
+    oldlp.prev.next = oldlp.next
+    oldlp.next.prev = oldlp.prev
 
     adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
     cur_bp.last_line = cur_bp.last_line - 1
