@@ -118,10 +118,14 @@ function term_init ()
   }
 
   codetokey_map = table.invert (keytocode_map)
+
+  -- When there are duplicates, merge uses the one from argument two,
+  -- hence when curses returns KEY_BACKSPACE we treat it as \C-h below.
   codetokey_map = table.merge (codetokey_map,
                                {
                                  [27] = KBD_META, -- Escape key
                                  [127] = KBD_BS, -- Delete key
+                                 [curses.KEY_BACKSPACE] = CTRL ('h'),
                                  [curses.KEY_SUSPEND] = CTRL ('z'),
                                })
 
