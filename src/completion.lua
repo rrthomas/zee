@@ -206,7 +206,7 @@ end
 function make_buffer_completion ()
   local cp = completion_new ()
   for _, bp in ipairs (buffers) do
-    table.insert (cp.completions, bp.buffer_name)
+    table.insert (cp.completions, bp.name)
   end
 
   return cp
