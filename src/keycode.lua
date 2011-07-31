@@ -83,6 +83,7 @@ local keynametocode_map = {
   ["\\C-"] = KBD_CTRL,
   ["\\DELETE"] = KBD_DEL,
   ["\\DOWN"] = KBD_DOWN,
+  ["\\e"] = 27, -- Escape or ^[
   ["\\END"] = KBD_END,
   ["\\F1"] = KBD_F1,
   ["\\F10"] = KBD_F10,
