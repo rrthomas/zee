@@ -99,7 +99,6 @@ local function completion_readdir (cp, path)
 
   local dir = posix.dir (pdir)
   if dir then
-    local buf = ""
     for _, d in ipairs (dir) do
       local s = posix.stat (pdir .. d)
       if s and s.type == "directory" then
