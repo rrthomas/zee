@@ -45,7 +45,7 @@ local codetoname = {
   [KBD_F10]   = "<f10>",
   [KBD_F11]   = "<f11>",
   [KBD_F12]   = "<f12>",
-  [' ']       = "SPC",
+  [string.byte(' ')] = "SPC",
 }
 
 -- Convert a key chord into its ASCII representation
