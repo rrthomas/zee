@@ -55,38 +55,43 @@ end
 
 local codetokey_map, keytocode_map
 
+
+local function CTRL (c)
+  return bit.bor (KBD_CTRL, string.byte (c))
+end
+
 function term_init ()
   curses.initscr ()
 
   keytocode_map = {
-    [bit.bor (KBD_CTRL, string.byte ('@'))] = 0, -- C-@
-    [bit.bor (KBD_CTRL, string.byte ('a'))] = 1, -- C-a
-    [bit.bor (KBD_CTRL, string.byte ('b'))] = 2, -- C-b
-    [bit.bor (KBD_CTRL, string.byte ('c'))] = 3, -- C-c
-    [bit.bor (KBD_CTRL, string.byte ('d'))] = 4, -- C-d
-    [bit.bor (KBD_CTRL, string.byte ('e'))] = 5, -- C-e
-    [bit.bor (KBD_CTRL, string.byte ('f'))] = 6, -- C-f
-    [bit.bor (KBD_CTRL, string.byte ('g'))] = 7, -- C-g
-    [bit.bor (KBD_CTRL, string.byte ('h'))] = 8, -- C-h
+    [CTRL ('@')] = 0,
+    [CTRL ('a')] = 1,
+    [CTRL ('b')] = 2,
+    [CTRL ('c')] = 3,
+    [CTRL ('d')] = 4,
+    [CTRL ('e')] = 5,
+    [CTRL ('f')] = 6,
+    [CTRL ('g')] = 7,
+    [CTRL ('h')] = 8,
     [KBD_TAB] = 9,
-    [bit.bor (KBD_CTRL, string.byte ('j'))] = 10, -- C-j
-    [bit.bor (KBD_CTRL, string.byte ('k'))] = 11, -- C-k
-    [bit.bor (KBD_CTRL, string.byte ('l'))] = 12, -- C-l
+    [CTRL ('j')] = 10,
+    [CTRL ('k')] = 11,
+    [CTRL ('l')] = 12,
     [KBD_RET] = 13,
-    [bit.bor (KBD_CTRL, string.byte ('n'))] = 14, -- C-n
-    [bit.bor (KBD_CTRL, string.byte ('o'))] = 15, -- C-o
-    [bit.bor (KBD_CTRL, string.byte ('p'))] = 16, -- C-p
-    [bit.bor (KBD_CTRL, string.byte ('q'))] = 17, -- C-q
-    [bit.bor (KBD_CTRL, string.byte ('r'))] = 18, -- C-r
-    [bit.bor (KBD_CTRL, string.byte ('s'))] = 19, -- C-s
-    [bit.bor (KBD_CTRL, string.byte ('t'))] = 20, -- C-t
-    [bit.bor (KBD_CTRL, string.byte ('u'))] = 21, -- C-u
-    [bit.bor (KBD_CTRL, string.byte ('v'))] = 22, -- C-v
-    [bit.bor (KBD_CTRL, string.byte ('w'))] = 23, -- C-w
-    [bit.bor (KBD_CTRL, string.byte ('x'))] = 24, -- C-x
-    [bit.bor (KBD_CTRL, string.byte ('y'))] = 25, -- C-y
-    [bit.bor (KBD_CTRL, string.byte ('z'))] = 26, -- C-z
-    [bit.bor (KBD_CTRL, string.byte ('_'))] = 31, -- C-_
+    [CTRL ('n')] = 14,
+    [CTRL ('o')] = 15,
+    [CTRL ('p')] = 16,
+    [CTRL ('q')] = 17,
+    [CTRL ('r')] = 18,
+    [CTRL ('s')] = 19,
+    [CTRL ('t')] = 20,
+    [CTRL ('u')] = 21,
+    [CTRL ('v')] = 22,
+    [CTRL ('w')] = 23,
+    [CTRL ('x')] = 24,
+    [CTRL ('y')] = 25,
+    [CTRL ('z')] = 26,
+    [CTRL ('_')] = 31,
     [KBD_PGUP] = curses.KEY_PPAGE,
     [KBD_PGDN] = curses.KEY_NPAGE,
     [KBD_HOME] = curses.KEY_HOME,
@@ -115,9 +120,9 @@ function term_init ()
   codetokey_map = table.invert (keytocode_map)
   codetokey_map = table.merge (codetokey_map,
                                {
-                                 [27] = KBD_META,
-                                 [127] = KBD_BS,
-                                 [curses.KEY_SUSPEND] = bit.bor (KBD_CTRL, string.byte ('z')), -- C-z
+                                 [27] = KBD_META, -- Escape key
+                                 [127] = KBD_BS, -- Delete key
+                                 [curses.KEY_SUSPEND] = CTRL ('z'),
                                })
 
   term_set_size (curses.cols (), curses.lines ())
