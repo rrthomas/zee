@@ -43,25 +43,6 @@ Stop Zile and return to superior process.
   end
 )
 
-Defun ("overwrite-mode",
-       {"number"},
-[[
-Toggle overwrite mode.
-With prefix argument @i{arg}, turn overwrite mode on if @i{arg} is positive,
-otherwise turn it off.  In overwrite mode, printing characters typed
-in replace existing text on a one-for-one basis, rather than pushing
-it to the right.  At the end of a line, such characters extend the line.
-Before a tab, such characters insert until the tab is filled in.
-@kbd{C-q} still inserts characters in overwrite mode; this
-is supposed to make it easier to insert characters when necessary.
-]],
-  true,
-  function (arg)
-    cur_bp.overwrite = arg and arg > 0 or not cur_bp.overwrite
-    return true
-  end
-)
-
 Defun ("toggle-read-only",
        {},
 [[
@@ -365,7 +346,7 @@ This is useful for inserting control characters.
   function ()
     minibuf_write ("C-q-")
     local c = xgetkey (GETKEY_UNFILTERED, 0)
-    insert_char_in_insert_mode (string.char (c))
+    insert_char (string.char (c))
     minibuf_clear ()
   end
 )

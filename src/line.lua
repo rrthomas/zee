@@ -68,8 +68,7 @@ local function adjust_markers (newlp, oldlp, pointo, dir, delta)
   unchain_marker (m_pt)
 end
 
--- Insert the character at the current position and move the text at its right
--- whatever the insert/overwrite mode is.
+-- Insert the character at the current position and move the text at its right.
 -- This function doesn't change the current position of the pointer.
 local function intercalate_char (c)
   if warn_if_readonly_buffer () then
@@ -94,41 +93,11 @@ function insert_char (c)
     return false
   end
 
-  if cur_bp.overwrite then
-    local pt = cur_bp.pt
-    -- (Current character isn't the end of line or a \t) or
-    -- (current character is a \t and we are in the tab limit).
-    if pt.o < #pt.p.text and string.sub (pt.p.text, pt.o + 1, pt.o + 1) ~= '\t' or
-      string.sub (pt.p.text, pt.o + 1, pt.o + 1) == '\t' and get_goalc () % t == t then
-      -- Replace the character.
-      undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1)
-      pt.p.text = string.sub (pt.p.text, 1, pt.o) .. c .. string.sub (pt.p.text, pt.o + 2)
-      pt.o = pt.o + 1
-      cur_bp.modified = true
-
-      return true
-    end
-    -- Fall through to insertion mode of a character at the end
-    -- of the line, since it is the same as overwrite mode.
-  end
-
   intercalate_char (c)
   forward_char ()
   adjust_markers (cur_bp.pt.p, cur_bp.pt.p, cur_bp.pt.o, 0, 1)
 
   return true
-end
-
--- Insert a character at the current position in insert mode
--- whatever the current insert mode is.
-function insert_char_in_insert_mode (c)
-  local old_overwrite = cur_bp.overwrite
-
-  cur_bp.overwrite = false
-  local ret = insert_char (c)
-  cur_bp.overwrite = old_overwrite
-
-  return ret
 end
 
 function insert_string (s)
@@ -139,7 +108,7 @@ function insert_string (s)
     if string.sub (s, i, i) == '\n' then
       insert_newline ()
     else
-      insert_char_in_insert_mode (string.sub (s, i, i))
+      insert_char (string.sub (s, i, i))
     end
   end
   undo_nosave = false
@@ -247,9 +216,9 @@ local function insert_tab ()
   end
 
   if get_variable_bool ("indent-tabs-mode") then
-    insert_char_in_insert_mode ('\t')
+    insert_char ('\t')
   else
-    insert_expanded_tab (insert_char_in_insert_mode)
+    insert_expanded_tab (insert_char)
   end
 
   return true
@@ -305,28 +274,6 @@ local function backward_delete_char ()
   end
 
   delete_char ()
-  return true
-end
-
-local function backward_delete_char_overwrite ()
-  if bolp () or eolp () then
-    return backward_delete_char ()
-  end
-
-  deactivate_mark ()
-
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
-  backward_char ()
-  if following_char () == '\t' then
-    insert_expanded_tab (insert_char)
-  else
-    insert_char (' ')
-  end
-  backward_char ()
-
   return true
 end
 
@@ -449,7 +396,7 @@ does nothing.
           if cur_goalc % t == 0 and cur_goalc + t <= target_goalc then
             ok = bool_to_lisp (insert_tab ())
           else
-            ok = bool_to_lisp (insert_char_in_insert_mode (' '))
+            ok = bool_to_lisp (insert_char (' '))
           end
           cur_goalc = get_goalc ()
         until ok ~= leT or cur_goalc >= target_goalc
@@ -548,7 +495,7 @@ Delete the previous @i{n} characters (following if @i{n} is negative).
 ]],
   true,
   function (n)
-    return execute_with_uniarg (true, n, cur_bp.overwrite and backward_delete_char_overwrite or backward_delete_char, delete_char)
+    return execute_with_uniarg (true, n, backward_delete_char, delete_char)
   end
 )
 
@@ -582,7 +529,7 @@ Delete all spaces and tabs around point, leaving one space.
   function ()
     undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
     execute_function ("delete-horizontal-space")
-    insert_char_in_insert_mode (' ')
+    insert_char (' ')
     undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
   end
 )

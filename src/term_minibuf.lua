@@ -45,7 +45,6 @@ local function draw_minibuf_read (prompt, value, match, pointo)
   term_refresh ()
 end
 
-local overwrite_mode = false
 local function do_minibuf_read (prompt, value, pos, cp, hp)
   local thistab
   local lasttab = -1
@@ -120,8 +119,6 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
       else
         ding ()
       end
-    elseif c == KBD_INS then
-      overwrite_mode = not overwrite_mode
     elseif c == bit.bor (KBD_META, string.byte ('v')) or c == KBD_PGUP then
       if cp == nil then
         ding ()
@@ -189,9 +186,6 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
       else
         as = string.sub (as, 1, pos) .. string.char (c) .. string.sub (as, pos + 1)
         pos = pos + 1
-        if overwrite_mode and pos ~= #as then
-          as = string.sub (as, 1, pos) .. string.sub (as, pos + 2)
-        end
       end
     end
 

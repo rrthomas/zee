@@ -302,9 +302,6 @@ local function draw_status_line (line, wp)
   if wp.bp.autofill then
     as = as .. " Fill"
   end
-  if wp.bp.overwrite then
-    as = as .. " Ovwrt"
-  end
   if thisflag.defining_macro then
     as = as .. " Def"
   end

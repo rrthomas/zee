@@ -74,7 +74,6 @@
 (global-set-key "\DOWN" 'next-line)
 (global-set-key "\C-o" 'open-line)
 (global-set-key "\C-xo" 'other-window)
-(global-set-key "\INSERT" 'overwrite-mode)
 (global-set-key "\C-p" 'previous-line)
 (global-set-key "\UP" 'previous-line)
 (global-set-key "\M-%" 'query-replace)
