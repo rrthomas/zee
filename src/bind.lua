@@ -100,7 +100,25 @@ end
 
 root_bindings = tree.new ()
 
+-- Fix up known discrepencies between terminal key sequences and terminfo
+-- capability settings.
+-- FIXME: type (RHS) == "number" or translation will not work!
+local key_translation_map = {
+
+  -- Many xterminal emulators send these sequences irrespective of terminfo
+  ["\\M-OP"] = KBD_F1,
+  ["\\M-OQ"] = KBD_F2,
+  ["\\M-OR"] = KBD_F3,
+  ["\\M-OS"] = KBD_F4,
+}
+
 function init_default_bindings ()
+  -- First install translations, so that they are over-ridden by any
+  -- subsequent binding!
+  for key, translation in pairs (key_translation_map) do
+    root_bindings[keystrtovec (key)] = translation
+  end
+
   -- Bind all printing keys to self_insert_command
   for i = 0, 0xff do
     if posix.isprint (string.char (i)) then
@@ -168,6 +186,10 @@ function get_key_sequence ()
   local func
   while true do
     func = root_bindings[keys]
+    if type (func) == "number" then
+      keys = { func }
+      func = root_bindings[keys]
+    end
     if type (func) ~= "table" then
       break
     end
