@@ -89,12 +89,12 @@ end
 -- If the user's home directory cannot be read, nil is returned.
 function compact_path (path)
   local home = posix.getpasswd (nil, "dir")
-  -- If we cannot get the home directory, return error
+  -- If we cannot get the home directory, return empty string
   if home == nil then
-    return nil
+    return ""
   end
 
-  -- Replace `^/$HOME' (if found) with `~'.
+  -- Replace `^$HOME' (if found) with `~'.
   return string.gsub (path, "^" .. home, "~")
 end
 
