@@ -20,7 +20,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.5.0.50, bug-zile@gnu.org)
+AC_INIT([Zile], [2.5.0.50], [bug-zile@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options check-news])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -36,7 +36,7 @@ gl_EARLY
 gl_INIT
 
 dnl Lua 5.1
-AX_PROG_LUA(501)
+AX_PROG_LUA([501])
 
 dnl Lua lrex
 LREX=rex_$with_lrex
@@ -53,24 +53,24 @@ fi
 AC_SUBST([LREX], ["$LREX"])
 
 dnl help2man
-AX_WITH_PROG(HELP2MAN, help2man, false)
+AX_WITH_PROG([HELP2MAN], [help2man], [false])
 
 dnl Emacs >= 23.1 (optional)
-AX_WITH_PROG(EMACSPROG, emacs)
+AX_WITH_PROG([EMACSPROG], [emacs])
 if test -n "$EMACSPROG"; then
   emacs_min_version=23.1
   emacs_version=$($EMACSPROG --version 2>&1 | head -n 1 | cut -d' ' -f3)
   AC_MSG_CHECKING([Emacs version $emacs_version >= $emacs_min_version])
-  AX_COMPARE_VERSION($emacs_version, ge, $emacs_min_version,
-    AC_MSG_RESULT([yes]),
+  AX_COMPARE_VERSION([$emacs_version], [ge], [$emacs_min_version],
+    [AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])
     unset EMACSPROG])
 fi
 
 dnl Extra definitions
-AC_SUBST(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"])
-AC_SUBST(CONFIGURE_HOST, ["${ac_hostname}"])
+AC_SUBST([CONFIGURE_DATE], ["`date '+%a %b %d %Y'`"])
+AC_SUBST([CONFIGURE_HOST], ["${ac_hostname}"])
 
 dnl Generate output
-AC_CONFIG_FILES(Makefile src/zile.lua)
+AC_CONFIG_FILES([Makefile src/zile.lua])
 AC_OUTPUT
