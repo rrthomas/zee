@@ -22,7 +22,7 @@
 -- FIXME: Add apropos
 
 local function write_function_description (name, doc)
-  insert_string (string.format ("%s is %s built-in function in `C source code'.\n\n%s",
+  insert_string (string.format ("%s is %s built-in function in `Lua source code'.\n\n%s",
                                 name,
                                 get_function_interactive (name) and "an interactive" or "a",
                                 doc))
@@ -58,7 +58,7 @@ local function write_key_description (name, doc, binding)
   assert (interactive ~= nil)
 
   insert_string (string.format ("%s runs the command %s, which is %s built-in\n" ..
-                                "function in `C source code'.\n\n%s",
+                                "function in `Lua source code'.\n\n%s",
                               binding, name,
                               interactive and "an interactive" or "a",
                               doc))
@@ -104,7 +104,7 @@ Display documentation of the command invoked by a key sequence.
 )
 
 local function write_variable_description (name, curval, doc)
-  insert_string (string.format ("%s is a variable defined in `C source code'.\n\n" ..
+  insert_string (string.format ("%s is a variable defined in `Lua source code'.\n\n" ..
                                 "Its value is %s\n\n%s",
                               name, curval, doc))
 end
