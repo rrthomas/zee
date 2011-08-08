@@ -54,7 +54,7 @@ Whichever character you type to run this command is inserted.
 
 _last_command = nil
 _this_command = nil
-interactive = false
+_interactive = false
 
 function process_command ()
   local keys = get_key_sequence ()
@@ -65,9 +65,9 @@ function process_command ()
 
   if function_exists (name) then
     _this_command = name
-    interactive = true
+    _interactive = true
     execute_function (name, lastflag.set_uniarg and (prefix_arg or 1))
-    interactive = false
+    _interactive = false
     _last_command = _this_command
   else
     minibuf_error (keyvectostr (keys) .. " is undefined")

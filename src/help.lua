@@ -54,13 +54,13 @@ Display the full documentation of a function.
 )
 
 local function write_key_description (name, doc, binding)
-  local interactive = get_function_interactive (name)
-  assert (interactive ~= nil)
+  local _interactive = get_function_interactive (name)
+  assert (_interactive ~= nil)
 
   insert_string (string.format ("%s runs the command %s, which is %s built-in\n" ..
                                 "function in `Lua source code'.\n\n%s",
                               binding, name,
-                              interactive and "an interactive" or "a",
+                              _interactive and "an interactive" or "a",
                               doc))
 end
 
