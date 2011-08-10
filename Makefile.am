@@ -19,11 +19,33 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+CLOC = cloc
+
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = BUGS FAQ GNUmakefile maint.mk m4/gnulib-cache.m4
+EXTRA_DIST =                 \
+    BUGS                \
+    FAQ                \
+    GNUmakefile            \
+    build-aux/zile-help2man-wrapper    \
+    maint.mk
 
+CLEANFILES =
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
+
+include doc/Makefile.am
 include src/Makefile.am
+include tests/Makefile.am
+
+loc:
+	$(CLOC) $(PRODUCTIONSOURCES)
+
+loc-tests:
+	$(CLOC) $(TESTSOURCES)
+
+loc-all:
+	$(CLOC) $(TESTSOURCES) $(PRODUCTIONSOURCES)
 
 ChangeLog:
 	git2cl > ChangeLog

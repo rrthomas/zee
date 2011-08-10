@@ -9,7 +9,7 @@
 # provided the copyright notice and this notice are preserved.
 
 if test "$1" = "--help"; then
-  $builddir/zile $1 | sed 's/^\([-+F]\)/  \1/'
+  $builddir/src/zile $1 | sed 's/^\([-+F]\)/  \1/'
 else
-  $builddir/zile $1
+  $builddir/src/zile $1
 fi

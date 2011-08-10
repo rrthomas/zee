@@ -19,8 +19,6 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-LUA_ENV = LUA_INIT= LUA_PATH="$(abs_top_srcdir)/src/?.lua;;"
-
 bin_SCRIPTS = src/zile
 
 BUILT_SOURCES = src/loadlua.lua
@@ -100,64 +98,6 @@ install-exec-hook:
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
 	rm -f $@.tmp
 
-$(top_builddir)/src/zile.1: $(top_srcdir)/src/zile $(top_builddir)/src/zile.1.in Makefile
-	rm -f $@ $@.tmp
-	$(install_edit) '$(top_srcdir)/$@.in' >$@.tmp
-	mv $@.tmp $@
-
-$(top_builddir)/src/zile.1.in: $(top_srcdir)/src/main.lua $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
-	builddir=$(top_builddir)/src $(HELP2MAN) --output=$(top_builddir)/src/zile.1.in --no-info --name="Zile Is Lossy Emacs" --include $(top_srcdir)/src/man-extras $(top_srcdir)/src/zile-help2man-wrapper
-
-dist_man_MANS = src/zile.1
-
-CLEANFILES = src/zile
-DISTCLEANFILES = src/zile.1
-MAINTAINERCLEANFILES = src/loadlua.lua src/zile.1.in
-
-TESTSOURCES = $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) $(TESTSCRIPTS)
-ALLSOURCES = $(TESTSOURCES) $(PRODUCTIONSOURCES)
-
-CLOC = cloc --force-lang="C",h
-
-loc:
-	$(CLOC) $(PRODUCTIONSOURCES)
-
-loc-tests:
-	$(CLOC) $(TESTSOURCES)
-
-loc-all:
-	$(CLOC) $(ALLSOURCES)
-
-TESTS_VARS = srcdir=$(top_srcdir)/src abs_srcdir=$(abs_top_srcdir)/src builddir=$(top_builddir)/src
-TESTS_ENVIRONMENT = $(TESTS_VARS)
-
-check-local:
-	echo $(LISP_TESTS) | $(LUA_ENV) $(TESTS_VARS) EMACSPROG="$(EMACSPROG)" xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
-	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) $(TESTS_VARS) EMACSPROG= xargs $(LUA) "$(top_srcdir)/src/run-lisp-tests.lua"
-
-TESTSCRIPTS =						\
-	src/run-lisp-tests.lua				\
-	src/test-bad-argument
-
-# FIXME: Find a way of making these work (screen-dependent tests by setting TERM and/or COLUMNS and LINES?)
-#	lisp-tests/disabled/*.el
-
-# FIXME: Make these work in Emacs too
-LISP_TESTS_ZILE_ONLY = $(top_srcdir)/src/lisp-tests/zile-only/*.el
-
-LISP_TESTS = $(top_srcdir)/src/lisp-tests/*.el
-
-LISP_TESTS_OUTPUTS = $(top_srcdir)/src/lisp-tests/*.output $(top_srcdir)/src/lisp-tests/zile-only/*.output
-
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
-	src/zile.lua.in					\
-	$(LISP_TESTS)					\
-	$(LISP_TESTS_ZILE_ONLY)				\
-	$(LISP_TESTS_OUTPUTS)				\
-	src/lisp-tests/test.input			\
-	$(TESTSCRIPTS)					\
-	src/quit.el					\
-	src/man-extras					\
-	src/zile.1.in					\
-	src/zile-help2man-wrapper
+	src/zile.lua.in
