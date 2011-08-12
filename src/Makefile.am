@@ -77,7 +77,7 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/src/*.el				\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
-LUA_CLIBS = posix curses bit rex_gnu
+LUA_CLIBS = posix curses bit $(LREX)
 
 src/loadlua.lua: Makefile.am
 	echo "-- Generated file - do not edit!" > $@
