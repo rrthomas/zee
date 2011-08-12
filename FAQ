@@ -111,5 +111,5 @@ INDEX
 
 2.8 Zile has a bug!
 
-    For instructions on reporting bugs, see the file BUGS, or send email to
-    <bug-zile@gnu.org>.
+    For instructions on reporting bugs, see the REPORTING BUGS
+    section in the README file, or send email to <bug-zile@gnu.org>.

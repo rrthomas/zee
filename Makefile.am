@@ -23,16 +23,17 @@ CLOC = cloc
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST =                 \
-    BUGS                \
-    FAQ                \
-    GNUmakefile            \
-    build-aux/zile-help2man-wrapper    \
-    maint.mk
-
 CLEANFILES =
 DISTCLEANFILES =
 MAINTAINERCLEANFILES =
+
+EXTRA_DIST = 						\
+	FAQ						\
+	BNUmakefile					\
+	build-aux/zile-help2man-wrapper			\
+	maint.mk
+
+doc_DATA = AUTHORS FAQ NEWS
 
 include doc/Makefile.am
 include src/Makefile.am
