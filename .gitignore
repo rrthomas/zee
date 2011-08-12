@@ -15,6 +15,7 @@
 /config.status.lineno
 /configure
 /configure.lineno
+/gnulib
 /lib
 /maint.mk
 /zile*.tar.gz
