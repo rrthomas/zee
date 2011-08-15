@@ -30,8 +30,17 @@ PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
 PATH_DATA = "@pkgdatadir@"
+LREX = "@LREX@"
 
 package.path = PATH_DATA .. "/?.lua;" .. package.path
 require "loadlua"
 ldb = require "ldb"
-main ()
+
+
+local function err(err)
+  term_close ()
+  print("Internal error.  Please report this bug with steps to reproduce the problem")
+  print(debug.traceback(err, 2))
+end
+
+xpcall(main, err)

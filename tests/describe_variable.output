@@ -1,4 +1,4 @@
-tab-width is a variable defined in `C source code'.
+tab-width is a variable defined in `Lua source code'.
 Here is a sample file.
 It has several lines.
 

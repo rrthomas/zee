@@ -445,7 +445,7 @@ Interactively, confirmation is required unless you supply a prefix argument.
   true,
   function ()
     return write_buffer (cur_bp, true,
-                         interactive and not lastflag.set_uniarg,
+                         _interactive and not lastflag.set_uniarg,
                          nil, "Write file: ")
   end
 )
@@ -548,7 +548,7 @@ Make DIR become the current buffer's default directory.
 ]],
   true,
   function (dir)
-    if not dir and interactive then
+    if not dir and _interactive then
       dir = minibuf_read_filename ("Change default directory: ", cur_bp.dir)
     end
 

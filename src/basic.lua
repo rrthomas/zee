@@ -229,7 +229,7 @@ Goto line arg, counting from line 1 at beginning of buffer.
   true,
   function (n)
     n = n or current_prefix_arg
-    if not n and interactive then
+    if not n and _interactive then
       n = minibuf_read_number ("Goto line: ")
       if n == "" then
         -- FIXME: This error message should come from deeper down.

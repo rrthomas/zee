@@ -312,7 +312,7 @@ Just C-u as argument means to use the current column.
 ]],
   true,
   function (n)
-    if not n and interactive then
+    if not n and _interactive then
       if lastflag.set_uniarg then
         n = current_prefix_arg
       else
