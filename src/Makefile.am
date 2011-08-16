@@ -19,9 +19,9 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-bin_SCRIPTS = src/zile
-
 BUILT_SOURCES = src/loadlua.lua
+
+bin_SCRIPTS = src/zile
 
 src_zile_LUA =						\
 	src/lib.lua					\
@@ -64,8 +64,7 @@ LUA_RUNTIME =						\
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
 	src/loadlua.lua					\
-	src/default-bindings.el				\
-	src/dotzile-extra.el
+	src/default-bindings.el
 
 PRODUCTIONSOURCES =					\
 	$(zile_SOURCES)					\
@@ -105,3 +104,6 @@ EXTRA_DIST +=						\
 CLEANFILES +=						\
 	src/zile					\
 	src/zile.lua
+
+DISTCLEANFILES +=					\
+	$(BUILT_SOURCES)
