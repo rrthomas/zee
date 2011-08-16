@@ -19,8 +19,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-DISTCLEANFILES += doc/zile.1
-MAINTAINERCLEANFILES += doc/zile.1.in
+MAINTAINERCLEANFILES += doc/zile.1.in doc/zile.1
 
 EXTRA_DIST +=						\
 	doc/man-extras					\
@@ -34,6 +33,7 @@ doc/zile.1: doc/zile.1.in doc/Makefile.am
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper src/zile
+doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper
+	$(MAKE) $(MAKE_FLAGS) src/zile
 	@test -d doc || mkdir doc
 	builddir=$(builddir) $(HELP2MAN) --output=doc/zile.1.in --no-info --name="GNU Zile" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper

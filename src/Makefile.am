@@ -101,3 +101,7 @@ install-exec-hook:
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
 	src/zile.lua.in
+
+CLEANFILES +=						\
+	src/zile					\
+	src/zile.lua
