@@ -29,7 +29,7 @@ MAINTAINERCLEANFILES =
 
 EXTRA_DIST = 						\
 	FAQ						\
-	BNUmakefile					\
+	GNUmakefile					\
 	build-aux/zile-help2man-wrapper			\
 	maint.mk
 
