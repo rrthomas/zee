@@ -35,5 +35,5 @@ doc/zile.1: doc/zile.1.in doc/Makefile.am
 	mv $@.tmp $@
 
 doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper src/zile
-	@test -d doc || mkdir/doc
+	@test -d doc || mkdir doc
 	builddir=$(builddir) $(HELP2MAN) --output=doc/zile.1.in --no-info --name="GNU Zile" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper
