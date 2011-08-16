@@ -337,3 +337,33 @@ function minibuf_read_function_name (fmt)
                                    "No function name given",
                                    "Undefined function name `%s'")
 end
+
+
+Defun ("eval-buffer",
+       {"string"},
+[[
+Execute the current buffer as Lisp code.
+
+When called from a Lisp program (i.e., not interactively), this
+function accepts an optional argument, the buffer to evaluate (nil
+means use current buffer).
+]],
+  true,
+  function (buffer)
+    local bp
+
+    if buffer and buffer ~= "" then
+      bp = find_buffer (buffer)
+    else
+      bp = cur_bp
+    end
+
+    local s, lp = "", bp.lines.next
+    while lp ~= bp.lines do
+      s = s .. lp.text .. "\n"
+      lp = lp.next
+    end
+
+    return lisp_loadstring (s)
+  end
+)
