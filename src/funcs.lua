@@ -192,7 +192,7 @@ by 4 each time.
         else
           break
         end
-      elseif key == string.byte ('-') and i == 0 then
+      elseif key == bit.bor (KBD_META, string.byte ('-')) and i == 0 then
         if sgn > 0 then
           sgn = -sgn
           as = as .. "-"
