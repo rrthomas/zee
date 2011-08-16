@@ -63,71 +63,70 @@ end
 function term_init ()
   curses.initscr ()
 
-  keytocode_map = {
-    [CTRL ('@')] = 0,
-    [CTRL ('a')] = 1,
-    [CTRL ('b')] = 2,
-    [CTRL ('c')] = 3,
-    [CTRL ('d')] = 4,
-    [CTRL ('e')] = 5,
-    [CTRL ('f')] = 6,
-    [CTRL ('g')] = 7,
-    [CTRL ('h')] = 8,
-    [KBD_TAB] = 9,
-    [CTRL ('j')] = 10,
-    [CTRL ('k')] = 11,
-    [CTRL ('l')] = 12,
-    [KBD_RET] = 13,
-    [CTRL ('n')] = 14,
-    [CTRL ('o')] = 15,
-    [CTRL ('p')] = 16,
-    [CTRL ('q')] = 17,
-    [CTRL ('r')] = 18,
-    [CTRL ('s')] = 19,
-    [CTRL ('t')] = 20,
-    [CTRL ('u')] = 21,
-    [CTRL ('v')] = 22,
-    [CTRL ('w')] = 23,
-    [CTRL ('x')] = 24,
-    [CTRL ('y')] = 25,
-    [CTRL ('z')] = 26,
-    [CTRL ('_')] = 31,
-    [KBD_PGUP] = curses.KEY_PPAGE,
-    [KBD_PGDN] = curses.KEY_NPAGE,
-    [KBD_HOME] = curses.KEY_HOME,
-    [KBD_END] = curses.KEY_END,
-    [KBD_DEL] = curses.KEY_DC,
-    [KBD_BS] = curses.KEY_BACKSPACE,
-    [KBD_INS] = curses.KEY_IC, -- INSERT
-    [KBD_LEFT] = curses.KEY_LEFT,
-    [KBD_RIGHT] = curses.KEY_RIGHT,
-    [KBD_UP] = curses.KEY_UP,
-    [KBD_DOWN] = curses.KEY_DOWN,
-    [KBD_F1] = curses.KEY_F1,
-    [KBD_F2] = curses.KEY_F2,
-    [KBD_F3] = curses.KEY_F3,
-    [KBD_F4] = curses.KEY_F4,
-    [KBD_F5] = curses.KEY_F5,
-    [KBD_F6] = curses.KEY_F6,
-    [KBD_F7] = curses.KEY_F7,
-    [KBD_F8] = curses.KEY_F8,
-    [KBD_F9] = curses.KEY_F9,
-    [KBD_F10] = curses.KEY_F10,
-    [KBD_F11] = curses.KEY_F11,
-    [KBD_F12] = curses.KEY_F12,
+  -- from curses keycodes to zile keycodes
+  codetokey_map = {
+    [0]                    = CTRL ('@'),
+    [1]                    = CTRL ('a'),
+    [2]                    = CTRL ('b'),
+    [3]                    = CTRL ('c'),
+    [4]                    = CTRL ('d'),
+    [5]                    = CTRL ('e'),
+    [6]                    = CTRL ('f'),
+    [7]                    = CTRL ('g'),
+    [8]                    = CTRL ('h'),
+    [9]                    = KBD_TAB,
+    [10]                   = CTRL ('j'),
+    [11]                   = CTRL ('k'),
+    [12]                   = CTRL ('l'),
+    [13]                   = KBD_RET,
+    [14]                   = CTRL ('n'),
+    [15]                   = CTRL ('o'),
+    [16]                   = CTRL ('p'),
+    [17]                   = CTRL ('q'),
+    [18]                   = CTRL ('r'),
+    [19]                   = CTRL ('s'),
+    [20]                   = CTRL ('t'),
+    [21]                   = CTRL ('u'),
+    [22]                   = CTRL ('v'),
+    [23]                   = CTRL ('w'),
+    [24]                   = CTRL ('x'),
+    [25]                   = CTRL ('y'),
+    [26]                   = CTRL ('z'),
+    [27]                   = KBD_META,
+    [31]                   = CTRL ('_'),
+    [127]                  = KBD_BS,     -- normally, a Delete key press
+    [curses.KEY_BACKSPACE] = CTRL ('h'), -- normally, a C-h key press
+    [curses.KEY_DC]        = KBD_DEL,    -- normally, Shift-Delete or M-Delete 
+    [curses.KEY_DOWN]      = KBD_DOWN,
+    [curses.KEY_END]       = KBD_END,
+    [curses.KEY_F1]        = KBD_F1,
+    [curses.KEY_F2]        = KBD_F2,
+    [curses.KEY_F3]        = KBD_F3,
+    [curses.KEY_F4]        = KBD_F4,
+    [curses.KEY_F5]        = KBD_F5,
+    [curses.KEY_F6]        = KBD_F6,
+    [curses.KEY_F7]        = KBD_F7,
+    [curses.KEY_F8]        = KBD_F8,
+    [curses.KEY_F9]        = KBD_F9,
+    [curses.KEY_F10]       = KBD_F10,
+    [curses.KEY_F11]       = KBD_F11,
+    [curses.KEY_F12]       = KBD_F12,
+    [curses.KEY_HOME]      = KBD_HOME,
+    [curses.KEY_IC]        = KBD_INS,    -- INSERT
+    [curses.KEY_LEFT]      = KBD_LEFT,
+    [curses.KEY_NPAGE]     = KBD_PGDN,
+    [curses.KEY_PPAGE]     = KBD_PGUP,
+    [curses.KEY_RIGHT]     = KBD_RIGHT,
+    [curses.KEY_SUSPEND]   = CTRL ('z'),
+    [curses.KEY_UP]        = KBD_UP,
   }
 
-  codetokey_map = table.invert (keytocode_map)
-
-  -- When there are duplicates, merge uses the one from argument two,
-  -- hence when curses returns KEY_BACKSPACE we treat it as \C-h below.
-  codetokey_map = table.merge (codetokey_map,
-                               {
-                                 [27] = KBD_META, -- Escape key
-                                 [127] = KBD_BS, -- Delete key
-                                 [curses.KEY_BACKSPACE] = CTRL ('h'),
-                                 [curses.KEY_SUSPEND] = CTRL ('z'),
-                               })
+  -- `keytocode_map` is only used by term_ungetkey() to push curses key
+  -- events back onto the curses input queue, so duplicates on the RHS
+  -- of `codetokey_map` don't matter: by the time client code's look at
+  -- the queued event again, term_getkey() has translated any unstable
+  -- reverse mapping from the LHS above, back to the original RHS key.
+  keytocode_map = table.invert (codetokey_map)
 
   term_set_size (curses.cols (), curses.lines ())
   curses.echo (false)
