@@ -1,7 +1,6 @@
 *.patch
 *~
 .sc-start*
-.gitmodules
 /COPYING
 /ChangeLog
 /GNUmakefile
