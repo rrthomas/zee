@@ -19,11 +19,10 @@ INDEX
 2 General questions
    2.1 What does `Zile' mean?
    2.2 Why another clone of Emacs?  Why not just use Emacs?
-   2.3 How small does Zile get?
-   2.4 I like the xyz function of Emacs but it's not in Zile!
-   2.5 Does Zile support Unicode/UTF-8?
-   2.6 Zile doesn't compile, or its tests don't pass.
-   2.7 Zile has a bug!
+   2.3 I like the xyz function of Emacs but it's not in Zile!
+   2.4 Does Zile support Unicode/UTF-8?
+   2.5 Zile doesn't compile, or its tests don't pass.
+   2.6 Zile has a bug!
 
 ------------------------------------------------------------------------------
 
@@ -73,12 +72,7 @@ INDEX
     which Emacs would be unsuitable, including small systems and quick
     editing sessions.
 
-2.3 How small does Zile get?
-
-    On Ubuntu 11.04 i386, Zile 2.4.0.60 built with gcc 4.5.2 -O2
-    weighs in at Kb when stripped.
-
-2.5 I like the xyz function of Emacs but it's not in Zile!
+2.3 I like the xyz function of Emacs but it's not in Zile!
 
     Zile was written to be small but fast and powerful enough.
 
@@ -91,11 +85,11 @@ INDEX
     in Zile, please send a message to the developers (see question
     1.7).
 
-2.6 Does Zile support Unicode/UTF-8?
+2.4 Does Zile support Unicode/UTF-8?
 
     No.
 
-2.7 Zile doesn't compile, or its tests don't pass.
+2.5 Zile doesn't compile, or its tests don't pass.
 
     If you have problems getting Zile to work on a POSIX system,
     please report your difficulties to the maintainers in as much
@@ -106,7 +100,7 @@ INDEX
     a wider range of systems get to run more POSIX code, and Zile
     is not burdened with special-case code.
 
-2.8 Zile has a bug!
+2.6 Zile has a bug!
 
     For instructions on reporting bugs, see the REPORTING BUGS
     section in the README file, or send email to <bug-zile@gnu.org>.
