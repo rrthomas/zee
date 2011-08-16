@@ -94,9 +94,9 @@ function term_init ()
     [26]                   = CTRL ('z'),
     [27]                   = KBD_META,
     [31]                   = CTRL ('_'),
-    [127]                  = KBD_BS,     -- normally, a Delete key press
+    [127]                  = KBD_BS,     -- delete char left of cursor
     [curses.KEY_BACKSPACE] = CTRL ('h'), -- normally, a C-h key press
-    [curses.KEY_DC]        = KBD_DEL,    -- normally, Shift-Delete or M-Delete 
+    [curses.KEY_DC]        = KBD_DEL,    -- delete char under cursor
     [curses.KEY_DOWN]      = KBD_DOWN,
     [curses.KEY_END]       = KBD_END,
     [curses.KEY_F1]        = KBD_F1,
