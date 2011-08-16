@@ -94,11 +94,10 @@ INDEX
     If you have problems getting Zile to work on a POSIX system,
     please report your difficulties to the maintainers in as much
     detail as possible.  If you are keen to get Zile working on a
-    non-POSIX system, please do so by improving the compatibility
-    code on which Zile is built; the maintainers will not accept
-    non-POSIX compatibility patches to Zile.  This helps everyone:
-    a wider range of systems get to run more POSIX code, and Zile
-    is not burdened with special-case code.
+    non-POSIX system, please do so by improving gnulib; the
+    maintainers will not accept non-POSIX compatibility patches to
+    Zile.  This helps everyone: a wider range of systems get to run
+    more POSIX code, and Zile is not burdened with special-case code.
 
 2.6 Zile has a bug!
 
