@@ -95,6 +95,10 @@ function term_init ()
     [27]                   = KBD_META,
     [31]                   = CTRL ('_'),
     [127]                  = KBD_BS,     -- delete char left of cursor
+
+    -- term_xgetkey() will only ever return any of the following keycodes
+    -- when curses keypad mode is true (GETKEY_UNFILTERED is not set)...
+
     [curses.KEY_BACKSPACE] = CTRL ('h'), -- normally, a C-h key press
     [curses.KEY_DC]        = KBD_DEL,    -- delete char under cursor
     [curses.KEY_DOWN]      = KBD_DOWN,
@@ -121,12 +125,20 @@ function term_init ()
     [curses.KEY_UP]        = KBD_UP,
   }
 
-  -- `keytocode_map` is only used by term_ungetkey() to push curses key
-  -- events back onto the curses input queue, so duplicates on the RHS
-  -- of `codetokey_map` don't matter: by the time client code's look at
-  -- the queued event again, term_getkey() has translated any unstable
-  -- reverse mapping from the LHS above, back to the original RHS key.
   keytocode_map = table.invert (codetokey_map)
+
+  -- FIXME: How do we handle an unget on e.g. KBD_F1?
+  --        shouldn't crash Zile with: (execute-kbd-macro "\C-q\F1")
+
+  -- ...therefore, we must never term_ungetkey() keypad mode keycodes,
+  -- otherwise we'll get an unprintable char back if that keycode is
+  -- subsequently fetched from the buffer with GETKEY_UNFILTERED. So, we
+  -- use table.merge() to stabilise duplicate mappings after inverting
+  -- codetokey_map:
+  keytocode_map = table.merge (keytocode_map, {
+                                [CTRL ('h')] = 8,
+                                [CTRL ('z')] = 26,
+                              })
 
   term_set_size (curses.cols (), curses.lines ())
   curses.echo (false)
