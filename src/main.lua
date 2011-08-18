@@ -206,7 +206,7 @@ function process_args ()
     elseif longindex == 1 then
       table.insert (zarg, {'function', optarg})
     elseif longindex == 2 then
-      table.insert (zarg, {'loadfile', optarg})
+      table.insert (zarg, {'loadfile', normalize_path (optarg)})
     elseif longindex == 3 then
       io.write ("Usage: " .. arg[0] .. " [OPTION-OR-FILENAME]...\n" ..
                 "\n" ..
@@ -240,7 +240,7 @@ function process_args ()
       if optarg[1] == '+' then
         line = tonumber (optarg, 10)
       else
-        table.insert (zarg, {'file', optarg, line})
+        table.insert (zarg, {'file', normalize_path (optarg), line})
         line = 1
       end
     end
