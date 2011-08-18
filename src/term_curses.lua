@@ -183,31 +183,27 @@ local function keytocodes (key)
   return codevec
 end
 
-local function get_char_unfiltered (delay)
+local function get_char (delay)
   local c
 
-  curses.stdscr ():timeout (delay)
-
-  repeat
-    c = curses.stdscr ():getch ()
-
-    if curses.KEY_RESIZE == c then
-      term_set_size (curses.cols (), curses.lines ())
-      resize_windows ()
-    end
-  until curses.KEY_RESIZE ~= c
-
-  curses.stdscr ():timeout (-1)
-
-  return c
-end
-
-local function get_char (delay)
   if #key_buf > 0 then
     return table.remove (key_buf)
   else
-    return get_char_unfiltered (delay)
+    curses.stdscr ():timeout (delay)
+
+    repeat
+      c = curses.stdscr ():getch ()
+
+      if curses.KEY_RESIZE == c then
+        term_set_size (curses.cols (), curses.lines ())
+        resize_windows ()
+      end
+    until curses.KEY_RESIZE ~= c
+
+    curses.stdscr ():timeout (-1)
   end
+
+  return c
 end
 
 function term_getkey (delay)
