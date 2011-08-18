@@ -349,7 +349,7 @@ local function write_to_disk (bp, filename)
         bp.backup = true
       else
         minibuf_error (string.format ("Cannot make backup file: %s", posix.errno ()))
-        waitkey (WAITKEY_DEFAULT)
+        waitkey ()
       end
     end
   end
@@ -465,7 +465,7 @@ local function save_some_buffers ()
       else
         while true do
           minibuf_write (string.format ("Save file %s? (y, n, !, ., q) ", fname))
-          local c = getkey ()
+          local c = getkey (GETKEY_DEFAULT)
           minibuf_clear ()
 
           if c == KBD_CANCEL then -- C-g

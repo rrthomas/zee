@@ -345,8 +345,7 @@ This is useful for inserting control characters.
   true,
   function ()
     minibuf_write ("C-q-")
-    local c = xgetkey (GETKEY_UNFILTERED, 0)
-    insert_char (string.char (c))
+    insert_string (getkey_unfiltered (GETKEY_DEFAULT))
     minibuf_clear ()
   end
 )

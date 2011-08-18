@@ -244,7 +244,7 @@ local function isearch (forward, regexp)
 
     minibuf_write (buf)
 
-    local c = getkey ()
+    local c = getkey (GETKEY_DEFAULT)
 
     if c == KBD_CANCEL then
       cur_bp.pt = start
@@ -270,7 +270,7 @@ local function isearch (forward, regexp)
       end
     elseif bit.band (c, KBD_CTRL) ~= 0 and bit.band (c, 0xff) == string.byte ('q') then
       minibuf_write (string.format ("%s^Q-", buf))
-      pattern = pattern .. string.char (xgetkey (GETKEY_UNFILTERED, 0))
+      pattern = pattern .. getkey_unfiltered (GETKEY_DEFAULT)
     elseif bit.band (c, KBD_CTRL) ~= 0 and (bit.band (c, 0xff) == string.byte ('r') or bit.band (c, 0xff) == string.byte ('s')) then
       -- Invert direction.
       if bit.band (c, 0xff) == string.byte ('r') then
@@ -425,12 +425,12 @@ what to do with it.
         end
         while true do
           minibuf_write (string.format ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl))
-          c = getkey ()
+          c = getkey (GETKEY_DEFAULT)
           if c == KBD_CANCEL or c == KBD_RET or c == string.byte (' ') or c == string.byte ('y') or c == string.byte ('n') or c == string.byte ('q') or c == string.byte ('.') or c == string.byte ('!') then
             break
           end
           minibuf_error ("Please answer y, n, !, . or q.")
-          waitkey (WAITKEY_DEFAULT)
+          waitkey ()
         end
         minibuf_clear ()
 

@@ -148,7 +148,7 @@ function minibuf_read_yn (fmt)
 
   while true do
     minibuf_write (errmsg .. fmt)
-    local key = getkey ()
+    local key = getkey (GETKEY_DEFAULT)
     if key == string.byte ('y') then
       return true
     elseif key == string.byte ('n') then

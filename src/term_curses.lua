@@ -95,10 +95,6 @@ function term_init ()
     [27]                   = KBD_META,
     [31]                   = CTRL ('_'),
     [127]                  = KBD_BS,     -- delete char left of cursor
-
-    -- term_xgetkey() will only ever return any of the following keycodes
-    -- when curses keypad mode is true (GETKEY_UNFILTERED is not set)...
-
     [curses.KEY_BACKSPACE] = CTRL ('h'), -- normally, a C-h key press
     [curses.KEY_DC]        = KBD_DEL,    -- delete char under cursor
     [curses.KEY_DOWN]      = KBD_DOWN,
@@ -130,11 +126,6 @@ function term_init ()
   -- FIXME: How do we handle an unget on e.g. KBD_F1?
   --        shouldn't crash Zile with: (execute-kbd-macro "\C-q\F1")
 
-  -- ...therefore, we must never term_ungetkey() keypad mode keycodes,
-  -- otherwise we'll get an unprintable char back if that keycode is
-  -- subsequently fetched from the buffer with GETKEY_UNFILTERED. So, we
-  -- use table.merge() to stabilise duplicate mappings after inverting
-  -- codetokey_map:
   keytocode_map = table.merge (keytocode_map, {
                                 [CTRL ('h')] = 8,
                                 [CTRL ('z')] = 26,
@@ -165,12 +156,11 @@ local function codetokey (c)
   local ret
   if codetokey_map[c] then
     ret = codetokey_map[c]
-  elseif c > 0xff or c < 0 then
+  elseif nil == c or c > 0xff or c < 0 then
     ret = KBD_NOKEY -- Undefined behaviour.
   else
     ret = c
   end
-
   return ret
 end
 
@@ -193,48 +183,50 @@ local function keytocodes (key)
   return codevec
 end
 
-local function get_char ()
+local function get_char_unfiltered (delay)
   local c
 
-  if #key_buf > 0 then
-    c = key_buf[#key_buf]
-    table.remove (key_buf)
-  else
+  curses.stdscr ():timeout (delay)
+
+  repeat
     c = curses.stdscr ():getch ()
-  end
+
+    if curses.KEY_RESIZE == c then
+      term_set_size (curses.cols (), curses.lines ())
+      resize_windows ()
+    end
+  until curses.KEY_RESIZE ~= c
+
+  curses.stdscr ():timeout (-1)
 
   return c
 end
 
-function term_xgetkey (mode, timeout)
-  while true do
-    if bit.band (mode, GETKEY_DELAYED) ~= 0 then
-      curses.stdscr ():timeout (timeout * 100)
-    end
-
-    local c = get_char ()
-    if bit.band (mode, GETKEY_DELAYED) ~= 0 then
-      curses.stdscr ():timeout (-1)
-    end
-
-    if c == curses.KEY_RESIZE then
-      term_set_size (curses.cols (), curses.lines ())
-      resize_windows ()
-    elseif c ~= nil then
-      local key
-      if bit.band (mode, GETKEY_UNFILTERED) ~= 0 then
-        key = c
-      else
-        key = codetokey (c)
-        while key == KBD_META do
-          key = bit.bor (codetokey (get_char ()), KBD_META)
-        end
-      end
-      return key
-    else
-      return KBD_NOKEY
-    end
+local function get_char (delay)
+  if #key_buf > 0 then
+    return table.remove (key_buf)
+  else
+    return get_char_unfiltered (delay)
   end
+end
+
+function term_getkey (delay)
+  local key = codetokey (get_char (delay))
+  while KBD_META == key do
+    key = bit.bor (codetokey (get_char (GETKEY_DEFAULT)), KBD_META)
+  end
+  return key
+end
+
+function term_getkey_unfiltered (delay)
+  curses.stdscr ():keypad (false)
+  local c, s = get_char (delay), ""
+  while nil ~= c do
+    s = s .. string.char (c)
+    c = get_char (0)
+  end
+  curses.stdscr ():keypad (true)
+  return s
 end
 
 function term_ungetkey (key)

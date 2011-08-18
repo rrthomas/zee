@@ -30,7 +30,7 @@ Copy region into register @i{register}.
   function (reg)
     if not reg then
       minibuf_write ("Copy to register: ")
-      reg = getkey ()
+      reg = getkey (GETKEY_DEFAULT)
     end
 
     if reg == KBD_CANCEL then
@@ -80,7 +80,7 @@ Puts point before and mark after the inserted text.
 
     if not reg then
       minibuf_write ("Insert register: ")
-      reg = getkey ()
+      reg = getkey (GETKEY_DEFAULT)
     end
 
     if reg == KBD_CANCEL then

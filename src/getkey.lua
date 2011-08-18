@@ -26,11 +26,10 @@ function lastkey ()
   return _last_key
 end
 
--- Get a keystroke, waiting for up to timeout 10ths of a second if
--- mode contains GETKEY_DELAYED, and translating it into a
--- keycode unless mode contains GETKEY_UNFILTERED.
-function xgetkey (mode, timeout)
-  _last_key = term_xgetkey (mode, timeout)
+-- Get a keystroke, waiting for up to GETKEY_DELAY ms, and translatie
+-- it into a keycode.
+function getkey (delay)
+  _last_key = term_getkey (delay)
 
   if thisflag.defining_macro then
     add_key_to_cmd (_last_key)
@@ -39,10 +38,21 @@ function xgetkey (mode, timeout)
   return _last_key
 end
 
--- Wait for a keystroke indefinitely, and return the
--- corresponding keycode.
-function getkey ()
-  return xgetkey (0, 0)
+function getkey_unfiltered (delay)
+  local s = term_getkey_unfiltered (delay)
+
+  _last_key = s:byte (#s)
+  if thisflag.defining_macro then
+    for i = 1,#s do add_key_to_cmd (s:byte (i)) end
+  end
+
+  return s
+end
+
+-- Wait for GETKEY_DELAYED ms or until a key is pressed.
+-- The key is then available with getkey.
+function waitkey ()
+  ungetkey (getkey (GETKEY_DELAYED))
 end
 
 -- Push a key into the input buffer.
@@ -57,10 +67,4 @@ function ungetkey (key)
   if thisflag.defining_macro then
     remove_key_from_cmd ()
   end
-end
-
--- Wait for timeout 10ths if a second or until a key is pressed.
--- The key is then available with [x]getkey.
-function waitkey (timeout)
-  ungetkey (xgetkey (GETKEY_DELAYED, timeout))
 end

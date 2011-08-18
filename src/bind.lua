@@ -132,7 +132,7 @@ function do_binding_completion (as)
 
   minibuf_write (((lastflag.set_uniarg or lastflag.uniarg_empty) and "C-u " or "") ..
                  bs .. as .. "-")
-  key = getkey ()
+  key = getkey (GETKEY_DEFAULT)
   minibuf_clear ()
 
   return key
@@ -161,7 +161,7 @@ function get_key_sequence ()
 
   local key
   repeat
-    key = getkey ()
+    key = getkey (GETKEY_DEFAULT)
   until key ~= KBD_NOKEY
   table.insert (keys, key)
 

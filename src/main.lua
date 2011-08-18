@@ -36,8 +36,8 @@ UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
 
 -- Keyboard handling
 
-GETKEY_DELAYED = 0001
-GETKEY_UNFILTERED = 0002
+GETKEY_DEFAULT = -1
+GETKEY_DELAYED = 2000
 
 -- Special value returned for invalid key codes, or when no key is pressed
 KBD_NOKEY = -1
