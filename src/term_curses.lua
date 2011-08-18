@@ -220,13 +220,9 @@ end
 
 function term_getkey_unfiltered (delay)
   curses.stdscr ():keypad (false)
-  local c, s = get_char (delay), ""
-  while nil ~= c do
-    s = s .. string.char (c)
-    c = get_char (0)
-  end
+  local c = get_char (delay)
   curses.stdscr ():keypad (true)
-  return s
+  return c
 end
 
 function term_ungetkey (key)

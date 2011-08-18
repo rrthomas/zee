@@ -39,14 +39,12 @@ function getkey (delay)
 end
 
 function getkey_unfiltered (delay)
-  local s = term_getkey_unfiltered (delay)
-
-  _last_key = s:byte (#s)
+  local c = term_getkey_unfiltered (delay)
+  _last_key = c
   if thisflag.defining_macro then
-    for i = 1,#s do add_key_to_cmd (s:byte (i)) end
+    add_key_to_cmd (c)
   end
-
-  return s
+  return c
 end
 
 -- Wait for GETKEY_DELAYED ms or until a key is pressed.

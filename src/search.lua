@@ -270,7 +270,7 @@ local function isearch (forward, regexp)
       end
     elseif bit.band (c, KBD_CTRL) ~= 0 and bit.band (c, 0xff) == string.byte ('q') then
       minibuf_write (string.format ("%s^Q-", buf))
-      pattern = pattern .. getkey_unfiltered (GETKEY_DEFAULT)
+      pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
     elseif bit.band (c, KBD_CTRL) ~= 0 and (bit.band (c, 0xff) == string.byte ('r') or bit.band (c, 0xff) == string.byte ('s')) then
       -- Invert direction.
       if bit.band (c, 0xff) == string.byte ('r') then
