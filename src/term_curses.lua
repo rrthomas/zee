@@ -211,14 +211,8 @@ function term_xgetkey (mode, timeout)
     if bit.band (mode, GETKEY_DELAYED) ~= 0 then
       curses.stdscr ():timeout (timeout * 100)
     end
-    if bit.band (mode, GETKEY_UNFILTERED) ~= 0 then
-      curses.stdscr ():keypad (false)
-    end
 
-    local c = get_char (mode)
-    if bit.band (mode, GETKEY_UNFILTERED) ~= 0 then
-      curses.stdscr ():keypad (true)
-    end
+    local c = get_char ()
     if bit.band (mode, GETKEY_DELAYED) ~= 0 then
       curses.stdscr ():timeout (-1)
     end
