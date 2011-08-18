@@ -109,6 +109,7 @@ local keynametocode_map = {
   ["\\RET"] = KBD_RET,
   ["\\RIGHT"] = KBD_RIGHT,
   ["\\SPC"] = string.byte (' '),
+  ["\\t"] = KBD_TAB,
   ["\\TAB"] = KBD_TAB,
   ["\\UP"] = KBD_UP,
   ["\\\\"] = string.byte ('\\'),
