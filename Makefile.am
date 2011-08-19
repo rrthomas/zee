@@ -27,7 +27,7 @@ CLEANFILES =
 DISTCLEANFILES =
 MAINTAINERCLEANFILES =
 
-EXTRA_DIST = 						\
+EXTRA_DIST =						\
 	FAQ						\
 	GNUmakefile					\
 	build-aux/zile-help2man-wrapper			\

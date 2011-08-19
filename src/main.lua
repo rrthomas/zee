@@ -106,8 +106,8 @@ local ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc.
 
 local ZILE_COPYRIGHT_NOTICE = [[
 GNU ]] .. PACKAGE_NAME .. [[ comes with ABSOLUTELY NO WARRANTY.
-Zile is Free Software--Free as in Freedom--so you can redistribute copies 
-of Zile and modify it; see the file COPYING. Otherwise, a copy can be 
+Zile is Free Software--Free as in Freedom--so you can redistribute copies
+of Zile and modify it; see the file COPYING. Otherwise, a copy can be
 downloaded from http://www.gnu.org/licenses/gpl.html.
 ]]
 
