@@ -105,7 +105,7 @@ lastflag = {}
 local ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc."
 
 local ZILE_COPYRIGHT_NOTICE = [[
-GNU Zile comes with ABSOLUTELY NO WARRANTY.
+GNU ]] .. PACKAGE_NAME .. [[ comes with ABSOLUTELY NO WARRANTY.
 Zile is Free Software--Free as in Freedom--so you can redistribute copies 
 of Zile and modify it; see the file COPYING. Otherwise, a copy can be 
 downloaded from http://www.gnu.org/licenses/gpl.html.
@@ -113,11 +113,12 @@ downloaded from http://www.gnu.org/licenses/gpl.html.
 
 local splash_str = "Welcome to GNU " .. PACKAGE_NAME .. [[.
 
-Visit new file	C-x C-f
-Undo changes	C-x u
-Exit ]] .. PACKAGE_NAME .. [[	C-x C-c
-(`C-' means use the CTRL key.  `M-' means hold the META (or ALT) key.
-If you have no META key, you may type ESC followed by the character.)
+Undo changes	C-x u        Exit ]] .. PACKAGE_NAME .. [[	C-x C-c
+(`C-' means use the CTRL key.  `M-' means hold the Meta (or Alt) key.
+If you have no Meta key, you may type ESC followed by the character.)
+Combinations like `C-x u' mean first press `C-x', then `u'.
+
+Keys not working properly?  See file://]] .. PATH_DOCDIR .. [[/FAQ
 
 ]] .. ZILE_VERSION_STRING .. [[
 

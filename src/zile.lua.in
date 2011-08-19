@@ -30,6 +30,7 @@ PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
 PATH_DATA = "@pkgdatadir@"
+PATH_DOCDIR = "@pkgdocdir@"
 LREX = "@LREX@"
 
 package.path = PATH_DATA .. "/?.lua;" .. package.path
