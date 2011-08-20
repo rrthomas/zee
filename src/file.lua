@@ -99,21 +99,25 @@ function compact_path (path)
 end
 
 Defun ("find-file",
-       {},
+       {"string"},
 [[
 Edit the specified file.
 Switch to a buffer visiting the file,
 creating one if none already exists.
 ]],
   true,
-  function ()
-    local ms = minibuf_read_filename ("Find file: ", cur_bp.dir)
-    local ok = leNIL
+  function (filename)
+    local ok = leT
 
-    if not ms then
-      ok = execute_function ("keyboard-quit")
-    elseif ms ~= "" then
-      ok = bool_to_lisp (find_file (ms))
+    if not filename then
+      filename = minibuf_read_filename ("Find file: ", cur_bp.dir)
+      if not filename then
+        ok = execute_function ("keyboard-quit")
+      end
+    end
+
+    if not filename or "" == filename or not find_file (filename) then
+      ok = leNIL
     end
 
     return ok
@@ -121,15 +125,15 @@ creating one if none already exists.
 )
 
 Defun ("find-file-read-only",
-       {},
+       {"string"},
 [[
 Edit the specified file but don't allow changes.
 Like `find-file' but marks buffer as read-only.
 Use @kbd{M-x toggle-read-only} to permit editing.
 ]],
   true,
-  function ()
-    local ok = excecute_function ("find-file")
+  function (filename)
+    local ok = excecute_function ("find-file", filename)
     if ok == leT then
       cur_bp.readonly = true
     end
