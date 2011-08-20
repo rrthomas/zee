@@ -6,6 +6,7 @@
 /GNUmakefile
 /HACKING
 /INSTALL
+/README-release
 /aclocal.m4
 /autom4te.cache
 /config.cache
@@ -15,6 +16,7 @@
 /configure
 /configure.lineno
 /gnulib
+/lib
 /maint.mk
 /zile*.tar.gz
 /zile*.tar.gz.directive*
