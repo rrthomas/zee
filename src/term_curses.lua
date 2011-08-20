@@ -95,7 +95,6 @@ function term_init ()
     [27]                   = KBD_META,
     [31]                   = CTRL ('_'),
     [127]                  = KBD_BS,     -- delete char left of cursor
-    [curses.KEY_BACKSPACE] = CTRL ('h'), -- normally, a C-h key press
     [curses.KEY_DC]        = KBD_DEL,    -- delete char under cursor
     [curses.KEY_DOWN]      = KBD_DOWN,
     [curses.KEY_END]       = KBD_END,
@@ -121,6 +120,10 @@ function term_init ()
     [curses.KEY_UP]        = KBD_UP,
   }
 
+  local kbs = curses.tigetstr("kbs")
+  assert (1 == #kbs)
+  codetokey_map[curses.KEY_BACKSPACE] = codetokey_map[string.byte(kbs)]
+
   keytocode_map = table.invert (codetokey_map)
 
   -- FIXME: How do we handle an unget on e.g. KBD_F1?
@@ -129,6 +132,7 @@ function term_init ()
   keytocode_map = table.merge (keytocode_map, {
                                 [CTRL ('h')] = 8,
                                 [CTRL ('z')] = 26,
+                                [KBD_BS] = 127,
                               })
 
   term_set_size (curses.cols (), curses.lines ())
