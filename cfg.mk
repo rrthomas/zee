@@ -26,7 +26,7 @@ gnulib_dir = $(GNULIB_SRCDIR)
 old_NEWS_hash := 45e683b0a584b4bade66372096748a20
 
 # Don't check test outputs
-VC_LIST_ALWAYS_EXCLUDE_REGEX = \.output$$
+VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
 # Lua-ish, not GNU-ish, error messages in some internal files
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
