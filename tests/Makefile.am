@@ -1,5 +1,5 @@
-# Source Makefile.am
-
+# Tests Makefile.am
+#
 # Copyright (c) 1997-2011 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
@@ -23,13 +23,19 @@ LUA_ENV = LUA_INIT= LUA_PATH="$(abs_srcdir)/src/?.lua;;"
 
 RUNLISPTESTS = $(LUA) $(srcdir)/tests/run-lisp-tests.lua
 
-LISP_TESTS = $(srcdir)/tests/*.el
-
-# FIXME: Make these work in Emacs too
-LISP_TESTS_ZILE_ONLY = $(srcdir)/tests/zile-only/*.el
+LISP_TESTS =						\
+	$(srcdir)/tests/*.el				\
+	$(srcdir)/tests/interactive/*.el
+LISP_TESTS_ZILE_ONLY =					\
+	$(srcdir)/tests/zile-only/*.el
 
 # FIXME: Find a way of making these work (screen-dependent tests by setting TERM and/or COLUMNS and LINES?)
-#     tests/disabled/*.lua
+#	tests/disabled/*.el
+
+LISP_TESTS_OUTPUTS =					\
+	$(srcdir)/tests/*.output			\
+	$(srcdir)/tests/interactive/*.output		\
+	$(srcdir)/tests/zile-only/*.output
 
 LISP_ALL_TESTS =					\
 	$(LISP_TESTS)					\
@@ -40,12 +46,8 @@ LISP_TESTS_ENVIRONMENT =				\
 	srcdir=$(srcdir)
 
 check-local: src/zile
-	@test -d tests || mkdir tests
 	echo $(LISP_TESTS) | $(LUA_ENV) EMACSPROG="$(EMACSPROG)" $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
-	@test -d tests/zile-only || mkdir tests/zile-only
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) EMACSPROG= $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
-
-LISP_TESTS_OUTPUTS = $(top_srcdir)/tests/*.output
 
 TESTSCRIPTS =						\
     tests/run-lisp-tests.lua				\

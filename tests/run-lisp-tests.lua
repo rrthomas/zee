@@ -35,6 +35,16 @@ local zile_fail = 0
 local emacs_pass = 0
 local emacs_fail = 0
 
+function mkdir_p (p)
+  local ftype = posix.stat (p).type
+  if nil == ftype then
+    mkdir_p (posix.dirname (p))
+    return posix.mkdir (p)
+  elseif 'directory' ~= ftype then
+    return nil, p..': file exists already'
+  end
+end
+
 -- If TERM is not set to a terminal type, choose a default
 local TERM = os.getenv ("TERM")
 if not TERM or TERM == "unknown" then
@@ -50,6 +60,8 @@ for _, name in ipairs (arg) do
     local edit_file = io.catfile (builddir, "tests", name .. ".input")
     local args = {"--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
     local input = io.catfile (srcdir, "tests", "test.input")
+
+    mkdir_p (posix.dirname (edit_file))
 
     if EMACSPROG ~= "" then
       posix.system ("cp", input, edit_file)
