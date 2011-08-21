@@ -133,7 +133,7 @@ Use @kbd{M-x toggle-read-only} to permit editing.
 ]],
   true,
   function (filename)
-    local ok = excecute_function ("find-file", filename)
+    local ok = execute_function ("find-file", filename)
     if ok == leT then
       cur_bp.readonly = true
     end
