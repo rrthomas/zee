@@ -107,17 +107,16 @@ creating one if none already exists.
 ]],
   true,
   function (filename)
-    local ok = leT
+    local ok = leNIL
 
     if not filename then
       filename = minibuf_read_filename ("Find file: ", cur_bp.dir)
-      if not filename then
-        ok = execute_function ("keyboard-quit")
-      end
     end
 
-    if not filename or "" == filename or not find_file (filename) then
-      ok = leNIL
+    if not filename then
+        ok = execute_function ("keyboard-quit")
+    else if "" ~= filename then
+      ok = find_file (filename)
     end
 
     return ok
