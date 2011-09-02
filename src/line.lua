@@ -581,7 +581,7 @@ Defun ("insert",
 [[
 Insert the argument at point.
 ]],
-  true,
+  false,
   function (arg)
     insert_string (arg)
   end
