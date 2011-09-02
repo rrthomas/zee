@@ -114,8 +114,8 @@ creating one if none already exists.
     end
 
     if not filename then
-        ok = execute_function ("keyboard-quit")
-    else if "" ~= filename then
+      ok = execute_function ("keyboard-quit")
+    elseif "" ~= filename then
       ok = find_file (filename)
     end
 
