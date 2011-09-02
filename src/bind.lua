@@ -142,9 +142,9 @@ local function walk_bindings (tree, process, st)
   local function walk_bindings_tree (tree, keys, process, st)
     for key, node in pairs (tree) do
       table.insert (keys, chordtostr (key))
-      if type (node) == "string" then -- a function name
+      if type (node) == "string" then
         process (table.concat (keys, " "), node, st)
-      elseif type (node) ~= "number" then -- not a key translation
+      else
         walk_bindings_tree (node, keys, process, st)
       end
       table.remove (keys)
