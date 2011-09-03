@@ -275,7 +275,7 @@ local function make_screen_pos (wp)
   elseif bv then
     return "Bot"
   end
-  return string.format ("%2d%%", window_pt (wp).n / wp.bp.last_line * 100)
+  return string.format ("%2d%%", 100 * window_pt (wp).n / wp.bp.last_line)
 end
 
 local function draw_status_line (line, wp)
