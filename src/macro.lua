@@ -114,7 +114,9 @@ Execute macro as string of editor command characters.
   function (keystr)
     local keys = keystrtovec (keystr)
     if keys ~= nil then
+      undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
       process_keys (keys)
+      undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
       return leT
     else
       return leNIL
