@@ -362,7 +362,7 @@ function main ()
     end
     term_redisplay ()
     term_refresh ()
-    process_command ()
+    get_and_run_command ()
   end
 
   -- Tidy and close the terminal.

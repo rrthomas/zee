@@ -91,14 +91,9 @@ local function process_keys (keys)
     term_ungetkey (keys[#keys - i + 1])
   end
 
-  -- FIXME: Why doesn't the following work on the lua branch, but does on master? (739f529)
-  -- We handle the uniarg at a higher level.
-  --prefix_arg = 1
-  --lastflag.set_uniarg = false
-
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
   while term_buf_len () > cur do
-    process_command ()
+    get_and_run_command ()
   end
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 end

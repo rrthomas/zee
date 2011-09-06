@@ -56,7 +56,7 @@ _last_command = nil
 _this_command = nil
 _interactive = false
 
-function process_command ()
+function get_and_run_command ()
   local keys = get_key_sequence ()
   local name = get_function_by_keys (keys)
 
