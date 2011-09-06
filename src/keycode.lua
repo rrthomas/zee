@@ -49,7 +49,7 @@ local codetoname = {
 }
 
 -- Convert a key chord into its ASCII representation
-function chordtostr (key)
+function chordtodesc (key)
   local s = ""
 
   if bit.band (key, KBD_CTRL) ~= 0 then
@@ -74,7 +74,7 @@ end
 
 -- Convert a key code sequence into a key code sequence string.
 function keyvectodesc (keys)
-  return table.concat (list.map (chordtostr, keys), " ")
+  return table.concat (list.map (chordtodesc, keys), " ")
 end
 
 -- Array of key names

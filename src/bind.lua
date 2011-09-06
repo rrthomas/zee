@@ -129,7 +129,7 @@ end
 local function walk_bindings (tree, process, st)
   local function walk_bindings_tree (tree, keys, process, st)
     for key, node in pairs (tree) do
-      table.insert (keys, chordtostr (key))
+      table.insert (keys, chordtodesc (key))
       if type (node) == "string" then
         process (table.concat (keys, " "), node, st)
       else
