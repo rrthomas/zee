@@ -84,6 +84,25 @@ The macro is now available for use via @kbd{C-x e}.
   end
 )
 
+local function process_keys (keys)
+  local cur = term_buf_len ()
+
+  for i = 1, #keys do
+    term_ungetkey (keys[#keys - i + 1])
+  end
+
+  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  while term_buf_len () > cur do
+    process_command ()
+  end
+  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+end
+
+local function call_last_kbd_macro ()
+  process_keys (cur_mp)
+  return true
+end
+
 Defun ("call-last-kbd-macro",
        {},
 [[
@@ -96,12 +115,7 @@ A prefix argument serves as a repeat count.
       minibuf_error ("No kbd macro has been defined")
       return leNIL
     end
-
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-    for _ = 1, current_prefix_arg or 1 do
-      process_keys (cur_mp)
-    end
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    execute_with_uniarg (true, current_prefix_arg, call_last_kbd_macro)
   end
 )
 
@@ -114,9 +128,7 @@ Execute macro as string of editor command characters.
   function (keystr)
     local keys = keystrtovec (keystr)
     if keys ~= nil then
-      undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
       process_keys (keys)
-      undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
       return leT
     else
       return leNIL
