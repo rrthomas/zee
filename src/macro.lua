@@ -91,6 +91,11 @@ local function process_keys (keys)
     term_ungetkey (keys[#keys - i + 1])
   end
 
+  -- FIXME: Why doesn't the following work on the lua branch, but does on master? (739f529)
+  -- We handle the uniarg at a higher level.
+  --prefix_arg = 1
+  --lastflag.set_uniarg = false
+
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
   while term_buf_len () > cur do
     process_command ()
@@ -98,8 +103,10 @@ local function process_keys (keys)
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 end
 
-local function call_last_kbd_macro ()
-  process_keys (cur_mp)
+local macro_keys = {}
+
+local function call_macro ()
+  process_keys (macro_keys)
   return true
 end
 
@@ -115,7 +122,10 @@ A prefix argument serves as a repeat count.
       minibuf_error ("No kbd macro has been defined")
       return leNIL
     end
-    execute_with_uniarg (true, current_prefix_arg, call_last_kbd_macro)
+
+    -- FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec)
+    macro_keys = cur_mp
+    execute_with_uniarg (true, current_prefix_arg, call_macro)
   end
 )
 
@@ -128,7 +138,8 @@ Execute macro as string of editor command characters.
   function (keystr)
     local keys = keystrtovec (keystr)
     if keys ~= nil then
-      process_keys (keys)
+      macro_keys = keys
+      execute_with_uniarg (true, current_prefix_arg, call_macro)
       return leT
     else
       return leNIL

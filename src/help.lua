@@ -78,12 +78,12 @@ Display documentation of the command invoked by a key sequence.
         return false
       end
       name = get_function_by_keys (keys)
-      binding = keyvectostr (keys)
+      binding = keyvectodesc (keys)
     else
       minibuf_write ("Describe key:")
       keys = get_key_sequence ()
       name = get_function_by_keys (keys)
-      binding = keyvectostr (keys)
+      binding = keyvectodesc (keys)
 
       if not name then
         minibuf_error (binding .. " is undefined")

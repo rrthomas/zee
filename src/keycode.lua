@@ -73,7 +73,7 @@ end
 
 
 -- Convert a key code sequence into a key code sequence string.
-function keyvectostr (keys)
+function keyvectodesc (keys)
   return table.concat (list.map (chordtostr, keys), " ")
 end
 

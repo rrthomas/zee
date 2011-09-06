@@ -70,7 +70,7 @@ function process_command ()
     _interactive = false
     _last_command = _this_command
   else
-    minibuf_error (keyvectostr (keys) .. " is undefined")
+    minibuf_error (keyvectodesc (keys) .. " is undefined")
   end
 
   -- Only add keystrokes if we were already in macro defining mode
@@ -159,7 +159,7 @@ function get_key_sequence ()
     if type (func) ~= "table" then
       break
     end
-    local s = keyvectostr (keys)
+    local s = keyvectodesc (keys)
     table.insert (keys, do_binding_completion (s))
   end
 
@@ -273,7 +273,7 @@ sequence.
     else
       minibuf_write ("Set key globally: ")
       keys = get_key_sequence ()
-      keystr = keyvectostr (keys)
+      keystr = keyvectodesc (keys)
     end
 
     if not name then
