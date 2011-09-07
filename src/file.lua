@@ -230,7 +230,7 @@ Set mark after the inserted text.
 -- Write buffer to given file name with given mode.
 local function raw_write_to_disk (bp, filename, mode)
   local ret = true
-  local h = io.open (filename, "w") -- FIXME: use posix.open, and use mode
+  local h = posix.creat (filename, mode)
 
   if not h then
     return false
@@ -239,13 +239,13 @@ local function raw_write_to_disk (bp, filename, mode)
   -- Save the lines.
   local lp = bp.lines.next
   while lp ~= bp.lines do
-    if not h:write (lp.text) then
+    if not posix.write (h, lp.text) then
       ret = false
       break
     end
 
     if lp.next ~= bp.lines then
-      if not h:write (bp.eol) then
+      if not posix.write (h, bp.eol) then
         ret = false
         break
       end
@@ -254,7 +254,7 @@ local function raw_write_to_disk (bp, filename, mode)
     lp = lp.next
   end
 
-  if not h:close () then
+  if posix.close (h) ~= 0 then
     ret = false
   end
 
