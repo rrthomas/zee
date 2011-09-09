@@ -87,8 +87,8 @@ The macro is now available for use via @kbd{C-x e}.
 local function process_keys (keys)
   local cur = term_buf_len ()
 
-  for i = 1, #keys do
-    term_ungetkey (keys[#keys - i + 1])
+  for i=#keys,1,-1 do
+    term_ungetkey (keys[i])
   end
 
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
