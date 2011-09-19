@@ -73,11 +73,9 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/src/*.el				\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
-LUA_CLIBS = posix curses bit $(LREX)
-
-src/loadlua.lua: Makefile.am
-	echo "-- Generated file - do not edit!" > $@
-	for i in $(LUA_CLIBS) $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
+src/loadlua.lua: Makefile.am src/loadlua.lua.in
+	cp src/loadlua.lua.in $@
+	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
 install_edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
@@ -100,7 +98,8 @@ install-exec-hook:
 
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
-	src/zile.lua.in
+	src/zile.lua.in					\
+	src/loadlua.lua.in
 
 CLEANFILES +=						\
 	src/zile					\

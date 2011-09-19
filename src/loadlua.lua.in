@@ -1,0 +1,26 @@
+require "std"
+
+local function version_to_list (v)
+  return list.new (string.split (v, "%."))
+end
+
+local function module_version (module, pattern)
+  return version_to_list (string.match (module.version or module._VERSION,
+                                        pattern or "[^/]*/?%s*(.*)%s*/?"))
+end
+
+local function require_version (module, min, too_big, pattern)
+  local m = require (module)
+  if min then
+    assert (module_version (m, pattern) >= version_to_list (min))
+  end
+  if max then
+    assert (module_version (m, pattern) < version_to_list (max))
+  end
+end
+
+require_version ("std", "25")
+require_version ("posix", "5.1.14")
+require "curses" -- part of luaposix
+require "bit" -- no version needed
+require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)")
