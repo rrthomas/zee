@@ -36,12 +36,12 @@ local emacs_pass = 0
 local emacs_fail = 0
 
 function mkdir_p (p)
-  local ftype = posix.stat (p).type
-  if nil == ftype then
+  local st = posix.stat (p)
+  if nil == st then
     mkdir_p (posix.dirname (p))
     return posix.mkdir (p)
-  elseif 'directory' ~= ftype then
-    return nil, p..': file exists already'
+  elseif "directory" ~= st.ftype then
+    return nil, p .. ": file exists already"
   end
 end
 
