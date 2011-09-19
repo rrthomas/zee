@@ -27,32 +27,12 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options check-news])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-AC_ARG_WITH([lrex],
-  [AS_HELP_STRING([--with-lrex=ARG],
-    [lrex flavour to use for Zile searches @<:@default=gnu@:>@])],
-  [],
-  [with_lrex=gnu])
-
 dnl Set up gnulib
 gl_EARLY
 gl_INIT
 
 dnl Lua 5.1
 AX_PROG_LUA([501])
-
-dnl Lua lrex
-LREX=rex_$with_lrex
-AC_MSG_CHECKING([Lua $LREX module is installed])
-AC_CACHE_VAL([zi_cv_lib_lrex],
-[zi_cv_lib_lrex=no
-if `$LUA -l$LREX -e 'os.exit(0)' >/dev/null 2>/dev/null`; then
-  zi_cv_lib_lrex=yes
-fi])
-AC_MSG_RESULT([$zi_cv_lib_lrex])
-if test "no" = "$zi_cv_lib_lrex"; then
-  AC_MSG_ERROR([$LUA was unable to load $LREX module])
-fi
-AC_SUBST([LREX], ["$LREX"])
 
 dnl help2man
 AX_WITH_PROG([HELP2MAN], [help2man], [false])
