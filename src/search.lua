@@ -33,17 +33,8 @@ local function no_upper (s, regex)
   return true
 end
 
-local lrex = require (LREX)
-local re_flags = lrex.flags ()
+local re_flags = rex_gnu.flags ()
 local re_find_err
-
-if "rex_pcre" == LREX then
-  -- copy pcre flag names into equivalent gnu names
-  re_flags.backward = 0
-  re_flags.ICASE = re_flags.CASELESS
-  re_flags.not_bol = re_flags.NOTBOL
-  re_flags.not_eol = re_flags.NOTEOL
-end
 
 local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   local ret
@@ -55,11 +46,8 @@ local function find_substr (as, s, from, to, forward, notbol, noteol, regex, ica
   if icase then
     cf = bit.bor (cf, re_flags.ICASE)
   end
-  if not forward and "rex_pcre" == LREX then
-    s = ".*" .. s
-  end
 
-  local ok, r = pcall (lrex.new, s, cf)
+  local ok, r = pcall (rex_gnu.new, s, cf)
   if ok then
     local ef = 0
     if notbol then
