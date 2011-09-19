@@ -37,14 +37,17 @@ Emacs user should feel at home with Zile. Zile is aimed at small
 footprint systems (a typical binary is about 100Kb) and quick editing
 sessions (it starts up and shuts down instantly).
 
-Zile is written in Lua 5.1 using **luaposix 5.1.11** APIs, and hence
-requires only a Lua 5.1 runtime and a few additional Lua modules:
+Zile is written in Lua 5.1 using POSIX APIs, and hence requires only a
+Lua 5.1 runtime and a few additional Lua modules:
 
- * Lua stdlib 23 or newer <http://luaforge.net/projects/stdlib>
- * Lua BitOp 1.0.0 or newer <http://bitop.luajit.org/>
- * lrexlib 2.5.0 or newer <http://luaforge.net/projects/lrexlib>
- * lcurses 5.1.4 or newer <http://luaforge.net/projects/lcurses>
- * luaposix 5.1.11 or newer <http://luaforge.net/projects/luaposix>
+ * Lua stdlib <http://luaforge.net/projects/stdlib>
+ * Lua BitOp <http://bitop.luajit.org/>
+ * lrexlib <http://luaforge.net/projects/lrexlib>
+   (the rex_gnu module must be built)
+ * luaposix <http://luaforge.net/projects/luaposix>
+   (the curses module must be built)
+
+For exact version dependencies, see `src/loadlibs.lua.in`.
 
   [Emacs]:   http://www.gnu.org/s/emacs
   [gnulib]:  http://www.gnu.org/s/gnulib
