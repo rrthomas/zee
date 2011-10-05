@@ -314,7 +314,7 @@ local function draw_status_line (line, wp)
   term_attrset (FONT_NORMAL)
 end
 
-local cur_topline
+local cur_topline = 0
 
 function term_redisplay ()
   local topline = 0
@@ -339,6 +339,10 @@ function term_redisplay ()
     topline = topline + wp.fheight
   end
 
+  term_redraw_cursor ()
+end
+
+function term_redraw_cursor ()
   -- Redraw cursor.
   term_move (cur_topline + cur_wp.topdelta, point_screen_column)
 end

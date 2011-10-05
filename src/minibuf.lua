@@ -32,7 +32,7 @@ function minibuf_refresh ()
     end
 
     -- Redisplay (and leave the cursor in the correct position).
-    term_redisplay ()
+    term_redraw_cursor ()
     term_refresh ()
   end
 end
