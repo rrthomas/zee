@@ -53,6 +53,5 @@ ChangeLog:
 
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
-	woger gnu upload=alpha.gnu.org package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=~/announce-$(PACKAGE)-$(VERSION) dist_type=".tar.gz" && \
-	woger freshmeat package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) version=$(VERSION) description="the tiny Emacs clone" notes=release-notes && \
+	woger freshmeat,gnu upload=alpha.gnu.org package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=release-notes dist_type="tar.gz" && \
 	rm -f release-notes
