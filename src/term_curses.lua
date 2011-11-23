@@ -121,7 +121,10 @@ function term_init ()
   }
 
   local kbs = curses.tigetstr("kbs")
-  assert (1 == #kbs)
+  if (nil == kbs or 1 ~= #kbs) then
+    kbs = string.char(127)
+  end
+
   codetokey_map[curses.KEY_BACKSPACE] = codetokey_map[string.byte(kbs)]
 
   keytocode_map = table.invert (codetokey_map)
