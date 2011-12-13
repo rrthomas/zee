@@ -77,10 +77,8 @@ function show_splash_screen (splash)
 end
 
 local function make_char_printable (c)
-  if c == 0 then
-    return "^@"
-  elseif c > 0 and c <= 27 then
-    return string.format ("^%c", string.byte ("A") + c - 1)
+  if c >= 0 and c <= 27 then
+    return string.format ("^%c", string.byte ("@") + c)
   else
     return string.format ("\\%o", bit.band (c, 0xff))
   end
