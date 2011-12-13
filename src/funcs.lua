@@ -904,7 +904,7 @@ Move point to the first non-whitespace character on this line.
 
 -- Move through words
 local function iswordchar (c)
-  return (string.match (c, "%w") ~= nil) or c == '$'
+  return (c ~= nil and string.match (c, "%w") ~= nil) or c == '$'
 end
 
 local function move_word (dir, next_char, move_char, at_extreme)
