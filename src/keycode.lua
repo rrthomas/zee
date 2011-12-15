@@ -150,6 +150,12 @@ local function strtochord (s)
   return s, key
 end
 
+-- Convert a keychord string to its key code.
+function keycode (s)
+  local _, key = strtochord (s)
+  return key
+end
+
 -- Convert a key sequence string into a key code sequence, or nil if
 -- it can't be converted.
 function keystrtovec (s)
