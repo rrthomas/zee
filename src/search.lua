@@ -204,7 +204,7 @@ local function isearch (forward, regexp)
 
     local c = getkey (GETKEY_DEFAULT)
 
-    if c == KBD_CANCEL then
+    if c == keycode "\\C-g" then
       goto_offset (start)
       thisflag.need_resync = true
 
@@ -217,7 +217,7 @@ local function isearch (forward, regexp)
       end
       cur_bp.mark = old_mark
       break
-    elseif c == KBD_BS then
+    elseif c == keycode "\\BACKSPACE" then
       if #pattern > 0 then
         pattern = string.sub (pattern, 1, -2)
         cur = start
@@ -226,14 +226,14 @@ local function isearch (forward, regexp)
       else
         ding ()
       end
-    elseif bit.band (c, KBD_CTRL) ~= 0 and bit.band (c, 0xff) == string.byte ('q') then
+    elseif c == keycode "\\C-q" then
       minibuf_write (string.format ("%s^Q-", buf))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
-    elseif bit.band (c, KBD_CTRL) ~= 0 and (bit.band (c, 0xff) == string.byte ('r') or bit.band (c, 0xff) == string.byte ('s')) then
+    elseif c == keycode "\\C-r" or c == keycode "\\C-s" then
       -- Invert direction.
-      if bit.band (c, 0xff) == string.byte ('r') then
+      if c == keycode "\\C-r" then
         forward = false
-      elseif bit.band (c, 0xff) == string.byte ('s') then
+      elseif c == keycode "\\C-s" then
         forward = true
       end
       if #pattern > 0 then
@@ -244,8 +244,8 @@ local function isearch (forward, regexp)
       elseif last_search then
         pattern = last_search
       end
-    elseif bit.band (c, KBD_META) ~= 0 or bit.band (c, KBD_CTRL) ~= 0 or c > KBD_TAB then
-      if c == KBD_RET and #pattern == 0 then
+    elseif bit.band (c, KBD_META) ~= 0 or bit.band (c, KBD_CTRL) ~= 0 or c > 0xff then
+      if c == keycode "\\RET" and #pattern == 0 then
         do_search (forward, regexp)
       else
         if #pattern > 0 then
@@ -260,7 +260,7 @@ local function isearch (forward, regexp)
         else
           minibuf_clear ()
         end
-        if c ~= KBD_RET then
+        if c ~= keycode "\\RET" then
           ungetkey (c)
         end
       end
@@ -394,7 +394,7 @@ what to do with it.
         while true do
           minibuf_write (string.format ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl))
           c = getkey (GETKEY_DEFAULT)
-          if c == KBD_CANCEL or c == KBD_RET or c == string.byte (' ') or c == string.byte ('y') or c == string.byte ('n') or c == string.byte ('q') or c == string.byte ('.') or c == string.byte ('!') then
+          if c == keycode "\\C-g" or c == keycode "\\RET" or c == keycode " " or c == keycode "y" or c == keycode "n"  or c == keycode "q" or c == keycode "." or c == keycode "!" then
             break
           end
           minibuf_error ("Please answer y, n, !, . or q.")
@@ -402,17 +402,17 @@ what to do with it.
         end
         minibuf_clear ()
 
-        if c == string.byte ('q') then -- Quit immediately.
+        if c == keycode "q" then -- Quit immediately.
           break
-        elseif c == KBD_CANCEL then -- C-g
+        elseif c == keycode "\\C-g" then
           ok = execute_function ("keyboard-quit")
           break
-        elseif c == string.byte ('!') then -- Replace all without asking.
+        elseif c == keycode "!" then -- Replace all without asking.
           noask = true
         end
       end
 
-      if c ~= string.byte ('n') and c ~= KBD_RET and c ~= KBD_DEL then -- Do not replace.
+      if c ~= keycode "n" and c ~= keycode "\\RET" and c ~= keycode "\\DELETE" then -- Do not replace.
         -- Perform replacement.
         count = count + 1
         local case_repl = repl
@@ -429,7 +429,7 @@ what to do with it.
         goto_offset (m.o)
         unchain_marker (m)
 
-        if c == string.byte ('.') then -- Replace and quit.
+        if c == keycode "." then -- Replace and quit.
           break
         end
       end

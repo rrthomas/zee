@@ -162,7 +162,7 @@ by 4 each time.
       local key = do_binding_completion (table.concat (keys, " "))
 
       -- Cancelled.
-      if key == KBD_CANCEL then
+      if key == keycode "\\C-g" then
         ok = execute_function ("keyboard-quit")
         break
       -- Digit pressed.
@@ -183,14 +183,14 @@ by 4 each time.
         end
 
         i = i + 1
-      elseif key == bit.bor (KBD_CTRL, string.byte ('u')) then
+      elseif key == keycode "\\C-u" then
         as = as .. "C-u"
         if i == 0 then
           arg = arg * 4
         else
           break
         end
-      elseif key == bit.bor (KBD_META, string.byte ('-')) and i == 0 then
+      elseif key == keycode "\\M--" and i == 0 then
         if sgn > 0 then
           sgn = -sgn
           as = as .. "-"

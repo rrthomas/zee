@@ -19,6 +19,34 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+-- Common non-alphanumeric keys.
+local KBD_CANCEL = 257
+local KBD_TAB = 258
+local KBD_RET = 259
+local KBD_PGUP = 260
+local KBD_PGDN = 261
+local KBD_HOME = 262
+local KBD_END = 263
+local KBD_DEL = 264
+local KBD_BS = 265
+local KBD_INS = 266
+local KBD_LEFT = 267
+local KBD_RIGHT = 268
+local KBD_UP = 269
+local KBD_DOWN = 270
+local KBD_F1 = 272
+local KBD_F2 = 273
+local KBD_F3 = 274
+local KBD_F4 = 275
+local KBD_F5 = 276
+local KBD_F6 = 277
+local KBD_F7 = 278
+local KBD_F8 = 279
+local KBD_F9 = 280
+local KBD_F10 = 281
+local KBD_F11 = 282
+local KBD_F12 = 283
+
 local codetoname = {
   [KBD_PGUP]  = "<prior>",
   [KBD_PGDN]  = "<next>",
@@ -77,6 +105,7 @@ function keyvectodesc (keys)
   return table.concat (list.map (chordtodesc, keys), " ")
 end
 
+
 -- Array of key names
 local keynametocode_map = {
   ["\\BACKSPACE"] = KBD_BS,
@@ -128,21 +157,20 @@ local function strtokey (s)
     if p then
       return string.sub (s, #p + 1), keynametocode_map [p]
     end
-    return "", KBD_NOKEY
+    return "", nil
   end
 
   return string.sub (s, 2), string.byte (s)
 end
 
--- Convert a key chord string to its key code.
 local function strtochord (s)
   local key = 0
 
   local k
   repeat
     s, k = strtokey (s)
-    if k == KBD_NOKEY then
-      return "", KBD_NOKEY
+    if k == nil then
+      return "", nil
     end
     key = bit.bor (key, k)
   until k ~= KBD_CTRL and k ~= KBD_META
@@ -164,7 +192,7 @@ function keystrtovec (s)
   while s ~= "" do
     local code
     s, code = strtochord (s)
-    if code == KBD_NOKEY then
+    if code == nil then
       return nil
     end
     table.insert (keys, code)

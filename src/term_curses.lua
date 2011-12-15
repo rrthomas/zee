@@ -68,10 +68,6 @@ end
 local codetokey_map, keytocode_map
 
 
-local function CTRL (c)
-  return bit.bor (KBD_CTRL, string.byte (c))
-end
-
 function term_width ()
   return curses.cols ()
 end
@@ -90,59 +86,59 @@ function term_init ()
 
   -- from curses keycodes to zile keycodes
   codetokey_map = {
-    [0]                    = CTRL ('@'),
-    [1]                    = CTRL ('a'),
-    [2]                    = CTRL ('b'),
-    [3]                    = CTRL ('c'),
-    [4]                    = CTRL ('d'),
-    [5]                    = CTRL ('e'),
-    [6]                    = CTRL ('f'),
-    [7]                    = CTRL ('g'),
-    [8]                    = CTRL ('h'),
-    [9]                    = KBD_TAB,
-    [10]                   = CTRL ('j'),
-    [11]                   = CTRL ('k'),
-    [12]                   = CTRL ('l'),
-    [13]                   = KBD_RET,
-    [14]                   = CTRL ('n'),
-    [15]                   = CTRL ('o'),
-    [16]                   = CTRL ('p'),
-    [17]                   = CTRL ('q'),
-    [18]                   = CTRL ('r'),
-    [19]                   = CTRL ('s'),
-    [20]                   = CTRL ('t'),
-    [21]                   = CTRL ('u'),
-    [22]                   = CTRL ('v'),
-    [23]                   = CTRL ('w'),
-    [24]                   = CTRL ('x'),
-    [25]                   = CTRL ('y'),
-    [26]                   = CTRL ('z'),
+    [0]                    = keycode "\\C-@",
+    [1]                    = keycode "\\C-a",
+    [2]                    = keycode "\\C-b",
+    [3]                    = keycode "\\C-c",
+    [4]                    = keycode "\\C-d",
+    [5]                    = keycode "\\C-e",
+    [6]                    = keycode "\\C-f",
+    [7]                    = keycode "\\C-g",
+    [8]                    = keycode "\\C-h",
+    [9]                    = keycode "\\TAB",
+    [10]                   = keycode "\\C-j",
+    [11]                   = keycode "\\C-k",
+    [12]                   = keycode "\\C-l",
+    [13]                   = keycode "\\RET",
+    [14]                   = keycode "\\C-n",
+    [15]                   = keycode "\\C-o",
+    [16]                   = keycode "\\C-p",
+    [17]                   = keycode "\\C-q",
+    [18]                   = keycode "\\C-r",
+    [19]                   = keycode "\\C-s",
+    [20]                   = keycode "\\C-t",
+    [21]                   = keycode "\\C-u",
+    [22]                   = keycode "\\C-v",
+    [23]                   = keycode "\\C-w",
+    [24]                   = keycode "\\C-x",
+    [25]                   = keycode "\\C-y",
+    [26]                   = keycode "\\C-z",
     [27]                   = KBD_META,
-    [31]                   = CTRL ('_'),
-    [127]                  = KBD_BS,     -- delete char left of cursor
-    [curses.KEY_DC]        = KBD_DEL,    -- delete char under cursor
-    [curses.KEY_DOWN]      = KBD_DOWN,
-    [curses.KEY_END]       = KBD_END,
-    [curses.KEY_F1]        = KBD_F1,
-    [curses.KEY_F2]        = KBD_F2,
-    [curses.KEY_F3]        = KBD_F3,
-    [curses.KEY_F4]        = KBD_F4,
-    [curses.KEY_F5]        = KBD_F5,
-    [curses.KEY_F6]        = KBD_F6,
-    [curses.KEY_F7]        = KBD_F7,
-    [curses.KEY_F8]        = KBD_F8,
-    [curses.KEY_F9]        = KBD_F9,
-    [curses.KEY_F10]       = KBD_F10,
-    [curses.KEY_F11]       = KBD_F11,
-    [curses.KEY_F12]       = KBD_F12,
-    [curses.KEY_HOME]      = KBD_HOME,
-    [curses.KEY_IC]        = KBD_INS,    -- INSERT
-    [curses.KEY_LEFT]      = KBD_LEFT,
-    [curses.KEY_NPAGE]     = KBD_PGDN,
-    [curses.KEY_PPAGE]     = KBD_PGUP,
-    [curses.KEY_RIGHT]     = KBD_RIGHT,
-    [curses.KEY_SUSPEND]   = CTRL ('z'),
-    [curses.KEY_UP]        = KBD_UP,
+    [31]                   = keycode "\\C-_",
+    [127]                  = keycode "\\BACKSPACE",
+    [curses.KEY_DC]        = keycode "\\DELETE",
+    [curses.KEY_DOWN]      = keycode "\\DOWN",
+    [curses.KEY_END]       = keycode "\\END",
+    [curses.KEY_F1]        = keycode "\\F1",
+    [curses.KEY_F2]        = keycode "\\F2",
+    [curses.KEY_F3]        = keycode "\\F3",
+    [curses.KEY_F4]        = keycode "\\F4",
+    [curses.KEY_F5]        = keycode "\\F5",
+    [curses.KEY_F6]        = keycode "\\F6",
+    [curses.KEY_F7]        = keycode "\\F7",
+    [curses.KEY_F8]        = keycode "\\F8",
+    [curses.KEY_F9]        = keycode "\\F9",
+    [curses.KEY_F10]       = keycode "\\F10",
+    [curses.KEY_F11]       = keycode "\\F11",
+    [curses.KEY_F12]       = keycode "\\F12",
+    [curses.KEY_HOME]      = keycode "\\HOME",
+    [curses.KEY_IC]        = keycode "\\INSERT",
+    [curses.KEY_LEFT]      = keycode "\\LEFT",
+    [curses.KEY_NPAGE]     = keycode "\\PAGEDOWN",
+    [curses.KEY_PPAGE]     = keycode "\\PAGEUP",
+    [curses.KEY_RIGHT]     = keycode "\\RIGHT",
+    [curses.KEY_SUSPEND]   = keycode "\\C-z",
+    [curses.KEY_UP]        = keycode "\\UP"
   }
 
   local kbs = curses.tigetstr("kbs")
@@ -158,9 +154,9 @@ function term_init ()
   --        shouldn't crash Zile with: (execute-kbd-macro "\C-q\F1")
 
   keytocode_map = table.merge (keytocode_map, {
-                                [CTRL ('h')] = 8,
-                                [CTRL ('z')] = 26,
-                                [KBD_BS] = 127,
+                                [keycode "\\C-h"] = 8,
+                                [keycode "\\C-z"] = 26,
+                                [keycode "\\BACKSPACE"] = 127,
                               })
 
   curses.echo (false)
@@ -188,17 +184,18 @@ local function codetokey (c)
   if codetokey_map[c] then
     ret = codetokey_map[c]
   elseif nil == c or c > 0xff or c < 0 then
-    ret = KBD_NOKEY -- Undefined behaviour.
+    ret = nil -- Undefined behaviour.
   else
     ret = c
   end
+
   return ret
 end
 
 local function keytocodes (key)
   local codevec = {}
 
-  if key ~= KBD_NOKEY then
+  if key ~= nil then
     if bit.band (key, KBD_META) ~= 0 then
       table.insert (codevec, 27)
       key = bit.band (key, bit.bnot (KBD_META))

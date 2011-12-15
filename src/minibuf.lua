@@ -149,11 +149,11 @@ function minibuf_read_yn (fmt)
   while true do
     minibuf_write (errmsg .. fmt)
     local key = getkey (GETKEY_DEFAULT)
-    if key == string.byte ('y') then
+    if key == keycode "y" then
       return true
-    elseif key == string.byte ('n') then
+    elseif key == keycode "n" then
       return false
-    elseif key == bit.bor (KBD_CTRL, string.byte ('g')) then
+    elseif key == keycode "\\C-g" then
       return -1
     else
       errmsg = "Please answer y or n.  "

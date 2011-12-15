@@ -438,22 +438,22 @@ local function save_some_buffers ()
           local c = getkey (GETKEY_DEFAULT)
           minibuf_clear ()
 
-          if c == KBD_CANCEL then -- C-g
+          if c == keycode "\\C-g" then
             execute_function ("keyboard-quit")
             return false
-          elseif c == string.byte ('q') then
+          elseif c == keycode "q" then
             bp = nil
             break
-          elseif c == string.byte ('.') then
+          elseif c == keycode "." then
             save_buffer (bp)
             return true
-          elseif c == string.byte ('!') then
+          elseif c == keycode "!" then
             noask = true
           end
-          if c == string.byte ('!') or c == string.byte (' ') or c == string.byte ('y') then
+          if c == keycode "!" or c == keycode " " or c == keycode "y" then
             save_buffer (bp)
           end
-          if c == string.byte ('!') or c == string.byte (' ') or c == string.byte ('y') or c == string.byte ('n') or c == KBD_RET or c == KBD_DEL then
+          if c == keycode "!" or c == keycode " " or c == keycode "y" or c == keycode "n" or c == keycode "\\RET" or c == keycode "\\DELETE" then
             break
           else
             minibuf_error ("Please answer y, n, !, . or q.")

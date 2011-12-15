@@ -33,7 +33,7 @@ Copy region into register @i{register}.
       reg = getkey (GETKEY_DEFAULT)
     end
 
-    if reg == KBD_CANCEL then
+    if reg == keycode "\\C-g" then
       return execute_function ("keyboard-quit")
     else
       minibuf_clear ()
@@ -79,7 +79,7 @@ Puts point before and mark after the inserted text.
       reg = getkey (GETKEY_DEFAULT)
     end
 
-    if reg == KBD_CANCEL then
+    if reg == keycode "\\C-g" then
       ok = execute_function ("keyboard-quit")
     else
       minibuf_clear ()

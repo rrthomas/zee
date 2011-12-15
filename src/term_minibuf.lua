@@ -90,49 +90,49 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     thistab = -1
 
     local c = getkey (GETKEY_DEFAULT)
-    if c == KBD_NOKEY or c == KBD_RET then
-    elseif c == bit.bor (KBD_CTRL, string.byte ('z')) then
+    if c == nil or c == keycode "\\RET" then
+    elseif c == keycode "\\C-z" then
       execute_function ("suspend-emacs")
-    elseif c == KBD_CANCEL then
+    elseif c == keycode "\\C-g" then
       as = nil
       break
-    elseif c == bit.bor (KBD_CTRL, string.byte ('a')) or c == KBD_HOME then
+    elseif c == keycode "\\C-a" or c == keycode "\\HOME" then
       pos = 0
-    elseif c == bit.bor (KBD_CTRL, string.byte ('e')) or c == KBD_END then
+    elseif c == keycode "\\C-e" or c == keycode "\\END" then
       pos = #as
-    elseif c == bit.bor (KBD_CTRL, string.byte ('b')) or c == KBD_LEFT then
+    elseif c == keycode "\\C-b" or c == keycode "\\LEFT" then
       if pos > 0 then
         pos = pos - 1
       else
         ding ()
       end
-    elseif c == bit.bor (KBD_CTRL, string.byte ('f')) or c == KBD_RIGHT then
+    elseif c == keycode "\\C-f" or c == keycode "\\RIGHT" then
       if pos < #as then
         pos = pos + 1
       else
         ding ()
       end
-    elseif c == bit.bor (KBD_CTRL, string.byte ('k')) then
+    elseif c == keycode "\\C-k" then
       -- FIXME: do kill-register save.
       if pos < #as then
         as = string.sub (as, pos + 1)
       else
         ding ()
       end
-    elseif c == KBD_BS then
+    elseif c == keycode "\\BACKSPACE" then
       if pos > 0 then
         as = string.sub (as, 1, pos - 1) .. string.sub (as, pos + 1)
         pos = pos - 1
       else
         ding ()
       end
-    elseif c == bit.bor (KBD_CTRL, string.byte ('d')) or c == KBD_DEL then
+    elseif c == keycode "\\C-d" or c == keycode "\\DELETE" then
       if pos < #as then
         as = string.sub (as, 1, pos) .. string.sub (as, pos + 2)
       else
         ding ()
       end
-    elseif c == bit.bor (KBD_META, string.byte ('v')) or c == KBD_PGUP then
+    elseif c == keycode "\\M-v" or c == keycode "\\PAGEUP" then
       if cp == nil then
         ding ()
       end
@@ -140,7 +140,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
         completion_scroll_down ()
         thistab = lasttab
       end
-    elseif c == bit.bor (KBD_CTRL, string.byte ('v')) or c == KBD_PGDN then
+    elseif c == keycode "\\C-v" or c == keycode "\\PAGEDOWN" then
       if cp == nil then
         ding ()
       end
@@ -148,7 +148,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
         completion_scroll_up ()
         thistab = lasttab
       end
-    elseif c == KBD_UP or c == bit.bor (KBD_META, string.byte ('p')) then
+    elseif c == keycode "\\M-p" or c == keycode "\\UP" then
       if hp then
         local elem = previous_history_element (hp)
         if elem then
@@ -158,7 +158,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
           as = elem
         end
       end
-    elseif c == KBD_DOWN or c == bit.bor (KBD_META, string.byte ('n')) then
+    elseif c == keycode "\\M-n" or c == keycode "\\DOWN" then
       if hp then
         local elem = next_history_element (hp)
         if elem then
@@ -168,7 +168,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
           saved = nil
         end
       end
-    elseif c == KBD_TAB or (c == ' ' and cp) then
+    elseif c == keycode "\\TAB" or (c == keycode " " and cp) then
       if not cp then
         ding ()
       else
@@ -207,7 +207,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     end
 
     lasttab = thistab
-  until c == KBD_RET or c == KBD_CANCEL
+  until c == keycode "\\RET" or c == keycode "\\C-g"
 
   minibuf_clear ()
   maybe_close_popup (cp)

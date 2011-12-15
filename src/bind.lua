@@ -154,7 +154,7 @@ function get_key_sequence ()
   local key
   repeat
     key = getkey (GETKEY_DEFAULT)
-  until key ~= KBD_NOKEY
+  until key ~= nil
   table.insert (keys, key)
 
   local func

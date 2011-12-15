@@ -32,41 +32,9 @@ program_name = posix.basename (arg[0] or PACKAGE)
 GETKEY_DEFAULT = -1
 GETKEY_DELAYED = 2000
 
--- Special value returned for invalid key codes, or when no key is pressed
-KBD_NOKEY = -1
-
 -- Key modifiers.
 KBD_CTRL = 512
 KBD_META = 1024
-
--- Common non-alphanumeric keys.
-KBD_CANCEL = bit.bor (KBD_CTRL, string.byte ('g'))
-KBD_TAB = 258
-KBD_RET = 259
-KBD_PGUP = 260
-KBD_PGDN = 261
-KBD_HOME = 262
-KBD_END = 263
-KBD_DEL = 264
-KBD_BS = 265
-KBD_INS = 266
-KBD_LEFT = 267
-KBD_RIGHT = 268
-KBD_UP = 269
-KBD_DOWN = 270
-KBD_F1 = 272
-KBD_F2 = 273
-KBD_F3 = 274
-KBD_F4 = 275
-KBD_F5 = 276
-KBD_F6 = 277
-KBD_F7 = 278
-KBD_F8 = 279
-KBD_F9 = 280
-KBD_F10 = 281
-KBD_F11 = 282
-KBD_F12 = 283
-
 
 -- Global variables
 main_vars = {}
