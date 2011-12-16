@@ -196,7 +196,7 @@ local function isearch (forward, regexp)
         string.sub (re_find_err, 1, 8) == "Invalid " then
         re_find_err = "incomplete input"
       end
-      buf = string.format (" [%s]", re_find_err)
+      buf = buf .. string.format (" [%s]", re_find_err)
       re_find_err = nil
     end
 
