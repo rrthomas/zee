@@ -307,6 +307,7 @@ local function isearch (forward, regexp)
 
     if thisflag.need_resync then
       resync_redisplay (cur_wp)
+      term_redisplay ()
     end
   end
 
