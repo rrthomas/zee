@@ -90,7 +90,7 @@ function get_and_run_command ()
   if function_exists (name) then
     call_command (name, lastflag.set_uniarg and (prefix_arg or 1 ))
   else
-    minibuf_error (keyvectodesc (keys) .. " is undefined")
+    minibuf_error (tostring (keys) .. " is undefined")
   end
 end
 
@@ -155,7 +155,7 @@ end
 -- Get a key sequence from the keyboard; the sequence returned
 -- has at most the last stroke unbound.
 function get_key_sequence ()
-  local keys = {}
+  local keys = keystrtovec ""
 
   local key
   repeat
@@ -169,7 +169,7 @@ function get_key_sequence ()
     if type (func) ~= "table" then
       break
     end
-    local s = keyvectodesc (keys)
+    local s = tostring (keys)
     table.insert (keys, do_binding_completion (s))
   end
 
@@ -277,7 +277,7 @@ sequence.
     else
       minibuf_write ("Set key globally: ")
       keys = get_key_sequence ()
-      keystr = keyvectodesc (keys)
+      keystr = tostring (keys)
     end
 
     if not name then

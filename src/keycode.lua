@@ -82,11 +82,6 @@ local codetoname = {
   [string.byte('\t')] = "TAB",
 }
 
--- Convert a key code sequence into a descriptive string.
-function keyvectodesc (keys)
-  return table.concat (list.map (tostring, keys), " ")
-end
-
 
 -- Array of key names
 local keynametocode_map = {
@@ -276,7 +271,11 @@ end
 -- Convert a key sequence string into a key code sequence, or nil if
 -- it can't be converted.
 function keystrtovec (s)
-  local keys = {}
+  local keys = setmetatable ({}, {
+    __tostring = function (self)
+                   return table.concat (list.map (tostring, self), " ")
+                 end
+  })
 
   for chord in keychords (s) do
     table.insert (keys, keycode (chord))
