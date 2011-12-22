@@ -22,22 +22,19 @@
 -- Key binding.
 
 function self_insert_command ()
-  local ret = true
-  local keys = term_keytocodes (lastkey ())
+  local key = term_keytobyte (lastkey ())
   deactivate_mark ()
-  for _, key in ipairs (keys) do
-    if key <= 0xff then
-      if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
-        fill_break_line ()
-      end
-      insert_char (string.char (key))
-    else
-      ret = false
-    end
+  if not key then
+    ding ()
+    return false
   end
 
-  if not ret then ding () end
-  return ret
+  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill_column") then
+    fill_break_line ()
+  end
+
+  insert_char (string.char (key))
+  return true
 end
 
 Defun ("self-insert-command",

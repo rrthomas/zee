@@ -238,7 +238,21 @@ function term_getkey (delay)
 end
 
 
-function term_keytocodes (key)
+-- If key can be represented as an ASCII byte, return it, otherwise
+-- return nil.
+function term_keytobyte (key)
+  local codes = keytocode[key]
+  if codes then
+    codes = codes[1]
+    if 0xff >= codes then
+      return codes
+    end
+  end
+  return nil
+end
+
+
+local function keytocodes (key)
   local codevec = {}
 
   if key ~= nil then
@@ -257,7 +271,7 @@ function term_keytocodes (key)
 end
 
 function term_ungetkey (key)
-  unget_codes (term_keytocodes (keycode (key)))
+  unget_codes (keytocodes (keycode (key)))
 end
 
 function term_buf_len ()
