@@ -21,13 +21,18 @@
 
 local attr_map, codetokey, keytocode, key_buf
 
-function term_init ()
-  local functable_mt = {
-    __call = function (t, k)
-               return t[k]
-             end,
-  }
+local ESC      = 0x1b
+local ESCDELAY = 500
 
+local function keypad (on)
+  local capstr = curses.tigetstr (on and "smkx" or "rmkx")
+  if capstr then
+    io.stdout:write (capstr)
+    io.stdout:flush ()
+  end
+end
+
+function term_init ()
   curses.initscr ()
 
   attr_map = {
@@ -37,106 +42,112 @@ function term_init ()
 
   key_buf = {}
 
-  -- from curses keycodes to zile keycodes
-  codetokey = {
-    [0]                    = keycode "\\C-@",
-    [1]                    = keycode "\\C-a",
-    [2]                    = keycode "\\C-b",
-    [3]                    = keycode "\\C-c",
-    [4]                    = keycode "\\C-d",
-    [5]                    = keycode "\\C-e",
-    [6]                    = keycode "\\C-f",
-    [7]                    = keycode "\\C-g",
-    [8]                    = keycode "\\C-h",
-    [9]                    = keycode "\\TAB",
-    [10]                   = keycode "\\C-j",
-    [11]                   = keycode "\\C-k",
-    [12]                   = keycode "\\C-l",
-    [13]                   = keycode "\\RET",
-    [14]                   = keycode "\\C-n",
-    [15]                   = keycode "\\C-o",
-    [16]                   = keycode "\\C-p",
-    [17]                   = keycode "\\C-q",
-    [18]                   = keycode "\\C-r",
-    [19]                   = keycode "\\C-s",
-    [20]                   = keycode "\\C-t",
-    [21]                   = keycode "\\C-u",
-    [22]                   = keycode "\\C-v",
-    [23]                   = keycode "\\C-w",
-    [24]                   = keycode "\\C-x",
-    [25]                   = keycode "\\C-y",
-    [26]                   = keycode "\\C-z",
-    [27]                   = keycode "\\e",
-    [28]                   = keycode "\\C-\\",
-    [29]                   = keycode "\\C-]",
-    [30]                   = keycode "\\C-^",
-    [31]                   = keycode "\\C-_",
-    [32]                   = keycode "\\SPC",
-    [127]                  = keycode "\\BACKSPACE",
-    [curses.KEY_DC]        = keycode "\\DELETE",
-    [curses.KEY_DOWN]      = keycode "\\DOWN",
-    [curses.KEY_END]       = keycode "\\END",
-    [curses.KEY_F1]        = keycode "\\F1",
-    [curses.KEY_F2]        = keycode "\\F2",
-    [curses.KEY_F3]        = keycode "\\F3",
-    [curses.KEY_F4]        = keycode "\\F4",
-    [curses.KEY_F5]        = keycode "\\F5",
-    [curses.KEY_F6]        = keycode "\\F6",
-    [curses.KEY_F7]        = keycode "\\F7",
-    [curses.KEY_F8]        = keycode "\\F8",
-    [curses.KEY_F9]        = keycode "\\F9",
-    [curses.KEY_F10]       = keycode "\\F10",
-    [curses.KEY_F11]       = keycode "\\F11",
-    [curses.KEY_F12]       = keycode "\\F12",
-    [curses.KEY_HOME]      = keycode "\\HOME",
-    [curses.KEY_IC]        = keycode "\\INSERT",
-    [curses.KEY_LEFT]      = keycode "\\LEFT",
-    [curses.KEY_NPAGE]     = keycode "\\PAGEDOWN",
-    [curses.KEY_PPAGE]     = keycode "\\PAGEUP",
-    [curses.KEY_RIGHT]     = keycode "\\RIGHT",
-    [curses.KEY_SUSPEND]   = keycode "\\C-z",
-    [curses.KEY_UP]        = keycode "\\UP"
-  }
+  -- from curses key presses to zile keycodes
+  codetokey = tree.new ()
 
-  local kbs = curses.tigetstr("kbs")
-  if not kbs or #kbs ~= 1 then
-    kbs = string.char(127)
-  end
+  -- from zile keycodes back to curses keypresses
+  keytocode = {}
 
-  codetokey[curses.KEY_BACKSPACE] = codetokey[string.byte (kbs)]
+  -- Starting with specially named keys:
+  for code, key in pairs {
+    [0x9]     = "\\TAB",
+    [0xd]     = "\\RET",
+    [0x20]    = "\\SPC",
+    ["kdch1"] = "\\DELETE",
+    ["kcud1"] = "\\DOWN",
+    ["kend"]  = "\\END",
+    ["kf1"]   = "\\F1",
+    ["kf2"]   = "\\F2",
+    ["kf3"]   = "\\F3",
+    ["kf4"]   = "\\F4",
+    ["kf5"]   = "\\F5",
+    ["kf6"]   = "\\F6",
+    ["kf7"]   = "\\F7",
+    ["kf8"]   = "\\F8",
+    ["kf9"]   = "\\F9",
+    ["kf10"]  = "\\F10",
+    ["kf11"]  = "\\F11",
+    ["kf12"]  = "\\F12",
+    ["khome"] = "\\HOME",
+    ["kich1"] = "\\INSERT",
+    ["kcub1"] = "\\LEFT",
+    ["knp"]   = "\\PAGEDOWN",
+    ["kpp"]   = "\\PAGEUP",
+    ["kcuf1"] = "\\RIGHT",
+    ["kspd"]  = "\\C-z",
+    ["kcuu1"] = "\\UP"
+  } do
+    local codes = nil
+    if type (code) == "string" then
+      local s = curses.tigetstr (code)
+      if s then
+        codes = {}
+        for i=1,#s do
+          table.insert (codes, s:byte (i))
+        end
+      end
+    else
+      codes = {code}
+    end
 
-  for c=0,0x7f do
-    codetokey[c] = codetokey[c] or keycode (string.char (c))
-    if not codetokey[c + 0x80] then
-      codetokey[c + 0x80] = "\\M-" + codetokey[c]
+    if codes then
+      key = keycode (key)
+      keytocode[key]   = codes
+      codetokey[codes] = key
     end
   end
 
-  setmetatable (codetokey, functable_mt)
+  -- Reverse lookup of a lone ESC.
+  keytocode[keycode "\\e"] = { ESC }
 
-  -- FIXME: How do we handle an unget on e.g. KBD_F1?
-  --        shouldn't crash Zile with: (execute-kbd-macro "\C-q\F1")
+  -- ...fallback on 0x7f for backspace if terminfo doesn't know better
+  if not curses.tigetstr ("kbs") then
+    keytocode[keycode "\\BACKSPACE"] = {0x7f}
+  end
+  if not codetokey[{0x7f}] then codetokey[{0x7f}] = keycode "\\BACKSPACE" end
 
-  keytocode = table.merge (table.invert (codetokey), {
-                            [keycode "\\C-h"]       = 8,
-                            [keycode "\t"]          = 9,
-                            [keycode "\\t"]         = 9,
-                            [keycode "\\C-z"]       = 26,
-                            [keycode " "]           = 32,
-                            [keycode "\\SPC"]       = 32,
-                            [keycode "\\BACKSPACE"] = 127,
-                          })
-  setmetatable (keytocode, functable_mt)
+  -- ...inject remaining ASCII key codes
+  for code=0,0x7f do
+    local key = nil
+    if not codetokey[{code}] then
+      -- control keys
+      if code < 0x20 then
+        key = keycode ("\\C-" .. string.lower (string.char (code + 0x40)))
+
+      -- printable keys
+      elseif code < 0x80 then
+        key = keycode (string.char (code))
+
+      -- meta keys
+      else
+        local basekey = codetokey[{code - 0x80}]
+        if type (basekey) == "table" and basekey.key then
+          key = "\\M-" + basekey
+        end
+      end
+
+      if key ~= nil then
+        codetokey[{code}] = key
+        keytocode[key]    = {code}
+      end
+    end
+  end
 
   curses.echo (false)
   curses.nl (false)
   curses.raw (true)
   curses.stdscr ():meta (true)
   curses.stdscr ():intrflush (false)
-  curses.stdscr ():keypad (true)
+  curses.stdscr ():keypad (false)
+
+  -- Put terminal in application mode.
+  keypad (true)
 end
 
 function term_close ()
+  -- Revert terminal to cursor mode before exiting.
+  keypad (false)
+
   curses.endwin ()
 end
 
@@ -167,19 +178,68 @@ local function get_char (delay)
   return c
 end
 
+local function unget_codes (codes)
+  key_buf = list.concat (key_buf, list.reverse (codes))
+end
+
 function term_getkey (delay)
-  local key = codetokey (get_char (delay))
-  while keycode "\\e" == key do
-    key = "\\M-" + codetokey (get_char (GETKEY_DEFAULT))
+  local codes, key = {}
+
+  local c = get_char (delay)
+  if c == ESC then
+    -- Detecting ESC is tricky...
+    c = get_char (ESCDELAY)
+    if c == nil then
+      -- ...if nothing follows quickly enough, assume ESC keypress...
+      key = keycode "\\e"
+    else
+      -- ...see whether the following chars match an escape sequence...
+      codes = { ESC }
+      while true do
+        table.insert (codes, c)
+        key = codetokey[codes]
+        if key and key.key then
+          -- ...return the codes for the matched escape sequence.
+          break
+        elseif key == nil then
+          -- ...no match, rebuffer unmatched chars and return ESC.
+          unget_codes (list.tail (codes))
+          key = keycode "\\e"
+          break
+        end
+        -- ...partial match, fetch another char and try again.
+        c = get_char (GETKEY_DEFAULT)
+      end
+    end
+  else
+    -- Detecting non-ESC involves fetching chars and matching...
+    while true do
+      table.insert (codes, c)
+      key = codetokey[codes]
+      if key and key.key then
+        -- ..code lookeup matched a key, return it.
+        break
+      elseif key == nil then
+        -- ...or return nil for an invalid lookup code.
+        key = nil
+        break
+      end
+      -- ...for a partial match, fetch another char and try again.
+      c = get_char (GETKEY_DEFAULT)
+    end
   end
+
+  if key == keycode "\\e" then
+    local another = term_getkey (GETKEY_DEFAULT)
+    if another then key = "\\M-" + another end
+  end
+
   return key
 end
 
+
 function term_getkey_unfiltered (delay)
-  curses.stdscr ():keypad (false)
-  local c = get_char (delay)
-  curses.stdscr ():keypad (true)
-  return c
+  return get_char (delay)
 end
 
 function term_keytocodes (key)
@@ -187,13 +247,13 @@ function term_keytocodes (key)
 
   if key ~= nil then
     if key.META then
-      table.insert (codevec, 27)
+      codevec = { ESC }
       key = key - "\\M-"
     end
 
-    local code = keytocode (key)
+    local code = keytocode[key]
     if code then
-      table.insert (codevec, code)
+      codevec = list.concat (codevec, code)
     end
   end
 
@@ -201,7 +261,7 @@ function term_keytocodes (key)
 end
 
 function term_ungetkey (key)
-  key_buf = list.concat (key_buf, list.reverse (term_keytocodes (keycode (key))))
+  unget_codes (term_keytocodes (keycode (key)))
 end
 
 function term_buf_len ()
