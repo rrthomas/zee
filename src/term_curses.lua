@@ -252,7 +252,7 @@ function term_keytobyte (key)
 end
 
 
-local function keytocodes (key)
+function term_ungetkey (key)
   local codevec = {}
 
   if key ~= nil then
@@ -267,11 +267,7 @@ local function keytocodes (key)
     end
   end
 
-  return codevec
-end
-
-function term_ungetkey (key)
-  unget_codes (keytocodes (key))
+  unget_codes (codevec)
 end
 
 function term_buf_len ()
