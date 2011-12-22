@@ -158,7 +158,7 @@ function term_reopen ()
   curses.doupdate ()
 end
 
-local function get_char (delay)
+function term_getkey_unfiltered (delay)
   if #key_buf > 0 then
     return table.remove (key_buf)
   end
@@ -185,10 +185,10 @@ end
 function term_getkey (delay)
   local codes, key = {}
 
-  local c = get_char (delay)
+  local c = term_getkey_unfiltered (delay)
   if c == ESC then
     -- Detecting ESC is tricky...
-    c = get_char (ESCDELAY)
+    c = term_getkey_unfiltered (ESCDELAY)
     if c == nil then
       -- ...if nothing follows quickly enough, assume ESC keypress...
       key = keycode "\\e"
@@ -208,7 +208,7 @@ function term_getkey (delay)
           break
         end
         -- ...partial match, fetch another char and try again.
-        c = get_char (GETKEY_DEFAULT)
+        c = term_getkey_unfiltered (GETKEY_DEFAULT)
       end
     end
   else
@@ -225,7 +225,7 @@ function term_getkey (delay)
         break
       end
       -- ...for a partial match, fetch another char and try again.
-      c = get_char (GETKEY_DEFAULT)
+      c = term_getkey_unfiltered (GETKEY_DEFAULT)
     end
   end
 
@@ -237,10 +237,6 @@ function term_getkey (delay)
   return key
 end
 
-
-function term_getkey_unfiltered (delay)
-  return get_char (delay)
-end
 
 function term_keytocodes (key)
   local codevec = {}
