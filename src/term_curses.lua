@@ -24,6 +24,8 @@ local attr_map, codetokey, keytocode, key_buf
 local ESC      = 0x1b
 local ESCDELAY = 500
 
+local resumed = true
+
 local function keypad (on)
   local capstr = curses.tigetstr (on and "smkx" or "rmkx")
   if capstr then
@@ -140,8 +142,7 @@ function term_init ()
   curses.stdscr ():intrflush (false)
   curses.stdscr ():keypad (false)
 
-  -- Put terminal in application mode.
-  keypad (true)
+  posix.signal (posix.SIGCONT, function () resumed = true end)
 end
 
 function term_close ()
@@ -161,6 +162,12 @@ end
 function term_getkey_unfiltered (delay)
   if #key_buf > 0 then
     return table.remove (key_buf)
+  end
+
+  -- Put terminal in application mode if necessary.
+  if resumed then
+    keypad (true)
+    resumed = nil
   end
 
   curses.stdscr ():timeout (delay)
