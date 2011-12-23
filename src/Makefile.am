@@ -77,14 +77,6 @@ src/loadlua.lua: Makefile.am src/loadlua.lua.in
 	cp src/loadlua.lua.in $@
 	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
-install_edit = sed \
-	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
-	-e 's|@pkgdocdir[@]|$(docdir)|g'
-
-inplace_edit = sed \
-	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g' \
-	-e 's|@pkgdocdir[@]|$(abs_top_srcdir)|g'
-
 $(top_builddir)/src/zile: $(top_builddir)/src/zile.lua Makefile
 	rm -f $@ $@.tmp
 	$(inplace_edit) '$@.lua' >$@.tmp

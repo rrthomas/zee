@@ -27,13 +27,13 @@ EXTRA_DIST +=						\
 
 dist_man_MANS = doc/zile.1
 
-doc/zile.1: doc/zile.1.in doc/Makefile.am
+doc/zile.1: doc/zile.1.in doc/Makefile.am config.status
 	@test -d doc || mkdir doc
 	rm -f $@ $@.tmp
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper
+doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac
 	$(MAKE) $(MAKE_FLAGS) src/zile
 	@test -d doc || mkdir doc
 	builddir=$(builddir) $(HELP2MAN) --output=doc/zile.1.in --no-info --name="GNU Zile" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper

@@ -27,6 +27,14 @@ CLEANFILES =
 DISTCLEANFILES =
 MAINTAINERCLEANFILES =
 
+install_edit = sed \
+	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
+	-e 's|@pkgdocdir[@]|$(docdir)|g'
+
+inplace_edit = sed \
+	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g' \
+	-e 's|@pkgdocdir[@]|$(abs_top_srcdir)|g'
+
 EXTRA_DIST =						\
 	FAQ						\
 	GNUmakefile					\
