@@ -21,10 +21,7 @@
 
 -- Create an empty list, returning a pointer to the list
 function line_new ()
-  local l = {}
-  l.next = l
-  l.prev = l
-  return l
+  return {}
 end
 
 function set_line_prev (l, p)
@@ -38,7 +35,9 @@ end
 -- Insert a line into list after the given point, returning the new line
 function line_insert (l, s)
   local n = {next = l.next, prev = l, text = s}
-  set_line_prev (l.next, n)
+  if l.next then
+    set_line_prev (l.next, n)
+  end
   set_line_next (l, n)
 
   return n
@@ -252,8 +251,12 @@ function delete_char ()
     local bs = oldlp.text
     as = as .. bs
     cur_bp.pt.p.text = as
-    set_line_next (oldlp.prev, oldlp.next)
-    set_line_prev (oldlp.next, oldlp.prev)
+    if oldlp.prev then
+      set_line_next (oldlp.prev, oldlp.next)
+    end
+    if oldlp.next then
+      set_line_prev (oldlp.next, oldlp.prev)
+    end
 
     adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
     cur_bp.last_line = cur_bp.last_line - 1

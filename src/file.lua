@@ -237,14 +237,14 @@ local function raw_write_to_disk (bp, filename, mode)
   end
 
   -- Save the lines.
-  local lp = bp.lines.next
-  while lp ~= bp.lines do
+  local lp = bp.lines
+  while lp ~= nil do
     if not posix.write (h, lp.text) then
       ret = false
       break
     end
 
-    if lp.next ~= bp.lines then
+    if lp.next ~= nil then
       if not posix.write (h, bp.eol) then
         ret = false
         break
@@ -593,7 +593,7 @@ local function insert_buffer (bp)
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
   undo_nosave = true
-  insert_lines (0, old_cur_n, old_lines, bp.lines.next)
+  insert_lines (0, old_cur_n, old_lines, bp.lines)
   insert_string (old_cur_line)
   if old_cur_n < old_lines then
     insert_newline ()
@@ -724,9 +724,7 @@ local function read_file (filename)
     until not buf
   end
 
-  set_line_next (lp, cur_bp.lines)
-  set_line_prev (cur_bp.lines, lp)
-  cur_bp.lines.next.p = cur_bp.pt
+  cur_bp.lines.p = cur_bp.pt
   cur_bp.dir = posix.dirname (filename)
 
   h:close ()

@@ -161,7 +161,7 @@ local function draw_window (topline, wp)
   local pt = window_pt (wp)
   local lp, lineno = pt.p, pt.n
   for i = wp.topdelta, 1, -1 do
-    if lp.prev == wp.bp.lines then
+    if lp.prev == nil then
       break
     end
     lp = lp.prev

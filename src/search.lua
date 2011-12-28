@@ -98,7 +98,7 @@ local function search (pt, s, forward, regexp)
   -- Match following lines.
   while not pos do
     lp = lp[forward and "next" or "prev"]
-    if lp == cur_bp.lines then
+    if lp == nil then
       break
     end
     as = lp.text

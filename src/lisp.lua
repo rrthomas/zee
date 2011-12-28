@@ -358,8 +358,8 @@ means use current buffer).
       bp = cur_bp
     end
 
-    local s, lp = "", bp.lines.next
-    while lp ~= bp.lines do
+    local s, lp = "", bp.lines
+    while lp ~= nil do
       s = s .. lp.text .. "\n"
       lp = lp.next
     end

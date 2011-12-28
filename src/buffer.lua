@@ -40,11 +40,7 @@ function buffer_new ()
   bp.pt.p.text = ""
 
   -- Allocate the limit marker.
-  bp.lines = line_new ()
-  set_line_prev (bp.lines, bp.pt.p)
-  set_line_next (bp.lines, bp.pt.p)
-  set_line_prev (bp.pt.p, bp.lines)
-  set_line_next (bp.pt.p, bp.lines)
+  bp.lines = bp.pt.p
   bp.last_line = 0
 
   -- Allocate markers list.
@@ -105,17 +101,12 @@ function delete_region (rp)
 end
 
 function calculate_buffer_size (bp)
-  local lp = bp.lines.next
   local size = 0
-
-  if lp == bp.lines then
-    return 0
-  end
-
-  while true do
+  local lp = bp.lines
+  while lp ~= nil do
     size = size + #lp.text
     lp = lp.next
-    if lp == bp.lines then
+    if lp == nil then
       break
     end
     size = size + 1

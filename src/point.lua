@@ -25,7 +25,7 @@ end
 
 function make_point (lineno, offset)
   local pt = point_new ()
-  pt.p = cur_bp.lines.next
+  pt.p = cur_bp.lines
   pt.n = lineno
   pt.o = offset
   for i = lineno, 1, -1 do
@@ -35,17 +35,11 @@ function make_point (lineno, offset)
 end
 
 function point_min ()
-  local pt = point_new ()
-  pt.p = cur_bp.lines.next
-  pt.n = 0
-  pt.o = 0
-  return pt
+  return make_point (0, 0)
 end
 
 function point_max ()
-  local pt = point_new ()
-  pt.p = cur_bp.lines.prev
-  pt.n = cur_bp.last_line
+  local pt = make_point (cur_bp.last_line, 0)
   pt.o = #pt.p.text
   return pt
 end
