@@ -980,13 +980,14 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, #as, #as)
-    cur_bp.pt.p.text = string.sub (cur_bp.pt.p.text, 1, cur_bp.pt.o) ..
-      recase (as, rcase) ..
-      string.sub (cur_bp.pt.p.text, cur_bp.pt.o + 1 + #as)
+    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    for i = 1, #as do
+      delete_char ()
+    end
+    insert_string (recase (as, rcase))
+    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0);
   end
 
-  forward_word ()
   cur_bp.modified = true
 
   return true
@@ -1035,21 +1036,20 @@ local function setcase_region (func)
     return leNIL
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, rp.start, rp.size, rp.size)
+  undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
 
-  local lp = rp.start.p
-  local i = rp.start.o
+  local m = point_marker ()
+  cur_bp.pt = rp.start
   for _ = rp.size, 1, -1 do
-    if i < #lp.text then
-      lp.text = string.sub (lp.text, 1, i) .. func (lp.text[i + 1]) .. string.sub (lp.text, i + 2)
-      i = i + 1
-    else
-      lp = lp.next
-      i = 0
-    end
+    local c = func (following_char ())
+    delete_char ()
+    insert_char (c)
   end
+  cur_bp.pt = m.pt
+  unchain_marker (m)
 
   cur_bp.modified = true
+  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 
   return leT
 end
