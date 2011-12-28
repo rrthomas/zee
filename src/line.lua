@@ -24,21 +24,13 @@ function line_new ()
   return {}
 end
 
-function set_line_prev (l, p)
-  l.prev = p
-end
-
-function set_line_next (l, n)
-  l.next = n
-end
-
 -- Insert a line into list after the given point, returning the new line
 function line_insert (l, s)
   local n = {next = l.next, prev = l, text = s}
   if l.next then
-    set_line_prev (l.next, n)
+    l.next.prev = n
   end
-  set_line_next (l, n)
+  l.next = n
 
   return n
 end
@@ -252,10 +244,10 @@ function delete_char ()
     as = as .. bs
     cur_bp.pt.p.text = as
     if oldlp.prev then
-      set_line_next (oldlp.prev, oldlp.next)
+      oldlp.prev.next = oldlp.next
     end
     if oldlp.next then
-      set_line_prev (oldlp.next, oldlp.prev)
+      oldlp.next.prev = oldlp.prev
     end
 
     adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
