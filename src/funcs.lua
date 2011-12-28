@@ -80,7 +80,7 @@ Put the mark where point is now, and point where the mark is now.
     end
 
     local tmp = table.clone (cur_bp.pt)
-    cur_bp.pt = table.clone (cur_bp.mark.pt)
+    goto_point (cur_bp.mark.pt)
     cur_bp.mark.pt = tmp
     activate_mark ()
     thisflag.need_resync = true
@@ -384,7 +384,7 @@ Fill paragraph at or after point.
     execute_function ("end-of-line")
     while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
 
-    cur_bp.pt = table.clone (m.pt)
+    goto_point (m.pt)
     unchain_marker (m)
 
     undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
@@ -615,7 +615,7 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ()
     end
 
-    cur_bp.pt = table.clone (m.pt)
+    goto_point (m.pt)
 
     if seq_started then
       undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
@@ -761,12 +761,12 @@ local function move_sexp (dir)
         end
       end
 
-      cur_bp.pt.o = cur_bp.pt.o + dir
+      goto_point ({n = cur_bp.pt.n, o = cur_bp.pt.o + dir})
 
       if not issexpchar (c) then
         if gotsexp and level == 0 then
           if not issexpseparator (c) then
-            cur_bp.pt.o = cur_bp.pt.o - dir
+            goto_point({n = cur_bp.pt.n, o = cur_bp.pt.o - dir})
           end
           return true
         end
@@ -783,7 +783,7 @@ local function move_sexp (dir)
       end
       return false
     end
-    cur_bp.pt.o = dir > 0 and 0 or #cur_bp.pt.p.text
+    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or #cur_bp.pt.p.text})
   end
 end
 
@@ -894,7 +894,7 @@ Move point to the first non-whitespace character on this line.
 ]],
   true,
   function ()
-    cur_bp.pt = line_beginning_position (1)
+    goto_point (line_beginning_position (1))
     while not eolp () and string.match (following_char (), "%s") do
       forward_char ()
     end
@@ -918,7 +918,7 @@ local function move_word (dir, next_char, move_char, at_extreme)
       else
         gotword = true
       end
-      cur_bp.pt.o = cur_bp.pt.o + dir
+      goto_point ({n = cur_bp.pt.n, o = cur_bp.pt.o + dir})
     end
     if gotword then
       return true
@@ -1039,13 +1039,13 @@ local function setcase_region (func)
   undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
 
   local m = point_marker ()
-  cur_bp.pt = rp.start
+  goto_point (rp.start)
   for _ = rp.size, 1, -1 do
     local c = func (following_char ())
     delete_char ()
     insert_char (c)
   end
-  cur_bp.pt = m.pt
+  goto_point (m.pt)
   unchain_marker (m)
 
   cur_bp.modified = true

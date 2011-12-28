@@ -116,7 +116,7 @@ local function search (pt, s, forward, regexp)
       previous_line ()
     end
   end
-  cur_bp.pt.o = pos - 1
+  goto_point ({n = cur_bp.pt.n, o = pos - 1})
   thisflag.need_resync = true
   return true
 end
@@ -235,7 +235,7 @@ local function isearch (forward, regexp)
     local c = getkey (GETKEY_DEFAULT)
 
     if c == KBD_CANCEL then
-      cur_bp.pt = start
+      goto_point (start)
       thisflag.need_resync = true
 
       -- Quit.
@@ -251,7 +251,7 @@ local function isearch (forward, regexp)
       if #pattern > 0 then
         pattern = string.sub (pattern, 1, -2)
         cur = table.clone (start)
-        cur_bp.pt = table.clone (start)
+        goto_point (start)
         thisflag.need_resync = true
       else
         ding ()

@@ -98,7 +98,7 @@ function delete_region (rp)
     delete_char ()
   end
   undo_nosave = false
-  cur_bp.pt = table.clone (m.pt)
+  goto_point (m.pt)
   unchain_marker (m)
 
   return true

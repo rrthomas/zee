@@ -26,7 +26,7 @@ Move point to beginning of current line.
 ]],
   true,
   function ()
-    cur_bp.pt = line_beginning_position (current_prefix_arg or 1)
+    goto_point (line_beginning_position (current_prefix_arg or 1))
     cur_bp.goalc = 0
   end
 )
@@ -38,7 +38,7 @@ Move point to end of current line.
 ]],
   true,
   function ()
-    cur_bp.pt = line_end_position (current_prefix_arg or 1)
+    goto_point (line_end_position (current_prefix_arg or 1))
     cur_bp.goalc = math.huge
   end
 )
@@ -282,7 +282,7 @@ column, or at the end of the line if it is not long enough.
 
 -- Move point to the beginning of the buffer; do not touch the mark.
 function gotobob ()
-  cur_bp.pt = point_min ()
+  goto_point (point_min ())
   thisflag.need_resync = true
 end
 
@@ -299,7 +299,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 
 -- Move point to the end of the buffer; do not touch the mark.
 function gotoeob ()
-  cur_bp.pt = point_max ()
+  goto_point (point_max ())
   thisflag.need_resync = true
 end
 

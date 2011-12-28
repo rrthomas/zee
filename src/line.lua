@@ -64,7 +64,7 @@ local function adjust_markers (newlp, oldlp, pointo, dir, delta)
   end
 
   -- This marker has been updated to new position.
-  cur_bp.pt = table.clone (m_pt.pt)
+  goto_point (m_pt.pt)
   unchain_marker (m_pt)
 end
 
@@ -160,7 +160,7 @@ function fill_break_line ()
       cur_bp.pt.o = break_col
       execute_function ("delete-horizontal-space")
       insert_newline ()
-      cur_bp.pt = table.clone (m.pt)
+      goto_point (m.pt)
       break_made = true
     else -- Undo fiddling with point.
       cur_bp.pt.o = old_col
@@ -307,7 +307,7 @@ local function previous_line_indent ()
   cur_indent = get_goalc ()
 
   -- Restore point.
-  cur_bp.pt = table.clone (m.pt)
+  goto_point (m.pt)
   unchain_marker (m)
 
   return cur_indent
@@ -381,7 +381,7 @@ does nothing.
       if not eolp () then
         target_goalc = get_goalc ()
       end
-      cur_bp.pt = table.clone (m.pt)
+      goto_point (m.pt)
       unchain_marker (m)
     end
 
@@ -437,7 +437,7 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ()
       pos = get_goalc ()
       local indent = pos > 0 or (not eolp () and string.match (following_char (), "%s"))
-      cur_bp.pt = table.clone (m.pt)
+      goto_point (m.pt)
       unchain_marker (m)
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
