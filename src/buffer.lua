@@ -27,29 +27,16 @@ buffer_name_history = history_new ()
 
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
--- The allocation of the first empty line is done here to simplify
--- the code.
 function buffer_new ()
   local bp = {}
 
-  -- Allocate point.
   bp.pt = point_new ()
-
-  -- Allocate a line.
   bp.pt.p = line_new ()
   bp.pt.p.text = ""
-
-  -- Allocate the limit marker.
   bp.lines = bp.pt.p
   bp.last_line = 0
-
-  -- Allocate markers list.
   bp.markers = {}
-
-  -- Set default EOL string.
   bp.eol = coding_eol_lf
-
-  -- Set directory.
   bp.dir = posix.getcwd () or ""
 
   -- Insert into buffer list.
