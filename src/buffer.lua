@@ -19,6 +19,176 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+-- Create an empty list, returning a pointer to the list
+function line_new ()
+  return {}
+end
+
+-- Insert a line into list after the given point, returning the new line
+function line_insert (l, s)
+  local n = {next = l.next, prev = l, text = s}
+  if l.next then
+    l.next.prev = n
+  end
+  l.next = n
+
+  return n
+end
+
+-- Adjust markers (including point) when line at point is split, or
+-- next line is joined on, or where a line is edited.
+--   newlp is the line to which characters were moved, oldlp the line
+--     moved from (if dir == 0, newlp == oldlp)
+--   pointo is point at which oldlp was split (to make newlp) or
+--     joined to newlp
+--   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
+--   if dir == 0, delta gives the number of characters inserted (>0) or
+--     deleted (<0)
+local function adjust_markers (newlp, oldlp, pointo, dir, delta)
+  local m_pt = point_marker ()
+
+  assert (dir == -1 or dir == 0 or dir == 1)
+
+  for m in pairs (cur_bp.markers) do
+    if m.pt.p == oldlp and (dir == -1 or m.pt.o > pointo) then
+      m.pt.p = newlp
+      m.pt.o = m.pt.o + delta - (pointo * dir)
+      m.pt.n = m.pt.n + dir
+    elseif m.pt.n > cur_bp.pt.n then
+      m.pt.n = m.pt.n + dir
+    end
+  end
+
+  -- This marker has been updated to new position.
+  goto_point (m_pt.pt)
+  unchain_marker (m_pt)
+end
+
+-- Check the case of a string.
+-- Returns "uppercase" if it is all upper case, "capitalized" if just
+-- the first letter is, and nil otherwise.
+local function check_case (s)
+  if string.match (s, "^%u+$") then
+    return "uppercase"
+  elseif string.match (s, "^%u%U*") then
+    return "capitalized"
+  end
+end
+
+-- Insert the character at the current position and move the text at its right.
+-- This function doesn't change the current position of the pointer.
+local function intercalate_char (c)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  local as = cur_bp.pt.p.text
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
+  as = string.sub (as, 1, cur_bp.pt.o) .. c .. string.sub (as, cur_bp.pt.o + 1)
+  cur_bp.pt.p.text = as
+  cur_bp.modified = true
+
+  return true
+end
+
+-- Insert the character `c' at the current point position
+-- into the current buffer.
+function insert_char (c)
+  local t = tab_width (cur_bp)
+
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  intercalate_char (c)
+  forward_char ()
+  adjust_markers (cur_bp.pt.p, cur_bp.pt.p, cur_bp.pt.o, 0, 1)
+
+  return true
+end
+
+-- Insert a newline at the current position without moving the cursor.
+-- Update markers after point in the split line.
+function intercalate_newline ()
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
+
+  -- Move the text after the point into a new line.
+  line_insert (cur_bp.pt.p, string.sub (cur_bp.pt.p.text, cur_bp.pt.o + 1))
+  cur_bp.last_line = cur_bp.last_line + 1
+  cur_bp.pt.p.text = string.sub (cur_bp.pt.p.text, 1, cur_bp.pt.o)
+  adjust_markers (cur_bp.pt.p.next, cur_bp.pt.p, cur_bp.pt.o, 1, 0)
+
+  cur_bp.modified = true
+  thisflag.need_resync = true
+
+  return true
+end
+
+function delete_char ()
+  deactivate_mark ()
+
+  if eobp () then
+    minibuf_error ("End of buffer")
+    return false
+  end
+
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
+
+  if eolp () then
+    local oldlen = #cur_bp.pt.p.text
+    local oldlp = cur_bp.pt.p.next
+
+    -- Join the lines.
+    local as = cur_bp.pt.p.text
+    local bs = oldlp.text
+    as = as .. bs
+    cur_bp.pt.p.text = as
+    if oldlp.prev then
+      oldlp.prev.next = oldlp.next
+    end
+    if oldlp.next then
+      oldlp.next.prev = oldlp.prev
+    end
+
+    adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
+    cur_bp.last_line = cur_bp.last_line - 1
+    thisflag.need_resync = true
+  else
+    local as = cur_bp.pt.p.text
+    as = string.sub (as, 1, cur_bp.pt.o) .. string.sub (as, cur_bp.pt.o + 2)
+    cur_bp.pt.p.text = as
+    adjust_markers (cur_bp.pt.p, cur_bp.pt.p, cur_bp.pt.o, 0, -1)
+  end
+
+  cur_bp.modified = true
+
+  return true
+end
+
+-- Replace text in the line `lp' with `newtext'. If `replace_case' is
+-- true then the new characters will be the same case as the old.
+function line_replace_text (lp, offset, oldlen, newtext, replace_case)
+  if replace_case and get_variable_bool ("case-replace") then
+    local case_type = check_case (string.sub (lp.text, offset + 1, offset + oldlen))
+    if case_type then
+      newtext = recase (newtext, case_type)
+    end
+  end
+
+  cur_bp.modified = true
+  lp.text = string.sub (lp.text, 1, offset) .. newtext .. string.sub (lp.text, offset + 1 + oldlen)
+  adjust_markers (lp, lp, offset, 0, #newtext - oldlen)
+end
+
+
 -- The buffer list
 buffers = {}
 
