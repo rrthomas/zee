@@ -19,11 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
--- Create an empty list, returning a pointer to the list
-function line_new ()
-  return {}
-end
-
 -- Insert a line into list after the given point, returning the new line
 function line_insert (l, s)
   local n = {next = l.next, prev = l, text = s}
@@ -201,7 +196,7 @@ function buffer_new ()
   local bp = {}
 
   bp.pt = point_new ()
-  bp.pt.p = line_new ()
+  bp.pt.p = {}
   bp.pt.p.text = ""
   bp.lines = bp.pt.p
   bp.last_line = 0
