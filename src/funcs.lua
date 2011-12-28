@@ -907,11 +907,11 @@ local function iswordchar (c)
   return (c ~= nil and string.match (c, "%w") ~= nil) or c == '$'
 end
 
-local function move_word (dir, next_char, move_char, at_extreme)
+local function move_word (dir, next, move, at_extreme)
   local gotword = false
   while true do
     while not at_extreme () do
-      if not iswordchar (next_char ()) then
+      if not iswordchar (next ()) then
         if gotword then
           return true
         end
@@ -923,7 +923,7 @@ local function move_word (dir, next_char, move_char, at_extreme)
     if gotword then
       return true
     end
-    if not move_char () then
+    if not move () then
       break
     end
   end

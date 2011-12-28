@@ -43,29 +43,6 @@ Move point to end of current line.
   end
 )
 
-local function move_char (dir)
-  if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
-    cur_bp.pt.o = cur_bp.pt.o + dir
-    return true
-  elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
-    thisflag.need_resync = true
-    if dir > 0 then
-      cur_bp.pt.p = cur_bp.pt.p.next
-    else
-      cur_bp.pt.p = cur_bp.pt.p.prev
-    end
-    cur_bp.pt.n = cur_bp.pt.n + dir
-    if dir > 0 then
-      execute_function ("beginning-of-line")
-    else
-      execute_function ("end-of-line")
-    end
-    return true
-  end
-
-  return false
-end
-
 function backward_char ()
   return move_char (-1)
 end
@@ -123,67 +100,6 @@ end
 
 function get_goalc ()
   return get_goalc_bp (cur_bp, cur_bp.pt)
-end
-
--- Go to the column `goalc'.  Take care of expanding tabulations.
-local function goto_goalc ()
-  local col = 0
-
-  local i = 1
-  while i <= #cur_bp.pt.p.text do
-    if col == cur_bp.goalc then
-      break
-    elseif cur_bp.pt.p.text[i] == '\t' then
-      local t = tab_width (cur_bp)
-      for w = t - col % t, 1, -1 do
-        col = col + 1
-        if col == cur_bp.goalc then
-          break
-        end
-      end
-    else
-      col = col + 1
-    end
-    i = i + 1
-  end
-
-  cur_bp.pt.o = i - 1
-end
-
-local function move_line (n)
-  local ok = true
-  local dir
-
-  if n == 0 then
-    return false
-  elseif n > 0 then
-    dir = 1
-    if n > cur_bp.last_line - cur_bp.pt.n then
-      ok = false
-      n = cur_bp.last_line - cur_bp.pt.n
-    end
-  else
-    dir = -1
-    n = -n
-    if n > cur_bp.pt.n then
-      ok = false
-      n = cur_bp.pt.n
-    end
-  end
-
-  for i = n, 1, -1 do
-    cur_bp.pt.p = cur_bp.pt.p[dir > 0 and "next" or "prev"]
-    cur_bp.pt.n = cur_bp.pt.n + dir
-  end
-
-  if _last_command ~= "next-line" and _last_command ~= "previous-line" then
-    cur_bp.goalc = get_goalc ()
-  end
-  goto_goalc ()
-
-  thisflag.need_resync = true
-
-  return ok
 end
 
 Defun ("goto-char",
