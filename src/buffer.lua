@@ -41,10 +41,10 @@ function buffer_new ()
 
   -- Allocate the limit marker.
   bp.lines = line_new ()
-  bp.lines.prev = bp.pt.p
-  bp.lines.next = bp.pt.p
-  bp.pt.p.prev = bp.lines
-  bp.pt.p.next = bp.lines
+  set_line_prev (bp.lines, bp.pt.p)
+  set_line_next (bp.lines, bp.pt.p)
+  set_line_prev (bp.pt.p, bp.lines)
+  set_line_next (bp.pt.p, bp.lines)
   bp.last_line = 0
 
   -- Allocate markers list.

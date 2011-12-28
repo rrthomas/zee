@@ -724,8 +724,8 @@ local function read_file (filename)
     until not buf
   end
 
-  lp.next = cur_bp.lines
-  cur_bp.lines.prev = lp
+  set_line_next (lp, cur_bp.lines)
+  set_line_prev (cur_bp.lines, lp)
   cur_bp.lines.next.p = cur_bp.pt
   cur_bp.dir = posix.dirname (filename)
 
