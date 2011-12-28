@@ -177,7 +177,7 @@ local function draw_window (topline, wp)
     term_clrtoeol ()
 
     -- If at the end of the buffer, don't write any text.
-    if lp ~= wp.bp.lines then
+    if lineno <= wp.bp.last_line then
       draw_line (i, wp.start_column, wp, lp, lineno, rp, highlight)
 
       if wp.start_column > 0 then

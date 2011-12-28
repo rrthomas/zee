@@ -362,7 +362,7 @@ does nothing.
     deactivate_mark ()
 
     -- If we're on first line, set target to 0.
-    if cur_bp.pt.p.prev == cur_bp.lines then
+    if cur_bp.pt.n == 0 then
       target_goalc = 0
     else
       -- Find goalc in previous non-blank line.

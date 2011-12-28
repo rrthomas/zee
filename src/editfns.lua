@@ -63,12 +63,12 @@ end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return cur_bp.pt.p.prev == cur_bp.lines and bolp ()
+  return cur_bp.pt.n == 0 and bolp ()
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return cur_bp.pt.p.next == cur_bp.lines and eolp ()
+  return cur_bp.pt.n == cur_bp.last_line and eolp ()
 end
 
 -- Return true if point is at the beginning of a line.

@@ -65,13 +65,13 @@ function line_beginning_position (count)
   pt.o = 0
 
   count = count - 1
-  while count < 0 and pt.p.prev ~= cur_bp.lines do
+  while count < 0 and pt.n > 0 do
     pt.p = pt.p.prev
     pt.n = pt.n - 1
     count = count + 1
   end
 
-  while count > 0 and pt.p.next ~= cur_bp.lines do
+  while count > 0 and pt.n < cur_bp.last_line do
     pt.p = pt.p.next
     pt.n = pt.n + 1
     count = count - 1
