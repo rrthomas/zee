@@ -31,14 +31,17 @@ function make_point (lineno, offset)
   for i = lineno, 1, -1 do
     pt.p = get_line_next (pt.p)
   end
+  assert (pt.p)
   return pt
 end
 
 function offset_to_point (bp, offset)
   local pt = {p = bp.lines, n = 0}
+  assert (pt.p)
   while offset > 0 and offset > #get_line_text (pt.p) do
-    offset = offset - #get_line_text (pt.p) - 1 -- FIXME: Length of EOL.
+    offset = offset - #get_line_text (pt.p) - #bp.eol
     pt.p = get_line_next (pt.p)
+    assert (pt.p)
     pt.n = pt.n + 1
   end
   pt.o = offset
@@ -60,7 +63,7 @@ function point_to_offset (pt)
   local lp = cur_bp.lines
   for i = 1, pt.n do
     assert (lp ~= nil)
-    pt_o = pt_o + #get_line_text (lp) + 1 -- FIXME: length of EOL
+    pt_o = pt_o + #get_line_text (lp) + #cur_bp.eol -- FIXME: Use correct buffer's EOL!
     lp = get_line_next (lp)
   end
   return pt_o

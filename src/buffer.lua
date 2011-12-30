@@ -23,29 +23,28 @@ function get_line_prev (lp)
   if lp.o == 0 then
     return nil
   end
-  -- FIXME: Search for line ending.
-  local prev = posix.memrchr (string.sub (lp.bp.text, 1, lp.o - 1), '\n')
-  return {bp = lp.bp, o = prev and prev - 1 + 1 or 0} -- FIXME: length of line ending
+  -- FIXME: Write & use memrmem
+  local found = find_substr (lp.bp.text, lp.bp.eol, 0, lp.o - 1, false, true, true, false, false)
+  return {bp = lp.bp, o = found and (found + #lp.bp.eol - 1) or 0}
 end
 
 function get_line_next (lp)
-  -- FIXME: Search for line ending.
-  local next = string.find (string.sub (lp.bp.text, lp.o + 1), '\n')
+  local next = string.find (string.sub (lp.bp.text, lp.o + 1), lp.bp.eol)
   if next == nil then
     return nil
   end
-  return {bp = lp.bp, o = lp.o + next - 1 + 1} -- FIXME: length of line ending
+  return {bp = lp.bp, o = lp.o + next - 1 + #lp.bp.eol}
  end
 
 function get_line_text (lp)
-  -- FIXME: Search for line ending.
-  local next = string.find (string.sub (lp.bp.text, lp.o + 1), '\n')
-  if next == nil then
-    next = #lp.bp.text - lp.o + 1
+  local next_lp = get_line_next (lp)
+  local next
+  if next_lp == nil then
+    next = #lp.bp.text
   else
-    next = next - 1 -- FIXME: length of line encoding
+    next = next_lp.o - #lp.bp.eol
   end
-  return string.sub (lp.bp.text, lp.o + 1, lp.o + 1 + next - 1)
+  return string.sub (lp.bp.text, lp.o + 1, next)
 end
 
 -- Adjust markers (including point) when text is edited.
@@ -94,8 +93,8 @@ end
 -- into the current buffer.
 function insert_char (c)
   if intercalate_char (c) then
-    forward_char ()
     adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
+    forward_char ()
     return true
   end
   return false
@@ -104,14 +103,14 @@ end
 -- Insert a newline at the current position without moving the cursor.
 -- Update markers after point in the split line.
 function intercalate_newline ()
-  -- FIXME: Insert line ending.
-  if not intercalate_char ('\n') then
-    return false
+  for i = 1, #cur_bp.eol do
+    if not intercalate_char (cur_bp.eol[i]) then
+      return false
+    end
   end
 
-  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
+  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, #cur_bp.eol)
   cur_bp.last_line = cur_bp.last_line + 1
-
   cur_bp.modified = true
   thisflag.need_resync = true
 
@@ -133,9 +132,8 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
 
   if eolp () then
-    -- FIXME: Remove line ending's length, not just one char.
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
-    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 2)
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#cur_bp.eol)
+    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 1 + #cur_bp.eol)
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
@@ -250,11 +248,11 @@ end
 -- Copy a region of text into a string.
 function copy_text_block (pt, size)
   local lp = pt.p
-  local s = string.sub (get_line_text (lp), pt.o + 1) .. "\n" -- FIXME: Insert line ending.
+  local s = string.sub (get_line_text (lp), pt.o + 1) .. cur_bp.eol
 
   lp = get_line_next (lp)
   while #s < size do
-    s = s .. get_line_text (lp) .. "\n" -- FIXME: Insert line ending.
+    s = s .. get_line_text (lp) .. cur_bp.eol
     lp = get_line_next (lp)
   end
 
@@ -509,6 +507,7 @@ function move_char (dir)
     else
       cur_bp.pt.p = get_line_prev (cur_bp.pt.p)
     end
+    assert (cur_bp.pt.p)
     cur_bp.pt.n = cur_bp.pt.n + dir
     if dir > 0 then
       execute_function ("beginning-of-line")
@@ -568,6 +567,7 @@ function move_line (n)
 
   for i = n, 1, -1 do
     cur_bp.pt.p = (dir > 0 and get_line_next or get_line_prev) (cur_bp.pt.p)
+    assert (cur_bp.pt.p)
     cur_bp.pt.n = cur_bp.pt.n + dir
   end
 

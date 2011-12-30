@@ -36,7 +36,7 @@ end
 local re_flags = rex_gnu.flags ()
 local re_find_err
 
-local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
+function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   local ret
   local cf = 0
 
