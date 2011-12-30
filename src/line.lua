@@ -58,7 +58,7 @@ function fill_break_line ()
 
     -- Find break point moving left from fill-column.
     for i = cur_bp.pt.o, 1, -1 do
-      if string.match (cur_bp.pt.p.text[i], "%s") then
+      if string.match (get_line_text (cur_bp.pt.p)[i], "%s") then
         break_col = i
         break
       end
@@ -67,8 +67,8 @@ function fill_break_line ()
     -- If no break point moving left from fill-column, find first
     -- possible moving right.
     if break_col == 0 then
-      for i = cur_bp.pt.o + 1, #cur_bp.pt.p.text do
-        if string.match (cur_bp.pt.p.text[i], "%s") then
+      for i = cur_bp.pt.o + 1, #get_line_text (cur_bp.pt.p) do
+        if string.match (get_line_text (cur_bp.pt.p)[i], "%s") then
           break_col = i
           break
         end
@@ -79,7 +79,7 @@ function fill_break_line ()
       cur_bp.pt.o = break_col
       execute_function ("delete-horizontal-space")
       insert_newline ()
-      goto_point (m.pt)
+      goto_point (get_marker_pt (m))
       break_made = true
     else -- Undo fiddling with point.
       cur_bp.pt.o = old_col
@@ -164,7 +164,7 @@ local function previous_line_indent ()
   cur_indent = get_goalc ()
 
   -- Restore point.
-  goto_point (m.pt)
+  goto_point (get_marker_pt (m))
   unchain_marker (m)
 
   return cur_indent
@@ -238,7 +238,7 @@ does nothing.
       if not eolp () then
         target_goalc = get_goalc ()
       end
-      goto_point (m.pt)
+      goto_point (get_marker_pt (m))
       unchain_marker (m)
     end
 
@@ -294,7 +294,7 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ()
       pos = get_goalc ()
       local indent = pos > 0 or (not eolp () and string.match (following_char (), "%s"))
-      goto_point (m.pt)
+      goto_point (get_marker_pt (m))
       unchain_marker (m)
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.

@@ -43,19 +43,19 @@ function undo_save (ty, pt, osize, size)
 
     if n > pt.n then
       repeat
-        lp = lp.prev
+        lp = get_line_prev (lp)
         n = n - 1
       until n <= pt.n
     elseif n < pt.n then
       repeat
-        lp = lp.next
+        lp = get_line_next (lp)
         n = n + 1
       until n >= pt.n
     end
 
     pt.p = lp
     up.size = size
-    up.text = copy_text_block (table.clone (pt), osize)
+    up.text = copy_text_block (pt, osize)
   end
 
   up.next = cur_bp.last_undop

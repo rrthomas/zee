@@ -19,43 +19,49 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
--- Insert a line into list after the given point, returning the new line
-function line_insert (l, s)
-  local n = {next = l.next, prev = l, text = s}
-  if l.next then
-    l.next.prev = n
+function get_line_prev (lp)
+  if lp.o == 0 then
+    return nil
   end
-  l.next = n
-
-  return n
+  -- FIXME: Search for line ending.
+  local prev = posix.memrchr (string.sub (lp.bp.text, 1, lp.o - 1), '\n')
+  return {bp = lp.bp, o = prev and prev - 1 + 1 or 0} -- FIXME: length of line ending
 end
 
--- Adjust markers (including point) when line at point is split, or
--- next line is joined on, or where a line is edited.
---   newlp is the line to which characters were moved, oldlp the line
---     moved from (if dir == 0, newlp == oldlp)
---   pointo is point at which oldlp was split (to make newlp) or
---     joined to newlp
---   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
---   if dir == 0, delta gives the number of characters inserted (>0) or
+function get_line_next (lp)
+  -- FIXME: Search for line ending.
+  local next = string.find (string.sub (lp.bp.text, lp.o + 1), '\n')
+  if next == nil then
+    return nil
+  end
+  return {bp = lp.bp, o = lp.o + next - 1 + 1} -- FIXME: length of line ending
+ end
+
+function get_line_text (lp)
+  -- FIXME: Search for line ending.
+  local next = string.find (string.sub (lp.bp.text, lp.o + 1), '\n')
+  if next == nil then
+    next = #lp.bp.text - lp.o + 1
+  else
+    next = next - 1 -- FIXME: length of line encoding
+  end
+  return string.sub (lp.bp.text, lp.o + 1, lp.o + 1 + next - 1)
+end
+
+-- Adjust markers (including point) when text is edited.
+--   o is offset at which edit was made
+--   delta gives the number of characters inserted (>0) or
 --     deleted (<0)
-local function adjust_markers (newlp, oldlp, pointo, dir, delta)
+local function adjust_markers (o, delta)
   local m_pt = point_marker ()
-
-  assert (dir == -1 or dir == 0 or dir == 1)
-
   for m in pairs (cur_bp.markers) do
-    if m.pt.p == oldlp and (dir == -1 or m.pt.o > pointo) then
-      m.pt.p = newlp
-      m.pt.o = m.pt.o + delta - (pointo * dir)
-      m.pt.n = m.pt.n + dir
-    elseif m.pt.n > cur_bp.pt.n then
-      m.pt.n = m.pt.n + dir
+    if m.o > o then
+      m.o = m.o + delta
     end
   end
 
   -- This marker has been updated to new position.
-  goto_point (m_pt.pt)
+  goto_point (get_marker_pt (m_pt))
   unchain_marker (m_pt)
 end
 
@@ -77,10 +83,8 @@ local function intercalate_char (c)
     return false
   end
 
-  local as = cur_bp.pt.p.text
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
-  as = string.sub (as, 1, cur_bp.pt.o) .. c .. string.sub (as, cur_bp.pt.o + 1)
-  cur_bp.pt.p.text = as
+  cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. c .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 1)
   cur_bp.modified = true
 
   return true
@@ -89,33 +93,24 @@ end
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  local t = tab_width (cur_bp)
-
-  if warn_if_readonly_buffer () then
-    return false
+  if intercalate_char (c) then
+    forward_char ()
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
+    return true
   end
-
-  intercalate_char (c)
-  forward_char ()
-  adjust_markers (cur_bp.pt.p, cur_bp.pt.p, cur_bp.pt.o, 0, 1)
-
-  return true
+  return false
 end
 
 -- Insert a newline at the current position without moving the cursor.
 -- Update markers after point in the split line.
 function intercalate_newline ()
-  if warn_if_readonly_buffer () then
+  -- FIXME: Insert line ending.
+  if not intercalate_char ('\n') then
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
-
-  -- Move the text after the point into a new line.
-  line_insert (cur_bp.pt.p, string.sub (cur_bp.pt.p.text, cur_bp.pt.o + 1))
+  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
   cur_bp.last_line = cur_bp.last_line + 1
-  cur_bp.pt.p.text = string.sub (cur_bp.pt.p.text, 1, cur_bp.pt.o)
-  adjust_markers (cur_bp.pt.p.next, cur_bp.pt.p, cur_bp.pt.o, 1, 0)
 
   cur_bp.modified = true
   thisflag.need_resync = true
@@ -138,29 +133,14 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
 
   if eolp () then
-    local oldlen = #cur_bp.pt.p.text
-    local oldlp = cur_bp.pt.p.next
-
-    -- Join the lines.
-    local as = cur_bp.pt.p.text
-    local bs = oldlp.text
-    as = as .. bs
-    cur_bp.pt.p.text = as
-    if oldlp.prev then
-      oldlp.prev.next = oldlp.next
-    end
-    if oldlp.next then
-      oldlp.next.prev = oldlp.prev
-    end
-
-    adjust_markers (cur_bp.pt.p, oldlp, oldlen, -1, 0)
+    -- FIXME: Remove line ending's length, not just one char.
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
+    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 2)
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
-    local as = cur_bp.pt.p.text
-    as = string.sub (as, 1, cur_bp.pt.o) .. string.sub (as, cur_bp.pt.o + 2)
-    cur_bp.pt.p.text = as
-    adjust_markers (cur_bp.pt.p, cur_bp.pt.p, cur_bp.pt.o, 0, -1)
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
+    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 2)
   end
 
   cur_bp.modified = true
@@ -172,15 +152,15 @@ end
 -- true then the new characters will be the same case as the old.
 function line_replace_text (lp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (lp.text, offset + 1, offset + oldlen))
+    local case_type = check_case (string.sub (get_line_text (lp), offset + 1, offset + oldlen))
     if case_type then
       newtext = recase (newtext, case_type)
     end
   end
 
   cur_bp.modified = true
-  lp.text = string.sub (lp.text, 1, offset) .. newtext .. string.sub (lp.text, offset + 1 + oldlen)
-  adjust_markers (lp, lp, offset, 0, #newtext - oldlen)
+  lp.bp.text = string.sub (lp.bp.text, 1, offset) .. newtext .. string.sub (lp.bp.text, offset + 1 + oldlen)
+  adjust_markers (lp.o + offset, #newtext - oldlen)
 end
 
 
@@ -189,6 +169,11 @@ buffers = {}
 
 buffer_name_history = history_new ()
 
+function insert_buffer (bp)
+  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  insert_string (bp.text)
+  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+end
 
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
@@ -196,8 +181,8 @@ function buffer_new ()
   local bp = {}
 
   bp.pt = point_new ()
-  bp.pt.p = {}
-  bp.pt.p.text = ""
+  bp.pt.p = {bp = bp, o = 0, n = 0}
+  bp.text = ""
   bp.lines = bp.pt.p
   bp.last_line = 0
   bp.markers = {}
@@ -246,7 +231,7 @@ function delete_region (rp)
     delete_char ()
   end
   undo_nosave = false
-  goto_point (m.pt)
+  goto_point (get_marker_pt (m))
   unchain_marker (m)
 
   return true
@@ -256,8 +241,8 @@ function calculate_buffer_size (bp)
   local size = 0
   local lp = bp.lines
   while lp ~= nil do
-    size = size + #lp.text
-    lp = lp.next
+    size = size + #get_line_text (lp)
+    lp = get_line_next (lp)
     if lp == nil then
       break
     end
@@ -275,12 +260,12 @@ end
 -- Copy a region of text into a string.
 function copy_text_block (pt, size)
   local lp = pt.p
-  local s = string.sub (lp.text, pt.o + 1) .. "\n"
+  local s = string.sub (get_line_text (lp), pt.o + 1) .. "\n" -- FIXME: Insert line ending.
 
-  lp = lp.next
+  lp = get_line_next (lp)
   while #s < size do
-    s = s .. lp.text .. "\n"
-    lp = lp.next
+    s = s .. get_line_text (lp) .. "\n" -- FIXME: Insert line ending.
+    lp = get_line_next (lp)
   end
 
   return string.sub (s, 1, size)
@@ -323,21 +308,21 @@ function calculate_the_region (rp)
     return false
   end
 
-  if cmp_point (cur_bp.pt, cur_bp.mark.pt) < 0 then
+  if cmp_point (cur_bp.pt, get_marker_pt (cur_bp.mark)) < 0 then
     -- Point is before mark.
     rp.start = table.clone (cur_bp.pt)
-    rp.finish = table.clone (cur_bp.mark.pt)
+    rp.finish = get_marker_pt (cur_bp.mark)
   else
     -- Mark is before point.
-    rp.start = table.clone (cur_bp.mark.pt)
+    rp.start = get_marker_pt (cur_bp.mark)
     rp.finish = table.clone (cur_bp.pt)
   end
 
   local size = rp.finish.o - rp.start.o
   local lp = rp.start.p
-  while lp ~= rp.finish.p do
-    size = size + #lp.text + 1
-    lp = lp.next
+  for i = rp.start.n, rp.finish.n - 1 do
+    size = size + #get_line_text (lp) + 1
+    lp = get_line_next (lp)
   end
 
   rp.size = size
@@ -517,9 +502,9 @@ function move_char (dir)
   elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
     thisflag.need_resync = true
     if dir > 0 then
-      cur_bp.pt.p = cur_bp.pt.p.next
+      cur_bp.pt.p = get_line_next (cur_bp.pt.p)
     else
-      cur_bp.pt.p = cur_bp.pt.p.prev
+      cur_bp.pt.p = get_line_prev (cur_bp.pt.p)
     end
     cur_bp.pt.n = cur_bp.pt.n + dir
     if dir > 0 then
@@ -538,10 +523,10 @@ function goto_goalc ()
   local col = 0
 
   local i = 1
-  while i <= #cur_bp.pt.p.text do
+  while i <= #get_line_text (cur_bp.pt.p) do
     if col == cur_bp.goalc then
       break
-    elseif cur_bp.pt.p.text[i] == '\t' then
+    elseif get_line_text (cur_bp.pt.p)[i] == '\t' then
       local t = tab_width (cur_bp)
       for w = t - col % t, 1, -1 do
         col = col + 1
@@ -561,7 +546,6 @@ end
 function move_line (n)
   local ok = true
   local dir
-
   if n == 0 then
     return false
   elseif n > 0 then
@@ -580,7 +564,7 @@ function move_line (n)
   end
 
   for i = n, 1, -1 do
-    cur_bp.pt.p = cur_bp.pt.p[dir > 0 and "next" or "prev"]
+    cur_bp.pt.p = (dir > 0 and get_line_next or get_line_prev) (cur_bp.pt.p)
     cur_bp.pt.n = cur_bp.pt.n + dir
   end
 

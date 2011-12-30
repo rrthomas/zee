@@ -189,8 +189,8 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = cur_bp.pt.o + 1, #cur_bp.pt.p.text do
-      local c = cur_bp.pt.p.text[i]
+    for i = cur_bp.pt.o + 1, #get_line_text (cur_bp.pt.p) do
+      local c = get_line_text (cur_bp.pt.p)[i]
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
         break
@@ -209,7 +209,7 @@ local function kill_line (whole_line)
     local rp = region_new ()
 
     rp.start = cur_bp.pt
-    rp.size = #cur_bp.pt.p.text - cur_bp.pt.o
+    rp.size = #get_line_text (cur_bp.pt.p) - cur_bp.pt.o
 
     copy_or_kill_region (true, rp)
   end

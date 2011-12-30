@@ -29,8 +29,19 @@ function make_point (lineno, offset)
   pt.n = lineno
   pt.o = offset
   for i = lineno, 1, -1 do
-    pt.p = pt.p.next
+    pt.p = get_line_next (pt.p)
   end
+  return pt
+end
+
+function offset_to_point (bp, offset)
+  local pt = {p = bp.lines, n = 0}
+  while offset > 0 and offset > #get_line_text (pt.p) do
+    offset = offset - #get_line_text (pt.p) - 1 -- FIXME: Length of EOL.
+    pt.p = get_line_next (pt.p)
+    pt.n = pt.n + 1
+  end
+  pt.o = offset
   return pt
 end
 
@@ -40,8 +51,19 @@ end
 
 function point_max ()
   local pt = make_point (cur_bp.last_line, 0)
-  pt.o = #pt.p.text
+  pt.o = #get_line_text (pt.p)
   return pt
+end
+
+function point_to_offset (pt)
+  local pt_o = pt.o
+  local lp = cur_bp.lines
+  for i = 1, pt.n do
+    assert (lp ~= nil)
+    pt_o = pt_o + #get_line_text (lp) + 1 -- FIXME: length of EOL
+    lp = get_line_next (lp)
+  end
+  return pt_o
 end
 
 function cmp_point (pt1, pt2)
@@ -60,13 +82,13 @@ function line_beginning_position (count)
 
   count = count - 1
   while count < 0 and pt.n > 0 do
-    pt.p = pt.p.prev
+    pt.p = get_line_prev (pt.p)
     pt.n = pt.n - 1
     count = count + 1
   end
 
   while count > 0 and pt.n < cur_bp.last_line do
-    pt.p = pt.p.next
+    pt.p = get_line_next (pt.p)
     pt.n = pt.n + 1
     count = count - 1
   end
@@ -76,7 +98,7 @@ end
 
 function line_end_position (count)
   local pt = line_beginning_position (count)
-  pt.o = #pt.p.text
+  pt.o = #get_line_text (pt.p)
   return pt
 end
 

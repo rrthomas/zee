@@ -22,18 +22,23 @@
 
 -- Marker datatype
 
-local function marker_new (bp, pt)
-  local marker = {bp = bp, pt = table.clone (pt)}
+function get_marker_pt (m)
+  return offset_to_point (m.bp, m.o)
+end
+
+local function marker_new (bp, o)
+  local marker = {bp = bp, o = o}
   bp.markers[marker] = true
   return marker
 end
 
+-- FIXME: Replace with table.clone
 function copy_marker (m)
-  return marker_new (m.bp, m.pt)
+  return marker_new (m.bp, m.o)
 end
 
 function point_marker ()
-  return marker_new (cur_bp, cur_bp.pt)
+  return marker_new (cur_bp, point_to_offset (cur_bp.pt))
 end
 
 function unchain_marker (marker)
@@ -54,9 +59,7 @@ function push_mark ()
     table.insert (mark_ring, copy_marker (cur_bp.mark))
   else
     -- Save an invalid mark.
-    local m = marker_new (cur_bp, point_min ())
-    m.pt.p = nil
-    table.insert (mark_ring, m)
+    table.insert (mark_ring, marker_new (cur_bp, 0))
   end
 end
 

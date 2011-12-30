@@ -360,8 +360,8 @@ means use current buffer).
 
     local s, lp = "", bp.lines
     while lp ~= nil do
-      s = s .. lp.text .. "\n"
-      lp = lp.next
+      s = s .. get_line_text (lp) .. "\n"
+      lp = get_line_next (lp)
     end
 
     return lisp_loadstring (s)

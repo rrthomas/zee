@@ -80,8 +80,8 @@ Put the mark where point is now, and point where the mark is now.
     end
 
     local tmp = table.clone (cur_bp.pt)
-    goto_point (cur_bp.mark.pt)
-    cur_bp.mark.pt = tmp
+    goto_point (get_marker_pt (cur_bp.mark))
+    cur_bp.mark.o = point_to_offset (tmp)
     activate_mark ()
     thisflag.need_resync = true
   end
@@ -384,7 +384,7 @@ Fill paragraph at or after point.
     execute_function ("end-of-line")
     while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
 
-    goto_point (m.pt)
+    goto_point (get_marker_pt (m))
     unchain_marker (m)
 
     undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
@@ -571,7 +571,7 @@ On nonblank line, delete any immediately following blank lines.
         activate_mark ()
         while execute_function ("forward-line") == leT and is_blank_line () do end
         seq_started = true
-        undo_save (UNDO_START_SEQUENCE, m.pt, 0, 0)
+        undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0)
         execute_function ("delete-region")
         pop_mark ()
       end
@@ -594,10 +594,10 @@ On nonblank line, delete any immediately following blank lines.
       if forward then
         execute_function ("forward-line")
       end
-      if cur_bp.pt.p ~= m.pt.p then
+      if cur_bp.pt.n ~= get_marker_pt (m).n then
         if not seq_started then
           seq_started = true
-          undo_save (UNDO_START_SEQUENCE, m.pt, 0, 0)
+          undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0)
         end
         execute_function ("delete-region")
       end
@@ -615,7 +615,7 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ()
     end
 
-    goto_point (m.pt)
+    goto_point (get_marker_pt (m))
 
     if seq_started then
       undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
@@ -709,13 +709,13 @@ local function move_sexp (dir)
   end
 
   local function precedingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < #cur_bp.pt.p.text and
-      (cur_bp.pt.p.text[cur_bp.pt.o + 1 + 1] == '\"' or cur_bp.pt.p.text[cur_bp.pt.o + 1 + 1] == '\'')
+    return c == '\\' and cur_bp.pt.o + 1 < #get_line_text (cur_bp.pt.p) and
+      (get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\"' or get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\'')
   end
 
   local function followingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < #cur_bp.pt.p.text and
-      (cur_bp.pt.p.text[cur_bp.pt.o + 1 + 1] == '\"' or cur_bp.pt.p.text[cur_bp.pt.o + 1 + 1] == '\'')
+    return c == '\\' and cur_bp.pt.o + 1 < #get_line_text (cur_bp.pt.p) and
+      (get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\"' or get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\'')
   end
 
   while true do
@@ -783,7 +783,7 @@ local function move_sexp (dir)
       end
       return false
     end
-    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or #cur_bp.pt.p.text})
+    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or #get_line_text (cur_bp.pt.p)})
   end
 end
 
@@ -971,9 +971,9 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = cur_bp.pt.o, #cur_bp.pt.p.text do
-    if iswordchar (cur_bp.pt.p.text[i + 1]) then
-      as = as .. cur_bp.pt.p.text[i + 1]
+  for i = cur_bp.pt.o, #get_line_text (cur_bp.pt.p) do
+    if iswordchar (get_line_text (cur_bp.pt.p)[i + 1]) then
+      as = as .. get_line_text (cur_bp.pt.p)[i + 1]
     else
       break
     end
@@ -1045,7 +1045,7 @@ local function setcase_region (func)
     delete_char ()
     insert_char (c)
   end
-  goto_point (m.pt)
+  goto_point (get_marker_pt (m))
   unchain_marker (m)
 
   cur_bp.modified = true
@@ -1119,7 +1119,7 @@ local function transpose_subr (forward_func, backward_func)
       execute_function ("newline")
     else
       pop_mark ()
-      goto_point (m1.pt)
+      goto_point (get_marker_pt (m1))
       minibuf_error ("End of buffer")
 
       unchain_marker (p0)
@@ -1128,7 +1128,7 @@ local function transpose_subr (forward_func, backward_func)
     end
   end
 
-  goto_point (m1.pt)
+  goto_point (get_marker_pt (m1))
 
   -- Forward.
   forward_func ()
@@ -1160,13 +1160,13 @@ local function transpose_subr (forward_func, backward_func)
   end
 
   -- Insert the first string.
-  goto_point (m2.pt)
+  goto_point (get_marker_pt (m2))
   unchain_marker (m2)
   insert_string (as1)
 
   -- Insert the second string.
   if as2 then
-    goto_point (m1.pt)
+    goto_point (get_marker_pt (m1))
     insert_string (as2)
   end
   unchain_marker (m1)

@@ -239,19 +239,19 @@ local function raw_write_to_disk (bp, filename, mode)
   -- Save the lines.
   local lp = bp.lines
   while lp ~= nil do
-    if not posix.write (h, lp.text) then
+    if not posix.write (h, get_line_text (lp)) then
       ret = false
       break
     end
 
-    if lp.next ~= nil then
+    if get_line_next (lp) ~= nil then
       if not posix.write (h, bp.eol) then
         ret = false
         break
       end
     end
 
-    lp = lp.next
+    lp = get_line_next (lp)
   end
 
   if posix.close (h) ~= 0 then
@@ -572,36 +572,6 @@ Make DIR become the current buffer's default directory.
   end
 )
 
-local function insert_lines (n, finish, last, from_lp)
-  while n < finish do
-    insert_string (from_lp.text)
-    if n < last then
-      insert_newline ()
-    end
-    n = n + 1
-    from_lp = from_lp.next
-  end
-  return n
-end
-
-local function insert_buffer (bp)
-  local old_next = bp.pt.p.next
-  local old_cur_line = bp.pt.p.text
-  local old_cur_n = bp.pt.n
-  local old_lines = bp.last_line
-  local size = calculate_buffer_size (bp)
-
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
-  undo_nosave = true
-  insert_lines (0, old_cur_n, old_lines, bp.lines)
-  insert_string (old_cur_line)
-  if old_cur_n < old_lines then
-    insert_newline ()
-  end
-  insert_lines (old_cur_n + 1, old_lines, old_lines, old_next)
-  undo_nosave = false
-end
-
 Defun ("insert-buffer",
        {"string"},
 [[
@@ -712,11 +682,10 @@ local function read_file (filename)
       local i = 1
       while i <= #buf do
         if cur_bp.eol ~= string.sub (buf, i, i + #cur_bp.eol - 1) then
-          lp.text = lp.text .. buf[i]
+          insert_char (buf[i])
           i = i + 1
         else
-          lp = line_insert (lp, "")
-          cur_bp.last_line = cur_bp.last_line + 1
+          insert_newline ()
           i = i + #cur_bp.eol
         end
       end
@@ -726,6 +695,7 @@ local function read_file (filename)
 
   cur_bp.lines.p = cur_bp.pt
   cur_bp.dir = posix.dirname (filename)
+  cur_bp.modified = false
 
   h:close ()
 end

@@ -32,11 +32,11 @@ end
 
 
 function is_empty_line ()
-  return #cur_bp.pt.p.text == 0
+  return #get_line_text (cur_bp.pt.p) == 0
 end
 
 function is_blank_line ()
-  return string.match (cur_bp.pt.p.text, "^%s*$") ~= nil
+  return string.match (get_line_text (cur_bp.pt.p), "^%s*$") ~= nil
 end
 
 -- Returns the character following point in the current buffer.
@@ -46,7 +46,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return cur_bp.pt.p.text[cur_bp.pt.o + 1]
+    return get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1]
   end
 end
 
@@ -57,7 +57,7 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return cur_bp.pt.p.text[cur_bp.pt.o]
+    return get_line_text (cur_bp.pt.p)[cur_bp.pt.o]
   end
 end
 
@@ -78,5 +78,5 @@ end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return cur_bp.pt.o == #cur_bp.pt.p.text
+  return cur_bp.pt.o == #get_line_text (cur_bp.pt.p)
 end

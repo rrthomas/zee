@@ -122,7 +122,7 @@ local function draw_line (line, startcol, wp, lp, lineno, rp, highlight)
   term_move (line, 0)
 
   local x = 0
-  for i = startcol, #lp.text - 1 do
+  for i = startcol, #get_line_text (lp) - 1 do
     if x >= wp.ewidth then
       break
     end
@@ -130,7 +130,7 @@ local function draw_line (line, startcol, wp, lp, lineno, rp, highlight)
     if highlight and in_region (lineno, i, rp) then
       font = FONT_REVERSE
     end
-    x = outch (string.byte (lp.text, i + 1), font, x)
+    x = outch (string.byte (get_line_text (lp), i + 1), font, x)
   end
 
   draw_end_of_line (line, wp, lineno, rp, highlight, x, x + startcol)
@@ -144,7 +144,7 @@ local function calculate_highlight_region (wp, rp)
   end
 
   rp.start = window_pt (wp)
-  rp.finish = wp.bp.mark.pt
+  rp.finish = get_marker_pt (wp.bp.mark)
   if cmp_point (rp.finish, rp.start) < 0 then
     local pt = rp.start
     rp.start = rp.finish
@@ -161,10 +161,10 @@ local function draw_window (topline, wp)
   local pt = window_pt (wp)
   local lp, lineno = pt.p, pt.n
   for i = wp.topdelta, 1, -1 do
-    if lp.prev == nil then
+    if get_line_prev (lp) == nil then
       break
     end
-    lp = lp.prev
+    lp = get_line_prev (lp)
     lineno = lineno - 1
   end
 
@@ -185,7 +185,7 @@ local function draw_window (topline, wp)
         term_addstr ('$')
       end
 
-      lp = lp.next
+      lp = get_line_next (lp)
       lineno = lineno + 1
     end
   end
@@ -216,7 +216,7 @@ local function calculate_start_column (wp)
   for lp = pt.o, 0, -1 do
     col = 0
     for p = lp, pt.o - 1 do
-      local c = string.sub (pt.p.text, p + 1, p + 1)
+      local c = string.sub (get_line_text (pt.p), p + 1, p + 1)
       if c == '\t' then
         col = bit.bor (col, t - 1) + 1
       elseif posix.isprint (c) then

@@ -56,7 +56,7 @@ function set_current_window (wp)
 
   -- Update the buffer point with the window's saved point marker.
   if cur_wp.saved_pt then
-    goto_point (cur_wp.saved_pt.pt)
+    goto_point (get_marker_pt (cur_wp.saved_pt))
     unchain_marker (cur_wp.saved_pt)
     cur_wp.saved_pt = nil
   end
@@ -83,7 +83,7 @@ function window_pt (wp)
     return table.clone (cur_bp.pt)
   else
     if wp.saved_pt ~= nil then
-      return table.clone (wp.saved_pt.pt)
+      return get_marker_pt (wp.saved_pt)
     else
       return table.clone (wp.bp.pt)
     end

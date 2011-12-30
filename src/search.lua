@@ -76,8 +76,8 @@ end
 
 local function search (pt, s, forward, regexp)
   local lp = pt.p
-  local as = lp.text
-  local from, to = 0, #as
+  local as = get_line_text (lp)
+  local from, to, lineno = 0, #as, pt.n
   local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
   local notbol, noteol  = false, false
 
@@ -97,11 +97,12 @@ local function search (pt, s, forward, regexp)
 
   -- Match following lines.
   while not pos do
-    lp = lp[forward and "next" or "prev"]
+    lp = (forward and get_line_next or get_line_prev) (lp)
+    lineno = lineno + (forward and 1 or -1)
     if lp == nil then
       break
     end
-    as = lp.text
+    as = get_line_text (lp)
     pos = find_substr (as, s, 0, #as, forward, false, false, regexp, downcase)
   end
 
@@ -109,7 +110,7 @@ local function search (pt, s, forward, regexp)
     return false
   end
 
-  while cur_bp.pt.p ~= lp do
+  while cur_bp.pt.n ~= lineno do
     if forward then
       next_line ()
     else
@@ -281,7 +282,7 @@ local function isearch (forward, regexp)
         if #pattern > 0 then
           -- Save mark.
           set_mark ()
-          cur_bp.mark.pt = table.clone (start)
+          cur_bp.mark.o = point_to_offset (start)
 
           -- Save search string.
           last_search = pattern
