@@ -675,7 +675,7 @@ function zile_exit (doabort)
       local buf, as = ""
       local i
       local fname = bp.filename or bp.name
-      buf = string.upper (fname .. PACKAGE .. "SAVE")
+      buf = fname .. string.upper (PACKAGE) .. "SAVE"
       io.stderr:write (string.format ("Saving %s...\r\n", buf))
       raw_write_to_disk (bp, buf, "rw-------")
     end
