@@ -227,7 +227,7 @@ local function print_buf (old_bp, bp)
                                 old_bp == bp and '.' or ' ',
                                 bp.readonly and '%' or ' ',
                                 bp.modified and '*' or ' ',
-                                bp.name, calculate_buffer_size (bp), "Fundamental"))
+                                bp.name, get_buffer_size (bp), "Fundamental"))
   if bp.filename then
     insert_string (compact_path (bp.filename))
   end

@@ -210,6 +210,10 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
+function get_buffer_size (bp)
+  return #bp.text
+end
+
 function activate_mark ()
   cur_bp.mark_active = true
 end
@@ -236,21 +240,6 @@ function delete_region (rp)
   unchain_marker (m)
 
   return true
-end
-
-function calculate_buffer_size (bp)
-  local size = 0
-  local lp = bp.lines
-  while lp ~= nil do
-    size = size + #get_line_text (lp)
-    lp = get_line_next (lp)
-    if lp == nil then
-      break
-    end
-    size = size + 1
-  end
-
-  return size
 end
 
 -- Return a safe tab width for the given buffer.
