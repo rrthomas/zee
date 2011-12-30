@@ -679,16 +679,7 @@ local function read_file (filename)
 
     -- Process this and subsequent chunks into lines.
     repeat
-      local i = 1
-      while i <= #buf do
-        if cur_bp.eol ~= string.sub (buf, i, i + #cur_bp.eol - 1) then
-          insert_char (buf[i])
-          i = i + 1
-        else
-          insert_newline ()
-          i = i + #cur_bp.eol
-        end
-      end
+      insert_string (buf)
       buf = h:read (posix.BUFSIZ)
     until not buf
   end
