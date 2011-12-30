@@ -261,11 +261,11 @@ end
 
 local function signal_init ()
   -- Set up signal handling
-  posix.signal[posix.SIGSEGV] = segv_sig_handler
-  posix.signal[posix.SIGBUS] = segv_sig_handler
-  posix.signal[posix.SIGHUP] = other_sig_handler
-  posix.signal[posix.SIGINT] = other_sig_handler
-  posix.signal[posix.SIGTERM] = other_sig_handler
+  posix.signal(posix.SIGSEGV, segv_sig_handler)
+  posix.signal(posix.SIGBUS, segv_sig_handler)
+  posix.signal(posix.SIGHUP, other_sig_handler)
+  posix.signal(posix.SIGINT, other_sig_handler)
+  posix.signal(posix.SIGTERM, other_sig_handler)
 end
 
 function main ()
