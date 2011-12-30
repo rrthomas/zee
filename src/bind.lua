@@ -198,8 +198,7 @@ Defun ("where-is",
        {},
 [[
 Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command name.  If the prefix arg is non-nil, insert the
-message in the buffer.
+Argument is a command name.
 ]],
   true,
   function ()
@@ -215,12 +214,7 @@ message in the buffer.
         if #g.bindings == 0 then
           minibuf_write (name .. " is not on any key")
         else
-          local s = string.format ("%s is on %s", name, g.bindings)
-          if lastflag.set_uniarg then
-            insert_string (s)
-          else
-            minibuf_write (s)
-          end
+          minibuf_write ("%s is on %s", name, g.bindings)
         end
         return true
       end
