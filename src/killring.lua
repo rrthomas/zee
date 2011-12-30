@@ -47,9 +47,9 @@ local function copy_or_kill_region (kill, rp)
 end
 
 local function copy_or_kill_the_region (kill)
-  local rp = region_new ()
+  local rp = calculate_the_region ()
 
-  if calculate_the_region (rp) then
+  if rp then
     maybe_free_kill_ring ()
     copy_or_kill_region (kill, rp)
     return true

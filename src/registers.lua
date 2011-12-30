@@ -36,14 +36,13 @@ Copy region into register @i{register}.
     if reg == KBD_CANCEL then
       return execute_function ("keyboard-quit")
     else
-      local rp = {}
-
       minibuf_clear ()
       if reg < 0 then
         reg = 0
       end
 
-      if not calculate_the_region (rp) then
+      local rp = calculate_the_region ()
+      if not rp then
         return leNIL
       else
         regs[reg] = get_buffer_region (cur_bp, rp)

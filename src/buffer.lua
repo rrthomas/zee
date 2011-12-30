@@ -343,11 +343,12 @@ end
 
 -- Calculate the region size between point and mark and set the
 -- region.
-function calculate_the_region (rp)
+function calculate_the_region ()
   if warn_if_no_mark () then
-    return false
+    return nil
   end
 
+  local rp = region_new ()
   if cmp_point (cur_bp.pt, get_marker_pt (cur_bp.mark)) < 0 then
     -- Point is before mark.
     set_region_start (rp, cur_bp.pt)
@@ -358,7 +359,7 @@ function calculate_the_region (rp)
     set_region_end (rp, cur_bp.pt)
   end
 
-  return true
+  return rp
 end
 
 -- Switch to the specified buffer.

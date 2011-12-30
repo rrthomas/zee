@@ -503,9 +503,9 @@ The output is available in that buffer in both cases.
     end
 
     if cmd then
-      local rp = region_new ()
+      local rp = calculate_the_region ()
 
-      if not calculate_the_region (rp) then
+      if not rp then
         ok = leNIL
       else
         local tempfile = os.tmpname ()
@@ -539,9 +539,9 @@ Delete the text between point and mark.
 ]],
   true,
   function ()
-    local rp = region_new ()
+    local rp = calculate_the_region ()
 
-    if not calculate_the_region (rp) or not delete_region (rp) then
+    if not rp or not delete_region (rp) then
       return leNIL
     end
     deactivate_mark ()
@@ -1029,9 +1029,9 @@ and the rest lower case.
 
 -- Set the region case.
 local function setcase_region (func)
-  local rp = region_new ()
+  local rp = calculate_the_region ()
 
-  if warn_if_readonly_buffer () or not calculate_the_region (rp) then
+  if warn_if_readonly_buffer () or not rp then
     return leNIL
   end
 
@@ -1078,10 +1078,8 @@ Convert the region to lower case.
 
 -- Transpose functions
 local function region_to_string ()
-  local rp = region_new ()
   activate_mark ()
-  calculate_the_region (rp)
-  return get_buffer_region (cur_bp, rp)
+  return get_buffer_region (cur_bp, calculate_the_region ())
 end
 
 local function transpose_subr (forward_func, backward_func)
