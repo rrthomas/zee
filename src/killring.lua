@@ -32,7 +32,7 @@ local function kill_ring_push (s)
 end
 
 local function copy_or_kill_region (kill, rp)
-  kill_ring_push (copy_text_block (rp.start, rp.size))
+  kill_ring_push (copy_text_block (get_region_start (rp), get_region_size (rp)))
 
   if kill then
     if cur_bp.readonly then
@@ -176,9 +176,10 @@ Save the region as if killed, but don't kill it.
 local function kill_to_bol ()
   if not bolp () then
     local rp = region_new ()
-    rp.size = cur_bp.pt.o
-    cur_bp.pt.o = 0
-    rp.start = cur_bp.pt
+    local pt = table.clone (cur_bp.pt)
+    set_region_end (rp, pt)
+    pt.o = 0
+    set_region_start (rp, pt)
 
     copy_or_kill_region (true, rp)
   end
@@ -207,9 +208,11 @@ local function kill_line (whole_line)
 
   if not eolp () then
     local rp = region_new ()
+    local pt = table.clone (cur_bp.pt)
 
-    rp.start = cur_bp.pt
-    rp.size = #get_line_text (cur_bp.pt.p) - cur_bp.pt.o
+    set_region_start (rp, pt)
+    pt.o = #get_line_text (cur_bp.pt.p)
+    set_region_end (rp, pt)
 
     copy_or_kill_region (true, rp)
   end

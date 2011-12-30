@@ -515,7 +515,7 @@ The output is available in that buffer in both cases.
           minibuf_error ("Cannot open temporary file")
           ok = leNIL
         else
-          local as = copy_text_block (rp.start, rp.size)
+          local as = copy_text_block (get_region_start (rp), get_region_size (rp))
           local written, err = fd:write (as)
 
           if not written then
@@ -1036,11 +1036,11 @@ local function setcase_region (func)
     return leNIL
   end
 
-  undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_region_start (rp), 0, 0)
 
   local m = point_marker ()
-  goto_point (rp.start)
-  for _ = rp.size, 1, -1 do
+  goto_point (get_region_start (rp))
+  for _ = get_region_size (rp), 1, -1 do
     local c = func (following_char ())
     delete_char ()
     insert_char (c)
@@ -1082,7 +1082,7 @@ local function region_to_string ()
   local rp = region_new ()
   activate_mark ()
   calculate_the_region (rp)
-  return copy_text_block (rp.start, rp.size)
+  return copy_text_block (get_region_start (rp), get_region_size (rp))
 end
 
 local function transpose_subr (forward_func, backward_func)

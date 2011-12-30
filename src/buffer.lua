@@ -224,10 +224,10 @@ function delete_region (rp)
     return false
   end
 
-  goto_point (rp.start)
-  undo_save (UNDO_REPLACE_BLOCK, rp.start, rp.size, 0)
+  goto_point (get_region_start (rp))
+  undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), get_region_size(rp), 0)
   undo_nosave = true
-  for i = rp.size, 1, -1 do
+  for i = get_region_size (rp), 1, -1 do
     delete_char ()
   end
   undo_nosave = false
@@ -272,14 +272,14 @@ function copy_text_block (pt, size)
 end
 
 function in_region (lineno, x, rp)
-  if lineno < rp.start.n or lineno > rp.finish.n then
+  if lineno < get_region_start (rp).n or lineno > get_region_end (rp).n then
     return false
-  elseif rp.start.n == rp.finish.n then
-    return x >= rp.start.o and x < rp.finish.o
-  elseif lineno == rp.start.n then
-    return x >= rp.start.o
-  elseif lineno == rp.finish.n then
-    return x < rp.finish.o
+  elseif get_region_start (rp).n == get_region_end (rp).n then
+    return x >= get_region_start (rp).o and x < get_region_end (rp).o
+  elseif lineno == get_region_start (rp).n then
+    return x >= get_region_start (rp).o
+  elseif lineno == get_region_end (rp).n then
+    return x < get_region_end (rp).o
   else
     return true
   end
@@ -301,6 +301,27 @@ function region_new ()
   return {}
 end
 
+function set_region_start (rp, pt)
+  rp.start = point_to_offset (pt)
+end
+
+function set_region_end (rp, pt)
+  rp.finish = point_to_offset (pt)
+end
+
+function get_region_start (rp)
+  return offset_to_point (cur_bp, rp.start);
+end
+
+function get_region_end (rp)
+  return offset_to_point (cur_bp, rp.finish);
+end
+
+function get_region_size (rp)
+  return rp.finish - rp.start
+end
+
+
 -- Calculate the region size between point and mark and set the
 -- region.
 function calculate_the_region (rp)
@@ -310,22 +331,14 @@ function calculate_the_region (rp)
 
   if cmp_point (cur_bp.pt, get_marker_pt (cur_bp.mark)) < 0 then
     -- Point is before mark.
-    rp.start = table.clone (cur_bp.pt)
-    rp.finish = get_marker_pt (cur_bp.mark)
+    set_region_start (rp, cur_bp.pt)
+    set_region_end (rp, get_marker_pt (cur_bp.mark))
   else
     -- Mark is before point.
-    rp.start = get_marker_pt (cur_bp.mark)
-    rp.finish = table.clone (cur_bp.pt)
+    set_region_start (rp, get_marker_pt (cur_bp.mark))
+    set_region_end (rp, cur_bp.pt)
   end
 
-  local size = rp.finish.o - rp.start.o
-  local lp = rp.start.p
-  for i = rp.start.n, rp.finish.n - 1 do
-    size = size + #get_line_text (lp) + 1
-    lp = get_line_next (lp)
-  end
-
-  rp.size = size
   return true
 end
 

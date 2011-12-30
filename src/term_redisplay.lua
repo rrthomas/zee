@@ -143,12 +143,12 @@ local function calculate_highlight_region (wp, rp)
     return false
   end
 
-  rp.start = window_pt (wp)
-  rp.finish = get_marker_pt (wp.bp.mark)
-  if cmp_point (rp.finish, rp.start) < 0 then
-    local pt = rp.start
-    rp.start = rp.finish
-    rp.finish = pt
+  set_region_start (rp, window_pt (wp))
+  set_region_end (rp, get_marker_pt (wp.bp.mark))
+  if cmp_point (get_region_end (rp), get_region_start (rp)) < 0 then
+    local pt = get_region_start (rp)
+    set_region_start (rp, get_region_end (rp))
+    set_region_end (rp, pt)
   end
   return true
 end

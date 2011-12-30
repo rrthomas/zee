@@ -46,7 +46,7 @@ Copy region into register @i{register}.
       if not calculate_the_region (rp) then
         return leNIL
       else
-        regs[reg] = copy_text_block (rp.start, rp.size)
+        regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp))
       end
     end
 
