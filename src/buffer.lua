@@ -56,7 +56,7 @@ local function adjust_markers (o, delta)
   local m_pt = point_marker ()
   for m in pairs (cur_bp.markers) do
     if m.o > o then
-      m.o = m.o + delta
+      m.o = math.max (o, m.o + delta)
     end
   end
 
@@ -159,8 +159,9 @@ function line_replace_text (lp, offset, oldlen, newtext, replace_case)
   end
 
   cur_bp.modified = true
-  lp.bp.text = string.sub (lp.bp.text, 1, offset) .. newtext .. string.sub (lp.bp.text, offset + 1 + oldlen)
   adjust_markers (lp.o + offset, #newtext - oldlen)
+  -- FIXME: Don't rely on editing at point.
+  lp.bp.text = string.sub (lp.bp.text, 1, offset) .. newtext .. string.sub (lp.bp.text, offset + 1 + oldlen)
 end
 
 
