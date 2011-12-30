@@ -170,30 +170,24 @@ If the current buffer now contains an empty file that you just visited
   end
 )
 
+-- Insert file contents into current buffer.
+-- Return quietly if the file doesn't exist, or other error.
 local function insert_file (filename)
-  if not exist_file (filename) then
-    minibuf_error (string.format ("Unable to read file `%s'", filename))
-    return false
+  if exist_file (filename) then
+    local h = io.open (filename, "r")
+    if h then
+      local buf = h:read ("*a")
+      h:close ()
+      if #buf >= 1 then
+        undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
+        undo_nosave = true
+        insert_string (buf)
+        undo_nosave = false
+      end
+      return true
+    end
   end
-
-  local h, err = io.open (filename, "r")
-  if not h then
-    minibuf_write (string.format ("%s: %s", filename, err))
-    return false
-  end
-
-  local buf = h:read ("*a")
-  h:close ()
-  if #buf < 1 then
-    return true
-  end
-
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #buf)
-  undo_nosave = true
-  insert_string (buf)
-  undo_nosave = false
-
-  return true
+  return false
 end
 
 Defun ("insert-file",
@@ -217,8 +211,15 @@ Set mark after the inserted text.
       end
     end
 
-    if not file or file == "" or not insert_file (file) then
+    if not file or file == "" then
       ok = leNIL
+    end
+
+    if ok ~= leNIL then
+      if not insert_file (file) then
+        ok = leNIL
+        minibuf_error ("%s: %s", file, posix.errno ())
+      end
     else
       set_mark_interactive ()
     end
@@ -624,73 +625,6 @@ Puts mark after the inserted text.
   end
 )
 
--- Maximum number of EOLs to check before deciding type.
-local max_eol_check_count = 3
--- Read the file contents into current buffer.
--- Return quietly if the file doesn't exist, or other error.
-local function read_file (filename)
-  local h, err = io.open (filename, "r")
-  if h == nil then
-    local msg, err = posix.errno ()
-    if err ~= posix.ENOENT then
-      minibuf_write (string.format ("%s: %s", err, errmsg))
-      cur_bp.readonly = true
-    end
-    return
-  end
-
-  if not check_writable (filename) then
-    cur_bp.readonly = true
-  end
-
-  local lp = cur_bp.pt.p
-
-  -- Read first chunk and determine EOL type.
-  -- FIXME: Don't assume first EOL occurs in first chunk.
-  local first_eol = true
-  local this_eol_type
-  local eol_len, total_eols = 0, 0
-  local buf = h:read (posix.BUFSIZ) or ""
-  if #buf > 0 then
-    local i = 1
-    while i <= #buf and total_eols < max_eol_check_count do
-      if buf[i] == '\n' or buf[i] == '\r' then
-        total_eols = total_eols + 1
-        if buf[i] == '\n' then
-          this_eol_type = coding_eol_lf
-        elseif i == #buf or buf[i + 1] ~= '\n' then
-          this_eol_type = coding_eol_cr
-        else
-          this_eol_type = coding_eol_crlf
-          i = i + 1
-        end
-
-        if first_eol then
-          cur_bp.eol = this_eol_type
-          first_eol = false
-        elseif cur_bp.eol ~= this_eol_type then
-          -- This EOL is different from the last; arbitrarily choose LF.
-          cur_bp.eol = coding_eol_lf
-          break
-        end
-      end
-      i = i + 1
-    end
-
-    -- Process this and subsequent chunks into lines.
-    repeat
-      insert_string (buf)
-      buf = h:read (posix.BUFSIZ)
-    until not buf
-  end
-
-  cur_bp.lines.p = cur_bp.pt
-  cur_bp.dir = posix.dirname (filename)
-  cur_bp.modified = false
-
-  h:close ()
-end
-
 function find_file (filename)
   for _, bp in ipairs (buffers) do
     if bp.filename == filename then
@@ -708,7 +642,19 @@ function find_file (filename)
   set_buffer_names (bp, filename)
 
   switch_to_buffer (bp)
-  read_file (filename)
+
+  if insert_file (filename) then
+    if not check_writable (filename) then
+      cur_bp.readonly = true
+    end
+    buffer_set_eol_type (cur_bp)
+
+    -- Reset undo history
+    cur_bp.next_undop = nil
+    cur_bp.last_undop = nil
+  end
+
+  bp.modified = false
   bp.dir = posix.dirname (filename)
   posix.chdir (bp.dir) -- FIXME: Call cd instead of last two lines
 

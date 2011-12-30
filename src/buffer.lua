@@ -47,6 +47,41 @@ function get_line_text (lp)
   return string.sub (lp.bp.text, lp.o + 1, next)
 end
 
+-- Determine EOL type from buffer contents.
+-- Maximum number of EOLs to check before deciding type.
+local max_eol_check_count = 3
+function buffer_set_eol_type (bp)
+  local first_eol = true
+  local total_eols = 0
+  local i = 1
+  while i <= #bp.text and total_eols < max_eol_check_count do
+    local c = bp.text[i]
+    if c == '\n' or c == '\r' then
+      local this_eol_type
+      total_eols = total_eols + 1
+      if c == '\n' then
+        this_eol_type = coding_eol_lf
+      elseif i == #bp.text or bp.text[i + 1] ~= '\n' then
+        this_eol_type = coding_eol_cr
+      else
+        this_eol_type = coding_eol_crlf
+        i = i + 1
+      end
+
+      if first_eol then
+        -- This is the first end-of-line.
+        cur_bp.eol = this_eol_type
+        first_eol = false
+      elseif cur_bp.eol ~= this_eol_type then
+        -- This EOL is different from the last; arbitrarily choose LF.
+        cur_bp.eol = coding_eol_lf
+        break
+      end
+    end
+    i = i + 1
+  end
+end
+
 -- Adjust markers (including point) when text is edited.
 --   o is offset at which edit was made
 --   delta gives the number of characters inserted (>0) or
