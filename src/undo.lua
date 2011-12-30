@@ -53,9 +53,9 @@ function undo_save (ty, pt, osize, size)
       until n >= pt.n
     end
 
-    pt.p = lp
     up.size = size
-    up.text = copy_text_block (pt, osize)
+    local o = get_line_offset (lp)
+    up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
   end
 
   up.next = cur_bp.last_undop

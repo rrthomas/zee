@@ -46,7 +46,7 @@ Copy region into register @i{register}.
       if not calculate_the_region (rp) then
         return leNIL
       else
-        regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp))
+        regs[reg] = get_buffer_region (cur_bp, rp)
       end
     end
 

@@ -32,7 +32,7 @@ local function kill_ring_push (s)
 end
 
 local function copy_or_kill_region (kill, rp)
-  kill_ring_push (copy_text_block (get_region_start (rp), get_region_size (rp)))
+  kill_ring_push (get_buffer_region (cur_bp, rp))
 
   if kill then
     if cur_bp.readonly then

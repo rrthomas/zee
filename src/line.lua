@@ -19,6 +19,7 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+-- FIXME: Accept string and encoding.
 function insert_string (s)
   local i
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)

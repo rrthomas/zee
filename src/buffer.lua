@@ -47,6 +47,10 @@ function get_line_text (lp)
   return string.sub (lp.bp.text, lp.o + 1, next)
 end
 
+function get_line_offset (lp)
+  return lp.o
+end
+
 -- Determine EOL type from buffer contents.
 -- Maximum number of EOLs to check before deciding type.
 local max_eol_check_count = 3
@@ -281,17 +285,9 @@ function tab_width (bp)
 end
 
 -- Copy a region of text into a string.
-function copy_text_block (pt, size)
-  local lp = pt.p
-  local s = string.sub (get_line_text (lp), pt.o + 1) .. cur_bp.eol
-
-  lp = get_line_next (lp)
-  while #s < size do
-    s = s .. get_line_text (lp) .. cur_bp.eol
-    lp = get_line_next (lp)
-  end
-
-  return string.sub (s, 1, size)
+-- FIXME: Return encoding.
+function get_buffer_region (bp, r)
+  return string.sub (bp.text, r.start + 1, r.finish)
 end
 
 function in_region (lineno, x, rp)

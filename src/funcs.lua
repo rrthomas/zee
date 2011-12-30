@@ -515,8 +515,7 @@ The output is available in that buffer in both cases.
           minibuf_error ("Cannot open temporary file")
           ok = leNIL
         else
-          local as = copy_text_block (get_region_start (rp), get_region_size (rp))
-          local written, err = fd:write (as)
+          local written, err = fd:write (get_buffer_region (cur_bp, rp))
 
           if not written then
             minibuf_error ("Error writing to temporary file: " .. err)
@@ -1082,7 +1081,7 @@ local function region_to_string ()
   local rp = region_new ()
   activate_mark ()
   calculate_the_region (rp)
-  return copy_text_block (get_region_start (rp), get_region_size (rp))
+  return get_buffer_region (cur_bp, rp)
 end
 
 local function transpose_subr (forward_func, backward_func)
