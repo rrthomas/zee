@@ -237,22 +237,10 @@ local function raw_write_to_disk (bp, filename, mode)
     return false
   end
 
-  -- Save the lines.
-  local lp = bp.lines
-  while lp ~= nil do
-    if not posix.write (h, get_line_text (lp)) then
-      ret = false
-      break
-    end
-
-    if get_line_next (lp) ~= nil then
-      if not posix.write (h, bp.eol) then
-        ret = false
-        break
-      end
-    end
-
-    lp = get_line_next (lp)
+  local len = get_buffer_size (bp)
+  local written = posix.write (h, bp.text, len)
+  if written < 0 or written ~= len then
+    ret = written
   end
 
   if posix.close (h) ~= 0 then
@@ -358,7 +346,7 @@ local function write_to_disk (bp, filename)
   end
 
   local ret, err = raw_write_to_disk (bp, filename, "rw-rw-rw-")
-  if not ret then
+  if ret ~= true then
     if ret == -1 then
       minibuf_error (string.format ("Error writing `%s': %s", filename, err))
     else
