@@ -123,6 +123,7 @@ local function intercalate_char (c)
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
   cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. c .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 1)
+  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
   cur_bp.modified = true
 
   return true
@@ -132,7 +133,6 @@ end
 -- into the current buffer.
 function insert_char (c)
   if intercalate_char (c) then
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
     forward_char ()
     return true
   end
@@ -148,9 +148,7 @@ function intercalate_newline ()
     end
   end
 
-  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, #cur_bp.eol)
   cur_bp.last_line = cur_bp.last_line + 1
-  cur_bp.modified = true
   thisflag.need_resync = true
 
   return true
