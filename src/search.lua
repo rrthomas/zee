@@ -75,49 +75,28 @@ function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
 end
 
 local function search (pt, s, forward, regexp)
-  local lp = pt.p
-  local as = get_line_text (lp)
-  local from, to, lineno = 0, #as, pt.n
+  local from, to = 0, get_buffer_size (cur_bp)
   local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
-  local notbol, noteol  = false, false
+  local notbol, noteol = false, false
 
   if #s < 1 then
     return false
   end
 
-  -- Match first line.
+  -- Attempt match.
   if forward then
     notbol = pt.o > from
-    from = pt.o
+    from = get_line_offset (pt.p) + pt.o
   else
     noteol = pt.o < to
-    to = pt.o
+    to = get_line_offset (pt.p) + pt.o
   end
-  local pos = find_substr (as, s, from, to, forward, notbol, noteol, regexp, downcase)
-
-  -- Match following lines.
-  while not pos do
-    lp = (forward and get_line_next or get_line_prev) (lp)
-    lineno = lineno + (forward and 1 or -1)
-    if lp == nil then
-      break
-    end
-    as = get_line_text (lp)
-    pos = find_substr (as, s, 0, #as, forward, false, false, regexp, downcase)
-  end
-
+  local pos = find_substr (get_buffer_text (cur_bp).s, s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
     return false
   end
 
-  while cur_bp.pt.n ~= lineno do
-    if forward then
-      next_line ()
-    else
-      previous_line ()
-    end
-  end
-  goto_point ({n = cur_bp.pt.n, o = pos - 1})
+  goto_point (offset_to_point (cur_bp, pos - 1))
   thisflag.need_resync = true
   return true
 end
