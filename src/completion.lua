@@ -50,13 +50,11 @@ function completion_write (cp, width)
   local numcols = math.floor ((width - 1) / maxlen)
   local col = 0
   for i, v in ipairs (cp.matches) do
-    if col >= numcols then
-      col = 0
-      s = s .. "\n"
+    insert_string (string.format ("%-" .. tostring (maxlen) .. "s", v))
+    col = (col + 1) % numcols
+    if col == 0 then
+      insert_newline ()
     end
-    s = s .. v
-    col = col + 1
-    s = s .. string.rep (" ", maxlen - #v)
   end
   return s
 end
