@@ -185,20 +185,19 @@ function delete_char ()
   return true
 end
 
--- Replace text in the line `lp' with `newtext'. If `replace_case' is
--- true then the new characters will be the same case as the old.
-function line_replace_text (lp, offset, oldlen, newtext, replace_case)
+-- Replace text in the buffer `bp' with `newtext'. If `replace_case'
+-- is true then the new characters will be the same case as the old.
+function buffer_replace_text (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (get_line_text (lp), offset + 1, offset + oldlen))
+    local case_type = check_case (string.sub (bp.text, offset + 1, offset + oldlen))
     if case_type then
       newtext = recase (newtext, case_type)
     end
   end
 
   cur_bp.modified = true
-  adjust_markers (lp.o + offset, #newtext - oldlen)
-  -- FIXME: Don't rely on editing at point.
-  lp.bp.text = string.sub (lp.bp.text, 1, offset) .. newtext .. string.sub (lp.bp.text, offset + 1 + oldlen)
+  adjust_markers (offset, #newtext - oldlen)
+  bp.text = string.sub (bp.text, 1, offset) .. newtext .. string.sub (bp.text, offset + 1 + oldlen)
 end
 
 

@@ -438,7 +438,7 @@ what to do with it.
         -- Perform replacement.
         count = count + 1
         undo_save (UNDO_REPLACE_BLOCK, make_point (cur_bp.pt.n, cur_bp.pt.o - #find), #find, #repl)
-        line_replace_text (cur_bp.pt.p, cur_bp.pt.o - #find, #find, repl, find_no_upper)
+        buffer_replace_text (cur_bp, get_line_offset (cur_bp.pt.p) + cur_bp.pt.o - #find, #find, repl, find_no_upper)
 
         if c == string.byte ('.') then -- Replace and quit.
           break
