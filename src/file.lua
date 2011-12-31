@@ -21,13 +21,6 @@
 
 -- FIXME: Warn when file changes on disk
 
-
--- Formats of end-of-line
-coding_eol_lf = "\n"
-coding_eol_crlf = "\r\n"
-coding_eol_cr = "\r"
-
-
 function exist_file (filename)
   if posix.stat (filename) then
     return true
@@ -185,7 +178,7 @@ local function insert_file (filename)
       if #buf >= 1 then
         undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
         undo_nosave = true
-        insert_string (buf) -- FIXME: Detect coding of file.
+        insert_estr (estr_new (buf))
         undo_nosave = false
       end
       return true
@@ -639,7 +632,6 @@ function find_file (filename)
     if not check_writable (filename) then
       cur_bp.readonly = true
     end
-    buffer_set_eol_type (cur_bp)
 
     -- Reset undo history
     cur_bp.next_undop = nil

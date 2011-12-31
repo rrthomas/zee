@@ -19,26 +19,40 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function insert_string (s, eol)
-  eol = eol or coding_eol_lf
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)
+function replace_estr (del, es)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, del, #es.s)
   undo_nosave = true
+  buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, "", false)
   local p = 1
-  while p <= #s do
-    local next = string.find (s, eol, p)
-    local line_len = (next or #s + 1) - p
-    assert (replace (0, string.sub (s, p, p + line_len - 1)))
+  while p <= #es.s do
+    local next = string.find (es.s, es.eol, p)
+    local line_len = (next or #es.s + 1) - p
+    buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, string.sub (es.s, p, p + line_len - 1), false)
+    assert (move_char (line_len))
     p = p + line_len
     if next then
-      insert_newline ()
-      p = p + #eol
+      buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, get_buffer_eol (cur_bp), false)
+      assert (move_char (1))
+      cur_bp.last_line = cur_bp.last_line + 1
+      thisflag.need_resync = true
+      p = p + #es.eol
     end
   end
   undo_nosave = false
+
+  return true
 end
 
 function insert_estr (es)
-  insert_string (es.s, es.eol)
+  return replace_estr (0, es)
+end
+
+function insert_string (s, eol)
+  return insert_estr ({s = s, eol = eol or coding_eol_lf})
 end
 
 -- Replace a string at point, moving point forwards.
@@ -111,14 +125,7 @@ function fill_break_line ()
 end
 
 function insert_newline ()
-  if not replace (0, get_buffer_eol (cur_bp)) then
-    return false
-  end
-
-  cur_bp.last_line = cur_bp.last_line + 1
-  thisflag.need_resync = true
-
-  return true
+  return insert_string ("\n")
 end
 
 -- Insert a newline at the current position without moving the cursor.

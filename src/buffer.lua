@@ -34,7 +34,7 @@ function get_line_next (lp)
     return nil
   end
   return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_eol (lp.bp)}
- end
+end
 
 function get_line_text (lp)
   local next_lp = get_line_next (lp)
@@ -49,41 +49,6 @@ end
 
 function get_line_offset (lp)
   return lp.o
-end
-
--- Determine EOL type from buffer contents.
--- Maximum number of EOLs to check before deciding type.
-local max_eol_check_count = 3
-function buffer_set_eol_type (bp)
-  local first_eol = true
-  local total_eols = 0
-  local i = 1
-  while i <= #get_buffer_text (bp) and total_eols < max_eol_check_count do
-    local c = get_buffer_text (bp)[i]
-    if c == '\n' or c == '\r' then
-      local this_eol_type
-      total_eols = total_eols + 1
-      if c == '\n' then
-        this_eol_type = coding_eol_lf
-      elseif i == #get_buffer_text (bp) or get_buffer_text (bp)[i + 1] ~= '\n' then
-        this_eol_type = coding_eol_cr
-      else
-        this_eol_type = coding_eol_crlf
-        i = i + 1
-      end
-
-      if first_eol then
-        -- This is the first end-of-line.
-        cur_bp.es.eol = this_eol_type
-        first_eol = false
-      elseif get_buffer_eol (cur_bp) ~= this_eol_type then
-        -- This EOL is different from the last; arbitrarily choose LF.
-        cur_bp.es.eol = coding_eol_lf
-        break
-      end
-    end
-    i = i + 1
-  end
 end
 
 function point_to_offset (pt)
@@ -175,7 +140,8 @@ buffer_name_history = history_new ()
 
 function insert_buffer (bp)
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-  insert_estr (bp.es)
+  -- Copy text to avoid problems when bp == cur_bp.
+  insert_estr (estr_dup (bp.es))
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 end
 
