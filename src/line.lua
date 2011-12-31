@@ -48,9 +48,7 @@ function replace (del, s)
   end
 
   buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, s, false)
-  for i = #s, 1, -1 do
-    assert (move_char (1))
-  end
+  assert (move_char (#s))
   return true
 end
 

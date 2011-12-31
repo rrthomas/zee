@@ -59,7 +59,7 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 ]],
   true,
   function (n)
-    local ok = execute_with_uniarg (false, n, backward_char, forward_char)
+    local ok = bool_to_lisp (move_char (-(n or 1)))
     if ok == leNIL then
       minibuf_error ("Beginning of buffer")
     end
@@ -75,7 +75,7 @@ On reaching end of buffer, stop and signal error.
 ]],
   true,
   function (n)
-    local ok = execute_with_uniarg (false, n, forward_char, backward_char)
+    local ok = bool_to_lisp (move_char (n or 1))
     if ok == leNIL then
       minibuf_error ("End of buffer")
     end

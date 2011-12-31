@@ -500,28 +500,23 @@ end
 
 -- Basic movement routines
 
-function move_char (dir)
-  if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
-    cur_bp.pt.o = cur_bp.pt.o + dir
-    return true
-  elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
-    thisflag.need_resync = true
-    if dir > 0 then
-      cur_bp.pt.p = get_line_next (cur_bp.pt.p)
+function move_char (offset)
+  local dir = offset >= 0 and 1 or -1
+  for i = 1, math.abs (offset) do
+    if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
+      cur_bp.pt.o = cur_bp.pt.o + dir
+    elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
+      thisflag.need_resync = true
+      cur_bp.pt.p = (dir > 0 and get_line_next or get_line_prev) (cur_bp.pt.p)
+      assert (cur_bp.pt.p)
+      cur_bp.pt.n = cur_bp.pt.n + dir
+      execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
-      cur_bp.pt.p = get_line_prev (cur_bp.pt.p)
+      return false
     end
-    assert (cur_bp.pt.p)
-    cur_bp.pt.n = cur_bp.pt.n + dir
-    if dir > 0 then
-      execute_function ("beginning-of-line")
-    else
-      execute_function ("end-of-line")
-    end
-    return true
   end
 
-  return false
+  return true
 end
 
 -- Go to the column `goalc'.  Take care of expanding tabulations.
