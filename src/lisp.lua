@@ -81,6 +81,7 @@ end
 function bool_to_lisp (b)
   return b and leT or leNIL
 end
+
 function read_char (s, pos)
   if pos <= #s then
     return s[pos], pos + 1
