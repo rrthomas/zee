@@ -216,7 +216,7 @@ local function calculate_start_column (wp)
   for lp = pt.o, 0, -1 do
     col = 0
     for p = lp, pt.o - 1 do
-      local c = string.sub (get_line_text (pt.p), p + 1, p + 1)
+      local c = get_line_text (pt.p)[p + 1]
       if c == '\t' then
         col = bit.bor (col, t - 1) + 1
       elseif posix.isprint (c) then

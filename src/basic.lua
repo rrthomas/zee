@@ -88,7 +88,7 @@ function get_goalc_bp (bp, pt)
   local col = 0
   local t = tab_width (bp)
   for i = 1, math.min (pt.o, #get_line_text (pt.p)) do
-    if string.sub (get_line_text (pt.p), i, 1) == '\t' then
+    if get_line_text (pt.p)[i] == '\t' then
       col = bit.bor (col, t - 1)
     end
     col = col + 1

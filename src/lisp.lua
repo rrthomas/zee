@@ -83,7 +83,7 @@ function bool_to_lisp (b)
 end
 function read_char (s, pos)
   if pos <= #s then
-    return string.sub (s, pos, pos), pos + 1
+    return s[pos], pos + 1
   end
   return -1, pos
 end

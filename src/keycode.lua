@@ -117,7 +117,7 @@ local keynametocode_map = {
 
 -- Convert a prefix of a key string to its key code.
 local function strtokey (s)
-  if string.sub (s, 1, 1) == '\\' then
+  if s[1] == '\\' then
     local p
     for i in pairs (keynametocode_map) do
       if i == string.sub (s, 1, #i) then
