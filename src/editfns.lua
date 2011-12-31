@@ -46,7 +46,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1]
+    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + cur_bp.pt.o + 1]
   end
 end
 
@@ -57,7 +57,7 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return get_line_text (cur_bp.pt.p)[cur_bp.pt.o]
+    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + cur_bp.pt.o]
   end
 end
 

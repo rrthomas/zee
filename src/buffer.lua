@@ -24,27 +24,27 @@ function get_line_prev (lp)
     return nil
   end
   -- FIXME: Write & use memrmem
-  local found = find_substr (get_buffer_text (lp.bp), get_buffer_eol (lp.bp), 0, lp.o - 1, false, true, true, false, false)
-  return {bp = lp.bp, o = found and (found + #get_buffer_eol (lp.bp) - 1) or 0}
+  local found = find_substr (get_buffer_text (lp.bp).s, get_buffer_text (lp.bp).eol, 0, lp.o - 1, false, true, true, false, false)
+  return {bp = lp.bp, o = found and (found + #get_buffer_text (lp.bp).eol - 1) or 0}
 end
 
 function get_line_next (lp)
-  local next = string.find (string.sub (get_buffer_text (lp.bp), lp.o + 1), get_buffer_eol (lp.bp))
+  local next = string.find (string.sub (get_buffer_text (lp.bp).s, lp.o + 1), get_buffer_text (lp.bp).eol)
   if next == nil then
     return nil
   end
-  return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_eol (lp.bp)}
+  return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_text (lp.bp).eol}
 end
 
 function get_line_text (lp)
   local next_lp = get_line_next (lp)
   local next
   if next_lp == nil then
-    next = #get_buffer_text (lp.bp)
+    next = #get_buffer_text (lp.bp).s
   else
-    next = next_lp.o - #get_buffer_eol (lp.bp)
+    next = next_lp.o - #get_buffer_text (lp.bp).eol
   end
-  return string.sub (get_buffer_text (lp.bp), lp.o + 1, next)
+  return string.sub (get_buffer_text (lp.bp).s, lp.o + 1, next)
 end
 
 function get_line_offset (lp)
@@ -101,13 +101,13 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
 
   if eolp () then
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#get_buffer_eol (cur_bp))
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp), 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp), cur_bp.pt.p.o + cur_bp.pt.o + 1 + #get_buffer_eol (cur_bp))
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#get_buffer_text (cur_bp).eol)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp).s, cur_bp.pt.p.o + cur_bp.pt.o + 1 + #get_buffer_text (cur_bp).eol)
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
     adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp), 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp), cur_bp.pt.p.o + cur_bp.pt.o + 2)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp).s, cur_bp.pt.p.o + cur_bp.pt.o + 2)
   end
 
   cur_bp.modified = true
@@ -120,7 +120,7 @@ end
 -- case as the old.
 function buffer_replace (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (get_buffer_text (bp), offset + 1, offset + oldlen))
+    local case_type = check_case (string.sub (get_buffer_text (bp).s, offset + 1, offset + oldlen))
     if case_type then
       newtext = recase (newtext, case_type)
     end
@@ -129,7 +129,7 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
   undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, #newtext)
   bp.modified = true
   adjust_markers (offset, #newtext - oldlen)
-  bp.es.s = string.sub (get_buffer_text (bp), 1, offset) .. newtext .. string.sub (get_buffer_text (bp), offset + 1 + oldlen)
+  bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
 end
 
 
@@ -178,12 +178,12 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
-function get_buffer_text (bp)
-  return bp.es.s
+function get_buffer_o (bp)
+  return bp.pt.p.o
 end
 
-function get_buffer_eol (bp)
-  return bp.es.eol
+function get_buffer_text (bp)
+  return bp.es
 end
 
 function get_buffer_size (bp)
@@ -225,7 +225,7 @@ end
 
 -- Copy a region of text into a string.
 function get_buffer_region (bp, r)
-  return {s = string.sub (get_buffer_text (bp), r.start + 1, r.finish), eol = get_buffer_eol (bp)}
+  return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
 end
 
 function in_region (lineno, x, rp)
@@ -491,9 +491,9 @@ function goto_goalc ()
 
   local i = 1
   while i <= #get_line_text (cur_bp.pt.p) do
-    if col == cur_bp.goalc then
+    if col == get_goalc () then
       break
-    elseif get_line_text (cur_bp.pt.p)[i] == '\t' then
+    elseif get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i] == '\t' then
       local t = tab_width (cur_bp)
       for w = t - col % t, 1, -1 do
         col = col + 1

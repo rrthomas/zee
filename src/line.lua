@@ -35,7 +35,7 @@ function replace_estr (del, es)
     assert (move_char (line_len))
     p = p + line_len
     if next then
-      buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, get_buffer_eol (cur_bp), false)
+      buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, get_buffer_text (cur_bp).eol, false)
       assert (move_char (1))
       cur_bp.last_line = cur_bp.last_line + 1
       thisflag.need_resync = true

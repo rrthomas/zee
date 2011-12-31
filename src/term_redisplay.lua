@@ -263,9 +263,9 @@ local function draw_status_line (line, wp)
   term_addstr (string.rep ('-', wp.ewidth))
 
   local eol_type
-  if get_buffer_eol (cur_bp) == coding_eol_cr then
+  if get_buffer_text (cur_bp).eol == coding_eol_cr then
     eol_type = "(Mac)"
-  elseif get_buffer_eol (cur_bp) == coding_eol_crlf then
+  elseif get_buffer_text (cur_bp).eol == coding_eol_crlf then
     eol_type = "(DOS)"
   else
     eol_type = ":"

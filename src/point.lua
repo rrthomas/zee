@@ -23,6 +23,7 @@ function point_new ()
   return {o = 0, n = 0, p = {}}
 end
 
+-- FIXME: Remove p member of Point, and use estr functions directly on o member instead.
 function make_point (lineno, offset)
   local pt = point_new ()
   pt.p = cur_bp.lines
@@ -39,7 +40,7 @@ function offset_to_point (bp, offset)
   local pt = {p = bp.lines, n = 0}
   assert (pt.p)
   while offset > 0 and offset > #get_line_text (pt.p) do
-    offset = offset - #get_line_text (pt.p) - #get_buffer_eol (bp)
+    offset = offset - #get_line_text (pt.p) - #get_buffer_text (bp).eol
     pt.p = get_line_next (pt.p)
     assert (pt.p)
     pt.n = pt.n + 1
