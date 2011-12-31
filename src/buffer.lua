@@ -115,27 +115,10 @@ local function check_case (s)
   end
 end
 
--- Insert a string at point, moving point forwards.
-function buffer_insert (bp, s)
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)
-  bp.es.s = string.sub (get_buffer_text (bp), 1, bp.pt.p.o + bp.pt.o) .. s .. string.sub (get_buffer_text (bp), bp.pt.p.o + bp.pt.o + 1)
-  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, #s)
-  for i = #s, 1, -1 do
-    assert (move_char (1))
-  end
-  cur_bp.modified = true
-
-  return true
-end
-
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  return buffer_insert (cur_bp, c)
+  return replace (0, c)
 end
 
 function delete_char ()
@@ -170,7 +153,7 @@ end
 -- Replace text in the buffer `bp' at offset `offset' with `newtext'.
 -- If `replace_case' is true then the new characters will be the same
 -- case as the old.
-function buffer_replace_text (bp, offset, oldlen, newtext, replace_case)
+function buffer_replace (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
     local case_type = check_case (string.sub (get_buffer_text (bp), offset + 1, offset + oldlen))
     if case_type then
@@ -178,6 +161,7 @@ function buffer_replace_text (bp, offset, oldlen, newtext, replace_case)
     end
   end
 
+  undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, #newtext)
   bp.modified = true
   adjust_markers (offset, #newtext - oldlen)
   bp.es.s = string.sub (get_buffer_text (bp), 1, offset) .. newtext .. string.sub (get_buffer_text (bp), offset + 1 + oldlen)

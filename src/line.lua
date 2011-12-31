@@ -27,7 +27,7 @@ function insert_string (s, eol)
   while p <= #s do
     local next = string.find (s, eol, p)
     local line_len = (next or #s + 1) - p
-    assert (buffer_insert (cur_bp, string.sub (s, p, p + line_len - 1)))
+    assert (replace (0, string.sub (s, p, p + line_len - 1)))
     p = p + line_len
     if next then
       insert_newline ()
@@ -39,6 +39,19 @@ end
 
 function insert_estr (es)
   insert_string (es.s, es.eol)
+end
+
+-- Replace a string at point, moving point forwards.
+function replace (del, s)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, s, false)
+  for i = #s, 1, -1 do
+    assert (move_char (1))
+  end
+  return true
 end
 
 -- If point is greater than fill-column, then split the line at the
@@ -100,7 +113,7 @@ function fill_break_line ()
 end
 
 function insert_newline ()
-  if not buffer_insert (cur_bp, get_buffer_eol (cur_bp)) then
+  if not replace (0, get_buffer_eol (cur_bp)) then
     return false
   end
 

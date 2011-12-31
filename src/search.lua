@@ -437,8 +437,7 @@ what to do with it.
       if c ~= string.byte ('n') and c ~= KBD_RET and c ~= KBD_DEL then -- Do not replace.
         -- Perform replacement.
         count = count + 1
-        undo_save (UNDO_REPLACE_BLOCK, make_point (cur_bp.pt.n, cur_bp.pt.o - #find), #find, #repl)
-        buffer_replace_text (cur_bp, get_line_offset (cur_bp.pt.p) + cur_bp.pt.o - #find, #find, repl, find_no_upper)
+        buffer_replace (cur_bp, get_line_offset (cur_bp.pt.p) + cur_bp.pt.o - #find, #find, repl, find_no_upper)
 
         if c == string.byte ('.') then -- Replace and quit.
           break
