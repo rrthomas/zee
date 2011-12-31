@@ -26,14 +26,10 @@ function insert_string (s, eol)
   local p = 1
   while p <= #s do
     local next = string.find (s, eol, p)
-    if next == nil then
-      next = #s + 1
-    end
-    while p < next do
-      insert_char (s[p])
-      p = p + 1
-    end
-    if next <= #s then
+    local line_len = (next or #s + 1) - p
+    assert (buffer_insert (cur_bp, string.sub (s, p, p + line_len - 1)))
+    p = p + line_len
+    if next then
       insert_newline ()
       p = p + #eol
     end
@@ -104,7 +100,19 @@ function fill_break_line ()
 end
 
 function insert_newline ()
-  return intercalate_newline () and forward_char ()
+  if not buffer_insert (cur_bp, cur_bp.eol) then
+    return false
+  end
+
+  cur_bp.last_line = cur_bp.last_line + 1
+  thisflag.need_resync = true
+
+  return true
+end
+
+-- Insert a newline at the current position without moving the cursor.
+function intercalate_newline ()
+  return insert_newline () and backward_char ()
 end
 
 local function insert_expanded_tab (inschr)

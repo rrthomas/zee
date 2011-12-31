@@ -58,17 +58,6 @@ function point_max ()
   return pt
 end
 
-function point_to_offset (pt)
-  local pt_o = pt.o
-  local lp = cur_bp.lines
-  for i = 1, pt.n do
-    assert (lp ~= nil)
-    pt_o = pt_o + #get_line_text (lp) + #cur_bp.eol -- FIXME: Use correct buffer's EOL!
-    lp = get_line_next (lp)
-  end
-  return pt_o
-end
-
 function cmp_point (pt1, pt2)
   if pt1.n < pt2.n then
     return -1

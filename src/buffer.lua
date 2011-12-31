@@ -86,10 +86,11 @@ function buffer_set_eol_type (bp)
   end
 end
 
--- Adjust markers (including point) when text is edited.
---   o is offset at which edit was made
---   delta gives the number of characters inserted (>0) or
---     deleted (<0)
+function point_to_offset (pt)
+  return pt.p.o + pt.o
+end
+
+-- Adjust markers (including point) at offset `o' by offset `delta'.
 local function adjust_markers (o, delta)
   local m_pt = point_marker ()
   for m in pairs (cur_bp.markers) do
@@ -114,15 +115,18 @@ local function check_case (s)
   end
 end
 
--- Insert the character at the current position without moving point.
-local function intercalate_char (c)
+-- Insert a string at point, moving point forwards.
+function buffer_insert (bp, s)
   if warn_if_readonly_buffer () then
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, 1)
-  cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. c .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 1)
-  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, 1)
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)
+  bp.text = string.sub (bp.text, 1, bp.pt.p.o + bp.pt.o) .. s .. string.sub (bp.text, bp.pt.p.o + bp.pt.o + 1)
+  adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, #s)
+  for i = #s, 1, -1 do
+    assert (move_char (1))
+  end
   cur_bp.modified = true
 
   return true
@@ -131,26 +135,7 @@ end
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  if intercalate_char (c) then
-    forward_char ()
-    return true
-  end
-  return false
-end
-
--- Insert a newline at the current position without moving the cursor.
--- Update markers after point in the split line.
-function intercalate_newline ()
-  for i = 1, #cur_bp.eol do
-    if not intercalate_char (cur_bp.eol[i]) then
-      return false
-    end
-  end
-
-  cur_bp.last_line = cur_bp.last_line + 1
-  thisflag.need_resync = true
-
-  return true
+  return buffer_insert (cur_bp, c)
 end
 
 function delete_char ()
@@ -182,8 +167,9 @@ function delete_char ()
   return true
 end
 
--- Replace text in the buffer `bp' with `newtext'. If `replace_case'
--- is true then the new characters will be the same case as the old.
+-- Replace text in the buffer `bp' at offset `offset' with `newtext'.
+-- If `replace_case' is true then the new characters will be the same
+-- case as the old.
 function buffer_replace_text (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
     local case_type = check_case (string.sub (bp.text, offset + 1, offset + oldlen))
@@ -216,7 +202,7 @@ function buffer_new ()
 
   bp.pt = point_new ()
   bp.pt.p = {bp = bp, o = 0, n = 0}
-  bp.text = ""
+  bp.text = "" -- FIXME: Merge with eol and make an estr.
   bp.lines = bp.pt.p
   bp.last_line = 0
   bp.markers = {}

@@ -165,6 +165,7 @@ local function draw_window (topline, wp)
       break
     end
     lp = get_line_prev (lp)
+    assert (lp)
     lineno = lineno - 1
   end
 
