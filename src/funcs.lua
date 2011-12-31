@@ -515,7 +515,7 @@ The output is available in that buffer in both cases.
           minibuf_error ("Cannot open temporary file")
           ok = leNIL
         else
-          local written, err = fd:write (get_buffer_region (cur_bp, rp))
+          local written, err = fd:write (get_buffer_region (cur_bp, rp).s)
 
           if not written then
             minibuf_error ("Error writing to temporary file: " .. err)
@@ -1079,7 +1079,7 @@ Convert the region to lower case.
 -- Transpose functions
 local function region_to_string ()
   activate_mark ()
-  return get_buffer_region (cur_bp, calculate_the_region ())
+  return get_buffer_region (cur_bp, calculate_the_region ()).s
 end
 
 local function transpose_subr (forward_func, backward_func)

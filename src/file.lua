@@ -185,7 +185,7 @@ local function insert_file (filename)
       if #buf >= 1 then
         undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
         undo_nosave = true
-        insert_string (buf)
+        insert_string (buf) -- FIXME: Detect coding of file.
         undo_nosave = false
       end
       return true

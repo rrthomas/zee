@@ -45,7 +45,7 @@ Copy region into register @i{register}.
       if not rp then
         return leNIL
       else
-        regs[reg] = get_buffer_region (cur_bp, rp)
+        regs[reg] = get_buffer_region (cur_bp, rp).s -- FIXME: Convert newlines.
       end
     end
 
@@ -105,22 +105,21 @@ Puts point before and mark after the inserted text.
 local function write_registers_list (i)
   for i, r in pairs (regs) do
     if r then
-      local as = ""
-
+      local as
       if posix.isprint (string.char (i)) then
         as = string.format ("%c", i)
       else
         as = string.format ("\\%o", i)
       end
-
       insert_string (string.format ("Register %s contains ", as))
+
       if r == "" then
         insert_string ("the empty string\n")
       elseif string.match (r, "^%s+$") then
         insert_string ("whitespace\n")
       else
         local len = math.min (20, math.max (0, cur_wp.ewidth - 6)) + 1
-        insert_string (string.format ("text starting with\n    %s\n", string.sub (s, 1, len)))
+        insert_string (string.format ("text starting with\n    %s\n", string.sub (r, 1, len)))
       end
     end
   end

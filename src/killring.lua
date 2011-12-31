@@ -27,8 +27,9 @@ local function maybe_free_kill_ring ()
   end
 end
 
-local function kill_ring_push (s)
-  kill_ring_text = (kill_ring_text or "") .. s
+local function kill_ring_push (es)
+  -- FIXME: Convert newlines.
+  kill_ring_text = (kill_ring_text or "") .. es.s
 end
 
 local function copy_or_kill_region (kill, rp)
@@ -222,7 +223,7 @@ local function kill_line (whole_line)
       return false
     end
 
-    kill_ring_push ("\n")
+    kill_ring_push ({s = "\n", eol = coding_eol_lf})
     _this_command = "kill-region"
   end
 

@@ -19,19 +19,30 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
--- FIXME: Accept string and encoding.
-function insert_string (s)
-  local i
+function insert_string (s, eol)
+  eol = eol or coding_eol_lf
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)
   undo_nosave = true
-  for i = 1, #s do
-    if string.sub (s, i, i) == '\n' then
+  local p = 1
+  while p <= #s do
+    local next = string.find (s, eol, p)
+    if next == nil then
+      next = #s + 1
+    end
+    while p < next do
+      insert_char (s[p])
+      p = p + 1
+    end
+    if next <= #s then
       insert_newline ()
-    else
-      insert_char (string.sub (s, i, i))
+      p = p + #eol
     end
   end
   undo_nosave = false
+end
+
+function insert_estr (es)
+  insert_string (es.s, es.eol)
 end
 
 -- If point is greater than fill-column, then split the line at the

@@ -208,7 +208,7 @@ buffer_name_history = history_new ()
 
 function insert_buffer (bp)
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-  insert_string (bp.text)
+  insert_estr ({s = bp.text, eol = bp.eol})
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 end
 
@@ -284,9 +284,8 @@ function tab_width (bp)
 end
 
 -- Copy a region of text into a string.
--- FIXME: Return encoding.
 function get_buffer_region (bp, r)
-  return string.sub (bp.text, r.start + 1, r.finish)
+  return {s = string.sub (bp.text, r.start + 1, r.finish), eol = bp.eol}
 end
 
 function in_region (lineno, x, rp)

@@ -104,7 +104,7 @@ local function revert_action (up)
     for i = 1, up.size do
       delete_char ()
     end
-    insert_string (up.text)
+    insert_estr (up.text)
     undo_nosave = false
   end
 
