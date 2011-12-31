@@ -114,8 +114,7 @@ local function check_case (s)
   end
 end
 
--- Insert the character at the current position and move the text at its right.
--- This function doesn't change the current position of the pointer.
+-- Insert the character at the current position without moving point.
 local function intercalate_char (c)
   if warn_if_readonly_buffer () then
     return false
