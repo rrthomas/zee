@@ -45,6 +45,21 @@ local function draw_minibuf_read (prompt, value, match, pointo)
   term_refresh ()
 end
 
+function maybe_close_popup (cp)
+  local old_wp = cur_wp
+  local wp = find_window ("*Completions*")
+  if cp and cp.poppedup and wp then
+    set_current_window (wp)
+    if cp.close then
+      execute_function ("delete-window")
+    elseif cp.old_bp then
+      switch_to_buffer (cp.old_bp)
+    end
+    set_current_window (old_wp)
+    term_redisplay ()
+  end
+end
+
 local function do_minibuf_read (prompt, value, pos, cp, hp)
   local thistab
   local lasttab = -1
@@ -167,6 +182,10 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
           if thistab == "incomplete" or thistab == "matches" then
             popup_completion (cp)
           end
+          if thistab == "match" then
+            maybe_close_popup (cp)
+            cp.poppedup = false
+          end
           if thistab == "incomplete" or thistab == "matches" or thistab == "match" then
             local bs = cp.filename and cp.path or ""
             bs = bs .. cp.match
@@ -205,18 +224,6 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
   end
 
   local s = do_minibuf_read (prompt, value, pos, cp, hp)
-
-  local old_wp = cur_wp
-  local wp = find_window ("*Completions*")
-  if cp and cp.poppedup and wp then
-    set_current_window (wp)
-    if cp.close then
-      execute_function ("delete-window")
-    elseif cp.old_bp then
-      switch_to_buffer (cp.old_bp)
-    end
-    set_current_window (old_wp)
-  end
-
+  maybe_close_popup (cp)
   return s
 end
