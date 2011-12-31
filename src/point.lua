@@ -39,7 +39,7 @@ function offset_to_point (bp, offset)
   local pt = {p = bp.lines, n = 0}
   assert (pt.p)
   while offset > 0 and offset > #get_line_text (pt.p) do
-    offset = offset - #get_line_text (pt.p) - #bp.eol
+    offset = offset - #get_line_text (pt.p) - #get_buffer_eol (bp)
     pt.p = get_line_next (pt.p)
     assert (pt.p)
     pt.n = pt.n + 1

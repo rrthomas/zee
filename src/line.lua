@@ -100,7 +100,7 @@ function fill_break_line ()
 end
 
 function insert_newline ()
-  if not buffer_insert (cur_bp, cur_bp.eol) then
+  if not buffer_insert (cur_bp, get_buffer_eol (cur_bp)) then
     return false
   end
 

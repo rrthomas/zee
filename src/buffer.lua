@@ -24,27 +24,27 @@ function get_line_prev (lp)
     return nil
   end
   -- FIXME: Write & use memrmem
-  local found = find_substr (lp.bp.text, lp.bp.eol, 0, lp.o - 1, false, true, true, false, false)
-  return {bp = lp.bp, o = found and (found + #lp.bp.eol - 1) or 0}
+  local found = find_substr (get_buffer_text (lp.bp), get_buffer_eol (lp.bp), 0, lp.o - 1, false, true, true, false, false)
+  return {bp = lp.bp, o = found and (found + #get_buffer_eol (lp.bp) - 1) or 0}
 end
 
 function get_line_next (lp)
-  local next = string.find (string.sub (lp.bp.text, lp.o + 1), lp.bp.eol)
+  local next = string.find (string.sub (get_buffer_text (lp.bp), lp.o + 1), get_buffer_eol (lp.bp))
   if next == nil then
     return nil
   end
-  return {bp = lp.bp, o = lp.o + next - 1 + #lp.bp.eol}
+  return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_eol (lp.bp)}
  end
 
 function get_line_text (lp)
   local next_lp = get_line_next (lp)
   local next
   if next_lp == nil then
-    next = #lp.bp.text
+    next = #get_buffer_text (lp.bp)
   else
-    next = next_lp.o - #lp.bp.eol
+    next = next_lp.o - #get_buffer_eol (lp.bp)
   end
-  return string.sub (lp.bp.text, lp.o + 1, next)
+  return string.sub (get_buffer_text (lp.bp), lp.o + 1, next)
 end
 
 function get_line_offset (lp)
@@ -58,14 +58,14 @@ function buffer_set_eol_type (bp)
   local first_eol = true
   local total_eols = 0
   local i = 1
-  while i <= #bp.text and total_eols < max_eol_check_count do
-    local c = bp.text[i]
+  while i <= #get_buffer_text (bp) and total_eols < max_eol_check_count do
+    local c = get_buffer_text (bp)[i]
     if c == '\n' or c == '\r' then
       local this_eol_type
       total_eols = total_eols + 1
       if c == '\n' then
         this_eol_type = coding_eol_lf
-      elseif i == #bp.text or bp.text[i + 1] ~= '\n' then
+      elseif i == #get_buffer_text (bp) or get_buffer_text (bp)[i + 1] ~= '\n' then
         this_eol_type = coding_eol_cr
       else
         this_eol_type = coding_eol_crlf
@@ -74,11 +74,11 @@ function buffer_set_eol_type (bp)
 
       if first_eol then
         -- This is the first end-of-line.
-        cur_bp.eol = this_eol_type
+        cur_bp.es.eol = this_eol_type
         first_eol = false
-      elseif cur_bp.eol ~= this_eol_type then
+      elseif get_buffer_eol (cur_bp) ~= this_eol_type then
         -- This EOL is different from the last; arbitrarily choose LF.
-        cur_bp.eol = coding_eol_lf
+        cur_bp.es.eol = coding_eol_lf
         break
       end
     end
@@ -122,7 +122,7 @@ function buffer_insert (bp, s)
   end
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #s)
-  bp.text = string.sub (bp.text, 1, bp.pt.p.o + bp.pt.o) .. s .. string.sub (bp.text, bp.pt.p.o + bp.pt.o + 1)
+  bp.es.s = string.sub (get_buffer_text (bp), 1, bp.pt.p.o + bp.pt.o) .. s .. string.sub (get_buffer_text (bp), bp.pt.p.o + bp.pt.o + 1)
   adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, #s)
   for i = #s, 1, -1 do
     assert (move_char (1))
@@ -153,13 +153,13 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
 
   if eolp () then
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#cur_bp.eol)
-    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 1 + #cur_bp.eol)
+    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#get_buffer_eol (cur_bp))
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp), 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp), cur_bp.pt.p.o + cur_bp.pt.o + 1 + #get_buffer_eol (cur_bp))
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
     adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
-    cur_bp.text = string.sub (cur_bp.text, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (cur_bp.text, cur_bp.pt.p.o + cur_bp.pt.o + 2)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp), 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp), cur_bp.pt.p.o + cur_bp.pt.o + 2)
   end
 
   cur_bp.modified = true
@@ -172,15 +172,15 @@ end
 -- case as the old.
 function buffer_replace_text (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (bp.text, offset + 1, offset + oldlen))
+    local case_type = check_case (string.sub (get_buffer_text (bp), offset + 1, offset + oldlen))
     if case_type then
       newtext = recase (newtext, case_type)
     end
   end
 
-  cur_bp.modified = true
+  bp.modified = true
   adjust_markers (offset, #newtext - oldlen)
-  bp.text = string.sub (bp.text, 1, offset) .. newtext .. string.sub (bp.text, offset + 1 + oldlen)
+  bp.es.s = string.sub (get_buffer_text (bp), 1, offset) .. newtext .. string.sub (get_buffer_text (bp), offset + 1 + oldlen)
 end
 
 
@@ -191,7 +191,7 @@ buffer_name_history = history_new ()
 
 function insert_buffer (bp)
   undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
-  insert_estr ({s = bp.text, eol = bp.eol})
+  insert_estr (bp.es)
   undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
 end
 
@@ -202,11 +202,10 @@ function buffer_new ()
 
   bp.pt = point_new ()
   bp.pt.p = {bp = bp, o = 0, n = 0}
-  bp.text = "" -- FIXME: Merge with eol and make an estr.
+  bp.es = {s = "", eol = coding_eol_lf}
   bp.lines = bp.pt.p
   bp.last_line = 0
   bp.markers = {}
-  bp.eol = coding_eol_lf
   bp.dir = posix.getcwd () or ""
 
   -- Insert into buffer list.
@@ -229,8 +228,16 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
+function get_buffer_text (bp)
+  return bp.es.s
+end
+
+function get_buffer_eol (bp)
+  return bp.es.eol
+end
+
 function get_buffer_size (bp)
-  return #bp.text
+  return #bp.es.s
 end
 
 function activate_mark ()
@@ -268,7 +275,7 @@ end
 
 -- Copy a region of text into a string.
 function get_buffer_region (bp, r)
-  return {s = string.sub (bp.text, r.start + 1, r.finish), eol = bp.eol}
+  return {s = string.sub (get_buffer_text (bp), r.start + 1, r.finish), eol = get_buffer_eol (bp)}
 end
 
 function in_region (lineno, x, rp)

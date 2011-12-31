@@ -242,7 +242,7 @@ local function raw_write_to_disk (bp, filename, mode)
   end
 
   local len = get_buffer_size (bp)
-  local written = posix.write (h, bp.text, len)
+  local written = posix.write (h, get_buffer_text (bp), len)
   if written < 0 or written ~= len then
     ret = written
   end
