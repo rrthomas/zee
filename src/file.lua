@@ -29,7 +29,11 @@ coding_eol_cr = "\r"
 
 
 function exist_file (filename)
-  return posix.stat (filename) ~= nil
+  if posix.stat (filename) then
+    return true
+  end
+  local _, err = posix.errno ()
+  return err ~= posix.ENOENT
 end
 
 local function is_regular_file (filename)
