@@ -74,7 +74,7 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/src/*.el				\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
-src/loadlua.lua: Makefile.am src/loadlua.lua.in
+src/loadlua.lua: src/Makefile.am src/loadlua.lua.in
 	cp src/loadlua.lua.in $@
 	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
