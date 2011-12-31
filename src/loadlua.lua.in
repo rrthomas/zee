@@ -20,7 +20,7 @@ local function require_version (module, min, too_big, pattern)
 end
 
 require_version ("std", "25")
-require_version ("posix", "5.1.14")
+require_version ("posix", "5.1.16")
 require "curses" -- part of luaposix
-require "bit" -- no version needed
+require "bit" -- no particular version needed
 require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)")
