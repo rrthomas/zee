@@ -38,23 +38,8 @@ function undo_save (ty, pt, osize, size)
   end
 
   if ty == UNDO_REPLACE_BLOCK then
-    local lp = cur_bp.pt.p
-    local n = cur_bp.pt.n
-
-    if n > pt.n then
-      repeat
-        lp = get_line_prev (lp)
-        n = n - 1
-      until n <= pt.n
-    elseif n < pt.n then
-      repeat
-        lp = get_line_next (lp)
-        n = n + 1
-      until n >= pt.n
-    end
-
     up.size = size
-    local o = get_line_offset (lp)
+    local o = point_to_offset (pt)
     up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
   end
 
@@ -92,8 +77,6 @@ local function revert_action (up)
     pt.n = up.n
     pt.o = up.o
     undo_save (UNDO_END_SEQUENCE, pt, 0, 0)
-    goto_point (pt)
-    return up.next
   end
 
   goto_point (pt)

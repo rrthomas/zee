@@ -36,12 +36,15 @@ function get_line_next (lp)
   return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_text (lp.bp).eol}
 end
 
-function get_line_offset (lp)
-  return lp.o
-end
-
 function point_to_offset (pt)
-  return pt.p.o + pt.o
+  if pt.p.o then
+    return pt.p.o + pt.o
+  end
+  local o = 0
+  while pt.n > 0 do
+    o = estr_next_line (get_buffer_text (cur_bp), o)
+  end
+  return o + pt.o
 end
 
 -- Adjust markers (including point) at offset `o' by offset `delta'.

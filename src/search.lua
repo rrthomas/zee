@@ -86,10 +86,10 @@ local function search (pt, s, forward, regexp)
   -- Attempt match.
   if forward then
     notbol = pt.o > from
-    from = get_line_offset (pt.p) + pt.o
+    from = point_to_offset (pt)
   else
     noteol = pt.o < to
-    to = get_line_offset (pt.p) + pt.o
+    to = point_to_offset (pt)
   end
   local pos = find_substr (get_buffer_text (cur_bp).s, s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
@@ -416,7 +416,7 @@ what to do with it.
       if c ~= string.byte ('n') and c ~= KBD_RET and c ~= KBD_DEL then -- Do not replace.
         -- Perform replacement.
         count = count + 1
-        buffer_replace (cur_bp, get_line_offset (cur_bp.pt.p) + cur_bp.pt.o - #find, #find, repl, find_no_upper)
+        buffer_replace (cur_bp, point_to_offset (cur_bp.pt) - #find, #find, repl, find_no_upper)
 
         if c == string.byte ('.') then -- Replace and quit.
           break
