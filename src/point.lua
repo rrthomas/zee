@@ -39,13 +39,14 @@ end
 function offset_to_point (bp, offset)
   local pt = {p = bp.lines, n = 0}
   assert (pt.p)
-  while offset > 0 and offset > #get_line_text (pt.p) do
-    offset = offset - #get_line_text (pt.p) - #get_buffer_text (bp).eol
+  local o = 0
+  while estr_end_of_line (get_buffer_text (bp), o) < offset do
     pt.p = get_line_next (pt.p)
     assert (pt.p)
     pt.n = pt.n + 1
+    o = estr_next_line (get_buffer_text (bp), o)
   end
-  pt.o = offset
+  pt.o = offset - o
   return pt
 end
 
@@ -54,9 +55,7 @@ function point_min ()
 end
 
 function point_max ()
-  local pt = make_point (cur_bp.last_line, 0)
-  pt.o = #get_line_text (pt.p)
-  return pt
+  return offset_to_point (cur_bp, get_buffer_size (cur_bp))
 end
 
 function cmp_point (pt1, pt2)
@@ -91,7 +90,7 @@ end
 
 function line_end_position (count)
   local pt = line_beginning_position (count)
-  pt.o = #get_line_text (pt.p)
+  pt.o = get_buffer_line_len (cur_bp)
   return pt
 end
 

@@ -708,13 +708,13 @@ local function move_sexp (dir)
   end
 
   local function precedingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < #get_line_text (cur_bp.pt.p) and
-      (get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\"' or get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\'')
+    return c == '\\' and cur_bp.pt.o + 1 < get_buffer_line_len (cur_bp) and
+      (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\'')
   end
 
   local function followingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < #get_line_text (cur_bp.pt.p) and
-      (get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\"' or get_line_text (cur_bp.pt.p)[cur_bp.pt.o + 1 + 1] == '\'')
+    return c == '\\' and cur_bp.pt.o + 1 < get_buffer_line_len (cur_bp) and
+      (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\'')
   end
 
   while true do
@@ -782,7 +782,7 @@ local function move_sexp (dir)
       end
       return false
     end
-    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or #get_line_text (cur_bp.pt.p)})
+    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or get_buffer_line_len (cur_bp)})
   end
 end
 
@@ -970,9 +970,9 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = cur_bp.pt.o, #get_line_text (cur_bp.pt.p) do
-    if iswordchar (get_line_text (cur_bp.pt.p)[i + 1]) then
-      as = as .. get_line_text (cur_bp.pt.p)[i + 1]
+  for i = cur_bp.pt.o, get_buffer_line_len (cur_bp) do
+    if iswordchar (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i + 1]) then
+      as = as .. get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i + 1]
     else
       break
     end

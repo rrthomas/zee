@@ -118,11 +118,10 @@ local function draw_end_of_line (line, wp, lineno, rp, highlight, x, i)
   end
 end
 
-local function draw_line (line, startcol, wp, lp, lineno, rp, highlight)
+local function draw_line (line, startcol, wp, o, lineno, rp, highlight)
   term_move (line, 0)
-
   local x = 0
-  for i = startcol, #get_line_text (lp) - 1 do
+  for i = startcol + 1, estr_end_of_line (get_buffer_text (wp.bp), o) - o do
     if x >= wp.ewidth then
       break
     end
@@ -130,7 +129,7 @@ local function draw_line (line, startcol, wp, lp, lineno, rp, highlight)
     if highlight and in_region (lineno, i, rp) then
       font = FONT_REVERSE
     end
-    x = outch (string.byte (get_line_text (lp), i + 1), font, x)
+    x = outch (string.byte (get_buffer_text (wp.bp).s[o + i]), font, x)
   end
 
   draw_end_of_line (line, wp, lineno, rp, highlight, x, x + startcol)
@@ -159,13 +158,10 @@ local function draw_window (topline, wp)
 
   -- Find the first line to display on the first screen line.
   local pt = window_pt (wp)
-  local lp, lineno = pt.p, pt.n
+  local lineno = pt.n
+  local o = get_buffer_o (wp.bp)
   for i = wp.topdelta, 1, -1 do
-    if get_line_prev (lp) == nil then
-      break
-    end
-    lp = get_line_prev (lp)
-    assert (lp)
+    o = estr_prev_line (get_buffer_text (wp.bp), o)
     lineno = lineno - 1
   end
 
@@ -179,14 +175,14 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if lineno <= wp.bp.last_line then
-      draw_line (i, wp.start_column, wp, lp, lineno, rp, highlight)
+      draw_line (i, wp.start_column, wp, o, lineno, rp, highlight)
 
       if wp.start_column > 0 then
         term_move (i, 0)
         term_addstr ('$')
       end
 
-      lp = get_line_next (lp)
+      o = estr_next_line (get_buffer_text (wp.bp), o)
       lineno = lineno + 1
     end
   end
@@ -210,6 +206,7 @@ local point_screen_column = 0
 local function calculate_start_column (wp)
   local t = tab_width (wp.bp)
   local pt = window_pt (wp)
+  local o = point_to_offset (pt) - pt.o
   local rpfact = math.floor (pt.o / math.floor (wp.ewidth / 3))
 
   local col = 0
@@ -217,7 +214,7 @@ local function calculate_start_column (wp)
   for lp = pt.o, 0, -1 do
     col = 0
     for p = lp, pt.o - 1 do
-      local c = get_line_text (pt.p)[p + 1]
+      local c = get_buffer_text (wp.bp).s[o + p + 1]
       if c == '\t' then
         col = bit.bor (col, t - 1) + 1
       elseif posix.isprint (c) then

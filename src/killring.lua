@@ -191,8 +191,8 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = cur_bp.pt.o + 1, #get_line_text (cur_bp.pt.p) do
-      local c = get_line_text (cur_bp.pt.p)[i]
+    for i = cur_bp.pt.o + 1, get_buffer_line_len (cur_bp) do
+      local c = get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i]
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
         break
@@ -212,7 +212,7 @@ local function kill_line (whole_line)
     local pt = table.clone (cur_bp.pt)
 
     set_region_start (rp, pt)
-    pt.o = #get_line_text (cur_bp.pt.p)
+    pt.o = get_buffer_line_len (cur_bp)
     set_region_end (rp, pt)
 
     copy_or_kill_region (true, rp)

@@ -91,7 +91,7 @@ function fill_break_line ()
 
     -- Find break point moving left from fill-column.
     for i = cur_bp.pt.o, 1, -1 do
-      if string.match (get_line_text (cur_bp.pt.p)[i], "%s") then
+      if string.match (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i], "%s") then
         break_col = i
         break
       end
@@ -100,9 +100,9 @@ function fill_break_line ()
     -- If no break point moving left from fill-column, find first
     -- possible moving right.
     if break_col == 0 then
-      for i = cur_bp.pt.o + 1, #get_line_text (cur_bp.pt.p) do
-        if string.match (get_line_text (cur_bp.pt.p)[i], "%s") then
-          break_col = i
+      for i = get_buffer_o (cur_bp) + cur_bp.pt.o + 1, estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) do
+        if string.match (get_buffer_text (cur_bp).s[i], "%s") then
+          break_col = i - get_buffer_o (cur_bp)
           break
         end
       end

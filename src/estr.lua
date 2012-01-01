@@ -64,20 +64,33 @@ end
 estr_dup = table.clone
 
 function estr_prev_line (es, o)
-  if o < #es.eol then
+  local so = estr_start_of_line (es, o)
+  if so == 0 then
     return nil
   end
-  -- FIXME: Write & use memrmem
-  local found = find_substr (es.s, es.eol, 0, o - 1, false, true, true, false, false)
-  return found and (found + #es.eol - 1) or 0
+  return estr_start_of_line (es, so - #es.eol)
 end
 
 function estr_next_line (es, o)
-  local next = string.find (string.sub (es.s, o + 1), es.eol)
-  if next == nil then
+  local eo = estr_end_of_line (es, o)
+  if eo == #es.s then
     return nil
   end
-  return o + next - 1 + #es.eol
+  return eo + #es.eol
+end
+
+function estr_start_of_line (es, o)
+  local prev = find_substr (es.s, es.eol, 0, o, false, true, true, false, false)
+  return prev and (prev + #es.eol - 1) or 0
+end
+
+function estr_end_of_line (es, o)
+  local next = string.find (string.sub (es.s, o + 1), es.eol)
+  return next and o + next - 1 or #es.s
+end
+
+function estr_line_len (es, o)
+  return estr_end_of_line (es, o) - estr_start_of_line (es, o)
 end
 
 function estr_cat (es, src)

@@ -359,12 +359,6 @@ means use current buffer).
       bp = cur_bp
     end
 
-    local s, lp = "", bp.lines
-    while lp ~= nil do
-      s = s .. get_line_text (lp) .. "\n"
-      lp = get_line_next (lp)
-    end
-
-    return lisp_loadstring (s)
+    return lisp_loadstring (get_buffer_text (bp).s)
   end
 )

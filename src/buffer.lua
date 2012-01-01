@@ -36,17 +36,6 @@ function get_line_next (lp)
   return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_text (lp.bp).eol}
 end
 
-function get_line_text (lp)
-  local next_lp = get_line_next (lp)
-  local next
-  if next_lp == nil then
-    next = #get_buffer_text (lp.bp).s
-  else
-    next = next_lp.o - #get_buffer_text (lp.bp).eol
-  end
-  return string.sub (get_buffer_text (lp.bp).s, lp.o + 1, next)
-end
-
 function get_line_offset (lp)
   return lp.o
 end
@@ -223,6 +212,12 @@ function tab_width (bp)
   return math.max (get_variable_number_bp (bp, "tab-width"), 1)
 end
 
+function get_buffer_line_text (bp, o)
+  return string.sub (get_buffer_text (bp).s,
+                     estr_start_of_line (get_buffer_text (bp), o) + 1,
+                     estr_end_of_line (get_buffer_text (bp), o))
+end
+
 -- Copy a region of text into a string.
 function get_buffer_region (bp, r)
   return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
@@ -252,6 +247,10 @@ local function warn_if_no_mark ()
     return true
   end
   return false
+end
+
+function get_buffer_line_len (bp)
+  return estr_end_of_line (get_buffer_text (bp), get_buffer_o (bp)) - get_buffer_o (bp)
 end
 
 function region_new ()
@@ -489,11 +488,12 @@ end
 function goto_goalc ()
   local col = 0
 
-  local i = 1
-  while i <= #get_line_text (cur_bp.pt.p) do
+  local i = get_buffer_o (cur_bp)
+  local lim = estr_next_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) or math.huge
+  while i < lim do
     if col == get_goalc () then
       break
-    elseif get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i] == '\t' then
+    elseif get_buffer_text (cur_bp).s[i] == '\t' then
       local t = tab_width (cur_bp)
       for w = t - col % t, 1, -1 do
         col = col + 1
@@ -507,7 +507,7 @@ function goto_goalc ()
     i = i + 1
   end
 
-  cur_bp.pt.o = i - 1
+  cur_bp.pt.o = i - get_buffer_o (cur_bp)
 end
 
 function move_line (n)

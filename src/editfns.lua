@@ -32,11 +32,11 @@ end
 
 
 function is_empty_line ()
-  return #get_line_text (cur_bp.pt.p) == 0
+  return get_buffer_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp))
 end
 
 function is_blank_line ()
-  return string.match (get_line_text (cur_bp.pt.p), "^%s*$") ~= nil
+  return string.match (get_buffer_line_text (cur_bp, get_buffer_o (cur_bp)), "^%s*$") ~= nil
 end
 
 -- Returns the character following point in the current buffer.
@@ -78,5 +78,5 @@ end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return cur_bp.pt.o == #get_line_text (cur_bp.pt.p)
+  return cur_bp.pt.o == get_buffer_line_len (cur_bp)
 end
