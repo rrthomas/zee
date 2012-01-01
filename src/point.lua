@@ -20,29 +20,17 @@
 -- MA 02111-1301, USA.
 
 function point_new ()
-  return {o = 0, n = 0, p = {}}
+  return {o = 0, n = 0}
 end
 
--- FIXME: Remove p member of Point, and use estr functions directly on o member instead.
 function make_point (lineno, offset)
-  local pt = point_new ()
-  pt.p = cur_bp.lines
-  pt.n = lineno
-  pt.o = offset
-  for i = lineno, 1, -1 do
-    pt.p = get_line_next (pt.p)
-  end
-  assert (pt.p)
-  return pt
+  return {n = lineno, o = offset}
 end
 
 function offset_to_point (bp, offset)
-  local pt = {p = bp.lines, n = 0}
-  assert (pt.p)
+  local pt = {n = 0}
   local o = 0
   while estr_end_of_line (get_buffer_text (bp), o) < offset do
-    pt.p = get_line_next (pt.p)
-    assert (pt.p)
     pt.n = pt.n + 1
     o = estr_next_line (get_buffer_text (bp), o)
   end
@@ -69,23 +57,20 @@ end
 
 function line_beginning_position (count)
   -- Copy current point position without offset (beginning of line).
-  local pt = table.clone (cur_bp.pt)
-  pt.o = 0
+  local o = get_buffer_o (cur_bp)
 
   count = count - 1
-  while count < 0 and pt.n > 0 do
-    pt.p = get_line_prev (pt.p)
-    pt.n = pt.n - 1
+  while count < 0 and o > 0 do
+    o = estr_prev_line (get_buffer_text (cur_bp), o)
     count = count + 1
   end
 
-  while count > 0 and pt.n < cur_bp.last_line do
-    pt.p = get_line_next (pt.p)
-    pt.n = pt.n + 1
+  while count > 0 and o do
+    o = estr_next_line (get_buffer_text (cur_bp), o)
     count = count - 1
   end
 
-  return pt
+  return offset_to_point (cur_bp, o)
 end
 
 function line_end_position (count)
@@ -94,7 +79,7 @@ function line_end_position (count)
   return pt
 end
 
--- Go to coordinates described by pt (ignoring pt.p)
+-- Go to coordinates described by pt
 function goto_point (pt)
   if cur_bp.pt.n > pt.n then
     repeat

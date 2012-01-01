@@ -19,29 +19,9 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function get_line_prev (lp)
-  if lp.o == 0 then
-    return nil
-  end
-  -- FIXME: Write & use memrmem
-  local found = find_substr (get_buffer_text (lp.bp).s, get_buffer_text (lp.bp).eol, 0, lp.o - 1, false, true, true, false, false)
-  return {bp = lp.bp, o = found and (found + #get_buffer_text (lp.bp).eol - 1) or 0}
-end
-
-function get_line_next (lp)
-  local next = string.find (string.sub (get_buffer_text (lp.bp).s, lp.o + 1), get_buffer_text (lp.bp).eol)
-  if next == nil then
-    return nil
-  end
-  return {bp = lp.bp, o = lp.o + next - 1 + #get_buffer_text (lp.bp).eol}
-end
-
 function point_to_offset (pt)
-  if pt.p.o then
-    return pt.p.o + pt.o
-  end
   local o = 0
-  while pt.n > 0 do
+  for n = pt.n, 1, -1 do
     o = estr_next_line (get_buffer_text (cur_bp), o)
   end
   return o + pt.o
@@ -93,13 +73,13 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
 
   if eolp () then
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -#get_buffer_text (cur_bp).eol)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp).s, cur_bp.pt.p.o + cur_bp.pt.o + 1 + #get_buffer_text (cur_bp).eol)
+    adjust_markers (point_to_offset (cur_bp.pt), -#get_buffer_text (cur_bp).eol)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, point_to_offset (cur_bp.pt)) .. string.sub (get_buffer_text (cur_bp).s, point_to_offset (cur_bp.pt) + 1 + #get_buffer_text (cur_bp).eol)
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
-    adjust_markers (cur_bp.pt.p.o + cur_bp.pt.o, -1)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, cur_bp.pt.p.o + cur_bp.pt.o) .. string.sub (get_buffer_text (cur_bp).s, cur_bp.pt.p.o + cur_bp.pt.o + 2)
+    adjust_markers (point_to_offset (cur_bp.pt), -1)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, point_to_offset (cur_bp.pt)) .. string.sub (get_buffer_text (cur_bp).s, point_to_offset (cur_bp.pt) + 2)
   end
 
   cur_bp.modified = true
@@ -120,7 +100,7 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
 
   undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, #newtext)
   bp.modified = true
-  adjust_markers (offset, #newtext - oldlen)
+  adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
   bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
 end
 
@@ -143,9 +123,7 @@ function buffer_new ()
   local bp = {}
 
   bp.pt = point_new ()
-  bp.pt.p = {bp = bp, o = 0, n = 0}
   bp.es = {s = "", eol = coding_eol_lf}
-  bp.lines = bp.pt.p
   bp.last_line = 0
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
@@ -171,7 +149,9 @@ function get_buffer_filename_or_name (bp)
 end
 
 function get_buffer_o (bp)
-  return bp.pt.p.o
+  local pt = table.clone (bp.pt)
+  pt.o = 0
+  return point_to_offset (pt)
 end
 
 function get_buffer_text (bp)
@@ -475,8 +455,6 @@ function move_char (offset)
       cur_bp.pt.o = cur_bp.pt.o + dir
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      cur_bp.pt.p = (dir > 0 and get_line_next or get_line_prev) (cur_bp.pt.p)
-      assert (cur_bp.pt.p)
       cur_bp.pt.n = cur_bp.pt.n + dir
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
@@ -534,8 +512,6 @@ function move_line (n)
   end
 
   for i = n, 1, -1 do
-    cur_bp.pt.p = (dir > 0 and get_line_next or get_line_prev) (cur_bp.pt.p)
-    assert (cur_bp.pt.p)
     cur_bp.pt.n = cur_bp.pt.n + dir
   end
 
