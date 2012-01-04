@@ -1042,7 +1042,7 @@ local function setcase_region (func)
   undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
 
   local m = point_marker ()
-  goto_point (get_region_start (rp))
+  goto_offset (rp.start)
   for _ = get_region_size (rp), 1, -1 do
     local c = func (following_char ())
     delete_char ()

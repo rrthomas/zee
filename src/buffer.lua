@@ -19,10 +19,10 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function point_to_offset (pt)
+function point_to_offset (bp, pt)
   local o = 0
   for n = pt.n, 1, -1 do
-    o = estr_next_line (get_buffer_text (cur_bp), o)
+    o = estr_next_line (get_buffer_text (bp), o)
   end
   return o + pt.o
 end
@@ -203,19 +203,9 @@ function get_buffer_region (bp, r)
   return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
 end
 
-function in_region (lineno, x, rp)
-  if lineno < get_region_start (rp).n or lineno > get_region_end (rp).n then
-    return false
-  elseif get_region_start (rp).n == get_region_end (rp).n then
-    return x >= get_region_start (rp).o and x < get_region_end (rp).o
-  elseif lineno == get_region_start (rp).n then
-    return x >= get_region_start (rp).o
-  elseif lineno == get_region_end (rp).n then
-    return x < get_region_end (rp).o
-  else
-    return true
-  end
-  return false
+function in_region (lineno, x, r)
+  local o = point_to_offset (cur_bp, {n = lineno, o = x})
+  return o >= r.start and o <= r.finish
 end
 
 local function warn_if_no_mark ()
@@ -237,22 +227,6 @@ function region_new ()
   return {}
 end
 
-function set_region_start (rp, pt)
-  rp.start = point_to_offset (pt)
-end
-
-function set_region_end (rp, pt)
-  rp.finish = point_to_offset (pt)
-end
-
-function get_region_start (rp)
-  return offset_to_point (cur_bp, rp.start);
-end
-
-function get_region_end (rp)
-  return offset_to_point (cur_bp, rp.finish);
-end
-
 function get_region_size (rp)
   return rp.finish - rp.start
 end
@@ -266,7 +240,7 @@ function calculate_the_region ()
   end
 
   local o = cur_bp.o
-  local m = point_to_offset (get_marker_pt (cur_bp.mark))
+  local m = point_to_offset (cur_bp, get_marker_pt (cur_bp.mark))
   return {start = math.min (o, m), finish = math.max (o, m)}
 end
 

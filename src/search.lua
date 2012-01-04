@@ -86,10 +86,10 @@ local function search (pt, s, forward, regexp)
   -- Attempt match.
   if forward then
     notbol = pt.o > from
-    from = point_to_offset (pt)
+    from = point_to_offset (cur_bp, pt)
   else
     noteol = pt.o < to
-    to = point_to_offset (pt)
+    to = point_to_offset (cur_bp, pt)
   end
   local pos = find_substr (get_buffer_text (cur_bp).s, s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
@@ -261,7 +261,7 @@ local function isearch (forward, regexp)
         if #pattern > 0 then
           -- Save mark.
           set_mark ()
-          cur_bp.mark.o = point_to_offset (start)
+          cur_bp.mark.o = point_to_offset (cur_bp, start)
 
           -- Save search string.
           last_search = pattern

@@ -41,5 +41,5 @@ end
 
 -- Go to coordinates described by pt.
 function goto_point (pt)
-  goto_offset (point_to_offset (pt));
+  goto_offset (point_to_offset (cur_bp, pt));
 end

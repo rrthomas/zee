@@ -45,6 +45,8 @@ local function copy_or_kill_region (kill, rp)
 
   _this_command = "kill-region"
   deactivate_mark ()
+
+  return true
 end
 
 local function copy_or_kill_the_region (kill)
@@ -175,15 +177,8 @@ Save the region as if killed, but don't kill it.
 )
 
 local function kill_to_bol ()
-  if not bolp () then
-    local rp = region_new ()
-    local pt = get_buffer_pt (cur_bp)
-    set_region_end (rp, pt)
-    pt.o = 0
-    set_region_start (rp, pt)
-
-    copy_or_kill_region (true, rp)
-  end
+  return bolp () or
+    copy_or_kill_region (true, {start = get_buffer_line_o (cur_bp), finish = get_buffer_o (cur_bp)})
 end
 
 local function kill_line (whole_line)
@@ -208,14 +203,7 @@ local function kill_line (whole_line)
   undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
   if not eolp () then
-    local rp = region_new ()
-    local pt = get_buffer_pt (cur_bp)
-
-    set_region_start (rp, pt)
-    pt.o = get_buffer_line_len (cur_bp)
-    set_region_end (rp, pt)
-
-    copy_or_kill_region (true, rp)
+    ok = copy_or_kill_region (true, {start = get_buffer_o (cur_bp), finish = get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp)})
   end
 
   if ok and (whole_line or only_blanks_to_end_of_line) and not eobp () then

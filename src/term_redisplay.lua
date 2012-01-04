@@ -142,12 +142,12 @@ local function calculate_highlight_region (wp, rp)
     return false
   end
 
-  set_region_start (rp, window_pt (wp))
-  set_region_end (rp, get_marker_pt (wp.bp.mark))
+  rp.start = point_to_offset (wp.bp, window_pt (wp))
+  rp.finish = point_to_offset (wp.bp, get_marker_pt (wp.bp.mark))
   if rp.finish < rp.start then
-    local pt = get_region_start (rp)
-    set_region_start (rp, get_region_end (rp))
-    set_region_end (rp, pt)
+    local o = rp.start
+    rp.start = rp.finish
+    rp.finish = o
   end
   return true
 end
@@ -208,7 +208,7 @@ local point_screen_column = 0
 local function calculate_start_column (wp)
   local t = tab_width (wp.bp)
   local pt = window_pt (wp)
-  local o = point_to_offset (pt) - pt.o
+  local o = point_to_offset (cur_bp, pt) - pt.o
   local rpfact = math.floor (pt.o / math.floor (wp.ewidth / 3))
 
   local col = 0
