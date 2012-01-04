@@ -897,7 +897,7 @@ Move point to the first non-whitespace character on this line.
 ]],
   true,
   function ()
-    goto_point (line_beginning_position (1))
+    goto_offset (get_buffer_line_o (cur_bp))
     while not eolp () and string.match (following_char (), "%s") do
       forward_char ()
     end

@@ -26,7 +26,7 @@ Move point to beginning of current line.
 ]],
   true,
   function ()
-    goto_point (line_beginning_position (current_prefix_arg or 1))
+    goto_offset (get_buffer_line_o (cur_bp))
     cur_bp.goalc = 0
   end
 )
@@ -38,7 +38,7 @@ Move point to end of current line.
 ]],
   true,
   function ()
-    goto_point (line_end_position (current_prefix_arg or 1))
+    goto_offset (get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp))
     cur_bp.goalc = math.huge
   end
 )

@@ -31,30 +31,6 @@ function offset_to_point (bp, offset)
   return pt
 end
 
-function line_beginning_position (count)
-  -- Copy current point position without offset (beginning of line).
-  local o = get_buffer_line_o (cur_bp)
-
-  count = count - 1
-  while count < 0 and o > 0 do
-    o = estr_prev_line (get_buffer_text (cur_bp), o)
-    count = count + 1
-  end
-
-  while count > 0 and o do
-    o = estr_next_line (get_buffer_text (cur_bp), o)
-    count = count - 1
-  end
-
-  return offset_to_point (cur_bp, o)
-end
-
-function line_end_position (count)
-  local pt = line_beginning_position (count)
-  pt.o = get_buffer_line_len (cur_bp)
-  return pt
-end
-
 function goto_offset (o)
   local old_n = get_buffer_pt (cur_bp).n
   cur_bp.o = o
