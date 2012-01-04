@@ -73,13 +73,13 @@ function delete_char ()
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0)
 
   if eolp () then
-    adjust_markers (point_to_offset (cur_bp.pt), -#get_buffer_text (cur_bp).eol)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, point_to_offset (cur_bp.pt)) .. string.sub (get_buffer_text (cur_bp).s, point_to_offset (cur_bp.pt) + 1 + #get_buffer_text (cur_bp).eol)
+    adjust_markers (get_buffer_pt_o (cur_bp), -#get_buffer_text (cur_bp).eol)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 1 + #get_buffer_text (cur_bp).eol)
     cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
-    adjust_markers (point_to_offset (cur_bp.pt), -1)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, point_to_offset (cur_bp.pt)) .. string.sub (get_buffer_text (cur_bp).s, point_to_offset (cur_bp.pt) + 2)
+    adjust_markers (get_buffer_pt_o (cur_bp), -1)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 2)
   end
 
   cur_bp.modified = true
@@ -273,7 +273,7 @@ function calculate_the_region ()
     return nil
   end
 
-  local o = point_to_offset (cur_bp.pt)
+  local o = get_buffer_pt_o (cur_bp)
   local m = point_to_offset (get_marker_pt (cur_bp.mark))
   return {start = math.min (o, m), finish = math.max (o, m)}
 end

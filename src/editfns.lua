@@ -1,6 +1,6 @@
 -- Useful editing functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -63,12 +63,12 @@ end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return point_to_offset (cur_bp.pt) == 0
+  return get_buffer_pt_o (cur_bp) == 0
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return point_to_offset (cur_bp.pt) == get_buffer_size (cur_bp)
+  return get_buffer_pt_o (cur_bp) == get_buffer_size (cur_bp)
 end
 
 -- Return true if point is at the beginning of a line.

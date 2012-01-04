@@ -1,6 +1,6 @@
 -- Search and replace functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -416,7 +416,7 @@ what to do with it.
       if c ~= string.byte ('n') and c ~= KBD_RET and c ~= KBD_DEL then -- Do not replace.
         -- Perform replacement.
         count = count + 1
-        buffer_replace (cur_bp, point_to_offset (cur_bp.pt) - #find, #find, repl, find_no_upper)
+        buffer_replace (cur_bp, get_buffer_pt_o (cur_bp) - #find, #find, repl, find_no_upper)
 
         if c == string.byte ('.') then -- Replace and quit.
           break

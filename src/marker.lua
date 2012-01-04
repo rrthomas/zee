@@ -1,6 +1,6 @@
 -- Marker facility functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -38,7 +38,7 @@ function copy_marker (m)
 end
 
 function point_marker ()
-  return marker_new (cur_bp, point_to_offset (cur_bp.pt))
+  return marker_new (cur_bp, get_buffer_pt_o (cur_bp))
 end
 
 function unchain_marker (marker)

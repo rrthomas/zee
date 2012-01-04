@@ -26,16 +26,16 @@ function replace_estr (del, es)
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), del, #es.s)
   undo_nosave = true
-  buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, "", false)
+  buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), del, "", false)
   local p = 1
   while p <= #es.s do
     local next = string.find (es.s, es.eol, p)
     local line_len = (next or #es.s + 1) - p
-    buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, string.sub (es.s, p, p + line_len - 1), false)
+    buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1), false)
     assert (move_char (line_len))
     p = p + line_len
     if next then
-      buffer_replace (cur_bp, point_to_offset (cur_bp.pt), 0, get_buffer_text (cur_bp).eol, false)
+      buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), 0, get_buffer_text (cur_bp).eol, false)
       assert (move_char (1))
       cur_bp.last_line = cur_bp.last_line + 1
       thisflag.need_resync = true
@@ -61,7 +61,7 @@ function replace (del, s)
     return false
   end
 
-  buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, s, false)
+  buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), del, s, false)
   assert (move_char (#s))
   return true
 end
