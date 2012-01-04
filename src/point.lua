@@ -65,23 +65,9 @@ end
 
 -- Go to coordinates described by pt
 function goto_point (pt)
-  if get_buffer_pt (cur_bp).n > pt.n then
-    repeat
-      execute_function ("previous-line")
-    until get_buffer_pt (cur_bp).n == pt.n
-  elseif get_buffer_pt (cur_bp).n < pt.n then
-    repeat
-      execute_function ("next-line")
-    until get_buffer_pt (cur_bp).n == pt.n
-  end
-
-  if get_buffer_pt (cur_bp).o > pt.o then
-    repeat
-      execute_function ("backward-char")
-    until get_buffer_pt (cur_bp).o == pt.o
-  elseif get_buffer_pt (cur_bp).o < pt.o then
-    repeat
-      execute_function ("forward-char")
-    until get_buffer_pt (cur_bp).o == pt.o
+  local old_n = get_buffer_pt (cur_bp).n
+  cur_bp.o = point_to_offset (pt)
+  if get_buffer_pt (cur_bp).n ~= old_n then
+    resync_goalc ()
   end
 end

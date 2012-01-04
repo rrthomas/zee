@@ -479,6 +479,15 @@ function goto_goalc ()
   cur_bp.o = i
 end
 
+function resync_goalc ()
+  if last_command ~= "next-line" and last_command ~= "previous-line" then
+    cur_bp.goalc = get_goalc ()
+  end
+  goto_goalc ()
+
+  thisflag.need_resync = true
+end
+
 function move_line (n)
   local ok = true
   local o = cur_bp.o
@@ -500,12 +509,7 @@ function move_line (n)
     n = n - 1
   end
 
-  if _last_command ~= "next-line" and _last_command ~= "previous-line" then
-    cur_bp.goalc = get_goalc ()
-  end
-  goto_goalc ()
-
-  thisflag.need_resync = true
+  resync_goalc ()
 
   return ok
 end
