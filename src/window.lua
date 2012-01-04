@@ -47,11 +47,7 @@ function set_current_window (wp)
   end
 
   cur_wp.saved_pt = point_marker ()
-
-  -- Change the current window.
   cur_wp = wp
-
-  -- Change the current buffer.
   cur_bp = wp.bp
 
   -- Update the buffer point with the window's saved point marker.
