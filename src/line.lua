@@ -111,7 +111,7 @@ function fill_break_line ()
       cur_bp.o = get_buffer_line_o (cur_bp) + break_col
       execute_function ("delete-horizontal-space")
       insert_newline ()
-      goto_point (get_marker_pt (m))
+      goto_offset (m.o)
       break_made = true
     else -- Undo fiddling with point.
       cur_bp.o = get_buffer_line_o (cur_bp) + old_col
@@ -201,7 +201,7 @@ local function previous_line_indent ()
   cur_indent = get_goalc ()
 
   -- Restore point.
-  goto_point (get_marker_pt (m))
+  goto_offset (m.o)
   unchain_marker (m)
 
   return cur_indent
@@ -275,7 +275,7 @@ does nothing.
       if not eolp () then
         target_goalc = get_goalc ()
       end
-      goto_point (get_marker_pt (m))
+      goto_offset (m.o)
       unchain_marker (m)
     end
 
@@ -331,7 +331,7 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ()
       pos = get_goalc ()
       local indent = pos > 0 or (not eolp () and string.match (following_char (), "%s"))
-      goto_point (get_marker_pt (m))
+      goto_offset (m.o)
       unchain_marker (m)
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.

@@ -22,10 +22,6 @@
 
 -- Marker datatype
 
-function get_marker_pt (m)
-  return offset_to_point (m.bp, m.o)
-end
-
 local function marker_new (bp, o)
   local marker = {bp = bp, o = o}
   bp.markers[marker] = true

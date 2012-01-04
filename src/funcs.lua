@@ -384,7 +384,7 @@ Fill paragraph at or after point.
     execute_function ("end-of-line")
     while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
 
-    goto_point (get_marker_pt (m))
+    goto_offset (m.o)
     unchain_marker (m)
 
     undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
@@ -593,7 +593,7 @@ On nonblank line, delete any immediately following blank lines.
       if forward then
         execute_function ("forward-line")
       end
-      if get_buffer_pt (cur_bp).n ~= get_marker_pt (m).n then
+      if get_buffer_pt (cur_bp).n ~= offset_to_point (cur_bp, m.o).n then
         if not seq_started then
           seq_started = true
           undo_save (UNDO_START_SEQUENCE, m.o, 0, 0)
@@ -614,7 +614,7 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ()
     end
 
-    goto_point (get_marker_pt (m))
+    goto_offset (m.o)
 
     if seq_started then
       undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
@@ -1048,7 +1048,7 @@ local function setcase_region (func)
     delete_char ()
     insert_char (c)
   end
-  goto_point (get_marker_pt (m))
+  goto_offset (m.o)
   unchain_marker (m)
 
   cur_bp.modified = true
@@ -1120,7 +1120,7 @@ local function transpose_subr (forward_func, backward_func)
       execute_function ("newline")
     else
       pop_mark ()
-      goto_point (get_marker_pt (m1))
+      goto_offset (m1.o)
       minibuf_error ("End of buffer")
 
       unchain_marker (p0)
@@ -1129,7 +1129,7 @@ local function transpose_subr (forward_func, backward_func)
     end
   end
 
-  goto_point (get_marker_pt (m1))
+  goto_offset (m1.o)
 
   -- Forward.
   forward_func ()
@@ -1161,13 +1161,13 @@ local function transpose_subr (forward_func, backward_func)
   end
 
   -- Insert the first string.
-  goto_point (get_marker_pt (m2))
+  goto_offset (m2.o)
   unchain_marker (m2)
   insert_string (as1)
 
   -- Insert the second string.
   if as2 then
-    goto_point (get_marker_pt (m1))
+    goto_offset (m1.o)
     insert_string (as2)
   end
   unchain_marker (m1)

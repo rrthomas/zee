@@ -56,7 +56,7 @@ function set_current_window (wp)
 
   -- Update the buffer point with the window's saved point marker.
   if cur_wp.saved_pt then
-    goto_point (get_marker_pt (cur_wp.saved_pt))
+    goto_offset (cur_wp.saved_pt.o)
     unchain_marker (cur_wp.saved_pt)
     cur_wp.saved_pt = nil
   end
@@ -83,7 +83,7 @@ function window_pt (wp)
     return offset_to_point (cur_bp, cur_bp.o)
   else
     if wp.saved_pt ~= nil then
-      return get_marker_pt (wp.saved_pt)
+      return offset_to_point (wp.bp, wp.saved_pt.o)
     else
       return offset_to_point (wp.bp, wp.bp.o)
     end

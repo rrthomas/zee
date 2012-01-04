@@ -143,7 +143,7 @@ local function calculate_highlight_region (wp, rp)
   end
 
   rp.start = point_to_offset (wp.bp, window_pt (wp))
-  rp.finish = point_to_offset (wp.bp, get_marker_pt (wp.bp.mark))
+  rp.finish = wp.bp.mark.o
   if rp.finish < rp.start then
     local o = rp.start
     rp.start = rp.finish

@@ -239,8 +239,7 @@ function calculate_the_region ()
     return nil
   end
 
-  local o = cur_bp.o
-  local m = point_to_offset (cur_bp, get_marker_pt (cur_bp.mark))
+  local o, m = cur_bp.o, cur_bp.mark.o
   return {start = math.min (o, m), finish = math.max (o, m)}
 end
 
