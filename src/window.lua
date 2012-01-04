@@ -303,22 +303,23 @@ Both windows display the same buffer now current.
       return leNIL
     end
 
-    local newwp = window_new ()
+    local newwp = table.merge (window_new (), {
+                                 fwidth = cur_wp.fwidth,
+                                 ewidth = cur_wp.ewidth,
+                                 fheight = math.floor (cur_wp.fheight / 2) + cur_wp.fheight % 2,
+                                 bp = cur_wp.bp,
+                                 saved_pt = point_marker (),
+                                 next = cur_wp.next,
+                             })
     table.insert (windows, newwp)
-    newwp.fwidth = cur_wp.fwidth
-    newwp.ewidth = cur_wp.ewidth
-    newwp.fheight = math.floor (cur_wp.fheight / 2) + cur_wp.fheight % 2
     newwp.eheight = newwp.fheight - 1
+
+    cur_wp.next = newwp
     cur_wp.fheight = math.floor (cur_wp.fheight / 2)
     cur_wp.eheight = cur_wp.fheight - 1
     if cur_wp.topdelta >= cur_wp.eheight then
       recenter (cur_wp)
     end
-    newwp.bp = cur_wp.bp
-    newwp.saved_pt = point_marker ()
-    newwp.next = cur_wp.next
-    newwp.next = cur_wp.next
-    cur_wp.next = newwp
 
     return leT
   end
