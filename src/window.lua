@@ -299,7 +299,7 @@ Both windows display the same buffer now current.
   function ()
     -- Windows smaller than 4 lines cannot be split.
     if cur_wp.fheight < 4 then
-      minibuf_error (string.format ("Window height %d too small for splitting", cur_wp.fheight))
+      minibuf_error (string.format ("Window height %d too small (after splitting)", cur_wp.fheight))
       return leNIL
     end
 
