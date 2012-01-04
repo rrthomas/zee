@@ -1,6 +1,6 @@
 -- Undo facility functions
 --
--- Copyright (c) 2010 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -27,19 +27,18 @@ undo_nosave = false
 local doing_undo = false
 
 -- Save a reverse delta for doing undo.
-function undo_save (ty, pt, osize, size)
+function undo_save (ty, o, osize, size)
   if cur_bp.noundo or undo_nosave then
     return
   end
 
-  local up = {type = ty, n = pt.n, o = pt.o}
+  local up = {type = ty, o = o}
   if not cur_bp.modified then
     up.unchanged = true
   end
 
   if ty == UNDO_REPLACE_BLOCK then
     up.size = size
-    local o = point_to_offset (pt)
     up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
   end
 
@@ -61,28 +60,23 @@ end
 
 -- Revert an action.  Return the next undo entry.
 local function revert_action (up)
-  local pt = point_new ()
-
-  pt.n = up.n
-  pt.o = up.o
+  local o = up.o
 
   doing_undo = true
 
   if up.type == UNDO_END_SEQUENCE then
-    undo_save (UNDO_START_SEQUENCE, pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, up.o, 0, 0)
     up = up.next
     while up.type ~= UNDO_START_SEQUENCE do
       up = revert_action (up)
     end
-    pt.n = up.n
-    pt.o = up.o
-    undo_save (UNDO_END_SEQUENCE, pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, up.o, 0, 0)
   end
 
-  goto_point (pt)
+  goto_point (offset_to_point (cur_bp, o))
 
   if up.type == UNDO_REPLACE_BLOCK then
-    undo_save (UNDO_REPLACE_BLOCK, pt, up.size, #up.text)
+    undo_save (UNDO_REPLACE_BLOCK, o, up.size, #up.text)
     undo_nosave = true
     for i = 1, up.size do
       delete_char ()

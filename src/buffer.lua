@@ -1,6 +1,6 @@
 -- Buffer-oriented functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -70,7 +70,7 @@ function delete_char ()
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 1, 0)
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0)
 
   if eolp () then
     adjust_markers (point_to_offset (cur_bp.pt), -#get_buffer_text (cur_bp).eol)
@@ -98,7 +98,7 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
     end
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, #newtext)
+  undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, #newtext)
   bp.modified = true
   adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
   bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
@@ -111,10 +111,10 @@ buffers = {}
 buffer_name_history = history_new ()
 
 function insert_buffer (bp)
-  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   -- Copy text to avoid problems when bp == cur_bp.
   insert_estr (estr_dup (bp.es))
-  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 end
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -148,6 +148,11 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
+function get_buffer_pt_o (bp)
+  return point_to_offset (bp.pt)
+end
+
+-- FIXME: This should really return pt
 function get_buffer_o (bp)
   local pt = table.clone (bp.pt)
   pt.o = 0
@@ -178,7 +183,7 @@ function delete_region (rp)
   end
 
   goto_point (get_region_start (rp))
-  undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), get_region_size(rp), 0)
+  undo_save (UNDO_REPLACE_BLOCK, rp.start, get_region_size (rp), 0)
   undo_nosave = true
   for i = get_region_size (rp), 1, -1 do
     delete_char ()

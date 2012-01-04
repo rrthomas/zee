@@ -1,6 +1,6 @@
 -- Line-oriented editing functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -24,7 +24,7 @@ function replace_estr (del, es)
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, del, #es.s)
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), del, #es.s)
   undo_nosave = true
   buffer_replace (cur_bp, point_to_offset (cur_bp.pt), del, "", false)
   local p = 1
@@ -137,13 +137,13 @@ local function insert_expanded_tab (inschr)
   local c = get_goalc ()
   local t = tab_width (cur_bp)
 
-  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
   for c = t - c % t, 1, -1 do
     inschr (' ')
   end
 
-  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 end
 
 local function insert_tab ()
@@ -281,7 +281,7 @@ does nothing.
     end
 
     -- Insert indentation.
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
     if target_goalc > 0 then
       -- If not at EOL on target line, insert spaces & tabs up to
       -- target_goalc; if already at EOL on target line, insert a tab.
@@ -301,7 +301,7 @@ does nothing.
     else
       ok = bool_to_lisp (insert_tab ())
     end
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 )
 
@@ -323,7 +323,7 @@ Indentation is done using the `indent-for-tab-command' function.
 
     deactivate_mark ()
 
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
     if insert_newline () then
       local m = point_marker ()
       local pos
@@ -341,7 +341,7 @@ Indentation is done using the `indent-for-tab-command' function.
       end
       ok = leT
     end
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 )
 
@@ -375,7 +375,7 @@ Delete all spaces and tabs around point.
 ]],
   true,
   function ()
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
     while not eolp () and string.match (following_char (), "%s") do
       delete_char ()
@@ -385,7 +385,7 @@ Delete all spaces and tabs around point.
       backward_delete_char ()
     end
 
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 )
 
@@ -396,10 +396,10 @@ Delete all spaces and tabs around point, leaving one space.
 ]],
   true,
   function ()
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
     execute_function ("delete-horizontal-space")
     insert_char (' ')
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 )
 

@@ -1,6 +1,6 @@
 -- Miscellaneous Emacs functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -360,7 +360,7 @@ Fill paragraph at or after point.
   function ()
     local m = point_marker ()
 
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
     execute_function ("forward-paragraph")
     local finish = cur_bp.pt.n
@@ -387,7 +387,7 @@ Fill paragraph at or after point.
     goto_point (get_marker_pt (m))
     unchain_marker (m)
 
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 )
 
@@ -412,12 +412,12 @@ local function pipe_command (cmd, tempfile, insert, replace)
   else
     if insert then
       if replace then
-        undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+        undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
       end
       execute_function ("delete-region")
       insert_string (out)
       if replace then
-        undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+        undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
       end
     else
       write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
@@ -570,7 +570,7 @@ On nonblank line, delete any immediately following blank lines.
         activate_mark ()
         while execute_function ("forward-line") == leT and is_blank_line () do end
         seq_started = true
-        undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0)
+        undo_save (UNDO_START_SEQUENCE, m.o, 0, 0)
         execute_function ("delete-region")
         pop_mark ()
       end
@@ -596,7 +596,7 @@ On nonblank line, delete any immediately following blank lines.
       if cur_bp.pt.n ~= get_marker_pt (m).n then
         if not seq_started then
           seq_started = true
-          undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0)
+          undo_save (UNDO_START_SEQUENCE, m.o, 0, 0)
         end
         execute_function ("delete-region")
       end
@@ -617,7 +617,7 @@ On nonblank line, delete any immediately following blank lines.
     goto_point (get_marker_pt (m))
 
     if seq_started then
-      undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
     end
 
     unchain_marker (m)
@@ -979,12 +979,12 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
     for i = 1, #as do
       delete_char ()
     end
     insert_string (recase (as, rcase))
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
   end
 
   cur_bp.modified = true
@@ -1035,7 +1035,7 @@ local function setcase_region (func)
     return leNIL
   end
 
-  undo_save (UNDO_START_SEQUENCE, get_region_start (rp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
 
   local m = point_marker ()
   goto_point (get_region_start (rp))
@@ -1048,7 +1048,7 @@ local function setcase_region (func)
   unchain_marker (m)
 
   cur_bp.modified = true
-  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
   return leT
 end
@@ -1193,14 +1193,14 @@ local function transpose (uniarg, forward_func, backward_func)
     backward_func = tmp_func
     uniarg = -uniarg
   end
-  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   for uni = 1, uniarg do
     ret = transpose_subr (forward_func, backward_func)
     if not ret then
       break
     end
   end
-  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
   return bool_to_lisp (ret)
 end

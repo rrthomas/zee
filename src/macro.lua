@@ -1,6 +1,6 @@
 -- Macro facility functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -91,11 +91,11 @@ local function process_keys (keys)
     term_ungetkey (keys[i])
   end
 
-  undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   while term_buf_len () > cur do
     get_and_run_command ()
   end
-  undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 end
 
 local macro_keys = {}

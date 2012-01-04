@@ -1,6 +1,6 @@
 -- Registers facility functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -56,7 +56,7 @@ Copy region into register @i{register}.
 local regnum
 
 function insert_register ()
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, #regs[regnum])
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 0, #regs[regnum])
   undo_nosave = true
   insert_string (regs[regnum])
   undo_nosave = false

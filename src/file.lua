@@ -1,6 +1,6 @@
 -- Disk file handling
 --
--- Copyright (c) 2009-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -176,7 +176,7 @@ local function insert_file (filename)
       local buf = h:read ("*a")
       h:close ()
       if #buf >= 1 then
-        undo_save (UNDO_REPLACE_BLOCK, cur_bp.pt, 0, size)
+        undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 0, size)
         undo_nosave = true
         insert_estr (estr_new (buf))
         undo_nosave = false

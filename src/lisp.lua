@@ -1,6 +1,6 @@
 -- Zile Lisp interpreter
 --
--- Copyright (c) 2009-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -281,7 +281,7 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
     uniarg = -uniarg
   end
   if undo then
-    undo_save (UNDO_START_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
   local ret = true
   for _ = 1, uniarg do
@@ -291,7 +291,7 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
     end
   end
   if undo then
-    undo_save (UNDO_END_SEQUENCE, cur_bp.pt, 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
   end
 
   return bool_to_lisp (ret)
