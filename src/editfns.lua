@@ -46,7 +46,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return get_buffer_text (cur_bp).s[get_buffer_pt_o (cur_bp) + 1]
+    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1]
   end
 end
 
@@ -57,18 +57,18 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return get_buffer_text (cur_bp).s[get_buffer_pt_o (cur_bp)]
+    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp)]
   end
 end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return get_buffer_pt_o (cur_bp) == 0
+  return get_buffer_o (cur_bp) == 0
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return get_buffer_pt_o (cur_bp) == get_buffer_size (cur_bp)
+  return get_buffer_o (cur_bp) == get_buffer_size (cur_bp)
 end
 
 -- Return true if point is at the beginning of a line.

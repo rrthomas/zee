@@ -71,15 +71,15 @@ function delete_char ()
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0)
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 1, 0)
   local o
   if eolp () then
-    o = adjust_markers (get_buffer_pt_o (cur_bp), -#get_buffer_text (cur_bp).eol)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 1 + #get_buffer_text (cur_bp).eol)
+    o = adjust_markers (get_buffer_o (cur_bp), -#get_buffer_text (cur_bp).eol)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_o (cur_bp) + 1 + #get_buffer_text (cur_bp).eol)
     thisflag.need_resync = true
   else
-    o = adjust_markers (get_buffer_pt_o (cur_bp), -1)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 2)
+    o = adjust_markers (get_buffer_o (cur_bp), -1)
+    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_o (cur_bp) + 2)
   end
 
   cur_bp.modified = true
@@ -113,10 +113,10 @@ buffers = {}
 buffer_name_history = history_new ()
 
 function insert_buffer (bp)
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   -- Copy text to avoid problems when bp == cur_bp.
   insert_estr (estr_dup (bp.es))
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 end
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -149,7 +149,7 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
-function get_buffer_pt_o (bp)
+function get_buffer_o (bp)
   return bp.o
 end
 

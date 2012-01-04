@@ -360,7 +360,7 @@ Fill paragraph at or after point.
   function ()
     local m = point_marker ()
 
-    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
     execute_function ("forward-paragraph")
     local finish = get_buffer_pt (cur_bp).n
@@ -387,7 +387,7 @@ Fill paragraph at or after point.
     goto_point (get_marker_pt (m))
     unchain_marker (m)
 
-    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   end
 )
 
@@ -412,12 +412,12 @@ local function pipe_command (cmd, tempfile, insert, replace)
   else
     if insert then
       if replace then
-        undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+        undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
       end
       execute_function ("delete-region")
       insert_string (out)
       if replace then
-        undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+        undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
       end
     else
       write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
@@ -617,7 +617,7 @@ On nonblank line, delete any immediately following blank lines.
     goto_point (get_marker_pt (m))
 
     if seq_started then
-      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+      undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
     end
 
     unchain_marker (m)
@@ -759,12 +759,12 @@ local function move_sexp (dir)
         end
       end
 
-      goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) + dir))
+      goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) + dir))
 
       if not issexpchar (c) then
         if gotsexp and level == 0 then
           if not issexpseparator (c) then
-            goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) - dir))
+            goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) - dir))
           end
           return true
         end
@@ -921,7 +921,7 @@ local function move_word (dir, next, move, at_extreme)
       else
         gotword = true
       end
-      goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) + dir))
+      goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) + dir))
     end
     if gotword then
       return true
@@ -983,12 +983,12 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
     for i = 1, #as do
       delete_char ()
     end
     insert_string (recase (as, rcase))
-    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
   end
 
   cur_bp.modified = true
@@ -1052,7 +1052,7 @@ local function setcase_region (func)
   unchain_marker (m)
 
   cur_bp.modified = true
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
   return leT
 end
@@ -1197,14 +1197,14 @@ local function transpose (uniarg, forward_func, backward_func)
     backward_func = tmp_func
     uniarg = -uniarg
   end
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   for uni = 1, uniarg do
     ret = transpose_subr (forward_func, backward_func)
     if not ret then
       break
     end
   end
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
   return bool_to_lisp (ret)
 end

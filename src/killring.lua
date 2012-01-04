@@ -67,10 +67,10 @@ local function kill_text (uniarg, mark_func)
   end
 
   push_mark ()
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   execute_function (mark_func, uniarg)
   execute_function ("kill-region")
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   pop_mark ()
 
   _this_command = "kill-region"
@@ -135,7 +135,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
 
     set_mark_interactive ()
 
-    undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 0, #kill_ring_text)
+    undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 0, #kill_ring_text)
     undo_nosave = true
     insert_string (kill_ring_text)
     undo_nosave = false
@@ -205,7 +205,7 @@ local function kill_line (whole_line)
     return false
   end
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
   if not eolp () then
     local rp = region_new ()
@@ -227,7 +227,7 @@ local function kill_line (whole_line)
     _this_command = "kill-region"
   end
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
   return ok
 end
@@ -261,14 +261,14 @@ with no argument.
     if not arg then
       ok = bool_to_lisp (kill_line (bolp () and get_variable_bool ("kill-whole-line")))
     else
-      undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+      undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
       if arg <= 0 then
         kill_to_bol ()
       end
       if arg ~= 0 and ok == leT then
         ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward)
       end
-      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
+      undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
     end
 
     deactivate_mark ()
