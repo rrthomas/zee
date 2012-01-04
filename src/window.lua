@@ -1,6 +1,6 @@
 -- Window handling functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -26,7 +26,7 @@ windows = {}
 -- {
 --   next: The next window in window list.
 --   bp: The buffer displayed in window.
---   topdelta: The top line delta.
+--   topdelta: The top line delta from point.
 --   lastpointn: The last point line number.
 --   start_column: The start column of the window (>0 if scrolled sideways).
 --   saved_pt: The point line pointer, line number and offset
@@ -80,12 +80,12 @@ function window_pt (wp)
     assert (wp.bp == cur_bp)
     assert (wp.saved_pt == nil)
     assert (cur_bp ~= nil)
-    return table.clone (cur_bp.pt)
+    return offset_to_point (cur_bp, cur_bp.o)
   else
     if wp.saved_pt ~= nil then
       return get_marker_pt (wp.saved_pt)
     else
-      return table.clone (wp.bp.pt)
+      return offset_to_point (wp.bp, wp.bp.o)
     end
   end
 end
@@ -248,7 +248,7 @@ function completion_scroll_up ()
   local wp = find_window ("*Completions*")
   assert (wp)
   set_current_window (wp)
-  if cur_bp.pt.n >= cur_bp.last_line - cur_wp.eheight or not execute_function ("scroll-up") then
+  if not execute_function ("scroll-up") then
     gotobob ()
   end
   set_current_window (old_wp)
@@ -263,7 +263,7 @@ function completion_scroll_down ()
   local wp = find_window ("*Completions*")
   assert (wp)
   set_current_window (wp)
-  if cur_bp.pt.n == 0 or not execute_function ("scroll-down") then
+  if not execute_function ("scroll-down") then
     gotoeob ()
     resync_redisplay (cur_wp)
   end
@@ -277,7 +277,7 @@ function window_top_visible (wp)
 end
 
 function window_bottom_visible (wp)
-  return window_pt (wp).n + wp.eheight - wp.topdelta > wp.bp.last_line
+  return wp.all_displayed
 end
 
 function popup_window ()

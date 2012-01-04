@@ -1,6 +1,6 @@
 -- Basic movement functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -88,7 +88,7 @@ function get_goalc_bp (bp, pt)
   local col = 0
   local t = tab_width (bp)
   for i = 1, math.min (pt.o, get_buffer_line_len (bp)) do
-    if get_buffer_text (bp).s[get_buffer_o (bp) + i] == '\t' then
+    if get_buffer_text (bp).s[get_buffer_line_o (bp) + i] == '\t' then
       col = bit.bor (col, t - 1)
     end
     col = col + 1
@@ -98,7 +98,7 @@ function get_goalc_bp (bp, pt)
 end
 
 function get_goalc ()
-  return get_goalc_bp (cur_bp, cur_bp.pt)
+  return get_goalc_bp (cur_bp, get_buffer_pt (cur_bp))
 end
 
 Defun ("goto-char",
@@ -153,7 +153,7 @@ Goto line arg, counting from line 1 at beginning of buffer.
     end
 
     if type (n) == "number" then
-      move_line ((math.max (n, 1) - 1) - cur_bp.pt.n)
+      move_line ((math.max (n, 1) - 1) - get_buffer_pt (cur_bp).n)
       execute_function ("beginning-of-line")
     end
   end

@@ -1,6 +1,6 @@
 -- Redisplay engine
 --
--- Copyright (c) 2009-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -159,7 +159,7 @@ local function draw_window (topline, wp)
   -- Find the first line to display on the first screen line.
   local pt = window_pt (wp)
   local lineno = pt.n
-  local o = get_buffer_o (wp.bp)
+  local o = get_buffer_line_o (wp.bp)
   for i = wp.topdelta, 1, -1 do
     o = estr_prev_line (get_buffer_text (wp.bp), o)
     lineno = lineno - 1
@@ -174,7 +174,7 @@ local function draw_window (topline, wp)
     term_clrtoeol ()
 
     -- If at the end of the buffer, don't write any text.
-    if lineno <= wp.bp.last_line then
+    if o ~= nil then
       draw_line (i, wp.start_column, wp, o, lineno, rp, highlight)
 
       if wp.start_column > 0 then
@@ -186,6 +186,8 @@ local function draw_window (topline, wp)
       lineno = lineno + 1
     end
   end
+
+  wp.all_displayed = o == nil or o == get_buffer_size (wp.bp)
 end
 
 function make_modeline_flags (wp)
@@ -250,7 +252,7 @@ local function make_screen_pos (wp)
   elseif bv then
     return "Bot"
   end
-  return string.format ("%2d%%", 100 * window_pt (wp).n / wp.bp.last_line)
+  return string.format ("%2d%%", (window_pt (wp).n - wp.topdelta) / offset_to_point (wp.bp, get_buffer_size (wp.bp)).n * 100)
 end
 
 local function draw_status_line (line, wp)

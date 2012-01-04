@@ -98,17 +98,16 @@ function resize_windows ()
 end
 
 function resync_redisplay (wp)
-  local delta = wp.bp.pt.n - wp.lastpointn
+  local delta = get_buffer_pt (wp.bp).n - wp.lastpointn
 
   if delta ~= 0 then
-    if (delta > 0 and wp.topdelta + delta < wp.eheight) or
-      (delta < 0 and wp.topdelta >= -delta) then
+    if (delta > 0 and wp.topdelta + delta < wp.eheight) or (delta < 0 and wp.topdelta >= -delta) then
       wp.topdelta = wp.topdelta + delta
-    elseif wp.bp.pt.n > wp.eheight / 2 then
+    elseif get_buffer_pt (wp.bp).n > wp.eheight / 2 then
       wp.topdelta = math.floor (wp.eheight / 2)
     else
-      wp.topdelta = wp.bp.pt.n
+      wp.topdelta = get_buffer_pt (wp.bp).n
     end
   end
-  wp.lastpointn = wp.bp.pt.n
+  wp.lastpointn = get_buffer_pt (wp.bp).n
 end

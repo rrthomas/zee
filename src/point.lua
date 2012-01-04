@@ -25,6 +25,7 @@ function offset_to_point (bp, offset)
   while estr_end_of_line (get_buffer_text (bp), o) < offset do
     pt.n = pt.n + 1
     o = estr_next_line (get_buffer_text (bp), o)
+    assert (o)
   end
   pt.o = offset - o
   return pt
@@ -40,7 +41,7 @@ end
 
 function line_beginning_position (count)
   -- Copy current point position without offset (beginning of line).
-  local o = get_buffer_o (cur_bp)
+  local o = get_buffer_line_o (cur_bp)
 
   count = count - 1
   while count < 0 and o > 0 do
@@ -64,23 +65,23 @@ end
 
 -- Go to coordinates described by pt
 function goto_point (pt)
-  if cur_bp.pt.n > pt.n then
+  if get_buffer_pt (cur_bp).n > pt.n then
     repeat
       execute_function ("previous-line")
-    until cur_bp.pt.n == pt.n
-  elseif cur_bp.pt.n < pt.n then
+    until get_buffer_pt (cur_bp).n == pt.n
+  elseif get_buffer_pt (cur_bp).n < pt.n then
     repeat
       execute_function ("next-line")
-    until cur_bp.pt.n == pt.n
+    until get_buffer_pt (cur_bp).n == pt.n
   end
 
-  if cur_bp.pt.o > pt.o then
+  if get_buffer_pt (cur_bp).o > pt.o then
     repeat
       execute_function ("backward-char")
-    until cur_bp.pt.o == pt.o
-  elseif cur_bp.pt.o < pt.o then
+    until get_buffer_pt (cur_bp).o == pt.o
+  elseif get_buffer_pt (cur_bp).o < pt.o then
     repeat
       execute_function ("forward-char")
-    until cur_bp.pt.o == pt.o
+    until get_buffer_pt (cur_bp).o == pt.o
   end
 end

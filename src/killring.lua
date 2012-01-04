@@ -177,7 +177,7 @@ Save the region as if killed, but don't kill it.
 local function kill_to_bol ()
   if not bolp () then
     local rp = region_new ()
-    local pt = table.clone (cur_bp.pt)
+    local pt = get_buffer_pt (cur_bp)
     set_region_end (rp, pt)
     pt.o = 0
     set_region_start (rp, pt)
@@ -191,8 +191,8 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = cur_bp.pt.o + 1, get_buffer_line_len (cur_bp) do
-      local c = get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i]
+    for i = get_buffer_pt (cur_bp).o + 1, get_buffer_line_len (cur_bp) do
+      local c = get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i]
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
         break
@@ -209,7 +209,7 @@ local function kill_line (whole_line)
 
   if not eolp () then
     local rp = region_new ()
-    local pt = table.clone (cur_bp.pt)
+    local pt = get_buffer_pt (cur_bp)
 
     set_region_start (rp, pt)
     pt.o = get_buffer_line_len (cur_bp)

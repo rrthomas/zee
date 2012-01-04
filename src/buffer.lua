@@ -37,8 +37,9 @@ local function adjust_markers (o, delta)
   end
 
   -- This marker has been updated to new position.
-  goto_point (get_marker_pt (m_pt))
+  local m = m_pt.o
   unchain_marker (m_pt)
+  return m
 end
 
 -- Check the case of a string.
@@ -71,18 +72,18 @@ function delete_char ()
   end
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0)
-
+  local o
   if eolp () then
-    adjust_markers (get_buffer_pt_o (cur_bp), -#get_buffer_text (cur_bp).eol)
+    o = adjust_markers (get_buffer_pt_o (cur_bp), -#get_buffer_text (cur_bp).eol)
     cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 1 + #get_buffer_text (cur_bp).eol)
-    cur_bp.last_line = cur_bp.last_line - 1
     thisflag.need_resync = true
   else
-    adjust_markers (get_buffer_pt_o (cur_bp), -1)
+    o = adjust_markers (get_buffer_pt_o (cur_bp), -1)
     cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_pt_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_pt_o (cur_bp) + 2)
   end
 
   cur_bp.modified = true
+  goto_point (offset_to_point (cur_bp, o))
 
   return true
 end
@@ -100,8 +101,9 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
 
   undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, #newtext)
   bp.modified = true
-  adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
   bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
+  bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
+  thisflag.need_resync = true
 end
 
 
@@ -122,9 +124,8 @@ end
 function buffer_new ()
   local bp = {}
 
-  bp.pt = point_min ()
+  bp.o = 0
   bp.es = {s = "", eol = coding_eol_lf}
-  bp.last_line = 0
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 
@@ -149,14 +150,15 @@ function get_buffer_filename_or_name (bp)
 end
 
 function get_buffer_pt_o (bp)
-  return point_to_offset (bp.pt)
+  return bp.o
 end
 
--- FIXME: This should really return pt
-function get_buffer_o (bp)
-  local pt = table.clone (bp.pt)
-  pt.o = 0
-  return point_to_offset (pt)
+function get_buffer_pt (bp)
+  return offset_to_point (bp, bp.o)
+end
+
+function get_buffer_line_o (bp)
+  return estr_start_of_line (bp.es, bp.o)
 end
 
 function get_buffer_text (bp)
@@ -176,21 +178,11 @@ function deactivate_mark ()
 end
 
 function delete_region (rp)
-  local m = point_marker ()
-
   if warn_if_readonly_buffer () then
     return false
   end
 
-  goto_point (get_region_start (rp))
-  undo_save (UNDO_REPLACE_BLOCK, rp.start, get_region_size (rp), 0)
-  undo_nosave = true
-  for i = get_region_size (rp), 1, -1 do
-    delete_char ()
-  end
-  undo_nosave = false
-  goto_point (get_marker_pt (m))
-  unchain_marker (m)
+  buffer_replace (cur_bp, rp.start, get_region_size (rp), "", false)
 
   return true
 end
@@ -238,7 +230,7 @@ local function warn_if_no_mark ()
 end
 
 function get_buffer_line_len (bp)
-  return estr_end_of_line (get_buffer_text (bp), get_buffer_o (bp)) - get_buffer_o (bp)
+  return estr_end_of_line (get_buffer_text (bp), get_buffer_line_o (bp)) - get_buffer_line_o (bp)
 end
 
 function region_new ()
@@ -273,7 +265,7 @@ function calculate_the_region ()
     return nil
   end
 
-  local o = get_buffer_pt_o (cur_bp)
+  local o = cur_bp.o
   local m = point_to_offset (get_marker_pt (cur_bp.mark))
   return {start = math.min (o, m), finish = math.max (o, m)}
 end
@@ -448,10 +440,10 @@ function move_char (offset)
   local dir = offset >= 0 and 1 or -1
   for i = 1, math.abs (offset) do
     if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
-      cur_bp.pt.o = cur_bp.pt.o + dir
+      cur_bp.o = cur_bp.o + dir
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      cur_bp.pt.n = cur_bp.pt.n + dir
+      cur_bp.o = cur_bp.o + #cur_bp.es.eol * dir
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
       return false
@@ -465,8 +457,8 @@ end
 function goto_goalc ()
   local col = 0
 
-  local i = get_buffer_o (cur_bp)
-  local lim = estr_next_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) or math.huge
+  local i = get_buffer_line_o (cur_bp)
+  local lim = estr_next_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) or math.huge
   while i < lim do
     if col == get_goalc () then
       break
@@ -484,31 +476,28 @@ function goto_goalc ()
     i = i + 1
   end
 
-  cur_bp.pt.o = i - get_buffer_o (cur_bp)
+  cur_bp.o = i
 end
 
 function move_line (n)
   local ok = true
-  local dir
+  local o = cur_bp.o
+  local backward = n < 0
   if n == 0 then
     return false
-  elseif n > 0 then
-    dir = 1
-    if n > cur_bp.last_line - cur_bp.pt.n then
-      ok = false
-      n = cur_bp.last_line - cur_bp.pt.n
-    end
-  else
-    dir = -1
+  end
+  if backward then
     n = -n
-    if n > cur_bp.pt.n then
-      ok = false
-      n = cur_bp.pt.n
-    end
   end
 
-  for i = n, 1, -1 do
-    cur_bp.pt.n = cur_bp.pt.n + dir
+  while n > 0 do
+    o = (backward and estr_prev_line or estr_next_line) (cur_bp.es, cur_bp.o)
+    if o == nil then
+      ok = false
+      break
+    end
+    cur_bp.o = o
+    n = n - 1
   end
 
   if _last_command ~= "next-line" and _last_command ~= "previous-line" then

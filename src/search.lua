@@ -118,7 +118,7 @@ function do_search (forward, regexp, pattern)
   if #pattern > 0 then
     last_search = pattern
 
-    if not search (cur_bp.pt, pattern, forward, regexp) then
+    if not search (get_buffer_pt (cur_bp), pattern, forward, regexp) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
       ok = leT
@@ -179,7 +179,7 @@ local function isearch (forward, regexp)
   local last = true
   local buf = ""
   local pattern = ""
-  local start = table.clone (cur_bp.pt)
+  local start = get_buffer_pt (cur_bp)
   local cur = table.clone (start)
 
   local old_mark
@@ -248,7 +248,7 @@ local function isearch (forward, regexp)
       end
       if #pattern > 0 then
         -- Find next match.
-        cur = table.clone (cur_bp.pt)
+        cur = get_buffer_pt (cur_bp)
         -- Save search string.
         last_search = pattern
       elseif last_search then
@@ -385,7 +385,7 @@ what to do with it.
       execute_function ("keyboard-quit")
     end
 
-    while search (cur_bp.pt, find, true, false) do
+    while search (get_buffer_pt (cur_bp), find, true, false) do
       local c = string.byte (' ')
 
       if not noask then

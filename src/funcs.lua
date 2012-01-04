@@ -79,9 +79,9 @@ Put the mark where point is now, and point where the mark is now.
       return leNIL
     end
 
-    local tmp = table.clone (cur_bp.pt)
-    goto_point (get_marker_pt (cur_bp.mark))
-    cur_bp.mark.o = point_to_offset (tmp)
+    local tmp = cur_bp.o
+    goto_point (offset_to_point (cur_bp, cur_bp.mark.o))
+    cur_bp.mark.o = tmp
     activate_mark ()
     thisflag.need_resync = true
   end
@@ -316,11 +316,11 @@ Just C-u as argument means to use the current column.
       if lastflag.set_uniarg then
         n = current_prefix_arg
       else
-        n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", cur_bp.pt.o))
+        n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", get_buffer_pt (cur_bp).o))
         if not n then -- cancelled
           return leNIL
         elseif n == "" then
-          n = cur_bp.pt.o
+          n = get_buffer_pt (cur_bp).o
         end
       end
     end
@@ -363,13 +363,13 @@ Fill paragraph at or after point.
     undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0)
 
     execute_function ("forward-paragraph")
-    local finish = cur_bp.pt.n
+    local finish = get_buffer_pt (cur_bp).n
     if is_empty_line () then
       finish = finish - 1
     end
 
     execute_function ("backward-paragraph")
-    local start = cur_bp.pt.n
+    local start = get_buffer_pt (cur_bp).n
     if is_empty_line () then -- Move to next line if between two paragraphs.
       next_line ()
       start = start + 1
@@ -593,7 +593,7 @@ On nonblank line, delete any immediately following blank lines.
       if forward then
         execute_function ("forward-line")
       end
-      if cur_bp.pt.n ~= get_marker_pt (m).n then
+      if get_buffer_pt (cur_bp).n ~= get_marker_pt (m).n then
         if not seq_started then
           seq_started = true
           undo_save (UNDO_START_SEQUENCE, m.o, 0, 0)
@@ -708,13 +708,13 @@ local function move_sexp (dir)
   end
 
   local function precedingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < get_buffer_line_len (cur_bp) and
-      (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\'')
+    return c == '\\' and get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp) and
+      (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\'')
   end
 
   local function followingquotedquote (c)
-    return c == '\\' and cur_bp.pt.o + 1 < get_buffer_line_len (cur_bp) and
-      (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1 + 1] == '\'')
+    return c == '\\' and get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp) and
+      (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\'')
   end
 
   while true do
@@ -723,8 +723,7 @@ local function move_sexp (dir)
 
       -- Skip quotes that aren't sexp separators.
       if (dir > 0 and precedingquotedquote or followingquotedquote) (c) then
-        pt = cur_bp.pt
-        pt.o = pt.o + dir
+        cur_bp.o = cur_bp.o + dir
         c = 'a' -- Treat ' and " like word chars.
       end
 
@@ -760,12 +759,12 @@ local function move_sexp (dir)
         end
       end
 
-      goto_point ({n = cur_bp.pt.n, o = cur_bp.pt.o + dir})
+      goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) + dir))
 
       if not issexpchar (c) then
         if gotsexp and level == 0 then
           if not issexpseparator (c) then
-            goto_point({n = cur_bp.pt.n, o = cur_bp.pt.o - dir})
+            goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) - dir))
           end
           return true
         end
@@ -782,8 +781,13 @@ local function move_sexp (dir)
       end
       return false
     end
-    goto_point ({n = cur_bp.pt.n, o = dir > 0 and 0 or get_buffer_line_len (cur_bp)})
+    if dir > 0 then
+      execute_function ("beginning-of-line")
+    else
+      execute_function ("end-of-line")
+    end
   end
+  return false
 end
 
 local function forward_sexp ()
@@ -917,7 +921,7 @@ local function move_word (dir, next, move, at_extreme)
       else
         gotword = true
       end
-      goto_point ({n = cur_bp.pt.n, o = cur_bp.pt.o + dir})
+      goto_point (offset_to_point (cur_bp, get_buffer_pt_o (cur_bp) + dir))
     end
     if gotword then
       return true
@@ -970,9 +974,9 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = cur_bp.pt.o, get_buffer_line_len (cur_bp) do
-    if iswordchar (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i + 1]) then
-      as = as .. get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i + 1]
+  for i = get_buffer_pt (cur_bp).o, get_buffer_line_len (cur_bp) do
+    if iswordchar (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i + 1]) then
+      as = as .. get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i + 1]
     else
       break
     end
@@ -1090,7 +1094,7 @@ local function transpose_subr (forward_func, backward_func)
     backward_func ()
   end
   -- For transpose-lines.
-  if forward_func == next_line and cur_bp.pt.n == 0 then
+  if forward_func == next_line and get_buffer_pt (cur_bp).n == 0 then
     forward_func ()
   end
 

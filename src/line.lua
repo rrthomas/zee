@@ -37,7 +37,6 @@ function replace_estr (del, es)
     if next then
       buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), 0, get_buffer_text (cur_bp).eol, false)
       assert (move_char (1))
-      cur_bp.last_line = cur_bp.last_line + 1
       thisflag.need_resync = true
       p = p + #es.eol
     end
@@ -84,14 +83,14 @@ function fill_break_line ()
     local m = point_marker ()
 
     -- Move cursor back to fill column
-    old_col = cur_bp.pt.o
+    old_col = get_buffer_pt (cur_bp).o
     while get_goalc () > fillcol + 1 do
-      cur_bp.pt.o = cur_bp.pt.o - 1
+      cur_bp.o = cur_bp.o - 1
     end
 
     -- Find break point moving left from fill-column.
-    for i = cur_bp.pt.o, 1, -1 do
-      if string.match (get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + i], "%s") then
+    for i = get_buffer_pt (cur_bp).o, 1, -1 do
+      if string.match (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i], "%s") then
         break_col = i
         break
       end
@@ -100,22 +99,22 @@ function fill_break_line ()
     -- If no break point moving left from fill-column, find first
     -- possible moving right.
     if break_col == 0 then
-      for i = get_buffer_o (cur_bp) + cur_bp.pt.o + 1, estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) do
+      for i = get_buffer_pt_o (cur_bp) + 1, estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) do
         if string.match (get_buffer_text (cur_bp).s[i], "%s") then
-          break_col = i - get_buffer_o (cur_bp)
+          break_col = i - get_buffer_line_o (cur_bp)
           break
         end
       end
     end
 
     if break_col >= 1 then -- Break line.
-      cur_bp.pt.o = break_col
+      cur_bp.o = get_buffer_line_o (cur_bp) + break_col
       execute_function ("delete-horizontal-space")
       insert_newline ()
       goto_point (get_marker_pt (m))
       break_made = true
     else -- Undo fiddling with point.
-      cur_bp.pt.o = old_col
+      cur_bp.o = get_buffer_line_o (cur_bp) + old_col
     end
 
     unchain_marker (m)
@@ -252,7 +251,7 @@ does nothing.
     deactivate_mark ()
 
     -- If we're on first line, set target to 0.
-    if cur_bp.pt.n == 0 then
+    if get_buffer_pt (cur_bp).n == 0 then
       target_goalc = 0
     else
       -- Find goalc in previous non-blank line.
