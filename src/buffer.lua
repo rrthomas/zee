@@ -122,7 +122,7 @@ end
 function buffer_new ()
   local bp = {}
 
-  bp.pt = point_new ()
+  bp.pt = point_min ()
   bp.es = {s = "", eol = coding_eol_lf}
   bp.last_line = 0
   bp.markers = {}

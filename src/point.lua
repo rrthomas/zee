@@ -19,14 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function point_new ()
-  return {o = 0, n = 0}
-end
-
-function make_point (lineno, offset)
-  return {n = lineno, o = offset}
-end
-
 function offset_to_point (bp, offset)
   local pt = {n = 0}
   local o = 0
@@ -39,7 +31,7 @@ function offset_to_point (bp, offset)
 end
 
 function point_min ()
-  return make_point (0, 0)
+  return {n = 0, o = 0}
 end
 
 function point_max ()
