@@ -203,11 +203,6 @@ function get_buffer_region (bp, r)
   return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
 end
 
-function in_region (lineno, x, r)
-  local o = point_to_offset (cur_bp, {n = lineno, o = x})
-  return o >= r.start and o <= r.finish
-end
-
 local function warn_if_no_mark ()
   if not cur_bp.mark then
     minibuf_error ("The mark is not set now")

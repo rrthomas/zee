@@ -102,13 +102,17 @@ local function outch (c, font, x)
   return x
 end
 
-local function draw_end_of_line (line, wp, lineno, rp, highlight, x, i)
+local function in_region (o, x, r)
+  return o + x >= r.start and o + x <= r.finish
+end
+
+local function draw_end_of_line (line, wp, o, rp, highlight, x, i)
   if x >= term_width () then
     term_move (line, term_width () - 1)
     term_addstr ('$')
   elseif highlight == true then
     while x < wp.ewidth do
-      if in_region (lineno, i, rp) then
+      if in_region (o, i, rp) then
         x = outch (string.byte (' '), FONT_REVERSE, x)
       else
         x = x + 1
@@ -118,7 +122,7 @@ local function draw_end_of_line (line, wp, lineno, rp, highlight, x, i)
   end
 end
 
-local function draw_line (line, startcol, wp, o, lineno, rp, highlight)
+local function draw_line (line, startcol, wp, o, rp, highlight)
   term_move (line, 0)
   local x = 0
   for i = startcol + 1, estr_end_of_line (get_buffer_text (wp.bp), o) - o do
@@ -126,13 +130,13 @@ local function draw_line (line, startcol, wp, o, lineno, rp, highlight)
       break
     end
     local font = FONT_NORMAL
-    if highlight and in_region (lineno, i, rp) then
+    if highlight and in_region (o, i, rp) then
       font = FONT_REVERSE
     end
     x = outch (string.byte (get_buffer_text (wp.bp).s[o + i]), font, x)
   end
 
-  draw_end_of_line (line, wp, lineno, rp, highlight, x, x + startcol)
+  draw_end_of_line (line, wp, o, rp, highlight, x, x + startcol)
 end
 
 local function calculate_highlight_region (wp, rp)
@@ -157,12 +161,12 @@ local function draw_window (topline, wp)
   local highlight = calculate_highlight_region (wp, rp)
 
   -- Find the first line to display on the first screen line.
-  local pt = window_pt (wp)
-  local lineno = pt.n
   local o = get_buffer_line_o (wp.bp)
-  for i = wp.topdelta, 1, -1 do
+  local i = wp.topdelta
+  while i > 0 and o > 0 do
     o = estr_prev_line (get_buffer_text (wp.bp), o)
-    lineno = lineno - 1
+    assert (o)
+    i = i - 1
   end
 
   cur_tab_width = tab_width (wp.bp)
@@ -175,7 +179,7 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      draw_line (i, wp.start_column, wp, o, lineno, rp, highlight)
+      draw_line (i, wp.start_column, wp, o, rp, highlight)
 
       if wp.start_column > 0 then
         term_move (i, 0)
@@ -183,7 +187,6 @@ local function draw_window (topline, wp)
       end
 
       o = estr_next_line (get_buffer_text (wp.bp), o)
-      lineno = lineno + 1
     end
   end
 
