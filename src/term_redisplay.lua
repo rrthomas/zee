@@ -141,18 +141,12 @@ end
 
 local function calculate_highlight_region (wp, rp)
   if (wp ~= cur_wp and not get_variable_bool ("highlight-nonselected-windows"))
-    or (wp.bp.mark == nil)
+    or wp.bp.mark == nil
     or not wp.bp.mark_active then
     return false
   end
 
-  rp.start = point_to_offset (wp.bp, window_pt (wp))
-  rp.finish = wp.bp.mark.o
-  if rp.finish < rp.start then
-    local o = rp.start
-    rp.start = rp.finish
-    rp.finish = o
-  end
+  rp = region_new (point_to_offset (wp.bp, window_pt (wp)), wp.bp.mark.o)
   return true
 end
 

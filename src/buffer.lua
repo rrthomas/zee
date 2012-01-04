@@ -227,15 +227,18 @@ function get_region_size (rp)
 end
 
 
--- Calculate the region size between point and mark and set the
--- region.
+-- Make a region from two offsets
+function region_new (o1, o2)
+  return {start = math.min (o1, o2), finish = math.max (o1, o2)}
+end
+
+-- Return the region between point and mark.
 function calculate_the_region ()
   if warn_if_no_mark () then
     return nil
   end
 
-  local o, m = cur_bp.o, cur_bp.mark.o
-  return {start = math.min (o, m), finish = math.max (o, m)}
+  return region_new (cur_bp.o, cur_bp.mark.o)
 end
 
 -- Switch to the specified buffer.
