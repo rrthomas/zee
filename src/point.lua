@@ -1,6 +1,6 @@
 -- Point facility functions
 --
--- Copyright (c) 2010, 2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -44,15 +44,6 @@ end
 
 function point_max ()
   return offset_to_point (cur_bp, get_buffer_size (cur_bp))
-end
-
-function cmp_point (pt1, pt2)
-  if pt1.n < pt2.n then
-    return -1
-  elseif pt1.n > pt2.n then
-    return 1
-  end
-  return (pt1.o < pt2.o) and -1 or ((pt1.o > pt2.o) and 1 or 0)
 end
 
 function line_beginning_position (count)
