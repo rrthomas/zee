@@ -126,7 +126,7 @@ Position 1 is the beginning of the buffer.
     end
 
     if ok == leT and n then
-      gotobob ()
+      execute_function ("beginning-of-buffer")
       for _ = 1, n - 1 do
         if not forward_char () then
           break
@@ -195,12 +195,6 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
--- Move point to the beginning of the buffer; do not touch the mark.
-function gotobob ()
-  goto_point (point_min ())
-  thisflag.need_resync = true
-end
-
 Defun ("beginning-of-buffer",
        {},
 [[
@@ -208,15 +202,10 @@ Move point to the beginning of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    gotobob ()
+    goto_offset (0)
+    thisflag.need_resync = true
   end
 )
-
--- Move point to the end of the buffer; do not touch the mark.
-function gotoeob ()
-  goto_point (point_max ())
-  thisflag.need_resync = true
-end
 
 Defun ("end-of-buffer",
        {},
@@ -225,7 +214,8 @@ Move point to the end of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    gotoeob ()
+    goto_offset (get_buffer_size (cur_bp))
+    thisflag.need_resync = true
   end
 )
 

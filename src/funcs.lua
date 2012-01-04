@@ -123,7 +123,7 @@ function write_temp_buffer (name, show, func, ...)
   -- Use the "callback" routine.
   func (...)
 
-  gotobob ()
+  execute_function ("beginning-of-buffer")
   cur_bp.readonly = true
   cur_bp.modified = false
 
@@ -884,9 +884,9 @@ Put point at beginning and mark at end of buffer.
 ]],
   true,
   function ()
-    gotoeob ()
+    execute_function ("end-of-buffer")
     execute_function ("set-mark-command")
-    gotobob ()
+    execute_function ("beginning-of-buffer")
   end
 )
 

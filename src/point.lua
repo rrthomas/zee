@@ -31,14 +31,6 @@ function offset_to_point (bp, offset)
   return pt
 end
 
-function point_min ()
-  return {n = 0, o = 0}
-end
-
-function point_max ()
-  return offset_to_point (cur_bp, get_buffer_size (cur_bp))
-end
-
 function line_beginning_position (count)
   -- Copy current point position without offset (beginning of line).
   local o = get_buffer_line_o (cur_bp)
@@ -63,11 +55,15 @@ function line_end_position (count)
   return pt
 end
 
--- Go to coordinates described by pt
-function goto_point (pt)
+function goto_offset (o)
   local old_n = get_buffer_pt (cur_bp).n
-  cur_bp.o = point_to_offset (pt)
+  cur_bp.o = o
   if get_buffer_pt (cur_bp).n ~= old_n then
     resync_goalc ()
   end
+end
+
+-- Go to coordinates described by pt.
+function goto_point (pt)
+  goto_offset (point_to_offset (pt));
 end

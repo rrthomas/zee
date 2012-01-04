@@ -249,7 +249,7 @@ function completion_scroll_up ()
   assert (wp)
   set_current_window (wp)
   if not execute_function ("scroll-up") then
-    gotobob ()
+    execute_function ("beginning-of-buffer")
   end
   set_current_window (old_wp)
 
