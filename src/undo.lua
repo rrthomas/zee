@@ -73,7 +73,7 @@ local function revert_action (up)
     undo_save (UNDO_END_SEQUENCE, up.o, 0, 0)
   end
 
-  goto_point (offset_to_point (cur_bp, o))
+  goto_offset (o)
 
   if up.type == UNDO_REPLACE_BLOCK then
     undo_save (UNDO_REPLACE_BLOCK, o, up.size, #up.text)

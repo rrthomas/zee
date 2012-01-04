@@ -96,7 +96,7 @@ local function search (pt, s, forward, regexp)
     return false
   end
 
-  goto_point (offset_to_point (cur_bp, pos - 1))
+  goto_offset (pos - 1)
   thisflag.need_resync = true
   return true
 end

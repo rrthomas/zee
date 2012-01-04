@@ -83,7 +83,7 @@ function delete_char ()
   end
 
   cur_bp.modified = true
-  goto_point (offset_to_point (cur_bp, o))
+  goto_offset (o)
 
   return true
 end
