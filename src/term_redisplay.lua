@@ -294,12 +294,10 @@ end
 local cur_topline = 0
 
 function term_redisplay ()
-  local topline = 0
-
-  cur_topline = topline
-
   calculate_start_column (cur_wp)
 
+  local topline = 0
+  cur_topline = topline
   for _, wp in ipairs (windows) do
     if wp == cur_wp then
       cur_topline = topline
