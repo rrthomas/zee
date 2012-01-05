@@ -146,7 +146,7 @@ local function calculate_highlight_region (wp, rp)
     return false
   end
 
-  rp = region_new (point_to_offset (wp.bp, window_pt (wp)), wp.bp.mark.o)
+  rp = region_new (window_o (wp), wp.bp.mark.o)
   return true
 end
 
@@ -204,8 +204,8 @@ local point_screen_column = 0
 -- at point has to be truncated.
 local function calculate_start_column (wp)
   local t = tab_width (wp.bp)
-  local pt = window_pt (wp)
-  local o = point_to_offset (cur_bp, pt) - pt.o
+  local pt = offset_to_point (wp.bp, window_o (wp))
+  local o = window_o (wp) - pt.o
   local rpfact = math.floor (pt.o / math.floor (wp.ewidth / 3))
 
   local col = 0
@@ -249,11 +249,11 @@ local function make_screen_pos (wp)
   elseif bv then
     return "Bot"
   end
-  return string.format ("%2d%%", (window_pt (wp).n - wp.topdelta) / offset_to_point (wp.bp, get_buffer_size (wp.bp)).n * 100)
+  return string.format ("%2d%%", (window_o (wp) / get_buffer_size (wp.bp)) * 100)
 end
 
 local function draw_status_line (line, wp)
-  local pt = window_pt (wp)
+  local pt = offset_to_point (wp.bp, window_o (wp))
   term_attrset (FONT_REVERSE)
   term_move (line, 0)
   term_addstr (string.rep ('-', wp.ewidth))

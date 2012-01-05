@@ -86,10 +86,6 @@ function window_o (wp)
   end
 end
 
-function window_pt (wp)
-  return offset_to_point (wp.bp, window_o (wp))
-end
-
 local function window_prev (this_wp)
   for i, wp in ipairs (windows) do
     if wp == this_wp then
@@ -273,7 +269,7 @@ function completion_scroll_down ()
 end
 
 function window_top_visible (wp)
-  return window_pt (wp).n == wp.topdelta
+  return offset_to_point (wp.bp, window_o (wp)).n == wp.topdelta
 end
 
 function window_bottom_visible (wp)

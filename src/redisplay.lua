@@ -1,6 +1,6 @@
 -- Terminal independent redisplay routines
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -20,7 +20,7 @@
 -- MA 02111-1301, USA.
 
 function recenter (wp)
-  local pt = window_pt (wp)
+  local pt = offset_to_point (wp.bp, window_o (wp))
 
   if pt.n > wp.eheight / 2 then
     wp.topdelta = wp.eheight / 2
