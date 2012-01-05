@@ -34,8 +34,8 @@ INTRODUCTION
 
 GNU Zile (_Zile Is Lossy Emacs_) is a lightweight [Emacs][] clone. Every
 Emacs user should feel at home with Zile. Zile is aimed at small
-footprint systems (a typical binary is about 100Kb) and quick editing
-sessions (it starts up and shuts down instantly).
+footprint systems and quick editing sessions (it starts up and shuts
+down instantly).
 
 Zile is written in Lua 5.1 using POSIX APIs, and hence requires only a
 Lua 5.1 runtime and a few additional Lua modules:
