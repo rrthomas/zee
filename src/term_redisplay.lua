@@ -155,7 +155,7 @@ local function draw_window (topline, wp)
   local highlight = calculate_highlight_region (wp, rp)
 
   -- Find the first line to display on the first screen line.
-  local o = get_buffer_line_o (wp.bp)
+  local o = estr_start_of_line (get_buffer_text (wp.bp), window_o (wp))
   local i = wp.topdelta
   while i > 0 and o > 0 do
     o = estr_prev_line (get_buffer_text (wp.bp), o)

@@ -66,7 +66,7 @@ function find_window (name)
   end
 end
 
-function window_pt (wp)
+function window_o (wp)
   -- The current window uses the current buffer point; all other
   -- windows have a saved point, except that if a window has just been
   -- killed, it needs to use its new buffer's current point.
@@ -76,14 +76,18 @@ function window_pt (wp)
     assert (wp.bp == cur_bp)
     assert (wp.saved_pt == nil)
     assert (cur_bp ~= nil)
-    return offset_to_point (cur_bp, cur_bp.o)
+    return cur_bp.o
   else
     if wp.saved_pt ~= nil then
-      return offset_to_point (wp.bp, wp.saved_pt.o)
+      return wp.saved_pt.o
     else
-      return offset_to_point (wp.bp, wp.bp.o)
+      return wp.bp.o
     end
   end
+end
+
+function window_pt (wp)
+  return offset_to_point (wp.bp, window_o (wp))
 end
 
 local function window_prev (this_wp)
@@ -299,16 +303,11 @@ Both windows display the same buffer now current.
       return leNIL
     end
 
-    local newwp = table.merge (window_new (), {
-                                 fwidth = cur_wp.fwidth,
-                                 ewidth = cur_wp.ewidth,
-                                 fheight = math.floor (cur_wp.fheight / 2) + cur_wp.fheight % 2,
-                                 bp = cur_wp.bp,
-                                 saved_pt = point_marker (),
-                                 next = cur_wp.next,
-                             })
-    table.insert (windows, newwp)
+    local newwp = table.clone (cur_wp)
+    newwp.fheight = cur_wp.fheight / 2 + cur_wp.fheight % 2
     newwp.eheight = newwp.fheight - 1
+    newwp.saved_pt = point_marker ()
+    table.insert (windows, newwp)
 
     cur_wp.next = newwp
     cur_wp.fheight = math.floor (cur_wp.fheight / 2)
