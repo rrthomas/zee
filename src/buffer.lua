@@ -429,9 +429,9 @@ function goto_goalc ()
   local col = 0
 
   local i = get_buffer_line_o (cur_bp)
-  local lim = estr_next_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) or math.huge
+  local lim = get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp)
   while i < lim do
-    if col == get_goalc () then
+    if col == cur_bp.goalc then
       break
     elseif get_buffer_text (cur_bp).s[i] == '\t' then
       local t = tab_width (cur_bp)
@@ -450,20 +450,15 @@ function goto_goalc ()
   cur_bp.o = i
 end
 
-function resync_goalc ()
-  if last_command ~= "next-line" and last_command ~= "previous-line" then
-    cur_bp.goalc = get_goalc ()
-  end
-  goto_goalc ()
-
-  thisflag.need_resync = true
-end
-
 function move_line (n)
   local func = estr_next_line
   if n < 0 then
     n = -n
     func = estr_prev_line
+  end
+
+  if _last_command ~= "next-line" and _last_command ~= "previous-line" then
+    cur_bp.goalc = get_goalc ()
   end
 
   while n > 0 do
@@ -475,7 +470,8 @@ function move_line (n)
     n = n - 1
   end
 
-  resync_goalc ()
+  goto_goalc ()
+  thisflag.need_resync = true
 
   return n == 0
 end
