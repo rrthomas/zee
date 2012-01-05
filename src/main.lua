@@ -87,6 +87,7 @@ KBD_F12 = 283
 -- Zile font codes
 FONT_NORMAL = 0
 FONT_REVERSE = 1
+FONT_UNDERLINE = 2
 
 -- Default waitkey pause in ds
 WAITKEY_DEFAULT = 20

@@ -45,8 +45,14 @@ function term_addch (c)
   curses.stdscr ():addch (bit.band (c, bit.bnot (curses.A_ATTRIBUTES)))
 end
 
-function term_attrset (attr)
-  curses.stdscr ():attrset (attr == FONT_REVERSE and curses.A_REVERSE or 0)
+function term_attrset (attrs)
+  local cattrs = 0
+  for i, v in pairs (attr_map) do
+    if bit.band (attrs, i) ~= 0 then
+      cattrs = bit.bor (cattrs, v)
+    end
+  end
+  curses.stdscr ():attrset (cattrs)
 end
 
 function term_beep ()
@@ -62,6 +68,11 @@ end
 
 function term_init ()
   curses.initscr ()
+
+  attr_map = {
+    [FONT_REVERSE] = curses.A_REVERSE,
+    [FONT_UNDERLINE] = curses.A_UNDERLINE,
+  }
 
   -- from curses keycodes to zile keycodes
   codetokey_map = {
