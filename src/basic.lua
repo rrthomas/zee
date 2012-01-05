@@ -177,7 +177,7 @@ column, or at the end of the line if it is not long enough.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n or current_prefix_arg or 1, previous_line, next_line)
+    return move_line (-(n or current_prefix_arg or 1))
   end
 )
 
@@ -191,7 +191,7 @@ column, or at the end of the line if it is not long enough.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n or current_prefix_arg or 1, next_line, previous_line)
+    return move_line (n or current_prefix_arg or 1)
   end
 )
 

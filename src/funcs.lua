@@ -633,10 +633,10 @@ Precisely, if point is on line I, move to the start of line I + N.
 ]],
   true,
   function (n)
-    n = n or current_prefix_arg
+    n = n or current_prefix_arg or 1
     if n ~= 0 then
       execute_function ("beginning-of-line")
-      return execute_with_uniarg (false, n, next_line, previous_line)
+      return move_line (n)
     end
     return false
   end
