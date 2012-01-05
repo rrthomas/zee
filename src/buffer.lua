@@ -460,20 +460,15 @@ function resync_goalc ()
 end
 
 function move_line (n)
-  local ok = true
-  local o = cur_bp.o
-  local backward = n < 0
-  if n == 0 then
-    return false
-  end
-  if backward then
+  local func = estr_next_line
+  if n < 0 then
     n = -n
+    func = estr_prev_line
   end
 
   while n > 0 do
-    o = (backward and estr_prev_line or estr_next_line) (cur_bp.es, cur_bp.o)
+    o = func (cur_bp.es, cur_bp.o)
     if o == nil then
-      ok = false
       break
     end
     cur_bp.o = o
@@ -482,7 +477,7 @@ function move_line (n)
 
   resync_goalc ()
 
-  return ok
+  return n == 0
 end
 
 
