@@ -104,17 +104,17 @@ Repeat this command to undo more changes.
   function ()
     if cur_bp.noundo then
       minibuf_error ("Undo disabled in this buffer")
-      return leNIL
+      return false
     end
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     if not cur_bp.next_undop then
       minibuf_error ("No further undo information")
       cur_bp.next_undop = cur_bp.last_undop
-      return leNIL
+      return false
     end
 
     cur_bp.next_undop = revert_action (cur_bp.next_undop)

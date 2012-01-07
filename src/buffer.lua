@@ -485,7 +485,7 @@ With a nil argument, kill the current buffer.
 ]],
   true,
   function (buffer)
-    local ok = leT
+    local ok = true
 
     if not buffer then
       local cp = make_buffer_completion ()
@@ -501,15 +501,15 @@ With a nil argument, kill the current buffer.
       bp = find_buffer (buffer)
       if not bp then
         minibuf_error (string.format ("Buffer `%s' not found", buffer))
-        ok = leNIL
+        ok = false
       end
     else
       bp = cur_bp
     end
 
-    if ok == leT then
+    if ok then
       if not check_modified_buffer (bp) then
-        ok = leNIL
+        ok = false
       else
         kill_buffer (bp)
       end
@@ -539,7 +539,7 @@ Select buffer @i{buffer} in the current window.
 ]],
   true,
   function (buffer)
-    local ok = leT
+    local ok = true
     local bp = buffer_next (cur_bp)
 
     if not buffer then
@@ -552,7 +552,7 @@ Select buffer @i{buffer} in the current window.
       end
     end
 
-    if ok == leT then
+    if ok then
       if buffer and buffer ~= "" then
         bp = find_buffer (buffer)
         if not bp then

@@ -52,7 +52,7 @@ Use @kbd{C-x )} to finish recording and make the macro available.
   function ()
     if thisflag.defining_macro then
       minibuf_error ("Already defining a keyboard macro")
-      return leNIL
+      return false
     end
 
     if cur_mp ~= nil then
@@ -77,7 +77,7 @@ The macro is now available for use via @kbd{C-x e}.
   function ()
     if not thisflag.defining_macro then
       minibuf_error ("Not defining a keyboard macro")
-      return leNIL
+      return false
     end
 
     thisflag.defining_macro = false
@@ -115,7 +115,7 @@ A prefix argument serves as a repeat count.
   function ()
     if cur_mp == nil then
       minibuf_error ("No kbd macro has been defined")
-      return leNIL
+      return false
     end
 
     -- FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec)
@@ -135,9 +135,7 @@ Execute macro as string of editor command characters.
     if keys ~= nil then
       macro_keys = keys
       execute_with_uniarg (true, current_prefix_arg, call_macro)
-      return leT
-    else
-      return leNIL
+      return true
     end
   end
 )

@@ -19,9 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-leT = {data = "t"}
-leNIL = {data = "nil"}
-
 
 -- User commands
 usercmd = {}
@@ -53,13 +50,7 @@ function Defun (name, argtypes, doc, interactive, func)
              setfenv (func, setmetatable ({current_prefix_arg = prefix_arg},
                                           {__index = _G, __newindex = _G}))
              prefix_arg = false
-             local ret = func (unpack (args))
-             if not ret then
-               return leNIL
-             elseif ret == true then
-               return leT
-             end
-             return ret
+             return func (unpack (args))
            end
   }
 end
@@ -75,11 +66,6 @@ function get_function_doc (name)
   if usercmd[name] then
     return usercmd[name].doc
   end
-end
-
--- Turn a boolean into a Lisp boolean
-function bool_to_lisp (b)
-  return b and leT or leNIL
 end
 
 function read_char (s, pos)
@@ -190,7 +176,7 @@ function execute_function (name, uniarg)
   if usercmd[name] and usercmd[name].func then
     return usercmd[name].func (uniarg)
   else
-    return leNIL
+    return false
   end
 end
 
@@ -203,7 +189,7 @@ end
 
 function evaluateNode (node)
   if node == nil then
-    return leNIL
+    return nil
   end
   local value
   if node.branch ~= nil then
@@ -294,7 +280,7 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
     undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
   end
 
-  return bool_to_lisp (ret)
+  return ret
 end
 
 Defun ("execute-extended-command",

@@ -59,8 +59,8 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 ]],
   true,
   function (n)
-    local ok = bool_to_lisp (move_char (-(n or 1)))
-    if ok == leNIL then
+    local ok = move_char (-(n or 1))
+    if not ok then
       minibuf_error ("Beginning of buffer")
     end
     return ok
@@ -75,8 +75,8 @@ On reaching end of buffer, stop and signal error.
 ]],
   true,
   function (n)
-    local ok = bool_to_lisp (move_char (n or 1))
-    if ok == leNIL then
+    local ok = move_char (n or 1)
+    if not ok then
       minibuf_error ("End of buffer")
     end
     return ok
@@ -109,7 +109,7 @@ Position 1 is the beginning of the buffer.
 ]],
   true,
   function (n)
-    local ok = leT
+    local ok = true
 
     if not n then
       repeat
@@ -125,7 +125,7 @@ Position 1 is the beginning of the buffer.
       until n
     end
 
-    if ok == leT and n then
+    if ok and n then
       execute_function ("beginning-of-buffer")
       for _ = 1, n - 1 do
         if not forward_char () then
@@ -133,6 +133,8 @@ Position 1 is the beginning of the buffer.
         end
       end
     end
+
+    return ok
   end
 )
 

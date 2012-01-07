@@ -65,7 +65,7 @@ local function kill_text (uniarg, mark_func)
   maybe_free_kill_ring ()
 
   if warn_if_readonly_buffer () then
-    return leNIL
+    return false
   end
 
   push_mark ()
@@ -128,11 +128,11 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
   function ()
     if not kill_ring_text then
       minibuf_error ("Kill ring is empty")
-      return leNIL
+      return false
     end
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     set_mark_interactive ()
@@ -161,7 +161,7 @@ to make one entry in the kill ring.
 ]],
   true,
   function ()
-    return bool_to_lisp (copy_or_kill_the_region (true))
+    return copy_or_kill_the_region (true)
   end
 )
 
@@ -172,7 +172,7 @@ Save the region as if killed, but don't kill it.
 ]],
   true,
   function ()
-    return bool_to_lisp (copy_or_kill_the_region (false))
+    return copy_or_kill_the_region (false)
   end
 )
 
@@ -242,23 +242,24 @@ with no argument.
 ]],
   true,
   function (arg)
-    local ok = leT
+    local ok = true
 
     maybe_free_kill_ring ()
 
     if not arg then
-      ok = bool_to_lisp (kill_line (bolp () and get_variable_bool ("kill-whole-line")))
+      ok = kill_line (bolp () and get_variable_bool ("kill-whole-line"))
     else
       undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
       if arg <= 0 then
         kill_to_bol ()
       end
-      if arg ~= 0 and ok == leT then
+      if arg ~= 0 and ok then
         ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward)
       end
       undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
     end
 
     deactivate_mark ()
+    return ok
   end
 )

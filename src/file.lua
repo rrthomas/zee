@@ -104,7 +104,7 @@ creating one if none already exists.
 ]],
   true,
   function (filename)
-    local ok = leNIL
+    local ok = false
 
     if not filename then
       filename = minibuf_read_filename ("Find file: ", cur_bp.dir)
@@ -130,7 +130,7 @@ Use @kbd{M-x toggle-read-only} to permit editing.
   true,
   function (filename)
     local ok = execute_function ("find-file", filename)
-    if ok == leT then
+    if ok then
       cur_bp.readonly = true
     end
   end
@@ -155,12 +155,12 @@ If the current buffer now contains an empty file that you just visited
     end
     ms = minibuf_read_filename ("Find alternate: ", buf, base)
 
-    local ok = leNIL
+    local ok = false
     if not ms then
       ok = execute_function ("keyboard-quit")
     elseif ms ~= "" and check_modified_buffer (cur_bp ()) then
       kill_buffer (cur_bp)
-      ok = bool_to_lisp (find_file (ms))
+      ok = find_file (ms)
     end
 
     return ok
@@ -195,10 +195,10 @@ Set mark after the inserted text.
 ]],
   true,
   function (file)
-    local ok = leT
+    local ok = true
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     if not file then
@@ -209,12 +209,12 @@ Set mark after the inserted text.
     end
 
     if not file or file == "" then
-      ok = leNIL
+      ok = false
     end
 
-    if ok ~= leNIL then
+    if ok then
       if not insert_file (file) then
-        ok = leNIL
+        ok = false
         minibuf_error ("%s: %s", file, posix.errno ())
       end
     else
@@ -357,7 +357,7 @@ end
 
 local function write_buffer (bp, needname, confirm, name, prompt)
   local ans = true
-  local ok = leT
+  local ok = true
 
   if needname then
     name = minibuf_read_filename (prompt, "")
@@ -365,7 +365,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
       return execute_function ("keyboard-quit")
     end
     if name == "" then
-      return leNIL
+      return false
     end
     confirm = true
   end
@@ -378,7 +378,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
       minibuf_error ("Canceled")
     end
     if ans ~= true then
-      ok = leNIL
+      ok = false
     end
   end
 
@@ -394,7 +394,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
       bp.modified = false
       undo_set_unchanged (bp.last_undop)
     else
-      ok = leNIL
+      ok = false
     end
   end
 
@@ -496,7 +496,7 @@ Save some modified file-visiting buffers.  Asks user about each one.
 ]],
   true,
   function ()
-    return bool_to_lisp (save_some_buffers ())
+    return save_some_buffers ()
   end
 )
 
@@ -508,7 +508,7 @@ Offer to save each buffer, then kill this Zile process.
   true,
   function ()
     if not save_some_buffers () then
-      return leNIL
+      return false
     end
 
     for _, bp in ipairs (buffers) do
@@ -518,7 +518,7 @@ Offer to save each buffer, then kill this Zile process.
           if ans == nil then
             return execute_function ("keyboard-quit")
           elseif not ans then
-            return leNIL
+            return false
           end
           break -- We have found a modified buffer, so stop.
         end
@@ -566,7 +566,7 @@ Puts mark after the inserted text.
 ]],
   true,
   function (buffer)
-    local ok = leT
+    local ok = true
 
     local def_bp = buffers[#buffers]
     for i = 2, #buffers do
@@ -577,7 +577,7 @@ Puts mark after the inserted text.
     end
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     if not buffer then
@@ -589,14 +589,14 @@ Puts mark after the inserted text.
       end
     end
 
-    if ok == leT then
+    if ok then
       local bp
 
       if buffer and buffer ~= "" then
         bp = find_buffer (buffer)
         if not bp then
           minibuf_error (string.format ("Buffer `%s' not found", buffer))
-          ok = leNIL
+          ok = false
         end
       else
         bp = def_bp

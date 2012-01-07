@@ -218,7 +218,7 @@ the indentation.  Else stay at same point in text.
   true,
   function ()
     if get_variable_bool ("tab-always-indent") then
-      return bool_to_lisp (insert_tab ())
+      return insert_tab ()
     elseif (get_goalc () < previous_line_indent ()) then
       return execute_function ("indent-relative")
     end
@@ -242,10 +242,10 @@ does nothing.
     local target_goalc = 0
     local cur_goalc = get_goalc ()
     local t = tab_width (cur_bp)
-    local ok = leNIL
+    local ok = false
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     deactivate_mark ()
@@ -288,19 +288,21 @@ does nothing.
       if cur_goalc < target_goalc then
         repeat
           if cur_goalc % t == 0 and cur_goalc + t <= target_goalc then
-            ok = bool_to_lisp (insert_tab ())
+            ok = insert_tab ()
           else
-            ok = bool_to_lisp (insert_char (' '))
+            ok = insert_char (' ')
           end
           cur_goalc = get_goalc ()
-        until ok ~= leT or cur_goalc >= target_goalc
+        until not ok or cur_goalc >= target_goalc
       else
-        ok = bool_to_lisp (insert_tab ())
+        ok = insert_tab ()
       end
     else
-      ok = bool_to_lisp (insert_tab ())
+      ok = insert_tab ()
     end
     undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+
+    return ok
   end
 )
 
@@ -312,12 +314,10 @@ Indentation is done using the `indent-for-tab-command' function.
 ]],
   true,
   function ()
-    local ret
-
-    local ok = leNIL
+    local ok = false
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     deactivate_mark ()
@@ -338,9 +338,11 @@ Indentation is done using the `indent-for-tab-command' function.
       if indent then
         execute_function ("indent-for-tab-command")
       end
-      ok = leT
+      ok = true
     end
     undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+
+    return ok
   end
 )
 

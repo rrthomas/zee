@@ -143,7 +143,7 @@ Remove the current window from the screen.
   function ()
     if #windows == 1 then
       minibuf_error ("Attempt to delete sole ordinary window")
-      return leNIL
+      return false
     end
 
     delete_window (cur_wp)
@@ -158,7 +158,7 @@ Make current window one line bigger.
   true,
   function ()
     if #windows == 1 then
-      return leNIL
+      return false
     end
 
     local wp = cur_wp.next
@@ -166,14 +166,14 @@ Make current window one line bigger.
       for _, wp in ipairs (windows) do
         if wp.next == cur_wp then
           if wp.fheight < 3 then
-            return leNIL
+            return false
           end
           break
         end
       end
 
       if cur_wp == windows[#windows] and cur_wp.next.fheight < 3 then
-        return leNIL
+        return false
       end
 
       wp.fheight = wp.fheight - 1
@@ -195,7 +195,7 @@ Make current window one line smaller.
   true,
   function ()
     if #windows == 1 or cur_wp.fheight < 3 then
-      return leNIL
+      return false
     end
 
     local next_wp = window_next (cur_wp)
@@ -296,7 +296,7 @@ Both windows display the same buffer now current.
     -- Windows smaller than 4 lines cannot be split.
     if cur_wp.fheight < 4 then
       minibuf_error (string.format ("Window height %d too small (after splitting)", cur_wp.fheight))
-      return leNIL
+      return false
     end
 
     local newwp = table.clone (cur_wp)

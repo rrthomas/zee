@@ -1,6 +1,6 @@
 -- Zile variables handling functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -65,13 +65,13 @@ Set a variable value to the user-specified value.
 ]],
   true,
   function (var, val)
-    local ok = leT
+    local ok = true
 
     if not var then
       var = minibuf_read_variable_name ("Set variable: ")
     end
     if not var then
-      return leNIL
+      return false
     end
     if not val then
       val = minibuf_read (string.format ("Set %s to value: ", var), "")
@@ -80,7 +80,7 @@ Set a variable value to the user-specified value.
       ok = execute_function ("keyboard-quit")
     end
 
-    if ok == leT then
+    if ok then
       set_variable (var, val)
     end
 

@@ -1,6 +1,6 @@
 -- Self documentation facility functions
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -38,13 +38,13 @@ Display the full documentation of a function.
     if not func then
       func = minibuf_read_function_name ("Describe function: ")
       if not func then
-        return leNIL
+        return false
       end
     end
 
     local doc = get_function_doc (func)
     if not doc then
-      return leNIL
+      return false
     else
       write_temp_buffer ("*Help*", true, write_function_description, func, doc)
     end
@@ -116,19 +116,19 @@ Display the full documentation of a variable.
 ]],
   true,
   function (name)
-    local ok = leT
+    local ok = true
 
     if not name then
       name = minibuf_read_variable_name ("Describe variable: ")
     end
 
     if not name then
-      ok = leNIL
+      ok = false
     else
       local doc = main_vars[name].doc
 
       if not doc then
-        ok = leNIL
+        ok = false
       else
         write_temp_buffer ("*Help*", true,
                            write_variable_description,

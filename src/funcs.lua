@@ -28,7 +28,6 @@ Cancel current command.
   function ()
     deactivate_mark ()
     minibuf_error ("Quit")
-    return leNIL
   end
 )
 
@@ -76,7 +75,7 @@ Put the mark where point is now, and point where the mark is now.
   function ()
     if not cur_bp.mark then
       minibuf_error ("No mark set in this buffer")
-      return leNIL
+      return false
     end
 
     local tmp = cur_bp.o
@@ -148,7 +147,7 @@ by 4 each time.
 ]],
   true,
   function ()
-    local ok = leT
+    local ok = true
 
     -- Need to process key used to invoke universal-argument.
     pushkey (lastkey ())
@@ -208,7 +207,7 @@ by 4 each time.
       table.insert (keys, as)
     end
 
-    if ok == leT then
+    if ok then
       prefix_arg = arg * sgn
       thisflag.set_uniarg = true
       minibuf_clear ()
@@ -318,7 +317,7 @@ Just C-u as argument means to use the current column.
       else
         n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", get_buffer_pt (cur_bp).o))
         if not n then -- cancelled
-          return leNIL
+          return false
         elseif n == "" then
           n = get_buffer_pt (cur_bp).o
         end
@@ -327,7 +326,7 @@ Just C-u as argument means to use the current column.
 
     if not n then
       minibuf_error ("set-fill-column requires an explicit argument")
-      return leNIL
+      return false
     end
 
     minibuf_write (string.format ("Fill column set to %d (was %d)", n, get_variable_number ("fill-column")))
@@ -493,7 +492,7 @@ The output is available in that buffer in both cases.
 ]],
   true,
   function (start, finish, cmd, insert)
-    local ok = leT
+    local ok = true
 
     if not cmd then
       cmd = minibuf_read_shell_command ()
@@ -506,22 +505,22 @@ The output is available in that buffer in both cases.
       local rp = calculate_the_region ()
 
       if not rp then
-        ok = leNIL
+        ok = false
       else
         local tempfile = os.tmpname ()
         local fd = io.open (tempfile, "w")
 
         if not fd then
           minibuf_error ("Cannot open temporary file")
-          ok = leNIL
+          ok = false
         else
           local written, err = fd:write (get_buffer_region (cur_bp, rp).s)
 
           if not written then
             minibuf_error ("Error writing to temporary file: " .. err)
-            ok = leNIL
+            ok = false
           else
-            ok = bool_to_lisp (pipe_command (cmd, tempfile, insert, true))
+            ok = pipe_command (cmd, tempfile, insert, true)
           end
 
           fd:close ()
@@ -529,6 +528,7 @@ The output is available in that buffer in both cases.
         end
       end
     end
+    return ok
   end
 )
 
@@ -542,10 +542,10 @@ Delete the text between point and mark.
     local rp = calculate_the_region ()
 
     if not rp or not delete_region (rp) then
-      return leNIL
+      return false
     end
     deactivate_mark ()
-    return leT
+    return true
   end
 )
 
@@ -1036,7 +1036,7 @@ local function setcase_region (func)
   local rp = calculate_the_region ()
 
   if warn_if_readonly_buffer () or not rp then
-    return leNIL
+    return false
   end
 
   undo_save (UNDO_START_SEQUENCE, rp.start, 0, 0)
@@ -1188,7 +1188,7 @@ local function transpose (uniarg, forward_func, backward_func)
   local ret = true
 
   if warn_if_readonly_buffer () then
-    return leNIL
+    return false
   end
 
   if uniarg < 0 then
@@ -1206,7 +1206,7 @@ local function transpose (uniarg, forward_func, backward_func)
   end
   undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
-  return bool_to_lisp (ret)
+  return ret
 end
 
 Defun ("transpose-chars",

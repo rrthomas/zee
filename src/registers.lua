@@ -43,7 +43,7 @@ Copy region into register @i{register}.
 
       local rp = calculate_the_region ()
       if not rp then
-        return leNIL
+        return false
       else
         regs[reg] = get_buffer_region (cur_bp, rp).s -- FIXME: Convert newlines.
       end
@@ -71,10 +71,10 @@ Puts point before and mark after the inserted text.
 ]],
   true,
   function (reg)
-    local ok = leT
+    local ok = true
 
     if warn_if_readonly_buffer () then
-      return leNIL
+      return false
     end
 
     if not reg then
@@ -88,7 +88,7 @@ Puts point before and mark after the inserted text.
       minibuf_clear ()
       if not regs[reg] then
         minibuf_error ("Register does not contain text")
-        ok = leNIL
+        ok = false
       else
         set_mark_interactive ()
         regnum = reg

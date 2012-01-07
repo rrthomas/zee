@@ -104,7 +104,7 @@ end
 local last_search
 
 function do_search (forward, regexp, pattern)
-  local ok = leNIL
+  local ok = false
   local ms
 
   if not pattern then
@@ -121,7 +121,7 @@ function do_search (forward, regexp, pattern)
     if not search (get_buffer_pt (cur_bp), pattern, forward, regexp) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
-      ok = leT
+      ok = true
     end
   end
 
@@ -366,7 +366,7 @@ what to do with it.
 ]],
   true,
   function ()
-    local ok = leT
+    local ok = true
     local noask = false
     local count = 0
 
@@ -376,7 +376,7 @@ what to do with it.
       return execute_function ("keyboard-quit")
     end
     if find == "" then
-      return leNIL
+      return false
     end
     local find_no_upper = no_upper (find, false)
 
@@ -431,5 +431,7 @@ what to do with it.
     if ok then
       minibuf_write (string.format ("Replaced %d occurrence%s", count, count ~= 1 and "s" or ""))
     end
+
+    return ok
   end
 )
