@@ -28,6 +28,7 @@ Cancel current command.
   function ()
     deactivate_mark ()
     minibuf_error ("Quit")
+    return false
   end
 )
 

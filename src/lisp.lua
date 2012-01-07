@@ -50,7 +50,11 @@ function Defun (name, argtypes, doc, interactive, func)
              setfenv (func, setmetatable ({current_prefix_arg = prefix_arg},
                                           {__index = _G, __newindex = _G}))
              prefix_arg = false
-             return func (unpack (args))
+             local ret = func (unpack (args))
+             if ret == nil then
+               ret = true
+             end
+             return ret
            end
   }
 end
