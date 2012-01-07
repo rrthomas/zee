@@ -104,59 +104,41 @@ end
 Defun ("goto-char",
        {"number"},
 [[
-Read a number N and move the cursor to character number N.
-Position 1 is the beginning of the buffer.
+Set point to @i{position}, a number.
+Beginning of buffer is position 1.
 ]],
   true,
   function (n)
-    local ok = true
-
     if not n then
-      repeat
-        local ms = minibuf_read ("Goto char: ", "")
-        if not ms then
-          ok = execute_function ("keyboard-quit")
-          break
-        end
-        n = tonumber (ms, 10)
-        if not n then
-          ding ()
-        end
-      until n
+      n = minibuf_read_number ("Goto char: ", "")
     end
 
-    if ok and n then
-      execute_function ("beginning-of-buffer")
-      for _ = 1, n - 1 do
-        if not forward_char () then
-          break
-        end
-      end
+    if type (n) == "number" then
+      cur_bp.o = math.max (n, 1) - 1
+      thisflag.need_resync = true
+    else
+      return false
     end
-
-    return ok
   end
 )
 
 Defun ("goto-line",
        {"number"},
 [[
-Goto line arg, counting from line 1 at beginning of buffer.
+Goto @i{line}, counting from line 1 at beginning of buffer.
 ]],
   true,
   function (n)
     n = n or current_prefix_arg
     if not n and _interactive then
       n = minibuf_read_number ("Goto line: ")
-      if n == "" then
-        -- FIXME: This error message should come from deeper down.
-        minibuf_error ("End of file during parsing")
-      end
     end
 
     if type (n) == "number" then
       move_line ((math.max (n, 1) - 1) - get_buffer_pt (cur_bp).n)
       execute_function ("beginning-of-line")
+    else
+      return false
     end
   end
 )
