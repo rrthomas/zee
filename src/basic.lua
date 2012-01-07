@@ -114,7 +114,7 @@ Beginning of buffer is position 1.
     end
 
     if type (n) == "number" then
-      cur_bp.o = math.max (n, 1) - 1
+      goto_offset (math.max (n, 1) - 1)
       thisflag.need_resync = true
     else
       return false
