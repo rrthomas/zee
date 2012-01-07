@@ -115,7 +115,6 @@ Beginning of buffer is position 1.
 
     if type (n) == "number" then
       goto_offset (math.max (n, 1) - 1)
-      thisflag.need_resync = true
     else
       return false
     end
@@ -187,7 +186,6 @@ Move point to the beginning of the buffer; leave mark at previous position.
   true,
   function ()
     goto_offset (0)
-    thisflag.need_resync = true
   end
 )
 
@@ -199,7 +197,6 @@ Move point to the end of the buffer; leave mark at previous position.
   true,
   function ()
     goto_offset (get_buffer_size (cur_bp))
-    thisflag.need_resync = true
   end
 )
 
