@@ -176,10 +176,7 @@ local function insert_file (filename)
       local buf = h:read ("*a")
       h:close ()
       if #buf >= 1 then
-        undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 0, size)
-        undo_nosave = true
         insert_estr (estr_new (buf))
-        undo_nosave = false
       end
       return true
     end
