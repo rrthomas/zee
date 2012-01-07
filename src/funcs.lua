@@ -168,7 +168,7 @@ by 4 each time.
         ok = execute_function ("keyboard-quit")
         break
       -- Digit pressed.
-      elseif string.match (string.char (bit.band (key, 0xff)), "%d") then
+      elseif string.char (bit.band (key, 0xff)):match ("%d") then
         local digit = bit.band (key, 0xff) - string.byte ('0')
         thisflag.uniarg_empty = false
 
@@ -685,46 +685,27 @@ Move forward to end of paragraph.  With argument N, do it N times.
 )
 
 
--- Move through balanced expressions (sexp)
+-- Move through balanced expressions (sexps)
+local function isopenbracketchar (c)
+  return (c == '(') or (c == '[') or ( c== '{') or ((c == '\"') and not double_quote) or ((c == '\'') and not single_quote)
+end
+
+local function isclosebracketchar (c)
+  return (c == ')') or (c == ']') or (c == '}') or ((c == '\"') and double_quote) or ((c == '\'') and single_quote)
+end
+
 local function move_sexp (dir)
-  local gotsexp = false
-  local level = 0
-  local double_quote = dir < 0
-  local single_quote = dir < 0
-
-  local function issexpchar (c)
-    return string.match (c, "[%w$_]")
-  end
-
-  local function isopenbracketchar (c)
-    return (c == '(') or (c == '[') or ( c== '{') or ((c == '\"') and not double_quote) or ((c == '\'') and not single_quote)
-  end
-
-  local function isclosebracketchar (c)
-    return (c == ')') or (c == ']') or (c == '}') or ((c == '\"') and double_quote) or ((c == '\'') and single_quote)
-  end
-
-  local function issexpseparator (c)
-    return isopenbracketchar (c) or isclosebracketchar (c)
-  end
-
-  local function precedingquotedquote (c)
-    return c == '\\' and get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp) and
-      (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\'')
-  end
-
-  local function followingquotedquote (c)
-    return c == '\\' and get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp) and
-      (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\"' or get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + 1 + 1] == '\'')
-  end
+  local gotsexp, level = false, 0
+  local gotsexp, single_quote, double_quote = false, dir < 0, dir < 0
 
   while true do
     while not (dir > 0 and eolp or bolp) () do
-      local c = (dir > 0 and following_char or preceding_char) ()
+      local o = get_buffer_o (cur_bp) - (dir < 0 and 1 or 0)
+      local c = get_buffer_text (cur_bp).s[o + 1]
 
-      -- Skip quotes that aren't sexp separators.
-      if (dir > 0 and precedingquotedquote or followingquotedquote) (c) then
-        cur_bp.o = cur_bp.o + dir
+      -- Skip escaped quotes.
+      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and get_buffer_text (cur_bp).s[o] == '\\' then
+        move_char (dir)
         c = 'a' -- Treat ' and " like word chars.
       end
 
@@ -760,12 +741,12 @@ local function move_sexp (dir)
         end
       end
 
-      goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) + dir))
+      move_char (dir)
 
-      if not issexpchar (c) then
+      if not c:match ("[%a_$]") then
         if gotsexp and level == 0 then
-          if not issexpseparator (c) then
-            goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) - dir))
+          if not (isopenbracketchar (c) or isclosebracketchar (c)) then
+            move_char (-dir)
           end
           return true
         end
@@ -899,7 +880,7 @@ Move point to the first non-whitespace character on this line.
   true,
   function ()
     goto_offset (get_buffer_line_o (cur_bp))
-    while not eolp () and string.match (following_char (), "%s") do
+    while not eolp () and following_char ():match ("%s") do
       forward_char ()
     end
   end
@@ -908,7 +889,7 @@ Move point to the first non-whitespace character on this line.
 
 -- Move through words
 local function iswordchar (c)
-  return (c ~= nil and string.match (c, "%w") ~= nil) or c == '$'
+  return c and (c:match ("[%w$]"))
 end
 
 local function move_word (dir, next, move, at_extreme)

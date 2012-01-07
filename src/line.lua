@@ -91,7 +91,7 @@ function fill_break_line ()
 
     -- Find break point moving left from fill-column.
     for i = get_buffer_pt (cur_bp).o, 1, -1 do
-      if string.match (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i], "%s") then
+      if get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i]:match ("%s") then
         break_col = i
         break
       end
@@ -101,7 +101,7 @@ function fill_break_line ()
     -- possible moving right.
     if break_col == 0 then
       for i = get_buffer_o (cur_bp) + 1, estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) do
-        if string.match (get_buffer_text (cur_bp).s[i], "%s") then
+        if get_buffer_text (cur_bp).s[i]:match ("%s") then
           break_col = i - get_buffer_line_o (cur_bp)
           break
         end
@@ -195,7 +195,7 @@ local function previous_line_indent ()
   execute_function ("beginning-of-line")
 
   -- Find first non-blank char.
-  while not eolp () and string.match (following_char (), "%s") do
+  while not eolp () and following_char ():match ("%s") do
     forward_char ()
   end
 
@@ -262,13 +262,13 @@ does nothing.
 
       -- Now find the next blank char.
       if preceding_char () ~= '\t' or get_goalc () <= cur_goalc then
-        while not eolp () and not string.match (following_char (), "%s") do
+        while not eolp () and not following_char ():match ("%s") do
           forward_char ()
         end
       end
 
       -- Find next non-blank char.
-      while not eolp () and string.match (following_char (), "%s") do
+      while not eolp () and following_char ():match ("%s") do
         forward_char ()
       end
 
@@ -331,7 +331,7 @@ Indentation is done using the `indent-for-tab-command' function.
       -- Check where last non-blank goalc is.
       previous_nonblank_goalc ()
       pos = get_goalc ()
-      local indent = pos > 0 or (not eolp () and string.match (following_char (), "%s"))
+      local indent = pos > 0 or (not eolp () and following_char ():match ("%s"))
       goto_offset (m.o)
       unchain_marker (m)
       -- Only indent if we're in column > 0 or we're in column 0 and
@@ -379,11 +379,11 @@ Delete all spaces and tabs around point.
   function ()
     undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 
-    while not eolp () and string.match (following_char (), "%s") do
+    while not eolp () and following_char ():match ("%s") do
       delete_char ()
     end
 
-    while not bolp () and string.match (preceding_char (), "%s") do
+    while not bolp () and preceding_char ():match ("%s") do
       backward_delete_char ()
     end
 

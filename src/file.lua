@@ -69,7 +69,7 @@ function normalize_path (path)
     elseif v ~= "." then -- not `.'
       if v[1] == "~" then -- `~[user]'
         ncomp = {}
-        v = posix.getpasswd (string.match (v, "^~(.+)$"), "dir")
+        v = posix.getpasswd (v:match ("^~(.+)$"), "dir")
         if v == nil then
           return nil
         end

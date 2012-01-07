@@ -28,7 +28,7 @@ function self_insert_command ()
   key = bit.band (key, bit.bnot (KBD_CTRL))
   deactivate_mark ()
   if key <= 0xff then
-    if string.match (string.char (key), "%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
+    if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
       fill_break_line ()
     end
     insert_char (string.char (key))
@@ -174,7 +174,7 @@ function get_function_by_keys (keys)
   -- Detect Meta-digit
   if #keys == 1 then
     local key = keys[1]
-    if bit.band (key, KBD_META) ~= 0 and (string.match (string.char (bit.band (key, 0xff)), "%d") or bit.band (key, 0xff) == string.byte ('-')) then
+    if bit.band (key, KBD_META) ~= 0 and (string.char (bit.band (key, 0xff)):match ("%d") or bit.band (key, 0xff) == string.byte ('-')) then
       return "universal-argument"
     end
   end

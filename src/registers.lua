@@ -115,7 +115,7 @@ local function write_registers_list (i)
 
       if r == "" then
         insert_string ("the empty string\n")
-      elseif string.match (r, "^%s+$") then
+      elseif r:match ("^%s+$") then
         insert_string ("whitespace\n")
       else
         local len = math.min (20, math.max (0, cur_wp.ewidth - 6)) + 1

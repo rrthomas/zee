@@ -46,9 +46,9 @@ end
 -- Returns "uppercase" if it is all upper case, "capitalized" if just
 -- the first letter is, and nil otherwise.
 local function check_case (s)
-  if string.match (s, "^%u+$") then
+  if s:match ("^%u+$") then
     return "uppercase"
-  elseif string.match (s, "^%u%U*") then
+  elseif s:match ("^%u%U*") then
     return "capitalized"
   end
 end
