@@ -92,7 +92,7 @@ function compact_path (path)
   end
 
   -- Replace `^$HOME' (if found) with `~'.
-  return string.gsub (path, "^" .. home, "~")
+  return (string.gsub (path, "^" .. home, "~"))
 end
 
 Defun ("find-file",
