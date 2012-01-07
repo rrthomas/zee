@@ -1,6 +1,6 @@
 -- Key bindings and extended commands
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -56,6 +56,14 @@ _last_command = nil
 _this_command = nil
 _interactive = false
 
+function call_command (f, branch)
+  _this_command = f
+  _interactive = true
+  execute_function (f, branch)
+  _interactive = false
+  _last_command = _this_command
+end
+
 function get_and_run_command ()
   local keys = get_key_sequence ()
   local name = get_function_by_keys (keys)
@@ -64,11 +72,7 @@ function get_and_run_command ()
   minibuf_clear ()
 
   if function_exists (name) then
-    _this_command = name
-    _interactive = true
-    execute_function (name, lastflag.set_uniarg and (prefix_arg or 1))
-    _interactive = false
-    _last_command = _this_command
+    call_command (name, lastflag.set_uniarg and (prefix_arg or 1 ))
   else
     minibuf_error (keyvectodesc (keys) .. " is undefined")
   end

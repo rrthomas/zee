@@ -313,10 +313,8 @@ function main ()
     local type, arg, line = zarg[i][1], zarg[i][2], zarg[i][3]
 
     if type == "function" then
-      ok = function_exists (arg)
-      if ok then
-        ok = execute_function (arg)
-      else
+      ok = execute_function (arg)
+      if ok == nil then
         minibuf_error (string.format ("Function `%s' not defined", arg))
       end
     elseif type == "loadfile" then

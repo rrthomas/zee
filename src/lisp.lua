@@ -170,18 +170,14 @@ function evaluateBranch (branch)
   if branch == nil or branch.data == nil then
     return nil
   end
-  return execute_function (branch.data, branch)
+  return call_command (branch.data, branch)
 end
 
 function execute_function (name, uniarg)
   if uniarg ~= nil and type (uniarg) ~= "table" then
     uniarg = {next = {data = uniarg and tostring (uniarg) or nil}}
   end
-  if usercmd[name] and usercmd[name].func then
-    return usercmd[name].func (uniarg)
-  else
-    return false
-  end
+  return usercmd[name] and usercmd[name].func and usercmd[name].func (uniarg)
 end
 
 function leEval (list)
