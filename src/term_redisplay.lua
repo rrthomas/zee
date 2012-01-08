@@ -63,9 +63,7 @@ local function make_char_printable (c)
   end
 end
 
-local cur_tab_width = 0
-
-local function outch (c, font, x)
+local function outch (c, font, x, cur_tab_width)
   local tw = term_width ()
 
   if x >= tw then
@@ -106,23 +104,7 @@ local function in_region (o, x, r)
   return o + x >= r.start and o + x <= r.finish
 end
 
-local function draw_end_of_line (line, wp, o, rp, highlight, x, i)
-  if x >= term_width () then
-    term_move (line, term_width () - 1)
-    term_addstr ('$')
-  elseif highlight == true then
-    while x < wp.ewidth do
-      if in_region (o, i, rp) then
-        x = outch (string.byte (' '), FONT_REVERSE, x)
-      else
-        x = x + 1
-      end
-      i = i + 1
-    end
-  end
-end
-
-local function draw_line (line, startcol, wp, o, rp, highlight)
+local function draw_line (line, startcol, wp, o, rp, highlight, w)
   term_move (line, 0)
   local x = 0
   for i = startcol + 1, estr_end_of_line (get_buffer_text (wp.bp), o) - o do
@@ -136,7 +118,20 @@ local function draw_line (line, startcol, wp, o, rp, highlight)
     x = outch (string.byte (get_buffer_text (wp.bp).s[o + i]), font, x)
   end
 
-  draw_end_of_line (line, wp, o, rp, highlight, x, x + startcol)
+  if x >= term_width () then
+    term_move (line, term_width () - 1)
+    term_addstr ('$')
+  elseif highlight == true then
+    local i = x + startcol
+    while x < wp.ewidth do
+      if in_region (o, i, rp) then
+        x = outch (string.byte (' '), FONT_REVERSE, x, w)
+      else
+        x = x + 1
+      end
+      i = i + 1
+    end
+  end
 end
 
 local function calculate_highlight_region (wp, rp)
@@ -163,9 +158,8 @@ local function draw_window (topline, wp)
     i = i - 1
   end
 
-  cur_tab_width = tab_width (wp.bp)
-
   -- Draw the window lines.
+  local cur_tab_width = tab_width (wp.bp)
   for i = topline, wp.eheight + topline do
     -- Clear the line.
     term_move (i, 0)
@@ -173,7 +167,7 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      draw_line (i, wp.start_column, wp, o, rp, highlight)
+      draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
 
       if wp.start_column > 0 then
         term_move (i, 0)
@@ -196,46 +190,6 @@ function make_modeline_flags (wp)
     return "%%"
   end
   return "--"
-end
-
-local point_screen_column = 0
-
--- This function calculates the best start column to draw if the line
--- at point has to be truncated.
-local function calculate_start_column (wp)
-  local t = tab_width (wp.bp)
-  local pt = offset_to_point (wp.bp, window_o (wp))
-  local o = window_o (wp) - pt.o
-  local rpfact = math.floor (pt.o / math.floor (wp.ewidth / 3))
-
-  local col = 0
-  local lastcol = 0
-  for lp = pt.o, 0, -1 do
-    col = 0
-    for p = lp, pt.o - 1 do
-      local c = get_buffer_text (wp.bp).s[o + p + 1]
-      if c == '\t' then
-        col = bit.bor (col, t - 1) + 1
-      elseif posix.isprint (c) then
-        col = col + 1
-      else
-        col = col + #make_char_printable (string.byte (c))
-      end
-    end
-
-    local lpfact = math.floor (lp / math.floor (wp.ewidth / 3))
-
-    if col >= wp.ewidth - 1 or lpfact < rpfact - 2 then
-      wp.start_column = lp + 1
-      point_screen_column = lastcol
-      return
-    end
-
-    lastcol = col
-  end
-
-  wp.start_column = 0
-  point_screen_column = col
 end
 
 local function make_screen_pos (wp)
@@ -288,11 +242,44 @@ local function draw_status_line (line, wp)
   term_attrset (FONT_NORMAL)
 end
 
-local cur_topline = 0
+local cur_topline, col = 0, 0
 
 function term_redisplay ()
-  calculate_start_column (cur_wp)
+-- Calculate the start column if the line at point has to be truncated.
+  local lastcol, t = 0, tab_width (cur_wp.bp)
+  local pt = offset_to_point (cur_wp.bp, window_o (cur_wp))
+  local rpfact = math.floor (pt.o / math.floor (cur_wp.ewidth / 3))
+  local o = window_o (cur_wp) - pt.o
 
+  col = 0
+
+  for lp = pt.o, 0, -1 do
+    col = 0
+    for p = lp, pt.o - 1 do
+      local c = get_buffer_text (cur_wp.bp).s[o + p + 1]
+      if c == '\t' then
+        col = bit.bor (col, t - 1) + 1
+      elseif posix.isprint (c) then
+        col = col + 1
+      else
+        col = col + #make_char_printable (string.byte (c))
+      end
+    end
+
+    local lpfact = math.floor (lp / math.floor (cur_wp.ewidth / 3))
+    if col >= cur_wp.ewidth - 1 or lpfact < rpfact - 2 then
+      cur_wp.start_column = lp + 1
+      point_screen_column = lastcol
+      return
+    end
+
+    lastcol = col
+  end
+
+  cur_wp.start_column = 0
+  point_screen_column = col
+
+  -- Draw the window.
   local topline = 0
   cur_topline = topline
   for _, wp in ipairs (windows) do
@@ -316,7 +303,7 @@ end
 
 function term_redraw_cursor ()
   -- Redraw cursor.
-  term_move (cur_topline + cur_wp.topdelta, point_screen_column)
+  term_move (cur_topline + cur_wp.topdelta, col)
 end
 
 function term_full_redisplay ()
