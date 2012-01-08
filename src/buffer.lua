@@ -215,7 +215,7 @@ local function warn_if_no_mark ()
 end
 
 function get_buffer_line_len (bp)
-  return estr_end_of_line (get_buffer_text (bp), get_buffer_line_o (bp)) - get_buffer_line_o (bp)
+  return estr_line_len (get_buffer_text (bp), get_buffer_line_o (bp))
 end
 
 function region_new ()
