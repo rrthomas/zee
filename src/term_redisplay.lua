@@ -19,21 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-local width, height = 0, 0
-
-function term_width ()
-  return width
-end
-
-function term_height ()
-  return height
-end
-
-function term_set_size (cols, rows)
-  width = cols
-  height = rows
-end
-
 -- Tidy up the term ready to leave Zile (temporarily or permanently!).
 function term_tidy ()
   term_move (term_height () - 1, 0)

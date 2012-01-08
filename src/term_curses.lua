@@ -66,6 +66,14 @@ local function CTRL (c)
   return bit.bor (KBD_CTRL, string.byte (c))
 end
 
+function term_width ()
+  return curses.cols ()
+end
+
+function term_height ()
+  return curses.lines ()
+end
+
 function term_init ()
   curses.initscr ()
 
@@ -149,7 +157,6 @@ function term_init ()
                                 [KBD_BS] = 127,
                               })
 
-  term_set_size (curses.cols (), curses.lines ())
   curses.echo (false)
   curses.nl (false)
   curses.raw (true)
@@ -213,7 +220,6 @@ local function get_char (delay)
       c = curses.stdscr ():getch ()
 
       if curses.KEY_RESIZE == c then
-        term_set_size (curses.cols (), curses.lines ())
         resize_windows ()
       end
     until curses.KEY_RESIZE ~= c
