@@ -23,9 +23,6 @@
 -- information.
 undo_nosave = false
 
--- This variable is set to true when an undo is in execution.
-local doing_undo = false
-
 -- Undo delta types.
 UNDO_REPLACE_BLOCK = 0  -- Replace a block of characters.
 UNDO_START_SEQUENCE = 1 -- Start a multi operation sequence.
@@ -47,10 +44,6 @@ local function undo_save (ty, o, osize, size)
   end
 
   cur_bp.last_undop = up
-
-  if not doing_undo then
-    cur_bp.next_undop = up
-  end
 end
 
 
@@ -76,8 +69,6 @@ end
 
 -- Revert an action.  Return the next undo entry.
 local function revert_action (up)
-  doing_undo = true
-
   if up.type == UNDO_END_SEQUENCE then
     undo_start_sequence ()
     up = up.next
@@ -91,8 +82,6 @@ local function revert_action (up)
     goto_offset (up.o)
     replace_estr (up.size, up.text)
   end
-
-  doing_undo = false
 
   if up.unchanged then
     cur_bp.modified = false
