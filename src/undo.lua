@@ -26,28 +26,44 @@ undo_nosave = false
 -- This variable is set to true when an undo is in execution.
 local doing_undo = false
 
+-- Undo delta types.
+UNDO_REPLACE_BLOCK = 0  -- Replace a block of characters.
+UNDO_START_SEQUENCE = 1 -- Start a multi operation sequence.
+UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
+
 -- Save a reverse delta for doing undo.
-function undo_save (ty, o, osize, size)
+local function undo_save (ty, o, osize, size)
   if cur_bp.noundo or undo_nosave then
     return
   end
 
-  local up = {type = ty, o = o}
-  if not cur_bp.modified then
-    up.unchanged = true
-  end
+  local up = {type = ty, next = cur_bp.last_undop}
 
   if ty == UNDO_REPLACE_BLOCK then
+    up.o = o
     up.size = size
     up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
+    up.unchanged = not cur_bp.modified
   end
 
-  up.next = cur_bp.last_undop
   cur_bp.last_undop = up
 
   if not doing_undo then
     cur_bp.next_undop = up
   end
+end
+
+
+function undo_start_sequence ()
+  undo_save (UNDO_START_SEQUENCE, 0, 0, 0)
+end
+
+function undo_end_sequence ()
+  undo_save (UNDO_END_SEQUENCE, 0, 0, 0)
+end
+
+function undo_save_block (o, osize, size)
+  undo_save (UNDO_REPLACE_BLOCK, o, osize, size)
 end
 
 -- Set unchanged flags to false.
@@ -60,29 +76,20 @@ end
 
 -- Revert an action.  Return the next undo entry.
 local function revert_action (up)
-  local o = up.o
-
   doing_undo = true
 
   if up.type == UNDO_END_SEQUENCE then
-    undo_save (UNDO_START_SEQUENCE, up.o, 0, 0)
+    undo_start_sequence ()
     up = up.next
     while up.type ~= UNDO_START_SEQUENCE do
       up = revert_action (up)
     end
-    undo_save (UNDO_END_SEQUENCE, up.o, 0, 0)
+    undo_end_sequence ()
   end
 
-  goto_offset (o)
-
   if up.type == UNDO_REPLACE_BLOCK then
-    undo_save (UNDO_REPLACE_BLOCK, o, up.size, #up.text)
-    undo_nosave = true
-    for i = 1, up.size do
-      delete_char ()
-    end
-    insert_estr (up.text)
-    undo_nosave = false
+    goto_offset (up.o)
+    replace_estr (up.size, up.text)
   end
 
   doing_undo = false

@@ -56,7 +56,7 @@ Copy region into register @i{register}.
 local regnum
 
 function insert_register ()
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 0, #regs[regnum])
+  undo_save_block (get_buffer_o (cur_bp), 0, #regs[regnum])
   undo_nosave = true
   insert_string (regs[regnum])
   undo_nosave = false

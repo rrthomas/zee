@@ -24,7 +24,7 @@ function replace_estr (del, es)
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), del, #es.s)
+  undo_save_block (get_buffer_o (cur_bp), del, #es.s)
   undo_nosave = true
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, "", false)
   local p = 1
@@ -137,13 +137,13 @@ local function insert_expanded_tab (inschr)
   local c = get_goalc ()
   local t = tab_width (cur_bp)
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_start_sequence ()
 
   for c = t - c % t, 1, -1 do
     inschr (' ')
   end
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_end_sequence ()
 end
 
 local function insert_tab ()
@@ -281,7 +281,7 @@ does nothing.
     end
 
     -- Insert indentation.
-    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_start_sequence ()
     if target_goalc > 0 then
       -- If not at EOL on target line, insert spaces & tabs up to
       -- target_goalc; if already at EOL on target line, insert a tab.
@@ -301,7 +301,7 @@ does nothing.
     else
       ok = insert_tab ()
     end
-    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_end_sequence ()
 
     return ok
   end
@@ -323,7 +323,7 @@ Indentation is done using the `indent-for-tab-command' function.
 
     deactivate_mark ()
 
-    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_start_sequence ()
     if insert_newline () then
       local m = point_marker ()
       local pos
@@ -341,7 +341,7 @@ Indentation is done using the `indent-for-tab-command' function.
       end
       ok = true
     end
-    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_end_sequence ()
 
     return ok
   end
@@ -377,7 +377,7 @@ Delete all spaces and tabs around point.
 ]],
   true,
   function ()
-    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_start_sequence ()
 
     while not eolp () and following_char ():match ("%s") do
       delete_char ()
@@ -387,7 +387,7 @@ Delete all spaces and tabs around point.
       backward_delete_char ()
     end
 
-    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_end_sequence ()
   end
 )
 
@@ -398,10 +398,10 @@ Delete all spaces and tabs around point, leaving one space.
 ]],
   true,
   function ()
-    undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_start_sequence ()
     execute_function ("delete-horizontal-space")
     insert_char (' ')
-    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+    undo_end_sequence ()
   end
 )
 

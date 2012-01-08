@@ -27,13 +27,6 @@ ZILE_VERSION_STRING = "GNU " .. PACKAGE_NAME .. " " .. VERSION
 program_name = posix.basename (arg[0] or PACKAGE)
 
 
--- Main editor structures.
-
--- Undo delta types.
-UNDO_REPLACE_BLOCK = 0  -- Replace a block of characters.
-UNDO_START_SEQUENCE = 1 -- Start a multi operation sequence.
-UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
-
 -- Keyboard handling
 
 GETKEY_DEFAULT = -1
@@ -73,9 +66,6 @@ KBD_F9 = 280
 KBD_F10 = 281
 KBD_F11 = 282
 KBD_F12 = 283
-
-
--- Miscellaneous stuff.
 
 -- Global flags, stored in thisflag and lastflag.
 -- need_resync:    a resync is required.

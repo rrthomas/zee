@@ -91,11 +91,11 @@ local function process_keys (keys)
     term_ungetkey (keys[i])
   end
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_start_sequence ()
   while term_buf_len () > cur do
     get_and_run_command ()
   end
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_end_sequence ()
 end
 
 local macro_keys = {}

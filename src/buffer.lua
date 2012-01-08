@@ -71,7 +71,7 @@ function delete_char ()
     return false
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 1, 0)
+  undo_save_block (get_buffer_o (cur_bp), 1, 0)
   local o
   if eolp () then
     o = adjust_markers (get_buffer_o (cur_bp), -#get_buffer_text (cur_bp).eol)
@@ -99,7 +99,7 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
     end
   end
 
-  undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, #newtext)
+  undo_save_block (offset, oldlen, #newtext)
   bp.modified = true
   bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
   bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
@@ -113,10 +113,10 @@ buffers = {}
 buffer_name_history = history_new ()
 
 function insert_buffer (bp)
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_start_sequence ()
   -- Copy text to avoid problems when bp == cur_bp.
   insert_estr (estr_dup (bp.es))
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_end_sequence ()
 end
 
 -- Allocate a new buffer, set the default local variable values, and
