@@ -113,10 +113,8 @@ buffers = {}
 buffer_name_history = history_new ()
 
 function insert_buffer (bp)
-  undo_start_sequence ()
   -- Copy text to avoid problems when bp == cur_bp.
   insert_estr (estr_dup (bp.es))
-  undo_end_sequence ()
 end
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -203,7 +201,7 @@ function get_buffer_region (bp, r)
   return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
 end
 
-local function warn_if_no_mark ()
+function warn_if_no_mark ()
   if not cur_bp.mark then
     minibuf_error ("The mark is not set now")
     return true

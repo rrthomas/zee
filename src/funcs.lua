@@ -391,7 +391,7 @@ Fill paragraph at or after point.
   end
 )
 
-local function pipe_command (cmd, tempfile, insert, replace)
+local function pipe_command (cmd, tempfile, insert, do_replace)
   local cmdline = string.format ("%s 2>&1 <%s", cmd, tempfile)
   local pipe = io.popen (cmdline, "r")
   if not pipe then
@@ -402,24 +402,20 @@ local function pipe_command (cmd, tempfile, insert, replace)
   local out = pipe:read ("*a")
   pipe:close ()
   local eol = string.find (out, "\n")
-  local more_than_one_line = false
-  if eol and eol ~= #out then
-    more_than_one_line = true
-  end
 
   if #out == 0 then
     minibuf_write ("(Shell command succeeded with no output)")
   else
     if insert then
-      if replace then
-        undo_start_sequence ()
+      local del = 0
+      if do_replace and not warn_if_no_mark () then
+        local r = calculate_the_region ()
+        goto_offset (r.start)
+        del = get_region_size (r)
       end
-      execute_function ("delete-region")
-      insert_string (out)
-      if replace then
-        undo_end_sequence ()
-      end
+      replace (del, out)
     else
+      local more_than_one_line = eol and eol ~= #out
       write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
       if not more_than_one_line then
         minibuf_write (out)
@@ -965,12 +961,7 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    undo_start_sequence ()
-    for i = 1, #as do
-      delete_char ()
-    end
-    insert_string (recase (as, rcase))
-    undo_end_sequence ();
+    replace (#as, recase (as, rcase))
   end
 
   cur_bp.modified = true
