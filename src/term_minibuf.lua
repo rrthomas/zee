@@ -60,17 +60,20 @@ function maybe_close_popup (cp)
   end
 end
 
-local function do_minibuf_read (prompt, value, pos, cp, hp)
-  local thistab
+function term_minibuf_read (prompt, value, pos, cp, hp)
+  if hp then
+    history_prepare (hp)
+  end
+
+  local thistab, saved
   local lasttab = -1
   local as = value
-  local saved
 
   if pos == -1 then
     pos = #as
   end
 
-  while true do
+  repeat
     local s
     if lasttab == "matches" then
       s = " [Complete, but not unique]"
@@ -90,14 +93,9 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
     if c == KBD_NOKEY then
     elseif c == bit.bor (KBD_CTRL, string.byte ('z')) then
       execute_function ("suspend-emacs")
-    elseif c == KBD_RET then
-      term_move (term_height () - 1, 0)
-      term_clrtoeol ()
-      return as
     elseif c == KBD_CANCEL then
-      term_move (term_height () - 1, 0)
-      term_clrtoeol ()
-      return
+      as = nil
+      break
     elseif c == bit.bor (KBD_CTRL, string.byte ('a')) or c == KBD_HOME then
       pos = 0
     elseif c == bit.bor (KBD_CTRL, string.byte ('e')) or c == KBD_END then
@@ -209,21 +207,15 @@ local function do_minibuf_read (prompt, value, pos, cp, hp)
     end
 
     lasttab = thistab
-  end
+  until c == KBD_RET or c == KBD_CANCEL
+
+  minibuf_clear ()
+  maybe_close_popup (cp)
+  return s
 end
 
 function term_minibuf_write (s)
   term_move (term_height () - 1, 0)
   term_clrtoeol ()
   term_addstr (string.sub (s, 1, math.min (#s, term_width ())))
-end
-
-function term_minibuf_read (prompt, value, pos, cp, hp)
-  if hp then
-    history_prepare (hp)
-  end
-
-  local s = do_minibuf_read (prompt, value, pos, cp, hp)
-  maybe_close_popup (cp)
-  return s
 end
