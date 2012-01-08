@@ -38,7 +38,8 @@ The desired position of point is always relative to the current window.
   true,
   function ()
     recenter (cur_wp)
-    term_full_redisplay ()
+    term_clear ()
+    term_redisplay ()
     return leT
   end
 )

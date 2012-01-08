@@ -238,8 +238,3 @@ function term_redraw_cursor ()
   -- Redraw cursor.
   term_move (cur_topline + cur_wp.topdelta, col)
 end
-
-function term_full_redisplay ()
-  term_clear ()
-  term_redisplay ()
-end
