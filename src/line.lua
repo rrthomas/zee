@@ -24,8 +24,7 @@ function replace_estr (del, es)
     return false
   end
 
-  undo_save_block (get_buffer_o (cur_bp), del, #es.s)
-  undo_nosave = true
+  undo_start_sequence ()
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, "", false)
   local p = 1
   while p <= #es.s do
@@ -42,7 +41,7 @@ function replace_estr (del, es)
       p = p + eol_len
     end
   end
-  undo_nosave = false
+  undo_end_sequence ()
 
   return true
 end

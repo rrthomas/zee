@@ -19,10 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
--- Setting this variable to true stops undo_save saving the given
--- information.
-undo_nosave = false
-
 -- Undo delta types.
 UNDO_REPLACE_BLOCK = 0  -- Replace a block of characters.
 UNDO_START_SEQUENCE = 1 -- Start a multi operation sequence.
@@ -30,7 +26,7 @@ UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
 
 -- Save a reverse delta for doing undo.
 local function undo_save (ty, o, osize, size)
-  if cur_bp.noundo or undo_nosave then
+  if cur_bp.noundo then
     return
   end
 

@@ -136,12 +136,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
     end
 
     set_mark_interactive ()
-
-    undo_save_block (get_buffer_o (cur_bp), 0, #kill_ring_text)
-    undo_nosave = true
     insert_string (kill_ring_text)
-    undo_nosave = false
-
     deactivate_mark ()
   end
 )
