@@ -57,25 +57,14 @@ _this_command = nil
 _interactive = false
 
 function call_command (f, branch)
+  thisflag = {defining_macro = lastflag.defining_macro}
+
+  -- Execute the command.
   _this_command = f
   _interactive = true
-  execute_function (f, branch)
+  local ok = execute_function (f, branch)
   _interactive = false
   _last_command = _this_command
-end
-
-function get_and_run_command ()
-  local keys = get_key_sequence ()
-  local name = get_function_by_keys (keys)
-
-  thisflag = {defining_macro = lastflag.defining_macro}
-  minibuf_clear ()
-
-  if function_exists (name) then
-    call_command (name, lastflag.set_uniarg and (prefix_arg or 1 ))
-  else
-    minibuf_error (keyvectodesc (keys) .. " is undefined")
-  end
 
   -- Only add keystrokes if we were already in macro defining mode
   -- before the function call, to cope with start-kbd-macro.
@@ -83,11 +72,26 @@ function get_and_run_command ()
     add_cmd_to_macro ()
   end
 
-  if _last_command ~= "undo" then
+  if cur_bp and _last_command ~= "undo" then
     cur_bp.next_undop = cur_bp.last_undop
   end
 
   lastflag = thisflag
+
+  return ok
+end
+
+function get_and_run_command ()
+  local keys = get_key_sequence ()
+  local name = get_function_by_keys (keys)
+
+  minibuf_clear ()
+
+  if function_exists (name) then
+    call_command (name, lastflag.set_uniarg and (prefix_arg or 1 ))
+  else
+    minibuf_error (keyvectodesc (keys) .. " is undefined")
+  end
 end
 
 root_bindings = tree.new ()
