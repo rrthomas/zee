@@ -33,90 +33,47 @@ function term_finish ()
   term_close ()
 end
 
--- Add a string to the terminal
-function term_addstr (s)
-  for i = 1, #s do
-    term_addch (string.byte (s, i))
-  end
-end
-
-local function make_char_printable (c)
-  if c >= 0 and c <= 27 then
-    return string.format ("^%c", string.byte ("@") + c)
+local function make_char_printable (c, x, cur_tab_width)
+  assert (c ~= "")
+  if c == '\t' then
+    return string.rep (" ", cur_tab_width - x % cur_tab_width)
+  elseif posix.isprint (c) then
+    return c
+  elseif string.byte (c) > 0 and string.byte (c) <= 27 then
+    return string.format ("^%c", string.byte ("@") + string.byte (c))
   else
-    return string.format ("\\%o", bit.band (c, 0xff))
+    return string.format ("\\%o", string.byte (c))
   end
-end
-
-local function outch (c, font, x, cur_tab_width)
-  local tw = term_width ()
-
-  if x >= tw then
-    return x
-  end
-
-  term_attrset (font)
-
-  if c == string.byte ('\t') then
-    for w = cur_tab_width - x % cur_tab_width, 1, -1 do
-      term_addstr (' ')
-      x = x + 1
-      if x >= tw then
-        break
-      end
-    end
-  elseif posix.isprint (string.char (c)) then
-    term_addch (c)
-    x = x + 1
-  else
-    local s = make_char_printable (c)
-    local j = #s
-    for i = 1, j do
-      term_addch (string.byte (s, i))
-      x = x + 1
-      if x >= tw then
-        break
-      end
-    end
-  end
-
-  term_attrset (FONT_NORMAL)
-
-  return x
 end
 
 local function in_region (o, x, r)
   return o + x >= r.start and o + x <= r.finish
 end
 
-local function draw_line (line, startcol, wp, o, rp, highlight, w)
+local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   term_move (line, 0)
+
+  -- Draw body of line.
   local x = 0
-  for i = startcol + 1, estr_end_of_line (get_buffer_text (wp.bp), o) - o do
-    if x >= wp.ewidth then
+  for i = startcol, math.huge do
+    term_attrset ((highlight and in_region (o, i, r)) and FONT_REVERSE or FONT_NORMAL)
+    if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
       break
     end
-    local font = FONT_NORMAL
-    if highlight and in_region (o, i, rp) then
-      font = FONT_REVERSE
-    end
-    x = outch (string.byte (get_buffer_text (wp.bp).s[o + i]), font, x)
+    local s = make_char_printable (get_buffer_text (wp.bp).s[o + i + 1], x, cur_tab_width)
+    term_addstr (s)
+    x = x + #s
   end
 
+  -- Draw end of line.
   if x >= term_width () then
     term_move (line, term_width () - 1)
+    term_attrset (FONT_NORMAL)
     term_addstr ('$')
-  elseif highlight == true then
-    local i = x + startcol
-    while x < wp.ewidth do
-      if in_region (o, i, rp) then
-        x = outch (string.byte (' '), FONT_REVERSE, x, w)
-      else
-        x = x + 1
-      end
-      i = i + 1
-    end
+  else
+    term_addstr (string.rep (" ", wp.ewidth - x))
   end
+  term_attrset (FONT_NORMAL)
 end
 
 local function calculate_highlight_region (wp, rp)
@@ -232,37 +189,28 @@ local cur_topline, col = 0, 0
 function term_redisplay ()
 -- Calculate the start column if the line at point has to be truncated.
   local lastcol, t = 0, tab_width (cur_wp.bp)
-  local pt = offset_to_point (cur_wp.bp, window_o (cur_wp))
-  local rpfact = math.floor (pt.o / math.floor (cur_wp.ewidth / 3))
-  local o = window_o (cur_wp) - pt.o
+  local o = window_o (cur_wp)
+  local lineo = o - get_buffer_line_o (cur_wp.bp)
 
   col = 0
+  o = o - lineo
+  cur_wp.start_column = 0
 
-  for lp = pt.o, 0, -1 do
+  local ew = cur_wp.ewidth
+  for lp = lineo, 0, -1 do
     col = 0
-    for p = lp, pt.o - 1 do
-      local c = get_buffer_text (cur_wp.bp).s[o + p + 1]
-      if c == '\t' then
-        col = bit.bor (col, t - 1) + 1
-      elseif posix.isprint (c) then
-        col = col + 1
-      else
-        col = col + #make_char_printable (string.byte (c))
-      end
+    for p = lp, lineo - 1 do
+      col = col + #make_char_printable (get_buffer_text (cur_wp.bp).s[o + p + 1], col, t)
     end
 
-    local lpfact = math.floor (lp / math.floor (cur_wp.ewidth / 3))
-    if col >= cur_wp.ewidth - 1 or lpfact < rpfact - 2 then
+    if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then
       cur_wp.start_column = lp + 1
-      point_screen_column = lastcol
-      return
+      col = lastcol
+      break
     end
 
     lastcol = col
   end
-
-  cur_wp.start_column = 0
-  point_screen_column = col
 
   -- Draw the window.
   local topline = 0

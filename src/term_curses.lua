@@ -41,8 +41,9 @@ function term_clear ()
   curses.stdscr ():clear ()
 end
 
-function term_addch (c)
-  curses.stdscr ():addch (bit.band (c, bit.bnot (curses.A_ATTRIBUTES)))
+-- Add a string to the terminal
+function term_addstr (s)
+  curses.stdscr ():addstr (s)
 end
 
 function term_attrset (attrs)
