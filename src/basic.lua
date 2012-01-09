@@ -134,7 +134,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
     end
 
     if type (n) == "number" then
-      move_line ((math.max (n, 1) - 1) - get_buffer_pt (cur_bp).n)
+      move_line ((math.max (n, 1) - 1) - offset_to_point (cur_bp, get_buffer_o (cur_bp)).n)
       execute_function ("beginning-of-line")
     else
       return false

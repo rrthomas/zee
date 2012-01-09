@@ -27,26 +27,33 @@ function get_buffer_pre_point (bp)
 end
 
 function get_buffer_post_point (bp)
-  return bp.text.s:sub (get_buffer_o (bp) + 1)
-end
-
-function get_buffer_pt (bp)
-  return offset_to_point (bp, bp.o)
+  return bp.text.s:sub (get_buffer_o (bp) + bp.gap + 1)
 end
 
 function get_buffer_o (bp)
   return bp.o
 end
 
+function set_buffer_o (bp, o)
+  bp.o = o
+end
+
+function buffer_o_to_realo (bp, o)
+  return o <= bp.o and o or o - bp.gap;
+end
+
 function get_buffer_size (bp)
-  return #bp.text.s
+  return buffer_o_to_realo (bp, #bp.text.s)
 end
 
 function buffer_line_len (bp, o)
-  return estr_line_len (bp.text, o or get_buffer_line_o (bp))
+  o = o or get_buffer_line_o (bp)
+  return buffer_o_to_realo (bp, estr_end_of_line (bp.text, o)) -
+    buffer_o_to_realo (bp, estr_start_of_line (bp.text, o))
 end
 
 -- Adjust markers (including point) at offset `o' by offset `delta'.
+-- (Don't need to take the gap into account here.)
 local function adjust_markers (o, delta)
   local m_pt = point_marker ()
   for m in pairs (cur_bp.markers) do
@@ -66,9 +73,9 @@ end
 -- case as the old.
 function buffer_replace (bp, offset, oldlen, newtext)
   undo_save_block (offset, oldlen, #newtext)
-  bp.modified = true
   bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
-  bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
+  set_buffer_o (bp, adjust_markers (offset, #newtext - oldlen))
+  bp.modified = true
   thisflag.need_resync = true
 end
 
@@ -85,11 +92,11 @@ function replace_estr (del, es)
     local line_len = (next or #es.s + 1) - p
     buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1))
     local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
-    cur_bp.o = cur_bp.o + line_len
+    set_buffer_o (cur_bp, get_buffer_o (cur_bp) + line_len)
     p = p + line_len
     if next then
       buffer_replace (cur_bp, cur_bp.o, 0, get_buffer_eol (cur_bp))
-      cur_bp.o = cur_bp.o + buf_eol_len
+      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + buf_eol_len)
       thisflag.need_resync = true
       p = p + eol_len
     end
@@ -104,7 +111,7 @@ function insert_estr (es)
 end
 
 function get_buffer_char (bp, o)
-  return bp.text.s[o + 1]
+  return bp.text.s[buffer_o_to_realo (bp, o) + 1]
 end
 
 function buffer_prev_line (bp, o)
@@ -194,6 +201,7 @@ function buffer_new ()
   local bp = {}
 
   bp.o = 0
+  bp.gap = 0
   bp.text = {s = "", eol = coding_eol_lf}
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
@@ -487,10 +495,10 @@ function move_char (offset)
   local dir = offset >= 0 and 1 or -1
   for i = 1, math.abs (offset) do
     if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
-      cur_bp.o = cur_bp.o + dir
+      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + dir)
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      cur_bp.o = cur_bp.o + #get_buffer_eol (cur_bp) * dir
+      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + #get_buffer_eol (cur_bp) * dir)
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
       return false
@@ -523,7 +531,7 @@ function goto_goalc ()
     i = i + 1
   end
 
-  cur_bp.o = i
+  set_buffer_o (cur_bp, i)
 end
 
 function move_line (n)
@@ -542,7 +550,7 @@ function move_line (n)
     if o == nil then
       break
     end
-    cur_bp.o = o
+    set_buffer_o (cur_bp, o)
     n = n - 1
   end
 
@@ -553,9 +561,9 @@ function move_line (n)
 end
 
 function goto_offset (o)
-  local old_n = get_buffer_pt (cur_bp).n
-  cur_bp.o = o
-  if get_buffer_pt (cur_bp).n ~= old_n then
+  local old_lineo = get_buffer_line_o (cur_bp)
+  set_buffer_o (cur_bp, o)
+  if get_buffer_line_o (cur_bp) ~= old_lineo then
     cur_bp.goalc = get_goalc ()
     thisflag.need_resync = true
   end
