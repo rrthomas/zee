@@ -353,23 +353,22 @@ Fill paragraph at or after point.
     undo_start_sequence ()
 
     execute_function ("forward-paragraph")
-    local finish = get_buffer_pt (cur_bp).n
     if is_empty_line () then
-      finish = finish - 1
+      previous_line ()
     end
+    local m_end = point_marker ()
 
     execute_function ("backward-paragraph")
-    local start = get_buffer_pt (cur_bp).n
     if is_empty_line () then -- Move to next line if between two paragraphs.
       next_line ()
-      start = start + 1
     end
 
-    for i = start, finish - 1 do
+    while buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)) < m_end.o do
       execute_function ("end-of-line")
       delete_char ()
       execute_function ("just-one-space")
     end
+    unchain_marker (m_end)
 
     execute_function ("end-of-line")
     while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
