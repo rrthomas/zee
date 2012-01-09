@@ -47,7 +47,7 @@ local function make_char_printable (c, x, cur_tab_width)
 end
 
 local function in_region (o, x, r)
-  return o + x >= r.start and o + x <= r.finish
+  return o + x >= r.start and o + x < r.finish
 end
 
 local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
@@ -56,7 +56,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   -- Draw body of line.
   local x = 0
   for i = startcol, math.huge do
-    term_attrset ((highlight and in_region (o, i, r)) and FONT_REVERSE or FONT_NORMAL)
+    term_attrset ((highlight and in_region (o, i, rp)) and FONT_REVERSE or FONT_NORMAL)
     if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
       break
     end
@@ -76,20 +76,18 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   term_attrset (FONT_NORMAL)
 end
 
-local function calculate_highlight_region (wp, rp)
+local function calculate_highlight_region (wp)
   if (wp ~= cur_wp and not get_variable_bool ("highlight-nonselected-windows"))
     or wp.bp.mark == nil
     or not wp.bp.mark_active then
     return false
   end
 
-  rp = region_new (window_o (wp), wp.bp.mark.o)
-  return true
+  return true, region_new (window_o (wp), wp.bp.mark.o)
 end
 
 local function draw_window (topline, wp)
-  local rp = {}
-  local highlight = calculate_highlight_region (wp, rp)
+  local highlight, rp = calculate_highlight_region (wp, rp)
 
   -- Find the first line to display on the first screen line.
   local o = estr_start_of_line (get_buffer_text (wp.bp), window_o (wp))
