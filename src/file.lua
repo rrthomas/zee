@@ -380,7 +380,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
   end
 
   if ans == true then
-    if name ~= bp.filename then
+    if not bp.filename or name ~= bp.filename then
       set_buffer_names (bp, name)
     end
     bp.needname = false
