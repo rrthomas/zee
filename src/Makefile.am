@@ -79,12 +79,12 @@ src/loadlua.lua: src/Makefile.am src/loadlua.lua.in
 	cp src/loadlua.lua.in $@
 	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
-$(top_builddir)/src/zile: $(top_builddir)/src/zile.lua Makefile
+$(top_builddir)/src/zile: $(PRODUCTIONSOURCES) Makefile
 	rm -f $@ $@.tmp
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-	$(top_builddir)/src/zile --version
+	$(top_builddir)/src/zile --version >/dev/null
 
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/zile.lua' >$@.tmp
