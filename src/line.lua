@@ -19,37 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function replace_estr (del, es)
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
-  undo_start_sequence ()
-  buffer_replace (cur_bp, get_buffer_o (cur_bp), del, "")
-  local p = 1
-  while p <= #es.s do
-    local next = string.find (es.s, es.eol, p)
-    local line_len = (next or #es.s + 1) - p
-    buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1))
-    local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
-    cur_bp.o = cur_bp.o + line_len
-    p = p + line_len
-    if next then
-      buffer_replace (cur_bp, cur_bp.o, 0, get_buffer_eol (cur_bp))
-      cur_bp.o = cur_bp.o + buf_eol_len
-      thisflag.need_resync = true
-      p = p + eol_len
-    end
-  end
-  undo_end_sequence ()
-
-  return true
-end
-
-function insert_estr (es)
-  return replace_estr (0, es)
-end
-
 function insert_string (s, eol)
   return insert_estr ({s = s, eol = eol or coding_eol_lf})
 end

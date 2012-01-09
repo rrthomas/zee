@@ -30,12 +30,3 @@ function offset_to_point (bp, offset)
   pt.o = offset - o
   return pt
 end
-
-function goto_offset (o)
-  local old_n = get_buffer_pt (cur_bp).n
-  cur_bp.o = o
-  if get_buffer_pt (cur_bp).n ~= old_n then
-    cur_bp.goalc = get_goalc ()
-    thisflag.need_resync = true
-  end
-end

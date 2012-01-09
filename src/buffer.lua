@@ -19,6 +19,33 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+
+-- Buffer methods that know about the gap.
+
+function get_buffer_pre_point (bp)
+  return bp.text.s:sub (1, get_buffer_o (bp))
+end
+
+function get_buffer_post_point (bp)
+  return bp.text.s:sub (get_buffer_o (bp) + 1)
+end
+
+function get_buffer_pt (bp)
+  return offset_to_point (bp, bp.o)
+end
+
+function get_buffer_o (bp)
+  return bp.o
+end
+
+function get_buffer_size (bp)
+  return #bp.text.s
+end
+
+function buffer_line_len (bp, o)
+  return estr_line_len (bp.text, o or get_buffer_line_o (bp))
+end
+
 -- Adjust markers (including point) at offset `o' by offset `delta'.
 local function adjust_markers (o, delta)
   local m_pt = point_marker ()
@@ -32,6 +59,92 @@ local function adjust_markers (o, delta)
   local m = m_pt.o
   unchain_marker (m_pt)
   return m
+end
+
+-- Replace text in the buffer `bp' at offset `offset' with `newtext'.
+-- If `replace_case' is true then the new characters will be the same
+-- case as the old.
+function buffer_replace (bp, offset, oldlen, newtext)
+  undo_save_block (offset, oldlen, #newtext)
+  bp.modified = true
+  bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
+  bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
+  thisflag.need_resync = true
+end
+
+function replace_estr (del, es)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  undo_start_sequence ()
+  buffer_replace (cur_bp, get_buffer_o (cur_bp), del, "")
+  local p = 1
+  while p <= #es.s do
+    local next = string.find (es.s, es.eol, p)
+    local line_len = (next or #es.s + 1) - p
+    buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1))
+    local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
+    cur_bp.o = cur_bp.o + line_len
+    p = p + line_len
+    if next then
+      buffer_replace (cur_bp, cur_bp.o, 0, get_buffer_eol (cur_bp))
+      cur_bp.o = cur_bp.o + buf_eol_len
+      thisflag.need_resync = true
+      p = p + eol_len
+    end
+  end
+  undo_end_sequence ()
+
+  return true
+end
+
+function insert_estr (es)
+  return replace_estr (0, es)
+end
+
+function get_buffer_char (bp, o)
+  return bp.text.s[o + 1]
+end
+
+function buffer_prev_line (bp, o)
+  return estr_prev_line (bp.text, o)
+end
+
+function buffer_next_line (bp, o)
+  return estr_next_line (bp.text, o)
+end
+
+function buffer_start_of_line (bp, o)
+  return estr_start_of_line (bp.text, o)
+end
+
+function buffer_end_of_line (bp, o)
+  return estr_end_of_line (bp.text, o)
+end
+
+function get_buffer_line_o (bp)
+  return estr_start_of_line (bp.text, bp.o)
+end
+
+
+-- Buffer methods that don't know about the gap.
+
+function get_buffer_eol (bp)
+  return bp.text.eol
+end
+
+-- Copy a region of text into an estr.
+function get_buffer_region (bp, r)
+  local s = ""
+  if r.start < get_buffer_o (bp) then
+    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_o (bp)))
+  end
+  if r.finish > get_buffer_o (bp) then
+    local from = math.max (r.start - get_buffer_o (bp), 0)
+    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_o (bp))
+  end
+  return {s = s, eol = get_buffer_eol (bp)}
 end
 
 -- Insert the character `c' at the current point position
@@ -64,15 +177,9 @@ function delete_char ()
   return true
 end
 
--- Replace text in the buffer `bp' at offset `offset' with `newtext'.
--- If `replace_case' is true then the new characters will be the same
--- case as the old.
-function buffer_replace (bp, offset, oldlen, newtext)
-  undo_save_block (offset, oldlen, #newtext)
-  bp.modified = true
-  bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
-  bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
-  thisflag.need_resync = true
+function insert_buffer (bp)
+  -- Copy text to avoid problems when bp == cur_bp.
+  insert_estr ({s = get_buffer_pre_point (bp) .. get_buffer_post_point (bp), eol = get_buffer_eol (bp)})
 end
 
 
@@ -80,24 +187,6 @@ end
 buffers = {}
 
 buffer_name_history = history_new ()
-
-function insert_buffer (bp)
-  -- Copy text to avoid problems when bp == cur_bp.
-  insert_estr ({s = get_buffer_pre_point (bp) .. get_buffer_post_point (bp), eol = get_buffer_eol (bp)})
-end
-
--- Copy a region of text into an estr.
-function get_buffer_region (bp, r)
-  local s = ""
-  if r.start < get_buffer_o (bp) then
-    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_o (bp)))
-  end
-  if r.finish > get_buffer_o (bp) then
-    local from = math.max (r.start - get_buffer_o (bp), 0)
-    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_o (bp))
-  end
-  return {s = s, eol = get_buffer_eol (bp)}
-end
 
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
@@ -129,117 +218,30 @@ function get_buffer_filename_or_name (bp)
   return bp.filename or bp.name
 end
 
-function get_buffer_o (bp)
-  return bp.o
-end
-
-function get_buffer_pt (bp)
-  return offset_to_point (bp, bp.o)
-end
-
-function get_buffer_line_o (bp)
-  return estr_start_of_line (bp.text, bp.o)
-end
-
-function get_buffer_char (bp, o)
-  return bp.text.s[o + 1]
-end
-
-function get_buffer_pre_point (bp)
-  return bp.text.s:sub (1, get_buffer_o (bp))
-end
-
-function get_buffer_post_point (bp)
-  return bp.text.s:sub (get_buffer_o (bp) + 1)
-end
-
-function get_buffer_size (bp)
-  return #bp.text.s
-end
-
-function get_buffer_eol (bp)
-  return bp.text.eol
-end
-
-function buffer_prev_line (bp, o)
-  return estr_prev_line (bp.text, o)
-end
-
-function buffer_next_line (bp, o)
-  return estr_next_line (bp.text, o)
-end
-
-function buffer_start_of_line (bp, o)
-  return estr_start_of_line (bp.text, o)
-end
-
-function buffer_end_of_line (bp, o)
-  return estr_end_of_line (bp.text, o)
-end
-
-function buffer_line_len (bp, o)
-  return estr_line_len (bp.text, o or get_buffer_line_o (bp))
-end
-
-function activate_mark ()
-  cur_bp.mark_active = true
-end
-
-function deactivate_mark ()
-  cur_bp.mark_active = false
-end
-
-function delete_region (rp)
-  if warn_if_readonly_buffer () then
-    return false
+-- Set a new filename, and from it a name, for the buffer.
+function set_buffer_names (bp, filename)
+  if filename[1] ~= '/' then
+    filename = string.format ("%s/%s", posix.getcwd(), filename)
   end
+  bp.filename = filename
 
-  buffer_replace (cur_bp, rp.start, get_region_size (rp), "")
-
-  return true
-end
-
-function in_region (o, x, r)
-  return o + x >= r.start and o + x < r.finish
-end
-
--- Return a safe tab width for the given buffer.
-function tab_width (bp)
-  return math.max (get_variable_number_bp (bp, "tab-width"), 1)
-end
-
-function warn_if_no_mark ()
-  if not cur_bp.mark then
-    minibuf_error ("The mark is not set now")
-    return true
-  elseif not cur_bp.mark_active then
-    minibuf_error ("The mark is not active now")
-    return true
+  local s = posix.basename (filename)
+  local name = s
+  local i = 2
+  while find_buffer (name) do
+    name = string.format ("%s<%d>", s, i)
+    i = i + 1
   end
-  return false
+  bp.name = name
 end
 
-function region_new ()
-  return {}
-end
-
-function get_region_size (rp)
-  return rp.finish - rp.start
-end
-
-
--- Make a region from two offsets
-function region_new (o1, o2)
-  return {start = math.min (o1, o2), finish = math.max (o1, o2)}
-end
-
--- Return the region between point and mark.
-function calculate_the_region ()
-  if warn_if_no_mark () then
-    return nil
+-- Search for a buffer named `name'.
+function find_buffer (name)
+  for _, bp in ipairs (buffers) do
+    if bp.name == name then
+      return bp
+    end
   end
-
-  return region_new (cur_bp.o, cur_bp.mark.o)
 end
 
 -- Switch to the specified buffer.
@@ -270,30 +272,98 @@ function switch_to_buffer (bp)
   thisflag.need_resync = true
 end
 
--- Search for a buffer named `name'.
-function find_buffer (name)
-  for _, bp in ipairs (buffers) do
-    if bp.name == name then
-      return bp
-    end
+-- Print an error message into the echo area and return true
+-- if the current buffer is readonly; otherwise return false.
+function warn_if_readonly_buffer ()
+  if cur_bp.readonly then
+    minibuf_error (string.format ("Buffer is readonly: %s", cur_bp.name))
+    return true
   end
+
+  return false
 end
 
--- Set a new filename, and from it a name, for the buffer.
-function set_buffer_names (bp, filename)
-  if filename[1] ~= '/' then
-    filename = string.format ("%s/%s", posix.getcwd(), filename)
+function warn_if_no_mark ()
+  if not cur_bp.mark then
+    minibuf_error ("The mark is not set now")
+    return true
+  elseif not cur_bp.mark_active then
+    minibuf_error ("The mark is not active now")
+    return true
   end
-  bp.filename = filename
+  return false
+end
 
-  local s = posix.basename (filename)
-  local name = s
-  local i = 2
-  while find_buffer (name) do
-    name = string.format ("%s<%d>", s, i)
-    i = i + 1
+-- Make a region from two offsets
+function region_new (o1, o2)
+  return {start = math.min (o1, o2), finish = math.max (o1, o2)}
+end
+
+function get_region_size (rp)
+  return rp.finish - rp.start
+end
+
+-- Return the region between point and mark.
+function calculate_the_region ()
+  if warn_if_no_mark () then
+    return nil
   end
+
+  return region_new (cur_bp.o, cur_bp.mark.o)
+end
+
+function delete_region (rp)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  buffer_replace (cur_bp, rp.start, get_region_size (rp), "")
+
+  return true
+end
+
+function in_region (o, x, r)
+  return o + x >= r.start and o + x < r.finish
+end
+
+-- Set the specified buffer's temporary flag and move the buffer
+-- to the end of the buffer list.
+function set_temporary_buffer (bp)
+  bp.temporary = true
+
+  for i = 1, #buffers do
+    if buffers[i] == bp then
+      table.remove (buffers, i)
+      break
+    end
+  end
+  table.insert (buffers, 1, bp)
+end
+
+function activate_mark ()
+  cur_bp.mark_active = true
+end
+
+function deactivate_mark ()
+  cur_bp.mark_active = false
+end
+
+-- Return a safe tab width for the given buffer.
+function tab_width (bp)
+  return math.max (get_variable_number_bp (bp, "tab-width"), 1)
+end
+
+function create_auto_buffer (name)
+  local bp = buffer_new ()
   bp.name = name
+  bp.needname = true
+  bp.temporary = true
+  bp.nosave = true
+  return bp
+end
+
+function create_scratch_buffer ()
+  return create_auto_buffer ("*scratch*")
 end
 
 -- Remove the specified buffer from the buffer list.
@@ -339,37 +409,55 @@ function kill_buffer (kill_bp)
   end
 end
 
--- Set the specified buffer's temporary flag and move the buffer
--- to the end of the buffer list.
-function set_temporary_buffer (bp)
-  bp.temporary = true
+Defun ("kill-buffer",
+       {"string"},
+[[
+Kill buffer BUFFER.
+With a nil argument, kill the current buffer.
+]],
+  true,
+  function (buffer)
+    local ok = true
 
-  for i = 1, #buffers do
-    if buffers[i] == bp then
-      table.remove (buffers, i)
-      break
+    if not buffer then
+      local cp = make_buffer_completion ()
+      buffer = minibuf_read (string.format ("Kill buffer (default %s): ", cur_bp.name),
+                             "", cp, buffer_name_history)
+      if not buffer then
+        ok = execute_function ("keyboard-quit")
+      end
     end
+
+    local bp
+    if buffer and buffer ~= "" then
+      bp = find_buffer (buffer)
+      if not bp then
+        minibuf_error (string.format ("Buffer `%s' not found", buffer))
+        ok = false
+      end
+    else
+      bp = cur_bp
+    end
+
+    if ok then
+      if not check_modified_buffer (bp) then
+        ok = false
+      else
+        kill_buffer (bp)
+      end
+    end
+
+    return ok
   end
-  table.insert (buffers, 1, bp)
-end
+)
 
--- Print an error message into the echo area and return true
--- if the current buffer is readonly; otherwise return false.
-function warn_if_readonly_buffer ()
-  if cur_bp.readonly then
-    minibuf_error (string.format ("Buffer is readonly: %s", cur_bp.name))
-    return true
+function make_buffer_completion ()
+  local cp = completion_new ()
+  for _, bp in ipairs (buffers) do
+    table.insert (cp.completions, bp.name)
   end
 
-  return false
-end
-
-function activate_mark ()
-  cur_bp.mark_active = true
-end
-
-function deactivate_mark ()
-  cur_bp.mark_active = false
+  return cp
 end
 
 -- Check if the buffer has been modified.  If so, asks the user if
@@ -464,48 +552,14 @@ function move_line (n)
   return n == 0
 end
 
-
-Defun ("kill-buffer",
-       {"string"},
-[[
-Kill buffer BUFFER.
-With a nil argument, kill the current buffer.
-]],
-  true,
-  function (buffer)
-    local ok = true
-
-    if not buffer then
-      local cp = make_buffer_completion ()
-      buffer = minibuf_read (string.format ("Kill buffer (default %s): ", cur_bp.name),
-                             "", cp, buffer_name_history)
-      if not buffer then
-        ok = execute_function ("keyboard-quit")
-      end
-    end
-
-    local bp
-    if buffer and buffer ~= "" then
-      bp = find_buffer (buffer)
-      if not bp then
-        minibuf_error (string.format ("Buffer `%s' not found", buffer))
-        ok = false
-      end
-    else
-      bp = cur_bp
-    end
-
-    if ok then
-      if not check_modified_buffer (bp) then
-        ok = false
-      else
-        kill_buffer (bp)
-      end
-    end
-
-    return ok
+function goto_offset (o)
+  local old_n = get_buffer_pt (cur_bp).n
+  cur_bp.o = o
+  if get_buffer_pt (cur_bp).n ~= old_n then
+    cur_bp.goalc = get_goalc ()
+    thisflag.need_resync = true
   end
-)
+end
 
 local function buffer_next (this_bp)
   for i, bp in ipairs (buffers) do
@@ -557,16 +611,3 @@ Select buffer @i{buffer} in the current window.
     return ok
   end
 )
-
-function create_auto_buffer (name)
-  local bp = buffer_new ()
-  bp.name = name
-  bp.needname = true
-  bp.temporary = true
-  bp.nosave = true
-  return bp
-end
-
-function create_scratch_buffer ()
-  return create_auto_buffer ("*scratch*")
-end
