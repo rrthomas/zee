@@ -410,7 +410,7 @@ end
 Defun ("save-buffer",
        {},
 [[
-Save current buffer in visited file if modified. By default, makes the
+Save current buffer in visited file if modified.  By default, makes the
 previous version into a backup file if this is the first save.
 ]],
   true,
