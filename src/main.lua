@@ -119,18 +119,6 @@ Keys not working properly?  See file://]] .. PATH_DOCDIR .. [[/FAQ
 ]] .. ZILE_COPYRIGHT_NOTICE
 
 
-local function setup_main_screen ()
-  -- *scratch* and two files.
-  if #buffers == 3 then
-    execute_function ("split-window")
-    switch_to_buffer (buffers[2])
-    execute_function ("other-window")
-  elseif #buffers > 3 then
-    -- More than two files.
-    execute_function ("list-buffers")
-  end
-end
-
 -- Documented options table
 --
 -- Documentation line: "doc", "DOCSTRING"
@@ -295,7 +283,15 @@ function main ()
     cur_bp.readonly = true
     execute_function ("beginning-of-buffer")
   end
-  setup_main_screen ()
+
+  -- Set up screen according to number of files loaded.
+  if #buffers == 3 then   -- *scratch* and two files.
+    execute_function ("split-window")
+    switch_to_buffer (buffers[2])
+    execute_function ("other-window")
+  elseif #buffers > 3 then -- More than two files.
+    execute_function ("list-buffers")
+  end
 
   -- Load files and load files and run functions given on the command line.
   local ok = true
