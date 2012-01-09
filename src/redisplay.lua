@@ -40,7 +40,7 @@ The desired position of point is always relative to the current window.
     recenter (cur_wp)
     term_clear ()
     term_redisplay ()
-    return leT
+    return true
   end
 )
 

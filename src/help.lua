@@ -49,7 +49,7 @@ Display the full documentation of a function.
       write_temp_buffer ("*Help*", true, write_function_description, func, doc)
     end
 
-    return leT
+    return true
   end
 )
 

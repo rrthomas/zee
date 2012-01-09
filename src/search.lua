@@ -294,7 +294,7 @@ local function isearch (forward, regexp)
   -- done
   cur_wp.bp.isearch = false
 
-  return leT
+  return true
 end
 
 Defun ("isearch-forward",

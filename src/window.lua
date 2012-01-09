@@ -312,7 +312,7 @@ Both windows display the same buffer now current.
       recenter (cur_wp)
     end
 
-    return leT
+    return true
   end
 )
 

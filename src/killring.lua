@@ -75,7 +75,7 @@ local function kill_text (uniarg, mark_func)
 
   _this_command = "kill-region"
   minibuf_write ("") -- Erase "Set mark" message.
-  return leT
+  return true
 end
 
 Defun ("kill-word",

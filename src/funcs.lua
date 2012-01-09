@@ -332,7 +332,7 @@ Just C-u as argument means to use the current column.
 
     minibuf_write (string.format ("Fill column set to %d (was %d)", n, get_variable_number ("fill-column")))
     set_variable ("fill-column", tostring (n))
-    return leT
+    return true
   end
 )
 
@@ -565,7 +565,7 @@ On nonblank line, delete any immediately following blank lines.
         execute_function ("beginning-of-line")
         set_mark ()
         activate_mark ()
-        while execute_function ("forward-line") == leT and is_blank_line () do end
+        while execute_function ("forward-line") and is_blank_line () do end
         seq_started = true
         undo_start_sequence ()
         execute_function ("delete-region")
@@ -655,7 +655,7 @@ local function move_paragraph (uniarg, forward, backward, line_extremum)
   else
     execute_function (line_extremum)
   end
-  return leT
+  return true
 end
 
 Defun ("backward-paragraph",
@@ -805,7 +805,7 @@ move forward across N balanced expressions.
 local function mark (uniarg, func)
   execute_function ("set-mark")
   local ret = execute_function (func, uniarg)
-  if ret == leT then
+  if ret then
     execute_function ("exchange-point-and-mark")
   end
   return ret
@@ -1027,7 +1027,7 @@ local function setcase_region (func)
   cur_bp.modified = true
   undo_end_sequence ()
 
-  return leT
+  return true
 end
 
 Defun ("upcase-region",

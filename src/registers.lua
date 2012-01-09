@@ -49,7 +49,7 @@ Copy region into register @i{register}.
       end
     end
 
-    return leT
+    return true
   end
 )
 
