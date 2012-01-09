@@ -111,7 +111,7 @@ function get_buffer_region (bp, r)
     s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_o (bp)))
   end
   if r.finish > get_buffer_o (bp) then
-    local from = math.max (r.start, get_buffer_o (bp)) - get_buffer_o (bp)
+    local from = math.max (r.start - get_buffer_o (bp), 0)
     s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_o (bp))
   end
   return {s = s, eol = get_buffer_eol (bp)}
