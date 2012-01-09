@@ -36,7 +36,7 @@ local function undo_save (ty, o, osize, size)
 
   if ty == UNDO_REPLACE_BLOCK then
     up.size = size
-    up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
+    up.text = get_buffer_region (cur_bp, region_new (o, o + osize))
     up.unchanged = not cur_bp.modified
   end
 

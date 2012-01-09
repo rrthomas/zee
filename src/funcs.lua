@@ -546,8 +546,7 @@ On nonblank line, delete any immediately following blank lines.
   true,
   function ()
     local m = point_marker ()
-    local r = {start = get_buffer_line_o (cur_bp)}
-    r.finish = r.start
+    local r = region_new (get_buffer_line_o (cur_bp), get_buffer_line_o (cur_bp))
 
     undo_start_sequence ()
 

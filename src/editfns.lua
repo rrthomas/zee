@@ -36,7 +36,7 @@ function is_empty_line ()
 end
 
 function is_blank_line ()
-  return get_buffer_region (cur_bp, {start = get_buffer_line_o (cur_bp), finish = buffer_end_of_line (cur_bp, get_buffer_o (cur_bp))}).s:match ("^%s*$") ~= nil
+  return get_buffer_region (cur_bp, region_new (get_buffer_line_o (cur_bp), buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)))).s:match ("^%s*$") ~= nil
 end
 
 -- Returns the character following point in the current buffer.

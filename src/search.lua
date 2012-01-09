@@ -415,7 +415,7 @@ what to do with it.
         -- Perform replacement.
         count = count + 1
         local case_repl = repl
-        local r = {start = get_buffer_o (cur_bp) - #find, finish = get_buffer_o (cur_bp)}
+        local r = region_new (get_buffer_o (cur_bp) - #find, get_buffer_o (cur_bp))
         if find_no_upper and get_variable_bool ("case-replace") then
           local case_type = check_case (get_buffer_region (cur_bp, r).s)
           if case_type then
