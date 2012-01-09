@@ -106,16 +106,3 @@ function estr_cat (es, src)
 
   return es
 end
-
--- Read file contents into an estr.
--- On error, returns nil.
-function estr_readf (filename)
-  local h = io.open (filename)
-  if h then
-    local s = h:read ("*a")
-    h:close ()
-    if s then
-      return estr_new (s)
-    end
-  end
-end

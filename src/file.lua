@@ -193,9 +193,9 @@ Set mark after the inserted text.
     end
 
     if ok then
-      local es = estr_readf (file)
-      if es then
-        insert_estr (es)
+      local s = io.slurp (file)
+      if s then
+        insert_estr (estr_new (s))
       else
         ok = false
         minibuf_error ("%s: %s", file, posix.errno ())
@@ -611,16 +611,16 @@ function find_file (filename)
 
   switch_to_buffer (bp)
 
-  local es = estr_readf (filename)
-  if es then
+  local s = io.slurp (filename)
+  if s then
     if not check_writable (filename) then
       cur_bp.readonly = true
     end
   else
-    es = estr_new ("")
+    s = ""
   end
 
-  cur_bp.text = es
+  cur_bp.text = estr_new (s)
 
   -- Reset undo history
   cur_bp.next_undop = nil

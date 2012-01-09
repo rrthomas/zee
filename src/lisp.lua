@@ -209,11 +209,10 @@ function lisp_loadstring (s)
 end
 
 function lisp_loadfile (file)
-  local h = io.open (file)
+  local s = io.slurp (file)
 
-  if h then
-    lisp_loadstring (h:read ("*a"))
-    h:close ()
+  if s then
+    lisp_loadstring (s)
     return true
   end
 
