@@ -385,12 +385,12 @@ local function write_buffer (bp, needname, confirm, name, prompt)
 end
 
 local function save_buffer (bp)
-  if not bp.modified then
-    minibuf_write ("(No changes need to be saved)")
-    return leT
-  else
+  if bp.modified then
     return write_buffer (bp, bp.needname, false, bp.filename, "File to save in: ")
   end
+
+  minibuf_write ("(No changes need to be saved)")
+  return true
 end
 
 Defun ("save-buffer",
