@@ -32,7 +32,7 @@ end
 
 
 function is_empty_line ()
-  return get_buffer_line_len (cur_bp, get_buffer_line_o (cur_bp)) == 0
+  return buffer_line_len (cur_bp) == 0
 end
 
 function is_blank_line ()
@@ -78,5 +78,5 @@ end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) == get_buffer_line_len (cur_bp)
+  return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) == buffer_line_len (cur_bp)
 end

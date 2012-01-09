@@ -932,7 +932,7 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), get_buffer_line_len (cur_bp) do
+  for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) do
     local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
     if iswordchar (c) then
       as = as .. c

@@ -38,7 +38,7 @@ Move point to end of current line.
 ]],
   true,
   function ()
-    goto_offset (get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp))
+    goto_offset (get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp))
     cur_bp.goalc = math.huge
   end
 )
@@ -84,12 +84,11 @@ On reaching end of buffer, stop and signal error.
 )
 
 -- Get the goal column, expanding tabs.
--- FIXME: Get start of line from o, not from get_buffer_line_o.
 function get_goalc_bp (bp, o)
   local col = 0
   local t = tab_width (bp)
-  for i = 1, o - get_buffer_line_o (bp) do
-    if get_buffer_char (bp, get_buffer_line_o (bp) + i) == '\t' then
+  for i = 1, o - buffer_start_of_line (bp, o) do
+    if get_buffer_char (bp, buffer_start_of_line (bp, o) + i) == '\t' then
       col = bit.bor (col, t - 1)
     end
     col = col + 1

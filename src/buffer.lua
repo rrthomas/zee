@@ -196,11 +196,7 @@ function buffer_end_of_line (bp, o)
 end
 
 function buffer_line_len (bp, o)
-  return estr_line_len (bp.text, o)
-end
-
-function get_buffer_line_len (bp)
-  return buffer_line_len (bp, get_buffer_line_o (bp))
+  return estr_line_len (bp.text, o or get_buffer_line_o (bp))
 end
 
 function activate_mark ()
@@ -439,7 +435,7 @@ function goto_goalc ()
   local col = 0
 
   local i = get_buffer_line_o (cur_bp)
-  local lim = get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp)
+  local lim = get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp)
   while i < lim do
     if col == cur_bp.goalc then
       break

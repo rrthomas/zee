@@ -93,10 +93,10 @@ end
 
 -- FIXME: Replace the following with estr_replace, taken from replace_estr.
 function estr_cat (es, src)
-  local o = 1
-  while o and o <= #src.s do
+  local o = 0
+  while o and o < #src.s do
     local nexto = estr_next_line (src, o)
-    es.s = es.s .. string.sub (src.s, o, nexto and nexto - #src.eol or #src.s)
+    es.s = es.s .. string.sub (src.s, o + 1, nexto and nexto - #src.eol or #src.s)
     o = nexto
     if o then
       es.s = es.s .. es.eol
