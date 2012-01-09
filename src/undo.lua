@@ -32,8 +32,9 @@ local function undo_save (ty, o, osize, size)
 
   local up = {type = ty, next = cur_bp.last_undop}
 
+  up.o = o
+
   if ty == UNDO_REPLACE_BLOCK then
-    up.o = o
     up.size = size
     up.text = get_buffer_region (cur_bp, {start = o, finish = o + osize})
     up.unchanged = not cur_bp.modified
@@ -44,7 +45,7 @@ end
 
 
 function undo_start_sequence ()
-  undo_save (UNDO_START_SEQUENCE, 0, 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
 end
 
 function undo_end_sequence ()
@@ -74,8 +75,10 @@ local function revert_action (up)
     undo_end_sequence ()
   end
 
-  if up.type == UNDO_REPLACE_BLOCK then
+  if up.type ~= UNDO_END_SEQUENCE then
     goto_offset (up.o)
+  end
+  if up.type == UNDO_REPLACE_BLOCK then
     replace_estr (up.size, up.text)
   end
 
