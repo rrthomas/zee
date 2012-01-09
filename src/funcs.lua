@@ -583,7 +583,7 @@ On nonblank line, delete any immediately following blank lines.
 
     -- Delete any blank lines found.
     if r.start < r.finish then
-      buffer_replace (cur_bp, r.start, get_region_size (r), "", false)
+      buffer_replace (cur_bp, r.start, get_region_size (r), "")
     end
 
     -- If we found more than one blank line, leave one.

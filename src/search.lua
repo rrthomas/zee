@@ -347,6 +347,17 @@ is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
   end
 )
 
+-- Check the case of a string.
+-- Returns "uppercase" if it is all upper case, "capitalized" if just
+-- the first letter is, and nil otherwise.
+local function check_case (s)
+  if s:match ("^%u+$") then
+    return "uppercase"
+  elseif s:match ("^%u%U*") then
+    return "capitalized"
+  end
+end
+
 Defun ("query-replace",
        {},
 [[
@@ -403,7 +414,15 @@ what to do with it.
       if c ~= string.byte ('n') and c ~= KBD_RET and c ~= KBD_DEL then -- Do not replace.
         -- Perform replacement.
         count = count + 1
-        buffer_replace (cur_bp, get_buffer_o (cur_bp) - #find, #find, repl, find_no_upper)
+        local case_repl = repl
+        local r = {start = get_buffer_o (cur_bp) - #find, finish = get_buffer_o (cur_bp)}
+        if find_no_upper and get_variable_bool ("case-replace") then
+          local case_type = check_case (get_buffer_region (cur_bp, r).s)
+          if case_type then
+            case_repl = recase (repl, case_type)
+          end
+        end
+        buffer_replace (cur_bp, r.start, #find, case_repl)
 
         if c == string.byte ('.') then -- Replace and quit.
           break

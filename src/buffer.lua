@@ -53,10 +53,10 @@ function delete_char ()
   end
 
   if eolp () then
-    buffer_replace (cur_bp, cur_bp.o, #get_buffer_eol (cur_bp), "", false)
+    buffer_replace (cur_bp, cur_bp.o, #get_buffer_eol (cur_bp), "")
     thisflag.need_resync = true
   else
-    buffer_replace (cur_bp, cur_bp.o, 1, "", false)
+    buffer_replace (cur_bp, cur_bp.o, 1, "")
   end
 
   cur_bp.modified = true
@@ -64,28 +64,10 @@ function delete_char ()
   return true
 end
 
--- Check the case of a string.
--- Returns "uppercase" if it is all upper case, "capitalized" if just
--- the first letter is, and nil otherwise.
-local function check_case (s)
-  if s:match ("^%u+$") then
-    return "uppercase"
-  elseif s:match ("^%u%U*") then
-    return "capitalized"
-  end
-end
-
 -- Replace text in the buffer `bp' at offset `offset' with `newtext'.
 -- If `replace_case' is true then the new characters will be the same
 -- case as the old.
-function buffer_replace (bp, offset, oldlen, newtext, replace_case)
-  if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (get_buffer_region (bp, {start = offset, finish = offset + oldlen}).s)
-    if case_type then
-      newtext = recase (newtext, case_type)
-    end
-  end
-
+function buffer_replace (bp, offset, oldlen, newtext)
   undo_save_block (offset, oldlen, #newtext)
   bp.modified = true
   bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
@@ -212,7 +194,7 @@ function delete_region (rp)
     return false
   end
 
-  buffer_replace (cur_bp, rp.start, get_region_size (rp), "", false)
+  buffer_replace (cur_bp, rp.start, get_region_size (rp), "")
 
   return true
 end
