@@ -211,7 +211,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
 
   minibuf_clear ()
   maybe_close_popup (cp)
-  return s
+  return as
 end
 
 function term_minibuf_write (s)
