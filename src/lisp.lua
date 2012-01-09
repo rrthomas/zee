@@ -336,14 +336,7 @@ means use current buffer).
 ]],
   true,
   function (buffer)
-    local bp
-
-    if buffer and buffer ~= "" then
-      bp = find_buffer (buffer)
-    else
-      bp = cur_bp
-    end
-
-    return lisp_loadstring (bp.text.s)
+    local bp = (buffer and buffer ~= "") and find_buffer (buffer) or cur_bp
+    return lisp_loadstring (get_buffer_pre_point (bp) .. get_buffer_post_point (bp))
   end
 )

@@ -56,7 +56,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
     if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
       break
     end
-    local s = make_char_printable (wp.bp.text.s[o + i + 1], x, cur_tab_width)
+    local s = make_char_printable (get_buffer_char (wp.bp, o + i), x, cur_tab_width)
     term_addstr (s)
     x = x + #s
   end
@@ -114,9 +114,9 @@ local function draw_status_line (line, wp)
   term_addstr (string.rep ('-', wp.ewidth))
 
   local eol_type
-  if cur_bp.text.eol == coding_eol_cr then
+  if get_buffer_eol (cur_bp) == coding_eol_cr then
     eol_type = "(Mac)"
-  elseif cur_bp.text.eol == coding_eol_crlf then
+  elseif get_buffer_eol (cur_bp) == coding_eol_crlf then
     eol_type = "(DOS)"
   else
     eol_type = ":"
@@ -126,7 +126,7 @@ local function draw_status_line (line, wp)
 
   local as = string.format ("--%s%2s  %-15s   %s %-9s (Fundamental",
                             eol_type, make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
-                            string.format ("(%d,%d)", pt.n + 1, get_goalc_bp (wp.bp, pt)))
+                            string.format ("(%d,%d)", pt.n + 1, get_goalc_bp (wp.bp, window_o (wp))))
 
   if wp.bp.autofill then
     as = as .. " Fill"
@@ -147,10 +147,10 @@ local function draw_window (topline, wp)
   local highlight, rp = calculate_highlight_region (wp, rp)
 
   -- Find the first line to display on the first screen line.
-  local o = estr_start_of_line (wp.bp.text, window_o (wp))
+  local o = buffer_start_of_line (wp.bp, window_o (wp))
   local i = wp.topdelta
   while i > 0 and o > 0 do
-    o = estr_prev_line (wp.bp.text, o)
+    o = buffer_prev_line (wp.bp, o)
     assert (o)
     i = i - 1
   end
@@ -171,7 +171,7 @@ local function draw_window (topline, wp)
         term_addstr ('$')
       end
 
-      o = estr_next_line (wp.bp.text, o)
+      o = buffer_next_line (wp.bp, o)
     end
   end
 
@@ -200,7 +200,7 @@ function term_redisplay ()
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
-      col = col + #make_char_printable (cur_wp.bp.text.s[o + p + 1], col, t)
+      col = col + #make_char_printable (get_buffer_char (cur_wp.bp, o + p), col, t)
     end
 
     if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then
@@ -212,7 +212,7 @@ function term_redisplay ()
     lastcol = col
   end
 
-  -- Draw the window.
+  -- Draw the windows.
   local topline = 0
   cur_topline = topline
   for _, wp in ipairs (windows) do

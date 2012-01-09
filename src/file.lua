@@ -201,7 +201,7 @@ Set mark after the inserted text.
         minibuf_error ("%s: %s", file, posix.errno ())
       end
     else
-      set_mark_interactive ()
+      execute_function ("set-mark-command")
     end
 
     return ok
@@ -212,15 +212,20 @@ Set mark after the inserted text.
 local function write_to_disk (bp, filename, mode)
   local ret = true
   local h = posix.creat (filename, mode)
-
   if not h then
     return false
   end
 
-  local len = get_buffer_size (bp)
-  local written = posix.write (h, bp.text.s, len)
-  if written < 0 or written ~= len then
+  local s = get_buffer_pre_point (bp)
+  local written = posix.write (h, s)
+  if written < 0 or written ~= #s then
     ret = written
+  else
+    s = get_buffer_post_point (bp)
+    written = posix.write (h, s)
+    if written < 0 or written ~= #s then
+      ret = written
+    end
   end
 
   if posix.close (h) ~= 0 then
@@ -586,7 +591,7 @@ Puts mark after the inserted text.
       end
 
       insert_buffer (bp)
-      set_mark_interactive ()
+      execute_function ("set-mark-command")
     end
 
     return ok

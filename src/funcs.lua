@@ -80,7 +80,7 @@ Put the mark where point is now, and point where the mark is now.
     end
 
     local tmp = cur_bp.o
-    goto_point (offset_to_point (cur_bp, cur_bp.mark.o))
+    goto_offset (cur_bp.mark.o)
     cur_bp.mark.o = tmp
     activate_mark ()
     thisflag.need_resync = true
@@ -268,11 +268,6 @@ its major mode, and the visited file name (if any).
   end
 )
 
-function set_mark_interactive ()
-  set_mark ()
-  minibuf_write ("Mark set")
-end
-
 Defun ("set-mark",
        {},
 [[
@@ -280,7 +275,7 @@ Set this buffer's mark to point.
 ]],
   false,
   function ()
-    set_mark_interactive ()
+    set_mark ()
     activate_mark ()
   end
 )
@@ -293,6 +288,7 @@ Set the mark where point is.
   true,
   function ()
     execute_function ("set-mark")
+    minibuf_write ("Mark set")
   end
 )
 
@@ -306,14 +302,15 @@ Just C-u as argument means to use the current column.
   true,
   function (n)
     if not n and _interactive then
+      local o = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp)
       if lastflag.set_uniarg then
         n = current_prefix_arg
       else
-        n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", get_buffer_pt (cur_bp).o))
+        n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", o))
         if not n then -- cancelled
           return false
         elseif n == "" then
-          n = get_buffer_pt (cur_bp).o
+          n = o
         end
       end
     end
@@ -549,66 +546,56 @@ On nonblank line, delete any immediately following blank lines.
   true,
   function ()
     local m = point_marker ()
-    local seq_started = false
+    local r = {start = get_buffer_line_o (cur_bp)}
+    r.finish = r.start
 
-    -- Delete any immediately following blank lines.
-    if next_line () then
-      if is_blank_line () then
-        push_mark ()
-        execute_function ("beginning-of-line")
-        set_mark ()
-        activate_mark ()
-        while execute_function ("forward-line") and is_blank_line () do end
-        seq_started = true
-        undo_start_sequence ()
-        execute_function ("delete-region")
-        pop_mark ()
-      end
-      previous_line ()
-    end
+    undo_start_sequence ()
 
-    -- Delete any immediately preceding blank lines.
-    if is_blank_line () then
-      local forward = true
-      push_mark ()
-      execute_function ("beginning-of-line")
-      set_mark ()
-      activate_mark ()
+    -- Find following blank lines.
+    if execute_function ("forward-line") and is_blank_line () then
+      r.start = get_buffer_o (cur_bp)
       repeat
-        if not execute_function ("forward-line", -1) then
-          forward = false
-          break
-        end
-      until not is_blank_line ()
-      if forward then
-        execute_function ("forward-line")
-      end
-      if get_buffer_pt (cur_bp).n ~= offset_to_point (cur_bp, m.o).n then
-        if not seq_started then
-          seq_started = true
-          undo_start_sequence ()
-        end
-        execute_function ("delete-region")
-      end
-      pop_mark ()
+        r.finish = buffer_next_line (cur_bp, get_buffer_o (cur_bp))
+      until not execute_function ("forward-line") or not is_blank_line ()
     end
-
-    -- Isolated blank line, delete that one.
-    if not seq_started and is_blank_line () then
-      push_mark ()
-      execute_function ("beginning-of-line")
-      set_mark ()
-      activate_mark ()
-      execute_function ("forward-line")
-      execute_function ("delete-region") -- Just one action, without a sequence.
-      pop_mark ()
-    end
-
     goto_offset (m.o)
 
-    if seq_started then
-      undo_end_sequence ()
+    -- If this line is blank, find any preceding blank lines.
+    local singleblank = true
+    if is_blank_line () then
+      r.finish = math.max (r.finish, buffer_next_line (cur_bp, get_buffer_o (cur_bp) or math.huge))
+      repeat
+        r.start = get_buffer_line_o (cur_bp)
+      until not execute_function ("forward-line", -1) or not is_blank_line ()
+
+      goto_offset (m.o)
+      if r.start ~= get_buffer_line_o (cur_bp) or r.finish > buffer_next_line (cur_bp, get_buffer_o (cur_bp)) then
+        singleblank = false
+      end
+      r.finish = math.min (r.finish, get_buffer_size (cur_bp))
     end
+
+    -- If we are deleting to EOB, need to fudge extra line.
+    local at_eob = r.finish == get_buffer_size (cur_bp) and r.start > 0
+    if at_eob then
+      r.start = r.start - #get_buffer_eol (cur_bp)
+    end
+
+    -- Delete any blank lines found.
+    if r.start < r.finish then
+      buffer_replace (cur_bp, r.start, get_region_size (r), "", false)
+    end
+
+    -- If we found more than one blank line, leave one.
+    if not singleblank then
+      if not at_eob then
+        intercalate_newline ()
+      else
+        insert_newline ()
+      end
+    end
+
+    undo_end_sequence ()
 
     unchain_marker (m)
     deactivate_mark ()
@@ -690,10 +677,10 @@ local function move_sexp (dir)
   while true do
     while not (dir > 0 and eolp or bolp) () do
       local o = get_buffer_o (cur_bp) - (dir < 0 and 1 or 0)
-      local c = cur_bp.text.s[o + 1]
+      local c = get_buffer_char (cur_bp, o)
 
       -- Skip escaped quotes.
-      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and cur_bp.text.s[o] == '\\' then
+      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and get_buffer_char (cur_bp, o - 1) == '\\' then
         move_char (dir)
         c = 'a' -- Treat ' and " like word chars.
       end
@@ -892,7 +879,7 @@ local function move_word (dir, next, move, at_extreme)
       else
         gotword = true
       end
-      goto_point (offset_to_point (cur_bp, get_buffer_o (cur_bp) + dir))
+      goto_offset (get_buffer_o (cur_bp) + dir)
     end
     if gotword then
       return true
@@ -945,9 +932,10 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = get_buffer_pt (cur_bp).o, get_buffer_line_len (cur_bp) do
-    if iswordchar (cur_bp.text.s[get_buffer_line_o (cur_bp) + i + 1]) then
-      as = as .. cur_bp.text.s[get_buffer_line_o (cur_bp) + i + 1]
+  for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), get_buffer_line_len (cur_bp) do
+    local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
+    if iswordchar (c) then
+      as = as .. c
     else
       break
     end
@@ -1060,7 +1048,7 @@ local function transpose_subr (forward_func, backward_func)
     backward_func ()
   end
   -- For transpose-lines.
-  if forward_func == next_line and get_buffer_pt (cur_bp).n == 0 then
+  if forward_func == next_line and get_buffer_line_o (cur_bp) == 0 then
     forward_func ()
   end
 
@@ -1071,11 +1059,8 @@ local function transpose_subr (forward_func, backward_func)
     return false
   end
 
-  -- Save mark.
-  push_mark ()
-
   -- Mark the beginning of first string.
-  set_mark ()
+  push_mark ()
   local m1 = point_marker ()
 
   -- Check to make sure we can go forwards twice.

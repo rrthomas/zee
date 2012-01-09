@@ -31,11 +31,11 @@ function replace_estr (del, es)
     local next = string.find (es.s, es.eol, p)
     local line_len = (next or #es.s + 1) - p
     buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1), false)
-    local eol_len, buf_eol_len = #es.eol, #cur_bp.text.eol
+    local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
     cur_bp.o = cur_bp.o + line_len
     p = p + line_len
     if next then
-      buffer_replace (cur_bp, cur_bp.o, 0, cur_bp.text.eol, false)
+      buffer_replace (cur_bp, cur_bp.o, 0, get_buffer_eol (cur_bp), false)
       cur_bp.o = cur_bp.o + buf_eol_len
       thisflag.need_resync = true
       p = p + eol_len
@@ -83,14 +83,14 @@ function fill_break_line ()
     local m = point_marker ()
 
     -- Move cursor back to fill column
-    old_col = get_buffer_pt (cur_bp).o
+    old_col = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp)
     while get_goalc () > fillcol + 1 do
       cur_bp.o = cur_bp.o - 1
     end
 
     -- Find break point moving left from fill-column.
-    for i = get_buffer_pt (cur_bp).o, 1, -1 do
-      if cur_bp.text.s[get_buffer_line_o (cur_bp) + i]:match ("%s") then
+    for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), 1, -1 do
+      if get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i - 1):match ("%s") then
         break_col = i
         break
       end
@@ -99,8 +99,8 @@ function fill_break_line ()
     -- If no break point moving left from fill-column, find first
     -- possible moving right.
     if break_col == 0 then
-      for i = get_buffer_o (cur_bp) + 1, estr_end_of_line (cur_bp.text, get_buffer_line_o (cur_bp)) do
-        if cur_bp.text.s[i]:match ("%s") then
+      for i = get_buffer_o (cur_bp) + 1, buffer_end_of_line (cur_bp, get_buffer_line_o (cur_bp)) do
+        if get_buffer_char (cur_bp, i - 1):match ("%s") then
           break_col = i - get_buffer_line_o (cur_bp)
           break
         end

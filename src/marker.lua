@@ -57,6 +57,8 @@ function push_mark ()
     -- Save an invalid mark.
     table.insert (mark_ring, marker_new (cur_bp, 0))
   end
+
+  execute_function ("set-mark")
 end
 
 -- Pop a mark from the mark-ring and make it the current mark.

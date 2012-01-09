@@ -87,7 +87,7 @@ Puts point before and mark after the inserted text.
         minibuf_error ("Register does not contain text")
         ok = false
       else
-        set_mark_interactive ()
+        execute_function ("set-mark-command")
         regnum = reg
         execute_with_uniarg (true, current_prefix_arg, insert_register)
         execute_function ("exchange_point_and_mark")

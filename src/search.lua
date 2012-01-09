@@ -36,7 +36,7 @@ end
 local re_flags = rex_gnu.flags ()
 local re_find_err
 
-function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
+function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase)
   local ret
   local cf = 0
 
@@ -59,7 +59,7 @@ function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
     if not forward then
       ef = bit.bor (ef, re_flags.backward)
     end
-    local match_from, match_to = r:find (string.sub (as, from + 1, to), nil, ef)
+    local match_from, match_to = r:find (string.sub (as .. bs, from + 1, to), nil, ef)
     if match_from then
       if forward then
         ret = match_to + from + 1
@@ -74,24 +74,18 @@ function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   return ret
 end
 
-local function search (pt, s, forward, regexp)
-  local from, to = 0, get_buffer_size (cur_bp)
-  local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
-  local notbol, noteol = false, false
-
+local function search (o, s, forward, regexp)
   if #s < 1 then
     return false
   end
 
   -- Attempt match.
-  if forward then
-    notbol = pt.o > from
-    from = point_to_offset (cur_bp, pt)
-  else
-    noteol = pt.o < to
-    to = point_to_offset (cur_bp, pt)
-  end
-  local pos = find_substr (cur_bp.text.s, s, from, to, forward, notbol, noteol, regexp, downcase)
+  local notbol = forward and o > 0
+  local noteol = not forward and o < get_buffer_size (cur_bp)
+  local from = forward and o or 0
+  local to = forward and get_buffer_size (cur_bp) or o
+  local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
+  local pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp), s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
     return false
   end
@@ -118,7 +112,7 @@ function do_search (forward, regexp, pattern)
   if #pattern > 0 then
     last_search = pattern
 
-    if not search (get_buffer_pt (cur_bp), pattern, forward, regexp) then
+    if not search (get_buffer_o (cur_bp), pattern, forward, regexp) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
       ok = true
@@ -175,21 +169,17 @@ Search backward from point for match for regular expression REGEXP.
 
 -- Incremental search engine.
 local function isearch (forward, regexp)
-  local c
-  local last = true
-  local buf = ""
-  local pattern = ""
-  local start = get_buffer_pt (cur_bp)
-  local cur = table.clone (start)
-
   local old_mark
   if cur_wp.bp.mark then
     old_mark = copy_marker (cur_wp.bp.mark)
   end
 
-  -- I-search mode.
   cur_wp.bp.isearch = true
 
+  local last = true
+  local pattern = ""
+  local start = get_buffer_o (cur_bp)
+  local cur = start
   while true do
     -- Make the minibuf message.
     local buf = string.format ("%sI-search%s: %s",
@@ -215,7 +205,7 @@ local function isearch (forward, regexp)
     local c = getkey (GETKEY_DEFAULT)
 
     if c == KBD_CANCEL then
-      goto_point (start)
+      goto_offset (start)
       thisflag.need_resync = true
 
       -- Quit.
@@ -230,8 +220,8 @@ local function isearch (forward, regexp)
     elseif c == KBD_BS then
       if #pattern > 0 then
         pattern = string.sub (pattern, 1, -2)
-        cur = table.clone (start)
-        goto_point (start)
+        cur = start
+        goto_offset (start)
         thisflag.need_resync = true
       else
         ding ()
@@ -248,7 +238,7 @@ local function isearch (forward, regexp)
       end
       if #pattern > 0 then
         -- Find next match.
-        cur = get_buffer_pt (cur_bp)
+        cur = get_buffer_o (cur_bp)
         -- Save search string.
         last_search = pattern
       elseif last_search then
@@ -261,7 +251,7 @@ local function isearch (forward, regexp)
         if #pattern > 0 then
           -- Save mark.
           set_mark ()
-          cur_bp.mark.o = point_to_offset (cur_bp, start)
+          cur_bp.mark.o = start
 
           -- Save search string.
           last_search = pattern
@@ -366,12 +356,7 @@ what to do with it.
 ]],
   true,
   function ()
-    local ok = true
-    local noask = false
-    local count = 0
-
     local find = minibuf_read ("Query replace string: ", "")
-
     if not find then
       return execute_function ("keyboard-quit")
     end
@@ -385,7 +370,9 @@ what to do with it.
       execute_function ("keyboard-quit")
     end
 
-    while search (get_buffer_pt (cur_bp), find, true, false) do
+    local noask = false
+    local count = 0
+    while search (get_buffer_o (cur_bp), find, true, false) do
       local c = string.byte (' ')
 
       if not noask then

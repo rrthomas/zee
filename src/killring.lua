@@ -133,7 +133,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
       return false
     end
 
-    set_mark_interactive ()
+    execute_function ("set-mark-command")
     insert_string (kill_ring_text)
     deactivate_mark ()
   end
@@ -179,8 +179,8 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = get_buffer_pt (cur_bp).o + 1, get_buffer_line_len (cur_bp) do
-      local c = cur_bp.text.s[get_buffer_line_o (cur_bp) + i]
+    for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), get_buffer_line_len (cur_bp) - 1 do
+      local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
         break

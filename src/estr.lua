@@ -80,7 +80,7 @@ function estr_next_line (es, o)
 end
 
 function estr_start_of_line (es, o)
-  local prev = find_substr (es.s, es.eol, 0, o, false, true, true, false, false)
+  local prev = find_substr (es.s, "", es.eol, 0, o, false, true, true, false, false)
   return prev and (prev + #es.eol - 1) or 0
 end
 

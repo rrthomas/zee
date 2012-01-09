@@ -19,14 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function point_to_offset (bp, pt)
-  local o = 0
-  for n = pt.n, 1, -1 do
-    o = estr_next_line (bp.text, o)
-  end
-  return o + pt.o
-end
-
 -- Adjust markers (including point) at offset `o' by offset `delta'.
 local function adjust_markers (o, delta)
   local m_pt = point_marker ()
@@ -159,8 +151,48 @@ function get_buffer_line_o (bp)
   return estr_start_of_line (bp.text, bp.o)
 end
 
+function get_buffer_char (bp, o)
+  return bp.text.s[o + 1]
+end
+
+function get_buffer_pre_point (bp)
+  return bp.text.s:sub (1, get_buffer_o (bp))
+end
+
+function get_buffer_post_point (bp)
+  return bp.text.s:sub (get_buffer_o (bp) + 1)
+end
+
 function get_buffer_size (bp)
   return #bp.text.s
+end
+
+function get_buffer_eol (bp)
+  return bp.text.eol
+end
+
+function buffer_prev_line (bp, o)
+  return estr_prev_line (bp.text, o)
+end
+
+function buffer_next_line (bp, o)
+  return estr_next_line (bp.text, o)
+end
+
+function buffer_start_of_line (bp, o)
+  return estr_start_of_line (bp.text, o)
+end
+
+function buffer_end_of_line (bp, o)
+  return estr_end_of_line (bp.text, o)
+end
+
+function buffer_line_len (bp, o)
+  return estr_line_len (bp.text, o)
+end
+
+function get_buffer_line_len (bp)
+  return buffer_line_len (bp, get_buffer_line_o (bp))
 end
 
 function activate_mark ()
@@ -210,14 +242,6 @@ function warn_if_no_mark ()
     return true
   end
   return false
-end
-
-function buffer_line_len (bp, o)
-  return estr_line_len (bp.text, o)
-end
-
-function get_buffer_line_len (bp)
-  return buffer_line_len (bp, get_buffer_line_o (bp))
 end
 
 function region_new ()
@@ -422,7 +446,7 @@ function goto_goalc ()
   while i < lim do
     if col == cur_bp.goalc then
       break
-    elseif cur_bp.text.s[i] == '\t' then
+    elseif get_buffer_char (cur_bp, i) == '\t' then
       local t = tab_width (cur_bp)
       for w = t - col % t, 1, -1 do
         col = col + 1

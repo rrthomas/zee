@@ -32,7 +32,7 @@ end
 
 
 function is_empty_line ()
-  return get_buffer_line_o (cur_bp) == estr_end_of_line (cur_bp.text, get_buffer_line_o (cur_bp))
+  return get_buffer_line_len (cur_bp, get_buffer_line_o (cur_bp)) == 0
 end
 
 function is_blank_line ()
@@ -46,7 +46,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return cur_bp.text.s[get_buffer_o (cur_bp) + 1]
+    return get_buffer_char (cur_bp, get_buffer_o (cur_bp))
   end
 end
 
@@ -57,7 +57,7 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return cur_bp.text.s[get_buffer_o (cur_bp)]
+    return get_buffer_char (cur_bp, get_buffer_o (cur_bp) - 1)
   end
 end
 
@@ -73,10 +73,10 @@ end
 
 -- Return true if point is at the beginning of a line.
 function bolp ()
-  return get_buffer_pt (cur_bp).o == 0
+  return get_buffer_o (cur_bp) == get_buffer_line_o (cur_bp)
 end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return get_buffer_pt (cur_bp).o == get_buffer_line_len (cur_bp)
+  return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) == get_buffer_line_len (cur_bp)
 end

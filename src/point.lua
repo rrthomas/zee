@@ -22,9 +22,9 @@
 function offset_to_point (bp, offset)
   local pt = {n = 0}
   local o = 0
-  while estr_end_of_line (bp.text, o) < offset do
+  while buffer_end_of_line (bp, o) < offset do
     pt.n = pt.n + 1
-    o = estr_next_line (bp.text, o)
+    o = buffer_next_line (bp, o)
     assert (o)
   end
   pt.o = offset - o
@@ -38,9 +38,4 @@ function goto_offset (o)
     cur_bp.goalc = get_goalc ()
     thisflag.need_resync = true
   end
-end
-
--- Go to coordinates described by pt.
-function goto_point (pt)
-  goto_offset (point_to_offset (cur_bp, pt));
 end
