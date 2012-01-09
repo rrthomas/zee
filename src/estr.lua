@@ -61,8 +61,6 @@ function estr_new (s)
   return es
 end
 
-estr_dup = table.clone
-
 function estr_prev_line (es, o)
   local so = estr_start_of_line (es, o)
   if so == 0 then
@@ -93,6 +91,7 @@ function estr_line_len (es, o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o)
 end
 
+-- FIXME: Replace the following with estr_replace, taken from replace_estr.
 function estr_cat (es, src)
   local o = 1
   while o and o <= #src.s do
