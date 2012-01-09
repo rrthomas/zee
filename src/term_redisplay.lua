@@ -60,7 +60,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
     if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
       break
     end
-    local s = make_char_printable (get_buffer_text (wp.bp).s[o + i + 1], x, cur_tab_width)
+    local s = make_char_printable (wp.bp.text.s[o + i + 1], x, cur_tab_width)
     term_addstr (s)
     x = x + #s
   end
@@ -90,10 +90,10 @@ local function draw_window (topline, wp)
   local highlight, rp = calculate_highlight_region (wp, rp)
 
   -- Find the first line to display on the first screen line.
-  local o = estr_start_of_line (get_buffer_text (wp.bp), window_o (wp))
+  local o = estr_start_of_line (wp.bp.text, window_o (wp))
   local i = wp.topdelta
   while i > 0 and o > 0 do
-    o = estr_prev_line (get_buffer_text (wp.bp), o)
+    o = estr_prev_line (wp.bp.text, o)
     assert (o)
     i = i - 1
   end
@@ -114,7 +114,7 @@ local function draw_window (topline, wp)
         term_addstr ('$')
       end
 
-      o = estr_next_line (get_buffer_text (wp.bp), o)
+      o = estr_next_line (wp.bp.text, o)
     end
   end
 
@@ -153,9 +153,9 @@ local function draw_status_line (line, wp)
   term_addstr (string.rep ('-', wp.ewidth))
 
   local eol_type
-  if get_buffer_text (cur_bp).eol == coding_eol_cr then
+  if cur_bp.text.eol == coding_eol_cr then
     eol_type = "(Mac)"
-  elseif get_buffer_text (cur_bp).eol == coding_eol_crlf then
+  elseif cur_bp.text.eol == coding_eol_crlf then
     eol_type = "(DOS)"
   else
     eol_type = ":"
@@ -198,7 +198,7 @@ function term_redisplay ()
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
-      col = col + #make_char_printable (get_buffer_text (cur_wp.bp).s[o + p + 1], col, t)
+      col = col + #make_char_printable (cur_wp.bp.text.s[o + p + 1], col, t)
     end
 
     if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then

@@ -32,7 +32,7 @@ end
 
 
 function is_empty_line ()
-  return get_buffer_line_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp))
+  return get_buffer_line_o (cur_bp) == estr_end_of_line (cur_bp.text, get_buffer_line_o (cur_bp))
 end
 
 function is_blank_line ()
@@ -46,7 +46,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp) + 1]
+    return cur_bp.text.s[get_buffer_o (cur_bp) + 1]
   end
 end
 
@@ -57,7 +57,7 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return get_buffer_text (cur_bp).s[get_buffer_o (cur_bp)]
+    return cur_bp.text.s[get_buffer_o (cur_bp)]
   end
 end
 

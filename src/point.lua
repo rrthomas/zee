@@ -22,9 +22,9 @@
 function offset_to_point (bp, offset)
   local pt = {n = 0}
   local o = 0
-  while estr_end_of_line (get_buffer_text (bp), o) < offset do
+  while estr_end_of_line (bp.text, o) < offset do
     pt.n = pt.n + 1
-    o = estr_next_line (get_buffer_text (bp), o)
+    o = estr_next_line (bp.text, o)
     assert (o)
   end
   pt.o = offset - o

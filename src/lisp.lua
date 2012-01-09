@@ -209,7 +209,7 @@ function lisp_loadstring (s)
 end
 
 function lisp_loadfile (file)
-  local h = io.open (file, "r")
+  local h = io.open (file)
 
   if h then
     lisp_loadstring (h:read ("*a"))
@@ -345,6 +345,6 @@ means use current buffer).
       bp = cur_bp
     end
 
-    return lisp_loadstring (get_buffer_text (bp).s)
+    return lisp_loadstring (bp.text.s)
   end
 )

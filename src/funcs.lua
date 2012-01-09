@@ -697,10 +697,10 @@ local function move_sexp (dir)
   while true do
     while not (dir > 0 and eolp or bolp) () do
       local o = get_buffer_o (cur_bp) - (dir < 0 and 1 or 0)
-      local c = get_buffer_text (cur_bp).s[o + 1]
+      local c = cur_bp.text.s[o + 1]
 
       -- Skip escaped quotes.
-      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and get_buffer_text (cur_bp).s[o] == '\\' then
+      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and cur_bp.text.s[o] == '\\' then
         move_char (dir)
         c = 'a' -- Treat ' and " like word chars.
       end
@@ -953,8 +953,8 @@ local function setcase_word (rcase)
 
   local as = ""
   for i = get_buffer_pt (cur_bp).o, get_buffer_line_len (cur_bp) do
-    if iswordchar (get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i + 1]) then
-      as = as .. get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i + 1]
+    if iswordchar (cur_bp.text.s[get_buffer_line_o (cur_bp) + i + 1]) then
+      as = as .. cur_bp.text.s[get_buffer_line_o (cur_bp) + i + 1]
     else
       break
     end

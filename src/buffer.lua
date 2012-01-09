@@ -22,7 +22,7 @@
 function point_to_offset (bp, pt)
   local o = 0
   for n = pt.n, 1, -1 do
-    o = estr_next_line (get_buffer_text (bp), o)
+    o = estr_next_line (bp.text, o)
   end
   return o + pt.o
 end
@@ -74,12 +74,12 @@ function delete_char ()
   undo_save_block (get_buffer_o (cur_bp), 1, 0)
   local o
   if eolp () then
-    o = adjust_markers (get_buffer_o (cur_bp), -#get_buffer_text (cur_bp).eol)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_o (cur_bp) + 1 + #get_buffer_text (cur_bp).eol)
+    o = adjust_markers (get_buffer_o (cur_bp), -#cur_bp.text.eol)
+    cur_bp.text.s = string.sub (cur_bp.text.s, 1, get_buffer_o (cur_bp)) .. string.sub (cur_bp.text.s, get_buffer_o (cur_bp) + 1 + #cur_bp.text.eol)
     thisflag.need_resync = true
   else
     o = adjust_markers (get_buffer_o (cur_bp), -1)
-    cur_bp.es.s = string.sub (get_buffer_text (cur_bp).s, 1, get_buffer_o (cur_bp)) .. string.sub (get_buffer_text (cur_bp).s, get_buffer_o (cur_bp) + 2)
+    cur_bp.text.s = string.sub (cur_bp.text.s, 1, get_buffer_o (cur_bp)) .. string.sub (cur_bp.text.s, get_buffer_o (cur_bp) + 2)
   end
 
   cur_bp.modified = true
@@ -93,7 +93,7 @@ end
 -- case as the old.
 function buffer_replace (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (get_buffer_text (bp).s, offset + 1, offset + oldlen))
+    local case_type = check_case (string.sub (bp.text.s, offset + 1, offset + oldlen))
     if case_type then
       newtext = recase (newtext, case_type)
     end
@@ -101,7 +101,7 @@ function buffer_replace (bp, offset, oldlen, newtext, replace_case)
 
   undo_save_block (offset, oldlen, #newtext)
   bp.modified = true
-  bp.es.s = string.sub (get_buffer_text (bp).s, 1, offset) .. newtext .. string.sub (get_buffer_text (bp).s, offset + 1 + oldlen)
+  bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
   bp.o = adjust_markers (offset, #newtext - oldlen) -- FIXME: In case where buffer has shrunk and marker is now pointing off the end.
   thisflag.need_resync = true
 end
@@ -114,7 +114,7 @@ buffer_name_history = history_new ()
 
 function insert_buffer (bp)
   -- Copy text to avoid problems when bp == cur_bp.
-  insert_estr (estr_dup (bp.es))
+  insert_estr (estr_dup (bp.text))
 end
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -123,7 +123,7 @@ function buffer_new ()
   local bp = {}
 
   bp.o = 0
-  bp.es = {s = "", eol = coding_eol_lf}
+  bp.text = {s = "", eol = coding_eol_lf}
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 
@@ -156,15 +156,11 @@ function get_buffer_pt (bp)
 end
 
 function get_buffer_line_o (bp)
-  return estr_start_of_line (bp.es, bp.o)
-end
-
-function get_buffer_text (bp)
-  return bp.es
+  return estr_start_of_line (bp.text, bp.o)
 end
 
 function get_buffer_size (bp)
-  return #bp.es.s
+  return #bp.text.s
 end
 
 function activate_mark ()
@@ -191,14 +187,14 @@ function tab_width (bp)
 end
 
 function get_buffer_line_text (bp, o)
-  return string.sub (get_buffer_text (bp).s,
-                     estr_start_of_line (get_buffer_text (bp), o) + 1,
-                     estr_end_of_line (get_buffer_text (bp), o))
+  return string.sub (bp.text.s,
+                     estr_start_of_line (bp.text, o) + 1,
+                     estr_end_of_line (bp.text, o))
 end
 
 -- Copy a region of text into a string.
 function get_buffer_region (bp, r)
-  return {s = string.sub (get_buffer_text (bp).s, r.start + 1, r.finish), eol = get_buffer_text (bp).eol}
+  return {s = string.sub (bp.text.s, r.start + 1, r.finish), eol = bp.text.eol}
 end
 
 function warn_if_no_mark ()
@@ -213,7 +209,7 @@ function warn_if_no_mark ()
 end
 
 function buffer_line_len (bp, o)
-  return estr_line_len (get_buffer_text (bp), o)
+  return estr_line_len (bp.text, o)
 end
 
 function get_buffer_line_len (bp)
@@ -403,7 +399,7 @@ function move_char (offset)
       cur_bp.o = cur_bp.o + dir
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      cur_bp.o = cur_bp.o + #cur_bp.es.eol * dir
+      cur_bp.o = cur_bp.o + #cur_bp.text.eol * dir
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
       return false
@@ -422,7 +418,7 @@ function goto_goalc ()
   while i < lim do
     if col == cur_bp.goalc then
       break
-    elseif get_buffer_text (cur_bp).s[i] == '\t' then
+    elseif cur_bp.text.s[i] == '\t' then
       local t = tab_width (cur_bp)
       for w = t - col % t, 1, -1 do
         col = col + 1
@@ -451,7 +447,7 @@ function move_line (n)
   end
 
   while n > 0 do
-    o = func (cur_bp.es, cur_bp.o)
+    o = func (cur_bp.text, cur_bp.o)
     if o == nil then
       break
     end

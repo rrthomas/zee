@@ -30,7 +30,7 @@ local max_eol_check_count = 3
 function estr_new (s)
   local first_eol = true
   local total_eols = 0
-  local es = {s = s}
+  local es = {s = s, eol = coding_eol_lf}
   local i = 1
   while i <= #s and total_eols < max_eol_check_count do
     local c = s[i]
@@ -105,4 +105,17 @@ function estr_cat (es, src)
   end
 
   return es
+end
+
+-- Read file contents into an estr.
+-- On error, returns nil.
+function estr_readf (filename)
+  local h = io.open (filename)
+  if h then
+    local s = h:read ("*a")
+    h:close ()
+    if s then
+      return estr_new (s)
+    end
+  end
 end

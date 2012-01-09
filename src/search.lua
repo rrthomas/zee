@@ -91,7 +91,7 @@ local function search (pt, s, forward, regexp)
     noteol = pt.o < to
     to = point_to_offset (cur_bp, pt)
   end
-  local pos = find_substr (get_buffer_text (cur_bp).s, s, from, to, forward, notbol, noteol, regexp, downcase)
+  local pos = find_substr (cur_bp.text.s, s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
     return false
   end

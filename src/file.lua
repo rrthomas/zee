@@ -167,23 +167,6 @@ If the current buffer now contains an empty file that you just visited
   end
 )
 
--- Insert file contents into current buffer.
--- Return quietly if the file doesn't exist, or other error.
-local function insert_file (filename)
-  if exist_file (filename) then
-    local h = io.open (filename, "r")
-    if h then
-      local buf = h:read ("*a")
-      h:close ()
-      if #buf >= 1 then
-        insert_estr (estr_new (buf))
-      end
-      return true
-    end
-  end
-  return false
-end
-
 Defun ("insert-file",
        {"string"},
 [[
@@ -210,7 +193,10 @@ Set mark after the inserted text.
     end
 
     if ok then
-      if not insert_file (file) then
+      local es = estr_readf (file)
+      if es then
+        insert_estr (es)
+      else
         ok = false
         minibuf_error ("%s: %s", file, posix.errno ())
       end
@@ -232,7 +218,7 @@ local function raw_write_to_disk (bp, filename, mode)
   end
 
   local len = get_buffer_size (bp)
-  local written = posix.write (h, get_buffer_text (bp).s, len)
+  local written = posix.write (h, bp.text.s, len)
   if written < 0 or written ~= len then
     ret = written
   end
@@ -269,7 +255,7 @@ end
 
 -- Copy a file.
 local function copy_file (source, dest)
-  local ifd = io.open (source, "r")
+  local ifd = io.open (source)
   if not ifd then
     minibuf_error (string.format ("%s: unable to backup", source))
     return false
@@ -625,15 +611,20 @@ function find_file (filename)
 
   switch_to_buffer (bp)
 
-  if insert_file (filename) then
+  local es = estr_readf (filename)
+  if es then
     if not check_writable (filename) then
       cur_bp.readonly = true
     end
-
-    -- Reset undo history
-    cur_bp.next_undop = nil
-    cur_bp.last_undop = nil
+  else
+    es = estr_new ("")
   end
+
+  cur_bp.text = es
+
+  -- Reset undo history
+  cur_bp.next_undop = nil
+  cur_bp.last_undop = nil
 
   bp.modified = false
   bp.dir = posix.dirname (filename)

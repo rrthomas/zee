@@ -88,7 +88,7 @@ function get_goalc_bp (bp, pt)
   local col = 0
   local t = tab_width (bp)
   for i = 1, math.min (pt.o, get_buffer_line_len (bp)) do
-    if get_buffer_text (bp).s[get_buffer_line_o (bp) + i] == '\t' then
+    if bp.text.s[get_buffer_line_o (bp) + i] == '\t' then
       col = bit.bor (col, t - 1)
     end
     col = col + 1

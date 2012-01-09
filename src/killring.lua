@@ -180,7 +180,7 @@ local function kill_line (whole_line)
 
   if not whole_line then
     for i = get_buffer_pt (cur_bp).o + 1, get_buffer_line_len (cur_bp) do
-      local c = get_buffer_text (cur_bp).s[get_buffer_line_o (cur_bp) + i]
+      local c = cur_bp.text.s[get_buffer_line_o (cur_bp) + i]
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
         break
