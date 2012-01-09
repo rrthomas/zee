@@ -271,24 +271,6 @@ function switch_to_buffer (bp)
   thisflag.need_resync = true
 end
 
--- Create a buffer name using the file name.
-local function make_buffer_name (filename)
-  local s = posix.basename (filename)
-
-  if not find_buffer (s) then
-    return s
-  else
-    local i = 2
-    while true do
-      local name = string.format ("%s<%d>", s, i)
-      if not find_buffer (name) then
-        return name
-      end
-      i = i + 1
-    end
-  end
-end
-
 -- Search for a buffer named `name'.
 function find_buffer (name)
   for _, bp in ipairs (buffers) do
@@ -301,13 +283,18 @@ end
 -- Set a new filename, and from it a name, for the buffer.
 function set_buffer_names (bp, filename)
   if filename[1] ~= '/' then
-      filename = posix.getcwd () .. "/" .. filename
-      bp.filename = filename
-  else
-    bp.filename = filename
+    filename = string.format ("%s/%s", posix.getcwd(), filename)
   end
+  bp.filename = filename
 
-  bp.name = make_buffer_name (filename)
+  local s = posix.basename (filename)
+  local name = s
+  local i = 2
+  while find_buffer (name) do
+    name = string.format ("%s<%d>", s, i)
+    i = i + 1
+  end
+  bp.name = name
 end
 
 -- Remove the specified buffer from the buffer list.
