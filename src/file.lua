@@ -209,7 +209,7 @@ Set mark after the inserted text.
 )
 
 -- Write buffer to given file name with given mode.
-local function raw_write_to_disk (bp, filename, mode)
+local function write_to_disk (bp, filename, mode)
   local ret = true
   local h = posix.creat (filename, mode)
 
@@ -306,15 +306,15 @@ end
 
 -- Write the buffer contents to a file.
 -- Create a backup file if specified by the user variables.
-local function write_to_disk (bp, filename)
-  local backup = get_variable_bool ("make-backup-files")
-  local backupdir = get_variable_bool ("backup-directory") and get_variable ("backup-directory")
-
+local function backup_and_write (bp, filename)
   -- Make backup of original file.
+  local backup = get_variable_bool ("make-backup-files")
   if not bp.backup and backup then
     local h = io.open (filename, "r+")
     if h then
       h:close ()
+
+      local backupdir = get_variable_bool ("backup-directory") and get_variable ("backup-directory")
       local bfilename = create_backup_filename (filename, backupdir)
       if bfilename and copy_file (filename, bfilename) then
         bp.backup = true
@@ -325,17 +325,17 @@ local function write_to_disk (bp, filename)
     end
   end
 
-  local ret, err = raw_write_to_disk (bp, filename, "rw-rw-rw-")
-  if ret ~= true then
-    if ret == -1 then
-      minibuf_error (string.format ("Error writing `%s': %s", filename, err))
-    else
-      minibuf_error (string.format ("Error writing `%s'", filename))
-    end
-    return false
+  local ret, err = write_to_disk (bp, filename, "rw-rw-rw-")
+  if ret then
+    return true
   end
 
-  return true
+  if ret == -1 then
+    minibuf_error (string.format ("Error writing `%s': %s", filename, err))
+  else
+    minibuf_error (string.format ("Error writing `%s'", filename))
+  end
+  return false
 end
 
 local function write_buffer (bp, needname, confirm, name, prompt)
@@ -372,7 +372,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
     bp.needname = false
     bp.temporary = false
     bp.nosave = false
-    if write_to_disk (bp, name) then
+    if backup_and_write (bp, name) then
       minibuf_write ("Wrote " .. name)
       bp.modified = false
       undo_set_unchanged (bp.last_undop)
@@ -608,7 +608,6 @@ function find_file (filename)
 
   local bp = buffer_new ()
   set_buffer_names (bp, filename)
-
   switch_to_buffer (bp)
 
   local s = io.slurp (filename)
@@ -649,7 +648,7 @@ function zile_exit (doabort)
       local fname = bp.filename or bp.name
       buf = fname .. string.upper (PACKAGE) .. "SAVE"
       io.stderr:write (string.format ("Saving %s...\r\n", buf))
-      raw_write_to_disk (bp, buf, "rw-------")
+      write_to_disk (bp, buf, "rw-------")
     end
   end
 

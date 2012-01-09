@@ -218,22 +218,6 @@ by 4 each time.
   end
 )
 
-local function print_buf (old_bp, bp)
-  if bp.name[1] == ' ' then
-    return
-  end
-
-  insert_string (string.format ("%s%s%s %-19s %6u  %-17s",
-                                old_bp == bp and '.' or ' ',
-                                bp.readonly and '%' or ' ',
-                                bp.modified and '*' or ' ',
-                                bp.name, get_buffer_size (bp), "Fundamental"))
-  if bp.filename then
-    insert_string (compact_path (bp.filename))
-  end
-  insert_newline ()
-end
-
 local function write_buffers_list (old_wp)
   -- FIXME: Underline next line properly.
   insert_string ("CRM Buffer                Size  Mode             File\n")
@@ -250,9 +234,18 @@ local function write_buffers_list (old_wp)
 
   -- Print buffers.
   for _, bp in ripairs (bufs) do
-    -- Print all buffers except this one (the *Buffer List*).
-    if cur_bp ~= bp then
-      print_buf (old_wp.bp, bp)
+    -- Print all buffers whose names don't start with space except
+    -- this one (the *Buffer List*).
+    if cur_bp ~= bp and bp.name[1] ~= ' ' then
+      insert_string (string.format ("%s%s%s %-19s %6u  %-17s",
+                                    old_wp.bp == bp and '.' or ' ',
+                                    bp.readonly and '%' or ' ',
+                                    bp.modified and '*' or ' ',
+                                    bp.name, get_buffer_size (bp), "Fundamental"))
+      if bp.filename then
+        insert_string (compact_path (bp.filename))
+      end
+      insert_newline ()
     end
   end
 end

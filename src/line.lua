@@ -132,17 +132,9 @@ function intercalate_newline ()
   return insert_newline () and backward_char ()
 end
 
-local function insert_expanded_tab (inschr)
-  local c = get_goalc ()
+local function insert_expanded_tab ()
   local t = tab_width (cur_bp)
-
-  undo_start_sequence ()
-
-  for c = t - c % t, 1, -1 do
-    inschr (' ')
-  end
-
-  undo_end_sequence ()
+  insert_string (string.rep (' ', t - get_goalc () % t))
 end
 
 local function insert_tab ()
@@ -153,7 +145,7 @@ local function insert_tab ()
   if get_variable_bool ("indent-tabs-mode") then
     insert_char ('\t')
   else
-    insert_expanded_tab (insert_char)
+    insert_expanded_tab ()
   end
 
   return true

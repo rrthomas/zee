@@ -46,10 +46,6 @@ local function make_char_printable (c, x, cur_tab_width)
   end
 end
 
-local function in_region (o, x, r)
-  return o + x >= r.start and o + x < r.finish
-end
-
 local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   term_move (line, 0)
 
@@ -84,41 +80,6 @@ local function calculate_highlight_region (wp)
   end
 
   return true, region_new (window_o (wp), wp.bp.mark.o)
-end
-
-local function draw_window (topline, wp)
-  local highlight, rp = calculate_highlight_region (wp, rp)
-
-  -- Find the first line to display on the first screen line.
-  local o = estr_start_of_line (wp.bp.text, window_o (wp))
-  local i = wp.topdelta
-  while i > 0 and o > 0 do
-    o = estr_prev_line (wp.bp.text, o)
-    assert (o)
-    i = i - 1
-  end
-
-  -- Draw the window lines.
-  local cur_tab_width = tab_width (wp.bp)
-  for i = topline, wp.eheight + topline do
-    -- Clear the line.
-    term_move (i, 0)
-    term_clrtoeol ()
-
-    -- If at the end of the buffer, don't write any text.
-    if o ~= nil then
-      draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
-
-      if wp.start_column > 0 then
-        term_move (i, 0)
-        term_addstr ('$')
-      end
-
-      o = estr_next_line (wp.bp.text, o)
-    end
-  end
-
-  wp.all_displayed = o == nil or o == get_buffer_size (wp.bp)
 end
 
 function make_modeline_flags (wp)
@@ -182,6 +143,47 @@ local function draw_status_line (line, wp)
   term_attrset (FONT_NORMAL)
 end
 
+local function draw_window (topline, wp)
+  local highlight, rp = calculate_highlight_region (wp, rp)
+
+  -- Find the first line to display on the first screen line.
+  local o = estr_start_of_line (wp.bp.text, window_o (wp))
+  local i = wp.topdelta
+  while i > 0 and o > 0 do
+    o = estr_prev_line (wp.bp.text, o)
+    assert (o)
+    i = i - 1
+  end
+
+  -- Draw the window lines.
+  local cur_tab_width = tab_width (wp.bp)
+  for i = topline, wp.eheight + topline do
+    -- Clear the line.
+    term_move (i, 0)
+    term_clrtoeol ()
+
+    -- If at the end of the buffer, don't write any text.
+    if o ~= nil then
+      draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
+
+      if wp.start_column > 0 then
+        term_move (i, 0)
+        term_addstr ('$')
+      end
+
+      o = estr_next_line (wp.bp.text, o)
+    end
+  end
+
+  wp.all_displayed = o == nil or o == get_buffer_size (wp.bp)
+
+  -- Draw the status line only if there is available space after the
+  -- buffer text space.
+  if wp.fheight > wp.eheight then
+    draw_status_line (topline + wp.eheight, wp)
+  end
+end
+
 local cur_topline, col = 0, 0
 
 function term_redisplay ()
@@ -219,12 +221,6 @@ function term_redisplay ()
     end
 
     draw_window (topline, wp)
-
-    -- Draw the status line only if there is available space after the
-    -- buffer text space.
-    if wp.fheight > wp.eheight then
-      draw_status_line (topline + wp.eheight, wp)
-    end
 
     topline = topline + wp.fheight
   end

@@ -42,17 +42,6 @@ local function adjust_markers (o, delta)
   return m
 end
 
--- Check the case of a string.
--- Returns "uppercase" if it is all upper case, "capitalized" if just
--- the first letter is, and nil otherwise.
-local function check_case (s)
-  if s:match ("^%u+$") then
-    return "uppercase"
-  elseif s:match ("^%u%U*") then
-    return "capitalized"
-  end
-end
-
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
@@ -86,6 +75,17 @@ function delete_char ()
   goto_offset (o)
 
   return true
+end
+
+-- Check the case of a string.
+-- Returns "uppercase" if it is all upper case, "capitalized" if just
+-- the first letter is, and nil otherwise.
+local function check_case (s)
+  if s:match ("^%u+$") then
+    return "uppercase"
+  elseif s:match ("^%u%U*") then
+    return "capitalized"
+  end
 end
 
 -- Replace text in the buffer `bp' at offset `offset' with `newtext'.
@@ -179,6 +179,10 @@ function delete_region (rp)
   buffer_replace (cur_bp, rp.start, get_region_size (rp), "", false)
 
   return true
+end
+
+function in_region (o, x, r)
+  return o + x >= r.start and o + x < r.finish
 end
 
 -- Return a safe tab width for the given buffer.
