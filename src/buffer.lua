@@ -52,19 +52,14 @@ function delete_char ()
     return false
   end
 
-  undo_save_block (get_buffer_o (cur_bp), 1, 0)
-  local o
   if eolp () then
-    o = adjust_markers (get_buffer_o (cur_bp), -#cur_bp.text.eol)
-    cur_bp.text.s = string.sub (cur_bp.text.s, 1, get_buffer_o (cur_bp)) .. string.sub (cur_bp.text.s, get_buffer_o (cur_bp) + 1 + #cur_bp.text.eol)
+    buffer_replace (cur_bp, cur_bp.o, #get_buffer_eol (cur_bp), "", false)
     thisflag.need_resync = true
   else
-    o = adjust_markers (get_buffer_o (cur_bp), -1)
-    cur_bp.text.s = string.sub (cur_bp.text.s, 1, get_buffer_o (cur_bp)) .. string.sub (cur_bp.text.s, get_buffer_o (cur_bp) + 2)
+    buffer_replace (cur_bp, cur_bp.o, 1, "", false)
   end
 
   cur_bp.modified = true
-  goto_offset (o)
 
   return true
 end
@@ -85,7 +80,7 @@ end
 -- case as the old.
 function buffer_replace (bp, offset, oldlen, newtext, replace_case)
   if replace_case and get_variable_bool ("case-replace") then
-    local case_type = check_case (string.sub (bp.text.s, offset + 1, offset + oldlen))
+    local case_type = check_case (get_buffer_region (bp, {start = offset, finish = offset + oldlen}).s)
     if case_type then
       newtext = recase (newtext, case_type)
     end
@@ -106,7 +101,20 @@ buffer_name_history = history_new ()
 
 function insert_buffer (bp)
   -- Copy text to avoid problems when bp == cur_bp.
-  insert_estr (estr_dup (bp.text))
+  insert_estr ({s = get_buffer_pre_point (bp) .. get_buffer_post_point (bp), eol = get_buffer_eol (bp)})
+end
+
+-- Copy a region of text into an estr.
+function get_buffer_region (bp, r)
+  local s = ""
+  if r.start < get_buffer_o (bp) then
+    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_o (bp)))
+  end
+  if r.finish > get_buffer_o (bp) then
+    local from = math.max (r.start, get_buffer_o (bp)) - get_buffer_o (bp)
+    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_o (bp))
+  end
+  return {s = s, eol = get_buffer_eol (bp)}
 end
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -220,17 +228,6 @@ end
 -- Return a safe tab width for the given buffer.
 function tab_width (bp)
   return math.max (get_variable_number_bp (bp, "tab-width"), 1)
-end
-
-function get_buffer_line_text (bp, o)
-  return string.sub (bp.text.s,
-                     estr_start_of_line (bp.text, o) + 1,
-                     estr_end_of_line (bp.text, o))
-end
-
--- Copy a region of text into a string.
-function get_buffer_region (bp, r)
-  return {s = string.sub (bp.text.s, r.start + 1, r.finish), eol = bp.text.eol}
 end
 
 function warn_if_no_mark ()
@@ -427,7 +424,7 @@ function move_char (offset)
       cur_bp.o = cur_bp.o + dir
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      cur_bp.o = cur_bp.o + #cur_bp.text.eol * dir
+      cur_bp.o = cur_bp.o + #get_buffer_eol (cur_bp) * dir
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
       return false
@@ -464,10 +461,10 @@ function goto_goalc ()
 end
 
 function move_line (n)
-  local func = estr_next_line
+  local func = buffer_next_line
   if n < 0 then
     n = -n
-    func = estr_prev_line
+    func = buffer_prev_line
   end
 
   if _last_command ~= "next-line" and _last_command ~= "previous-line" then
@@ -475,7 +472,7 @@ function move_line (n)
   end
 
   while n > 0 do
-    o = func (cur_bp.text, cur_bp.o)
+    o = func (cur_bp, cur_bp.o)
     if o == nil then
       break
     end
