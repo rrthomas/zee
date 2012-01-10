@@ -855,7 +855,7 @@ Move point to the first non-whitespace character on this line.
   function ()
     goto_offset (get_buffer_line_o (cur_bp))
     while not eolp () and following_char ():match ("%s") do
-      forward_char ()
+      move_char (1)
     end
   end
 )
@@ -866,11 +866,11 @@ local function iswordchar (c)
   return c and (c:match ("[%w$]"))
 end
 
-local function move_word (dir, next, move, at_extreme)
+local function move_word (dir)
   local gotword = false
   while true do
-    while not at_extreme () do
-      if not iswordchar (next ()) then
+    while not (dir > 0 and eolp or bolp) () do
+      if not iswordchar ((dir > 0 and following_char or preceding_char) ()) then
         if gotword then
           return true
         end
@@ -882,7 +882,7 @@ local function move_word (dir, next, move, at_extreme)
     if gotword then
       return true
     end
-    if not move () then
+    if not move_char (dir) then
       break
     end
   end
@@ -890,11 +890,11 @@ local function move_word (dir, next, move, at_extreme)
 end
 
 local function forward_word ()
-  return move_word (1, following_char, forward_char, eolp)
+  return move_word (1)
 end
 
 local function backward_word ()
-  return move_word (-1, preceding_char, backward_char, bolp)
+  return move_word (-1)
 end
 
 Defun ("forward-word",
@@ -1038,22 +1038,19 @@ local function region_to_string ()
   return get_buffer_region (cur_bp, calculate_the_region ()).s
 end
 
-local function transpose_subr (forward_func, backward_func)
-  local p0 = point_marker ()
-
+local function transpose_subr (move_func)
   -- For transpose-chars.
-  if forward_func == forward_char and eolp () then
-    backward_func ()
+  if move_func == move_char and eolp () then
+    move_func (-1)
   end
   -- For transpose-lines.
-  if forward_func == next_line and get_buffer_line_o (cur_bp) == 0 then
-    forward_func ()
+  if move_func == move_line and get_buffer_line_o (cur_bp) == 0 then
+    move_func (1)
   end
 
   -- Backward.
-  if not backward_func () then
+  if not move_func (-1) then
     minibuf_error ("Beginning of buffer")
-    unchain_marker (p0)
     return false
   end
 
@@ -1062,8 +1059,8 @@ local function transpose_subr (forward_func, backward_func)
   local m1 = point_marker ()
 
   -- Check to make sure we can go forwards twice.
-  if not forward_func () or not forward_func () then
-    if forward_func == next_line then
+  if not move_func (1) or not move_func (1) then
+    if move_func == move_line then
       -- Add an empty line.
       execute_function ("end-of-line")
       execute_function ("newline")
@@ -1072,7 +1069,6 @@ local function transpose_subr (forward_func, backward_func)
       goto_offset (m1.o)
       minibuf_error ("End of buffer")
 
-      unchain_marker (p0)
       unchain_marker (m1)
       return false
     end
@@ -1081,27 +1077,26 @@ local function transpose_subr (forward_func, backward_func)
   goto_offset (m1.o)
 
   -- Forward.
-  forward_func ()
+  move_func (1)
 
   -- Save and delete 1st marked region.
   local as1 = region_to_string ()
 
-  unchain_marker (p0)
   execute_function ("delete-region")
 
   -- Forward.
-  forward_func ()
+  move_func (1)
 
   -- For transpose-lines.
   local m2, as2
-  if forward_func == next_line then
+  if move_func == move_line then
     m2 = point_marker ()
   else
     -- Mark the end of second string.
     set_mark ()
 
     -- Backward.
-    backward_func ()
+    move_func (-1)
     m2 = point_marker ()
 
     -- Save and delete 2nd marked region.
@@ -1126,29 +1121,22 @@ local function transpose_subr (forward_func, backward_func)
   deactivate_mark ()
 
   -- Move forward if necessary.
-  if forward_func ~= next_line then
-    forward_func ()
+  if move_func ~= move_line then
+    move_func (1)
   end
 
   return true
 end
 
-local function transpose (uniarg, forward_func, backward_func)
-  local ret = true
-
+local function transpose (uniarg, move)
   if warn_if_readonly_buffer () then
     return false
   end
 
-  if uniarg < 0 then
-    local tmp_func = forward_func
-    forward_func = backward_func
-    backward_func = tmp_func
-    uniarg = -uniarg
-  end
+  local ret = true
   undo_start_sequence ()
   for uni = 1, uniarg do
-    ret = transpose_subr (forward_func, backward_func)
+    ret = transpose_subr (move)
     if not ret then
       break
     end
@@ -1168,7 +1156,7 @@ If no argument and at end of line, the previous two chars are exchanged.
 ]],
   true,
   function (n)
-    return transpose (n or 1, forward_char, backward_char)
+    return transpose (n or 1, move_char)
   end
 )
 
@@ -1183,7 +1171,7 @@ are interchanged.
 ]],
   true,
   function (n)
-    return transpose (n or 1, forward_word, backward_word)
+    return transpose (n or 1, move_word)
   end
 )
 
@@ -1194,7 +1182,7 @@ Like @kbd{M-x transpose-words} but applies to sexps.
 ]],
   true,
   function (n)
-    return transpose (n or 1, forward_sexp, backward_sexp)
+    return transpose (n or 1, move_sexp)
   end
 )
 
@@ -1207,6 +1195,6 @@ With argument 0, interchanges line point is in with line mark is in.
 ]],
   true,
   function (n)
-    return transpose (n or 1, next_line, previous_line)
+    return transpose (n or 1, move_line)
   end
 )

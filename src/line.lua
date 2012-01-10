@@ -98,7 +98,7 @@ end
 
 -- Insert a newline at the current position without moving the cursor.
 function intercalate_newline ()
-  return insert_newline () and backward_char ()
+  return insert_newline () and move_char (-1)
 end
 
 local function insert_expanded_tab ()
@@ -123,7 +123,7 @@ end
 local function backward_delete_char ()
   deactivate_mark ()
 
-  if not backward_char () then
+  if not move_char (-1) then
     minibuf_error ("Beginning of buffer")
     return false
   end
@@ -143,7 +143,7 @@ local function previous_nonblank_goalc ()
 
   -- Go to `cur_goalc' in that non-blank line.
   while not eolp () and get_goalc () < cur_goalc do
-    forward_char ()
+    move_char (1)
   end
 end
 
@@ -156,7 +156,7 @@ local function previous_line_indent ()
 
   -- Find first non-blank char.
   while not eolp () and following_char ():match ("%s") do
-    forward_char ()
+    move_char (1)
   end
 
   cur_indent = get_goalc ()
@@ -223,13 +223,13 @@ does nothing.
       -- Now find the next blank char.
       if preceding_char () ~= '\t' or get_goalc () <= cur_goalc then
         while not eolp () and not following_char ():match ("%s") do
-          forward_char ()
+          move_char (1)
         end
       end
 
       -- Find next non-blank char.
       while not eolp () and following_char ():match ("%s") do
-        forward_char ()
+        move_char (1)
       end
 
       -- Target column.

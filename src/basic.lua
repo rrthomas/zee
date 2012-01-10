@@ -43,14 +43,6 @@ Move point to end of current line.
   end
 )
 
-function backward_char ()
-  return move_char (-1)
-end
-
-function forward_char ()
-  return move_char (1)
-end
-
 Defun ("backward-char",
        {"number"},
 [[
