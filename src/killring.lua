@@ -246,7 +246,7 @@ with no argument.
         kill_to_bol ()
       end
       if arg ~= 0 and ok then
-        ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward)
+        ok = execute_with_uniarg (false, arg, kill_whole_line, kill_line_backward)
       end
       undo_end_sequence ()
     end
