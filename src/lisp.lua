@@ -258,11 +258,10 @@ function function_exists (f)
 end
 
 function execute_with_uniarg (undo, uniarg, forward, backward)
-  local func = forward
   uniarg = uniarg or 1
 
   if backward and uniarg < 0 then
-    func = backward
+    forward = backward
     uniarg = -uniarg
   end
   if undo then
@@ -270,7 +269,7 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
   end
   local ret = true
   for _ = 1, uniarg do
-    ret = func ()
+    ret = forward ()
     if not ret then
       break
     end
@@ -281,6 +280,18 @@ function execute_with_uniarg (undo, uniarg, forward, backward)
 
   return ret
 end
+
+function move_with_uniarg (uniarg, move)
+  local ret = true
+  for uni = 1, math.abs (uniarg) do
+    ret = move (uniarg < 0 and - 1 or 1)
+    if not ret then
+      break
+    end
+  end
+  return ret
+end
+
 
 Defun ("execute-extended-command",
        {"number"},

@@ -746,14 +746,6 @@ local function move_sexp (dir)
   return false
 end
 
-local function forward_sexp ()
-  return move_sexp (1)
-end
-
-local function backward_sexp ()
-  return move_sexp (-1)
-end
-
 Defun ("forward-sexp",
        {"number"},
 [[
@@ -763,7 +755,7 @@ move backward across N balanced expressions.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n, forward_sexp, backward_sexp)
+    return move_with_uniarg (n or 1, move_sexp)
   end
 )
 
@@ -776,7 +768,7 @@ move forward across N balanced expressions.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n, backward_sexp, forward_sexp)
+    return move_with_uniarg (-(n or 1), move_sexp)
   end
 )
 
@@ -881,14 +873,6 @@ local function move_word (dir)
   return gotword
 end
 
-local function forward_word ()
-  return move_word (1)
-end
-
-local function backward_word ()
-  return move_word (-1)
-end
-
 Defun ("forward-word",
        {"number"},
 [[
@@ -897,7 +881,7 @@ With argument, do this that many times.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n, forward_word, backward_word)
+    return move_with_uniarg (n or 1, move_word)
   end
 )
 
@@ -910,13 +894,13 @@ With argument, do this that many times.
 ]],
   true,
   function (n)
-    return execute_with_uniarg (false, n, backward_word, forward_word)
+    return move_with_uniarg (-(n or 1), move_word)
   end
 )
 
 local function setcase_word (rcase)
   if not iswordchar (following_char ()) then
-    if not forward_word () or not backward_word () then
+    if not move_word (1) or not move_word (-1) then
       return false
     end
   end
