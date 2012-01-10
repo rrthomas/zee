@@ -660,17 +660,17 @@ Move forward to end of paragraph.  With argument N, do it N times.
 
 
 -- Move through balanced expressions (sexps)
-local function isopenbracketchar (c)
-  return (c == '(') or (c == '[') or ( c== '{') or ((c == '\"') and not double_quote) or ((c == '\'') and not single_quote)
-end
-
-local function isclosebracketchar (c)
-  return (c == ')') or (c == ']') or (c == '}') or ((c == '\"') and double_quote) or ((c == '\'') and single_quote)
-end
-
 local function move_sexp (dir)
   local gotsexp, level = false, 0
   local gotsexp, single_quote, double_quote = false, dir < 0, dir < 0
+
+  local function isopenbracketchar (c)
+    return (c == '(') or (c == '[') or ( c== '{') or ((c == '\"') and not double_quote) or ((c == '\'') and not single_quote)
+  end
+
+  local function isclosebracketchar (c)
+    return (c == ')') or (c == ']') or (c == '}') or ((c == '\"') and double_quote) or ((c == '\'') and single_quote)
+  end
 
   while true do
     while not (dir > 0 and eolp or bolp) () do
@@ -868,25 +868,17 @@ end
 
 local function move_word (dir)
   local gotword = false
-  while true do
+  repeat
     while not (dir > 0 and eolp or bolp) () do
-      if not iswordchar ((dir > 0 and following_char or preceding_char) ()) then
-        if gotword then
-          return true
-        end
-      else
+      if iswordchar (get_buffer_char (cur_bp, get_buffer_o (cur_bp) - (dir < 0 and 1 or 0))) then
         gotword = true
+      elseif gotword then
+        break
       end
-      goto_offset (get_buffer_o (cur_bp) + dir)
+      move_char (dir)
     end
-    if gotword then
-      return true
-    end
-    if not move_char (dir) then
-      break
-    end
-  end
-  return false
+  until gotword or not move_char (dir)
+  return gotword
 end
 
 local function forward_word ()
