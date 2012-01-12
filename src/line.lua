@@ -23,17 +23,6 @@ function insert_string (s, eol)
   return insert_estr ({s = s, eol = eol or coding_eol_lf})
 end
 
--- Replace a string at point, moving point forwards.
-function replace (del, s)
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
-  buffer_replace (cur_bp, get_buffer_o (cur_bp), del, s, false)
-  assert (move_char (#s))
-  return true
-end
-
 -- If point is greater than fill-column, then split the line at the
 -- right-most space character at or before fill-column, if there is
 -- one, or at the left-most at or after fill-column, if not. If the

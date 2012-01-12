@@ -157,7 +157,7 @@ end
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  return replace (0, c)
+  return replace_estr (0, {s = c, eol = coding_eol_lf})
 end
 
 function delete_char ()

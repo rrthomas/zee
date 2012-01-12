@@ -402,7 +402,7 @@ local function pipe_command (cmd, tempfile, insert, do_replace)
         goto_offset (r.start)
         del = get_region_size (r)
       end
-      replace (del, out)
+      replace_estr (del, {s = out, eol = coding_eol_lf})
     else
       local more_than_one_line = eol and eol ~= #out
       write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
@@ -916,7 +916,7 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    replace (#as, recase (as, rcase))
+    replace_estr (#as, {s = recase (as, rcase), eol = coding_eol_lf})
   end
 
   cur_bp.modified = true
