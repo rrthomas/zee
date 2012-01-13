@@ -84,7 +84,7 @@ $(top_builddir)/src/zile: $(PRODUCTIONSOURCES) Makefile
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-	$(top_builddir)/src/zile --version >/dev/null
+	$(top_builddir)/src/zile --version >/dev/null || rm $@
 
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/zile.lua' >$@.tmp
