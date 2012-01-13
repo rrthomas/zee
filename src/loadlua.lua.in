@@ -14,12 +14,13 @@ local function require_version (module, min, too_big, pattern)
   if min then
     assert (module_version (m, pattern) >= version_to_list (min))
   end
-  if max then
-    assert (module_version (m, pattern) < version_to_list (max))
+  if too_big then
+    assert (module_version (m, pattern) < version_to_list (too_big))
   end
 end
 
 require_version ("std", "25")
+require "strict" -- optional stdlib module
 require_version ("posix", "5.1.16")
 require "curses" -- part of luaposix
 require "bit" -- no particular version needed
