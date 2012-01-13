@@ -75,6 +75,8 @@ function term_height ()
   return curses.lines ()
 end
 
+local attr_map
+
 function term_init ()
   curses.initscr ()
 
