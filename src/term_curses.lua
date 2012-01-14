@@ -46,6 +46,8 @@ function term_addstr (s)
   curses.stdscr ():addstr (s)
 end
 
+local attr_map
+
 function term_attrset (attrs)
   local cattrs = 0
   for i, v in pairs (attr_map) do
@@ -74,8 +76,6 @@ end
 function term_height ()
   return curses.lines ()
 end
-
-local attr_map
 
 function term_init ()
   curses.initscr ()

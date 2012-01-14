@@ -546,7 +546,7 @@ function move_line (n)
   end
 
   while n > 0 do
-    o = func (cur_bp, cur_bp.o)
+    local o = func (cur_bp, cur_bp.o)
     if o == nil then
       break
     end

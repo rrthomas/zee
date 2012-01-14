@@ -383,6 +383,7 @@ what to do with it.
 
     local noask = false
     local count = 0
+    local ok = true
     while search (get_buffer_o (cur_bp), find, true, false) do
       local c = string.byte (' ')
 
