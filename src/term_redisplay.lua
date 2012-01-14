@@ -144,7 +144,7 @@ local function draw_status_line (line, wp)
 end
 
 local function draw_window (topline, wp)
-  local highlight, rp = calculate_highlight_region (wp, rp)
+  local highlight, rp = calculate_highlight_region (wp)
 
   -- Find the first line to display on the first screen line.
   local o = buffer_start_of_line (wp.bp, window_o (wp))
