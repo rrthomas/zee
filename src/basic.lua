@@ -193,8 +193,7 @@ local function scroll_down ()
     return move_line (-cur_wp.eheight)
   end
 
-  minibuf_error ("Beginning of buffer")
-  return false
+  return minibuf_error ("Beginning of buffer")
 end
 
 local function scroll_up ()
@@ -202,8 +201,7 @@ local function scroll_up ()
     return move_line (cur_wp.eheight)
   end
 
-  minibuf_error ("End of buffer")
-  return false
+  return minibuf_error ("End of buffer")
 end
 
 Defun ("scroll-down",

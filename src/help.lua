@@ -86,8 +86,7 @@ Display documentation of the command invoked by a key sequence.
       binding = keyvectodesc (keys)
 
       if not name then
-        minibuf_error (binding .. " is undefined")
-        return false
+        return minibuf_error (binding .. " is undefined")
       end
     end
 

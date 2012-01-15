@@ -164,8 +164,7 @@ function delete_char ()
   deactivate_mark ()
 
   if eobp () then
-    minibuf_error ("End of buffer")
-    return false
+    return minibuf_error ("End of buffer")
   end
 
   if warn_if_readonly_buffer () then

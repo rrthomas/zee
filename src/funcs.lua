@@ -27,8 +27,7 @@ Cancel current command.
   true,
   function ()
     deactivate_mark ()
-    minibuf_error ("Quit")
-    return false
+    return minibuf_error ("Quit")
   end
 )
 
@@ -75,8 +74,7 @@ Put the mark where point is now, and point where the mark is now.
   true,
   function ()
     if not cur_bp.mark then
-      minibuf_error ("No mark set in this buffer")
-      return false
+      return minibuf_error ("No mark set in this buffer")
     end
 
     local tmp = cur_bp.o
@@ -316,8 +314,7 @@ Just C-u as argument means to use the current column.
     end
 
     if not n then
-      minibuf_error ("set-fill-column requires an explicit argument")
-      return false
+      return minibuf_error ("set-fill-column requires an explicit argument")
     end
 
     minibuf_write (string.format ("Fill column set to %d (was %d)", n, get_variable_number ("fill-column")))
@@ -384,8 +381,7 @@ local function pipe_command (cmd, tempfile, insert, do_replace)
   local cmdline = string.format ("%s 2>&1 <%s", cmd, tempfile)
   local pipe = io.popen (cmdline, "r")
   if not pipe then
-    minibuf_error ("Cannot open pipe to process")
-    return false
+    return minibuf_error ("Cannot open pipe to process")
   end
 
   local out = pipe:read ("*a")
@@ -497,14 +493,12 @@ The output is available in that buffer in both cases.
         local fd = io.open (tempfile, "w")
 
         if not fd then
-          minibuf_error ("Cannot open temporary file")
-          ok = false
+          ok = minibuf_error ("Cannot open temporary file")
         else
           local written, err = fd:write (get_buffer_region (cur_bp, rp).s)
 
           if not written then
-            minibuf_error ("Error writing to temporary file: " .. err)
-            ok = false
+            ok = minibuf_error ("Error writing to temporary file: " .. err)
           else
             ok = pipe_command (cmd, tempfile, insert, true)
           end
@@ -710,8 +704,7 @@ local function move_sexp (dir)
           single_quote = not single_quote
         end
         if level < 0 then
-          minibuf_error ("Scan error: \"Containing expression ends prematurely\"")
-          return false
+          return minibuf_error ("Scan error: \"Containing expression ends prematurely\"")
         end
       end
 
@@ -1026,8 +1019,7 @@ local function transpose_subr (move_func)
 
   -- Backward.
   if not move_func (-1) then
-    minibuf_error ("Beginning of buffer")
-    return false
+    return minibuf_error ("Beginning of buffer")
   end
 
   -- Mark the beginning of first string.

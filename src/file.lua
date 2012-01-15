@@ -197,8 +197,7 @@ Set mark after the inserted text.
       if s then
         insert_estr (estr_new (s))
       else
-        ok = false
-        minibuf_error ("%s: %s", file, posix.errno ())
+        ok = minibuf_error ("%s: %s", file, posix.errno ())
       end
     else
       execute_function ("set-mark-command")
@@ -262,15 +261,13 @@ end
 local function copy_file (source, dest)
   local ifd = io.open (source)
   if not ifd then
-    minibuf_error (string.format ("%s: unable to backup", source))
-    return false
+    return minibuf_error (string.format ("%s: unable to backup", source))
   end
 
   local ofd, tname = posix.mkstemp (dest .. "XXXXXX")
   if not ofd then
     ifd:close ()
-    minibuf_error (string.format ("%s: unable to create backup", dest))
-    return false
+    return minibuf_error (string.format ("%s: unable to create backup", dest))
   end
 
   local written = posix.write (ofd, ifd:read ("*a"))
@@ -278,8 +275,7 @@ local function copy_file (source, dest)
   posix.close (ofd)
 
   if not written then
-    minibuf_error (string.format ("Unable to write to backup file `%s'", dest))
-    return false
+    return minibuf_error (string.format ("Unable to write to backup file `%s'", dest))
   end
 
   local st = posix.stat (source)
@@ -336,11 +332,9 @@ local function backup_and_write (bp, filename)
   end
 
   if ret == -1 then
-    minibuf_error (string.format ("Error writing `%s': %s", filename, err))
-  else
-    minibuf_error (string.format ("Error writing `%s'", filename))
+    return minibuf_error (string.format ("Error writing `%s': %s", filename, err))
   end
-  return false
+  return minibuf_error (string.format ("Error writing `%s'", filename))
 end
 
 local function write_buffer (bp, needname, confirm, name, prompt)
@@ -583,8 +577,7 @@ Puts mark after the inserted text.
       if buffer and buffer ~= "" then
         bp = find_buffer (buffer)
         if not bp then
-          minibuf_error (string.format ("Buffer `%s' not found", buffer))
-          ok = false
+          ok = minibuf_error (string.format ("Buffer `%s' not found", buffer))
         end
       else
         bp = def_bp
@@ -607,8 +600,7 @@ function find_file (filename)
   end
 
   if exist_file (filename) and not is_regular_file (filename) then
-    minibuf_error ("File exists but could not be read")
-    return false
+    return minibuf_error ("File exists but could not be read")
   end
 
   local bp = buffer_new ()

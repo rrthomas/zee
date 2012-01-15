@@ -51,7 +51,7 @@ end
 -- Write the specified error string in the minibuffer and signal an error.
 function minibuf_error (s)
   minibuf_write (s)
-  ding ()
+  return ding ()
 end
 
 local function minibuf_test_in_completions (ms, cp)
