@@ -28,6 +28,9 @@ old_NEWS_hash := 40a4c6ac8e6b133a341fecbce7f875a6
 # Don't check test outputs
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
+# Trailing spaces are required for correct diff syntax
+exclude_file_name_regexp--sc_trailing_blank = \.diff$
+
 # Lua-ish, not GNU-ish, error messages in some internal files
 exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
 
