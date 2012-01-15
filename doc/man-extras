@@ -18,4 +18,5 @@ Zile was written by Reuben Thomas, based on the C version by Sandro
 Sigala, Reuben Thomas, David A. Capello and Scott Lawrence.
 
 [see also]
-.BR emacs (1)
+.BR emacs (1),
+.BR lua (1)
