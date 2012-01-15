@@ -105,11 +105,7 @@ Beginning of buffer is position 1.
       n = minibuf_read_number ("Goto char: ", "")
     end
 
-    if type (n) == "number" then
-      goto_offset (math.max (n, 1) - 1)
-    else
-      return false
-    end
+    return type (n) == "number" and goto_offset (math.max (n, 1) - 1)
   end
 )
 

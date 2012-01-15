@@ -63,18 +63,12 @@ end
 
 function estr_prev_line (es, o)
   local so = estr_start_of_line (es, o)
-  if so == 0 then
-    return nil
-  end
-  return estr_start_of_line (es, so - #es.eol)
+  return so ~= 0 and estr_start_of_line (es, so - #es.eol) or nil
 end
 
 function estr_next_line (es, o)
   local eo = estr_end_of_line (es, o)
-  if eo == #es.s then
-    return nil
-  end
-  return eo + #es.eol
+  return eo ~= #es.s and eo + #es.eol or nil
 end
 
 function estr_start_of_line (es, o)

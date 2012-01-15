@@ -61,15 +61,11 @@ end
 
 -- Return function's interactive field, or nil if not found.
 function get_function_interactive (name)
-  if usercmd[name] then
-    return usercmd[name].interactive
-  end
+  return usercmd[name] and usercmd[name].interactive or nil
 end
 
 function get_function_doc (name)
-  if usercmd[name] then
-    return usercmd[name].doc
-  end
+  return usercmd[name] and usercmd[name].doc or nil
 end
 
 function read_char (s, pos)
@@ -167,10 +163,7 @@ function lisp_read (s)
 end
 
 function evaluateBranch (branch)
-  if branch == nil or branch.data == nil then
-    return nil
-  end
-  return call_command (branch.data, branch)
+  return branch and branch.data and call_command (branch.data, branch) or nil
 end
 
 function execute_function (name, uniarg)
@@ -300,7 +293,6 @@ Read function name, then read its arguments and call it.
 ]],
   true,
   function (n)
-    local name
     local msg = ""
 
     if lastflag.set_uniarg then
@@ -312,10 +304,8 @@ Read function name, then read its arguments and call it.
     end
     msg = msg .. "M-x "
 
-    name = minibuf_read_function_name (msg)
-    if name then
-      return execute_function (name, n)
-    end
+    local name = minibuf_read_function_name (msg)
+    return name and execute_function (name, n) or nil
   end
 )
 
