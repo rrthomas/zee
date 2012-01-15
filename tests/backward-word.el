@@ -1,6 +1,5 @@
 (end-of-line)
-(backward-word)
-(backward-word)
+(backward-word 2)
 (insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

@@ -1,5 +1,4 @@
-(forward-word)
-(forward-word)
+(forward-word 2)
 (insert ")")
 (beginning-of-line)
 (insert "(")

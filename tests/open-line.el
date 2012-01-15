@@ -1,7 +1,5 @@
 (forward-line)
-(open-line 1)
-(open-line 1)
-(open-line 1)
+(open-line 3)
 (insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

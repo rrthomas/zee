@@ -1,5 +1,3 @@
-(capitalize-word 1)
-(capitalize-word 1)
-(capitalize-word 1)
+(capitalize-word 3)
 (save-buffer)
 (save-buffers-kill-emacs)

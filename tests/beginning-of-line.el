@@ -1,7 +1,5 @@
 (forward-line)
-(forward-word)
-(forward-word)
-(forward-word)
+(forward-word 3)
 (beginning-of-line)
 (insert "a")
 (save-buffer)
