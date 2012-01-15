@@ -9,9 +9,6 @@ of memory.
 
 [files]
 ~/.zile \(em user's Zile init file
-.PP
-@pkgdatadir@/dotzile-extra.el \(em which contains some useful
-code for the init file.
 
 [author]
 Zile was written by Reuben Thomas, based on the C version by Sandro
