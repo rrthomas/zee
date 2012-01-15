@@ -284,15 +284,6 @@ function main ()
     execute_function ("beginning-of-buffer")
   end
 
-  -- Set up screen according to number of files loaded.
-  if #buffers == 3 then   -- *scratch* and two files.
-    execute_function ("split-window")
-    switch_to_buffer (buffers[2])
-    execute_function ("other-window")
-  elseif #buffers > 3 then -- More than two files.
-    execute_function ("list-buffers")
-  end
-
   -- Load files and load files and run functions given on the command line.
   local ok = true
   for i = 1, #zarg do
