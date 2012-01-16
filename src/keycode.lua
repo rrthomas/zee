@@ -74,6 +74,7 @@ local codetoname = {
   [KBD_F11]   = "<f11>",
   [KBD_F12]   = "<f12>",
   [string.byte(' ')] = "SPC",
+  [string.byte('\t')] = "TAB",
 }
 
 -- Convert a key chord into its ASCII representation
@@ -141,6 +142,7 @@ local keynametocode_map = {
   ["\\t"] = KBD_TAB,
   ["\\TAB"] = KBD_TAB,
   ["\\UP"] = KBD_UP,
+  ["\t"] = string.byte ('\t'),
   ["\\\\"] = string.byte ('\\'),
 }
 

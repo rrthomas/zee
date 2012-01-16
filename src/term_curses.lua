@@ -19,7 +19,7 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-local key_buf
+local codetokey, keytocode, key_buf
 
 function term_buf_len ()
   return #key_buf
@@ -65,9 +65,6 @@ function term_beep ()
   curses.beep ()
 end
 
-local codetokey_map, keytocode_map
-
-
 function term_width ()
   return curses.cols ()
 end
@@ -77,6 +74,12 @@ function term_height ()
 end
 
 function term_init ()
+  local functable_mt = {
+    __call = function (t, k)
+               return t[k]
+             end,
+  }
+
   curses.initscr ()
 
   attr_map = {
@@ -85,7 +88,7 @@ function term_init ()
   }
 
   -- from curses keycodes to zile keycodes
-  codetokey_map = {
+  codetokey = {
     [0]                    = keycode "\\C-@",
     [1]                    = keycode "\\C-a",
     [2]                    = keycode "\\C-b",
@@ -146,18 +149,31 @@ function term_init ()
     kbs = string.char(127)
   end
 
-  codetokey_map[curses.KEY_BACKSPACE] = codetokey_map[string.byte(kbs)]
+  codetokey[curses.KEY_BACKSPACE] = codetokey[string.byte (kbs)]
 
-  keytocode_map = table.invert (codetokey_map)
+  for c=0,0x7f do
+    codetokey[c] = codetokey[c] or keycode (string.char (c))
+    if not codetokey[c + 0x100] then
+      codetokey[c + 0x100] = keycode ("\\M-" .. string.char (c))
+    end
+  end
+
+  setmetatable (codetokey, functable_mt)
 
   -- FIXME: How do we handle an unget on e.g. KBD_F1?
   --        shouldn't crash Zile with: (execute-kbd-macro "\C-q\F1")
 
-  keytocode_map = table.merge (keytocode_map, {
-                                [keycode "\\C-h"] = 8,
-                                [keycode "\\C-z"] = 26,
-                                [keycode "\\BACKSPACE"] = 127,
-                              })
+  keytocode = table.merge (table.invert (codetokey), {
+                            [keycode "\\C-h"]       = 8,
+                            [keycode "\t"]          = 9,
+                            [keycode "\\t"]         = 9,
+                            [keycode "\\C-z"]       = 26,
+                            [keycode "\\e"]         = 27,
+                            [keycode " "]           = 32,
+                            [keycode "\\SPC"]       = 32,
+                            [keycode "\\BACKSPACE"] = 127,
+                          })
+  setmetatable (keytocode, functable_mt)
 
   curses.echo (false)
   curses.nl (false)
@@ -179,19 +195,6 @@ function term_reopen ()
   curses.doupdate ()
 end
 
-local function codetokey (c)
-  local ret
-  if codetokey_map[c] then
-    ret = codetokey_map[c]
-  elseif nil == c or c > 0xff or c < 0 then
-    ret = nil -- Undefined behaviour.
-  else
-    ret = c
-  end
-
-  return ret
-end
-
 local function keytocodes (key)
   local codevec = {}
 
@@ -201,10 +204,9 @@ local function keytocodes (key)
       key = bit.band (key, bit.bnot (KBD_META))
     end
 
-    if keytocode_map[key] then
-      table.insert (codevec, keytocode_map[key])
-    elseif key < 0x100 then
-      table.insert (codevec, key)
+    local code = keytocode (key)
+    if code then
+      table.insert (codevec, code)
     end
   end
 
