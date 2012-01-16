@@ -19,59 +19,7 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-local codetokey, keytocode, key_buf
-
-function term_buf_len ()
-  return #key_buf
-end
-
-function term_move (y, x)
-  curses.stdscr ():move (y, x)
-end
-
-function term_clrtoeol ()
-  curses.stdscr ():clrtoeol ()
-end
-
-function term_refresh ()
-  curses.stdscr ():refresh ()
-end
-
-function term_clear ()
-  curses.stdscr ():clear ()
-end
-
-function term_addch (c)
-  curses.stdscr ():addch (c)
-end
-
-function term_addstr (s)
-  curses.stdscr ():addstr (s)
-end
-
-local attr_map
-
-function term_attrset (attrs)
-  local cattrs = 0
-  for i, v in pairs (attr_map) do
-    if bit.band (attrs, i) ~= 0 then
-      cattrs = bit.bor (cattrs, v)
-    end
-  end
-  curses.stdscr ():attrset (cattrs)
-end
-
-function term_beep ()
-  curses.beep ()
-end
-
-function term_width ()
-  return curses.cols ()
-end
-
-function term_height ()
-  return curses.lines ()
-end
+local attr_map, codetokey, keytocode, key_buf
 
 function term_init ()
   local functable_mt = {
@@ -86,6 +34,8 @@ function term_init ()
     [FONT_REVERSE] = curses.A_REVERSE,
     [FONT_UNDERLINE] = curses.A_UNDERLINE,
   }
+
+  key_buf = {}
 
   -- from curses keycodes to zile keycodes
   codetokey = {
@@ -181,7 +131,6 @@ function term_init ()
   curses.stdscr ():meta (true)
   curses.stdscr ():intrflush (false)
   curses.stdscr ():keypad (true)
-  key_buf = {}
 end
 
 function term_close ()
@@ -193,24 +142,6 @@ function term_reopen ()
   -- FIXME: implement def_shell_mode in lcurses
   --curses.def_shell_mode ()
   curses.doupdate ()
-end
-
-local function keytocodes (key)
-  local codevec = {}
-
-  if key ~= nil then
-    if bit.band (key, KBD_META) ~= 0 then
-      table.insert (codevec, 27)
-      key = bit.band (key, bit.bnot (KBD_META))
-    end
-
-    local code = keytocode (key)
-    if code then
-      table.insert (codevec, code)
-    end
-  end
-
-  return codevec
 end
 
 local function get_char (delay)
@@ -248,6 +179,74 @@ function term_getkey_unfiltered (delay)
   return c
 end
 
+local function keytocodes (key)
+  local codevec = {}
+
+  if key ~= nil then
+    if bit.band (key, KBD_META) ~= 0 then
+      table.insert (codevec, 27)
+      key = bit.band (key, bit.bnot (KBD_META))
+    end
+
+    local code = keytocode (key)
+    if code then
+      table.insert (codevec, code)
+    end
+  end
+
+  return codevec
+end
+
 function term_ungetkey (key)
   key_buf = list.concat (key_buf, list.reverse (keytocodes (key)))
+end
+
+function term_buf_len ()
+  return #key_buf
+end
+
+function term_move (y, x)
+  curses.stdscr ():move (y, x)
+end
+
+function term_clrtoeol ()
+  curses.stdscr ():clrtoeol ()
+end
+
+function term_refresh ()
+  curses.stdscr ():refresh ()
+end
+
+function term_clear ()
+  curses.stdscr ():clear ()
+end
+
+function term_addch (c)
+  curses.stdscr ():addch (c)
+end
+
+function term_addstr (s)
+  curses.stdscr ():addstr (s)
+end
+
+function term_attrset (attrs)
+  local cattrs = 0
+  for i, v in pairs (attr_map) do
+    if bit.band (attrs, i) ~= 0 then
+      cattrs = bit.bor (cattrs, v)
+    end
+  end
+  curses.stdscr ():attrset (cattrs)
+end
+
+function term_beep ()
+  curses.beep ()
+end
+
+function term_width ()
+  return curses.cols ()
+end
+
+function term_height ()
+  return curses.lines ()
 end
