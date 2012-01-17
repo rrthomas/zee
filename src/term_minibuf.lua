@@ -90,7 +90,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     thistab = -1
 
     local c = getkey (GETKEY_DEFAULT)
-    if c == KBD_NOKEY then
+    if c == KBD_NOKEY or c == KBD_RET then
     elseif c == bit.bor (KBD_CTRL, string.byte ('z')) then
       execute_function ("suspend-emacs")
     elseif c == KBD_CANCEL then
