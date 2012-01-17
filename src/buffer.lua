@@ -23,59 +23,88 @@
 -- Buffer methods that know about the gap.
 
 function get_buffer_pre_point (bp)
-  return bp.text.s:sub (1, get_buffer_o (bp))
+  return bp.text.s:sub (1, get_buffer_pt (bp))
 end
 
 function get_buffer_post_point (bp)
-  return bp.text.s:sub (get_buffer_o (bp) + bp.gap + 1)
+  return bp.text.s:sub (get_buffer_pt (bp) + bp.gap + 1)
 end
 
-function get_buffer_o (bp)
-  return bp.o
+function get_buffer_pt (bp)
+  return bp.pt
 end
 
-function set_buffer_o (bp, o)
-  bp.o = o
+function set_buffer_pt (bp, o)
+  local len = #bp.text.s
+  if o < bp.pt then
+    bp.text.s = bp.text.s:sub (1, o) .. string.rep ('\0', bp.gap) .. bp.text.s:sub (o + 1, bp.pt) .. bp.text.s:sub (bp.pt + bp.gap + 1)
+    assert (len == #bp.text.s)
+  elseif o > bp.pt then
+    bp.text.s = bp.text.s:sub (1, bp.pt) .. bp.text.s:sub (bp.pt + bp.gap + 1, bp.gap + o) .. string.rep ('\0', bp.gap) .. bp.text.s:sub (bp.gap + o + 1)
+    assert (len == #bp.text.s)
+  end
+  bp.pt = o
 end
 
-function buffer_o_to_realo (bp, o)
-  return o <= bp.o and o or o - bp.gap;
+local function realo_to_o (bp, o)
+  if o == nil then
+    return o
+  elseif o < bp.pt + bp.gap then
+    return math.min (o, bp.pt)
+  end
+  return o - bp.gap
+end
+
+local function o_to_realo (bp, o)
+  return o < bp.pt and o or o + bp.gap
 end
 
 function get_buffer_size (bp)
-  return buffer_o_to_realo (bp, #bp.text.s)
+  return realo_to_o (bp, #bp.text.s)
 end
 
 function buffer_line_len (bp, o)
   o = o or get_buffer_line_o (bp)
-  return buffer_o_to_realo (bp, estr_end_of_line (bp.text, o)) -
-    buffer_o_to_realo (bp, estr_start_of_line (bp.text, o))
+  return realo_to_o (bp, estr_end_of_line (bp.text, o_to_realo (bp, o))) -
+    realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
 end
 
--- Adjust markers (including point) at offset `o' by offset `delta'.
--- (Don't need to take the gap into account here.)
-local function adjust_markers (o, delta)
-  local m_pt = point_marker ()
+-- Replace `oldlen' chars after point `bp' with `newtext'.
+local min_gap = 1024 -- Minimum gap size after resize
+local max_gap = 4096 -- Maximum permitted gap size
+function replace (oldlen, newtext)
+  undo_save_block (cur_bp.pt, oldlen, #newtext)
+
+  -- Ensure gap fits #newtext; if gap becomes zero, set to min_gap.
+  if cur_bp.gap + oldlen < #newtext then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#newtext + min_gap) - (cur_bp.gap + oldlen)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
+    cur_bp.gap = #newtext + min_gap - oldlen
+  end
+
+  -- Remove oldlen chars, zeroing some if necessary.
+  if oldlen > #newtext then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap) .. string.rep ('\0', oldlen - #newtext) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1 + oldlen - #newtext)
+  end
+  cur_bp.gap = cur_bp.gap + oldlen
+
+  -- Insert #newtext chars.
+  cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap - #newtext) .. newtext .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1)
+  cur_bp.gap = cur_bp.gap - #newtext
+
+  -- Ensure gap doesn't get too big.
+  if cur_bp.gap > max_gap then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap - max_gap + 1)
+    cur_bp.gap = max_gap
+  end
+
+  -- Adjust markers.
   for m in pairs (cur_bp.markers) do
-    if m.o > o then
-      m.o = math.max (o, m.o + delta)
+    if m.o > cur_bp.pt then
+      m.o = math.max (cur_bp.pt, m.o + #newtext - oldlen)
     end
   end
 
-  -- This marker has been updated to new position.
-  local m = m_pt.o
-  unchain_marker (m_pt)
-  return m
-end
-
--- Replace text in the buffer `bp' at offset `offset' with `newtext'.
--- If `replace_case' is true then the new characters will be the same
--- case as the old.
-function buffer_replace (bp, offset, oldlen, newtext)
-  undo_save_block (offset, oldlen, #newtext)
-  bp.text.s = string.sub (bp.text.s, 1, offset) .. newtext .. string.sub (bp.text.s, offset + 1 + oldlen)
-  set_buffer_o (bp, adjust_markers (offset, #newtext - oldlen))
-  bp.modified = true
+  cur_bp.modified = true
   thisflag.need_resync = true
 end
 
@@ -85,18 +114,18 @@ function replace_estr (del, es)
   end
 
   undo_start_sequence ()
-  buffer_replace (cur_bp, get_buffer_o (cur_bp), del, "")
+  replace (del, "")
   local p = 1
   while p <= #es.s do
     local next = string.find (es.s, es.eol, p)
     local line_len = (next or #es.s + 1) - p
-    buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, string.sub (es.s, p, p + line_len - 1))
+    replace (0, string.sub (es.s, p, p + line_len - 1))
     local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
-    set_buffer_o (cur_bp, get_buffer_o (cur_bp) + line_len)
+    set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + line_len)
     p = p + line_len
     if next then
-      buffer_replace (cur_bp, cur_bp.o, 0, get_buffer_eol (cur_bp))
-      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + buf_eol_len)
+      replace (0, get_buffer_eol (cur_bp))
+      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + buf_eol_len)
       thisflag.need_resync = true
       p = p + eol_len
     end
@@ -111,27 +140,27 @@ function insert_estr (es)
 end
 
 function get_buffer_char (bp, o)
-  return bp.text.s[buffer_o_to_realo (bp, o) + 1]
+  return bp.text.s[o_to_realo (bp, o) + 1]
 end
 
 function buffer_prev_line (bp, o)
-  return estr_prev_line (bp.text, o)
+  return realo_to_o (bp, estr_prev_line (bp.text, o_to_realo (bp, o)))
 end
 
 function buffer_next_line (bp, o)
-  return estr_next_line (bp.text, o)
+  return realo_to_o (bp, estr_next_line (bp.text, o_to_realo (bp, o)))
 end
 
 function buffer_start_of_line (bp, o)
-  return estr_start_of_line (bp.text, o)
+  return realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
 end
 
 function buffer_end_of_line (bp, o)
-  return estr_end_of_line (bp.text, o)
+  return realo_to_o (bp, estr_end_of_line (bp.text, o_to_realo (bp, o)))
 end
 
 function get_buffer_line_o (bp)
-  return estr_start_of_line (bp.text, bp.o)
+  return realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, bp.pt)))
 end
 
 
@@ -144,12 +173,12 @@ end
 -- Copy a region of text into an estr.
 function get_buffer_region (bp, r)
   local s = ""
-  if r.start < get_buffer_o (bp) then
-    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_o (bp)))
+  if r.start < get_buffer_pt (bp) then
+    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_pt (bp)))
   end
-  if r.finish > get_buffer_o (bp) then
-    local from = math.max (r.start - get_buffer_o (bp), 0)
-    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_o (bp))
+  if r.finish > get_buffer_pt (bp) then
+    local from = math.max (r.start - get_buffer_pt (bp), 0)
+    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_pt (bp))
   end
   return {s = s, eol = get_buffer_eol (bp)}
 end
@@ -172,10 +201,10 @@ function delete_char ()
   end
 
   if eolp () then
-    buffer_replace (cur_bp, cur_bp.o, #get_buffer_eol (cur_bp), "")
+    replace (#get_buffer_eol (cur_bp), "")
     thisflag.need_resync = true
   else
-    buffer_replace (cur_bp, cur_bp.o, 1, "")
+    replace (1, "")
   end
 
   cur_bp.modified = true
@@ -199,7 +228,7 @@ buffer_name_history = history_new ()
 function buffer_new ()
   local bp = {}
 
-  bp.o = 0
+  bp.pt = 0
   bp.gap = 0
   bp.text = {s = "", eol = coding_eol_lf}
   bp.markers = {}
@@ -316,15 +345,19 @@ function calculate_the_region ()
     return nil
   end
 
-  return region_new (cur_bp.o, cur_bp.mark.o)
+  return region_new (cur_bp.pt, cur_bp.mark.o)
 end
 
-function delete_region (rp)
+function delete_region (r)
   if warn_if_readonly_buffer () then
     return false
   end
 
-  buffer_replace (cur_bp, rp.start, get_region_size (rp), "")
+  local m = point_marker ()
+  goto_offset (r.start)
+  replace (get_region_size (r), "")
+  goto_offset (m.o)
+  unchain_marker (m)
 
   return true
 end
@@ -494,10 +527,10 @@ function move_char (offset)
   local dir = offset >= 0 and 1 or -1
   for i = 1, math.abs (offset) do
     if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
-      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + dir)
+      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
     elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
       thisflag.need_resync = true
-      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + #get_buffer_eol (cur_bp) * dir)
+      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + #get_buffer_eol (cur_bp) * dir)
       execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
     else
       return false
@@ -530,7 +563,7 @@ function goto_goalc ()
     i = i + 1
   end
 
-  set_buffer_o (cur_bp, i)
+  set_buffer_pt (cur_bp, i)
 end
 
 function move_line (n)
@@ -545,11 +578,11 @@ function move_line (n)
   end
 
   while n > 0 do
-    local o = func (cur_bp, cur_bp.o)
+    local o = func (cur_bp, cur_bp.pt)
     if o == nil then
       break
     end
-    set_buffer_o (cur_bp, o)
+    set_buffer_pt (cur_bp, o)
     n = n - 1
   end
 
@@ -561,7 +594,7 @@ end
 
 function goto_offset (o)
   local old_lineo = get_buffer_line_o (cur_bp)
-  set_buffer_o (cur_bp, o)
+  set_buffer_pt (cur_bp, o)
   if get_buffer_line_o (cur_bp) ~= old_lineo then
     cur_bp.goalc = get_goalc ()
     thisflag.need_resync = true

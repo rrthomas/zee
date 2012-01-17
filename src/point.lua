@@ -22,7 +22,7 @@
 function offset_to_point (bp, offset)
   local pt = {n = 0}
   local o = 0
-  while buffer_end_of_line (bp, o) < offset do
+  while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < offset do
     pt.n = pt.n + 1
     o = buffer_next_line (bp, o)
     assert (o)

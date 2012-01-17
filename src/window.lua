@@ -76,12 +76,12 @@ function window_o (wp)
     assert (wp.bp == cur_bp)
     assert (wp.saved_pt == nil)
     assert (cur_bp ~= nil)
-    return cur_bp.o
+    return get_buffer_pt (cur_bp)
   else
-    if wp.saved_pt ~= nil then
+    if wp.saved_pt then
       return wp.saved_pt.o
     else
-      return wp.bp.o
+      return get_buffer_pt (wp.bp)
     end
   end
 end

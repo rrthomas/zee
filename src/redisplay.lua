@@ -99,7 +99,7 @@ function resize_windows ()
 end
 
 function resync_redisplay (wp)
-  local n = offset_to_point (wp.bp, get_buffer_o (wp.bp)).n
+  local n = offset_to_point (wp.bp, get_buffer_pt (wp.bp)).n
   local delta = n - wp.lastpointn
 
   if delta ~= 0 then

@@ -112,7 +112,7 @@ function do_search (forward, regexp, pattern)
   if #pattern > 0 then
     last_search = pattern
 
-    if not search (get_buffer_o (cur_bp), pattern, forward, regexp) then
+    if not search (get_buffer_pt (cur_bp), pattern, forward, regexp) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
       ok = true
@@ -178,7 +178,7 @@ local function isearch (forward, regexp)
 
   local last = true
   local pattern = ""
-  local start = get_buffer_o (cur_bp)
+  local start = get_buffer_pt (cur_bp)
   local cur = start
   while true do
     -- Make the minibuf message.
@@ -238,7 +238,7 @@ local function isearch (forward, regexp)
       end
       if #pattern > 0 then
         -- Find next match.
-        cur = get_buffer_o (cur_bp)
+        cur = get_buffer_pt (cur_bp)
         -- Save search string.
         last_search = pattern
       elseif last_search then
@@ -384,7 +384,7 @@ what to do with it.
     local noask = false
     local count = 0
     local ok = true
-    while search (get_buffer_o (cur_bp), find, true, false) do
+    while search (get_buffer_pt (cur_bp), find, true, false) do
       local c = string.byte (' ')
 
       if not noask then
@@ -416,14 +416,18 @@ what to do with it.
         -- Perform replacement.
         count = count + 1
         local case_repl = repl
-        local r = region_new (get_buffer_o (cur_bp) - #find, get_buffer_o (cur_bp))
+        local r = region_new (get_buffer_pt (cur_bp) - #find, get_buffer_pt (cur_bp))
         if find_no_upper and get_variable_bool ("case-replace") then
           local case_type = check_case (get_buffer_region (cur_bp, r).s)
           if case_type then
             case_repl = recase (repl, case_type)
           end
         end
-        buffer_replace (cur_bp, r.start, #find, case_repl)
+        local m = point_marker ()
+        goto_offset (r.start)
+        replace (#find, case_repl)
+        goto_offset (m.o)
+        unchain_marker (m)
 
         if c == string.byte ('.') then -- Replace and quit.
           break

@@ -108,27 +108,23 @@ function init_default_bindings ()
 end
 
 function do_binding_completion (as)
-  local key
   local bs = ""
 
   if lastflag.set_uniarg then
-    local arg = prefix_arg
-
-    if arg < 0 then
-      bs = bs .. "- "
-      arg = -arg
-    end
-
+    local arg = math.abs (prefix_arg or 1)
     repeat
-      bs = " " .. bs
-      bs = string.char (arg % 10 + string.byte ('0')) .. bs
+      bs = string.char (arg % 10 + string.byte ('0')) .. " " .. bs
       arg = math.floor (arg / 10)
     until arg == 0
   end
 
+  if prefix_arg and prefix_arg < 0 then
+    bs = "- " .. bs
+  end
+
   minibuf_write (((lastflag.set_uniarg or lastflag.uniarg_empty) and "C-u " or "") ..
                  bs .. as .. "-")
-  key = getkey (GETKEY_DEFAULT)
+  local key = getkey (GETKEY_DEFAULT)
   minibuf_clear ()
 
   return key

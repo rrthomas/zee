@@ -170,7 +170,7 @@ Save the region as if killed, but don't kill it.
 
 local function kill_to_bol ()
   return bolp () or
-    copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_o (cur_bp)))
+    copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_pt (cur_bp)))
 end
 
 local function kill_line (whole_line)
@@ -178,7 +178,7 @@ local function kill_line (whole_line)
   local only_blanks_to_end_of_line = true
 
   if not whole_line then
-    for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) - 1 do
+    for i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) - 1 do
       local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
       if not (c == ' ' or c == '\t') then
         only_blanks_to_end_of_line = false
@@ -195,7 +195,7 @@ local function kill_line (whole_line)
   undo_start_sequence ()
 
   if not eolp () then
-    ok = copy_or_kill_region (true, region_new (get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp)))
+    ok = copy_or_kill_region (true, region_new (get_buffer_pt (cur_bp), get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp)))
   end
 
   if ok and (whole_line or only_blanks_to_end_of_line) and not eobp () then

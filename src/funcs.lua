@@ -77,7 +77,7 @@ Put the mark where point is now, and point where the mark is now.
       return minibuf_error ("No mark set in this buffer")
     end
 
-    local tmp = cur_bp.o
+    local tmp = get_buffer_pt (cur_bp)
     goto_offset (cur_bp.mark.o)
     cur_bp.mark.o = tmp
     activate_mark ()
@@ -300,7 +300,7 @@ Just C-u as argument means to use the current column.
   true,
   function (n)
     if not n and _interactive then
-      local o = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp)
+      local o = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp)
       if lastflag.set_uniarg then
         n = current_prefix_arg
       else
@@ -332,8 +332,7 @@ This is useful for inserting control characters.
   true,
   function ()
     minibuf_write ("C-q-")
-    local c = getkey_unfiltered (GETKEY_DEFAULT)
-    insert_char (string.char (c))
+    insert_char (string.char (bit.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
     minibuf_clear ()
   end
 )
@@ -360,7 +359,7 @@ Fill paragraph at or after point.
       next_line ()
     end
 
-    while buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)) < m_end.o do
+    while buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < m_end.o do
       execute_function ("end-of-line")
       delete_char ()
       execute_function ("just-one-space")
@@ -545,9 +544,9 @@ On nonblank line, delete any immediately following blank lines.
 
     -- Find following blank lines.
     if execute_function ("forward-line") and is_blank_line () then
-      r.start = get_buffer_o (cur_bp)
+      r.start = get_buffer_pt (cur_bp)
       repeat
-        r.finish = buffer_next_line (cur_bp, get_buffer_o (cur_bp))
+        r.finish = buffer_next_line (cur_bp, get_buffer_pt (cur_bp))
       until not execute_function ("forward-line") or not is_blank_line ()
     end
     goto_offset (m.o)
@@ -555,13 +554,13 @@ On nonblank line, delete any immediately following blank lines.
     -- If this line is blank, find any preceding blank lines.
     local singleblank = true
     if is_blank_line () then
-      r.finish = math.max (r.finish, buffer_next_line (cur_bp, get_buffer_o (cur_bp) or math.huge))
+      r.finish = math.max (r.finish, buffer_next_line (cur_bp, get_buffer_pt (cur_bp) or math.huge))
       repeat
         r.start = get_buffer_line_o (cur_bp)
       until not execute_function ("forward-line", -1) or not is_blank_line ()
 
       goto_offset (m.o)
-      if r.start ~= get_buffer_line_o (cur_bp) or r.finish > buffer_next_line (cur_bp, get_buffer_o (cur_bp)) then
+      if r.start ~= get_buffer_line_o (cur_bp) or r.finish > buffer_next_line (cur_bp, get_buffer_pt (cur_bp)) then
         singleblank = false
       end
       r.finish = math.min (r.finish, get_buffer_size (cur_bp))
@@ -575,7 +574,7 @@ On nonblank line, delete any immediately following blank lines.
 
     -- Delete any blank lines found.
     if r.start < r.finish then
-      buffer_replace (cur_bp, r.start, get_region_size (r), "")
+      delete_region (r)
     end
 
     -- If we found more than one blank line, leave one.
@@ -668,7 +667,7 @@ local function move_sexp (dir)
 
   while true do
     while not (dir > 0 and eolp or bolp) () do
-      local o = get_buffer_o (cur_bp) - (dir < 0 and 1 or 0)
+      local o = get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0)
       local c = get_buffer_char (cur_bp, o)
 
       -- Skip escaped quotes.
@@ -855,7 +854,7 @@ local function move_word (dir)
   local gotword = false
   repeat
     while not (dir > 0 and eolp or bolp) () do
-      if iswordchar (get_buffer_char (cur_bp, get_buffer_o (cur_bp) - (dir < 0 and 1 or 0))) then
+      if iswordchar (get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0))) then
         gotword = true
       elseif gotword then
         break
@@ -899,7 +898,7 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) do
+  for i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) do
     local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
     if iswordchar (c) then
       as = as .. c

@@ -38,7 +38,7 @@ function is_empty_line ()
 end
 
 function is_blank_line ()
-  return get_buffer_region (cur_bp, region_new (get_buffer_line_o (cur_bp), buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)))).s:match ("^%s*$") ~= nil
+  return get_buffer_region (cur_bp, region_new (get_buffer_line_o (cur_bp), buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)))).s:match ("^%s*$") ~= nil
 end
 
 -- Returns the character following point in the current buffer.
@@ -48,7 +48,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return get_buffer_char (cur_bp, get_buffer_o (cur_bp))
+    return get_buffer_char (cur_bp, get_buffer_pt (cur_bp))
   end
 end
 
@@ -59,26 +59,26 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return get_buffer_char (cur_bp, get_buffer_o (cur_bp) - 1)
+    return get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - 1)
   end
 end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return get_buffer_o (cur_bp) == 0
+  return get_buffer_pt (cur_bp) == 0
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return get_buffer_o (cur_bp) == get_buffer_size (cur_bp)
+  return get_buffer_pt (cur_bp) == get_buffer_size (cur_bp)
 end
 
 -- Return true if point is at the beginning of a line.
 function bolp ()
-  return get_buffer_o (cur_bp) == get_buffer_line_o (cur_bp)
+  return get_buffer_pt (cur_bp) == get_buffer_line_o (cur_bp)
 end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) == buffer_line_len (cur_bp)
+  return get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp) == buffer_line_len (cur_bp)
 end

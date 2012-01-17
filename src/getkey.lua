@@ -44,6 +44,7 @@ function getkey_unfiltered (delay)
   if thisflag.defining_macro then
     add_key_to_cmd (c)
   end
+  io.stderr:write ("getkey_unfiltered " .. c .. "\n")
   return c
 end
 

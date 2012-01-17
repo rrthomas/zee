@@ -34,7 +34,7 @@ function copy_marker (m)
 end
 
 function point_marker ()
-  return marker_new (cur_bp, get_buffer_o (cur_bp))
+  return marker_new (cur_bp, get_buffer_pt (cur_bp))
 end
 
 function unchain_marker (marker)

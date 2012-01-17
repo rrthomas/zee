@@ -233,7 +233,7 @@ local function segv_sig_handler (signo)
 end
 
 local function other_sig_handler (signo)
-  io.stderr:write (program_name .. ": terminated with signal " .. tostring (signo) .. ".\r\n")
+  io.stderr:write (program_name .. ": terminated with signal " .. signo .. ".\r\n")
   zile_exit (false)
 end
 

@@ -45,7 +45,7 @@ end
 
 
 function undo_start_sequence ()
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0)
 end
 
 function undo_end_sequence ()
