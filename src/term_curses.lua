@@ -212,23 +212,21 @@ local function keytocodes (key)
 end
 
 local function get_char (delay)
-  local c
-
   if #key_buf > 0 then
     return table.remove (key_buf)
-  else
-    curses.stdscr ():timeout (delay)
-
-    repeat
-      c = curses.stdscr ():getch ()
-
-      if curses.KEY_RESIZE == c then
-        resize_windows ()
-      end
-    until curses.KEY_RESIZE ~= c
-
-    curses.stdscr ():timeout (-1)
   end
+
+  curses.stdscr ():timeout (delay)
+
+  local c
+  repeat
+    c = curses.stdscr ():getch ()
+    if curses.KEY_RESIZE == c then
+      resize_windows ()
+    end
+  until curses.KEY_RESIZE ~= c
+
+  curses.stdscr ():timeout (-1)
 
   return c
 end
