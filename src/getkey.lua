@@ -26,7 +26,7 @@ function lastkey ()
   return _last_key
 end
 
--- Get a keystroke, waiting for up to GETKEY_DELAY ms, and translatie
+-- Get a keystroke, waiting for up to GETKEY_DELAY ms, and translate
 -- it into a keycode.
 function getkey (delay)
   _last_key = term_getkey (delay)
