@@ -269,7 +269,7 @@ function completion_scroll_down ()
 end
 
 function window_top_visible (wp)
-  return offset_to_point (wp.bp, window_o (wp)).n == wp.topdelta
+  return offset_to_line (wp.bp, window_o (wp)) == wp.topdelta
 end
 
 function window_bottom_visible (wp)

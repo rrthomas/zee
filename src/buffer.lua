@@ -592,6 +592,17 @@ function move_line (n)
   return n == 0
 end
 
+function offset_to_line (bp, offset)
+  local n = 0
+  local o = 0
+  while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < offset do
+    n = n + 1
+    o = buffer_next_line (bp, o)
+    assert (o)
+  end
+  return n
+end
+
 function goto_offset (o)
   local old_lineo = get_buffer_line_o (cur_bp)
   set_buffer_pt (cur_bp, o)

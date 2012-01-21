@@ -108,7 +108,7 @@ local function make_screen_pos (wp)
 end
 
 local function draw_status_line (line, wp)
-  local pt = offset_to_point (wp.bp, window_o (wp))
+  local n = offset_to_line (wp.bp, window_o (wp))
   term_attrset (FONT_REVERSE)
   term_move (line, 0)
   term_addstr (string.rep ('-', wp.ewidth))
@@ -126,7 +126,7 @@ local function draw_status_line (line, wp)
 
   local as = string.format ("--%s%2s  %-15s   %s %-9s (Fundamental",
                             eol_type, make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
-                            string.format ("(%d,%d)", pt.n + 1, get_goalc_bp (wp.bp, window_o (wp))))
+                            string.format ("(%d,%d)", n + 1, get_goalc_bp (wp.bp, window_o (wp))))
 
   if wp.bp.autofill then
     as = as .. " Fill"

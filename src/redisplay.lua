@@ -20,12 +20,12 @@
 -- MA 02111-1301, USA.
 
 function recenter (wp)
-  local pt = offset_to_point (wp.bp, window_o (wp))
+  local n = offset_to_line (wp.bp, window_o (wp))
 
-  if pt.n > wp.eheight / 2 then
+  if n > wp.eheight / 2 then
     wp.topdelta = wp.eheight / 2
   else
-    wp.topdelta = pt.n
+    wp.topdelta = n
   end
 end
 
@@ -99,7 +99,7 @@ function resize_windows ()
 end
 
 function resync_redisplay (wp)
-  local n = offset_to_point (wp.bp, get_buffer_pt (wp.bp)).n
+  local n = offset_to_line (wp.bp, get_buffer_pt (wp.bp))
   local delta = n - wp.lastpointn
 
   if delta ~= 0 then
