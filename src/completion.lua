@@ -83,16 +83,16 @@ local function completion_readdir (cp, path)
 
   -- Split up path with dirname and basename, unless it ends in `/',
   -- in which case it's considered to be entirely dirname.
-  local pdir, base
+  local pdir
   if path[-1] ~= "/" then
     pdir = posix.dirname (path)
     if pdir ~= "/" then
       pdir = pdir .. "/"
     end
-    base = posix.basename (path)
+    path = posix.basename (path)
   else
     pdir = path
-    base = ""
+    path = ""
   end
 
   local dir = posix.dir (pdir)
