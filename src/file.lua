@@ -583,8 +583,10 @@ Puts mark after the inserted text.
         bp = def_bp
       end
 
-      insert_buffer (bp)
-      execute_function ("set-mark-command")
+      if ok then
+        insert_buffer (bp)
+        execute_function ("set-mark-command")
+      end
     end
 
     return ok
