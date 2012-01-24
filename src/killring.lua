@@ -68,8 +68,10 @@ local function kill_text (uniarg, mark_func)
   end
 
   push_mark ()
+  undo_start_sequence ()
   execute_function (mark_func, uniarg)
   execute_function ("kill-region")
+  undo_end_sequence ()
   pop_mark ()
 
   _this_command = "kill-region"
