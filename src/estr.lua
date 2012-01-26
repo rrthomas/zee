@@ -85,17 +85,24 @@ function estr_line_len (es, o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o)
 end
 
--- FIXME: Replace the following with estr_replace, taken from replace_estr.
-function estr_cat (es, src)
+function estr_replace (es, pos, del, ins)
+  local rest = es.s:sub (pos + del + 1)
+  es.s = es.s:sub (1, pos)
+
   local o = 0
-  while o and o < #src.s do
-    local nexto = estr_next_line (src, o)
-    es.s = es.s .. string.sub (src.s, o + 1, nexto and nexto - #src.eol or #src.s)
+  while o and o < #ins.s do
+    local nexto = estr_next_line (ins, o)
+    es.s = es.s .. ins.s:sub (o + 1, nexto and nexto - #ins.eol or #ins.s)
     o = nexto
     if o then
       es.s = es.s .. es.eol
     end
   end
 
+  es.s = es.s .. rest
   return es
+end
+
+function estr_cat (es, src)
+  return estr_replace (es, #es.s, 0, src)
 end

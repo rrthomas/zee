@@ -69,27 +69,36 @@ function buffer_line_len (bp, o)
     realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
 end
 
--- Replace `oldlen' chars after point `bp' with `newtext'.
+-- Replace `del' chars after point `bp' with `newtext'.
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
-function replace (oldlen, newtext)
-  undo_save_block (cur_bp.pt, oldlen, #newtext)
+function replace_estr (del, newtext)
+  if warn_if_readonly_buffer () then
+    return false
+  end
+
+  -- Convert inserted string to correct line ending
+  if newtext.eol ~= get_buffer_eol (cur_bp) then
+    newtext = estr_cat ({s = "", eol = get_buffer_eol (cur_bp)}, newtext)
+  end
+
+  undo_save_block (cur_bp.pt, del, #newtext.s)
 
   -- Ensure gap fits #newtext; if gap becomes zero, set to min_gap.
-  if cur_bp.gap + oldlen < #newtext then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#newtext + min_gap) - (cur_bp.gap + oldlen)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
-    cur_bp.gap = #newtext + min_gap - oldlen
+  if cur_bp.gap + del < #newtext.s then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#newtext.s + min_gap) - (cur_bp.gap + del)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
+    cur_bp.gap = #newtext.s + min_gap - del
   end
 
-  -- Remove oldlen chars, zeroing some if necessary.
-  if oldlen > #newtext then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap) .. string.rep ('\0', oldlen - #newtext) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1 + oldlen - #newtext)
+  -- Remove `del' chars, zeroing some if necessary.
+  if del > #newtext.s then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap) .. string.rep ('\0', del - #newtext.s) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1 + del - #newtext.s)
   end
-  cur_bp.gap = cur_bp.gap + oldlen
+  cur_bp.gap = cur_bp.gap + del
 
-  -- Insert #newtext chars.
-  cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap - #newtext) .. newtext .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1)
-  cur_bp.gap = cur_bp.gap - #newtext
+  -- Insert #newtext.s chars.
+  cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap - #newtext.s) .. newtext.s .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1)
+  cur_bp.gap = cur_bp.gap - #newtext.s
 
   -- Ensure gap doesn't get too big.
   if cur_bp.gap > max_gap then
@@ -100,38 +109,15 @@ function replace (oldlen, newtext)
   -- Adjust markers.
   for m in pairs (cur_bp.markers) do
     if m.o > cur_bp.pt then
-      m.o = math.max (cur_bp.pt, m.o + #newtext - oldlen)
+      m.o = math.max (cur_bp.pt, m.o + #newtext.s - del)
     end
   end
 
   cur_bp.modified = true
-  thisflag.need_resync = true
-end
-
-function replace_estr (del, es)
-  if warn_if_readonly_buffer () then
-    return false
+  set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + #newtext.s)
+  if estr_next_line (newtext, 0) then
+    thisflag.need_resync = true
   end
-
-  undo_start_sequence ()
-  replace (del, "")
-  local p = 1
-  while p <= #es.s do
-    local next = string.find (es.s, es.eol, p)
-    local line_len = (next or #es.s + 1) - p
-    replace (0, string.sub (es.s, p, p + line_len - 1))
-    local eol_len, buf_eol_len = #es.eol, #get_buffer_eol (cur_bp)
-    set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + line_len)
-    p = p + line_len
-    if next then
-      replace (0, get_buffer_eol (cur_bp))
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + buf_eol_len)
-      thisflag.need_resync = true
-      p = p + eol_len
-    end
-  end
-  undo_end_sequence ()
-
   return true
 end
 
@@ -201,10 +187,10 @@ function delete_char ()
   end
 
   if eolp () then
-    replace (#get_buffer_eol (cur_bp), "")
+    replace_estr (#get_buffer_eol (cur_bp), estr_new (""))
     thisflag.need_resync = true
   else
-    replace (1, "")
+    replace_estr (1, estr_new (""))
   end
 
   cur_bp.modified = true
@@ -355,7 +341,7 @@ function delete_region (r)
 
   local m = point_marker ()
   goto_offset (r.start)
-  replace (get_region_size (r), "")
+  replace_estr (get_region_size (r), estr_new (""))
   goto_offset (m.o)
   unchain_marker (m)
 
