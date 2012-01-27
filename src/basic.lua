@@ -79,8 +79,9 @@ On reaching end of buffer, stop and signal error.
 function get_goalc_bp (bp, o)
   local col = 0
   local t = tab_width (bp)
-  for i = 1, o - buffer_start_of_line (bp, o) do
-    if get_buffer_char (bp, buffer_start_of_line (bp, o) + i) == '\t' then
+  local start = buffer_start_of_line (bp, o)
+  for i = 1, o - start do
+    if get_buffer_char (bp, start + i) == '\t' then
       col = bit.bor (col, t - 1)
     end
     col = col + 1
