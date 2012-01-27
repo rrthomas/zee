@@ -239,6 +239,5 @@ function term_redisplay ()
 end
 
 function term_redraw_cursor ()
-  -- Redraw cursor.
   term_move (cur_topline + cur_wp.topdelta, col)
 end
