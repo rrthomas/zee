@@ -49,9 +49,10 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 
   -- Draw body of line.
   local x = 0
+  local line_len = buffer_line_len (wp.bp, o)
   for i = startcol, math.huge do
     term_attrset ((highlight and in_region (o, i, rp)) and FONT_REVERSE or FONT_NORMAL)
-    if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
+    if i >= line_len or x >= wp.ewidth then
       break
     end
     local c = get_buffer_char (wp.bp, o + i)
