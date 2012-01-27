@@ -72,7 +72,7 @@ function chordtodesc (key)
 end
 
 
--- Convert a key code sequence into a key code sequence string.
+-- Convert a key code sequence into a descriptive string.
 function keyvectodesc (keys)
   return table.concat (list.map (chordtodesc, keys), " ")
 end
