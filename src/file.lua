@@ -594,40 +594,38 @@ Puts mark after the inserted text.
 )
 
 function find_file (filename)
-  for _, bp in ipairs (buffers) do
-    if bp.filename == filename then
-      switch_to_buffer (bp)
-      return true
+  local bp
+  for i = 1, #buffers do
+    if buffers[i].filename == filename then
+      bp = buffers[i]
+      break
     end
   end
 
-  if exist_file (filename) and not is_regular_file (filename) then
-    return minibuf_error ("File exists but could not be read")
+  if not bp then
+    if exist_file (filename) and not is_regular_file (filename) then
+      return minibuf_error ("File exists but could not be read")
+    else
+      bp = buffer_new ()
+      set_buffer_names (bp, filename)
+      bp.dir = posix.dirname (filename)
+
+      local s = io.slurp (filename)
+      if s then
+        bp.readonly = not check_writable (filename)
+      else
+        s = ""
+      end
+      bp.text = estr_new (s)
+
+      -- Reset undo history
+      bp.next_undop = nil
+      bp.last_undop = nil
+      bp.modified = false
+    end
   end
 
-  local bp = buffer_new ()
-  set_buffer_names (bp, filename)
   switch_to_buffer (bp)
-
-  local s = io.slurp (filename)
-  if s then
-    if not check_writable (filename) then
-      cur_bp.readonly = true
-    end
-  else
-    s = ""
-  end
-
-  cur_bp.text = estr_new (s)
-
-  -- Reset undo history
-  cur_bp.next_undop = nil
-  cur_bp.last_undop = nil
-
-  bp.modified = false
-  bp.dir = posix.dirname (filename)
-  posix.chdir (bp.dir) -- FIXME: Call cd instead of last two lines
-
   thisflag.need_resync = true
 
   return true
