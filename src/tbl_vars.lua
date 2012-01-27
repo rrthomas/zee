@@ -19,12 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-main_vars = {}
-
-local function X (name, default_value, local_when_set, docstring)
-  main_vars[name] = {val = default_value, islocal = local_when_set, doc = texi (docstring)}
-end
-
 X ("inhibit-splash-screen", "nil", false, "Non-nil inhibits the startup screen.\nIt also inhibits display of the initial message in the `*scratch*' buffer.")
 X ("standard-indent", "4", false, "Default number of columns for margin-changing functions to indent.")
 X ("tab-width", "8", true, "Distance between tab stops (for display of tab characters), in columns.")

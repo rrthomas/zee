@@ -19,6 +19,8 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+doc_DATA += src/dotzile.sample
+
 BUILT_SOURCES = src/loadlua.lua
 
 bin_SCRIPTS = src/zile
@@ -28,9 +30,8 @@ src_zile_LUA =						\
 	src/estr.lua					\
 	src/history.lua					\
 	src/lisp.lua					\
-	src/tbl_vars.lua				\
-	src/variables.lua				\
 	src/main.lua					\
+	src/variables.lua				\
 	src/basic.lua					\
 	src/bind.lua					\
 	src/buffer.lua					\
@@ -85,6 +86,9 @@ $(top_builddir)/src/zile: $(PRODUCTIONSOURCES) Makefile
 	chmod +x $@
 	$(top_builddir)/src/zile --version >/dev/null || rm $@
 
+src/dotzile.sample: src/tbl_vars.lua build-aux/mkdotzile.lua
+	PACKAGE="$(PACKAGE)" $(LUA_ENV) $(LUA) $(srcdir)/build-aux/mkdotzile.lua $(srcdir)/src/tbl_vars.lua
+
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/zile.lua' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
@@ -93,7 +97,9 @@ install-exec-hook:
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
 	src/zile.lua.in					\
-	src/loadlua.lua.in
+	src/loadlua.lua.in				\
+	src/tbl_vars.lua				\
+	src/dotzile.sample
 
 CLEANFILES +=						\
 	src/zile					\
