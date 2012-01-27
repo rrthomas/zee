@@ -146,7 +146,7 @@ function term_init ()
   }
 
   local kbs = curses.tigetstr("kbs")
-  if (nil == kbs or 1 ~= #kbs) then
+  if not kbs or #kbs ~= 1 then
     kbs = string.char(127)
   end
 
