@@ -37,8 +37,6 @@ local function make_char_printable (c, x, cur_tab_width)
   assert (c ~= "")
   if c == '\t' then
     return string.rep (" ", cur_tab_width - x % cur_tab_width)
-  elseif posix.isprint (c) then
-    return c
   elseif string.byte (c) > 0 and string.byte (c) <= 27 then
     return string.format ("^%c", string.byte ("@") + string.byte (c))
   else
@@ -56,9 +54,15 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
     if i >= buffer_line_len (wp.bp, o) or x >= wp.ewidth then
       break
     end
-    local s = make_char_printable (get_buffer_char (wp.bp, o + i), x, cur_tab_width)
-    term_addstr (s)
-    x = x + #s
+    local c = get_buffer_char (wp.bp, o + i)
+    if posix.isprint (c) then
+      term_addch (string.byte (c))
+      x = x + 1
+    else
+      local s = make_char_printable (get_buffer_char (wp.bp, o + i), x, cur_tab_width)
+      term_addstr (s)
+      x = x + #s
+    end
   end
 
   -- Draw end of line.
@@ -200,7 +204,12 @@ function term_redisplay ()
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
-      col = col + #make_char_printable (get_buffer_char (cur_wp.bp, o + p), col, t)
+      local c = get_buffer_char (cur_wp.bp, o + p)
+      if posix.isprint (c) then
+        col = col + 1
+      else
+        col = col + #make_char_printable (c, col, t)
+      end
     end
 
     if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then

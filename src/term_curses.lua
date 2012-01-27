@@ -41,7 +41,10 @@ function term_clear ()
   curses.stdscr ():clear ()
 end
 
--- Add a string to the terminal
+function term_addch (c)
+  curses.stdscr ():addch (c)
+end
+
 function term_addstr (s)
   curses.stdscr ():addstr (s)
 end
