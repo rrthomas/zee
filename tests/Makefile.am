@@ -24,9 +24,11 @@ RUNLISPTESTS = $(LUA) $(srcdir)/tests/run-lisp-tests.lua
 LISP_TESTS =						\
 	$(srcdir)/tests/*.el				\
 	$(srcdir)/tests/interactive/*.el
+
 LISP_TESTS_ZILE_ONLY =					\
 	$(srcdir)/tests/regression/*.el			\
-	$(srcdir)/tests/zile-only/*.el
+	$(srcdir)/tests/zile-only/*.el			\
+	$(srcdir)/tests/zile-only/interactive/*.el
 
 # FIXME: Find a way of making these work (screen-dependent tests by setting TERM and/or COLUMNS and LINES?)
 #	tests/disabled/*.el
@@ -35,7 +37,8 @@ LISP_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/regression/*.output		\
-	$(srcdir)/tests/zile-only/*.output
+	$(srcdir)/tests/zile-only/*.output		\
+	$(srcdir)/tests/zile-only/interactive/*.output
 
 LISP_ALL_TESTS =					\
 	$(LISP_TESTS)					\
