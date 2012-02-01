@@ -98,8 +98,8 @@ end
 Defun ("find-file",
        {"string"},
 [[
-Edit the specified file.
-Switch to a buffer visiting the file,
+Edit file @i{filename}.
+Switch to a buffer visiting file @i{filename},
 creating one if none already exists.
 ]],
   true,
@@ -123,7 +123,7 @@ creating one if none already exists.
 Defun ("find-file-read-only",
        {"string"},
 [[
-Edit the specified file but don't allow changes.
+Edit file @i{filename} but don't allow changes.
 Like `find-file' but marks buffer as read-only.
 Use @kbd{M-x toggle-read-only} to permit editing.
 ]],
