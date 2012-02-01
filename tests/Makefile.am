@@ -21,6 +21,8 @@
 
 RUNLISPTESTS = $(LUA) $(srcdir)/tests/run-lisp-tests.lua
 
+TERM ?= vt100
+
 LISP_TESTS =						\
 	$(srcdir)/tests/*.el				\
 	$(srcdir)/tests/interactive/*.el
@@ -46,18 +48,17 @@ LISP_ALL_TESTS =					\
 
 LISP_TESTS_ENVIRONMENT =				\
 	abs_srcdir=$(abs_srcdir)			\
-	srcdir=$(srcdir)
+	srcdir=$(srcdir)				\
+	abs_builddir=$(abs_builddir)			\
+	TERM=$(TERM)
 
-check-local: src/zile
+check-local: $(builddir)/src/zile
+	$(LISP_TESTS_ENVIRONMENT) $(builddir)/src/zile --unknown-flag --load $(srcdir)/tests/quit.el
 	echo $(LISP_TESTS) | $(LUA_ENV) EMACSPROG="$(EMACSPROG)" $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) EMACSPROG= $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
 
-TESTSCRIPTS =						\
-    tests/run-lisp-tests.lua				\
-    tests/test-bad-argument
-
 EXTRA_DIST +=						\
-    $(LISP_ALL_TESTS)					\
-    $(LISP_TESTS_OUTPUTS)				\
-    tests/test.input					\
-    $(TESTSCRIPTS)
+	$(LISP_ALL_TESTS)				\
+	$(LISP_TESTS_OUTPUTS)				\
+	tests/test.input				\
+	tests/run-lisp-tests.lua

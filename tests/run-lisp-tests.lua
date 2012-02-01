@@ -1,6 +1,6 @@
 -- run-lisp-tests
 --
--- Copyright (c) 2010-2011 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -25,7 +25,7 @@
 require "posix"
 require "std"
 
--- srcdir and builddir are defined in the environment for a build
+-- The following are defined in the environment for a build
 local srcdir = os.getenv ("srcdir") or "."
 local abs_srcdir = os.getenv ("abs_srcdir") or "."
 local builddir = os.getenv ("builddir") or "."
@@ -43,12 +43,6 @@ function mkdir_p (p)
   elseif "directory" ~= st.ftype then
     return nil, p .. ": file exists already"
   end
-end
-
--- If TERM is not set to a terminal type, choose a default
-local TERM = os.getenv ("TERM")
-if not TERM or TERM == "unknown" then
-  os.setenv ("TERM", "vt100")
 end
 
 local EMACSPROG = os.getenv ("EMACSPROG") or ""
