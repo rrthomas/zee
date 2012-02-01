@@ -52,13 +52,13 @@ LISP_TESTS_ENVIRONMENT =				\
 	abs_builddir=$(abs_builddir)			\
 	TERM=$(TERM)
 
-check-local: $(builddir)/src/zile
-	$(LISP_TESTS_ENVIRONMENT) $(builddir)/src/zile --unknown-flag --load $(srcdir)/tests/quit.el
-	echo $(LISP_TESTS) | $(LUA_ENV) EMACSPROG="$(EMACSPROG)" $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
-	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) EMACSPROG= $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
-
 EXTRA_DIST +=						\
 	$(LISP_ALL_TESTS)				\
 	$(LISP_TESTS_OUTPUTS)				\
 	tests/test.input				\
 	tests/run-lisp-tests.lua
+
+check-local: $(builddir)/src/zile
+	$(LISP_TESTS_ENVIRONMENT) $(builddir)/src/zile --unknown-flag --load $(srcdir)/tests/quit.el
+	echo $(LISP_TESTS) | $(LUA_ENV) EMACSPROG="$(EMACSPROG)" $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
+	echo $(LISP_TESTS_ZILE_ONLY) | $(LUA_ENV) EMACSPROG= $(LISP_TESTS_ENVIRONMENT) xargs $(RUNLISPTESTS)
