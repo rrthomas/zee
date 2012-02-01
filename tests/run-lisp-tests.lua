@@ -29,23 +29,12 @@ require "std"
 local srcdir = os.getenv ("srcdir") or "."
 local abs_srcdir = os.getenv ("abs_srcdir") or "."
 local builddir = os.getenv ("builddir") or "."
+local EMACSPROG = os.getenv ("EMACSPROG") or ""
 
 local zile_pass = 0
 local zile_fail = 0
 local emacs_pass = 0
 local emacs_fail = 0
-
-function mkdir_p (p)
-  local st = posix.stat (p)
-  if nil == st then
-    mkdir_p (posix.dirname (p))
-    return posix.mkdir (p)
-  elseif "directory" ~= st.ftype then
-    return nil, p .. ": file exists already"
-  end
-end
-
-local EMACSPROG = os.getenv ("EMACSPROG") or ""
 
 for _, name in ipairs (arg) do
   local test = string.gsub (name, "%.el$", "")
@@ -55,7 +44,7 @@ for _, name in ipairs (arg) do
     local args = {"--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
     local input = io.catfile (srcdir, "tests", "test.input")
 
-    mkdir_p (posix.dirname (edit_file))
+    posix.system ("mkdir", "-p", posix.dirname (edit_file))
 
     if EMACSPROG ~= "" then
       posix.system ("cp", input, edit_file)
