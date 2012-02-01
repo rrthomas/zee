@@ -18,12 +18,12 @@
 -- along with GNU Zile; see the file COPYING.  If not, write to the
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
---
--- N.B. Tests that use execute-kbd-macro must note that keyboard input
--- is only evaluated once the script has finished running.
 
 require "posix"
 require "std"
+
+-- N.B. Tests that use execute-kbd-macro must note that keyboard input
+-- is only evaluated once the script has finished running.
 
 -- The following are defined in the environment for a build
 local srcdir = os.getenv ("srcdir") or "."
