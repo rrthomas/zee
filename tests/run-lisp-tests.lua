@@ -36,49 +36,46 @@ local zile_fail = 0
 local emacs_pass = 0
 local emacs_fail = 0
 
-for _, name in ipairs (arg) do
-  local test = string.gsub (name, "%.el$", "")
-  if io.open (test .. ".output") ~= nil then
-    name = posix.basename (test)
-    local edit_file = io.catfile (builddir, "tests", name .. ".input")
-    local args = {"--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
-    local input = io.catfile (srcdir, "tests", "test.input")
+zile_cmd = io.catfile (builddir, "src", "zile")
 
-    posix.system ("mkdir", "-p", posix.dirname (edit_file))
-
-    if EMACSPROG ~= "" then
-      posix.system ("cp", input, edit_file)
-      posix.system ("chmod", "+w", edit_file)
-      local status = posix.system (EMACSPROG, "--quick", "--batch", unpack (args))
-      if status == 0 then
-        if posix.system ("diff", test .. ".output", edit_file) == 0 then
-          emacs_pass = emacs_pass + 1
-          posix.system ("rm", "-f", edit_file, edit_file .. "~")
-        else
-          print ("Emacs " .. name .. " failed to produce correct output")
-          emacs_fail = emacs_fail + 1
-        end
-      else
-        print ("Emacs " .. name .. " failed to run with error code " .. tostring (status))
-        emacs_fail = emacs_fail + 1
-      end
-    end
-
-    posix.system ("cp", input, edit_file)
-    posix.system ("chmod", "+w", edit_file)
-    local status = posix.system (io.catfile (builddir, "src", "zile"), unpack (args))
-    if status == 0 then
-      if posix.system ("diff", test .. ".output", edit_file) == 0 then
-        zile_pass = zile_pass + 1
-        posix.system ("rm", "-f", edit_file, edit_file .. "~")
-      else
-        print ("Zile " .. name .. " failed to produce correct output")
-        zile_fail = zile_fail + 1
-      end
+function run_test (test, name, editor_name, edit_file, cmd, args)
+  posix.system ("cp", io.catfile (srcdir, "tests", "test.input"), edit_file)
+  posix.system ("chmod", "+w", edit_file)
+  local status = posix.system (cmd, unpack (args))
+  if status == 0 then
+    if posix.system ("diff", test .. ".output", edit_file) == 0 then
+      posix.system ("rm", "-f", edit_file, edit_file .. "~")
+      return true
     else
-      print ("Zile " .. name .. " failed to run with error code " .. tostring (status))
-      zile_fail = zile_fail + 1
+      print ("Emacs " .. name .. " failed to produce correct output")
     end
+  else
+    print ("Emacs " .. name .. " failed to run with error code " .. tostring (status))
+  end
+end
+
+for _, name in ipairs (arg) do
+  local test = name:gsub ("%.el$", "")
+  name = posix.basename (test)
+  local edit_file = io.catfile (builddir, "tests", name .. ".input")
+  local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", io.catfile (abs_srcdir, (string.gsub (test .. ".el", "^" .. srcdir .. "/", "")))}
+
+  posix.system ("mkdir", "-p", posix.dirname (edit_file))
+
+  if EMACSPROG ~= "" then
+    if run_test (test, name, "Emacs", edit_file, EMACSPROG, args) then
+      emacs_pass = emacs_pass + 1
+    else
+      emacs_fail = emacs_fail + 1
+      os.rename (edit_file, edit_file .. "-emacs")
+      os.rename (edit_file .. "~", edit_file .. "-emacs~")
+    end
+  end
+
+  if run_test (test, name, "Zile", edit_file, zile_cmd, args) then
+    zile_pass = zile_pass + 1
+  else
+    zile_fail = zile_fail + 1
   end
 end
 
