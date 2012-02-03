@@ -79,7 +79,6 @@ local codetoname = {
   [KBD_F11]   = "<f11>",
   [KBD_F12]   = "<f12>",
   [string.byte(' ')] = "SPC",
-  [string.byte('\t')] = "TAB",
 }
 
 
@@ -118,7 +117,7 @@ local keynametocode_map = {
   ["\\t"] = KBD_TAB,
   ["\\TAB"] = KBD_TAB,
   ["\\UP"] = KBD_UP,
-  ["\t"] = string.byte ('\t'),
+  ["\t"] = KBD_TAB,
   ["\\\\"] = string.byte ('\\'),
 }
 
@@ -152,7 +151,12 @@ local function mapkey (map, key, mod)
   return s
 end
 
-local keyreadsyntax_map = table.invert (keynametocode_map)
+local keyreadsyntax_map = table.merge (table.invert (keynametocode_map), {
+                                        [KBD_PGDN] = "\\PAGEDOWN",
+                                        [KBD_PGUP] = "\\PAGEUP",
+                                        [KBD_RET]  = "\\RET",
+                                        [KBD_TAB]  = "\\TAB",
+                                      })
 
 -- Convert an internal format key chord back to its read syntax
 function toreadsyntax (key)
@@ -217,6 +221,15 @@ end
 -- Convert a single keychord string to its key code.
 keycode = memoize (function (chord)
   local key, tail = setmetatable ({}, keycode_mt), chord
+
+  -- Equivalencies
+  if chord == "\\r" then
+    return keycode "\\RET"
+  elseif chord == " " then
+    return keycode "\\SPC"
+  elseif chord == "\\t" or chord == "\t" then
+    return keycode "\\TAB"
+  end
 
   local fragment
   repeat
