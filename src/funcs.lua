@@ -166,11 +166,11 @@ by 4 each time.
         ok = execute_function ("keyboard-quit")
         break
       -- Digit pressed.
-      elseif string.char (bit.band (key, 0xff)):match ("%d") then
-        local digit = bit.band (key, 0xff) - string.byte ('0')
+      elseif string.match (string.char (key.key), "%d") then
+        local digit = key.key - string.byte ('0')
         thisflag.uniarg_empty = false
 
-        if bit.band (key, KBD_META) ~= 0 then
+        if key.META then
           as = "ESC "
         end
 

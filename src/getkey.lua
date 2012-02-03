@@ -55,7 +55,7 @@ end
 
 -- Push a key into the input buffer.
 function pushkey (key)
-  term_ungetkey (key)
+  term_ungetkey (toreadsyntax (key))
 end
 
 -- Unget a key as if it had not been fetched.

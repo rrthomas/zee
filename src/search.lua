@@ -244,7 +244,7 @@ local function isearch (forward, regexp)
       elseif last_search then
         pattern = last_search
       end
-    elseif bit.band (c, KBD_META) ~= 0 or bit.band (c, KBD_CTRL) ~= 0 or c > 0xff then
+    elseif c.META or c.CTRL or c.key > 0xff then
       if c == keycode "\\RET" and #pattern == 0 then
         do_search (forward, regexp)
       else
@@ -266,7 +266,7 @@ local function isearch (forward, regexp)
       end
       break
     else
-      pattern = pattern .. string.char (c)
+      pattern = pattern .. table.concat (list.map (string.char, term_keytocodes (c)))
     end
 
     if #pattern > 0 then

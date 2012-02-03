@@ -20,6 +20,15 @@
 -- MA 02111-1301, USA.
 
 
+-- Memoize any function, by wrapping it in a functable.
+function memoize (fn)
+  return setmetatable ({}, {__call = function (self, k)
+    local v = self[k]
+    if nil == v then v = fn (k); self[k] = v end
+    return v
+  end})
+end
+
 -- Recase str according to newcase.
 function recase (s, newcase)
   local bs = ""

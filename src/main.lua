@@ -32,10 +32,6 @@ program_name = posix.basename (arg[0] or PACKAGE)
 GETKEY_DEFAULT = -1
 GETKEY_DELAYED = 2000
 
--- Key modifiers.
-KBD_CTRL = 512
-KBD_META = 1024
-
 -- Global variables
 main_vars = {}
 function X (name, default_value, local_when_set, docstring)

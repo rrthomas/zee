@@ -23,20 +23,20 @@
 
 function self_insert_command ()
   local ret = true
-  -- Mask out ~KBD_CTRL to allow control sequences to be themselves.
-  local key = lastkey ()
-  key = bit.band (key, bit.bnot (KBD_CTRL))
+  local keys = term_keytocodes (lastkey ())
   deactivate_mark ()
-  if key <= 0xff then
-    if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
-      fill_break_line ()
+  for _, key in ipairs (keys) do
+    if key <= 0xff then
+      if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
+        fill_break_line ()
+      end
+      insert_char (string.char (key))
+    else
+      ret = false
     end
-    insert_char (string.char (key))
-  else
-    ding ()
-    ret = false
   end
 
+  if not ret then ding () end
   return ret
 end
 
@@ -100,9 +100,15 @@ function init_default_bindings ()
   -- Bind all printing keys to self_insert_command
   for i = 0, 0xff do
     if posix.isprint (string.char (i)) then
-      root_bindings[{i}] = "self-insert-command"
+      root_bindings[{keycode (string.char (i))}] = "self-insert-command"
     end
   end
+
+  -- Bind special key names to self-insert-command
+  list.map (function (e)
+	      root_bindings[{keycode (e)}] = "self-insert-command"
+	    end,
+	    {"\\SPC", "\\TAB", "\\RET"})
 
   lisp_loadfile (PATH_DATA .. "/default-bindings.el")
 end
@@ -133,7 +139,7 @@ end
 local function walk_bindings (tree, process, st)
   local function walk_bindings_tree (tree, keys, process, st)
     for key, node in pairs (tree) do
-      table.insert (keys, chordtodesc (key))
+      table.insert (keys, tostring (key))
       if type (node) == "string" then
         process (table.concat (keys, " "), node, st)
       else
@@ -174,7 +180,7 @@ function get_function_by_keys (keys)
   -- Detect Meta-digit
   if #keys == 1 then
     local key = keys[1]
-    if bit.band (key, KBD_META) ~= 0 and (string.char (bit.band (key, 0xff)):match ("%d") or bit.band (key, 0xff) == string.byte ('-')) then
+    if key.META and string.match (string.char (key.key), "[%d%-]") then
       return "universal-argument"
     end
   end

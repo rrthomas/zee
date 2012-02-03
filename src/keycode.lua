@@ -19,6 +19,10 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+-- Key modifiers.
+local KBD_CTRL = 512
+local KBD_META = 1024
+
 -- Common non-alphanumeric keys.
 local KBD_CANCEL = 257
 local KBD_TAB = 258
@@ -48,6 +52,7 @@ local KBD_F11 = 282
 local KBD_F12 = 283
 
 local codetoname = {
+  [27]        = "\\e",
   [KBD_PGUP]  = "<prior>",
   [KBD_PGDN]  = "<next>",
   [KBD_HOME]  = "<home>",
@@ -77,33 +82,9 @@ local codetoname = {
   [string.byte('\t')] = "TAB",
 }
 
--- Convert a key chord into its ASCII representation
-function chordtodesc (key)
-  local s = ""
-
-  if bit.band (key, KBD_CTRL) ~= 0 then
-    s = s .. "C-"
-  end
-  if bit.band (key, KBD_META) ~= 0 then
-    s = s .. "M-"
-  end
-  key = bit.band (key, bit.bnot (bit.bor (KBD_CTRL, KBD_META)))
-
-  if codetoname[key] then
-    s = s .. codetoname[key]
-  elseif key <= 0xff and posix.isgraph (string.char (key)) then
-    s = s .. string.char (key)
-  else
-    s = s .. string.format ("<%x>", key)
-  end
-
-  return s
-end
-
-
 -- Convert a key code sequence into a descriptive string.
 function keyvectodesc (keys)
-  return table.concat (list.map (chordtodesc, keys), " ")
+  return table.concat (list.map (tostring, keys), " ")
 end
 
 
@@ -146,44 +127,150 @@ local keynametocode_map = {
   ["\\\\"] = string.byte ('\\'),
 }
 
--- Convert a prefix of a key string to its key code.
-local function strtokey (s)
-  if s[1] == '\\' then
-    local p
-    for i in pairs (keynametocode_map) do
-      if i == string.sub (s, 1, #i) then
-        p = i
+-- Insert printable characters in the ASCII range.
+for i=0x0,0x7f do
+  if posix.isprint (string.char (i)) and i ~= string.byte ('\\') then
+    keynametocode_map[string.char (i)] = i
+  end
+end
+
+local function mapkey (map, key, mod)
+  if not key then
+    return "invalid keycode: nil"
+  end
+
+  local s = ""
+  local s = (key.CTRL and mod.C or "") .. (key.META and mod.M or "")
+
+  if not key.key then
+    return "invalid keycode: " .. s .. "nil"
+  end
+
+  if map[key.key] then
+    s = s .. map[key.key]
+  elseif key.key <= 0xff and posix.isgraph (string.char (key.key)) then
+    s = s .. string.char (key.key)
+  else
+    s = s .. string.format ("<%x>", key.key)
+  end
+
+  return s
+end
+
+local keyreadsyntax_map = table.invert (keynametocode_map)
+
+-- Convert an internal format key chord back to its read syntax
+function toreadsyntax (key)
+  return mapkey (keyreadsyntax_map, key, {C = "\\C-", M = "\\M-"})
+end
+
+-- A key code has one `keypress' and some optional modifiers.
+-- For comparisons to work, keycodes are immutable atoms.
+local keycode_mt = {
+  -- Output the write syntax for this keycode (e.g. C-M-<f1>).
+  __tostring = function (self)
+    return mapkey (codetoname, self, {C = "C-", M = "M-"})
+  end,
+
+  -- Normalise modifier lookups to uppercase, sans `-' suffix.
+  --   hasmodifier = keycode.META or keycode["c"]
+  __index = function (self, mod)
+    mod = string.upper (string.sub (mod, 1, 1))
+    return rawget (self, mod)
+  end,
+
+  -- Return the immutable atom for this keycode with modifier added.
+  --   ctrlkey = "\\C-" + key
+  __add = function (self, mod)
+    if "string" == type (self) then mod, self = self, mod end
+    mod = string.upper (string.sub (mod, 2, 2))
+    if self[mod] then return self end
+    return keycode ("\\" .. mod .. "-" .. toreadsyntax (self))
+  end,
+
+  -- Return the immutable atom for this keycode with modifier removed.
+  --   withoutmeta = key - "\\M-"
+  __sub = function (self, mod)
+    if "string" == type (self) then mod, self = self, mod end
+    mod = string.upper (string.sub (mod, 2, 2))
+    return keycode (string.gsub (toreadsyntax (self), "\\" .. mod .. "%-", ""))
+  end,
+}
+
+-- Extract a prefix of a key string.
+local function strtokey (tail)
+  if tail == "\\" then
+    return "\\", ""
+  elseif tail[1] == "\\" then
+    local head
+
+    for match in pairs (keynametocode_map) do
+      if match == tail:sub (1, #match) then
+        head = match
         break
       end
     end
-    if p then
-      return string.sub (s, #p + 1), keynametocode_map [p]
+    if head then
+      return head, tail:sub (#head + 1)
     end
     return "", nil
   end
 
-  return string.sub (s, 2), string.byte (s)
+  return tail[1], tail:sub (2)
 end
 
-local function strtochord (s)
-  local key = 0
+-- Convert a single keychord string to its key code.
+keycode = memoize (function (chord)
+  local key, tail = setmetatable ({}, keycode_mt), chord
 
-  local k
+  local fragment
   repeat
-    s, k = strtokey (s)
-    if k == nil then
-      return "", nil
+    fragment, tail = strtokey (tail)
+    if fragment == nil then return nil end
+
+    if "\\C-" == fragment then
+      key.CTRL = true
+    elseif "\\M-" == fragment then
+      key.META = true
+    elseif "\\" == fragment then
+      key.key = keynametocode_map["\\\\"]
+    else
+      key.key = keynametocode_map[fragment]
     end
-    key = bit.bor (key, k)
-  until k ~= KBD_CTRL and k ~= KBD_META
+  until fragment ~= "\\C-" and fragment ~= "\\M-"
 
-  return s, key
-end
+  -- Normalise modifiers so that \\C-\\M-r and \\M-\\C-r are the same
+  -- atom.
+  local k = (key.CTRL and "\\C-" or "") .. (key.META and "\\M-" or "") .. fragment
+  if k ~= chord then return keycode (k) end
 
--- Convert a keychord string to its key code.
-function keycode (s)
-  local _, key = strtochord (s)
   return key
+end)
+
+-- Iterator over a key sequence string, returning the next key chord on
+-- each iteration.
+local function keychords (s)
+  local tail = s
+
+  local function strtochord (tail)
+    local head, fragment = ""
+
+    repeat
+      fragment, tail = strtokey (tail)
+      if fragment == nil then return nil end
+      head = head .. fragment
+    until fragment ~= "\\C-" and fragment ~= "\\M-"
+
+    return head, tail
+  end
+
+  return function ()
+    while tail ~= "" do
+      local head
+      head, tail = strtochord (tail)
+      return head
+    end
+  end
 end
 
 -- Convert a key sequence string into a key code sequence, or nil if
@@ -191,13 +278,8 @@ end
 function keystrtovec (s)
   local keys = {}
 
-  while s ~= "" do
-    local code
-    s, code = strtochord (s)
-    if code == nil then
-      return nil
-    end
-    table.insert (keys, code)
+  for chord in keychords (s) do
+    table.insert (keys, keycode (chord))
   end
 
   return keys

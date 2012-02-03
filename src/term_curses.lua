@@ -66,8 +66,12 @@ function term_init ()
     [24]                   = keycode "\\C-x",
     [25]                   = keycode "\\C-y",
     [26]                   = keycode "\\C-z",
-    [27]                   = KBD_META,
+    [27]                   = keycode "\\e",
+    [28]                   = keycode "\\C-\\",
+    [29]                   = keycode "\\C-]",
+    [30]                   = keycode "\\C-^",
     [31]                   = keycode "\\C-_",
+    [32]                   = keycode "\\SPC",
     [127]                  = keycode "\\BACKSPACE",
     [curses.KEY_DC]        = keycode "\\DELETE",
     [curses.KEY_DOWN]      = keycode "\\DOWN",
@@ -103,8 +107,8 @@ function term_init ()
 
   for c=0,0x7f do
     codetokey[c] = codetokey[c] or keycode (string.char (c))
-    if not codetokey[c + 0x100] then
-      codetokey[c + 0x100] = keycode ("\\M-" .. string.char (c))
+    if not codetokey[c + 0x80] then
+      codetokey[c + 0x80] = "\\M-" + codetokey[c]
     end
   end
 
@@ -118,7 +122,6 @@ function term_init ()
                             [keycode "\t"]          = 9,
                             [keycode "\\t"]         = 9,
                             [keycode "\\C-z"]       = 26,
-                            [keycode "\\e"]         = 27,
                             [keycode " "]           = 32,
                             [keycode "\\SPC"]       = 32,
                             [keycode "\\BACKSPACE"] = 127,
@@ -166,8 +169,8 @@ end
 
 function term_getkey (delay)
   local key = codetokey (get_char (delay))
-  while KBD_META == key do
-    key = bit.bor (codetokey (get_char (GETKEY_DEFAULT)), KBD_META)
+  while keycode "\\e" == key do
+    key = "\\M-" + codetokey (get_char (GETKEY_DEFAULT))
   end
   return key
 end
@@ -179,13 +182,13 @@ function term_getkey_unfiltered (delay)
   return c
 end
 
-local function keytocodes (key)
+function term_keytocodes (key)
   local codevec = {}
 
   if key ~= nil then
-    if bit.band (key, KBD_META) ~= 0 then
+    if key.META then
       table.insert (codevec, 27)
-      key = bit.band (key, bit.bnot (KBD_META))
+      key = key - "\\M-"
     end
 
     local code = keytocode (key)
@@ -198,7 +201,7 @@ local function keytocodes (key)
 end
 
 function term_ungetkey (key)
-  key_buf = list.concat (key_buf, list.reverse (keytocodes (key)))
+  key_buf = list.concat (key_buf, list.reverse (term_keytocodes (keycode (key))))
 end
 
 function term_buf_len ()
