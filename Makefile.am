@@ -54,10 +54,10 @@ loc:
 	$(CLOC) $(PRODUCTIONSOURCES)
 
 loc-tests:
-	$(CLOC) $(TESTSOURCES)
+	$(CLOC) $(LISP_ALL_TESTS)
 
 loc-all:
-	$(CLOC) $(TESTSOURCES) $(PRODUCTIONSOURCES)
+	$(CLOC) $(LISP_ALL_TESTS) $(PRODUCTIONSOURCES) $(srcdir)/tests/run-lisp-tests.lua
 
 ChangeLog:
 	git2cl > ChangeLog
