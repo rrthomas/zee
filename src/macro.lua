@@ -88,7 +88,7 @@ local function process_keys (keys)
   local cur = term_buf_len ()
 
   for i = #keys, 1, -1 do
-    term_ungetkey (toreadsyntax (keys[i]))
+    term_ungetkey (keys[i])
   end
 
   undo_start_sequence ()

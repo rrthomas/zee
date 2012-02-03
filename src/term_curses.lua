@@ -271,7 +271,7 @@ local function keytocodes (key)
 end
 
 function term_ungetkey (key)
-  unget_codes (keytocodes (keycode (key)))
+  unget_codes (keytocodes (key))
 end
 
 function term_buf_len ()
