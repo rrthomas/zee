@@ -34,7 +34,7 @@ function get_buffer_pt (bp)
   return bp.pt
 end
 
-function set_buffer_pt (bp, o)
+local function set_buffer_pt (bp, o)
   local len = #bp.text.s
   if o < bp.pt then
     bp.text.s = bp.text.s:sub (1, o) .. string.rep ('\0', bp.gap) .. bp.text.s:sub (o + 1, bp.pt) .. bp.text.s:sub (bp.pt + bp.gap + 1)

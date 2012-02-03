@@ -43,7 +43,7 @@ function fill_break_line ()
     -- Move cursor back to fill column
     old_col = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp)
     while get_goalc () > fillcol + 1 do
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) - 1)
+      move_char (-1)
     end
 
     -- Find break point moving left from fill-column.
@@ -66,13 +66,13 @@ function fill_break_line ()
     end
 
     if break_col >= 1 then -- Break line.
-      set_buffer_pt (cur_bp, get_buffer_line_o (cur_bp) + break_col)
+      goto_offset (get_buffer_line_o (cur_bp) + break_col)
       execute_function ("delete-horizontal-space")
       insert_newline ()
       goto_offset (m.o)
       break_made = true
     else -- Undo fiddling with point.
-      set_buffer_pt (cur_bp, get_buffer_line_o (cur_bp) + old_col)
+      goto_offset (get_buffer_line_o (cur_bp) + old_col)
     end
 
     unchain_marker (m)
