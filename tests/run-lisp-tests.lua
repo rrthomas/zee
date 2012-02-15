@@ -47,10 +47,10 @@ function run_test (test, name, editor_name, edit_file, cmd, args)
       posix.system ("rm", "-f", edit_file, edit_file .. "~")
       return true
     else
-      print ("Emacs " .. name .. " failed to produce correct output")
+      print (editor_name .. " " .. name .. " failed to produce correct output")
     end
   else
-    print ("Emacs " .. name .. " failed to run with error code " .. tostring (status))
+    print (editor_name .. " " .. name .. " failed to run with error code " .. tostring (status))
   end
 end
 
