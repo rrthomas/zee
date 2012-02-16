@@ -22,9 +22,10 @@
 
 -- Memoize any function, by wrapping it in a functable.
 function memoize (fn)
-  return setmetatable ({}, {__call = function (self, k)
+  return setmetatable ({}, {__call = function (self, ...)
+    local k = tostring {...}
     local v = self[k]
-    if nil == v then v = fn (k); self[k] = v end
+    if v == nil then v = fn (...); self[k] = v end
     return v
   end})
 end
