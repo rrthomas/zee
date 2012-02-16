@@ -322,7 +322,7 @@ function term_addstr (s)
 end
 
 function term_attrset (attrs)
-  curses.stdscr ():attrset (attrs)
+  curses.stdscr ():attrset (attrs or 0)
 end
 
 function term_beep ()
