@@ -26,6 +26,8 @@ ZILE_VERSION_STRING = "GNU " .. PACKAGE_NAME .. " " .. VERSION
 -- The executable name
 program_name = posix.basename (arg[0] or PACKAGE)
 
+-- Zi display attributes
+display = {}
 
 -- Keyboard handling
 
@@ -48,10 +50,6 @@ X = nil
 -- uniarg_empty:   current universal arg is just C-u's with no number.
 -- defining_macro: we are defining a macro.
 
--- Zile font codes
-FONT_NORMAL = 0
-FONT_REVERSE = 1
-FONT_UNDERLINE = 2
 
 -- Default waitkey pause in ds
 WAITKEY_DEFAULT = 20

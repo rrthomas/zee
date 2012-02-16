@@ -23,7 +23,7 @@
 function term_tidy ()
   term_move (term_height () - 1, 0)
   term_clrtoeol ()
-  term_attrset (FONT_NORMAL)
+  term_attrset (display.normal)
   term_refresh ()
 end
 
@@ -51,7 +51,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   local x = 0
   local line_len = buffer_line_len (wp.bp, o)
   for i = startcol, math.huge do
-    term_attrset ((highlight and in_region (o, i, rp)) and FONT_REVERSE or FONT_NORMAL)
+    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
     if i >= line_len or x >= wp.ewidth then
       break
     end
@@ -69,12 +69,12 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   -- Draw end of line.
   if x >= term_width () then
     term_move (line, term_width () - 1)
-    term_attrset (FONT_NORMAL)
+    term_attrset (display.normal)
     term_addstr ('$')
   else
     term_addstr (string.rep (" ", wp.ewidth - x))
   end
-  term_attrset (FONT_NORMAL)
+  term_attrset (display.normal)
 end
 
 local function calculate_highlight_region (wp)
@@ -114,7 +114,7 @@ end
 
 local function draw_status_line (line, wp)
   local n = offset_to_line (wp.bp, window_o (wp))
-  term_attrset (FONT_REVERSE)
+  term_attrset (display.reverse)
   term_move (line, 0)
   term_addstr (string.rep ('-', wp.ewidth))
 
@@ -145,7 +145,7 @@ local function draw_status_line (line, wp)
   as = as .. ")"
 
   term_addstr (string.sub (as, 1, term_width ()))
-  term_attrset (FONT_NORMAL)
+  term_attrset (display.normal)
 end
 
 local function draw_window (topline, wp)

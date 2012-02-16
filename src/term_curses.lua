@@ -19,7 +19,7 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-local attr_map, codetokey, keytocode, key_buf
+local codetokey, keytocode, key_buf
 
 local ESC      = 0x1b
 local ESCDELAY = 500
@@ -37,9 +37,25 @@ end
 function term_init ()
   curses.initscr ()
 
-  attr_map = {
-    [FONT_REVERSE] = curses.A_REVERSE,
-    [FONT_UNDERLINE] = curses.A_UNDERLINE,
+  display = {
+    normal    = curses.A_NORMAL,
+    standout  = curses.A_STANDOUT,
+    underline = curses.A_UNDERLINE,
+    reverse   = curses.A_REVERSE,
+    blink     = curses.A_BLINK,
+    dim       = curses.A_DIM,
+    bold      = curses.A_BOLD,
+    protect   = curses.A_PROTECT,
+    invisible = curses.A_INVIS,
+
+    black   = curses.COLOR_BLACK,
+    red     = curses.COLOR_RED,
+    green   = curses.COLOR_GREEN,
+    yellow  = curses.COLOR_YELLOW,
+    blue    = curses.COLOR_BLUE,
+    magenta = curses.COLOR_MAGENTA,
+    cyan    = curses.COLOR_CYAN,
+    white   = curses.COLOR_WHITE,
   }
 
   key_buf = {}
@@ -306,13 +322,7 @@ function term_addstr (s)
 end
 
 function term_attrset (attrs)
-  local cattrs = 0
-  for i, v in pairs (attr_map) do
-    if bit.band (attrs, i) ~= 0 then
-      cattrs = bit.bor (cattrs, v)
-    end
-  end
-  curses.stdscr ():attrset (cattrs)
+  curses.stdscr ():attrset (attrs)
 end
 
 function term_beep ()
