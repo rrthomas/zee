@@ -192,7 +192,8 @@ local keycode_mt = {
   __sub = function (self, mod)
     if "string" == type (self) then mod, self = self, mod end
     mod = string.upper (string.sub (mod, 2, 2))
-    return keycode (string.gsub (toreadsyntax (self), "\\" .. mod .. "%-", ""))
+    local keystr = string.gsub (toreadsyntax (self), "\\" .. mod .. "%-", "")
+    return keycode (keystr)
   end,
 }
 
