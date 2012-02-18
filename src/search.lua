@@ -102,7 +102,7 @@ function do_search (forward, regexp, pattern)
   local ms
 
   if not pattern then
-    ms = minibuf_read (string.format ("%s%s: ", regexp and "RE search" or "Search", forward and "" or " backward"), last_search)
+    ms = minibuf_read (string.format ("%s%s: ", regexp and "RE search" or "Search", forward and "" or " backward"), last_search or "")
     pattern = ms
   end
 
