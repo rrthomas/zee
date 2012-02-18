@@ -108,7 +108,7 @@ local function completion_readdir (cp, path)
     cp.path = compact_path (pdir)
   end
 
-  return base
+  return path
 end
 
 -- Arguments:
