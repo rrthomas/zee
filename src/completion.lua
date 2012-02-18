@@ -41,7 +41,6 @@ end
 -- COLUMN_GAP-character gap between each column.
 local COLUMN_GAP = 5
 function completion_write (cp, width)
-  local s = "Possible completions are:\n"
   local maxlen = 0
   for i, v in ipairs (cp.matches) do
     maxlen = math.max (maxlen, #v)
@@ -49,6 +48,8 @@ function completion_write (cp, width)
   maxlen = maxlen + COLUMN_GAP
   local numcols = math.floor ((width - 1) / maxlen)
   local col = 0
+
+  insert_string ("Possible completions are:\n")
   for i, v in ipairs (cp.matches) do
     insert_string (string.format ("%-" .. maxlen .. "s", v))
     col = (col + 1) % numcols
@@ -56,7 +57,6 @@ function completion_write (cp, width)
       insert_newline ()
     end
   end
-  return s
 end
 
 -- Returns the length of the common prefix of s1 and s2.
@@ -169,10 +169,6 @@ function completion_try (cp, search)
   return ret
 end
 
-local function write_completion (cp, width)
-  insert_string (completion_write (cp, width))
-end
-
 -- Popup the completion window.
 function popup_completion (cp)
   cp.poppedup = true
@@ -180,7 +176,7 @@ function popup_completion (cp)
     cp.close = true
   end
 
-  write_temp_buffer ("*Completions*", true, write_completion, cp, cur_wp.ewidth)
+  write_temp_buffer ("*Completions*", true, completion_write, cp, cur_wp.ewidth)
 
   if not cp.close then
     cp.old_bp = cur_bp
