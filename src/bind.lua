@@ -105,7 +105,7 @@ function init_default_bindings ()
   list.map (function (e)
 	      root_bindings[{keycode (e)}] = "self-insert-command"
 	    end,
-	    {"\\SPC", "\\TAB", "\\RET"})
+	    {"\\SPC", "\\TAB", "\\RET", "\\\\"})
 
   lisp_loadfile (PATH_DATA .. "/default-bindings.el")
 end

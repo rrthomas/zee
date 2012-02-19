@@ -71,6 +71,7 @@ function term_init ()
     [0x9]     = "\\TAB",
     [0xd]     = "\\RET",
     [0x20]    = "\\SPC",
+    [0x5c]    = "\\\\",
     ["kdch1"] = "\\DELETE",
     ["kcud1"] = "\\DOWN",
     ["kend"]  = "\\END",
