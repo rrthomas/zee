@@ -56,26 +56,28 @@ end
 
 for _, name in ipairs (arg) do
   local test = name:gsub ("%.el$", "")
-  name = posix.basename (test)
-  local edit_file = test:gsub ("^" .. srcdir, builddir) .. ".input"
-  local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", test:gsub ("^" .. srcdir, abs_srcdir) .. ".el"}
+  if io.open (test .. ".output") ~= nil then
+    name = posix.basename (test)
+    local edit_file = test:gsub ("^" .. srcdir, builddir) .. ".input"
+    local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", test:gsub ("^" .. srcdir, abs_srcdir) .. ".el"}
 
-  posix.system ("mkdir", "-p", posix.dirname (edit_file))
+    posix.system ("mkdir", "-p", posix.dirname (edit_file))
 
-  if EMACSPROG ~= "" then
-    if run_test (test, name, "Emacs", edit_file, EMACSPROG, args) then
-      emacs_pass = emacs_pass + 1
-    else
-      emacs_fail = emacs_fail + 1
-      os.rename (edit_file, edit_file .. "-emacs")
-      os.rename (edit_file .. "~", edit_file .. "-emacs~")
+    if EMACSPROG ~= "" then
+      if run_test (test, name, "Emacs", edit_file, EMACSPROG, args) then
+        emacs_pass = emacs_pass + 1
+      else
+        emacs_fail = emacs_fail + 1
+        os.rename (edit_file, edit_file .. "-emacs")
+        os.rename (edit_file .. "~", edit_file .. "-emacs~")
+      end
     end
-  end
 
-  if run_test (test, name, "Zile", edit_file, zile_cmd, args) then
-    zile_pass = zile_pass + 1
-  else
-    zile_fail = zile_fail + 1
+    if run_test (test, name, "Zile", edit_file, zile_cmd, args) then
+      zile_pass = zile_pass + 1
+    else
+      zile_fail = zile_fail + 1
+    end
   end
 end
 
