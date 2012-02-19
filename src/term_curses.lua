@@ -275,6 +275,15 @@ function term_keytobyte (key)
 end
 
 
+function term_bytetokey (byte)
+  if byte == ESC then
+    return keycode "\\e"
+  else
+    return codetokey[byte]
+  end
+end
+
+
 function term_ungetkey (key)
   local codevec = {}
 

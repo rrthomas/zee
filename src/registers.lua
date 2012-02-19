@@ -30,22 +30,18 @@ Copy region into register @i{register}.
   function (reg)
     if not reg then
       minibuf_write ("Copy to register: ")
-      reg = getkey (GETKEY_DEFAULT)
+      reg = getkey_unfiltered (GETKEY_DEFAULT)
     end
 
-    if reg == keycode "\\C-g" then
+    if reg == 7 then
       return execute_function ("keyboard-quit")
     else
       minibuf_clear ()
-      if reg < 0 then
-        reg = 0
-      end
-
       local rp = calculate_the_region ()
       if not rp then
         return false
       else
-        regs[reg] = get_buffer_region (cur_bp, rp).s -- FIXME: Convert newlines.
+        regs[term_bytetokey (reg)] = get_buffer_region (cur_bp, rp).s -- FIXME: Convert newlines.
       end
     end
 
@@ -56,7 +52,7 @@ Copy region into register @i{register}.
 local regnum
 
 function insert_register ()
-  insert_string (regs[regnum])
+  insert_string (regs[term_bytetokey (regnum)])
   return true
 end
 
@@ -76,14 +72,14 @@ Puts point before and mark after the inserted text.
 
     if not reg then
       minibuf_write ("Insert register: ")
-      reg = getkey (GETKEY_DEFAULT)
+      reg = getkey_unfiltered (GETKEY_DEFAULT)
     end
 
-    if reg == keycode "\\C-g" then
+    if reg == 7 then
       ok = execute_function ("keyboard-quit")
     else
       minibuf_clear ()
-      if not regs[reg] then
+      if not regs[term_bytetokey (reg)] then
         minibuf_error ("Register does not contain text")
         ok = false
       else
@@ -102,13 +98,7 @@ Puts point before and mark after the inserted text.
 local function write_registers_list (i)
   for i, r in pairs (regs) do
     if r then
-      local as
-      if posix.isprint (string.char (i)) then
-        as = string.format ("%c", i)
-      else
-        as = string.format ("\\%o", i)
-      end
-      insert_string (string.format ("Register %s contains ", as))
+      insert_string (string.format ("Register %s contains ", tostring (i)))
 
       if r == "" then
         insert_string ("the empty string\n")
