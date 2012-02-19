@@ -198,10 +198,10 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
         end
       end
     else
-      if c.key > 255 or not posix.isprint (string.char (c.key)) then
+      if c.key > 255 or c.META or c.CTRL or not posix.isprint (string.char (c.key)) then
         ding ()
       else
-        as = string.sub (as, 1, pos) .. tostring (c) .. string.sub (as, pos + 1)
+        as = string.sub (as, 1, pos) .. string.char (c.key) .. string.sub (as, pos + 1)
         pos = pos + 1
       end
     end
