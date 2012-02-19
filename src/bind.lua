@@ -177,7 +177,7 @@ function get_function_by_keys (keys)
   -- Detect Meta-digit
   if #keys == 1 then
     local key = keys[1]
-    if key.META and string.match (string.char (key.key), "[%d%-]") then
+    if key.META and key.key < 255 and string.match (string.char (key.key), "[%d%-]") then
       return "universal-argument"
     end
   end
