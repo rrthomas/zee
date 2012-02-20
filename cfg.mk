@@ -1,23 +1,21 @@
 # Configuration for maintainer-makefile
 #
-# Copyright (c) 2011 Free Software Foundation, Inc.
+# Copyright (c) 2011-2012 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
-# GNU Zile is free software; you can redistribute it and/or modify it
+# This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 #
-# GNU Zile is distributed in the hope that it will be useful, but
+# This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Zile; see the file COPYING.  If not, write to the
-# Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
-# MA 02111-1301, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 GNULIB_SRCDIR ?= $(srcdir)/gnulib
 gnulib_dir = $(GNULIB_SRCDIR)
@@ -27,6 +25,9 @@ old_NEWS_hash := 40a4c6ac8e6b133a341fecbce7f875a6
 
 # Don't check test outputs
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
+
+# Use dashes instead of lists when updating copyright headers
+update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=1
 
 # Trailing spaces are required for correct diff syntax
 exclude_file_name_regexp--sc_trailing_blank = \.diff$
