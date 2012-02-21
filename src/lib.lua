@@ -18,16 +18,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
--- Memoize any function, by wrapping it in a functable.
-function memoize (fn)
-  return setmetatable ({}, {__call = function (self, ...)
-    local k = tostring {...}
-    local v = self[k]
-    if v == nil then v = fn (...); self[k] = v end
-    return v
-  end})
-end
-
 -- Recase str according to newcase.
 function recase (s, newcase)
   local bs = ""
