@@ -48,6 +48,7 @@ src_zile_LUA =						\
 	src/redisplay.lua				\
 	src/registers.lua				\
 	src/search.lua					\
+	src/tbl_vars.lua				\
 	src/undo.lua					\
 	src/window.lua					\
 	src/term_curses.lua				\
@@ -96,7 +97,6 @@ EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
 	src/zile.lua.in					\
 	src/loadlua.lua.in				\
-	src/tbl_vars.lua				\
 	src/dotzile.sample
 
 CLEANFILES +=						\
