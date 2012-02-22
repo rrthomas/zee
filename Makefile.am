@@ -39,11 +39,11 @@ inplace_edit = sed \
 EXTRA_DIST =						\
 	FAQ						\
 	GNUmakefile					\
-	build-aux/zile-help2man-wrapper			\
 	maint.mk
 
 doc_DATA = AUTHORS FAQ NEWS
 
+include build-aux/Makefile.am
 include doc/Makefile.am
 include src/Makefile.am
 include tests/Makefile.am
