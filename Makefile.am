@@ -78,6 +78,17 @@ dist-hook: $(changelog)
 
 distcheck-hook: syntax-check
 
+uninstall-hook:
+	@$(NORMAL_UNINSTALL)
+	@test -d $(DESTDIR)$(bindir) && rmdir $(DESTDIR)$(bindir)
+	@test -d $(DESTDIR)$(docdir) && rmdir $(DESTDIR)$(docdir)
+	@test -d $(DESTDIR)$(datadir)/doc && rmdir $(DESTDIR)$(datadir)/doc
+	@test -d $(DESTDIR)$(man1dir) && rmdir $(DESTDIR)$(man1dir)
+	@test -d $(DESTDIR)$(mandir) && rmdir $(DESTDIR)$(mandir)
+	@test -d $(DESTDIR)$(pkgdatadir) && rmdir $(DESTDIR)$(pkgdatadir)
+	@test -d $(DESTDIR)$(datadir) && rmdir $(DESTDIR)$(datadir)
+	@test -d $(DESTDIR)$(prefix) && rmdir $(DESTDIR)$(prefix)
+
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger freecode,gnu upload=alpha.gnu.org package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=release-notes email=~/announce-$(PACKAGE)-$(VERSION) dist_type="tar.gz" && \
