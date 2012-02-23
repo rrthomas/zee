@@ -76,8 +76,20 @@ function replace_estr (del, newtext)
   end
 
   -- Convert inserted string to correct line ending
-  if newtext.eol ~= get_buffer_eol (cur_bp) then
-    newtext = estr_cat ({s = "", eol = get_buffer_eol (cur_bp)}, newtext)
+  local eol = get_buffer_eol (cur_bp)
+  if newtext.eol ~= eol then
+    newtext = estr_cat ({s = "", eol = eol}, newtext)
+  end
+
+  -- If we are inserting or removing newlines, then redisplay
+  -- all windows showing the changed buffer.
+  local b,e = cur_bp.text.s:find (eol, cur_bp.pt + cur_bp.gap +1)
+  if newtext.s:find (eol) or (b ~= nil and e <= cur_bp.pt + cur_bp.gap + del) then
+    for _, wp in ipairs (windows) do
+      if wp.bp == cur_bp then
+        wp.redisplay = true
+      end
+    end
   end
 
   undo_save_block (cur_bp.pt, del, #newtext.s)

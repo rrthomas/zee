@@ -25,6 +25,8 @@ function recenter (wp)
   else
     wp.topdelta = n
   end
+
+  wp.redisplay = true
 end
 
 Defun ("recenter",
@@ -108,6 +110,7 @@ function resync_redisplay (wp)
     else
       wp.topdelta = n
     end
+    wp.redisplay = true
   end
   wp.lastpointn = n
 end
