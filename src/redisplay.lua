@@ -21,7 +21,7 @@ function recenter (wp)
   local n = offset_to_line (wp.bp, window_o (wp))
 
   if n > wp.eheight / 2 then
-    wp.topdelta = wp.eheight / 2
+    wp.topdelta = math.floor (wp.eheight / 2)
   else
     wp.topdelta = n
   end
