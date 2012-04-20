@@ -47,18 +47,19 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 
   -- Draw body of line.
   local x = 0
-  local line_len = buffer_line_len (wp.bp, o)
-  for i = startcol, math.huge do
-    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
-    if i >= line_len or x >= wp.ewidth then
+  local bp = wp.bp
+  local line_len = buffer_line_len (bp, o)
+  for i = startcol, line_len - 1 do
+    if x >= wp.ewidth then
       break
     end
-    local c = get_buffer_char (wp.bp, o + i)
+    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
+    local c = get_buffer_char (bp, o + i)
     if posix.isprint (c) then
       term_addch (string.byte (c))
       x = x + 1
     else
-      local s = make_char_printable (get_buffer_char (wp.bp, o + i), x, cur_tab_width)
+      local s = make_char_printable (c, x, cur_tab_width)
       term_addstr (s)
       x = x + #s
     end
