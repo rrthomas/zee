@@ -55,7 +55,7 @@ end
 for _, name in ipairs (arg) do
   local test = name:gsub ("%.el$", "")
   if io.open (test .. ".output") ~= nil then
-    name = posix.basename (test)
+    name = test:gsub (io.catfile (srcdir, "tests/"), "")
     local edit_file = test:gsub ("^" .. srcdir, builddir) .. ".input"
     local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", test:gsub ("^" .. srcdir, abs_srcdir) .. ".el"}
 
