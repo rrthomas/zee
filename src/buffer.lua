@@ -67,18 +67,12 @@ function buffer_line_len (bp, o)
     realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
 end
 
--- Replace `del' chars after point `bp' with `newtext'.
+-- Replace `del' chars after point with `es'.
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
-function replace_estr (del, newtext)
+function replace_estr (del, es)
   if warn_if_readonly_buffer () then
     return false
-  end
-
-  -- Convert inserted string to correct line ending
-  local eol = get_buffer_eol (cur_bp)
-  if newtext.eol ~= eol then
-    newtext = estr_cat ({s = "", eol = eol}, newtext)
   end
 
   -- If we are inserting or removing newlines, then redisplay
@@ -92,40 +86,43 @@ function replace_estr (del, newtext)
     end
   end
 
-  undo_save_block (cur_bp.pt, del, #newtext.s)
+  local newlen = estr_len (es, cur_bp.text.eol)
+  undo_save_block (cur_bp.pt, del, newlen)
 
-  -- Ensure gap fits #newtext; if gap becomes zero, set to min_gap.
-  if cur_bp.gap + del < #newtext.s then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#newtext.s + min_gap) - (cur_bp.gap + del)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
-    cur_bp.gap = #newtext.s + min_gap - del
-  end
-
-  -- Remove `del' chars, zeroing some if necessary.
-  if del > #newtext.s then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap) .. string.rep ('\0', del - #newtext.s) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1 + del - #newtext.s)
-  end
-  cur_bp.gap = cur_bp.gap + del
-
-  -- Insert #newtext.s chars.
-  cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + cur_bp.gap - #newtext.s) .. newtext.s .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap + 1)
-  cur_bp.gap = cur_bp.gap - #newtext.s
-
-  -- Ensure gap doesn't get too big.
-  if cur_bp.gap > max_gap then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. cur_bp.text.s:sub (cur_bp.pt + cur_bp.gap - max_gap + 1)
+  -- Adjust gap.
+  local oldgap = cur_bp.gap
+  local added_gap = 0
+  if oldgap + del < newlen then
+    -- If gap would vanish, open it to min_gap.
+    added_gap = min_gap
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#es.s + min_gap) - (cur_bp.gap + del)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
+    cur_bp.gap = min_gap
+  elseif oldgap + del > max_gap + newlen then
+    -- If gap would be larger than max_gap, restrict it to max_gap.
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + newlen + max_gap) .. cur_bp.text.s:sub (cur_bp.pt + oldgap + del + 1)
     cur_bp.gap = max_gap
+  else
+    cur_bp.gap = oldgap + del - newlen
   end
+
+  -- Zero any new bit of gap not produced by insertion.
+  if math.max (oldgap, newlen) + added_gap < cur_bp.gap + newlen then
+    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + math.max (oldgap, newlen) + added_gap) .. string.rep ("\0", newlen + cur_bp.gap - math.max (oldgap, newlen) - added_gap) .. cur_bp.text.s:sub (cur_bp.pt + newlen + cur_bp.gap + 1)
+  end
+
+  -- Insert `newlen' chars.
+  estr_replace_estr (cur_bp.text, cur_bp.pt, es)
+  cur_bp.pt = cur_bp.pt + newlen
 
   -- Adjust markers.
   for m in pairs (cur_bp.markers) do
-    if m.o > cur_bp.pt then
-      m.o = math.max (cur_bp.pt, m.o + #newtext.s - del)
+    if m.o > cur_bp.pt - newlen then
+      m.o = math.max (cur_bp.pt - newlen, m.o + newlen - del)
     end
   end
 
   cur_bp.modified = true
-  set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + #newtext.s)
-  if estr_next_line (newtext, 0) then
+  if estr_next_line (es, 0) then
     thisflag.need_resync = true
   end
   return true

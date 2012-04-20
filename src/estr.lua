@@ -76,6 +76,7 @@ end
 
 function estr_end_of_line (es, o)
   local next = string.find (string.sub (es.s, o + 1), es.eol)
+  -- FIXME: local next = es.s:find (es.eol, o + 1)
   return next and o + next - 1 or #es.s
 end
 
@@ -83,24 +84,50 @@ function estr_line_len (es, o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o)
 end
 
-function estr_replace (es, pos, del, ins)
-  local rest = es.s:sub (pos + del + 1)
-  es.s = es.s:sub (1, pos)
+function estr_lines (es)
+  local lines = 0
+  local s = 1
+  local next
+  repeat
+    next = es.s:find (es.eol, s)
+    if next then
+      lines = lines + 1
+      s = next + #es.eol + 1
+    end
+  until not next
+  return lines
+end
 
-  local o = 0
-  while o and o < #ins.s do
-    local nexto = estr_next_line (ins, o)
-    es.s = es.s .. ins.s:sub (o + 1, nexto and nexto - #ins.eol or #ins.s)
-    o = nexto
-    if o then
-      es.s = es.s .. es.eol
+function replace_str (s, pos, rep)
+  return s:sub (1, pos) .. rep .. s:sub (pos + 1 + #rep)
+end
+
+function estr_replace_estr (es, pos, src)
+  local s = 1
+  local len = #src.s
+  while len > 0 do
+    local next = es.s:find (src.eol, s)
+    local line_len = next and next - s or len
+    es.s = replace_str (es.s, pos, src.s:sub (s, s + line_len))
+    pos = pos + line_len
+    len = len - line_len
+    s = next
+    if len > 0 then
+      es.s = replace_str (es.s, pos, es.eol)
+      s = s + #src.eol
+      len = len - #src.eol
+      pos = pos + #es.eol
     end
   end
-
-  es.s = es.s .. rest
   return es
 end
 
 function estr_cat (es, src)
-  return estr_replace (es, #es.s, 0, src)
+ local oldlen = #es.s
+ es.s = es.s:sub (1, oldlen) .. string.rep ("\0", estr_len (src, es.eol)) .. es.s:sub (1, oldlen + 1)
+ return estr_replace_estr (es, oldlen, src)
+end
+
+function estr_len (es, eol_type)
+  return #es.s + estr_lines (es) * (#eol_type - #es.eol)
 end
