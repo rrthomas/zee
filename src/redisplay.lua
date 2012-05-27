@@ -25,8 +25,6 @@ function recenter (wp)
   else
     wp.topdelta = n
   end
-
-  wp.redisplay = true
 end
 
 Defun ("recenter",

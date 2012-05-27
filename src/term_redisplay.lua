@@ -149,48 +149,30 @@ end
 
 local function draw_window (topline, wp)
   local highlight, rp = calculate_highlight_region (wp)
-  local bp = wp.bp
-
-  -- begin and end offsets for the current line
-  local b = buffer_start_of_line (bp, window_o (wp))
-  local e = b + buffer_line_len (bp, b)
 
   -- Find the first line to display on the first screen line.
-  local o = b
+  local o = buffer_start_of_line (wp.bp, window_o (wp))
   local i = wp.topdelta
   while i > 0 and o > 0 do
-    o = buffer_prev_line (bp, o)
+    o = buffer_prev_line (wp.bp, o)
     assert (o)
     i = i - 1
   end
 
-  -- Always redisplay if the start_column has changed
-  if wp.last_start_column ~= wp.start_column then
-    wp.redisplay = true
-    wp.last_start_column = wp.start_column
-  end
-
   -- Draw the window lines.
-  local cur_tab_width = tab_width (bp)
+  local cur_tab_width = tab_width (wp.bp)
   for i = topline, wp.eheight + topline do
-    -- Do we need to redraw this line?
-    local redraw = wp.redisplay or (o ~= nil and o >= b and o <= e)
-
-    if redraw then
-      -- Clear the line.
-      term_move (i, 0)
-      term_clrtoeol ()
-    end
+    -- Clear the line.
+    term_move (i, 0)
+    term_clrtoeol ()
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      if redraw then
-        draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
+      draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
 
-        if wp.start_column > 0 then
-          term_move (i, 0)
-          term_addstr ('$')
-	end
+      if wp.start_column > 0 then
+        term_move (i, 0)
+        term_addstr ('$')
       end
 
       o = buffer_next_line (wp.bp, o)
@@ -204,8 +186,6 @@ local function draw_window (topline, wp)
   if wp.fheight > wp.eheight then
     draw_status_line (topline + wp.eheight, wp)
   end
-
-  wp.redisplay = false
 end
 
 local cur_topline, col = 0, 0

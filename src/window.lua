@@ -344,7 +344,6 @@ function window_resync (wp)
     else
       wp.topdelta = n
     end
-    wp.redisplay = true
   end
   wp.lastpointn = n
 end

@@ -75,13 +75,8 @@ function replace_estr (del, es)
     return false
   end
 
-  -- If we are inserting or removing newlines, then redisplay
-  -- all windows showing the changed buffer.
-  local b, e = cur_bp.text.s:find (cur_bp.text.eol, cur_bp.pt + cur_bp.gap + 1)
-  if es.s:find (cur_bp.text.eol) or (b ~= nil and e <= cur_bp.pt + cur_bp.gap + del) then
-    for _, wp in ipairs (windows) do
-      wp.redisplay = wp.bp == cur_bp
-    end
+  if es.eol ~= get_buffer_eol (cur_bp) then
+    es = estr_cat ({s = "", eol = get_buffer_eol (cur_bp)}, es)
   end
 
   local newlen = estr_len (es, cur_bp.text.eol)
