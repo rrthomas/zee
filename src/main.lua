@@ -305,8 +305,6 @@ function main ()
     if lastflag.need_resync then
       window_resync (cur_wp)
     end
-    term_redisplay ()
-    term_refresh ()
     get_and_run_command ()
   end
 

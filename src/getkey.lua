@@ -27,7 +27,13 @@ end
 -- Get a keystroke, waiting for up to GETKEY_DELAY ms, and translate
 -- it into a keycode.
 function getkey (delay)
-  _last_key = term_getkey (delay)
+  _last_key = term_getkey (0)
+
+  if not _last_key then
+    term_redisplay ()
+    term_refresh ()
+    _last_key = term_getkey (delay)
+  end
 
   if thisflag.defining_macro then
     add_key_to_cmd (_last_key)

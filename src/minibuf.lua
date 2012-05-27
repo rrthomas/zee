@@ -42,8 +42,10 @@ end
 
 -- Write the specified string in the minibuffer.
 function minibuf_write (s)
-  minibuf_contents = s
-  minibuf_refresh ()
+  if s ~= minibuf_contents then
+    minibuf_contents = s
+    minibuf_refresh ()
+  end
 end
 
 -- Write the specified error string in the minibuffer and signal an error.
