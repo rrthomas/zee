@@ -63,7 +63,7 @@ thisflag = {}
 lastflag = {}
 
 
-local ZILE_COPYRIGHT_STRING = "Copyright (C) 2011 Free Software Foundation, Inc."
+local ZILE_COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
 
 local ZILE_COPYRIGHT_NOTICE = [[
 GNU ]] .. PACKAGE_NAME .. [[ comes with ABSOLUTELY NO WARRANTY.
