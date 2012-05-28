@@ -436,7 +436,7 @@ function kill_buffer (kill_bp)
   for _, wp in ipairs (windows) do
     if wp.bp == kill_bp then
       wp.bp = next_bp
-      resync_redisplay (wp)
+      window_resync (wp)
     end
   end
 end

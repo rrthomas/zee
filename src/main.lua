@@ -303,7 +303,7 @@ function main ()
   -- Run the main loop.
   while not thisflag.quit do
     if lastflag.need_resync then
-      resync_redisplay (cur_wp)
+      window_resync (cur_wp)
     end
     term_redisplay ()
     term_refresh ()

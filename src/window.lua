@@ -259,7 +259,7 @@ function completion_scroll_down ()
   set_current_window (wp)
   if not execute_function ("scroll-down") then
     gotoeob ()
-    resync_redisplay (cur_wp)
+    window_resync (cur_wp)
   end
   set_current_window (old_wp)
 
@@ -330,4 +330,21 @@ function create_scratch_window ()
   wp.eheight = wp.fheight - 1
   cur_bp = bp
   wp.bp = cur_bp
+end
+
+function window_resync (wp)
+  local n = offset_to_line (wp.bp, get_buffer_pt (wp.bp))
+  local delta = n - wp.lastpointn
+
+  if delta ~= 0 then
+    if (delta > 0 and wp.topdelta + delta < wp.eheight) or (delta < 0 and wp.topdelta >= -delta) then
+      wp.topdelta = wp.topdelta + delta
+    elseif n > wp.eheight / 2 then
+      wp.topdelta = math.floor (wp.eheight / 2)
+    else
+      wp.topdelta = n
+    end
+    wp.redisplay = true
+  end
+  wp.lastpointn = n
 end
