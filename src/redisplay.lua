@@ -32,14 +32,14 @@ end
 Defun ("recenter",
        {},
 [[
-Center point in window and redisplay screen.
-The desired position of point is always relative to the current window.
+Center point in selected window and redisplay frame.
 ]],
   true,
   function ()
     recenter (cur_wp)
     term_clear ()
     term_redisplay ()
+    term_refresh ()
     return true
   end
 )
