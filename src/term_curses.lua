@@ -196,8 +196,6 @@ function term_getkey_unfiltered (delay)
     end
   until curses.KEY_RESIZE ~= c
 
-  curses.stdscr ():timeout (-1)
-
   return c
 end
 
