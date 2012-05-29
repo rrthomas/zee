@@ -133,16 +133,14 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     elseif c == keycode "\\M-v" or c == keycode "\\PAGEUP" then
       if cp == nil then
         ding ()
-      end
-      if cp.poppedup then
+      elseif cp.poppedup then
         completion_scroll_down ()
         thistab = lasttab
       end
     elseif c == keycode "\\C-v" or c == keycode "\\PAGEDOWN" then
       if cp == nil then
         ding ()
-      end
-      if cp.poppedup then
+      elseif cp.poppedup then
         completion_scroll_up ()
         thistab = lasttab
       end
