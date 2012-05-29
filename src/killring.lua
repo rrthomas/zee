@@ -26,7 +26,7 @@ local function maybe_free_kill_ring ()
 end
 
 local function kill_ring_push (es)
-  kill_ring_text = estr_cat (kill_ring_text or estr_new (""), es)
+  kill_ring_text = (kill_ring_text or EStr ("")):cat (es)
 end
 
 local function copy_or_kill_region (kill, rp)
@@ -203,7 +203,7 @@ local function kill_line (whole_line)
       return false
     end
 
-    kill_ring_push ({s = "\n", eol = coding_eol_lf})
+    kill_ring_push (EStr ("\n"))
     _this_command = "kill-region"
   end
 

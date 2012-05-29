@@ -63,8 +63,8 @@ end
 
 function buffer_line_len (bp, o)
   o = o or get_buffer_line_o (bp)
-  return realo_to_o (bp, estr_end_of_line (bp.text, o_to_realo (bp, o))) -
-    realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
+  return realo_to_o (bp, bp.text:end_of_line (o_to_realo (bp, o))) -
+    realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, o)))
 end
 
 -- Replace `del' chars after point with `es'.
@@ -76,10 +76,10 @@ function replace_estr (del, es)
   end
 
   if es.eol ~= get_buffer_eol (cur_bp) then
-    es = estr_cat ({s = "", eol = get_buffer_eol (cur_bp)}, es)
+    es = EStr ("", get_buffer_eol (cur_bp)):cat (es)
   end
 
-  local newlen = estr_len (es, cur_bp.text.eol)
+  local newlen = es:len (cur_bp.text.eol)
 
   undo_save_block (cur_bp.pt, del, newlen)
 
@@ -105,7 +105,7 @@ function replace_estr (del, es)
   end
 
   -- Insert `newlen' chars.
-  estr_replace_estr (cur_bp.text, cur_bp.pt, es)
+  cur_bp.text:replace_estr (cur_bp.pt, es)
   cur_bp.pt = cur_bp.pt + newlen
 
   -- Adjust markers.
@@ -116,7 +116,7 @@ function replace_estr (del, es)
   end
 
   cur_bp.modified = true
-  if estr_next_line (es, 0) then
+  if es:next_line (0) then
     thisflag.need_resync = true
   end
   return true
@@ -131,23 +131,23 @@ function get_buffer_char (bp, o)
 end
 
 function buffer_prev_line (bp, o)
-  return realo_to_o (bp, estr_prev_line (bp.text, o_to_realo (bp, o)))
+  return realo_to_o (bp, bp.text:prev_line (o_to_realo (bp, o)))
 end
 
 function buffer_next_line (bp, o)
-  return realo_to_o (bp, estr_next_line (bp.text, o_to_realo (bp, o)))
+  return realo_to_o (bp, bp.text:next_line (o_to_realo (bp, o)))
 end
 
 function buffer_start_of_line (bp, o)
-  return realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, o)))
+  return realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, o)))
 end
 
 function buffer_end_of_line (bp, o)
-  return realo_to_o (bp, estr_end_of_line (bp.text, o_to_realo (bp, o)))
+  return realo_to_o (bp, bp.text:end_of_line (o_to_realo (bp, o)))
 end
 
 function get_buffer_line_o (bp)
-  return realo_to_o (bp, estr_start_of_line (bp.text, o_to_realo (bp, bp.pt)))
+  return realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, bp.pt)))
 end
 
 
@@ -167,13 +167,13 @@ function get_buffer_region (bp, r)
     local from = math.max (r.start - get_buffer_pt (bp), 0)
     s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_pt (bp))
   end
-  return {s = s, eol = get_buffer_eol (bp)}
+  return EStr (s, get_buffer_eol (bp))
 end
 
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  return replace_estr (0, {s = c, eol = coding_eol_lf})
+  return replace_estr (0, EStr (c))
 end
 
 function delete_char ()
@@ -188,10 +188,10 @@ function delete_char ()
   end
 
   if eolp () then
-    replace_estr (#get_buffer_eol (cur_bp), estr_new (""))
+    replace_estr (#get_buffer_eol (cur_bp), EStr (""))
     thisflag.need_resync = true
   else
-    replace_estr (1, estr_new (""))
+    replace_estr (1, EStr (""))
   end
 
   cur_bp.modified = true
@@ -201,7 +201,7 @@ end
 
 function insert_buffer (bp)
   -- Copy text to avoid problems when bp == cur_bp.
-  insert_estr ({s = get_buffer_pre_point (bp) .. get_buffer_post_point (bp), eol = get_buffer_eol (bp)})
+  insert_estr (EStr (get_buffer_pre_point (bp) .. get_buffer_post_point (bp), get_buffer_eol (bp)))
 end
 
 
@@ -217,7 +217,7 @@ function buffer_new ()
 
   bp.pt = 0
   bp.gap = 0
-  bp.text = {s = "", eol = coding_eol_lf}
+  bp.text = EStr ("")
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 
@@ -342,7 +342,7 @@ function delete_region (r)
 
   local m = point_marker ()
   goto_offset (r.start)
-  replace_estr (get_region_size (r), estr_new (""))
+  replace_estr (get_region_size (r), EStr (""))
   goto_offset (m.o)
   unchain_marker (m)
 

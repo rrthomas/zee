@@ -20,7 +20,7 @@
 -- MA 02111-1301, USA.
 
 function insert_string (s, eol)
-  return insert_estr ({s = s, eol = eol or coding_eol_lf})
+  return insert_estr (EStr (s, eol or coding_eol_lf))
 end
 
 -- If point is greater than fill-column, then split the line at the

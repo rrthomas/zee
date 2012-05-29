@@ -423,7 +423,7 @@ what to do with it.
         end
         local m = point_marker ()
         goto_offset (r.start)
-        replace_estr (#find, estr_new (case_repl))
+        replace_estr (#find, EStr (case_repl))
         goto_offset (m.o)
         unchain_marker (m)
 
