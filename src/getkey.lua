@@ -17,6 +17,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+-- Maximum time to avoid screen updates when catching up with buffered
+-- input, in milliseconds.
+local MAX_RESYNC_MS = 500
+
 local _last_key
 
 -- Return last key pressed
@@ -37,14 +41,23 @@ function getkeystroke (delay)
 end
 
 -- Return the next keystroke, refreshing the screen only when the input
--- buffer is empty.
+-- buffer is empty, or MAX_RESYNC_MS have elapsed since the last
+-- screen refresh.
+local next_refresh = {}
+local refresh_wait = {
+  sec  = math.floor (MAX_RESYNC_MS / 1000),
+  usec = (MAX_RESYNC_MS % 1000) * 1000,
+}
+
 function getkey (delay)
+  local now = posix.gettimeofday ()
   local keycode = getkeystroke (0)
 
-  if not keycode then
+  if not keycode or posix.timercmp (now, next_refresh) >= 0 then
     term_redisplay ()
     term_refresh ()
     keycode = getkeystroke (delay)
+    next_refresh = posix.timeradd (now, refresh_wait)
   end
 
   return keycode
