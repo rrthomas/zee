@@ -21,11 +21,11 @@
 -- Buffer methods that know about the gap.
 
 function get_buffer_pre_point (bp)
-  return bp.text.s:sub (1, get_buffer_pt (bp))
+  return bp.text:sub (1, get_buffer_pt (bp))
 end
 
 function get_buffer_post_point (bp)
-  return bp.text.s:sub (get_buffer_pt (bp) + bp.gap + 1)
+  return bp.text:sub (get_buffer_pt (bp) + bp.gap + 1)
 end
 
 function get_buffer_pt (bp)
@@ -33,13 +33,12 @@ function get_buffer_pt (bp)
 end
 
 local function set_buffer_pt (bp, o)
-  local len = #bp.text.s
   if o < bp.pt then
-    bp.text.s = bp.text.s:sub (1, o) .. string.rep ('\0', bp.gap) .. bp.text.s:sub (o + 1, bp.pt) .. bp.text.s:sub (bp.pt + bp.gap + 1)
-    assert (len == #bp.text.s)
+    bp.text:move (o + bp.gap, o, bp.pt - o)
+    bp.text:set (o, '\0', math.min (bp.pt - o, bp.gap))
   elseif o > bp.pt then
-    bp.text.s = bp.text.s:sub (1, bp.pt) .. bp.text.s:sub (bp.pt + bp.gap + 1, bp.gap + o) .. string.rep ('\0', bp.gap) .. bp.text.s:sub (bp.gap + o + 1)
-    assert (len == #bp.text.s)
+    bp.text:move (bp.pt, bp.pt + bp.gap, o - bp.pt)
+    bp.text:set (o + bp.gap - math.min (o - bp.pt, bp.gap), '\0', math.min (o - bp.pt, bp.gap))
   end
   bp.pt = o
 end
@@ -58,7 +57,7 @@ local function o_to_realo (bp, o)
 end
 
 function get_buffer_size (bp)
-  return realo_to_o (bp, #bp.text.s)
+  return realo_to_o (bp, bp.text:bytes ())
 end
 
 function buffer_line_len (bp, o)
@@ -89,11 +88,11 @@ function replace_estr (del, es)
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
     added_gap = min_gap
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt) .. string.rep ("\0", (#es.s + min_gap) - (cur_bp.gap + del)) .. cur_bp.text.s:sub (cur_bp.pt + 1)
+    cur_bp.text:insert (cur_bp.pt, (#es.s + min_gap) - (cur_bp.gap + del))
     cur_bp.gap = min_gap
   elseif oldgap + del > max_gap + newlen then
     -- If gap would be larger than max_gap, restrict it to max_gap.
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + newlen + max_gap) .. cur_bp.text.s:sub (cur_bp.pt + oldgap + del + 1)
+    cur_bp.text:remove (cur_bp.pt + newlen + max_gap, (oldgap + del) - (max_gap + newlen))
     cur_bp.gap = max_gap
   else
     cur_bp.gap = oldgap + del - newlen
@@ -101,7 +100,7 @@ function replace_estr (del, es)
 
   -- Zero any new bit of gap not produced by insertion.
   if math.max (oldgap, newlen) + added_gap < cur_bp.gap + newlen then
-    cur_bp.text.s = cur_bp.text.s:sub (1, cur_bp.pt + math.max (oldgap, newlen) + added_gap) .. string.rep ("\0", newlen + cur_bp.gap - math.max (oldgap, newlen) - added_gap) .. cur_bp.text.s:sub (cur_bp.pt + newlen + cur_bp.gap + 1)
+    cur_bp.text:set (cur_bp.pt + math.max (oldgap, newlen) + added_gap, '\0', newlen + cur_bp.gap - math.max (oldgap, newlen) - added_gap)
   end
 
   -- Insert `newlen' chars.
@@ -127,7 +126,8 @@ function insert_estr (es)
 end
 
 function get_buffer_char (bp, o)
-  return bp.text.s[o_to_realo (bp, o) + 1]
+  local n = o_to_realo (bp, o) + 1
+  return bp.text:sub (n, n)
 end
 
 function buffer_prev_line (bp, o)

@@ -130,7 +130,34 @@ EStr = Object {
     return self:replace_estr (oldlen, src)
   end,
 
+  bytes = function (self)
+    return #self.s
+  end,
+  
   len = function (self, eol_type)
-    return #self.s + self:lines () * (#eol_type - #self.eol)
+    return self:bytes () + self:lines () * (#eol_type - #self.eol)
+  end,
+
+  sub = function (self, from, to)
+    return self.s:sub (from, to)
+  end,
+
+  move = function (self, to, from, n)
+    assert (math.max (from, to) + n <= #self.s)
+    self.s = self.s:sub (1, to) .. self.s:sub (from + 1, from + n) .. self.s:sub (to + n + 1)
+  end,
+
+  set = function (self, from, c, n)
+    assert (from + n <= #self.s)
+    self.s = self.s:sub (1, from) .. string.rep (c, n) .. self.s:sub (from + n + 1)
+  end,
+
+  remove = function (self, from, n)
+    assert (from + n <= #self.s)
+    self.s = self.s:sub (1, from) .. self.s:sub (from + n + 1)
+  end,
+
+  insert = function (self, from, n)
+    self.s = self.s:sub (1, from) .. string.rep ('\0', n) .. self.s:sub (from + 1)
   end
 }
