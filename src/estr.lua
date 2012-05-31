@@ -17,6 +17,56 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+AStr = Object {
+  _init = function (self, s)
+    self.s = s
+    return self
+  end,
+
+  __tostring = function (self)
+    return self.s
+  end,
+
+  len = function (self) -- FIXME: In Lua 5.2 use __len metamethod (doesn't work for tables in 5.1)
+    return #self.s
+  end,
+
+  sub = function (self, from, to)
+    return self.s:sub (from, to)
+  end,
+
+  move = function (self, to, from, n)
+    assert (math.max (from, to) + n <= self.s:len ())
+    self.s = self.s:sub (1, to) .. self.s:sub (from + 1, from + n) .. self.s:sub (to + n + 1)
+  end,
+
+  set = function (self, from, c, n)
+    assert (from + n <= self.s:len ())
+    self.s = self.s:sub (1, from) .. string.rep (c, n) .. self.s:sub (from + n + 1)
+  end,
+
+  remove = function (self, from, n)
+    assert (from + n <= self.s:len ())
+    self.s = self.s:sub (1, from) .. self.s:sub (from + n + 1)
+  end,
+
+  insert = function (self, from, n)
+    self.s = self.s:sub (1, from) .. string.rep ('\0', n) .. self.s:sub (from + 1)
+  end,
+
+  replace = function (self, pos, rep)
+    self.s = self.s:sub (1, pos) .. rep .. self.s:sub (pos + 1 + #rep)
+  end,
+
+  find = function (self, s, from)
+    return self.s:find (s, from)
+  end,
+
+  rfind = function (self, s, from)
+    return find_substr (self.s, "", s, 0, from, false, true, true, false, false)
+  end
+}
+
 -- Formats of end-of-line
 coding_eol_lf = "\n"
 coding_eol_crlf = "\r\n"
@@ -25,13 +75,9 @@ coding_eol_cr = "\r"
 -- Maximum number of EOLs to check before deciding EStr type arbitrarily.
 local max_eol_check_count = 3
 
-local function replace_str (s, pos, rep)
-  return s:sub (1, pos) .. rep .. s:sub (pos + 1 + #rep)
-end
-
 EStr = Object {
-  _clone = function (self, s, eol)
-    self.s = s
+  _init = function (self, s, eol)
+    self.s = AStr (s)
     if eol then -- if eol supplied, use it
       self.eol = eol
     else -- otherwise, guess
@@ -66,8 +112,11 @@ EStr = Object {
         i = i + 1
       end
     end
-    local object = table.clone (self)
-    return setmetatable (object, object)
+    return self
+  end,
+
+  __tostring = function (self)
+    return tostring (self.s)
   end,
 
   prev_line = function (self, o)
@@ -77,17 +126,17 @@ EStr = Object {
 
   next_line = function (self, o)
     local eo = self:end_of_line (o)
-    return eo ~= #self.s and eo + #self.eol or nil
+    return eo ~= self.s:len () and eo + #self.eol or nil
   end,
 
   start_of_line = function (self, o)
-    local prev = find_substr (self.s, "", self.eol, 0, o, false, true, true, false, false)
+    local prev = self.s:rfind (self.eol, o)
     return prev and (prev + #self.eol - 1) or 0
   end,
 
   end_of_line = function (self, o)
     local next = self.s:find (self.eol, o + 1)
-    return next and next - 1 or #self.s
+    return next and next - 1 or self.s:len ()
   end,
 
   lines = function (self)
@@ -106,16 +155,16 @@ EStr = Object {
 
   replace_estr = function (self, pos, src)
     local s = 1
-    local len = #src.s
+    local len = src.s:len ()
     while len > 0 do
       local next = src.s:find (src.eol, s)
       local line_len = next and next - s or len
-      self.s = replace_str (self.s, pos, src.s:sub (s, s + line_len))
+      self.s:replace (pos, src.s:sub (s, s + line_len))
       pos = pos + line_len
       len = len - line_len
       s = next
       if len > 0 then
-        self.s = replace_str (self.s, pos, self.eol)
+        self.s:replace (pos, self.eol)
         s = s + #src.eol
         len = len - #src.eol
         pos = pos + #self.eol
@@ -125,16 +174,16 @@ EStr = Object {
   end,
 
   cat = function (self, src)
-    local oldlen = #self.s
-    self.s = self.s:sub (1, oldlen) .. string.rep ("\0", src:len (self.eol)) .. self.s:sub (oldlen + 1)
+    local oldlen = self.s:len ()
+    self.s:insert (oldlen, src:len (self.eol))
     return self:replace_estr (oldlen, src)
   end,
 
   bytes = function (self)
-    return #self.s
+    return self.s:len ()
   end,
-  
-  len = function (self, eol_type)
+
+  len = function (self, eol_type) -- FIXME in Lua 5.2 use __len metamethod
     return self:bytes () + self:lines () * (#eol_type - #self.eol)
   end,
 
@@ -143,21 +192,18 @@ EStr = Object {
   end,
 
   move = function (self, to, from, n)
-    assert (math.max (from, to) + n <= #self.s)
-    self.s = self.s:sub (1, to) .. self.s:sub (from + 1, from + n) .. self.s:sub (to + n + 1)
+    self.s:move (to, from, n)
   end,
 
   set = function (self, from, c, n)
-    assert (from + n <= #self.s)
-    self.s = self.s:sub (1, from) .. string.rep (c, n) .. self.s:sub (from + n + 1)
+    self.s:set (from, c, n)
   end,
 
   remove = function (self, from, n)
-    assert (from + n <= #self.s)
-    self.s = self.s:sub (1, from) .. self.s:sub (from + n + 1)
+    self.s:remove (from, n)
   end,
 
   insert = function (self, from, n)
-    self.s = self.s:sub (1, from) .. string.rep ('\0', n) .. self.s:sub (from + 1)
+    self.s:insert (from, n)
   end
 }

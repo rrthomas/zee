@@ -39,7 +39,7 @@ Copy region into register @i{register}.
       if not rp then
         return false
       else
-        regs[term_bytetokey (reg)] = get_buffer_region (cur_bp, rp).s -- FIXME: Convert newlines.
+        regs[term_bytetokey (reg)] = tostring (get_buffer_region (cur_bp, rp)) -- FIXME: Convert newlines.
       end
     end
 

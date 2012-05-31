@@ -17,6 +17,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+local function get_region ()
+  activate_mark ()
+  return get_buffer_region (cur_bp, calculate_the_region ())
+end
+
 Defun ("keyboard-quit",
        {},
 [[
@@ -494,7 +499,7 @@ The output is available in that buffer in both cases.
         if not fd then
           ok = minibuf_error ("Cannot open temporary file")
         else
-          local written, err = fd:write (get_buffer_region (cur_bp, rp).s)
+          local written, err = fd:write (tostring (get_region ()))
 
           if not written then
             ok = minibuf_error ("Error writing to temporary file: " .. err)
@@ -1001,11 +1006,6 @@ Convert the region to lower case.
 
 
 -- Transpose functions
-local function region_to_string ()
-  activate_mark ()
-  return get_buffer_region (cur_bp, calculate_the_region ()).s
-end
-
 local function transpose_subr (move_func)
   -- For transpose-chars.
   if move_func == move_char and eolp () then
@@ -1047,7 +1047,7 @@ local function transpose_subr (move_func)
   move_func (1)
 
   -- Save and delete 1st marked region.
-  local as1 = region_to_string ()
+  local as1 = tostring (get_region ())
 
   execute_function ("delete-region")
 
@@ -1067,7 +1067,7 @@ local function transpose_subr (move_func)
     m2 = point_marker ()
 
     -- Save and delete 2nd marked region.
-    as2 = region_to_string ()
+    as2 = tostring (get_region ())
     execute_function ("delete-region")
   end
 

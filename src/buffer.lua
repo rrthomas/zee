@@ -88,7 +88,7 @@ function replace_estr (del, es)
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
     added_gap = min_gap
-    cur_bp.text:insert (cur_bp.pt, (#es.s + min_gap) - (cur_bp.gap + del))
+    cur_bp.text:insert (cur_bp.pt, (es.s:len () + min_gap) - (cur_bp.gap + del))
     cur_bp.gap = min_gap
   elseif oldgap + del > max_gap + newlen then
     -- If gap would be larger than max_gap, restrict it to max_gap.
