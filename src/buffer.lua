@@ -104,7 +104,7 @@ function replace_estr (del, es)
   end
 
   -- Insert `newlen' chars.
-  cur_bp.text:replace_estr (cur_bp.pt, es)
+  cur_bp.text:replace (cur_bp.pt, es)
   cur_bp.pt = cur_bp.pt + newlen
 
   -- Adjust markers.
@@ -217,7 +217,7 @@ function buffer_new ()
 
   bp.pt = 0
   bp.gap = 0
-  bp.text = EStr ("")
+  bp.text = EStr (BStr (""))
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 

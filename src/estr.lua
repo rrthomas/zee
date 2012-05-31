@@ -67,6 +67,9 @@ AStr = Object {
   end
 }
 
+BStr = AStr {
+}
+
 -- Formats of end-of-line
 coding_eol_lf = "\n"
 coding_eol_crlf = "\r\n"
@@ -77,7 +80,10 @@ local max_eol_check_count = 3
 
 EStr = Object {
   _init = function (self, s, eol)
-    self.s = AStr (s)
+    self.s = s
+    if type (s) == "string" then
+      self.s = AStr (s)
+    end
     if eol then -- if eol supplied, use it
       self.eol = eol
     else -- otherwise, guess
@@ -153,7 +159,7 @@ EStr = Object {
     return lines
   end,
 
-  replace_estr = function (self, pos, src)
+  replace = function (self, pos, src)
     local s = 1
     local len = src.s:len ()
     while len > 0 do
@@ -176,7 +182,7 @@ EStr = Object {
   cat = function (self, src)
     local oldlen = self.s:len ()
     self.s:insert (oldlen, src:len (self.eol))
-    return self:replace_estr (oldlen, src)
+    return self:replace (oldlen, src)
   end,
 
   bytes = function (self)
