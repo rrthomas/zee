@@ -148,7 +148,7 @@ function minibuf_read_yn (fmt)
 
   while true do
     minibuf_write (errmsg .. fmt)
-    local key = getkey (GETKEY_DEFAULT)
+    local key = getkeystroke (GETKEY_DEFAULT)
     if key == keycode "y" then
       return true
     elseif key == keycode "n" then

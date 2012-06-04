@@ -24,22 +24,30 @@ function lastkey ()
   return _last_key
 end
 
--- Get a keystroke, waiting for up to GETKEY_DELAY ms, and translate
--- it into a keycode.
-function getkey (delay)
-  _last_key = term_getkey (0)
+-- Get a keystroke, waiting for up to delay ms, and translate it into a
+-- keycode.
+function getkeystroke (delay)
+  _last_key = term_getkey (delay)
 
-  if not _last_key then
-    term_redisplay ()
-    term_refresh ()
-    _last_key = term_getkey (delay)
-  end
-
-  if thisflag.defining_macro then
+  if _last_key and thisflag.defining_macro then
     add_key_to_cmd (_last_key)
   end
 
   return _last_key
+end
+
+-- Return the next keystroke, refreshing the screen only when the input
+-- buffer is empty.
+function getkey (delay)
+  local keycode = getkeystroke (0)
+
+  if not keycode then
+    term_redisplay ()
+    term_refresh ()
+    keycode = getkeystroke (delay)
+  end
+
+  return keycode
 end
 
 function getkey_unfiltered (delay)
