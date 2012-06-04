@@ -56,8 +56,11 @@ function getkey (delay)
   if not keycode or posix.timercmp (now, next_refresh) >= 0 then
     term_redisplay ()
     term_refresh ()
-    keycode = getkeystroke (delay)
     next_refresh = posix.timeradd (now, refresh_wait)
+  end
+
+  if not keycode then
+    keycode = getkeystroke (delay)
   end
 
   return keycode
