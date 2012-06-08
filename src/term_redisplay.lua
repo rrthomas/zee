@@ -49,11 +49,11 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   local x = 0
   local bp = wp.bp
   local line_len = buffer_line_len (bp, o)
-  for i = startcol, line_len - 1 do
-    if x >= wp.ewidth then
+  for i = startcol, math.huge do
+    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
+    if i >= line_len or x >= wp.ewidth then
       break
     end
-    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
     local c = get_buffer_char (bp, o + i)
     if posix.isprint (c) then
       term_addch (string.byte (c))
