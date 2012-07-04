@@ -298,7 +298,7 @@ Both windows display the same buffer now current.
     end
 
     local newwp = table.clone (cur_wp)
-    newwp.fheight = cur_wp.fheight / 2 + cur_wp.fheight % 2
+    newwp.fheight = math.floor (cur_wp.fheight / 2) + cur_wp.fheight % 2
     newwp.eheight = newwp.fheight - 1
     newwp.saved_pt = point_marker ()
     table.insert (windows, newwp)
