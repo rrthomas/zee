@@ -173,6 +173,7 @@ function term_reopen ()
   -- FIXME: implement def_shell_mode in lcurses
   --curses.def_shell_mode ()
   curses.doupdate ()
+  resumed = true
 end
 
 function term_getkey_unfiltered (delay)

@@ -2,6 +2,11 @@ GNU Zile NEWS                                    -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Bug fixes
+
+  Arrow keys work properly when resuming from M-x debug.
+
+
 * Noteworthy changes in release 2.5.0.50 (2011-09-20) [alpha]
 
 ** Bug fixes
