@@ -3,9 +3,11 @@
 /config.sub
 /do-release-commit-and-tag
 /install-sh
+/gendocs.sh
+/gitlog-to-changelog
+/gnu-web-doc-update
 /gnupload
 /missing
 /useless-if-before-free
 /vc-list-files
 /update-copyright
-/gitlog-to-changelog
