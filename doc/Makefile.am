@@ -17,21 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MAINTAINERCLEANFILES += doc/zile.1.in doc/zile.1
-
-EXTRA_DIST +=						\
-	doc/man-extras					\
-	doc/zile.1.in
-
+MAINTAINERCLEANFILES += $(srcdir)/doc/zile.1.in doc/zile.1
+DISTCLEANFILES += doc/zile.1
+EXTRA_DIST += doc/man-extras doc/zile.1.in
 dist_man_MANS = doc/zile.1
 
-doc/zile.1: doc/zile.1.in doc/Makefile.am config.status
+doc/zile.1: $(srcdir)/doc/zile.1.in doc/Makefile.am config.status
 	@test -d doc || mkdir doc
 	rm -f $@ $@.tmp
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac
-	$(MAKE) $(MAKE_FLAGS) src/zile
+$(srcdir)/doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac
 	@test -d doc || mkdir doc
-	builddir=$(builddir) $(HELP2MAN) --output=doc/zile.1.in --no-info --name="GNU Zile" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper
+## Exit gracefully if zile.1.in is not writeable, such as during distcheck!
+	$(AM_V_GEN)if ( touch $@.w && rm -f $@.w; ) >/dev/null 2>&1; then \
+	  builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper; \
+	fi
