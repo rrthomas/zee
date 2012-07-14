@@ -46,4 +46,4 @@ local function err(err)
   print (debug.traceback(err, 2))
 end
 
-xpcall(main, err)
+xpcall (main, err)
