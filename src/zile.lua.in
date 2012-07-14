@@ -42,8 +42,8 @@ ldb = require "ldb"
 
 local function err(err)
   term_close ()
-  print("Internal error.  Please report this bug with steps to reproduce the problem")
-  print(debug.traceback(err, 2))
+  print ("Internal error.  Please report this bug with steps to reproduce the problem")
+  print (debug.traceback(err, 2))
 end
 
 xpcall(main, err)
