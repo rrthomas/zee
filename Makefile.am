@@ -22,7 +22,7 @@ CLOC = cloc --force-lang="Lua",in
 ACLOCAL_AMFLAGS = -I m4
 
 LUA_PATH ?= ;
-LUA_ENV = LUA_INIT= LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
+LUA_ENV = LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
 
 CLEANFILES =
 DISTCLEANFILES =
