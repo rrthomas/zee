@@ -1,5 +1,5 @@
 #!/bin/sh
-A=--[[ LUA_INIT= exec @LUA@ "$0" "$@"  # -*- mode: lua; -*- ]]A
+A=--[[ exec @LUA@ "$0" "$@"  # -*- mode: lua; -*- ]]A
 --
 -- Program initialisation
 --
