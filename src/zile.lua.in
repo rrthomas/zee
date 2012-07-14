@@ -34,6 +34,7 @@ LREX = "@LREX@"
 -- Remove current directory from package search path
 package.path = package.path:gsub (";%./%?.lua;", ";")
 package.path = package.path:gsub ("^%./%?.lua;", "")
+package.path = package.path:gsub (";%./%?.lua$", "")
 
 package.path = PATH_DATA .. "/?.lua;" .. package.path
 require "loadlua"
