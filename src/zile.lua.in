@@ -29,7 +29,6 @@ PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
 PATH_DATA = "@pkgdatadir@"
 PATH_DOCDIR = "@pkgdocdir@"
-LREX = "@LREX@"
 
 -- Remove current directory from package search path
 package.path = package.path:gsub (";%./%?.lua;", ";")
