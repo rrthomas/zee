@@ -34,7 +34,8 @@ local zile_fail = 0
 local emacs_pass = 0
 local emacs_fail = 0
 
-zile_cmd = io.catfile (builddir, "src", "zile")
+local zile_cmd = io.catfile (builddir, "src", "zile")
+local srcdir_pat = string.escapePattern (srcdir)
 
 function run_test (test, name, editor_name, edit_file, cmd, args)
   posix.system ("cp", io.catfile (srcdir, "tests", "test.input"), edit_file)
@@ -56,8 +57,8 @@ for _, name in ipairs (arg) do
   local test = name:gsub ("%.el$", "")
   if io.open (test .. ".output") ~= nil then
     name = test:gsub (io.catfile (srcdir, "tests/"), "")
-    local edit_file = test:gsub ("^" .. srcdir, builddir) .. ".input"
-    local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", test:gsub ("^" .. srcdir, abs_srcdir) .. ".el"}
+    local edit_file = test:gsub ("^" .. srcdir_pat, builddir) .. ".input"
+    local args = {"--quick", "--batch", "--no-init-file", edit_file, "--load", test:gsub ("^" .. srcdir_pat, abs_srcdir) .. ".el"}
 
     posix.system ("mkdir", "-p", posix.dirname (edit_file))
 
