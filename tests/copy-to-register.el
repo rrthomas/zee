@@ -1,6 +1,0 @@
-(set-mark (point))
-(forward-char 4)
-(copy-to-register 97 (mark) (point))
-(insert-register 97)
-(save-buffer)
-(save-buffers-kill-emacs)

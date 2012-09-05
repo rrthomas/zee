@@ -46,7 +46,6 @@ src_zile_LUA =						\
 	src/marker.lua					\
 	src/minibuf.lua					\
 	src/redisplay.lua				\
-	src/registers.lua				\
 	src/search.lua					\
 	src/tbl_vars.lua				\
 	src/undo.lua					\
