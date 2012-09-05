@@ -17,62 +17,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AStr = Object {
-  _init = function (self, s)
-    self.s = s
-    return self
-  end,
-
-  __tostring = function (self)
-    return self.s
-  end,
-
-  len = function (self) -- FIXME: In Lua 5.2 use __len metamethod (doesn't work for tables in 5.1)
-    return #self.s
-  end,
-
-  sub = function (self, from, to)
-    return self.s:sub (from, to)
-  end,
-
-  move = function (self, to, from, n)
-    assert (math.max (from, to) + n <= self.s:len () + 1)
-    self.s = self.s:sub (1, to - 1) .. self.s:sub (from, from + n - 1) .. self.s:sub (to + n)
-  end,
-
-  set = function (self, from, c, n)
-    assert (from + n <= self.s:len () + 1)
-    self.s = self.s:sub (1, from - 1) .. string.rep (c, n) .. self.s:sub (from + n)
-  end,
-
-  remove = function (self, from, n)
-    assert (from + n <= self.s:len () + 1)
-    self.s = self.s:sub (1, from - 1) .. self.s:sub (from + n)
-  end,
-
-  insert = function (self, from, n)
-    assert (from <= self.s:len () + 1)
-    self.s = self.s:sub (1, from - 1) .. string.rep ('\0', n) .. self.s:sub (from)
-  end,
-
-  replace = function (self, pos, rep)
-    assert (pos + #rep <= self.s:len () + 1)
-    self.s = self.s:sub (1, pos - 1) .. rep .. self.s:sub (pos + #rep)
-  end,
-
-  find = function (self, s, from)
-    return self.s:find (s, from)
-  end,
-
-  rfind = function (self, s, from)
-    return find_substr (self.s, "", s, 1, from - 1, false, true, true, false, false)
-  end
-}
-
 require "alien"
 
 local allocation_chunk_size = 16
-BStr = Object {
+AStr = Object {
   _init = function (self, s)
     self.buf = alien.array ("char", #s, alien.buffer (s))
     self.length = #s
@@ -99,30 +47,30 @@ BStr = Object {
   end,
 
   move = function (self, to, from, n)
-    assert (math.max (from, to) + n <= self:len ())
+    assert (math.max (from, to) + n <= self:len () + 1)
     alien.memmove (self.buf.buffer:topointer (to), self.buf.buffer:topointer (from), n)
   end,
 
   set = function (self, from, c, n)
-    assert (from + n <= self:len ())
+    assert (from + n <= self:len () + 1)
     alien.memset (self.buf.buffer:topointer (from), c:byte (), n)
   end,
 
   remove = function (self, from, n)
-    assert (from + n <= self:len ())
+    assert (from + n <= self:len () + 1)
     self:move (from + n, from, n)
     self:set_len (self:len () - n)
   end,
 
   insert = function (self, from, n)
-    assert (from <= self:len ())
+    assert (from <= self:len () + 1)
     self:set_len (self:len () + n)
-    self:move (from + n, from, self:len () - (from + n))
+    self:move (from + n, from, self:len () + 1 - (from + n))
     self:set (from, '\0', n)
   end,
 
   replace = function (self, from, rep)
-    assert (from + #rep < self:len ())
+    assert (from + #rep <= self:len () + 1)
     alien.memmove (self.buf.buffer:topointer (from), rep, #rep)
   end,
 
