@@ -77,7 +77,7 @@ local function revert_action (up)
     goto_offset (up.o)
   end
   if up.type == UNDO_REPLACE_BLOCK then
-    replace_estr (up.size, up.text)
+    replace_astr (up.size, up.text)
   end
 
   if up.unchanged then

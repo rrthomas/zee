@@ -400,7 +400,7 @@ local function pipe_command (cmd, tempfile, insert, do_replace)
         goto_offset (r.start)
         del = get_region_size (r)
       end
-      replace_estr (del, EStr (out, coding_eol_lf))
+      replace_astr (del, AStr (out))
     else
       local more_than_one_line = eol and eol ~= #out
       write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
@@ -574,7 +574,7 @@ On nonblank line, delete any immediately following blank lines.
     -- If we are deleting to EOB, need to fudge extra line.
     local at_eob = r.finish == get_buffer_size (cur_bp) and r.start > 0
     if at_eob then
-      r.start = r.start - #get_buffer_eol (cur_bp)
+      r.start = r.start - 1
     end
 
     -- Delete any blank lines found.
@@ -913,7 +913,7 @@ local function setcase_word (rcase)
   end
 
   if #as > 0 then
-    replace_estr (#as, EStr (recase (as, rcase), coding_eol_lf))
+    replace_astr (#as, AStr (recase (as, rcase)))
   end
 
   cur_bp.modified = true

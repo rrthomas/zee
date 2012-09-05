@@ -25,8 +25,8 @@ local function maybe_free_kill_ring ()
   end
 end
 
-local function kill_ring_push (es)
-  kill_ring_text = (kill_ring_text or EStr ("")):cat (es)
+local function kill_ring_push (as)
+  kill_ring_text = (kill_ring_text or AStr ("")):cat (as)
 end
 
 local function copy_or_kill_region (kill, rp)
@@ -133,7 +133,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
     end
 
     execute_function ("set-mark-command")
-    insert_estr (kill_ring_text)
+    insert_astr (kill_ring_text)
     deactivate_mark ()
   end
 )
@@ -203,7 +203,7 @@ local function kill_line (whole_line)
       return false
     end
 
-    kill_ring_push (EStr ("\n"))
+    kill_ring_push (AStr ("\n"))
     _this_command = "kill-region"
   end
 

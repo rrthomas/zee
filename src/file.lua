@@ -193,7 +193,7 @@ Set mark after the inserted text.
     if ok then
       local s = io.slurp (file)
       if s then
-        insert_estr (EStr (s))
+        insert_astr (AStr (s))
       else
         ok = minibuf_error ("%s: %s", file, posix.errno ())
       end
@@ -614,7 +614,7 @@ function find_file (filename)
       else
         s = ""
       end
-      bp.text = EStr (s)
+      bp.text = AStr (s)
 
       -- Reset undo history
       bp.next_undop = nil

@@ -57,7 +57,7 @@ local function o_to_realo (bp, o)
 end
 
 function get_buffer_size (bp)
-  return realo_to_o (bp, bp.text:bytes ())
+  return realo_to_o (bp, bp.text:len ())
 end
 
 function buffer_line_len (bp, o)
@@ -66,19 +66,15 @@ function buffer_line_len (bp, o)
     realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, o)))
 end
 
--- Replace `del' chars after point with `es'.
+-- Replace `del' chars after point with `as'.
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
-function replace_estr (del, es)
+function replace_astr (del, as)
   if warn_if_readonly_buffer () then
     return false
   end
 
-  if es.eol ~= get_buffer_eol (cur_bp) then
-    es = EStr ("", get_buffer_eol (cur_bp)):cat (es)
-  end
-
-  local newlen = es:len (cur_bp.text.eol)
+  local newlen = as:len ()
 
   undo_save_block (cur_bp.pt, del, newlen)
 
@@ -88,7 +84,7 @@ function replace_estr (del, es)
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
     added_gap = min_gap
-    cur_bp.text:insert (cur_bp.pt, (es.s:len () + min_gap) - (cur_bp.gap + del))
+    cur_bp.text:insert (cur_bp.pt, (as:len () + min_gap) - (cur_bp.gap + del))
     cur_bp.gap = min_gap
   elseif oldgap + del > max_gap + newlen then
     -- If gap would be larger than max_gap, restrict it to max_gap.
@@ -104,7 +100,7 @@ function replace_estr (del, es)
   end
 
   -- Insert `newlen' chars.
-  cur_bp.text:replace (cur_bp.pt, es)
+  cur_bp.text:replace (cur_bp.pt, tostring (as))
   cur_bp.pt = cur_bp.pt + newlen
 
   -- Adjust markers.
@@ -115,14 +111,14 @@ function replace_estr (del, es)
   end
 
   cur_bp.modified = true
-  if es:next_line (1) then
+  if as:next_line (1) then
     thisflag.need_resync = true
   end
   return true
 end
 
-function insert_estr (es)
-  return replace_estr (0, es)
+function insert_astr (as)
+  return replace_astr (0, as)
 end
 
 function get_buffer_char (bp, o)
@@ -153,11 +149,7 @@ end
 
 -- Buffer methods that don't know about the gap.
 
-function get_buffer_eol (bp)
-  return bp.text.eol
-end
-
--- Copy a region of text into an estr.
+-- Copy a region of text into an AStr.
 function get_buffer_region (bp, r)
   local s = ""
   if r.start < get_buffer_pt (bp) then
@@ -167,13 +159,13 @@ function get_buffer_region (bp, r)
     local from = math.max (r.start - get_buffer_pt (bp), 0)
     s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_pt (bp))
   end
-  return EStr (s, get_buffer_eol (bp))
+  return AStr (s)
 end
 
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  return replace_estr (0, EStr (c))
+  return replace_astr (0, AStr (c))
 end
 
 function delete_char ()
@@ -188,11 +180,9 @@ function delete_char ()
   end
 
   if eolp () then
-    replace_estr (#get_buffer_eol (cur_bp), EStr (""))
     thisflag.need_resync = true
-  else
-    replace_estr (1, EStr (""))
   end
+  replace_astr (1, AStr (""))
 
   cur_bp.modified = true
 
@@ -201,7 +191,7 @@ end
 
 function insert_buffer (bp)
   -- Copy text to avoid problems when bp == cur_bp.
-  insert_estr (EStr (get_buffer_pre_point (bp) .. get_buffer_post_point (bp), get_buffer_eol (bp)))
+  insert_astr (AStr (get_buffer_pre_point (bp) .. get_buffer_post_point (bp)))
 end
 
 
@@ -217,7 +207,7 @@ function buffer_new ()
 
   bp.pt = 1
   bp.gap = 0
-  bp.text = EStr (AStr (""))
+  bp.text = AStr ("")
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 
@@ -342,7 +332,7 @@ function delete_region (r)
 
   local m = point_marker ()
   goto_offset (r.start)
-  replace_estr (get_region_size (r), EStr (""))
+  replace_astr (get_region_size (r), AStr (""))
   goto_offset (m.o)
   unchain_marker (m)
 
@@ -522,7 +512,7 @@ function move_char (offset)
       set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
     elseif not btest () then
       thisflag.need_resync = true
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + #get_buffer_eol (cur_bp) * dir)
+      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
       execute_function (lmove)
     else
       return false

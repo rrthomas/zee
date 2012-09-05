@@ -19,8 +19,8 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function insert_string (s, eol)
-  return insert_estr (EStr (s, eol or coding_eol_lf))
+function insert_string (s)
+  return insert_astr (AStr (s))
 end
 
 -- If point is greater than fill-column, then split the line at the

@@ -116,20 +116,10 @@ local function draw_status_line (line, wp)
   term_attrset (display.reverse)
   term_move (line, 0)
   term_addstr (string.rep ('-', wp.ewidth))
-
-  local eol_type
-  if get_buffer_eol (cur_bp) == coding_eol_cr then
-    eol_type = "(Mac)"
-  elseif get_buffer_eol (cur_bp) == coding_eol_crlf then
-    eol_type = "(DOS)"
-  else
-    eol_type = ":"
-  end
-
   term_move (line, 0)
 
-  local as = string.format ("--%s%2s  %-15s   %s %-9s (Fundamental",
-                            eol_type, make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
+  local as = string.format ("--%2s  %-15s   %s %-9s (Fundamental",
+                            make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
                             string.format ("(%d,%d)", n + 1, get_goalc_bp (wp.bp, window_o (wp))))
 
   if wp.bp.autofill then

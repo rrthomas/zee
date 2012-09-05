@@ -72,6 +72,7 @@ AStr = Object {
   replace = function (self, from, rep)
     assert (from + #rep <= self:len () + 1)
     alien.memmove (self.buf.buffer:topointer (from), rep, #rep)
+    return self
   end,
 
   find = function (self, s, from)
@@ -80,5 +81,45 @@ AStr = Object {
 
   rfind = function (self, s, from)
     return find_substr (tostring (self), "", s, 1, from - 1, false, true, true, false, false) -- FIXME
-  end
+  end,
+
+  cat = function (self, src)
+    local oldlen = self:len ()
+    self:insert (oldlen + 1, src:len ())
+    return self:replace (oldlen + 1, tostring (src))
+  end,
+
+  prev_line = function (self, o)
+    local so = self:start_of_line (o)
+    return so ~= 1 and self:start_of_line (so - 1) or nil
+  end,
+
+  next_line = function (self, o)
+    local eo = self:end_of_line (o)
+    return eo <= self:len () and eo + 1 or nil
+  end,
+
+  start_of_line = function (self, o)
+    local prev = self:rfind ("\n", o)
+    return prev and prev + 1 or 1
+  end,
+
+  end_of_line = function (self, o)
+    local next = self:find ("\n", o)
+    return next or self:len () + 1
+  end,
+
+  lines = function (self)
+    local lines = 0
+    local s = 1
+    local next
+    repeat
+      next = tostring (self):find ("\n", s)
+      if next then
+        lines = lines + 1
+        s = next + 1 + 1
+      end
+    until not next
+    return lines
+  end,
 }
