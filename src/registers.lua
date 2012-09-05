@@ -39,7 +39,7 @@ Copy region into register @i{register}.
       if not rp then
         return false
       else
-        regs[term_bytetokey (reg)] = tostring (get_buffer_region (cur_bp, rp)) -- FIXME: Convert newlines.
+        regs[term_bytetokey (reg)] = get_buffer_region (cur_bp, rp)
       end
     end
 
@@ -50,7 +50,7 @@ Copy region into register @i{register}.
 local regnum
 
 function insert_register ()
-  insert_string (regs[term_bytetokey (regnum)])
+  insert_estr (regs[term_bytetokey (regnum)])
   return true
 end
 
@@ -97,6 +97,7 @@ local function write_registers_list (i)
   for i, r in pairs (regs) do
     if r then
       insert_string (string.format ("Register %s contains ", tostring (i)))
+      r = tostring (r)
 
       if r == "" then
         insert_string ("the empty string\n")
