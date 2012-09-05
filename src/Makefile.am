@@ -25,6 +25,7 @@ bin_SCRIPTS = src/zile
 
 src_zile_LUA =						\
 	src/lib.lua					\
+	src/astr.lua					\
 	src/estr.lua					\
 	src/history.lua					\
 	src/lisp.lua					\
