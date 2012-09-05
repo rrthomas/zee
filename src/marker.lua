@@ -26,7 +26,6 @@ local function marker_new (bp, o)
   return marker
 end
 
--- FIXME: Replace with table.clone
 function copy_marker (m)
   return marker_new (m.bp, m.o)
 end
