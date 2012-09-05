@@ -36,26 +36,28 @@ AStr = Object {
   end,
 
   move = function (self, to, from, n)
-    assert (math.max (from, to) + n <= self.s:len ())
-    self.s = self.s:sub (1, to) .. self.s:sub (from + 1, from + n) .. self.s:sub (to + n + 1)
+    assert (math.max (from, to) + n <= self.s:len () + 1)
+    self.s = self.s:sub (1, to - 1) .. self.s:sub (from, from + n - 1) .. self.s:sub (to + n)
   end,
 
   set = function (self, from, c, n)
-    assert (from + n <= self.s:len ())
-    self.s = self.s:sub (1, from) .. string.rep (c, n) .. self.s:sub (from + n + 1)
+    assert (from + n <= self.s:len () + 1)
+    self.s = self.s:sub (1, from - 1) .. string.rep (c, n) .. self.s:sub (from + n)
   end,
 
   remove = function (self, from, n)
-    assert (from + n <= self.s:len ())
-    self.s = self.s:sub (1, from) .. self.s:sub (from + n + 1)
+    assert (from + n <= self.s:len () + 1)
+    self.s = self.s:sub (1, from - 1) .. self.s:sub (from + n)
   end,
 
   insert = function (self, from, n)
-    self.s = self.s:sub (1, from) .. string.rep ('\0', n) .. self.s:sub (from + 1)
+    assert (from <= self.s:len () + 1)
+    self.s = self.s:sub (1, from - 1) .. string.rep ('\0', n) .. self.s:sub (from)
   end,
 
   replace = function (self, pos, rep)
-    self.s = self.s:sub (1, pos) .. rep .. self.s:sub (pos + 1 + #rep)
+    assert (pos + #rep <= self.s:len () + 1)
+    self.s = self.s:sub (1, pos - 1) .. rep .. self.s:sub (pos + #rep)
   end,
 
   find = function (self, s, from)
@@ -63,11 +65,74 @@ AStr = Object {
   end,
 
   rfind = function (self, s, from)
-    return find_substr (self.s, "", s, 0, from, false, true, true, false, false)
+    return find_substr (self.s, "", s, 1, from - 1, false, true, true, false, false)
   end
 }
 
-BStr = AStr {
+require "alien"
+
+local allocation_chunk_size = 16
+BStr = Object {
+  _init = function (self, s)
+    self.buf = alien.array ("char", #s, alien.buffer (s))
+    self.length = #s
+    return self
+  end,
+
+  __tostring = function (self)
+    return self.buf.buffer:tostring (self:len ())
+  end,
+
+  len = function (self) -- FIXME: In Lua 5.2 use __len metamethod (doesn't work for tables in 5.1)
+    return self.length
+  end,
+
+  sub = function (self, from, to)
+    return tostring (self):sub (from, to) -- FIXME
+  end,
+
+  set_len = function (self, n)
+    if n > self.buf.length or n < self.buf.length / 2 then
+      self.buf:realloc (n + allocation_chunk_size)
+    end
+    self.length = n
+  end,
+
+  move = function (self, to, from, n)
+    assert (math.max (from, to) + n <= self:len ())
+    alien.memmove (self.buf.buffer:topointer (to), self.buf.buffer:topointer (from), n)
+  end,
+
+  set = function (self, from, c, n)
+    assert (from + n <= self:len ())
+    alien.memset (self.buf.buffer:topointer (from), c:byte (), n)
+  end,
+
+  remove = function (self, from, n)
+    assert (from + n <= self:len ())
+    self:move (from + n, from, n)
+    self:set_len (self:len () - n)
+  end,
+
+  insert = function (self, from, n)
+    assert (from <= self:len ())
+    self:set_len (self:len () + n)
+    self:move (from + n, from, self:len () - (from + n))
+    self:set (from, '\0', n)
+  end,
+
+  replace = function (self, from, rep)
+    assert (from + #rep < self:len ())
+    alien.memmove (self.buf.buffer:topointer (from), rep, #rep)
+  end,
+
+  find = function (self, s, from)
+    return tostring (self):find (s, from) -- FIXME
+  end,
+
+  rfind = function (self, s, from)
+    return find_substr (tostring (self), "", s, 1, from - 1, false, true, true, false, false) -- FIXME
+  end
 }
 
 -- Formats of end-of-line
@@ -127,22 +192,22 @@ EStr = Object {
 
   prev_line = function (self, o)
     local so = self:start_of_line (o)
-    return so ~= 0 and self:start_of_line (so - #self.eol) or nil
+    return so ~= 1 and self:start_of_line (so - #self.eol) or nil
   end,
 
   next_line = function (self, o)
     local eo = self:end_of_line (o)
-    return eo ~= self.s:len () and eo + #self.eol or nil
+    return eo <= self.s:len () and eo + #self.eol or nil
   end,
 
   start_of_line = function (self, o)
     local prev = self.s:rfind (self.eol, o)
-    return prev and (prev + #self.eol - 1) or 0
+    return prev and prev + #self.eol or 1
   end,
 
   end_of_line = function (self, o)
-    local next = self.s:find (self.eol, o + 1)
-    return next and next - 1 or self.s:len ()
+    local next = self.s:find (self.eol, o)
+    return next or self.s:len () + 1
   end,
 
   lines = function (self)
@@ -163,7 +228,7 @@ EStr = Object {
     local s = 1
     local len = src.s:len ()
     while len > 0 do
-      local next = src.s:find (src.eol, s)
+      local next = src.s:find (src.eol, s + #src.eol + 1)
       local line_len = next and next - s or len
       self.s:replace (pos, src.s:sub (s, s + line_len))
       pos = pos + line_len
@@ -181,8 +246,8 @@ EStr = Object {
 
   cat = function (self, src)
     local oldlen = self.s:len ()
-    self.s:insert (oldlen, src:len (self.eol))
-    return self:replace (oldlen, src)
+    self.s:insert (oldlen + 1, src:len (self.eol))
+    return self:replace (oldlen + 1, src)
   end,
 
   bytes = function (self)
@@ -193,6 +258,7 @@ EStr = Object {
     return self:bytes () + self:lines () * (#eol_type - #self.eol)
   end,
 
+  -- FIXME: The following should all convert their character arguments to byte values before calling the underlying *Str method
   sub = function (self, from, to)
     return self.s:sub (from, to)
   end,

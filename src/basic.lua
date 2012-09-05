@@ -104,7 +104,7 @@ Beginning of buffer is position 1.
       n = minibuf_read_number ("Goto char: ", "")
     end
 
-    return type (n) == "number" and goto_offset (math.max (n, 1) - 1)
+    return type (n) == "number" and goto_offset (math.max (n, 1))
   end
 )
 
@@ -172,7 +172,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    goto_offset (0)
+    goto_offset (1)
   end
 )
 
@@ -183,7 +183,7 @@ Move point to the end of the buffer; leave mark at previous position.
 ]],
   true,
   function ()
-    goto_offset (get_buffer_size (cur_bp))
+    goto_offset (get_buffer_size (cur_bp) + 1)
   end
 )
 

@@ -21,11 +21,11 @@
 -- Buffer methods that know about the gap.
 
 function get_buffer_pre_point (bp)
-  return bp.text:sub (1, get_buffer_pt (bp))
+  return bp.text:sub (1, get_buffer_pt (bp) - 1)
 end
 
 function get_buffer_post_point (bp)
-  return bp.text:sub (get_buffer_pt (bp) + bp.gap + 1)
+  return bp.text:sub (get_buffer_pt (bp) + bp.gap)
 end
 
 function get_buffer_pt (bp)
@@ -115,7 +115,7 @@ function replace_estr (del, es)
   end
 
   cur_bp.modified = true
-  if es:next_line (0) then
+  if es:next_line (1) then
     thisflag.need_resync = true
   end
   return true
@@ -126,7 +126,7 @@ function insert_estr (es)
 end
 
 function get_buffer_char (bp, o)
-  local n = o_to_realo (bp, o) + 1
+  local n = o_to_realo (bp, o)
   return bp.text:sub (n, n)
 end
 
@@ -161,7 +161,7 @@ end
 function get_buffer_region (bp, r)
   local s = ""
   if r.start < get_buffer_pt (bp) then
-    s = s .. get_buffer_pre_point (bp):sub (r.start + 1, math.min (r.finish, get_buffer_pt (bp)))
+    s = s .. get_buffer_pre_point (bp):sub (r.start, math.min (r.finish, get_buffer_pt (bp)))
   end
   if r.finish > get_buffer_pt (bp) then
     local from = math.max (r.start - get_buffer_pt (bp), 0)
@@ -215,9 +215,9 @@ buffer_name_history = history_new ()
 function buffer_new ()
   local bp = {}
 
-  bp.pt = 0
+  bp.pt = 1
   bp.gap = 0
-  bp.text = EStr (BStr (""))
+  bp.text = EStr (AStr (""))
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
 
@@ -511,14 +511,19 @@ end
 -- Basic movement routines
 
 function move_char (offset)
-  local dir = offset >= 0 and 1 or -1
+  local dir, ltest, btest, lmove
+  if offset >= 0 then
+    dir, ltest, btest, lmove = 1, eolp, eobp, "beginning-of-line"
+  else
+    dir, ltest, btest, lmove = -1, bolp, bobp, "end-of-line"
+  end
   for i = 1, math.abs (offset) do
-    if (dir > 0 and not eolp ()) or (dir < 0 and not bolp ()) then
+    if not ltest () then
       set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
-    elseif (dir > 0 and not eobp ()) or (dir < 0 and not bobp ()) then
+    elseif not btest () then
       thisflag.need_resync = true
       set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + #get_buffer_eol (cur_bp) * dir)
-      execute_function (dir > 0 and "beginning-of-line" or "end-of-line")
+      execute_function (lmove)
     else
       return false
     end
@@ -581,7 +586,7 @@ end
 
 function offset_to_line (bp, offset)
   local n = 0
-  local o = 0
+  local o = 1
   while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < offset do
     n = n + 1
     o = buffer_next_line (bp, o)

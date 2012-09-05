@@ -63,12 +63,12 @@ end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return get_buffer_pt (cur_bp) == 0
+  return get_buffer_pt (cur_bp) == 1
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return get_buffer_pt (cur_bp) == get_buffer_size (cur_bp)
+  return get_buffer_pt (cur_bp) > get_buffer_size (cur_bp)
 end
 
 -- Return true if point is at the beginning of a line.

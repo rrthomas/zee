@@ -57,12 +57,12 @@ function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase
     if not forward then
       ef = bit.bor (ef, re_flags.backward)
     end
-    local match_from, match_to = r:find (string.sub (as .. bs, from + 1, to), nil, ef)
+    local match_from, match_to = r:find (string.sub (as .. bs, from, to), nil, ef)
     if match_from then
       if forward then
-        ret = match_to + from + 1
+        ret = match_to + from
       else
-        ret = match_from + from
+        ret = match_from + from - 1
       end
     end
   else
@@ -78,17 +78,17 @@ local function search (o, s, forward, regexp)
   end
 
   -- Attempt match.
-  local notbol = forward and o > 0
-  local noteol = not forward and o < get_buffer_size (cur_bp)
-  local from = forward and o or 0
-  local to = forward and get_buffer_size (cur_bp) or o
+  local notbol = forward and o > 1
+  local noteol = not forward and o <= get_buffer_size (cur_bp)
+  local from = forward and o or 1
+  local to = forward and get_buffer_size (cur_bp) + 1 or o - 1
   local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
   local pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp), s, from, to, forward, notbol, noteol, regexp, downcase)
   if not pos then
     return false
   end
 
-  goto_offset (pos - 1)
+  goto_offset (pos)
   thisflag.need_resync = true
   return true
 end

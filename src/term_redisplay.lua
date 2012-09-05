@@ -153,7 +153,7 @@ local function draw_window (topline, wp)
   -- Find the first line to display on the first screen line.
   local o = buffer_start_of_line (wp.bp, window_o (wp))
   local i = wp.topdelta
-  while i > 0 and o > 0 do
+  while i > 0 and o > 1 do
     o = buffer_prev_line (wp.bp, o)
     assert (o)
     i = i - 1

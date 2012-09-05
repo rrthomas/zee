@@ -903,7 +903,7 @@ local function setcase_word (rcase)
   end
 
   local as = ""
-  for i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) do
+  for i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp), buffer_line_len (cur_bp) - 1 do
     local c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)
     if iswordchar (c) then
       as = as .. c
@@ -1012,7 +1012,7 @@ local function transpose_subr (move_func)
     move_func (-1)
   end
   -- For transpose-lines.
-  if move_func == move_line and get_buffer_line_o (cur_bp) == 0 then
+  if move_func == move_line and get_buffer_line_o (cur_bp) == 1 then
     move_func (1)
   end
 
