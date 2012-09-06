@@ -109,8 +109,8 @@ local options = {
   {"doc", ""},
   {"doc", "Action options:"},
   {"doc", ""},
-  {"act", "FILE", "visit FILE using find-file"},
-  {"act", "+LINE FILE", "visit FILE using find-file, then go to line LINE"},
+  {"act", "FILE", "visit FILE"},
+  {"act", "+LINE FILE", "visit FILE, then go to line LINE"},
 }
 
 -- Options table
