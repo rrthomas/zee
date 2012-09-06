@@ -1,5 +1,0 @@
-(set-mark (point))
-(forward-line 2)
-(upcase-region (point) (mark))
-(save-buffer)
-(save-buffers-kill-emacs)
