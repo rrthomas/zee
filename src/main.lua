@@ -288,16 +288,6 @@ function main ()
 
   lastflag.need_resync = true
 
-  -- Set up screen according to number of files loaded.
-  if #buffers == 3 then
-    -- *scratch* and two files.
-    execute_function ("split-window")
-    switch_to_buffer (buffers[#buffers -1])
-    execute_function ("other-window")
-  elseif #buffers > 3 then
-    execute_function ("list-buffers")
-  end
-
   -- Reinitialise the scratch buffer to catch settings
   init_buffer (scratch_bp)
 

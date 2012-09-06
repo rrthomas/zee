@@ -426,48 +426,6 @@ function kill_buffer (kill_bp)
   end
 end
 
-Defun ("kill-buffer",
-       {"string"},
-[[
-Kill buffer BUFFER.
-With a nil argument, kill the current buffer.
-]],
-  true,
-  function (buffer)
-    local ok = true
-
-    if not buffer then
-      local cp = make_buffer_completion ()
-      buffer = minibuf_read (string.format ("Kill buffer (default %s): ", cur_bp.name),
-                             "", cp, buffer_name_history)
-      if not buffer then
-        ok = execute_function ("keyboard-quit")
-      end
-    end
-
-    local bp
-    if buffer and buffer ~= "" then
-      bp = find_buffer (buffer)
-      if not bp then
-        minibuf_error (string.format ("Buffer `%s' not found", buffer))
-        ok = false
-      end
-    else
-      bp = cur_bp
-    end
-
-    if ok then
-      if not check_modified_buffer (bp) then
-        ok = false
-      else
-        kill_buffer (bp)
-      end
-    end
-
-    return ok
-  end
-)
-
 function make_buffer_completion ()
   local cp = completion_new ()
   for _, bp in ipairs (buffers) do
@@ -593,54 +551,3 @@ function goto_offset (o)
     thisflag.need_resync = true
   end
 end
-
-local function buffer_next (this_bp)
-  for i, bp in ipairs (buffers) do
-    if bp == this_bp then
-      if i > 1 then
-        return buffers[i - 1]
-      else
-        return buffers[#buffers]
-      end
-      break
-    end
-  end
-end
-
-Defun ("switch-to-buffer",
-       {"string"},
-[[
-Select buffer @i{buffer} in the current window.
-]],
-  true,
-  function (buffer)
-    local ok = true
-    local bp = buffer_next (cur_bp)
-
-    if not buffer then
-      local cp = make_buffer_completion ()
-      buffer = minibuf_read (string.format ("Switch to buffer (default %s): ", bp.name),
-                             "", cp, buffer_name_history)
-
-      if not buffer then
-        ok = execute_function ("keyboard-quit")
-      end
-    end
-
-    if ok then
-      if buffer and buffer ~= "" then
-        bp = find_buffer (buffer)
-        if not bp then
-          bp = buffer_new ()
-          bp.name = buffer
-          bp.needname = true
-          bp.nosave = true
-        end
-      end
-
-      switch_to_buffer (bp)
-    end
-
-    return ok
-  end
-)

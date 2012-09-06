@@ -1,6 +1,0 @@
-call_command ("switch-to-buffer", "*scratch*")
-call_command ("insert", "This is cool!.")
-call_command ("switch-to-buffer", "switch-to-buffer.input")
-call_command ("insert", "This is not.")
-call_command ("save-buffer")
-call_command ("save-buffers-kill-emacs")

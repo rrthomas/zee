@@ -397,17 +397,6 @@ local function save_some_buffers ()
   return true
 end
 
-Defun ("save-some-buffers",
-       {},
-[[
-Save some modified file-visiting buffers.  Asks user about each one.
-]],
-  true,
-  function ()
-    return save_some_buffers ()
-  end
-)
-
 Defun ("save-buffers-kill-emacs",
        {},
 [[
@@ -466,89 +455,28 @@ Make DIR become the current buffer's default directory.
   end
 )
 
-Defun ("insert-buffer",
-       {"string"},
-[[
-Insert after point the contents of BUFFER.
-Puts mark after the inserted text.
-]],
-  true,
-  function (buffer)
-    local ok = true
-
-    local def_bp = buffers[#buffers]
-    for i = 2, #buffers do
-      if buffers[i] == cur_bp then
-        def_bp = buffers[i - 1]
-        break
-      end
-    end
-
-    if warn_if_readonly_buffer () then
-      return false
-    end
-
-    if not buffer then
-      local cp = make_buffer_completion ()
-      buffer = minibuf_read (string.format ("Insert buffer (default %s): ", def_bp.name),
-                             "", cp, buffer_name_history)
-      if not buffer then
-        ok = execute_function ("keyboard-quit")
-      end
-    end
-
-    if ok then
-      local bp
-
-      if buffer and buffer ~= "" then
-        bp = find_buffer (buffer)
-        if not bp then
-          ok = minibuf_error (string.format ("Buffer `%s' not found", buffer))
-        end
-      else
-        bp = def_bp
-      end
-
-      if ok then
-        insert_buffer (bp)
-        execute_function ("set-mark-command")
-      end
-    end
-
-    return ok
-  end
-)
-
 function find_file (filename)
   local bp
-  for i = 1, #buffers do
-    if buffers[i].filename == filename then
-      bp = buffers[i]
-      break
-    end
-  end
 
-  if not bp then
-    if exist_file (filename) and not is_regular_file (filename) then
-      return minibuf_error ("File exists but could not be read")
+  if exist_file (filename) and not is_regular_file (filename) then
+    return minibuf_error ("File exists but could not be read")
+  else
+    bp = buffer_new ()
+    set_buffer_names (bp, filename)
+    bp.dir = posix.dirname (filename)
+
+    local s = io.slurp (filename)
+    if s then
+      bp.readonly = not check_writable (filename)
     else
-      bp = buffer_new ()
-      set_buffer_names (bp, filename)
-      bp.dir = posix.dirname (filename)
-
-      local s = io.slurp (filename)
-      if s then
-        bp.readonly = not check_writable (filename)
-      else
-        s = ""
-      end
-      bp.text = AStr (s)
-
-      -- Reset undo history
-      bp.next_undop = nil
-      bp.last_undop = nil
-      bp.modified = false
+      s = ""
     end
+    bp.text = AStr (s)
+
+    -- Reset undo history
+    bp.next_undop = nil
+    bp.last_undop = nil
+    bp.modified = false
   end
 
   switch_to_buffer (bp)

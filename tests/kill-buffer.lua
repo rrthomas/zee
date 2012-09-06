@@ -1,5 +1,0 @@
-call_command ("switch-to-buffer", "*scratch*")
-call_command ("kill-buffer", "*scratch*")
-call_command ("insert", "a")
-call_command ("save-buffer")
-call_command ("save-buffers-kill-emacs")

@@ -105,9 +105,9 @@ function init_default_bindings ()
 
   -- Bind special key names to self-insert-command
   list.map (function (e)
-	      root_bindings[{keycode (e)}] = "self-insert-command"
-	    end,
-	    {"\\SPC", "\\TAB", "\\RET", "\\\\"})
+              root_bindings[{keycode (e)}] = "self-insert-command"
+            end,
+            {"\\SPC", "\\TAB", "\\RET", "\\\\"})
 
   key_bind ("\\M-m", "back-to-indentation")
   key_bind ("\\C-b", "backward-char")
@@ -163,7 +163,6 @@ function init_default_bindings ()
   key_bind ("\\C-\\M-s", "isearch-forward-regexp")
   key_bind ("\\M-\\SPC", "just-one-space")
   key_bind ("\\C-g", "keyboard-quit")
-  key_bind ("\\C-xk", "kill-buffer")
   key_bind ("\\C-k", "kill-line")
   key_bind ("\\C-w", "kill-region")
   key_bind ("\\C-\\M-k", "kill-sexp")
@@ -186,7 +185,6 @@ function init_default_bindings ()
   key_bind ("\\C-l", "recenter")
   key_bind ("\\C-x\\C-s", "save-buffer")
   key_bind ("\\C-x\\C-c", "save-buffers-kill-emacs")
-  key_bind ("\\C-xs", "save-some-buffers")
   key_bind ("\\M-v", "scroll-down")
   key_bind ("\\PRIOR", "scroll-down")
   key_bind ("\\C-v", "scroll-up")
@@ -199,7 +197,6 @@ function init_default_bindings ()
   key_bind ("\\C-x(", "start-kbd-macro")
   key_bind ("\\C-x\\C-z", "suspend-emacs")
   key_bind ("\\C-z", "suspend-emacs")
-  key_bind ("\\C-xb", "switch-to-buffer")
   key_bind ("\\M-i", "tab-to-tab-stop")
   key_bind ("\\C-x\\C-q", "toggle-read-only")
   key_bind ("\\C-xu", "undo")
