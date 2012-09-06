@@ -656,119 +656,6 @@ Move forward to end of paragraph.  With argument N, do it N times.
   end
 )
 
-
--- Move through balanced expressions (sexps)
-local function move_sexp (dir)
-  local gotsexp, level = false, 0
-  local gotsexp, single_quote, double_quote = false, dir < 0, dir < 0
-
-  local function isopenbracketchar (c)
-    return (c == '(') or (c == '[') or ( c== '{') or ((c == '\"') and not double_quote) or ((c == '\'') and not single_quote)
-  end
-
-  local function isclosebracketchar (c)
-    return (c == ')') or (c == ']') or (c == '}') or ((c == '\"') and double_quote) or ((c == '\'') and single_quote)
-  end
-
-  while true do
-    while not (dir > 0 and eolp or bolp) () do
-      local o = get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0)
-      local c = get_buffer_char (cur_bp, o)
-
-      -- Skip escaped quotes.
-      if (c == '"' or c == '\'') and o > get_buffer_line_o (cur_bp) and get_buffer_char (cur_bp, o - 1) == '\\' then
-        move_char (dir)
-        c = 'a' -- Treat ' and " like word chars.
-      end
-
-      if (dir > 0 and isopenbracketchar or isclosebracketchar) (c) then
-        if level == 0 and gotsexp then
-          return true
-        end
-
-        level = level + 1
-        gotsexp = true
-        if c == '\"' then
-          double_quote = not double_quote
-        end
-        if c == '\'' then
-          single_quote = not single_quote
-        end
-      elseif (dir > 0 and isclosebracketchar or isopenbracketchar) (c) then
-        if level == 0 and gotsexp then
-          return true
-        end
-
-        level = level - 1
-        gotsexp = true
-        if c == '\"' then
-          double_quote = not double_quote
-        end
-        if c == '\'' then
-          single_quote = not single_quote
-        end
-        if level < 0 then
-          return minibuf_error ("Scan error: \"Containing expression ends prematurely\"")
-        end
-      end
-
-      move_char (dir)
-
-      if not c:match ("[%a_$]") then
-        if gotsexp and level == 0 then
-          if not (isopenbracketchar (c) or isclosebracketchar (c)) then
-            move_char (-dir)
-          end
-          return true
-        end
-      else
-        gotsexp = true
-      end
-    end
-    if gotsexp and level == 0 then
-      return true
-    end
-    if not (dir > 0 and next_line or previous_line) () then
-      if level ~= 0 then
-        minibuf_error ("Scan error: \"Unbalanced parentheses\"")
-      end
-      return false
-    end
-    if dir > 0 then
-      execute_function ("beginning-of-line")
-    else
-      execute_function ("end-of-line")
-    end
-  end
-  return false
-end
-
-Defun ("forward-sexp",
-       {"number"},
-[[
-Move forward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move backward across N balanced expressions.
-]],
-  true,
-  function (n)
-    return move_with_uniarg (n or 1, move_sexp)
-  end
-)
-
-Defun ("backward-sexp",
-       {"number"},
-[[
-Move backward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move forward across N balanced expressions.
-]],
-  true,
-  function (n)
-    return move_with_uniarg (-(n or 1), move_sexp)
-  end
-)
-
 local function mark (uniarg, func)
   execute_function ("set-mark")
   local ret = execute_function (func, uniarg)
@@ -786,19 +673,6 @@ Set mark argument words away from point.
   true,
   function (n)
     return mark (n, "forward-word")
-  end
-)
-
-Defun ("mark-sexp",
-       {"number"},
-[[
-Set mark @i{arg} sexps from point.
-The place mark goes is the same place @kbd{C-M-f} would
-move to with the same argument.
-]],
-  true,
-  function (n)
-    return mark (n, "forward-sexp")
   end
 )
 

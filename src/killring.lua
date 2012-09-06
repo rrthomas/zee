@@ -101,19 +101,6 @@ With argument @i{arg}, do this that many times.
   end
 )
 
-Defun ("kill-sexp",
-       {"number"},
-[[
-Kill the sexp (balanced expression) following the cursor.
-With @i{arg}, kill that many sexps after the cursor.
-Negative arg -N means kill N sexps before the cursor.
-]],
-  true,
-  function (arg)
-    return kill_text (arg, "mark-sexp")
-  end
-)
-
 Defun ("yank",
        {},
 [[
