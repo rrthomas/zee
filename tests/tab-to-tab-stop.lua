@@ -1,0 +1,6 @@
+call_command ("forward-line", "2")
+call_command ("tab-to-tab-stop")
+call_command ("tab-to-tab-stop")
+call_command ("insert", "tab")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

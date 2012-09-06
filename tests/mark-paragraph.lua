@@ -1,0 +1,5 @@
+call_command ("mark-paragraph")
+call_command ("kill-region", "point", "mark")
+call_command ("insert", "aaa")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

@@ -1,0 +1,5 @@
+call_command ("mark-whole-buffer")
+call_command ("copy-region-as-kill", "point", "mark")
+call_command ("yank")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

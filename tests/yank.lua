@@ -1,0 +1,7 @@
+call_command ("set-mark", "point")
+call_command ("forward-line", "2")
+call_command ("kill-region", "point", "mark")
+call_command ("forward-line", "3")
+call_command ("yank")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

@@ -1,7 +1,0 @@
-(set-mark (point))
-(forward-line 2)
-(kill-region (point) (mark))
-(forward-line 3)
-(yank)
-(save-buffer)
-(save-buffers-kill-emacs)

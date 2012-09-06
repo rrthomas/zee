@@ -1,7 +1,0 @@
-(forward-char 4)
-(set-mark (point))
-(forward-line 2)
-(exchange-point-and-mark)
-(insert "f")
-(save-buffer)
-(save-buffers-kill-emacs)

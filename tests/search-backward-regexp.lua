@@ -1,0 +1,5 @@
+call_command ("end-of-buffer")
+call_command ("search-backward-regexp", "l.n")
+call_command ("insert", "a")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

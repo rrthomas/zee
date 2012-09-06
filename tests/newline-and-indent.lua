@@ -1,0 +1,8 @@
+call_command ("newline-and-indent")
+call_command ("forward-line")
+call_command ("newline-and-indent")
+call_command ("forward-line")
+call_command ("newline-and-indent")
+call_command ("newline-and-indent")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

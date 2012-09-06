@@ -1,0 +1,6 @@
+call_command ("forward-word")
+call_command ("insert", "   ")
+call_command ("just-one-space")
+call_command ("insert", "a")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

@@ -102,8 +102,8 @@ local options = {
   {"doc", "Initialization options:"},
   {"doc", ""},
   {"opt", "no-init-file", 'q', "optional", "", "do not load ~/." .. PACKAGE},
-  {"opt", "funcall", 'f', "required", "FUNC", "call " .. PACKAGE_NAME .. " Lisp function FUNC with no arguments"},
-  {"opt", "load", 'l', "required", "FILE", "load " .. PACKAGE_NAME .. " Lisp FILE using the load function"},
+  {"opt", "funcall", 'f', "required", "FUNC", "call " .. PACKAGE_NAME .. " function FUNC with no arguments"},
+  {"opt", "load", 'l', "required", "FILE", "load " .. PACKAGE_NAME .. " Lua FILE using the load function"},
   {"opt", "help", '\0', "optional", "", "display this help message and exit"},
   {"opt", "version", '\0', "optional", "", "display version information and exit"},
   {"doc", ""},
@@ -132,7 +132,6 @@ function process_args ()
   local line = 1
   for c, longindex, optind, optarg in posix.getopt_long (arg, "-:f:l:q", longopts) do
     local this_optind = optind > 0 and optind or 1
-
     if c == 1 then -- Non-option (assume file name)
       longindex = 5
     elseif c == string.byte ('?') then -- Unknown option
@@ -238,10 +237,10 @@ function main ()
   cur_bp.modified = false
 
   if not qflag then
-    local s = os.getenv ("HOME")
-    if s then
-      lisp_loadfile (s .. "/." .. PACKAGE)
-    end
+    -- local s = os.getenv ("HOME")
+    -- if s then
+    --   lisp_loadfile (s .. "/." .. PACKAGE)
+    -- end
   end
 
   -- Create the splash buffer & message only if no files, function or
@@ -266,9 +265,12 @@ function main ()
         minibuf_error (string.format ("Function `%s' not defined", arg))
       end
     elseif type == "loadfile" then
-      ok = lisp_loadfile (arg)
+      local f = loadfile (arg) -- FIXME: call load function instead of duplicating code below
+      ok = f ~= nil
       if not ok then
         minibuf_error (string.format ("Cannot open load file: %s\n", arg))
+      else
+        f ()
       end
     elseif type == "file" then
       ok = find_file (arg)

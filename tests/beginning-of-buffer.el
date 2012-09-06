@@ -1,6 +1,0 @@
-(end-of-buffer)
-(insert "a")
-(beginning-of-buffer)
-(insert "b")
-(save-buffer)
-(save-buffers-kill-emacs)

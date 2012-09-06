@@ -1,5 +1,0 @@
-(end-of-buffer)
-(search-backward-regexp "l.n")
-(insert "a")
-(save-buffer)
-(save-buffers-kill-emacs)

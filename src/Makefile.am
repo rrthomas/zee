@@ -61,8 +61,7 @@ LUA_RUNTIME =						\
 
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
-	src/loadlua.lua					\
-	src/default-bindings.el
+	src/loadlua.lua
 
 PRODUCTIONSOURCES =					\
 	$(src_zile_LUA)					\
@@ -70,7 +69,6 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/src/loadlua.lua			\
 	$(top_srcdir)/src/ldb-config.lua		\
 	$(top_srcdir)/src/Makefile.am			\
-	$(top_srcdir)/src/*.el				\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
 src/loadlua.lua: src/Makefile.am src/loadlua.lua.in

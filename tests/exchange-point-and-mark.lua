@@ -1,0 +1,7 @@
+call_command ("forward-char", "4")
+call_command ("set-mark", "point")
+call_command ("forward-line", "2")
+call_command ("exchange-point-and-mark")
+call_command ("insert", "f")
+call_command ("save-buffer")
+call_command ("save-buffers-kill-emacs")

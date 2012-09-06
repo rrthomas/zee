@@ -1,6 +1,0 @@
-(set-mark (point))
-(forward-char 4)
-(copy-region-as-kill (mark) (point))
-(yank)
-(save-buffer)
-(save-buffers-kill-emacs)
