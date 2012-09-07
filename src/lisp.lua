@@ -77,9 +77,10 @@ Execute a file of Lua code named FILE.
   function (file)
     if file then
       local f = loadfile (file)
-      if f then
-        return f ()
+      if not f then
+        return false
       end
+      return f ()
     end
   end
 )

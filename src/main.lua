@@ -65,30 +65,6 @@ lastflag = {}
 
 local ZILE_COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
 
-local ZILE_COPYRIGHT_NOTICE = [[
-GNU ]] .. PACKAGE_NAME .. [[ comes with ABSOLUTELY NO WARRANTY.
-Zile is Free Software--Free as in Freedom--so you can redistribute copies
-of Zile and modify it; see the file COPYING. Otherwise, a copy can be
-downloaded from http://www.gnu.org/licenses/gpl.html.
-]]
-
-local splash_str = "Welcome to GNU " .. PACKAGE_NAME .. [[.
-
-Undo changes	C-x u        Exit ]] .. PACKAGE_NAME .. [[	C-x C-c
-(`C-' means use the CTRL key.  `M-' means hold the Meta (or Alt) key.
-If you have no Meta key, you may type ESC followed by the character.)
-Combinations like `C-x u' mean first press `C-x', then `u'.
-
-Keys not working properly?  See file://]] .. PATH_DOCDIR .. [[/FAQ
-
-]] .. ZILE_VERSION_STRING .. [[
-
-]] .. ZILE_COPYRIGHT_STRING .. [[
-
-
-]] .. ZILE_COPYRIGHT_NOTICE
-
-
 -- Documented options table
 --
 -- Documentation line: "doc", "DOCSTRING"
@@ -106,11 +82,6 @@ local options = {
   {"opt", "load", 'l', "required", "FILE", "load " .. PACKAGE_NAME .. " Lua FILE using the load function"},
   {"opt", "help", '\0', "optional", "", "display this help message and exit"},
   {"opt", "version", '\0', "optional", "", "display version information and exit"},
-  {"doc", ""},
-  {"doc", "Action options:"},
-  {"doc", ""},
-  {"act", "FILE", "visit FILE"},
-  {"act", "+LINE FILE", "visit FILE, then go to line LINE"},
 }
 
 -- Options table
@@ -124,12 +95,36 @@ end
 
 local zarg = {}
 local qflag = false
+local file
+local line = 1
+
+function usage ()
+  io.write ("Usage: " .. arg[0] .. " [OPTION...] [+LINE] FILE\n" ..
+            "\n" ..
+            "Run " .. PACKAGE_NAME .. ", the lightweight Emacs clone.\n" ..
+            "\n")
+
+  for _, v in ipairs (options) do
+    if v[1] == "doc" then
+      io.write (v[2] .. "\n")
+    elseif v[1] == "opt" then
+      local shortopt = string.format (", -%s", v[3])
+      local buf = string.format ("--%s%s %s", v[2], v[3] ~= '\0' and shortopt or "", v[5])
+      io.write (string.format ("%-24s%s\n", buf, v[6]))
+    elseif v[1] == "act" then
+      io.write (string.format ("%-24s%s\n", v[2], v[3]))
+    end
+  end
+
+  io.write ("\n" ..
+            "Report bugs to " .. PACKAGE_BUGREPORT .. ".\n")
+  os.exit (0)
+end
 
 function process_args ()
   -- Leading `-' means process all arguments in order, treating
   -- non-options as arguments to an option with code 1
   -- Leading `:' so as to return ':' for a missing arg, not '?'
-  local line = 1
   local this_optind = 1
   for c, longindex, optind, optarg in posix.getopt_long (arg, "-:f:l:q", longopts) do
     if c == 1 then -- Non-option (assume file name)
@@ -155,26 +150,7 @@ function process_args ()
     elseif longindex == 2 then
       table.insert (zarg, {'loadfile', normalize_path (optarg)})
     elseif longindex == 3 then
-      io.write ("Usage: " .. arg[0] .. " [OPTION-OR-FILENAME]...\n" ..
-                "\n" ..
-                "Run " .. PACKAGE_NAME .. ", the lightweight Emacs clone.\n" ..
-                "\n")
-
-      for _, v in ipairs (options) do
-        if v[1] == "doc" then
-          io.write (v[2] .. "\n")
-        elseif v[1] == "opt" then
-          local shortopt = string.format (", -%s", v[3])
-          local buf = string.format ("--%s%s %s", v[2], v[3] ~= '\0' and shortopt or "", v[5])
-          io.write (string.format ("%-24s%s\n", buf, v[6]))
-        elseif v[1] == "act" then
-          io.write (string.format ("%-24s%s\n", v[2], v[3]))
-        end
-      end
-
-      io.write ("\n" ..
-                "Report bugs to " .. PACKAGE_BUGREPORT .. ".\n")
-      os.exit (0)
+      usage ()
     elseif longindex == 4 then
       io.write (ZILE_VERSION_STRING .. "\n" ..
                 ZILE_COPYRIGHT_STRING .. "\n" ..
@@ -187,7 +163,7 @@ function process_args ()
       if optarg[1] == '+' then
         line = tonumber (optarg, 10)
       else
-        table.insert (zarg, {'file', normalize_path (optarg), line})
+        file = normalize_path (optarg)
         line = 1
       end
     end
@@ -219,24 +195,17 @@ local function signal_init ()
 end
 
 function main ()
-  local scratch_bp
-
   signal_init ()
-
   process_args ()
 
+  if not file then
+    usage ()
+  end
+
   os.setlocale ("")
-
   term_init ()
-
   init_default_bindings ()
-
-  -- Create the `*scratch*' buffer, so that initialisation commands
-  -- that act on a buffer have something to act on.
-  create_scratch_window ()
-  scratch_bp = cur_bp
-  insert_string (";; This buffer is for notes you don't want to save.\n;; If you want to create a file, visit that file with C-x C-f,\n;; then enter the text in that file's own buffer.\n\n")
-  cur_bp.modified = false
+  create_window ()
 
   if not qflag then
     -- local s = os.getenv ("HOME")
@@ -245,21 +214,16 @@ function main ()
     -- end
   end
 
-  -- Create the splash buffer & message only if no files, function or
-  -- load file is specified on the command line, and there has been no
-  -- error.
-  if #zarg == 0 and not minibuf_contents and not get_variable_bool ("inhibit-splash-screen") then
-    local bp = create_auto_buffer ("*GNU " .. PACKAGE_NAME .. "*")
-    switch_to_buffer (bp)
-    insert_string (splash_str)
-    cur_bp.readonly = true
-    execute_function ("beginning-of-buffer")
+  -- Load file
+  local ok = find_file (file)
+  if ok then
+    execute_function ("goto-line", line)
+    lastflag.need_resync = true
   end
 
-  -- Load files and load files and run functions given on the command line.
-  local ok = true
+  -- Load Lua files and run functions given on the command line.
   for i = 1, #zarg do
-    local type, arg, line = zarg[i][1], zarg[i][2], zarg[i][3]
+    local type, arg = zarg[i][1], zarg[i][2]
 
     if type == "function" then
       ok = execute_function (arg)
@@ -267,18 +231,9 @@ function main ()
         minibuf_error (string.format ("Function `%s' not defined", arg))
       end
     elseif type == "loadfile" then
-      local f = loadfile (arg) -- FIXME: call load function instead of duplicating code below
-      ok = f ~= nil
+      ok = execute_function ("load", arg)
       if not ok then
         minibuf_error (string.format ("Cannot open load file: %s\n", arg))
-      else
-        f ()
-      end
-    elseif type == "file" then
-      ok = find_file (arg)
-      if ok then
-        execute_function ("goto-line", line)
-        lastflag.need_resync = true
       end
     end
     if thisflag.quit then
@@ -288,8 +243,8 @@ function main ()
 
   lastflag.need_resync = true
 
-  -- Reinitialise the scratch buffer to catch settings
-  init_buffer (scratch_bp)
+  -- Reinitialise the buffer to catch settings
+  init_buffer (cur_bp)
 
   -- Refresh minibuffer in case there was an error that couldn't be
   -- written during startup

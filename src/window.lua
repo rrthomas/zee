@@ -314,10 +314,7 @@ Both windows display the same buffer now current.
   end
 )
 
--- This function creates the scratch buffer and window when there are
--- no other windows (and possibly no other buffers).
-function create_scratch_window ()
-  local bp = create_scratch_buffer ()
+function create_window ()
   local w, h = term_width (), term_height ()
   local wp = window_new ()
   cur_wp = wp
@@ -328,8 +325,6 @@ function create_scratch_window ()
   wp.fheight = h - 1
   -- Save space for status line.
   wp.eheight = wp.fheight - 1
-  cur_bp = bp
-  wp.bp = cur_bp
 end
 
 function window_resync (wp)

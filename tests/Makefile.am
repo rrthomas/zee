@@ -62,4 +62,3 @@ check-local: $(builddir)/src/zile
 	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
 	echo $(LUA_TESTS_ZILE_ONLY) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
 	echo $(LUA_TESTS_ZILE_ONLY_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	$(LUA_TESTS_ENVIRONMENT) $(builddir)/src/zile --unknown-flag --load $(srcdir)/tests/quit.lua

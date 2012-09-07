@@ -370,19 +370,6 @@ function tab_width (bp)
   return math.max (get_variable_number_bp (bp, "tab-width"), 1)
 end
 
-function create_auto_buffer (name)
-  local bp = buffer_new ()
-  bp.name = name
-  bp.needname = true
-  bp.temporary = true
-  bp.nosave = true
-  return bp
-end
-
-function create_scratch_buffer ()
-  return create_auto_buffer ("*scratch*")
-end
-
 -- Remove the specified buffer from the buffer list.
 -- Recreate the scratch buffer when required.
 function kill_buffer (kill_bp)
@@ -407,15 +394,7 @@ function kill_buffer (kill_bp)
     end
   end
 
-  -- If no buffers left, recreate scratch buffer and point windows at
-  -- it.
-  if #buffers == 0 then
-    table.insert (buffers, create_scratch_buffer ())
-    cur_bp = buffers[1]
-    for _, wp in ipairs (windows) do
-      wp.bp = cur_bp
-    end
-  end
+  assert (#buffers > 0)
 
   -- Resync windows that need it.
   for _, wp in ipairs (windows) do
@@ -424,35 +403,6 @@ function kill_buffer (kill_bp)
       window_resync (wp)
     end
   end
-end
-
-function make_buffer_completion ()
-  local cp = completion_new ()
-  for _, bp in ipairs (buffers) do
-    table.insert (cp.completions, bp.name)
-  end
-
-  return cp
-end
-
--- Check if the buffer has been modified.  If so, asks the user if
--- he/she wants to save the changes.  If the response is positive, return
--- true, else false.
-function check_modified_buffer (bp)
-  if bp.modified and not bp.nosave then
-    while true do
-      local ans = minibuf_read_yesno (string.format ("Buffer %s modified; kill anyway? (yes or no) ", bp.name))
-      if ans == nil then
-        execute_function ("keyboard-quit")
-        return false
-      elseif not ans then
-        return false
-      end
-      break
-    end
-  end
-
-  return true
 end
 
 
