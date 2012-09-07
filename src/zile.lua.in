@@ -37,7 +37,6 @@ package.path = package.path:gsub (";%./%?.lua$", "")
 
 package.path = PATH_DATA .. "/?.lua;" .. package.path
 require "loadlua"
-ldb = require "ldb"
 
 
 local function err(err)

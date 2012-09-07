@@ -261,17 +261,3 @@ function main ()
   -- Tidy and close the terminal.
   term_finish ()
 end
-
-Defun ("debug",
-       {},
-[[
-Enter the debugger.  Zile's debugger is not like Emacs's, principally
-in that it is a Lua debugger (the language in which Zile is written).
-]],
-  true,
-  function ()
-    term_close ()
-    ldb ()
-    term_reopen ()
-  end
-)

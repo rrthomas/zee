@@ -55,8 +55,6 @@ src_zile_LUA =						\
 	src/term_redisplay.lua
 
 LUA_RUNTIME =						\
-	src/ldb.lua					\
-	src/ldb-config.lua				\
 	$(src_zile_LUA)
 
 dist_pkgdata_DATA =					\
@@ -67,7 +65,6 @@ PRODUCTIONSOURCES =					\
 	$(src_zile_LUA)					\
 	$(top_srcdir)/src/zile.lua			\
 	$(top_srcdir)/src/loadlua.lua			\
-	$(top_srcdir)/src/ldb-config.lua		\
 	$(top_srcdir)/src/Makefile.am			\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
