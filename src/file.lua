@@ -160,98 +160,8 @@ local function write_to_disk (bp, filename, mode)
   return ret
 end
 
--- Create a backup filename according to user specified variables.
-local function create_backup_filename (filename, backupdir)
-  local res
-
-  -- Prepend the backup directory path to the filename
-  if backupdir then
-    local buf = backupdir
-    if buf[-1] ~= '/' then
-      buf = buf .. '/'
-      filename = gsub (filename, "/", "!")
-
-      if not normalize_path (buf) then
-        buf = nil
-      end
-      res = buf
-    end
-  else
-    res = filename
-  end
-
-  return res .. "~"
-end
-
--- Copy a file.
-local function copy_file (source, dest)
-  local ifd = io.open (source)
-  if not ifd then
-    return minibuf_error (string.format ("%s: unable to backup", source))
-  end
-
-  local ofd, tname = posix.mkstemp (dest .. "XXXXXX")
-  if not ofd then
-    ifd:close ()
-    return minibuf_error (string.format ("%s: unable to create backup", dest))
-  end
-
-  local written = posix.write (ofd, ifd:read ("*a"))
-  ifd:close ()
-  posix.close (ofd)
-
-  if not written then
-    return minibuf_error (string.format ("Unable to write to backup file `%s'", dest))
-  end
-
-  local st = posix.stat (source)
-
-  -- Recover file permissions and ownership.
-  if st then
-    posix.chmod (tname, st.mode)
-    posix.chown (tname, st.uid, st.gid)
-  end
-
-  if st then
-    local ok, err = os.rename (tname, dest)
-    if not ok then
-      minibuf_error (string.format ("Cannot rename temporary file `%s'", err))
-      os.remove (tname)
-      st = nil
-    end
-  elseif unlink (tname) == -1 then
-    minibuf_error (string.format ("Cannot remove temporary file `%s'", err))
-  end
-
-  -- Recover file modification time.
-  if st then
-    posix.utime (dest, st.mtime, st.atime)
-  end
-
-  return st ~= nil
-end
-
 -- Write the buffer contents to a file.
--- Create a backup file if specified by the user variables.
-local function backup_and_write (bp, filename)
-  -- Make backup of original file.
-  local backup = get_variable_bool ("make-backup-files")
-  if not bp.backup and backup then
-    local h = io.open (filename, "r+")
-    if h then
-      h:close ()
-
-      local backupdir = get_variable_bool ("backup-directory") and get_variable ("backup-directory")
-      local bfilename = create_backup_filename (filename, backupdir)
-      if bfilename and copy_file (filename, bfilename) then
-        bp.backup = true
-      else
-        minibuf_error (string.format ("Cannot make backup file: %s", posix.errno ()))
-        waitkey ()
-      end
-    end
-  end
-
+local function write_file (bp, filename)
   local ret, err = write_to_disk (bp, filename, "rw-rw-rw-")
   if ret then
     return true
@@ -297,7 +207,7 @@ local function write_buffer (bp, needname, confirm, name, prompt)
     bp.needname = false
     bp.temporary = false
     bp.nosave = false
-    if backup_and_write (bp, name) then
+    if write_file (bp, name) then
       minibuf_write ("Wrote " .. name)
       bp.modified = false
       undo_set_unchanged (bp.last_undop)
@@ -321,8 +231,7 @@ end
 Defun ("save-buffer",
        {},
 [[
-Save current buffer in visited file if modified.  By default, makes the
-previous version into a backup file if this is the first save.
+Save current buffer in visited file if modified.
 ]],
   true,
   function ()
@@ -423,35 +332,6 @@ Offer to save each buffer, then kill this Zile process.
     end
 
     thisflag.quit = true
-  end
-)
-
-Defun ("cd",
-       {"string"},
-[[
-Make DIR become the current buffer's default directory.
-]],
-  true,
-  function (dir)
-    if not dir and _interactive then
-      dir = minibuf_read_filename ("Change default directory: ", cur_bp.dir)
-    end
-
-    if not dir then
-      return execute_function ("keyboard-quit")
-    end
-
-    if dir ~= "" then
-      local st = posix.stat (dir)
-      if not st or not st.type == "directory" then
-        minibuf_error (string.format ("`%s' is not a directory", dir))
-      elseif posix.chdir (dir) == -1 then
-        minibuf_write (string.format ("%s: %s", dir, posix.errno ()))
-      else
-        cur_bp.dir = dir
-        return true
-      end
-    end
   end
 )
 

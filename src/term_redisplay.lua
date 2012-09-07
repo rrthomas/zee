@@ -77,9 +77,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 end
 
 local function calculate_highlight_region (wp)
-  if (wp ~= cur_wp and not get_variable_bool ("highlight-nonselected-windows"))
-    or wp.bp.mark == nil
-    or not wp.bp.mark_active then
+  if wp ~= cur_wp or wp.bp.mark == nil or not wp.bp.mark_active then
     return false
   end
 
@@ -118,7 +116,7 @@ local function draw_status_line (line, wp)
   term_addstr (string.rep ('-', wp.ewidth))
   term_move (line, 0)
 
-  local as = string.format ("--%2s  %-15s   %s %-9s (Fundamental",
+  local as = string.format ("--%2s  %-15s   %s %-9s (",
                             make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
                             string.format ("(%d,%d)", n + 1, get_goalc_bp (wp.bp, window_o (wp))))
 

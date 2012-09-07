@@ -219,56 +219,6 @@ by 4 each time.
   end
 )
 
-local function write_buffers_list (old_wp)
-  -- FIXME: Underline next line properly.
-  insert_string ("CRM Buffer                Size  Mode             File\n")
-  insert_string ("--- ------                ----  ----             ----\n")
-
-  -- Rotate buffer list to get current buffer at head.
-  local bufs = table.clone (buffers)
-  for i = #buffers, 1, -1 do
-    if buffers[i] == old_wp.bp then
-      break
-    end
-    table.insert (bufs, 1, table.remove (bufs))
-  end
-
-  -- Print buffers.
-  for _, bp in ripairs (bufs) do
-    -- Print all buffers whose names don't start with space except
-    -- this one (the *Buffer List*).
-    if cur_bp ~= bp and bp.name[1] ~= ' ' then
-      insert_string (string.format ("%s%s%s %-19s %6u  %-17s",
-                                    old_wp.bp == bp and '.' or ' ',
-                                    bp.readonly and '%' or ' ',
-                                    bp.modified and '*' or ' ',
-                                    bp.name, get_buffer_size (bp), "Fundamental"))
-      if bp.filename then
-        insert_string (compact_path (bp.filename))
-      end
-      insert_newline ()
-    end
-  end
-end
-
-Defun ("list-buffers",
-       {},
-[[
-Display a list of names of existing buffers.
-The list is displayed in a buffer named `*Buffer List*'.
-
-The C column has a `.' for the buffer from which you came.
-The R column has a `%' if the buffer is read-only.
-The M column has a `*' if it is modified.
-After this come the buffer name, its size in characters,
-its major mode, and the visited file name (if any).
-]],
-  true,
-  function ()
-    write_temp_buffer ("*Buffer List*", true, write_buffers_list, cur_wp)
-  end
-)
-
 Defun ("set-mark",
        {},
 [[
@@ -365,7 +315,8 @@ Fill paragraph at or after point.
     while buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < m_end.o do
       execute_function ("end-of-line")
       delete_char ()
-      execute_function ("just-one-space")
+      execute_function ("delete-horizontal-space")
+      insert_char (' ')
     end
     unchain_marker (m_end)
 
@@ -530,71 +481,6 @@ Delete the text between point and mark.
     end
     deactivate_mark ()
     return true
-  end
-)
-
-Defun ("delete-blank-lines",
-       {},
-[[
-On blank line, delete all surrounding blank lines, leaving just one.
-On isolated blank line, delete that one.
-On nonblank line, delete any immediately following blank lines.
-]],
-  true,
-  function ()
-    local m = point_marker ()
-    local r = region_new (get_buffer_line_o (cur_bp), get_buffer_line_o (cur_bp))
-
-    undo_start_sequence ()
-
-    -- Find following blank lines.
-    if execute_function ("forward-line") and is_blank_line () then
-      r.start = get_buffer_pt (cur_bp)
-      repeat
-        r.finish = buffer_next_line (cur_bp, get_buffer_pt (cur_bp))
-      until not execute_function ("forward-line") or not is_blank_line ()
-    end
-    goto_offset (m.o)
-
-    -- If this line is blank, find any preceding blank lines.
-    local singleblank = true
-    if is_blank_line () then
-      r.finish = math.max (r.finish, buffer_next_line (cur_bp, get_buffer_pt (cur_bp) or math.huge))
-      repeat
-        r.start = get_buffer_line_o (cur_bp)
-      until not execute_function ("forward-line", -1) or not is_blank_line ()
-
-      goto_offset (m.o)
-      if r.start ~= get_buffer_line_o (cur_bp) or r.finish > buffer_next_line (cur_bp, get_buffer_pt (cur_bp)) then
-        singleblank = false
-      end
-      r.finish = math.min (r.finish, get_buffer_size (cur_bp))
-    end
-
-    -- If we are deleting to EOB, need to fudge extra line.
-    local at_eob = r.finish == get_buffer_size (cur_bp) and r.start > 0
-    if at_eob then
-      r.start = r.start - 1
-    end
-
-    -- Delete any blank lines found.
-    if r.start < r.finish then
-      delete_region (r)
-    end
-
-    -- If we found more than one blank line, leave one.
-    if not singleblank then
-      if not at_eob then
-        intercalate_newline ()
-      else
-        insert_newline ()
-      end
-    end
-
-    undo_end_sequence ()
-
-    unchain_marker (m)
-    deactivate_mark ()
   end
 )
 

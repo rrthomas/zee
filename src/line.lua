@@ -340,20 +340,6 @@ Delete all spaces and tabs around point.
   end
 )
 
-Defun ("just-one-space",
-       {},
-[[
-Delete all spaces and tabs around point, leaving one space.
-]],
-  true,
-  function ()
-    undo_start_sequence ()
-    execute_function ("delete-horizontal-space")
-    insert_char (' ')
-    undo_end_sequence ()
-  end
-)
-
 Defun ("tab-to-tab-stop",
        {"number"},
 [[
