@@ -90,7 +90,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     local c = getkeystroke (GETKEY_DEFAULT)
     if c == nil or c == keycode "\\RET" then
     elseif c == keycode "\\C-z" then
-      execute_function ("suspend-emacs")
+      execute_function ("file-suspend")
     elseif c == keycode "\\C-g" then
       as = nil
       break

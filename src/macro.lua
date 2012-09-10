@@ -39,7 +39,7 @@ function cancel_kbd_macro ()
   thisflag.defining_macro = false
 end
 
-Defun ("start-kbd-macro",
+Defun ("macro-record",
        {},
 [[
 Record subsequent keyboard input, defining a keyboard macro.
@@ -64,7 +64,7 @@ Use @kbd{C-x )} to finish recording and make the macro available.
   end
 )
 
-Defun ("end-kbd-macro",
+Defun ("macro-stop",
        {},
 [[
 Finish defining a keyboard macro.
@@ -122,7 +122,7 @@ A prefix argument serves as a repeat count.
   end
 )
 
-Defun ("execute-kbd-macro",
+Defun ("macro-play",
   {"string"},
 [[
 Execute macro as string of editor command characters.

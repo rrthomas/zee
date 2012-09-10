@@ -217,7 +217,7 @@ function main ()
   -- Load file
   local ok = find_file (file)
   if ok then
-    execute_function ("goto-line", line)
+    execute_function ("edit-goto-line", line)
     lastflag.need_resync = true
   end
 

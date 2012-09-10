@@ -34,7 +34,7 @@ Cancel current command.
   end
 )
 
-Defun ("suspend-emacs",
+Defun ("file-suspend",
        {},
 [[
 Stop Zile and return to superior process.
@@ -45,7 +45,7 @@ Stop Zile and return to superior process.
   end
 )
 
-Defun ("toggle-read-only",
+Defun ("preferences-toggle-read-only",
        {},
 [[
 Change whether this buffer is visiting its file read-only.
@@ -56,7 +56,7 @@ Change whether this buffer is visiting its file read-only.
   end
 )
 
-Defun ("auto-fill-mode",
+Defun ("preferences-toggle-wrap-mode",
        {},
 [[
 Toggle Auto Fill mode.
@@ -69,7 +69,7 @@ automatically breaks the line at a previous space.
   end
 )
 
-Defun ("exchange-point-and-mark",
+Defun ("edit-select-other-end",
        {},
 [[
 Put the mark where point is now, and point where the mark is now.
@@ -124,7 +124,7 @@ function write_temp_buffer (name, show, func, ...)
   -- Use the "callback" routine.
   func (...)
 
-  execute_function ("beginning-of-buffer")
+  execute_function ("move-start-file")
   cur_bp.readonly = true
   cur_bp.modified = false
 
@@ -137,7 +137,7 @@ function write_temp_buffer (name, show, func, ...)
   end
 end
 
-Defun ("universal-argument",
+Defun ("edit-repeat",
        {},
 [[
 Begin a numeric argument for the following command.
@@ -219,7 +219,7 @@ by 4 each time.
   end
 )
 
-Defun ("set-mark",
+Defun ("edit-select-on",
        {},
 [[
 Set this buffer's mark to point.
@@ -238,7 +238,7 @@ Set the mark where point is.
 ]],
   true,
   function ()
-    execute_function ("set-mark")
+    execute_function ("edit-select-on")
     minibuf_write ("Mark set")
   end
 )
@@ -276,7 +276,7 @@ Just C-u as argument means to use the current column.
   end
 )
 
-Defun ("quoted-insert",
+Defun ("edit-insert-quoted",
        {},
 [[
 Read next input character and insert it.
@@ -290,7 +290,7 @@ This is useful for inserting control characters.
   end
 )
 
-Defun ("fill-paragraph",
+Defun ("edit-wrap-paragraph",
        {},
 [[
 Fill paragraph at or after point.
@@ -301,26 +301,26 @@ Fill paragraph at or after point.
 
     undo_start_sequence ()
 
-    execute_function ("forward-paragraph")
+    execute_function ("move-next-paragraph")
     if is_empty_line () then
       previous_line ()
     end
     local m_end = point_marker ()
 
-    execute_function ("backward-paragraph")
+    execute_function ("move-previous-paragraph")
     if is_empty_line () then -- Move to next line if between two paragraphs.
       next_line ()
     end
 
     while buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < m_end.o do
-      execute_function ("end-of-line")
+      execute_function ("move-end-line")
       delete_char ()
       execute_function ("delete-horizontal-space")
       insert_char (' ')
     end
     unchain_marker (m_end)
 
-    execute_function ("end-of-line")
+    execute_function ("move-end-line")
     while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
 
     goto_offset (m.o)
@@ -330,8 +330,8 @@ Fill paragraph at or after point.
   end
 )
 
-local function pipe_command (cmd, tempfile, insert, do_replace)
-  local cmdline = string.format ("%s 2>&1 <%s", cmd, tempfile)
+local function pipe_command (cmd, tempfile, insert)
+  local cmdline = string.format ("%s 2>&1%s", cmd, tempfile and " <" .. tempfile or "")
   local pipe = io.popen (cmdline, "r")
   if not pipe then
     return minibuf_error ("Cannot open pipe to process")
@@ -346,7 +346,7 @@ local function pipe_command (cmd, tempfile, insert, do_replace)
   else
     if insert then
       local del = 0
-      if do_replace and not warn_if_no_mark () then
+      if cur_bp.mark_active then
         local r = calculate_the_region ()
         goto_offset (r.start)
         del = get_region_size (r)
@@ -378,48 +378,15 @@ local function minibuf_read_shell_command ()
   return ms
 end
 
-Defun ("shell-command",
-       {"string", "boolean"},
-[[
-Execute string @i{command} in inferior shell; display output, if any.
-With prefix argument, insert the command's output at point.
-
-Command is executed synchronously.  The output appears in the buffer
-`*Shell Command Output*'.  If the output is short enough to display
-in the echo area, it is shown there, but it is nonetheless available
-in buffer `*Shell Command Output*' even though that buffer is not
-automatically displayed.
-
-The optional second argument @i{output-buffer}, if non-nil,
-says to insert the output in the current buffer.
-]],
-  true,
-  function (cmd, insert)
-    if not insert then
-      insert = lastflag.set_uniarg
-      -- Undo mangled interactive args when called from \C-u\M-!cmd\r.
-      if insert and cmd == tostring(current_prefix_arg) then cmd = nil end
-    end
-    if not cmd then
-      cmd = minibuf_read_shell_command ()
-    end
-
-    if cmd then
-      return pipe_command (cmd, "/dev/null", insert, false)
-    end
-    return true
-  end
-)
-
 -- The `start' and `end' arguments are fake, hence their string type,
 -- so they can be ignored.
-Defun ("shell-command-on-region",
+Defun ("edit-shell-command",
        {"string", "string", "string", "boolean"},
 [[
 Execute string command in inferior shell with region as input.
 Normally display output (if any) in temp buffer `*Shell Command Output*'
-Prefix arg means replace the region with it.  Return the exit code of
-command.
+Prefix arg means insert in the buffer, replacing the region if any.
+Return the exit code of command.
 
 If the command generates output, the output may be displayed
 in the echo area or in a buffer.
@@ -440,27 +407,31 @@ The output is available in that buffer in both cases.
 
     if cmd then
       local rp = calculate_the_region ()
+      local fd
 
-      if not rp then
-        ok = false
-      else
-        local tempfile = os.tmpname ()
-        local fd = io.open (tempfile, "w")
+      local tempfile
+      if rp then
+        tempfile = os.tmpname ()
 
+        fd = io.open (tempfile, "w")
         if not fd then
           ok = minibuf_error ("Cannot open temporary file")
         else
           local written, err = fd:write (tostring (get_region ()))
-
           if not written then
             ok = minibuf_error ("Error writing to temporary file: " .. err)
-          else
-            ok = pipe_command (cmd, tempfile, insert, true)
           end
-
-          fd:close ()
-          os.remove (tempfile)
         end
+      end
+
+      if ok then
+        ok = pipe_command (cmd, tempfile, insert)
+      end
+      if fd then
+        fd:close ()
+      end
+      if rp then
+        os.remove (tempfile)
       end
     end
     return ok
@@ -494,7 +465,7 @@ Precisely, if point is on line I, move to the start of line I + N.
   function (n)
     n = n or current_prefix_arg or 1
     if n ~= 0 then
-      execute_function ("beginning-of-line")
+      execute_function ("move-start-line")
       return move_line (n)
     end
     return false
@@ -513,40 +484,40 @@ local function move_paragraph (uniarg, forward, backward, line_extremum)
   end
 
   if is_empty_line () then
-    execute_function ("beginning-of-line")
+    execute_function ("move-start-line")
   else
     execute_function (line_extremum)
   end
   return true
 end
 
-Defun ("backward-paragraph",
+Defun ("move-previous-paragraph",
        {"number"},
 [[
 Move backward to start of paragraph.  With argument N, do it N times.
 ]],
   true,
   function (n)
-    return move_paragraph (n or 1, previous_line, next_line, "beginning-of-line")
+    return move_paragraph (n or 1, previous_line, next_line, "move-start-line")
   end
 )
 
-Defun ("forward-paragraph",
+Defun ("move-next-paragraph",
        {"number"},
 [[
 Move forward to end of paragraph.  With argument N, do it N times.
 ]],
   true,
   function (n)
-    return move_paragraph (n or 1, next_line, previous_line, "end-of-line")
+    return move_paragraph (n or 1, next_line, previous_line, "move-end-line")
   end
 )
 
 local function mark (uniarg, func)
-  execute_function ("set-mark")
+  execute_function ("edit-select-on")
   local ret = execute_function (func, uniarg)
   if ret then
-    execute_function ("exchange-point-and-mark")
+    execute_function ("edit-select-other-end")
   end
   return ret
 end
@@ -558,7 +529,7 @@ Set mark argument words away from point.
 ]],
   true,
   function (n)
-    return mark (n, "forward-word")
+    return mark (n, "move-next-word")
   end
 )
 
@@ -571,13 +542,13 @@ The paragraph marked is the one that contains point or follows point.
   true,
   function ()
     if _last_command == "mark-paragraph" then
-      execute_function ("exchange-point-and-mark")
-      execute_function ("forward-paragraph")
-      execute_function ("exchange-point-and-mark")
+      execute_function ("edit-select-other-end")
+      execute_function ("move-next-paragraph")
+      execute_function ("edit-select-other-end")
     else
-      execute_function ("forward-paragraph")
-      execute_function ("set-mark")
-      execute_function ("backward-paragraph")
+      execute_function ("move-next-paragraph")
+      execute_function ("edit-select-on")
+      execute_function ("move-previous-paragraph")
     end
   end
 )
@@ -589,9 +560,9 @@ Put point at beginning and mark at end of buffer.
 ]],
   true,
   function ()
-    execute_function ("end-of-buffer")
+    execute_function ("move-end-file")
     execute_function ("set-mark-command")
-    execute_function ("beginning-of-buffer")
+    execute_function ("move-start-file")
   end
 )
 
@@ -630,7 +601,7 @@ local function move_word (dir)
   return gotword
 end
 
-Defun ("forward-word",
+Defun ("move-next-word",
        {"number"},
 [[
 Move point forward one word (backward if the argument is negative).
@@ -642,7 +613,7 @@ With argument, do this that many times.
   end
 )
 
-Defun ("backward-word",
+Defun ("move-previous-word",
        {"number"},
 [[
 Move backward until encountering the end of a word (forward if the

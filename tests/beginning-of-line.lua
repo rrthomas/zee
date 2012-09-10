@@ -1,6 +1,0 @@
-call_command ("forward-line")
-call_command ("forward-word", "3")
-call_command ("beginning-of-line")
-call_command ("insert", "a")
-call_command ("save-buffer")
-call_command ("save-buffers-kill-emacs")

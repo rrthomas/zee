@@ -1,2 +1,2 @@
--- mark-paragraph kill-region aaa save-buffer save-buffers-kill-emacs
-call_command ("execute-kbd-macro", "\\M-h\\C-waaa\\C-x\\C-s\\C-x\\C-c")
+-- mark-paragraph edit-kill-selection aaa file-save file-quit
+call_command ("macro-play", "\\M-h\\C-waaa\\C-x\\C-s\\C-x\\C-c")

@@ -1,6 +1,0 @@
-call_command ("end-of-buffer")
-call_command ("insert", "a")
-call_command ("beginning-of-buffer")
-call_command ("insert", "b")
-call_command ("save-buffer")
-call_command ("save-buffers-kill-emacs")

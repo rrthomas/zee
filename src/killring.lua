@@ -20,7 +20,7 @@
 local kill_ring_text
 
 local function maybe_free_kill_ring ()
-  if _last_command ~= "kill-region" then
+  if _last_command ~= "edit-kill-selection" then
     kill_ring_text = nil
   end
 end
@@ -40,7 +40,7 @@ local function copy_or_kill_region (kill, rp)
     end
   end
 
-  _this_command = "kill-region"
+  _this_command = "edit-kill-selection"
   deactivate_mark ()
 
   return true
@@ -68,16 +68,16 @@ local function kill_text (uniarg, mark_func)
   push_mark ()
   undo_start_sequence ()
   execute_function (mark_func, uniarg)
-  execute_function ("kill-region")
+  execute_function ("edit-kill-selection")
   undo_end_sequence ()
   pop_mark ()
 
-  _this_command = "kill-region"
+  _this_command = "edit-kill-selection"
   minibuf_write ("") -- Erase "Set mark" message.
   return true
 end
 
-Defun ("kill-word",
+Defun ("edit-kill-word",
        {"number"},
 [[
 Kill characters forward until encountering the end of a word.
@@ -89,7 +89,7 @@ With argument @i{arg}, do this that many times.
   end
 )
 
-Defun ("backward-kill-word",
+Defun ("backward-edit-kill-word",
        {"number"},
 [[
 Kill characters backward until encountering the end of a word.
@@ -101,12 +101,12 @@ With argument @i{arg}, do this that many times.
   end
 )
 
-Defun ("yank",
+Defun ("edit-paste",
        {},
 [[
 Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
-killed @i{or} yanked.  Put point at end, and set mark at beginning.
+killed @i{or} pasted.  Put point at end, and set mark at beginning.
 ]],
   true,
   function ()
@@ -125,12 +125,12 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
   end
 )
 
-Defun ("kill-region",
+Defun ("edit-kill-selection",
        {},
 [[
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
-The command @kbd{C-y} (yank) can retrieve it from there.
+The command @kbd{C-y} (edit-paste) can retrieve it from there.
 If the buffer is read-only, Zile will beep and refrain from deleting
 the text, but put the text in the kill ring anyway.  This means that
 you can use the killing commands to copy text from a read-only buffer.
@@ -144,7 +144,7 @@ to make one entry in the kill ring.
   end
 )
 
-Defun ("copy-region-as-kill",
+Defun ("edit-copy",
        {},
 [[
 Save the region as if killed, but don't kill it.
@@ -186,12 +186,12 @@ local function kill_line (whole_line)
   end
 
   if ok and (whole_line or only_blanks_to_end_of_line) and not eobp () then
-    if not execute_function ("delete-char") then
+    if not execute_function ("edit-delete-next-character") then
       return false
     end
 
     kill_ring_push (AStr ("\n"))
-    _this_command = "kill-region"
+    _this_command = "edit-kill-selection"
   end
 
   undo_end_sequence ()
@@ -207,7 +207,7 @@ local function kill_line_backward ()
   return previous_line () and kill_whole_line ()
 end
 
-Defun ("kill-line",
+Defun ("edit-kill-line",
        {"number"},
 [[
 Kill the rest of the current line; if no nonblanks there, kill thru newline.

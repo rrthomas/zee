@@ -1,3 +1,3 @@
--- start-kbd-macro foo RET end-kbd-macro call-last-kbd-macro undo
--- save-buffer save-buffers-kill-emacs
-call_command ("execute-kbd-macro", "\\C-x(foo\\r\\C-x)\\C-xe\\C-_\\C-x\\C-s\\C-x\\C-c")
+-- macro-record foo RET macro-stop call-last-kbd-macro undo
+-- file-save file-quit
+call_command ("macro-play", "\\C-x(foo\\r\\C-x)\\C-xe\\C-_\\C-x\\C-s\\C-x\\C-c")

@@ -27,7 +27,7 @@ function recenter (wp)
   end
 end
 
-Defun ("recenter",
+Defun ("move-redraw",
        {},
 [[
 Center point in selected window and redisplay frame.
@@ -93,5 +93,5 @@ function resize_windows ()
     until decreased == false
   end
 
-  execute_function ("recenter")
+  execute_function ("move-redraw")
 end

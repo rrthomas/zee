@@ -1,3 +1,3 @@
--- forward-char forward-char forward-char forward-char delete-horizontal-space
--- save-buffer save-buffers-kill-emacs
-call_command ("execute-kbd-macro", "\\C-f\\C-f\\C-f\\C-f\\M-\\\\\\C-x\\C-s\\C-x\\C-c")
+-- move-next-character move-next-character move-next-character move-next-character delete-horizontal-space
+-- file-save file-quit
+call_command ("macro-play", "\\C-f\\C-f\\C-f\\C-f\\M-\\\\\\C-x\\C-s\\C-x\\C-c")

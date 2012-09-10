@@ -1,3 +1,3 @@
--- start-kbd-macro open-line foo LEFT LEFT LEFT end-kbd-macro
--- prefix-cmd 3 call-last-kbd-macro save-buffer save-buffers-kill-emacs
-call_command ("execute-kbd-macro", "\\C-x(foo\\r\\UP\\C-x)\\e3\\C-xe\\C-x\\C-s\\C-x\\C-c")
+-- macro-record open-line foo LEFT LEFT LEFT macro-stop
+-- prefix-cmd 3 call-last-kbd-macro file-save file-quit
+call_command ("macro-play", "\\C-x(foo\\r\\UP\\C-x)\\e3\\C-xe\\C-x\\C-s\\C-x\\C-c")

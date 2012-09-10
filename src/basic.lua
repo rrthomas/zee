@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defun ("beginning-of-line",
+Defun ("move-start-line",
        {},
 [[
 Move point to beginning of current line.
@@ -29,7 +29,7 @@ Move point to beginning of current line.
   end
 )
 
-Defun ("end-of-line",
+Defun ("move-end-line",
        {},
 [[
 Move point to end of current line.
@@ -41,7 +41,7 @@ Move point to end of current line.
   end
 )
 
-Defun ("backward-char",
+Defun ("move-previous-character",
        {"number"},
 [[
 Move point left N characters (right if N is negative).
@@ -57,7 +57,7 @@ On attempt to pass beginning or end of buffer, stop and signal error.
   end
 )
 
-Defun ("forward-char",
+Defun ("move-next-character",
        {"number"},
 [[
 Move point right N characters (left if N is negative).
@@ -108,7 +108,7 @@ Beginning of buffer is position 1.
   end
 )
 
-Defun ("goto-line",
+Defun ("edit-goto-line",
        {"number"},
 [[
 Goto @i{line}, counting from line 1 at beginning of buffer.
@@ -122,7 +122,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
 
     if type (n) == "number" then
       move_line ((math.max (n, 1) - 1) - offset_to_line (cur_bp, get_buffer_pt (cur_bp)))
-      execute_function ("beginning-of-line")
+      execute_function ("move-start-line")
     else
       return false
     end
@@ -137,7 +137,7 @@ function next_line ()
   return move_line (1)
 end
 
-Defun ("previous-line",
+Defun ("move-previous-line",
        {"number"},
 [[
 Move cursor vertically up one line.
@@ -151,7 +151,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Defun ("next-line",
+Defun ("move-next-line",
        {"number"},
 [[
 Move cursor vertically down one line.
@@ -165,7 +165,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Defun ("beginning-of-buffer",
+Defun ("move-start-file",
        {},
 [[
 Move point to the beginning of the buffer; leave mark at previous position.
@@ -176,7 +176,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
   end
 )
 
-Defun ("end-of-buffer",
+Defun ("move-end-file",
        {},
 [[
 Move point to the end of the buffer; leave mark at previous position.
@@ -203,7 +203,7 @@ local function scroll_up ()
   return minibuf_error ("End of buffer")
 end
 
-Defun ("scroll-down",
+Defun ("move-previous-page",
        {"number"},
 [[
 Scroll text of current window downward near full screen.
@@ -214,7 +214,7 @@ Scroll text of current window downward near full screen.
   end
 )
 
-Defun ("scroll-up",
+Defun ("move-next-page",
        {"number"},
 [[
 Scroll text of current window upward near full screen.

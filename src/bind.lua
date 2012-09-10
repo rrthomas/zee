@@ -35,7 +35,7 @@ function self_insert_command ()
   return true
 end
 
-Defun ("self-insert-command",
+Defun ("edit-insert-character",
        {},
 [[
 Insert the character you type.
@@ -67,7 +67,7 @@ function call_command (f, ...)
     add_cmd_to_macro ()
   end
 
-  if cur_bp and _last_command ~= "undo" then
+  if cur_bp and _last_command ~= "edit-undo" then
     cur_bp.next_undop = cur_bp.last_undop
   end
 
@@ -99,102 +99,101 @@ function init_default_bindings ()
   -- Bind all printing keys to self_insert_command
   for i = 0, 0xff do
     if posix.isprint (string.char (i)) then
-      root_bindings[{keycode (string.char (i))}] = "self-insert-command"
+      root_bindings[{keycode (string.char (i))}] = "edit-insert-character"
     end
   end
 
-  -- Bind special key names to self-insert-command
+  -- Bind special key names to edit-insert-character
   list.map (function (e)
-              root_bindings[{keycode (e)}] = "self-insert-command"
+              root_bindings[{keycode (e)}] = "edit-insert-character"
             end,
             {"\\SPC", "\\TAB", "\\RET", "\\\\"})
 
   key_bind ("\\M-m", "back-to-indentation")
-  key_bind ("\\C-b", "backward-char")
-  key_bind ("\\LEFT", "backward-char")
-  key_bind ("\\BACKSPACE", "backward-delete-char")
-  key_bind ("\\C-?", "backward-delete-char")
-  key_bind ("\\M-\\BACKSPACE", "backward-kill-word")
-  key_bind ("\\C-\\M-?", "backward-kill-word")
-  key_bind ("\\M-{", "backward-paragraph")
-  key_bind ("\\M-b", "backward-word")
-  key_bind ("\\M-\\LEFT", "backward-word")
-  key_bind ("\\M-<", "beginning-of-buffer")
-  key_bind ("\\C-a", "beginning-of-line")
-  key_bind ("\\HOME", "beginning-of-line")
+  key_bind ("\\C-b", "move-previous-character")
+  key_bind ("\\LEFT", "move-previous-character")
+  key_bind ("\\BACKSPACE", "backward-edit-delete-next-character")
+  key_bind ("\\C-?", "backward-edit-delete-next-character")
+  key_bind ("\\M-\\BACKSPACE", "backward-edit-kill-word")
+  key_bind ("\\C-\\M-?", "backward-edit-kill-word")
+  key_bind ("\\M-{", "move-previous-paragraph")
+  key_bind ("\\M-b", "move-previous-word")
+  key_bind ("\\M-\\LEFT", "move-previous-word")
+  key_bind ("\\M-<", "move-start-file")
+  key_bind ("\\C-a", "move-start-line")
+  key_bind ("\\HOME", "move-start-line")
   key_bind ("\\C-xe", "call-last-kbd-macro")
-  key_bind ("\\M-w", "copy-region-as-kill")
-  key_bind ("\\C-d", "delete-char")
-  key_bind ("\\DELETE", "delete-char")
+  key_bind ("\\M-w", "edit-copy")
+  key_bind ("\\C-d", "edit-delete-next-character")
+  key_bind ("\\DELETE", "edit-delete-next-character")
   key_bind ("\\M-\\\\", "delete-horizontal-space")
   key_bind ("\\C-hb", "describe-bindings")
   key_bind ("\\F1b", "describe-bindings")
   key_bind ("\\C-hf", "describe-function")
   key_bind ("\\F1f", "describe-function")
-  key_bind ("\\C-hk", "describe-key")
-  key_bind ("\\F1k", "describe-key")
+  key_bind ("\\C-hk", "help-key")
+  key_bind ("\\F1k", "help-key")
   key_bind ("\\C-hv", "describe-variable")
   key_bind ("\\F1v", "describe-variable")
-  key_bind ("\\C-x)", "end-kbd-macro")
-  key_bind ("\\M->", "end-of-buffer")
-  key_bind ("\\C-e", "end-of-line")
-  key_bind ("\\END", "end-of-line")
-  key_bind ("\\C-x\\C-x", "exchange-point-and-mark")
-  key_bind ("\\M-x", "execute-extended-command")
-  key_bind ("\\M-q", "fill-paragraph")
-  key_bind ("\\RIGHT", "forward-char")
-  key_bind ("\\C-f", "forward-char")
-  key_bind ("\\M-}", "forward-paragraph")
-  key_bind ("\\M-f", "forward-word")
-  key_bind ("\\M-\\RIGHT", "forward-word")
-  key_bind ("\\M-gg", "goto-line")
-  key_bind ("\\M-g\\M-g", "goto-line")
+  key_bind ("\\C-x)", "macro-stop")
+  key_bind ("\\M->", "move-end-file")
+  key_bind ("\\C-e", "move-end-line")
+  key_bind ("\\END", "move-end-line")
+  key_bind ("\\C-x\\C-x", "edit-select-other-end")
+  key_bind ("\\M-x", "execute-command")
+  key_bind ("\\M-q", "edit-wrap-paragraph")
+  key_bind ("\\RIGHT", "move-next-character")
+  key_bind ("\\C-f", "move-next-character")
+  key_bind ("\\M-}", "move-next-paragraph")
+  key_bind ("\\M-f", "move-next-word")
+  key_bind ("\\M-\\RIGHT", "move-next-word")
+  key_bind ("\\M-gg", "edit-goto-line")
+  key_bind ("\\M-g\\M-g", "edit-goto-line")
   key_bind ("\\TAB", "indent-for-tab-command")
   key_bind ("\\C-xi", "insert-file")
   key_bind ("\\C-r", "isearch-backward")
-  key_bind ("\\C-\\M-r", "isearch-backward-regexp")
+  key_bind ("\\C-\\M-r", "edit-find-backward")
   key_bind ("\\C-s", "isearch-forward")
-  key_bind ("\\C-\\M-s", "isearch-forward-regexp")
+  key_bind ("\\C-\\M-s", "edit-find")
   key_bind ("\\C-g", "keyboard-quit")
-  key_bind ("\\C-k", "kill-line")
-  key_bind ("\\C-w", "kill-region")
-  key_bind ("\\M-d", "kill-word")
+  key_bind ("\\C-k", "edit-kill-line")
+  key_bind ("\\C-w", "edit-kill-selection")
+  key_bind ("\\M-d", "edit-kill-word")
   key_bind ("\\M-h", "mark-paragraph")
   key_bind ("\\C-xh", "mark-whole-buffer")
   key_bind ("\\M-@", "mark-word")
-  key_bind ("\\RET", "newline")
-  key_bind ("\\C-j", "newline-and-indent")
-  key_bind ("\\C-n", "next-line")
-  key_bind ("\\DOWN", "next-line")
+  key_bind ("\\RET", "edit-insert-newline")
+  key_bind ("\\C-j", "edit-insert-newline-and-indent")
+  key_bind ("\\C-n", "move-next-line")
+  key_bind ("\\DOWN", "move-next-line")
   key_bind ("\\C-o", "open-line")
   key_bind ("\\C-xo", "other-window")
-  key_bind ("\\C-p", "previous-line")
-  key_bind ("\\UP", "previous-line")
-  key_bind ("\\M-%", "query-replace")
-  key_bind ("\\C-q", "quoted-insert")
-  key_bind ("\\C-l", "recenter")
-  key_bind ("\\C-x\\C-s", "save-buffer")
-  key_bind ("\\C-x\\C-c", "save-buffers-kill-emacs")
-  key_bind ("\\M-v", "scroll-down")
-  key_bind ("\\PRIOR", "scroll-down")
-  key_bind ("\\C-v", "scroll-up")
-  key_bind ("\\NEXT", "scroll-up")
+  key_bind ("\\C-p", "move-previous-line")
+  key_bind ("\\UP", "move-previous-line")
+  key_bind ("\\M-%", "edit-replace")
+  key_bind ("\\C-q", "edit-insert-quoted")
+  key_bind ("\\C-l", "move-redraw")
+  key_bind ("\\C-x\\C-s", "file-save")
+  key_bind ("\\C-x\\C-c", "file-quit")
+  key_bind ("\\M-v", "move-previous-page")
+  key_bind ("\\PRIOR", "move-previous-page")
+  key_bind ("\\C-v", "move-next-page")
+  key_bind ("\\NEXT", "move-next-page")
   key_bind ("\\C-xf", "set-fill-column")
   key_bind ("\\C-@", "set-mark-command")
-  key_bind ("\\M-!", "shell-command")
-  key_bind ("\\M-|", "shell-command-on-region")
-  key_bind ("\\C-x(", "start-kbd-macro")
-  key_bind ("\\C-x\\C-z", "suspend-emacs")
-  key_bind ("\\C-z", "suspend-emacs")
-  key_bind ("\\M-i", "tab-to-tab-stop")
-  key_bind ("\\C-x\\C-q", "toggle-read-only")
-  key_bind ("\\C-xu", "undo")
-  key_bind ("\\C-_", "undo")
-  key_bind ("\\C-u", "universal-argument")
+  key_bind ("\\M-|", "edit-shell-command")
+  key_bind ("\\C-x(", "macro-record")
+  key_bind ("\\C-x\\C-z", "file-suspend")
+  key_bind ("\\C-z", "file-suspend")
+  key_bind ("\\M-i", "edit-insert-tab")
+  key_bind ("\\C-x\\C-q", "preferences-toggle-read-only")
+  key_bind ("\\C-xu", "edit-undo")
+  key_bind ("\\C-_", "edit-undo")
+  key_bind ("\\C-u", "edit-repeat")
   key_bind ("\\C-hw", "where-is")
   key_bind ("\\F1w", "where-is")
   key_bind ("\\C-x\\C-w", "write-file")
-  key_bind ("\\C-y", "yank")
+  key_bind ("\\C-y", "edit-paste")
 end
 
 function do_binding_completion (as)
@@ -265,7 +264,7 @@ function get_function_by_keys (keys)
   if #keys == 1 then
     local key = keys[1]
     if key.META and key.key < 255 and string.match (string.char (key.key), "[%d%-]") then
-      return "universal-argument"
+      return "edit-repeat"
     end
   end
 

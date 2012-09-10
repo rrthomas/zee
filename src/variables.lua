@@ -56,7 +56,7 @@ function set_variable (var, val)
   vars[var].val = val
 end
 
-Defun ("set-variable",
+Defun ("preferences-set-variable",
        {"string", "string"},
 [[
 Set a variable value to the user-specified value.

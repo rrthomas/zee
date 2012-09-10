@@ -62,7 +62,7 @@ local function write_key_description (name, doc, binding)
                               doc))
 end
 
-Defun ("describe-key",
+Defun ("help-key",
        {"string"},
 [[
 Display documentation of the command invoked by a key sequence.

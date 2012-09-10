@@ -125,7 +125,7 @@ function move_with_uniarg (uniarg, move)
 end
 
 
-Defun ("execute-extended-command",
+Defun ("execute-command",
        {"number"},
 [[
 Read function name, then read its arguments and call it.

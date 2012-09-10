@@ -55,7 +55,7 @@ function push_mark ()
     table.insert (mark_ring, marker_new (cur_bp, 0))
   end
 
-  execute_function ("set-mark")
+  execute_function ("edit-select-on")
 end
 
 -- Pop a mark from the mark-ring and make it the current mark.

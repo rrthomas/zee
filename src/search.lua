@@ -317,7 +317,7 @@ Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
   end
 )
 
-Defun ("isearch-forward-regexp",
+Defun ("edit-find",
        {},
 [[
 Do incremental search forward for regular expression.
@@ -331,7 +331,7 @@ is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
   end
 )
 
-Defun ("isearch-backward-regexp",
+Defun ("edit-find-backward",
        {},
 [[
 Do incremental search forward for regular expression.
@@ -356,7 +356,7 @@ local function check_case (s)
   end
 end
 
-Defun ("query-replace",
+Defun ("edit-replace",
        {},
 [[
 Replace occurrences of a string with other text.

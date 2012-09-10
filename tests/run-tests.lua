@@ -20,7 +20,7 @@
 require "posix"
 require "std"
 
--- N.B. Tests that use execute-kbd-macro must note that keyboard input
+-- N.B. Tests that use macro-play must note that keyboard input
 -- is only evaluated once the script has finished running.
 
 -- The following are defined in the environment for a build

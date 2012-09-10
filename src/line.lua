@@ -140,8 +140,8 @@ local function previous_line_indent ()
   local cur_indent
   local m = point_marker ()
 
-  execute_function ("previous-line")
-  execute_function ("beginning-of-line")
+  execute_function ("move-previous-line")
+  execute_function ("move-start-line")
 
   -- Find first non-blank char.
   while not eolp () and following_char ():match ("%s") do
@@ -183,7 +183,7 @@ An indent point is a non-whitespace character following whitespace.
 The following line shows the indentation points in this line.
     ^         ^    ^     ^   ^           ^      ^  ^    ^
 If the previous nonblank line has no indent points beyond the
-column point starts at, `tab-to-tab-stop' is done instead, unless
+column point starts at, `edit-insert-tab' is done instead, unless
 this command is invoked with a numeric argument, in which case it
 does nothing.
 ]],
@@ -256,7 +256,7 @@ does nothing.
   end
 )
 
-Defun ("newline-and-indent",
+Defun ("edit-insert-newline-and-indent",
        {},
 [[
 Insert a newline, then indent.
@@ -297,7 +297,7 @@ Indentation is done using the `indent-for-tab-command' function.
 )
 
 
-Defun ("delete-char",
+Defun ("edit-delete-next-character",
        {"number"},
 [[
 Delete the following @i{n} characters (previous if @i{n} is negative).
@@ -308,7 +308,7 @@ Delete the following @i{n} characters (previous if @i{n} is negative).
   end
 )
 
-Defun ("backward-delete-char",
+Defun ("backward-edit-delete-next-character",
        {"number"},
 [[
 Delete the previous @i{n} characters (following if @i{n} is negative).
@@ -340,7 +340,7 @@ Delete all spaces and tabs around point.
   end
 )
 
-Defun ("tab-to-tab-stop",
+Defun ("edit-insert-tab",
        {"number"},
 [[
 Insert a tabulation at the current point position into the current
@@ -359,7 +359,7 @@ local function newline ()
   return insert_newline ()
 end
 
-Defun ("newline",
+Defun ("edit-insert-newline",
        {"number"},
 [[
 Insert a newline at the current point position into

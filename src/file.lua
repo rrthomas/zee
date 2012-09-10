@@ -228,7 +228,7 @@ local function save_buffer (bp)
   return true
 end
 
-Defun ("save-buffer",
+Defun ("file-save",
        {},
 [[
 Save current buffer in visited file if modified.
@@ -306,7 +306,7 @@ local function save_some_buffers ()
   return true
 end
 
-Defun ("save-buffers-kill-emacs",
+Defun ("file-quit",
        {},
 [[
 Offer to save each buffer, then kill this Zile process.

@@ -87,7 +87,7 @@ local function revert_action (up)
   return up.next
 end
 
-Defun ("undo",
+Defun ("edit-undo",
        {},
 [[
 Undo some previous changes.

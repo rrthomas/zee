@@ -168,8 +168,8 @@ function completion_scroll_up ()
   local wp = find_window ("*Completions*")
   assert (wp)
   set_current_window (wp)
-  if not execute_function ("scroll-up") then
-    execute_function ("beginning-of-buffer")
+  if not execute_function ("move-next-page") then
+    execute_function ("move-start-file")
   end
   set_current_window (old_wp)
 
@@ -183,7 +183,7 @@ function completion_scroll_down ()
   local wp = find_window ("*Completions*")
   assert (wp)
   set_current_window (wp)
-  if not execute_function ("scroll-down") then
+  if not execute_function ("move-previous-page") then
     gotoeob ()
     window_resync (cur_wp)
   end

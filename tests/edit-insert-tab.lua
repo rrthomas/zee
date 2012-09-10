@@ -1,0 +1,6 @@
+call_command ("forward-line", "2")
+call_command ("edit-insert-tab")
+call_command ("edit-insert-tab")
+call_command ("insert", "tab")
+call_command ("file-save")
+call_command ("file-quit")

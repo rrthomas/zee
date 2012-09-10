@@ -1,0 +1,5 @@
+call_command ("edit-select-on", "point")
+call_command ("forward-line", "4")
+call_command ("edit-shell-command", "mark", "point", "sort", true)
+call_command ("file-save")
+call_command ("file-quit")

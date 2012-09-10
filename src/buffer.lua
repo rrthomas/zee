@@ -221,7 +221,7 @@ end
 
 -- Initialise a buffer
 function init_buffer (bp)
-  if get_variable_bool ("auto-fill-mode") then
+  if get_variable_bool ("preferences-toggle-wrap-mode") then
     bp.autofill = true
   end
 end
@@ -411,9 +411,9 @@ end
 function move_char (offset)
   local dir, ltest, btest, lmove
   if offset >= 0 then
-    dir, ltest, btest, lmove = 1, eolp, eobp, "beginning-of-line"
+    dir, ltest, btest, lmove = 1, eolp, eobp, "move-start-line"
   else
-    dir, ltest, btest, lmove = -1, bolp, bobp, "end-of-line"
+    dir, ltest, btest, lmove = -1, bolp, bobp, "move-end-line"
   end
   for i = 1, math.abs (offset) do
     if not ltest () then
@@ -463,7 +463,7 @@ function move_line (n)
     func = buffer_prev_line
   end
 
-  if _last_command ~= "next-line" and _last_command ~= "previous-line" then
+  if _last_command ~= "move-next-line" and _last_command ~= "move-previous-line" then
     cur_bp.goalc = get_goalc ()
   end
 
