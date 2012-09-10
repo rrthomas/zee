@@ -97,11 +97,9 @@ local last_search
 
 function do_search (forward, regexp, pattern)
   local ok = false
-  local ms
 
   if not pattern then
-    ms = minibuf_read (string.format ("%s%s: ", regexp and "RE search" or "Search", forward and "" or " backward"), last_search or "")
-    pattern = ms
+    pattern = minibuf_read (string.format ("%s%s: ", regexp and "RE search" or "Search", forward and "" or " backward"), last_search or "")
   end
 
   if not pattern then
@@ -119,50 +117,6 @@ function do_search (forward, regexp, pattern)
 
   return ok
 end
-
-Defun ("search-forward",
-       {"string"},
-[[
-Search forward from point for the user specified text.
-]],
-  true,
-  function (pattern)
-    return do_search (true, false, pattern)
-  end
-)
-
-Defun ("search-backward",
-       {"string"},
-[[
-Search backward from point for the user specified text.
-]],
-  true,
-  function (pattern)
-    return do_search (false, false, pattern)
-  end
-)
-
-Defun ("search-forward-regexp",
-       {"string"},
-[[
-Search forward from point for regular expression REGEXP.
-]],
-  true,
-  function (pattern)
-    return do_search (true, true, pattern)
-  end
-)
-
-Defun ("search-backward-regexp",
-       {"string"},
-[[
-Search backward from point for match for regular expression REGEXP.
-]],
-  true,
-  function (pattern)
-    return do_search (false, true, pattern)
-  end
-)
 
 
 -- Incremental search engine.
@@ -284,38 +238,6 @@ local function isearch (forward, regexp)
 
   return true
 end
-
-Defun ("isearch-forward",
-       {},
-[[
-Do incremental search forward.
-With a prefix argument, do an incremental regular expression search instead.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
-]],
-  true,
-  function ()
-    return isearch (true, lastflag.set_uniarg)
-  end
-)
-
-Defun ("isearch-backward",
-       {},
-[[
-Do incremental search backward.
-With a prefix argument, do a regular expression search instead.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
-]],
-  true,
-  function ()
-    return isearch (false, lastflag.set_uniarg)
-  end
-)
 
 Defun ("edit-find",
        {},
