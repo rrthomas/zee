@@ -1,5 +1,0 @@
-call_command ("mark-whole-buffer")
-call_command ("edit-copy", "point", "mark")
-call_command ("edit-paste")
-call_command ("file-save")
-call_command ("file-quit")

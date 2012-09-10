@@ -1,5 +1,0 @@
-call_command ("mark-paragraph")
-call_command ("edit-kill-selection", "point", "mark")
-call_command ("insert", "aaa")
-call_command ("file-save")
-call_command ("file-quit")

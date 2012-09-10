@@ -513,59 +513,6 @@ Move forward to end of paragraph.  With argument N, do it N times.
   end
 )
 
-local function mark (uniarg, func)
-  execute_function ("edit-select-on")
-  local ret = execute_function (func, uniarg)
-  if ret then
-    execute_function ("edit-select-other-end")
-  end
-  return ret
-end
-
-Defun ("mark-word",
-       {"number"},
-[[
-Set mark argument words away from point.
-]],
-  true,
-  function (n)
-    return mark (n, "move-next-word")
-  end
-)
-
-Defun ("mark-paragraph",
-       {},
-[[
-Put point at beginning of this paragraph, mark at end.
-The paragraph marked is the one that contains point or follows point.
-]],
-  true,
-  function ()
-    if _last_command == "mark-paragraph" then
-      execute_function ("edit-select-other-end")
-      execute_function ("move-next-paragraph")
-      execute_function ("edit-select-other-end")
-    else
-      execute_function ("move-next-paragraph")
-      execute_function ("edit-select-on")
-      execute_function ("move-previous-paragraph")
-    end
-  end
-)
-
-Defun ("mark-whole-buffer",
-       {},
-[[
-Put point at beginning and mark at end of buffer.
-]],
-  true,
-  function ()
-    execute_function ("move-end-file")
-    execute_function ("set-mark-command")
-    execute_function ("move-start-file")
-  end
-)
-
 Defun ("back-to-indentation",
        {},
 [[

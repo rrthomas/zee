@@ -67,6 +67,7 @@ local function kill_text (uniarg, mark_func)
 
   push_mark ()
   undo_start_sequence ()
+  execute_function ("edit-select-on")
   execute_function (mark_func, uniarg)
   execute_function ("edit-kill-selection")
   undo_end_sequence ()
@@ -85,11 +86,11 @@ With argument @i{arg}, do this that many times.
 ]],
   true,
   function (arg)
-    return kill_text (arg, "mark-word")
+    return kill_text (arg, "move-next-word")
   end
 )
 
-Defun ("backward-edit-kill-word",
+Defun ("edit-kill-word-backward",
        {"number"},
 [[
 Kill characters backward until encountering the end of a word.
@@ -97,7 +98,7 @@ With argument @i{arg}, do this that many times.
 ]],
   true,
   function (arg)
-    return kill_text (-(arg or 1), "mark-word")
+    return kill_text (-(arg or 1), "move-next-word")
   end
 )
 
