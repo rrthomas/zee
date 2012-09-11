@@ -1,8 +1,8 @@
 --- gnulib/top/README-release	2012-05-27 16:52:52.000000000 +0700
 +++ README-release	2012-05-27 16:56:13.000000000 +0700
 @@ -1,3 +1,23 @@
-+                      GNU Zile developers’ notes
-+                      --------------------------
++                        Zee developers’ notes
++                        ---------------------
 +
 +     Copyright (c) 2011-2012 Free Software Foundation, Inc.
 +
@@ -37,5 +37,5 @@
 -    make check syntax-check distcheck
 +    make check syntax-check
  
- * Set the date, version number, and release type [stable/alpha/beta] on
-   line 3 of NEWS, commit that, and tag the release by running e.g.,
+* To (i) set the date, version number, and release type [stable/alpha/beta]
+  on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run

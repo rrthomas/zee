@@ -2,7 +2,7 @@
 --
 -- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- Tidy up the term ready to leave Zile (temporarily or permanently!).
+-- Tidy up the term ready to exit (temporarily or permanently!).
 function term_tidy ()
   term_move (term_height () - 1, 0)
   term_clrtoeol ()
@@ -25,7 +25,7 @@ function term_tidy ()
   term_refresh ()
 end
 
--- Tidy and close the terminal ready to leave Zile.
+-- Tidy and close the terminal ready to exit.
 function term_finish ()
   term_tidy ()
   term_close ()

@@ -2,7 +2,7 @@
 --
 -- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -58,10 +58,10 @@ function term_init ()
 
   key_buf = {}
 
-  -- from curses key presses to zile keycodes
+  -- from curses key presses to editor keycodes
   codetokey = tree.new ()
 
-  -- from zile keycodes back to curses keypresses
+  -- from editor keycodes back to curses key presses
   keytocode = {}
 
   -- Starting with specially named keys:

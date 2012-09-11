@@ -1,4 +1,4 @@
-                Zile FAQ - Frequently Asked Questions
+                Zee FAQ - Frequently Asked Questions
 
      Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
@@ -14,15 +14,10 @@ INDEX
    1.1 Some keys don't work (e.g. `C-h' does backspace).
    1.2 The META/ALT key doesn't work in xterm.
    1.3 How do I handle non-ASCII characters?
-   1.4 Why are my settings being ignored?
 
 2 General questions
-   2.1 What does `Zile' mean?
-   2.2 Why another clone of Emacs?  Why not just use Emacs?
-   2.3 I like the xyz function of Emacs but it's not in Zile!
-   2.4 Does Zile support Unicode/UTF-8?
-   2.5 Zile doesn't compile, or its tests don't pass.
-   2.6 Zile has a bug!
+   2.1 What does `Zee' mean?
+   2.2 Does Zee support Unicode/UTF-8?
 
 ------------------------------------------------------------------------------
 
@@ -31,14 +26,14 @@ INDEX
 1.1 Some keys don't work (e.g. `C-h' does backspace).
 
     The terminfo entry for your terminal type is probably incorrect.
-    Rebuilding Zile against the latest ncurses may help.
+    Rebuilding Zee against the latest ncurses may help.
 
     With Mac OS X, Terminal.app outputs different escape sequences
     than described by the xterm-color terminfo entry. Make sure you
     have the default terminal type preference set to xterm-256color,
-    or else run Zile with:
+    or else run Zee with:
 
-        TERM=xterm-256color zile
+        TERM=xterm-256color zee
 
 1.2 The META/ALT key doesn't work in xterm.
 
@@ -53,60 +48,19 @@ INDEX
 
 1.3 How do I handle non-ASCII characters?
 
-    Zile uses the operating system's locale support, so you need to
+    Zee uses the operating system's locale support, so you need to
     set an appropriate locale; how you do this depends on your OS.
-    However, Zile only works with 8-bit locales.
-
-1.4 Why are my settings in ~/.zile being ignored?
-
-    Since Zile 2.2.16, booleans are, as in Emacs, `t' and `nil' rather
-    than `true' and `false'. If you haven't yet updated your .zile,
-    you should do so.
+    However, Zee only works with 8-bit locales.
 
 ------------------------------------------------------------------------------
 
 2 General questions
 
-2.1 What does `Zile' mean?
+2.1 What does `Zee' mean?
 
-    It stands for `Zile Is Lossy Emacs'. It is just another recursive
-    acronym like `GNU'.  The reason that it's not written in all caps
-    is because Emacs (which is also an acronym) isn't either.
+    It's a short name related to `Zile', the name of the editor from
+    which Zee is descended.
 
-2.2 Why another clone of Emacs?  Why not just use Emacs?
+2.2 Does Zee support Unicode/UTF-8?
 
-    Zile is a small, portable Emacs for systems and situations in
-    which Emacs would be unsuitable, including small systems and quick
-    editing sessions.
-
-2.3 I like the xyz function of Emacs but it's not in Zile!
-
-    Zile was written to be small but fast and powerful enough.
-
-    In general, if you need something more powerful, use Emacs. You
-    could also try Jed, which emulates Emacs, is not much bigger than
-    Zile, and has syntax highlighting, a macro language and more
-    (http://www.jedsoft.org/jed/).
-
-    If you still think that a certain function should be implemented
-    in Zile, please send a message to the developers (see question
-    1.7).
-
-2.4 Does Zile support Unicode/UTF-8?
-
-    No.
-
-2.5 Zile doesn't compile, or its tests don't pass.
-
-    If you have problems getting Zile to work on a POSIX system,
-    please report your difficulties to the maintainers in as much
-    detail as possible.  If you are keen to get Zile working on a
-    non-POSIX system, please do so by improving gnulib; the
-    maintainers will not accept non-POSIX compatibility patches to
-    Zile.  This helps everyone: a wider range of systems get to run
-    more POSIX code, and Zile is not burdened with special-case code.
-
-2.6 Zile has a bug!
-
-    For instructions on reporting bugs, see the REPORTING BUGS
-    section in the README file, or send email to <bug-zile@gnu.org>.
+    No, but this is planned.

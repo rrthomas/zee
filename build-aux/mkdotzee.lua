@@ -1,8 +1,8 @@
--- Produce dotzile.sample
+-- Produce dotzee.sample
 --
 -- Copyright (c) 2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ function X (name, default_value, local_when_set, docstring)
 end
 require "tbl_vars"
 
-local h = io.open ("src/dotzile.sample", "w")
+local h = io.open ("src/dot" .. os.getenv ("PACKAGE") .. ".sample", "w")
 if not h then
   error ()
 end

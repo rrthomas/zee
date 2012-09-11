@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1997-2012 Free Software Foundation, Inc.
 #
-# This file is part of GNU Zile.
+# This file is part of Zee.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ gitlog_to_changelog	= $(srcdir)/build-aux/gitlog-to-changelog
 git_log_fix		= $(srcdir)/build-aux/git-log-fix
 changelog		= $(srcdir)/ChangeLog
 
-# Changes before this date are from before Lua was used for any of Zile.
+# Changes before this date are from before Lua was used.
 changelog_start_date = 2009-03-30
 $(changelog): .FORCE
 	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then \

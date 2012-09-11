@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1997-2012 Free Software Foundation, Inc.
 #
-# This file is part of GNU Zile.
+# This file is part of Zee.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -25,31 +25,32 @@ LUA_TESTS =						\
 	$(srcdir)/tests/*.lua				\
 	$(srcdir)/tests/interactive/*.lua
 
-LUA_TESTS_ZILE_ONLY =					\
+LUA_TESTS_ZEE_ONLY =					\
 	$(srcdir)/tests/regression/*.lua		\
-	$(srcdir)/tests/zile-only/*.lua			\
-	$(srcdir)/tests/zile-only/interactive/*.lua
+	$(srcdir)/tests/zee-only/*.lua			\
+	$(srcdir)/tests/zee-only/interactive/*.lua
 
-LUA_TESTS_ZILE_ONLY_FIXED_SCREEN =			\
-	$(srcdir)/tests/zile-only/fixed-screen/*.lua
+LUA_TESTS_ZEE_ONLY_FIXED_SCREEN =			\
+	$(srcdir)/tests/zee-only/fixed-screen/*.lua
 
 LUA_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/regression/*.output		\
-	$(srcdir)/tests/zile-only/*.output		\
-	$(srcdir)/tests/zile-only/interactive/*.output	\
-	$(srcdir)/tests/zile-only/fixed-screen/*.output
+	$(srcdir)/tests/zee-only/*.output		\
+	$(srcdir)/tests/zee-only/interactive/*.output	\
+	$(srcdir)/tests/zee-only/fixed-screen/*.output
 
-LUA_ALL_TESTS =					\
+LUA_ALL_TESTS =						\
 	$(LUA_TESTS)					\
-	$(LUA_TESTS_ZILE_ONLY)				\
-	$(LUA_TESTS_ZILE_ONLY_FIXED_SCREEN)
+	$(LUA_TESTS_ZEE_ONLY)				\
+	$(LUA_TESTS_ZEE_ONLY_FIXED_SCREEN)
 
-LUA_TESTS_ENVIRONMENT =				\
+LUA_TESTS_ENVIRONMENT =					\
 	abs_srcdir=$(abs_srcdir)			\
 	srcdir=$(srcdir)				\
 	abs_builddir=$(abs_builddir)			\
+	PACKAGE=$(PACKAGE)				\
 	TERM=$(TERM)
 
 EXTRA_DIST +=						\
@@ -58,7 +59,7 @@ EXTRA_DIST +=						\
 	tests/test.input				\
 	tests/run-lisp-tests.lua
 
-check-local: $(builddir)/src/zile
+check-local: $(builddir)/src/zee
 	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	echo $(LUA_TESTS_ZILE_ONLY_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	echo $(LUA_TESTS_ZILE_ONLY) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
+	echo $(LUA_TESTS_ZEE_ONLY_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
+	echo $(LUA_TESTS_ZEE_ONLY) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)

@@ -1,8 +1,8 @@
--- Zile variables handling functions
+-- Editor variables handling functions
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by

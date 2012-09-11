@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2012 Free Software Foundation, Inc.
 #
-# This file is part of GNU Zile.
+# This file is part of Zee.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -20,5 +20,5 @@
 EXTRA_DIST +=						\
 	build-aux/extract-trace				\
 	build-aux/options-parser			\
-	build-aux/mkdotzile.lua				\
-	build-aux/zile-help2man-wrapper
+	build-aux/mkdot$(PACKAGE).lua			\
+	build-aux/$(PACKAGE)-help2man-wrapper

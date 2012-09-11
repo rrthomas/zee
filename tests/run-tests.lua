@@ -2,7 +2,7 @@
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ local builddir = os.getenv ("builddir") or "."
 local pass = 0
 local fail = 0
 
-local zile_cmd = io.catfile (builddir, "src", "zile")
+local editor_cmd = io.catfile (builddir, "src", os.getenv ("PACKAGE"))
 local srcdir_pat = string.escapePattern (srcdir)
 
 function run_test (test, name, edit_file, cmd, args)
@@ -59,7 +59,7 @@ for _, name in ipairs (arg) do
 
     posix.system ("mkdir", "-p", posix.dirname (edit_file))
 
-    if run_test (test, name, edit_file, zile_cmd, args) then
+    if run_test (test, name, edit_file, editor_cmd, args) then
       pass = pass + 1
     else
       fail = fail + 1

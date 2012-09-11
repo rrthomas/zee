@@ -2,7 +2,7 @@
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -- Derived constants
-ZILE_VERSION_STRING = "GNU " .. PACKAGE_NAME .. " " .. VERSION
+VERSION_STRING = "GNU " .. PACKAGE_NAME .. " " .. VERSION
 
 -- Runtime constants
 -- The executable name
@@ -63,7 +63,7 @@ thisflag = {}
 lastflag = {}
 
 
-local ZILE_COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
+local COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
 
 -- Documented options table
 --
@@ -152,8 +152,8 @@ function process_args ()
     elseif longindex == 3 then
       usage ()
     elseif longindex == 4 then
-      io.write (ZILE_VERSION_STRING .. "\n" ..
-                ZILE_COPYRIGHT_STRING .. "\n" ..
+      io.write (VERSION_STRING .. "\n" ..
+                COPYRIGHT_STRING .. "\n" ..
                 "GNU " .. PACKAGE_NAME .. " comes with ABSOLUTELY NO WARRANTY.\n" ..
                 "You may redistribute copies of " .. PACKAGE_NAME .. "\n" ..
                 "under the terms of the GNU General Public License.\n" ..
@@ -176,13 +176,13 @@ local function segv_sig_handler (signo)
   io.stderr:write (program_name .. ": " .. PACKAGE_NAME ..
                    " crashed.  Please send a bug report to <" ..
                    PACKAGE_BUGREPORT .. ">.\r\n")
-  zile_exit (true)
+  editor_exit (true)
 end
 
 local function other_sig_handler (signo)
   local msg = program_name .. ": terminated with signal " .. signo .. ".\n" .. debug.traceback ()
   io.stderr:write (msg:gsub ("\n", "\r\n"))
-  zile_exit (false)
+  editor_exit (false)
 end
 
 local function signal_init ()

@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1997-2012 Free Software Foundation, Inc.
 #
-# This file is part of GNU Zile.
+# This file is part of Zee.
 #
 # This proram is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -17,20 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MAINTAINERCLEANFILES += $(srcdir)/doc/zile.1.in doc/zile.1
-DISTCLEANFILES += doc/zile.1
-EXTRA_DIST += doc/man-extras doc/zile.1.in
-man_MANS = doc/zile.1
+MAINTAINERCLEANFILES += $(srcdir)/doc/$(PACKAGE).1.in doc/$(PACKAGE).1
+DISTCLEANFILES += doc/$(PACKAGE).1
+EXTRA_DIST += doc/man-extras doc/$(PACKAGE).1.in
+man_MANS = doc/$(PACKAGE).1
 
-doc/zile.1: $(srcdir)/doc/zile.1.in doc/Makefile.am config.status
+doc/$(PACKAGE).1: $(srcdir)/doc/$(PACKAGE).1.in doc/Makefile.am config.status
 	@test -d doc || mkdir doc
 	rm -f $@ $@.tmp
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-$(srcdir)/doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac
+$(srcdir)/doc/$(PACKAGE).1.in: doc/man-extras build-aux/$(PACKAGE)-help2man-wrapper configure.ac
 	@test -d doc || mkdir doc
-## Exit gracefully if zile.1.in is not writeable, such as during distcheck!
+## Exit gracefully if $(PACKAGE).1.in is not writeable, such as during distcheck!
 	$(AM_V_GEN)if ( touch $@.w && rm -f $@.w; ) >/dev/null 2>&1; then \
-	  builddir=$(builddir) $(srcdir)/build-aux/missing --run $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper; \
+	  builddir=$(builddir) $(srcdir)/build-aux/missing --run $(HELP2MAN) --output=$@ --no-info --name="$(PACKAGE_NAME)" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/$(PACKAGE)-help2man-wrapper; \
 	fi

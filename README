@@ -1,7 +1,7 @@
-GNU Zile
-========
+Zee
+===
 
-GNU Zile is free software, licensed under the GNU GPL.
+Zee is free software, licensed under the GNU GPL.
 
 Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
@@ -32,12 +32,10 @@ Contents
 INTRODUCTION
 ============
 
-GNU Zile (_Zile Is Lossy Emacs_) is a lightweight [Emacs][] clone. Every
-Emacs user should feel at home with Zile. Zile is aimed at small
-footprint systems and quick editing sessions (it starts up and shuts
-down instantly).
+Zee is a lightweight editor. Zee is aimed at small footprint systems
+and quick editing sessions (it starts up and shuts down instantly).
 
-Zile is written in Lua 5.1 using POSIX APIs, and hence requires only a
+Zee is written in Lua 5.1 using POSIX APIs, and hence requires only a
 Lua 5.1 runtime and a few additional Lua modules:
 
  * Lua stdlib <http://luaforge.net/projects/stdlib>
@@ -61,19 +59,19 @@ Source Layout
  * See file `FAQ` for a selection of a Frequently Answered Questions.
  * See file `INSTALL` for generic compilation and installation
    instructions.
- * See file `NEWS` for a list of major changes in each Zile release.
+ * See file `NEWS` for a list of major changes in each release.
  * See file `THANKS` for a list of important contributors.
 
 The rest of the files in the top-level directory are part of the
-[Autotools]() build system used to compile and install Zile.
+[Autotools]() build system used to compile and install Zee.
 
- * Directory `build-aux` contains helper scripts used to build Zile.
- * Directory `doc` contains files used to create Zile's documentation.
- * Directory `m4` contains a mixture of [gnulib]() supplied and Zile
+ * Directory `build-aux` contains helper scripts used to build Zee.
+ * Directory `doc` contains files used to create Zee's documentation.
+ * Directory `m4` contains a mixture of [gnulib]() supplied and Zee-
    specific macros for rebuilding the `configure' script.
- * Directory `src` contains the source code used to build Zile.
+ * Directory `src` contains the source code used to build Zee.
  * Directory `tests` contains a small suite of tests used by
-   `make check` to sanity check a newly built `src/zile` binary.
+   `make check` to sanity check a newly built `src/zee` binary.
 
   [Autotools]: http://sourceware.org/autobook/
 
@@ -81,11 +79,11 @@ The rest of the files in the top-level directory are part of the
 Web Pages
 ---------
 
-GNU Zile's home page is at:
+Zee's home page is at:
 
   > <http://www.gnu.org/s/zile/>
 
-GNU Zile Development is co-ordinated from Ziles's project page at GNU
+Zee development is co-ordinated from Zile's project page at GNU
 Savannah:
 
   > <http://savannah.gnu.org/projects/zile/>
@@ -96,7 +94,7 @@ An archive of past releases is also archived at:
 
 But please use a mirror for faster downloads and to reduce stress on the
 main gnu machine. The following link will automatically redirect to a
-nearest mirror:
+nearby mirror:
 
   > <http://ftpmirror.gnu.org/zile/>
 
@@ -117,11 +115,11 @@ See [REPORTING BUGS][] for the bug reporting mailing list address.
 OBTAINING THE LATEST SOURCES
 ============================
 
-If you are just building GNU Zile from an [Official Release][], you
+If you are just building Zee from an [Official Release][], you
 should not normally need to run `./bootstrap` or `autoreconf`; just go
 ahead and start with `./configure`.
 
-If you are trying to build GNU Zile from the [Development Sources][],
+If you are trying to build Zee from the [Development Sources][],
 `./configure` will not work until the `./bootstrap` script has completed
 successfully.
 
@@ -129,7 +127,7 @@ successfully.
 Official Release
 ----------------
 
-Compressed tarballs of all recent GNU Zile releases are available from:
+Compressed tarballs of all recent Zee releases are available from:
 
   > <http://ftpmirror.gnu.org/zile>
 
@@ -176,7 +174,7 @@ and tell you right away.
 Development Sources
 -------------------
 
-Zile development sources are maintained at the GNU Savannah git server:
+Zee development sources are maintained at the GNU Savannah git server:
 
   > [git://git.sv.gnu.org/zile.git][gitbrowser]
 
@@ -195,8 +193,8 @@ git to transparently rewrite all savannah references to use http:
     git config --global url.http://git.sv.gnu.org/r/.insteadof \
         git://git.sv.gnu.org/
 
-When you are building GNU Zile from a git checkout, you first need to
-run the `bootstrap` script to generate various files that are shipped in
+When you are building Zee from a git checkout, you first need to run
+the `bootstrap` script to generate various files that are shipped in
 release tarballs, but not checked in to git.
 
 Normally, you just need to run `./bootstrap`, and it will either get
@@ -238,7 +236,7 @@ When you are ready to submit a report, first, please read this:
 
   > <http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 
-Zile has a suite of Lisp tests in the tests directory of the source
+Zee has a suite of Lua tests in the tests directory of the source
 distribution, which you can run with:
 
     make check

@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1997-2012 Free Software Foundation, Inc.
 #
-# This file is part of GNU Zile.
+# This file is part of Zee.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-doc_DATA += src/dotzile.sample
+doc_DATA += src/dot$(PACKAGE).sample
 
 BUILT_SOURCES = src/loadlua.lua
 
-bin_SCRIPTS = src/zile
+bin_SCRIPTS = src/$(PACKAGE)
 
-src_zile_LUA =						\
+src_@PACKAGE@_LUA =					\
 	src/lib.lua					\
 	src/astr.lua					\
 	src/history.lua					\
@@ -55,15 +55,15 @@ src_zile_LUA =						\
 	src/term_redisplay.lua
 
 LUA_RUNTIME =						\
-	$(src_zile_LUA)
+	$(src_$(PACKAGE)_LUA)
 
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
 	src/loadlua.lua
 
 PRODUCTIONSOURCES =					\
-	$(src_zile_LUA)					\
-	$(top_srcdir)/src/zile.lua			\
+	$(src_$(PACKAGE)_LUA)					\
+	$(top_srcdir)/src/$(PACKAGE).lua			\
 	$(top_srcdir)/src/loadlua.lua			\
 	$(top_srcdir)/src/Makefile.am			\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
@@ -72,30 +72,30 @@ src/loadlua.lua: src/Makefile.am src/loadlua.lua.in
 	cp src/loadlua.lua.in $@
 	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
-$(top_builddir)/src/zile: $(PRODUCTIONSOURCES) Makefile
+$(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
 	rm -f $@ $@.tmp
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-	$(top_builddir)/src/zile --version >/dev/null || rm $@
+	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
 
-src/dotzile.sample: src/tbl_vars.lua build-aux/mkdotzile.lua
-	PACKAGE="$(PACKAGE)" $(LUA_ENV) $(LUA) $(srcdir)/build-aux/mkdotzile.lua $(srcdir)/src/tbl_vars.lua
+src/dot$(PACKAGE).sample: src/tbl_vars.lua build-aux/mkdot$(PACKAGE).lua
+	PACKAGE="$(PACKAGE)" $(LUA_ENV) $(LUA) $(srcdir)/build-aux/mkdot$(PACKAGE).lua $(srcdir)/src/tbl_vars.lua
 
 install-exec-hook:
-	$(install_edit) '$(top_builddir)/src/zile.lua' >$@.tmp
-	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/zile
+	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
+	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/$(PACKAGE)
 	rm -f $@.tmp
 
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
-	src/zile.lua.in					\
+	src/$(PACKAGE).lua.in					\
 	src/loadlua.lua.in				\
-	src/dotzile.sample
+	src/dot$(PACKAGE).sample
 
 CLEANFILES +=						\
-	src/zile					\
-	src/zile.lua
+	src/$(PACKAGE)					\
+	src/$(PACKAGE).lua
 
 DISTCLEANFILES +=					\
 	$(BUILT_SOURCES)

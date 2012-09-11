@@ -2,7 +2,7 @@
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
--- This file is part of GNU Zile.
+-- This file is part of Zee.
 --
 -- This program is free software; you can redistribute it and/or modify it
 -- under the terms of the GNU General Public License as published by
@@ -132,9 +132,9 @@ Defun ("edit-kill-selection",
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
 The command @kbd{C-y} (edit-paste) can retrieve it from there.
-If the buffer is read-only, Zile will beep and refrain from deleting
-the text, but put the text in the kill ring anyway.  This means that
-you can use the killing commands to copy text from a read-only buffer.
+If the buffer is read-only, beep and refrain from deleting the text,
+but put the text in the kill ring anyway.  This means that you can
+use the killing commands to copy text from a read-only buffer.
 If the previous command was also a kill command,
 the text killed this time appends to the text killed last time
 to make one entry in the kill ring.

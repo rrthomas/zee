@@ -1,6 +1,5 @@
 [description]
-Zile is a lightweight Emacs clone that provides a subset of Emacs's
-functionality suitable for basic editing.
+Zee is a lightweight editor suitable for basic editing.
 
 /then go to/
 Exit status is 0 if OK, 1 if it cannot start up, for example because
@@ -8,12 +7,10 @@ of an invalid command-line argument, and 2 if it crashes or runs out
 of memory.
 
 [files]
-~/.zile \(em user's Zile init file
+~/.zee \(em user's init file
 
 [author]
-Zile was written by Reuben Thomas, based on the C version by Sandro
-Sigala, Reuben Thomas, David A. Capello and Scott Lawrence.
+Zee was written by Reuben Thomas, based on GNU Zile.
 
 [see also]
-.BR emacs (1),
 .BR lua (1)

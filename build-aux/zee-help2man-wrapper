@@ -1,5 +1,5 @@
 #! /bin/sh
-# Wrap Zile for help2man
+# Wrap Zee for help2man
 # Add two spaces before options so they will be processed properly.
 #
 # Copyright (c) 2009, 2012 Free Software Foundation, Inc.
@@ -9,7 +9,7 @@
 # provided the copyright notice and this notice are preserved.
 
 if test "$1" = "--help"; then
-  $builddir/src/zile $1 | sed 's/^\([-+F]\)/  \1/'
+  $builddir/src/zee $1 | sed 's/^\([-+F]\)/  \1/'
 else
-  $builddir/src/zile $1
+  $builddir/src/zee $1
 fi
