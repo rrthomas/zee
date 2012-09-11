@@ -88,55 +88,6 @@ Put the mark where point is now, and point where the mark is now.
   end
 )
 
-function write_temp_buffer (name, show, func, ...)
-  local old_wp = cur_wp
-  local old_bp = cur_bp
-
-  -- Popup a window with the buffer "name".
-  local wp = find_window (name)
-  if show and wp then
-    set_current_window (wp)
-  else
-    local bp = find_buffer (name)
-    if show then
-      set_current_window (popup_window ())
-    end
-    if bp == nil then
-      bp = buffer_new ()
-      bp.name = name
-    end
-    switch_to_buffer (bp)
-  end
-
-  -- Remove the contents of that buffer.
-  local new_bp = buffer_new ()
-  new_bp.name = cur_bp.name
-  kill_buffer (cur_bp)
-  cur_bp = new_bp
-  cur_wp.bp = cur_bp
-
-  -- Make the buffer a temporary one.
-  cur_bp.needname = true
-  cur_bp.noundo = true
-  cur_bp.nosave = true
-  set_temporary_buffer (cur_bp)
-
-  -- Use the "callback" routine.
-  func (...)
-
-  execute_function ("move-start-file")
-  cur_bp.readonly = true
-  cur_bp.modified = false
-
-  -- Restore old current window.
-  set_current_window (old_wp)
-
-  -- If we're not showing the new buffer, switch back to the old one.
-  if not show then
-    switch_to_buffer (old_bp)
-  end
-end
-
 Defun ("edit-repeat",
        {},
 [[
@@ -330,7 +281,7 @@ Fill paragraph at or after point.
   end
 )
 
-local function pipe_command (cmd, tempfile, insert)
+local function pipe_command (cmd, tempfile)
   local cmdline = string.format ("%s 2>&1%s", cmd, tempfile and " <" .. tempfile or "")
   local pipe = io.popen (cmdline, "r")
   if not pipe then
@@ -339,26 +290,17 @@ local function pipe_command (cmd, tempfile, insert)
 
   local out = pipe:read ("*a")
   pipe:close ()
-  local eol = string.find (out, "\n")
 
   if #out == 0 then
     minibuf_write ("(Shell command succeeded with no output)")
-  else
-    if insert then
-      local del = 0
-      if cur_bp.mark_active then
-        local r = calculate_the_region ()
-        goto_offset (r.start)
-        del = get_region_size (r)
-      end
-      replace_astr (del, AStr (out))
-    else
-      local more_than_one_line = eol and eol ~= #out
-      write_temp_buffer ("*Shell Command Output*", more_than_one_line, insert_string, out)
-      if not more_than_one_line then
-        minibuf_write (out)
-      end
+  elseif not warn_if_readonly_buffer () then
+    local del = 0
+    if cur_bp.mark_active then
+      local r = calculate_the_region ()
+      goto_offset (r.start)
+      del = get_region_size (r)
     end
+    replace_astr (del, AStr (out))
   end
 
   return true
@@ -381,28 +323,18 @@ end
 -- The `start' and `end' arguments are fake, hence their string type,
 -- so they can be ignored.
 Defun ("edit-shell-command",
-       {"string", "string", "string", "boolean"},
+       {"string", "string", "string"},
 [[
 Execute string command in inferior shell with region as input.
-Normally display output (if any) in temp buffer `*Shell Command Output*'
-Prefix arg means insert in the buffer, replacing the region if any.
+The output is inserted in the buffer, replacing the region if any.
 Return the exit code of command.
-
-If the command generates output, the output may be displayed
-in the echo area or in a buffer.
-If the output is short enough to display in the echo area, it is shown
-there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
-The output is available in that buffer in both cases.
 ]],
   true,
-  function (start, finish, cmd, insert)
+  function (start, finish, cmd)
     local ok = true
 
     if not cmd then
       cmd = minibuf_read_shell_command ()
-    end
-    if not insert then
-      insert = lastflag.set_uniarg
     end
 
     if cmd then
@@ -425,7 +357,7 @@ The output is available in that buffer in both cases.
       end
 
       if ok then
-        ok = pipe_command (cmd, tempfile, insert)
+        ok = pipe_command (cmd, tempfile)
       end
       if fd then
         fd:close ()

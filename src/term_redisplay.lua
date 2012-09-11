@@ -47,14 +47,13 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 
   -- Draw body of line.
   local x = 0
-  local bp = wp.bp
-  local line_len = buffer_line_len (bp, o)
+  local line_len = buffer_line_len (cur_bp, o)
   for i = startcol, math.huge do
     term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
     if i >= line_len or x >= wp.ewidth then
       break
     end
-    local c = get_buffer_char (bp, o + i)
+    local c = get_buffer_char (cur_bp, o + i)
     if posix.isprint (c) then
       term_addch (string.byte (c))
       x = x + 1
@@ -76,20 +75,20 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
   term_attrset (display.normal)
 end
 
-local function calculate_highlight_region (wp)
-  if wp ~= cur_wp or wp.bp.mark == nil or not wp.bp.mark_active then
+local function calculate_highlight_region ()
+  if cur_bp.mark == nil or not cur_bp.mark_active then
     return false
   end
 
-  return true, region_new (window_o (wp), wp.bp.mark.o)
+  return true, region_new (get_buffer_pt (cur_bp), cur_bp.mark.o)
 end
 
-function make_modeline_flags (wp)
-  if wp.bp.modified and wp.bp.readonly then
+function make_modeline_flags ()
+  if cur_bp.modified and cur_bp.readonly then
     return "%*"
-  elseif wp.bp.modified then
+  elseif cur_bp.modified then
     return "**"
-  elseif wp.bp.readonly then
+  elseif cur_bp.readonly then
     return "%%"
   end
   return "--"
@@ -106,27 +105,33 @@ local function make_screen_pos (wp)
   elseif bv then
     return "Bot"
   end
-  return string.format ("%2d%%", (window_o (wp) / get_buffer_size (wp.bp)) * 100)
+  return string.format ("%2d%%", (get_buffer_pt (cur_bp) / get_buffer_size (cur_bp)) * 100)
+end
+
+local function draw_border ()
+  term_attrset (display.reverse)
+  term_addstr (string.rep ('-', cur_wp.ewidth))
+  term_attrset (display.normal)
 end
 
 local function draw_status_line (line, wp)
-  local n = offset_to_line (wp.bp, window_o (wp))
+  term_move (line, 0)
+  draw_border()
+
   term_attrset (display.reverse)
   term_move (line, 0)
-  term_addstr (string.rep ('-', wp.ewidth))
-  term_move (line, 0)
-
+  local n = offset_to_line (cur_bp, get_buffer_pt (cur_bp))
   local as = string.format ("--%2s  %-15s   %s %-9s (",
-                            make_modeline_flags (wp), wp.bp.name, make_screen_pos (wp),
-                            string.format ("(%d,%d)", n + 1, get_goalc_bp (wp.bp, window_o (wp))))
+                            make_modeline_flags (), cur_bp.name, make_screen_pos (wp),
+                            string.format ("(%d,%d)", n + 1, get_goalc_bp (cur_bp, get_buffer_pt (cur_bp))))
 
-  if wp.bp.autofill then
+  if cur_bp.autofill then
     as = as .. " Fill"
   end
   if thisflag.defining_macro then
     as = as .. " Def"
   end
-  if wp.bp.isearch then
+  if cur_bp.isearch then
     as = as .. " Isearch"
   end
   as = as .. ")"
@@ -136,19 +141,19 @@ local function draw_status_line (line, wp)
 end
 
 local function draw_window (topline, wp)
-  local highlight, rp = calculate_highlight_region (wp)
+  local highlight, rp = calculate_highlight_region ()
 
   -- Find the first line to display on the first screen line.
-  local o = buffer_start_of_line (wp.bp, window_o (wp))
+  local o = buffer_start_of_line (cur_bp, get_buffer_pt (cur_bp))
   local i = wp.topdelta
   while i > 0 and o > 1 do
-    o = buffer_prev_line (wp.bp, o)
+    o = buffer_prev_line (cur_bp, o)
     assert (o)
     i = i - 1
   end
 
   -- Draw the window lines.
-  local cur_tab_width = tab_width (wp.bp)
+  local cur_tab_width = tab_width (cur_bp)
   for i = topline, wp.eheight + topline do
     -- Clear the line.
     term_move (i, 0)
@@ -163,11 +168,11 @@ local function draw_window (topline, wp)
         term_addstr ('$')
       end
 
-      o = buffer_next_line (wp.bp, o)
+      o = buffer_next_line (cur_bp, o)
     end
   end
 
-  wp.all_displayed = o == nil or o == get_buffer_size (wp.bp)
+  wp.all_displayed = o == nil or o == get_buffer_size (cur_bp)
 
   -- Draw the status line only if there is available space after the
   -- buffer text space.
@@ -178,11 +183,81 @@ end
 
 local cur_topline, col = 0, 0
 
+
+
+-- Popup
+
+-- Contents of popup window.
+local popup_text
+local popup_line = 0
+
+-- Set the popup string to `s'.
+function popup_set (s)
+  popup_text = s and AStr (s:chomp ())
+  popup_line = 0
+end
+
+-- Clear the popup string.
+function popup_clear ()
+  popup_set ()
+end
+
+-- Scroll the popup text and loop having reached the bottom.
+function popup_scroll_down_and_loop ()
+  popup_line = popup_line + cur_wp.fheight - 3
+  if popup_line > popup_text:lines () then
+    popup_line = 0
+  end
+  term_redisplay ()
+end
+
+-- Scroll down the popup text.
+function popup_scroll_down ()
+  local h = cur_wp.fheight - 3
+  popup_line = math.min (popup_line + h, popup_text:lines () + 1 - h)
+  term_display ()
+end
+
+-- Scroll up the popup text.
+function popup_scroll_up ()
+  popup_line = popup_line - math.min (win.fheight - 3, popup_line)
+  term_display ()
+end
+
+-- Draw the popup window.
+local function draw_popup ()
+  assert (popup_text)
+
+  -- Number of lines of popup_text that will fit on the terminal.
+  -- Allow 3 for the border above, and minibuffer and status line below.
+  local h = cur_wp.fheight - 3
+  -- Number of lines.
+  local l = popup_text:lines ()
+  -- Position of top of popup == number of lines not to use.
+  local y = math.max (h - l, 0)
+
+  term_move (y, 0)
+  draw_border ()
+
+  -- Draw popup text, and blank lines to bottom of window.
+  local o = 1
+  for l = 0, popup_line do
+    o = popup_text:next_line (o)
+  end
+  for i = 1, h - y + 1 do
+    if o then
+      term_addstr (popup_text:sub (o, popup_text:end_of_line (o)))
+      o = popup_text:next_line (o)
+    end
+    --term_clrtoeol ()
+  end
+end
+
 function term_redisplay ()
--- Calculate the start column if the line at point has to be truncated.
-  local lastcol, t = 0, tab_width (cur_wp.bp)
-  local o = window_o (cur_wp)
-  local lineo = o - get_buffer_line_o (cur_wp.bp)
+  -- Calculate the start column if the line at point has to be truncated.
+  local lastcol, t = 0, tab_width (cur_bp)
+  local o = get_buffer_pt (cur_bp)
+  local lineo = o - get_buffer_line_o (cur_bp)
 
   col = 0
   o = o - lineo
@@ -192,7 +267,7 @@ function term_redisplay ()
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
-      local c = get_buffer_char (cur_wp.bp, o + p)
+      local c = get_buffer_char (cur_bp, o + p)
       if posix.isprint (c) then
         col = col + 1
       else
@@ -212,14 +287,12 @@ function term_redisplay ()
   -- Draw the windows.
   local topline = 0
   cur_topline = topline
-  for _, wp in ipairs (windows) do
-    if wp == cur_wp then
-      cur_topline = topline
-    end
+  draw_window (topline, cur_wp)
+  topline = topline + cur_wp.fheight
 
-    draw_window (topline, wp)
-
-    topline = topline + wp.fheight
+  -- Draw the popup window.
+  if popup_text then
+    draw_popup ()
   end
 
   term_redraw_cursor ()

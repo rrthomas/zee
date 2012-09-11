@@ -117,7 +117,7 @@ AStr = Object {
       next = tostring (self):find ("\n", s)
       if next then
         lines = lines + 1
-        s = next + 1 + 1
+        s = next + 1
       end
     until not next
     return lines

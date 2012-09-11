@@ -189,11 +189,6 @@ function delete_char ()
   return true
 end
 
-function insert_buffer (bp)
-  -- Copy text to avoid problems when bp == cur_bp.
-  insert_astr (AStr (get_buffer_pre_point (bp) .. get_buffer_post_point (bp)))
-end
-
 
 -- The buffer list
 buffers = {}
@@ -237,52 +232,7 @@ function set_buffer_names (bp, filename)
     filename = string.format ("%s/%s", posix.getcwd(), filename)
   end
   bp.filename = filename
-
-  local s = posix.basename (filename)
-  local name = s
-  local i = 2
-  while find_buffer (name) do
-    name = string.format ("%s<%d>", s, i)
-    i = i + 1
-  end
-  bp.name = name
-end
-
--- Search for a buffer named `name'.
-function find_buffer (name)
-  for _, bp in ipairs (buffers) do
-    if bp.name == name then
-      return bp
-    end
-  end
-end
-
--- Switch to the specified buffer.
-function switch_to_buffer (bp)
-  assert (cur_wp.bp == cur_bp)
-
-  -- The buffer is the current buffer; return safely.
-  if cur_bp == bp then
-    return
-  end
-
-  -- Set current buffer.
-  cur_bp = bp
-  cur_wp.bp = cur_bp
-
-  -- Move the buffer to head.
-  for i = 1, #buffers do
-    if buffers[i] == bp then
-      table.remove (buffers, i)
-      table.insert (buffers, bp)
-      break
-    end
-  end
-
-  -- Change to buffer's default directory
-  posix.chdir (bp.dir)
-
-  thisflag.need_resync = true
+  bp.name = posix.basename (filename)
 end
 
 -- Print an error message into the echo area and return true
@@ -343,20 +293,6 @@ function in_region (o, x, r)
   return o + x >= r.start and o + x < r.finish
 end
 
--- Set the specified buffer's temporary flag and move the buffer
--- to the end of the buffer list.
-function set_temporary_buffer (bp)
-  bp.temporary = true
-
-  for i = 1, #buffers do
-    if buffers[i] == bp then
-      table.remove (buffers, i)
-      break
-    end
-  end
-  table.insert (buffers, 1, bp)
-end
-
 function activate_mark ()
   cur_bp.mark_active = true
 end
@@ -368,41 +304,6 @@ end
 -- Return a safe tab width for the given buffer.
 function tab_width (bp)
   return math.max (get_variable_number_bp (bp, "tab-width"), 1)
-end
-
--- Remove the specified buffer from the buffer list.
--- Recreate the scratch buffer when required.
-function kill_buffer (kill_bp)
-  -- Search for windows displaying the buffer to kill.
-  for _, wp in ipairs (windows) do
-    if wp.bp == kill_bp then
-      wp.topdelta = 0
-      wp.saved_pt = nil
-    end
-  end
-
-  -- Remove the buffer from the buffer list.
-  local next_bp = buffers[#buffers]
-  for i = 1, #buffers do
-    if buffers[i] == kill_bp then
-      table.remove (buffers, i)
-      next_bp = buffers[i > 1 and i - 1 or #buffers]
-      if cur_bp == kill_bp then
-        cur_bp = next_bp
-      end
-      break
-    end
-  end
-
-  assert (#buffers > 0)
-
-  -- Resync windows that need it.
-  for _, wp in ipairs (windows) do
-    if wp.bp == kill_bp then
-      wp.bp = next_bp
-      window_resync (wp)
-    end
-  end
 end
 
 

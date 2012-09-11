@@ -163,20 +163,3 @@ function minibuf_read_function_name (fmt)
                                    "No function name given",
                                    "Undefined function name `%s'")
 end
-
-
-Defun ("eval-buffer",
-       {"string"},
-[[
-Execute the current buffer as Lua code.
-
-When called from a Lua program (i.e., not interactively), this
-function accepts an optional argument, the buffer to evaluate (nil
-means use current buffer).
-]],
-  true,
-  function (buffer)
-    local bp = (buffer and buffer ~= "") and find_buffer (buffer) or cur_bp
-    return loadstring (get_buffer_pre_point (bp) .. get_buffer_post_point (bp)) () -- FIXME
-  end
-)

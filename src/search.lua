@@ -122,11 +122,11 @@ end
 -- Incremental search engine.
 local function isearch (forward, regexp)
   local old_mark
-  if cur_wp.bp.mark then
-    old_mark = copy_marker (cur_wp.bp.mark)
+  if cur_bp.mark then
+    old_mark = copy_marker (cur_bp.mark)
   end
 
-  cur_wp.bp.isearch = true
+  cur_bp.isearch = true
 
   local last = true
   local pattern = ""
@@ -234,7 +234,7 @@ local function isearch (forward, regexp)
   end
 
   -- done
-  cur_wp.bp.isearch = false
+  cur_bp.isearch = false
 
   return true
 end

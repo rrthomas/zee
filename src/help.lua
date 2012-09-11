@@ -19,13 +19,6 @@
 
 -- FIXME: Add apropos
 
-local function write_function_description (name, doc)
-  insert_string (string.format ("%s is %s built-in function in `Lua source code'.\n\n%s",
-                                name,
-                                get_function_interactive (name) and "an interactive" or "a",
-                                doc))
-end
-
 Defun ("describe-function",
        {"string"},
 [[
@@ -43,24 +36,15 @@ Display the full documentation of a function.
     local doc = get_function_doc (func)
     if not doc then
       return false
-    else
-      write_temp_buffer ("*Help*", true, write_function_description, func, doc)
     end
+    popup_set (string.format ("%s is %s built-in function in `Lua source code'.\n\n%s",
+                              func,
+                              get_function_interactive (func) and "an interactive" or "a",
+                              doc))
 
     return true
   end
 )
-
-local function write_key_description (name, doc, binding)
-  local _interactive = get_function_interactive (name)
-  assert (_interactive ~= nil)
-
-  insert_string (string.format ("%s runs the command %s, which is %s built-in\n" ..
-                                "function in `Lua source code'.\n\n%s",
-                              binding, name,
-                              _interactive and "an interactive" or "a",
-                              doc))
-end
 
 Defun ("help-key",
        {"string"},
@@ -94,17 +78,18 @@ Display documentation of the command invoked by a key sequence.
     if not doc then
       return false
     end
-    write_temp_buffer ("*Help*", true, write_key_description, name, doc, binding)
+    local _interactive = get_function_interactive (name)
+    assert (_interactive ~= nil)
+
+    popup_set (string.format ("%s runs the command %s, which is %s built-in\n" ..
+                              "function in `Lua source code'.\n\n%s",
+                              binding, name,
+                              _interactive and "an interactive" or "a",
+                              doc))
 
     return true
   end
 )
-
-local function write_variable_description (name, curval, doc)
-  insert_string (string.format ("%s is a variable defined in `Lua source code'.\n\n" ..
-                                "Its value is %s\n\n%s",
-                              name, curval, doc))
-end
 
 Defun ("describe-variable",
        {"string"},
@@ -127,9 +112,9 @@ Display the full documentation of a variable.
       if not doc then
         ok = false
       else
-        write_temp_buffer ("*Help*", true,
-                           write_variable_description,
-                           name, get_variable (name), doc)
+        popup_set (string.format ("%s is a variable defined in `Lua source code'.\n\n" ..
+                                  "Its value is %s\n\n%s",
+                                  name, get_variable (name), doc))
       end
     end
     return ok

@@ -44,16 +44,8 @@ local function draw_minibuf_read (prompt, value, match, pointo)
 end
 
 function maybe_close_popup (cp)
-  local old_wp = cur_wp
-  local wp = find_window ("*Completions*")
-  if cp and cp.poppedup and wp then
-    set_current_window (wp)
-    if cp.close then
-      execute_function ("delete-window")
-    elseif cp.old_bp then
-      switch_to_buffer (cp.old_bp)
-    end
-    set_current_window (old_wp)
+  if cp and cp.poppedup then
+    popup_clear ()
     term_redisplay ()
   end
 end
@@ -64,13 +56,14 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
   end
 
   local thistab, saved
-  local lasttab = -1
+  local lasttab
   local as = value
 
   if pos == -1 then
     pos = #as
   end
 
+  local completion_text, old_completion_text
   repeat
     local s
     if lasttab == "matches" then
@@ -83,9 +76,16 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
       s = ""
     end
 
+    if cp then
+      local completion_text = completion_write (cp, cur_wp.ewidth)
+      if completion_text ~= old_completion_text then
+        popup_set (completion_text)
+        old_completion_text = completion_text
+      end
+    end
     draw_minibuf_read (prompt, as, s, pos)
 
-    thistab = -1
+    thistab = nil
 
     local c = getkeystroke (GETKEY_DEFAULT)
     if c == nil or c == keycode "\\RET" then
@@ -134,14 +134,14 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
       if cp == nil then
         ding ()
       elseif cp.poppedup then
-        completion_scroll_down ()
+        popup_scroll_down ()
         thistab = lasttab
       end
     elseif c == keycode "\\C-v" or c == keycode "\\PAGEDOWN" then
       if cp == nil then
         ding ()
       elseif cp.poppedup then
-        completion_scroll_up ()
+        popup_scroll_up ()
         thistab = lasttab
       end
     elseif c == keycode "\\M-p" or c == keycode "\\UP" then
@@ -164,12 +164,12 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
           saved = nil
         end
       end
-    elseif c == keycode "\\TAB" or (c == keycode " " and cp) then
+    elseif c == keycode "\\TAB" then
       if not cp then
         ding ()
       else
-        if lasttab ~= -1 and lasttab ~= "no match" and cp.poppedup then
-          completion_scroll_up ()
+        if lasttab and lasttab ~= "no match" and cp.poppedup then
+          popup_scroll_down_and_loop ()
           thistab = lasttab
         else
           thistab = completion_try (cp, as)
@@ -184,7 +184,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
             local bs = cp.filename and cp.path or ""
             bs = bs .. cp.match
             if string.sub (as, 1, #bs) ~= bs then
-              thistab = -1
+              thistab = nil
             end
             as = bs
             pos = #as

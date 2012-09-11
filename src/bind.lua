@@ -80,6 +80,7 @@ function get_and_run_command ()
   local keys = get_key_sequence ()
   local name = get_function_by_keys (keys)
 
+  popup_clear ()
   minibuf_clear ()
 
   if function_exists (name) then
@@ -127,8 +128,6 @@ function init_default_bindings ()
   key_bind ("\\C-d", "edit-delete-next-character")
   key_bind ("\\DELETE", "edit-delete-next-character")
   key_bind ("\\M-\\\\", "delete-horizontal-space")
-  key_bind ("\\C-hb", "describe-bindings")
-  key_bind ("\\F1b", "describe-bindings")
   key_bind ("\\C-hf", "describe-function")
   key_bind ("\\F1f", "describe-function")
   key_bind ("\\C-hk", "help-key")
@@ -162,7 +161,6 @@ function init_default_bindings ()
   key_bind ("\\C-n", "move-next-line")
   key_bind ("\\DOWN", "move-next-line")
   key_bind ("\\C-o", "open-line")
-  key_bind ("\\C-xo", "other-window")
   key_bind ("\\C-p", "move-previous-line")
   key_bind ("\\UP", "move-previous-line")
   key_bind ("\\M-%", "edit-replace")
@@ -307,30 +305,6 @@ Argument is a command name.
         return true
       end
     end
-  end
-)
-
-local function print_binding (key, func)
-  insert_string (string.format ("%-15s %s\n", key, func))
-end
-
-local function write_bindings_list (key, binding)
-  insert_string ("Key translations:\n")
-  insert_string (string.format ("%-15s %s\n", "key", "binding"))
-  insert_string (string.format ("%-15s %s\n", "---", "-------"))
-
-  walk_bindings (root_bindings, print_binding)
-end
-
-Defun ("describe-bindings",
-       {},
-[[
-Show a list of all defined keys, and their definitions.
-]],
-  true,
-  function ()
-    write_temp_buffer ("*Help*", true, write_bindings_list)
-    return true
   end
 )
 

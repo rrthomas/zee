@@ -47,14 +47,15 @@ function completion_write (cp, width)
   local numcols = math.floor ((width - 1) / maxlen)
   local col = 0
 
-  insert_string ("Possible completions are:\n")
+  local s = "Possible completions are:\n"
   for i, v in ipairs (cp.matches) do
-    insert_string (string.format ("%-" .. maxlen .. "s", v))
+    s = s .. string.format ("%-" .. maxlen .. "s", v)
     col = (col + 1) % numcols
     if col == 0 then
-      insert_newline ()
+      s = s .. '\n'
     end
   end
+  return s
 end
 
 -- Returns the length of the common prefix of s1 and s2.
@@ -170,11 +171,9 @@ end
 -- Popup the completion window.
 function popup_completion (cp)
   cp.poppedup = true
-  if #windows == 1 then
-    cp.close = true
-  end
+  cp.close = true
 
-  write_temp_buffer ("*Completions*", true, completion_write, cp, cur_wp.ewidth)
+  popup_set (completion_write (cp, cur_wp.ewidth))
 
   if not cp.close then
     cp.old_bp = cur_bp

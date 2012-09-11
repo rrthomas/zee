@@ -359,7 +359,21 @@ function find_file (filename)
     bp.modified = false
   end
 
-  switch_to_buffer (bp)
+  -- Set current buffer.
+  cur_bp = bp
+
+  -- Move the buffer to head.
+  for i = 1, #buffers do
+    if buffers[i] == bp then
+      table.remove (buffers, i)
+      table.insert (buffers, bp)
+      break
+    end
+  end
+
+  -- Change to buffer's default directory
+  posix.chdir (bp.dir)
+
   thisflag.need_resync = true
 
   return true

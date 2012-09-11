@@ -193,7 +193,7 @@ function term_getkey_unfiltered (delay)
   repeat
     c = curses.stdscr ():getch ()
     if curses.KEY_RESIZE == c then
-      resize_windows ()
+      resize_window ()
     end
   until curses.KEY_RESIZE ~= c
 

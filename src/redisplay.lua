@@ -17,24 +17,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-function recenter (wp)
-  local n = offset_to_line (wp.bp, window_o (wp))
-
-  if n > wp.eheight / 2 then
-    wp.topdelta = math.floor (wp.eheight / 2)
-  else
-    wp.topdelta = n
-  end
-end
-
 Defun ("move-redraw",
        {},
 [[
-Center point in selected window and redisplay frame.
+Redraw screen.
 ]],
   true,
   function ()
-    recenter (cur_wp)
     term_clear ()
     term_redisplay ()
     term_refresh ()
@@ -42,56 +31,15 @@ Center point in selected window and redisplay frame.
   end
 )
 
-function resize_windows ()
-  local wp
+function resize_window ()
+  -- Resize window horizontally.
+  cur_wp.fwidth = term_width ()
+  cur_wp.ewidth = cur_wp.fwidth
 
-  -- Resize windows horizontally.
-  for _, wp in ipairs (windows) do
-    wp.fwidth = term_width ()
-    wp.ewidth = wp.fwidth
-  end
-
-  -- Work out difference in window height; windows may be taller than
-  -- terminal if the terminal was very short.
-  local hdelta = term_height () - 1
-  for _, wp in ipairs (windows) do
-    hdelta = hdelta - wp.fheight
-  end
-
-  -- Resize windows vertically.
-  if hdelta > 0 then
-    -- Increase windows height.
-    local w = #windows
-    while hdelta > 0 do
-      windows[w].fheight = windows[w].fheight + 1
-      windows[w].eheight = windows[w].eheight + 1
-      hdelta = hdelta - 1
-      w = w - 1
-      if w == 0 then
-        w = #windows
-      end
-    end
-  else
-    -- Decrease windows' height, and close windows if necessary.
-    local decreased
-    repeat
-      local w = #windows
-      decreased = false
-      while w > 0 and hdelta < 0 do
-        local wp = windows[w]
-        if wp.fheight > 2 then
-          wp.fheight = wp.fheight - 1
-          wp.eheight = wp.eheight - 1
-          hdelta = hdelta + 1
-          decreased = true
-        elseif #windows > 1 then
-          delete_window (wp)
-          w = w - 1
-          decreased = true
-        end
-      end
-    until decreased == false
-  end
+  -- Resize window vertically.
+  local hdelta = term_height () - 1 - cur_wp.fheight
+  cur_wp.fheight = cur_wp.fheight + hdelta
+  cur_wp.eheight = cur_wp.eheight + hdelta
 
   execute_function ("move-redraw")
 end
