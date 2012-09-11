@@ -67,8 +67,8 @@ static rblist popup_text = NULL;
 static size_t popup_line = 0;
 
 /*
- * Set the popup string to as, which should not have a trailing newline.
- * Passing NULL for as clears the popup string.
+ * Set the popup string to rbl, which should not have a trailing newline.
+ * Passing NULL clears the popup string.
  */
 void popup_set(rblist rbl)
 {
@@ -89,8 +89,7 @@ void popup_clear(void)
  */
 void popup_scroll_down_and_loop(void)
 {
-  const size_t h = win.fheight - 3;
-  const size_t inc = h;
+  const size_t inc = win.fheight - 3;
   popup_line += inc;
   if (popup_line > rblist_nl_count(popup_text))
     popup_line = 0;
@@ -103,8 +102,7 @@ void popup_scroll_down_and_loop(void)
 void popup_scroll_down(void)
 {
   const size_t h = win.fheight - 3;
-  const size_t inc = h;
-  popup_line = min(popup_line + inc, rblist_nl_count(popup_text) + 1 - h);
+  popup_line = min(popup_line + h, rblist_nl_count(popup_text) + 1 - h);
   term_display();
 }
 
@@ -114,8 +112,7 @@ void popup_scroll_down(void)
 void popup_scroll_up(void)
 {
   const size_t h = win.fheight - 3;
-  const size_t inc = h;
-  popup_line -= min(inc, popup_line);
+  popup_line -= min(h, popup_line);
   term_display();
 }
 
@@ -260,12 +257,12 @@ size_t string_display_width(rblist rbl)
 static void calculate_start_column(void)
 {
   const size_t width = win.ewidth, third_width = max(1, width / 3);
-  
+
   // Calculate absolute column of cursor and of end of line.
   const rblist line = rblist_line(buf->lines, buf->pt.n);
   const size_t x = string_display_width(rblist_sub(line, 0, buf->pt.o));
   const size_t length = string_display_width(line);
-  
+
   // Choose start_column.
   if (x < third_width || length < width) {
     // No-brainer cases: show left-hand end of line.
