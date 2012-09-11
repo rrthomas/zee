@@ -256,7 +256,7 @@ END_DEF
 DEF(edit_wrap_paragraph,
 "\
 Wrap the paragraph at or after the cursor. The wrap column can\n\
-be set using set_wrap_column.\
+is given by the variable `wrap_column'.\
 ")
 {
   size_t i, start, end;
