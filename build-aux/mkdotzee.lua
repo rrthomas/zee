@@ -45,8 +45,8 @@ h:write (
 -- auto-generated, because it's ugly in a user configuration file.
 
 for i, v in ipairs (vars) do
-  h:writelines ("; " .. v.doc:gsub ("\n", "\n; "),
-                "; Default value is " .. v.val .. ".",
-                "(setq " .. v.name .. " " .. v.val .. ")",
+  h:writelines ("-- " .. v.doc:gsub ("\n", "\n; "),
+                "-- Default value is " .. v.val .. ".",
+                "call_command (\"preferences-set-variable\", \"" .. v.name .. "\", \"" .. v.val .. "\")",
                 "")
 end

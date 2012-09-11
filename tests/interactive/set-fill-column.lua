@@ -1,9 +1,9 @@
 -- FIXME: Next line should not be needed
 call_command ("setq", "sentence-end-double-space", "nil")
 
--- edit-select-on edit-goto-line 3 RET edit-kill-selection edit-paste edit-paste open-line
--- edit-goto-line 6 RET edit-paste edit-goto-line 9 RET
-call_command ("macro-play", "\\C-@\\M-gg3\\r\\C-w\\C-y\\C-y\\C-o\\M-gg6\\r\\C-y\\M-gg9\\r")
+-- edit-select-on edit-goto-line 3 RET edit-kill-selection edit-paste edit-paste edit-insert-newline
+-- move-previous-character edit-goto-line 6 RET edit-paste edit-goto-line 9 RET
+call_command ("macro-play", "\\C-@\\M-gg3\\r\\C-w\\C-y\\C-y\\r\\C-b\\M-gg6\\r\\C-y\\M-gg9\\r")
 
 -- ESC 3 set-fill-column fill-paragraph ESC -3 edit-goto-line 6 RET
 -- ESC 12 set-fill-column fill-paragraph ESC -3 edit-goto-line 2 RET move-previous-character

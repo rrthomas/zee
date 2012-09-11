@@ -370,40 +370,6 @@ Return the exit code of command.
   end
 )
 
-Defun ("delete-region",
-       {},
-[[
-Delete the text between point and mark.
-]],
-  true,
-  function ()
-    local rp = calculate_the_region ()
-
-    if not rp or not delete_region (rp) then
-      return false
-    end
-    deactivate_mark ()
-    return true
-  end
-)
-
-Defun ("forward-line",
-       {"number"},
-[[
-Move N lines forward (backward if N is negative).
-Precisely, if point is on line I, move to the start of line I + N.
-]],
-  true,
-  function (n)
-    n = n or current_prefix_arg or 1
-    if n ~= 0 then
-      execute_function ("move-start-line")
-      return move_line (n)
-    end
-    return false
-  end
-)
-
 local function move_paragraph (uniarg, forward, backward, line_extremum)
   if uniarg < 0 then
     uniarg = -uniarg

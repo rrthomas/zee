@@ -1,5 +1,0 @@
-call_command ("edit-select-on", "point")
-call_command ("forward-line")
-call_command ("edit-kill-selection", "point", "mark")
-call_command ("file-save")
-call_command ("file-quit")

@@ -23,7 +23,7 @@ function ding ()
     cancel_kbd_macro ()
   end
 
-  if get_variable_bool ("ring-bell") and cur_wp then
+  if cur_wp then
     term_beep ()
   end
   -- enable call chaining with `return ding ()'

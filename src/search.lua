@@ -240,30 +240,35 @@ local function isearch (forward, regexp)
 end
 
 Defun ("edit-find",
-       {},
+       {"string", "boolean"},
 [[
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
-Like ordinary incremental search except that your input
-is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   true,
-  function ()
-    return isearch (true, not lastflag.set_uniarg)
+  function (s, plain)
+    debug ("plain " .. (lastflag.set_uniarg or plain) .. " _interactive " .. _interactive)
+    return (_interactive and isearch or do_search) (true, not (lastflag.set_uniarg or plain), s)
   end
 )
 
 Defun ("edit-find-backward",
        {},
 [[
-Do incremental search forward for regular expression.
+Do incremental search backward for regular expression.
 With a prefix argument, do a regular string search instead.
-Like ordinary incremental search except that your input
-is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   true,
-  function ()
-    return isearch (false, not lastflag.set_uniarg)
+  function (s, plain)
+    return (_interactive and isearch or do_search) (false, not (lastflag.set_uniarg or plain), s)
   end
 )
 

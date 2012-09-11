@@ -57,7 +57,7 @@ function call_command (f, ...)
   -- Execute the command.
   _this_command = f
   _interactive = true
-  local ok = execute_function (f, ...)
+  local ok = execute_function (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_function
   _interactive = false
   _last_command = _this_command
 
@@ -148,19 +148,17 @@ function init_default_bindings ()
   key_bind ("\\M-\\RIGHT", "move-next-word")
   key_bind ("\\M-gg", "edit-goto-line")
   key_bind ("\\M-g\\M-g", "edit-goto-line")
-  key_bind ("\\TAB", "indent-for-tab-command")
+  key_bind ("\\TAB", "indent-relative")
   key_bind ("\\C-xi", "insert-file")
   key_bind ("\\C-r", "edit-find-backward")
   key_bind ("\\C-s", "edit-find")
   key_bind ("\\C-g", "keyboard-quit")
-  key_bind ("\\C-k", "edit-kill-line")
   key_bind ("\\C-w", "edit-kill-selection")
   key_bind ("\\M-d", "edit-kill-word")
   key_bind ("\\RET", "edit-insert-newline")
   key_bind ("\\C-j", "edit-insert-newline-and-indent")
   key_bind ("\\C-n", "move-next-line")
   key_bind ("\\DOWN", "move-next-line")
-  key_bind ("\\C-o", "open-line")
   key_bind ("\\C-p", "move-previous-line")
   key_bind ("\\UP", "move-previous-line")
   key_bind ("\\M-%", "edit-replace")

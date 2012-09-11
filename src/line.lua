@@ -127,7 +127,8 @@ local function previous_nonblank_goalc ()
   local cur_goalc = get_goalc ()
 
   -- Find previous non-blank line.
-  while execute_function ("forward-line", -1) and is_blank_line () do
+  execute_function ("move-start-line")
+  while move_line (-1) and is_blank_line () do
   end
 
   -- Go to `cur_goalc' in that non-blank line.
@@ -135,45 +136,6 @@ local function previous_nonblank_goalc ()
     move_char (1)
   end
 end
-
-local function previous_line_indent ()
-  local cur_indent
-  local m = point_marker ()
-
-  execute_function ("move-previous-line")
-  execute_function ("move-start-line")
-
-  -- Find first non-blank char.
-  while not eolp () and following_char ():match ("%s") do
-    move_char (1)
-  end
-
-  cur_indent = get_goalc ()
-
-  -- Restore point.
-  goto_offset (m.o)
-  unchain_marker (m)
-
-  return cur_indent
-end
-
-Defun ("indent-for-tab-command",
-       {},
-[[
-Indent line or insert a tab.
-Depending on `tab-always-indent', either insert a tab or indent.
-If initial point was within line's indentation, position after
-the indentation.  Else stay at same point in text.
-]],
-  true,
-  function ()
-    if get_variable_bool ("tab-always-indent") then
-      return insert_tab ()
-    elseif (get_goalc () < previous_line_indent ()) then
-      return execute_function ("indent-relative")
-    end
-  end
-)
 
 Defun ("indent-relative",
        {},
@@ -368,17 +330,6 @@ the current buffer.
   true,
   function (n)
     return execute_with_uniarg (true, n, newline)
-  end
-)
-
-Defun ("open-line",
-       {"number"},
-[[
-Insert a newline and leave point before it.
-]],
-  true,
-  function (n)
-    return execute_with_uniarg (true, n, intercalate_newline)
   end
 )
 

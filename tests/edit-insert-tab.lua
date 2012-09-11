@@ -1,4 +1,4 @@
-call_command ("forward-line", "2")
+call_command ("move-next-line", "2")
 call_command ("edit-insert-tab")
 call_command ("edit-insert-tab")
 call_command ("insert", "tab")

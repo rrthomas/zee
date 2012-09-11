@@ -1,4 +1,5 @@
-call_command ("preferences-set-variable", "kill-whole-line", "t")
-call_command ("edit-kill-line")
+call_command ("preferences-set-variable", "case-fold-search", "nil")
+execute_function ("edit-find", "I")
+call_command ("insert", "a")
 call_command ("file-save")
 call_command ("file-quit")
