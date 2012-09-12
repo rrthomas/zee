@@ -250,7 +250,6 @@ Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   function (s, plain)
-    debug ("plain " .. (lastflag.set_uniarg or plain) .. " _interactive " .. _interactive)
     return (_interactive and isearch or do_search) (true, not (lastflag.set_uniarg or plain), s)
   end
 )
