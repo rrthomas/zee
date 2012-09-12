@@ -182,6 +182,21 @@ function popup_completion (cp)
   term_redisplay ()
 end
 
+-- FIXME: Common up minibuf_read*_name
+function minibuf_read_name (fmt)
+  local cp = completion_new ()
+  for v in pairs (main_vars) do
+    table.insert (cp.completions, v)
+  end
+  for name, func in pairs (usercmd) do
+    table.insert (cp.completions, name)
+  end
+
+  return minibuf_vread_completion (fmt, "", cp, nil,
+                                   "No name given",
+                                   "No such thing `%s'")
+end
+
 function minibuf_read_variable_name (fmt)
   local cp = completion_new ()
   for v in pairs (main_vars) do

@@ -46,7 +46,6 @@ Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
 Use @kbd{C-x )} to finish recording and make the macro available.
 ]],
-  true,
   function ()
     if thisflag.defining_macro then
       minibuf_error ("Already defining a keyboard macro")
@@ -71,7 +70,6 @@ Finish defining a keyboard macro.
 The definition was started by @kbd{C-x (}.
 The macro is now available for use via @kbd{C-x e}.
 ]],
-  true,
   function ()
     if not thisflag.defining_macro then
       minibuf_error ("Not defining a keyboard macro")
@@ -109,7 +107,6 @@ Defun ("call-last-kbd-macro",
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.
 ]],
-  true,
   function ()
     if cur_mp == nil then
       minibuf_error ("No kbd macro has been defined")
@@ -127,7 +124,6 @@ Defun ("macro-play",
 [[
 Execute macro as string of editor command characters.
 ]],
-  false,
   function (keystr)
     local keys = keystrtovec (keystr)
     if keys ~= nil then

@@ -149,7 +149,6 @@ column point starts at, `edit-insert-tab' is done instead, unless
 this command is invoked with a numeric argument, in which case it
 does nothing.
 ]],
-  true,
   function ()
     local target_goalc = 0
     local cur_goalc = get_goalc ()
@@ -224,7 +223,6 @@ Defun ("edit-insert-newline-and-indent",
 Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
 ]],
-  true,
   function ()
     local ok = false
 
@@ -264,7 +262,6 @@ Defun ("edit-delete-next-character",
 [[
 Delete the following @i{n} characters (previous if @i{n} is negative).
 ]],
-  true,
   function (n)
     return execute_with_uniarg (true, n, delete_char, backward_delete_char)
   end
@@ -275,7 +272,6 @@ Defun ("backward-edit-delete-next-character",
 [[
 Delete the previous @i{n} characters (following if @i{n} is negative).
 ]],
-  true,
   function (n)
     return execute_with_uniarg (true, n, backward_delete_char, delete_char)
   end
@@ -286,7 +282,6 @@ Defun ("delete-horizontal-space",
 [[
 Delete all spaces and tabs around point.
 ]],
-  true,
   function ()
     undo_start_sequence ()
 
@@ -308,7 +303,6 @@ Defun ("edit-insert-tab",
 Insert a tabulation at the current point position into the current
 buffer.
 ]],
-  true,
   function (n)
     return execute_with_uniarg (true, n, insert_tab)
   end
@@ -327,19 +321,7 @@ Defun ("edit-insert-newline",
 Insert a newline at the current point position into
 the current buffer.
 ]],
-  true,
   function (n)
     return execute_with_uniarg (true, n, newline)
-  end
-)
-
-Defun ("insert",
-       {"string"},
-[[
-Insert the argument at point.
-]],
-  false,
-  function (arg)
-    insert_string (arg)
   end
 )

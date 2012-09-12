@@ -2,4 +2,4 @@
 
 -- edit-delete-next-character edit-delete-next-character edit-delete-next-character edit-delete-next-character undo undo undo
 --  file-save file-quit
-call_command ("macro-play", "\\C-d\\C-d\\C-d\\C-d\\C-_\\C-_\\C-_\\C-x\\C-s\\C-x\\C-c")
+call_command ("macro-play", "\\C-d\\C-d\\C-d\\C-d\\C-_\\C-_\\C-_\\M-s\\C-\\M-q")

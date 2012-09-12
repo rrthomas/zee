@@ -3,4 +3,4 @@
 
 -- insert RET
 -- file-save file-quit
-call_command ("macro-play", "\\M-xinsert\\r\\C-g\\C-x\\C-s\\C-x\\C-c")
+call_command ("macro-play", "\\M-xinsert\\r\\C-g\\M-s\\C-\\M-q")

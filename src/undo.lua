@@ -93,7 +93,6 @@ Defun ("edit-undo",
 Undo some previous changes.
 Repeat this command to undo more changes.
 ]],
-  true,
   function ()
     if cur_bp.noundo then
       minibuf_error ("Undo disabled in this buffer")

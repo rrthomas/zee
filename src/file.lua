@@ -99,7 +99,6 @@ Defun ("insert-file",
 Insert contents of file FILENAME into buffer after point.
 Set mark after the inserted text.
 ]],
-  true,
   function (file)
     local ok = true
 
@@ -125,8 +124,6 @@ Set mark after the inserted text.
       else
         ok = minibuf_error ("%s: %s", file, posix.errno ())
       end
-    else
-      execute_function ("set-mark-command")
     end
 
     return ok
@@ -233,7 +230,6 @@ Defun ("file-save",
 [[
 Save current buffer in visited file if modified.
 ]],
-  true,
   function ()
     return save_buffer (cur_bp)
   end
@@ -247,7 +243,6 @@ This makes the buffer visit that file, and marks it as not modified.
 
 Interactively, confirmation is required unless you supply a prefix argument.
 ]],
-  true,
   function ()
     return write_buffer (cur_bp, true,
                          _interactive and not lastflag.set_uniarg,
@@ -311,7 +306,6 @@ Defun ("file-quit",
 [[
 Offer to save each buffer, then kill this process.
 ]],
-  true,
   function ()
     if not save_some_buffers () then
       return false

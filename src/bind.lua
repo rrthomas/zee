@@ -41,7 +41,6 @@ Defun ("edit-insert-character",
 Insert the character you type.
 Whichever character you type to run this command is inserted.
 ]],
-  true,
   function ()
     return execute_with_uniarg (true, current_prefix_arg, self_insert_command)
   end
@@ -92,8 +91,29 @@ end
 
 root_bindings = tree.new ()
 
-function key_bind (key,  cmd)
-  execute_function ("global-set-key", key, cmd)
+function key_bind (keystr, cmd)
+  local keys
+
+  if keystr then
+    keys = keystrtovec (keystr)
+    if not keys then
+      minibuf_error (string.format ("Key sequence %s is invalid", keystr))
+      return
+    end
+  else
+    minibuf_write ("Set key globally: ")
+    keys = get_key_sequence ()
+    keystr = tostring (keys)
+  end
+
+  if not function_exists (cmd) then -- Possible if called non-interactively
+    minibuf_error (string.format ("No such function `%s'", cmd))
+    return
+  end
+
+  root_bindings[keys] = cmd
+
+  return true
 end
 
 function init_default_bindings ()
@@ -110,7 +130,6 @@ function init_default_bindings ()
             end,
             {"\\SPC", "\\TAB", "\\RET", "\\\\"})
 
-  key_bind ("\\M-m", "back-to-indentation")
   key_bind ("\\C-b", "move-previous-character")
   key_bind ("\\LEFT", "move-previous-character")
   key_bind ("\\BACKSPACE", "backward-edit-delete-next-character")
@@ -123,22 +142,15 @@ function init_default_bindings ()
   key_bind ("\\M-<", "move-start-file")
   key_bind ("\\C-a", "move-start-line")
   key_bind ("\\HOME", "move-start-line")
-  key_bind ("\\C-xe", "call-last-kbd-macro")
+  key_bind ("\\M-m", "call-last-kbd-macro")
   key_bind ("\\M-w", "edit-copy")
   key_bind ("\\C-d", "edit-delete-next-character")
   key_bind ("\\DELETE", "edit-delete-next-character")
   key_bind ("\\M-\\\\", "delete-horizontal-space")
-  key_bind ("\\C-hf", "describe-function")
-  key_bind ("\\F1f", "describe-function")
-  key_bind ("\\C-hk", "help-key")
-  key_bind ("\\F1k", "help-key")
-  key_bind ("\\C-hv", "describe-variable")
-  key_bind ("\\F1v", "describe-variable")
   key_bind ("\\C-x)", "macro-stop")
   key_bind ("\\M->", "move-end-file")
   key_bind ("\\C-e", "move-end-line")
   key_bind ("\\END", "move-end-line")
-  key_bind ("\\C-x\\C-x", "edit-select-other-end")
   key_bind ("\\M-x", "execute-command")
   key_bind ("\\M-q", "edit-wrap-paragraph")
   key_bind ("\\RIGHT", "move-next-character")
@@ -146,10 +158,8 @@ function init_default_bindings ()
   key_bind ("\\M-}", "move-next-paragraph")
   key_bind ("\\M-f", "move-next-word")
   key_bind ("\\M-\\RIGHT", "move-next-word")
-  key_bind ("\\M-gg", "edit-goto-line")
-  key_bind ("\\M-g\\M-g", "edit-goto-line")
+  key_bind ("\\M-g", "edit-goto-line")
   key_bind ("\\TAB", "indent-relative")
-  key_bind ("\\C-xi", "insert-file")
   key_bind ("\\C-r", "edit-find-backward")
   key_bind ("\\C-s", "edit-find")
   key_bind ("\\C-g", "keyboard-quit")
@@ -164,26 +174,19 @@ function init_default_bindings ()
   key_bind ("\\M-%", "edit-replace")
   key_bind ("\\C-q", "edit-insert-quoted")
   key_bind ("\\C-l", "move-redraw")
-  key_bind ("\\C-x\\C-s", "file-save")
-  key_bind ("\\C-x\\C-c", "file-quit")
+  key_bind ("\\M-s", "file-save")
+  key_bind ("\\C-\\M-q", "file-quit")
   key_bind ("\\M-v", "move-previous-page")
   key_bind ("\\PRIOR", "move-previous-page")
   key_bind ("\\C-v", "move-next-page")
   key_bind ("\\NEXT", "move-next-page")
-  key_bind ("\\C-xf", "set-fill-column")
-  key_bind ("\\C-@", "set-mark-command")
+  key_bind ("\\C-@", "edit-select-on")
   key_bind ("\\M-|", "edit-shell-command")
-  key_bind ("\\C-x(", "macro-record")
-  key_bind ("\\C-x\\C-z", "file-suspend")
   key_bind ("\\C-z", "file-suspend")
   key_bind ("\\M-i", "edit-insert-tab")
-  key_bind ("\\C-x\\C-q", "preferences-toggle-read-only")
-  key_bind ("\\C-xu", "edit-undo")
+  key_bind ("\\M-r", "preferences-toggle-read-only")
   key_bind ("\\C-_", "edit-undo")
   key_bind ("\\C-u", "edit-repeat")
-  key_bind ("\\C-hw", "where-is")
-  key_bind ("\\F1w", "where-is")
-  key_bind ("\\C-x\\C-w", "write-file")
   key_bind ("\\C-y", "edit-paste")
 end
 
@@ -284,7 +287,6 @@ Defun ("where-is",
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command name.
 ]],
-  true,
   function ()
     local name = minibuf_read_function_name ("Where is command: ")
     local g = {}
@@ -303,47 +305,5 @@ Argument is a command name.
         return true
       end
     end
-  end
-)
-
-
-Defun ("global-set-key",
-       {"string", "string"},
-[[
-Bind a command to a key sequence.
-Read key sequence and function name, and bind the function to the key
-sequence.
-]],
-  true,
-  function (keystr, name)
-    local keys
-
-    if keystr then
-      keys = keystrtovec (keystr)
-      if not keys then
-        minibuf_error (string.format ("Key sequence %s is invalid", keystr))
-        return
-      end
-    else
-      minibuf_write ("Set key globally: ")
-      keys = get_key_sequence ()
-      keystr = tostring (keys)
-    end
-
-    if not name then
-      name = minibuf_read_function_name (string.format ("Set key %s to command: ", keystr))
-      if not name then
-        return
-      end
-    end
-
-    if not function_exists (name) then -- Possible if called non-interactively
-      minibuf_error (string.format ("No such function `%s'", name))
-      return
-    end
-
-    root_bindings[keys] = name
-
-    return true
   end
 )

@@ -26,10 +26,9 @@ usercmd = {}
 -- Initialise prefix arg
 prefix_arg = false -- Not nil, so it is picked up in environment table
 
-function Defun (name, argtypes, doc, interactive, func)
+function Defun (name, argtypes, doc, func)
   usercmd[name] = {
     doc = texi (doc),
-    interactive = interactive,
     func = function (...)
              local args = {}
              for i, v in ipairs ({...}) do
@@ -55,11 +54,6 @@ function Defun (name, argtypes, doc, interactive, func)
   }
 end
 
--- Return function's interactive field, or nil if not found.
-function get_function_interactive (name)
-  return usercmd[name] and usercmd[name].interactive or nil
-end
-
 function get_function_doc (name)
   return usercmd[name] and usercmd[name].doc or nil
 end
@@ -73,7 +67,6 @@ Defun ("load",
 [[
 Execute a file of Lua code named FILE.
 ]],
-  true,
   function (file)
     if file then
       local f = loadfile (file)
@@ -130,7 +123,6 @@ Defun ("execute-command",
 [[
 Read function name, then read its arguments and call it.
 ]],
-  true,
   function (n)
     local msg = ""
 
@@ -154,9 +146,7 @@ function minibuf_read_function_name (fmt)
   local cp = completion_new ()
 
   for name, func in pairs (usercmd) do
-    if func.interactive then
-      table.insert (cp.completions, name)
-    end
+    table.insert (cp.completions, name)
   end
 
   return minibuf_vread_completion (fmt, "", cp, functions_history,

@@ -1,5 +1,5 @@
 call_command ("move-end-file")
 call_command ("move-previous-page")
-call_command ("insert", "a")
+insert_string ("a")
 call_command ("file-save")
 call_command ("file-quit")

@@ -249,7 +249,6 @@ Type return to exit, leaving point at location found.
 Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
-  true,
   function (s, plain)
     debug ("plain " .. (lastflag.set_uniarg or plain) .. " _interactive " .. _interactive)
     return (_interactive and isearch or do_search) (true, not (lastflag.set_uniarg or plain), s)
@@ -266,7 +265,6 @@ Type return to exit, leaving point at location found.
 Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
-  true,
   function (s, plain)
     return (_interactive and isearch or do_search) (false, not (lastflag.set_uniarg or plain), s)
   end
@@ -290,7 +288,6 @@ Replace occurrences of a string with other text.
 As each match is found, the user must type a character saying
 what to do with it.
 ]],
-  true,
   function ()
     local find = minibuf_read ("Query replace string: ", "")
     if not find then

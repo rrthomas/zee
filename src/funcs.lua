@@ -27,7 +27,6 @@ Defun ("keyboard-quit",
 [[
 Cancel current command.
 ]],
-  true,
   function ()
     deactivate_mark ()
     return minibuf_error ("Quit")
@@ -39,7 +38,6 @@ Defun ("file-suspend",
 [[
 Stop editor and return to superior process.
 ]],
-  true,
   function ()
     posix.raise (posix.SIGTSTP)
   end
@@ -50,7 +48,6 @@ Defun ("preferences-toggle-read-only",
 [[
 Change whether this buffer is visiting its file read-only.
 ]],
-  true,
   function ()
     cur_bp.readonly = not cur_bp.readonly
   end
@@ -63,7 +60,6 @@ Toggle Auto Fill mode.
 In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 ]],
-  true,
   function ()
     cur_bp.autofill = not cur_bp.autofill
   end
@@ -74,7 +70,6 @@ Defun ("edit-select-other-end",
 [[
 Put the mark where point is now, and point where the mark is now.
 ]],
-  true,
   function ()
     if not cur_bp.mark then
       return minibuf_error ("No mark set in this buffer")
@@ -98,7 +93,6 @@ Digits or minus sign following @kbd{C-u} make up the numeric argument.
 Repeating @kbd{C-u} without digits or minus sign multiplies the argument
 by 4 each time.
 ]],
-  true,
   function ()
     local ok = true
 
@@ -170,60 +164,19 @@ by 4 each time.
   end
 )
 
-Defun ("edit-select-on",
-       {},
-[[
-Set this buffer's mark to point.
-]],
-  false,
-  function ()
-    set_mark ()
-    activate_mark ()
-  end
-)
+function select_on ()
+  set_mark ()
+  activate_mark ()
+end
 
-Defun ("set-mark-command",
+Defun ("edit-select-on",
        {},
 [[
 Set the mark where point is.
 ]],
-  true,
   function ()
-    execute_function ("edit-select-on")
+    select_on ()
     minibuf_write ("Mark set")
-  end
-)
-
-Defun ("set-fill-column",
-       {"number"},
-[[
-Set `fill-column' to specified argument.
-Use C-u followed by a number to specify a column.
-Just C-u as argument means to use the current column.
-]],
-  true,
-  function (n)
-    if not n and _interactive then
-      local o = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp)
-      if lastflag.set_uniarg then
-        n = current_prefix_arg
-      else
-        n = minibuf_read_number (string.format ("Set fill-column to (default %d): ", o))
-        if not n then -- cancelled
-          return false
-        elseif n == "" then
-          n = o
-        end
-      end
-    end
-
-    if not n then
-      return minibuf_error ("set-fill-column requires an explicit argument")
-    end
-
-    minibuf_write (string.format ("Fill column set to %d (was %d)", n, get_variable_number ("fill-column")))
-    set_variable ("fill-column", tostring (n))
-    return true
   end
 )
 
@@ -233,7 +186,6 @@ Defun ("edit-insert-quoted",
 Read next input character and insert it.
 This is useful for inserting control characters.
 ]],
-  true,
   function ()
     minibuf_write ("C-q-")
     insert_char (string.char (bit.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
@@ -246,7 +198,6 @@ Defun ("edit-wrap-paragraph",
 [[
 Fill paragraph at or after point.
 ]],
-  true,
   function ()
     local m = point_marker ()
 
@@ -329,7 +280,6 @@ Execute string command in inferior shell with region as input.
 The output is inserted in the buffer, replacing the region if any.
 Return the exit code of command.
 ]],
-  true,
   function (start, finish, cmd)
     local ok = true
 
@@ -394,7 +344,6 @@ Defun ("move-previous-paragraph",
 [[
 Move backward to start of paragraph.  With argument N, do it N times.
 ]],
-  true,
   function (n)
     return move_paragraph (n or 1, previous_line, next_line, "move-start-line")
   end
@@ -405,23 +354,8 @@ Defun ("move-next-paragraph",
 [[
 Move forward to end of paragraph.  With argument N, do it N times.
 ]],
-  true,
   function (n)
     return move_paragraph (n or 1, next_line, previous_line, "move-end-line")
-  end
-)
-
-Defun ("back-to-indentation",
-       {},
-[[
-Move point to the first non-whitespace character on this line.
-]],
-  true,
-  function ()
-    goto_offset (get_buffer_line_o (cur_bp))
-    while not eolp () and following_char ():match ("%s") do
-      move_char (1)
-    end
   end
 )
 
@@ -452,7 +386,6 @@ Defun ("move-next-word",
 Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
 ]],
-  true,
   function (n)
     return move_with_uniarg (n or 1, move_word)
   end
@@ -465,7 +398,6 @@ Move backward until encountering the end of a word (forward if the
 argument is negative).
 With argument, do this that many times.
 ]],
-  true,
   function (n)
     return move_with_uniarg (-(n or 1), move_word)
   end

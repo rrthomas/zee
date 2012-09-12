@@ -17,31 +17,27 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- FIXME: Add apropos
+local function get_variable_doc (name)
+  local doc = main_vars[name].doc
+  if doc then
+    return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
+                           name, get_variable (name), doc))
+  end
+end
 
-Defun ("describe-function",
+Defun ("help-thing",
        {"string"},
 [[
-Display the full documentation of a function.
+Display the documentation of a function or variable.
 ]],
-  true,
-  function (func)
-    if not func then
-      func = minibuf_read_function_name ("Describe function: ")
-      if not func then
-        return false
-      end
-    end
-
-    local doc = get_function_doc (func)
-    if not doc then
+  function (name)
+    name = name or minibuf_read_name ("Describe function or variable: ")
+    if not name then
       return false
     end
-    popup_set (string.format ("%s is %s built-in function in `Lua source code'.\n\n%s",
-                              func,
-                              get_function_interactive (func) and "an interactive" or "a",
-                              doc))
 
+    local doc = get_function_doc (name) or get_variable_doc (name) or "No help available"
+    popup_set (string.format ("Help for `%s':\n%s", name, doc))
     return true
   end
 )
@@ -51,7 +47,6 @@ Defun ("help-key",
 [[
 Display documentation of the command invoked by a key sequence.
 ]],
-  true,
   function (keystr)
     local name, binding, keys
     if keystr then
@@ -78,45 +73,9 @@ Display documentation of the command invoked by a key sequence.
     if not doc then
       return false
     end
-    local _interactive = get_function_interactive (name)
-    assert (_interactive ~= nil)
 
-    popup_set (string.format ("%s runs the command %s, which is %s built-in\n" ..
-                              "function in `Lua source code'.\n\n%s",
-                              binding, name,
-                              _interactive and "an interactive" or "a",
-                              doc))
+    popup_set (string.format ("%s runs the command `%s'.\n%s", binding, name, doc))
 
     return true
-  end
-)
-
-Defun ("describe-variable",
-       {"string"},
-[[
-Display the full documentation of a variable.
-]],
-  true,
-  function (name)
-    local ok = true
-
-    if not name then
-      name = minibuf_read_variable_name ("Describe variable: ")
-    end
-
-    if not name then
-      ok = false
-    else
-      local doc = main_vars[name].doc
-
-      if not doc then
-        ok = false
-      else
-        popup_set (string.format ("%s is a variable defined in `Lua source code'.\n\n" ..
-                                  "Its value is %s\n\n%s",
-                                  name, get_variable (name), doc))
-      end
-    end
-    return ok
   end
 )

@@ -61,19 +61,14 @@ Defun ("preferences-set-variable",
 [[
 Set a variable value to the user-specified value.
 ]],
-  true,
   function (var, val)
-    local ok = true
-
-    if not var then
-      var = minibuf_read_variable_name ("Set variable: ")
-    end
+    var = var or minibuf_read_variable_name ("Set variable: ")
     if not var then
       return false
     end
-    if not val then
-      val = minibuf_read (string.format ("Set %s to value: ", var), "")
-    end
+
+    val = val or minibuf_read (string.format ("Set %s to value: ", var), "")
+    local ok = true
     if not val then
       ok = execute_function ("keyboard-quit")
     end

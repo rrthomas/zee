@@ -1,6 +1,6 @@
 call_command ("move-next-line", "2")
 call_command ("edit-insert-tab")
 call_command ("edit-insert-tab")
-call_command ("insert", "tab")
+insert_string ("tab")
 call_command ("file-save")
 call_command ("file-quit")

@@ -67,7 +67,7 @@ local function kill_text (uniarg, mark_func)
 
   push_mark ()
   undo_start_sequence ()
-  execute_function ("edit-select-on")
+  select_on ()
   execute_function (mark_func, uniarg)
   execute_function ("edit-kill-selection")
   undo_end_sequence ()
@@ -84,7 +84,6 @@ Defun ("edit-kill-word",
 Kill characters forward until encountering the end of a word.
 With argument @i{arg}, do this that many times.
 ]],
-  true,
   function (arg)
     return kill_text (arg, "move-next-word")
   end
@@ -96,7 +95,6 @@ Defun ("edit-kill-word-backward",
 Kill characters backward until encountering the end of a word.
 With argument @i{arg}, do this that many times.
 ]],
-  true,
   function (arg)
     return kill_text (-(arg or 1), "move-next-word")
   end
@@ -109,7 +107,6 @@ Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
 killed @i{or} pasted.  Put point at end, and set mark at beginning.
 ]],
-  true,
   function ()
     if not kill_ring_text then
       minibuf_error ("Kill ring is empty")
@@ -120,7 +117,6 @@ killed @i{or} pasted.  Put point at end, and set mark at beginning.
       return false
     end
 
-    execute_function ("set-mark-command")
     insert_astr (kill_ring_text)
     deactivate_mark ()
   end
@@ -139,7 +135,6 @@ If the previous command was also a kill command,
 the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
 ]],
-  true,
   function ()
     return copy_or_kill_the_region (true)
   end
@@ -150,7 +145,6 @@ Defun ("edit-copy",
 [[
 Save the region as if killed, but don't kill it.
 ]],
-  true,
   function ()
     return copy_or_kill_the_region (false)
   end

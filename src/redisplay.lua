@@ -22,7 +22,6 @@ Defun ("move-redraw",
 [[
 Redraw screen.
 ]],
-  true,
   function ()
     term_clear ()
     term_redisplay ()
