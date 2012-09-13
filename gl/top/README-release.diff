@@ -1,41 +1,145 @@
---- gnulib/top/README-release	2012-05-27 16:52:52.000000000 +0700
-+++ README-release	2012-05-27 16:56:13.000000000 +0700
-@@ -1,3 +1,23 @@
-+                        Zee developers’ notes
+--- gnulib/top/README-release	2012-07-13 10:46:07.508212394 +0100
++++ HACKING	2012-09-13 23:08:27.910670273 +0100
+@@ -1,45 +1,59 @@
+-Here are most of the steps we (maintainers) follow when making a release.
++                        Zee developers' notes
 +                        ---------------------
-+
+ 
+-* Start from a clean, up-to-date git directory on "master":
 +     Copyright (c) 2011-2012 Free Software Foundation, Inc.
-+
+ 
+-    make -k maintainer-clean || { ./configure && make maintainer-clean; }
+-    git checkout master
+-    git pull origin master
 +     Copying and distribution of this file, with or without
 +     modification, are permitted in any medium without royalty
 +     provided the copyright notice and this notice are preserved.
-+
-+
-+Automated releases
-+------------------
-+
-+To make a release automatically, you need ncftp, and woger, from
-+http://rrt.sc3d.org/Software/woger
-+
-+
-+GNU Style releases
-+------------------
-+
- Here are most of the steps we (maintainers) follow when making a release.
  
- * Start from a clean, up-to-date git directory on "master":
-@@ -23,13 +43,9 @@
+-* Ensure that the latest stable versions of autoconf, automake, etc.
+-  are in your PATH.  See the buildreq list in bootstrap.conf for
+-  the complete list of tools.
  
-     http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
+-* Ensure that you have no uncommitted diffs.  This should produce no
+-  output:
++Coding style
++------------
++
++Rather than attempt an exhaustive list, the following points address
++just FDQs (Frequently Discussed Questions).
+ 
+-    git diff
++0. Follow the style of existing code. Consistency is more important
++than any particular element of style.
+ 
+-* Ensure that you've pushed all changes that belong in the release:
++1. Avoid reversed comparisons. Arguably a good idea in C, but in Lua
++"if a = 0 then..." is a syntax error, so there's no need to inflict
++"if 0 == a then..." on those who don't like that style.
+ 
+-    git push origin master
++2. Put space around operators and variables: "for i = 0, #t", not
++"for i=0,#t". The latter is cramped and harder to read.
+ 
+-* Check that the NixOS/Hydra autobuilder is reporting all is well:
++3. Use one-line conditionals sparingly. As a rule of thumb, only use
++them when the entire line is shorter than 70 characters. Their use is
++encouraged in code of the form "if CONDITION then return end", and a
++one-line "if...then...else...end" may often be superior to the
++quasi-ternary operator "x and a or b" (where if "a" can be false
++results in "b").
+ 
+-    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
  
 -* Run the following command to download any new translations:
--
++Making a release
++----------------
+ 
 -    ./bootstrap && ./configure
--
- * Pre-release testing: ensure that the following command succeeds:
++To make a release automatically, you need ncftp, and woger, from
++http://rrt.sc3d.org/Software/woger
+ 
+-* Pre-release testing: ensure that the following command succeeds:
++Here are the steps we (maintainers) follow when making a release.
  
 -    make check syntax-check distcheck
-+    make check syntax-check
++* Ensure that acceptable versions of autoconf, automake, etc.
++  are in your PATH.  See the buildreq list in bootstrap.conf for
++  the complete list of tools.
  
-* To (i) set the date, version number, and release type [stable/alpha/beta]
-  on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
+-* From top_srcdir, run:
++* Start from a clean, up-to-date git directory on "master", ensure
++  that you have no uncommitted diffs, have pushed all changes that
++  belong in the release, and that all tests pass:
+ 
+-    build-aux/do-release-commit-and-tag X.Y stable
++    make prerelease
+ 
+-  in order to (i) set the date, version number, and release type
+-  [stable/alpha/beta] on line 3 of NEWS, (ii) commit that, and (iii) tag the
+-  release.  See --help if you need options such as:
++* To (i) set the date, version number, and release type [stable/alpha/beta]
++  on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
+ 
+-    build-aux/do-release-commit-and-tag --branch=maint -C _build X.Y.Z stable
++    make release-commit RELEASE='X.Y stable'
+ 
+ * Run the following to create release tarballs.  Your choice selects the
+   corresponding upload-to destination in the emitted gnupload command.
+@@ -49,52 +63,12 @@
+     # "TYPE" must be stable, beta or alpha
+     make TYPE
+ 
+-* Test the tarball.  Copy it to a few odd-ball systems and ensure that
+-  it builds and passes all tests.
+-
+-* While that's happening, write the release announcement that you will
+-  soon post.  Start with the template, $HOME/announce-@PACKAGE@-X.Y
+-  that was just created by that "make" command.
++* Write the release announcement that you will soon post.  Start with
++  the template, $HOME/announce-@PACKAGE@-X.Y that was just created by
++  that "make" command.
+ 
+ Once all the builds and tests have passed,
+ 
+-* Run the gnupload command that was suggested by your "make TYPE" run above.
+-
+-* Wait a few minutes (maybe up to 30?) and then use the release URLs to
+-  download all tarball/signature pairs and use gpg --verify to ensure
+-  that they're all valid.
+-
+-* Push the NEWS-updating changes and the new tag:
+-
+-    v=$(cat .prev-version)
+-    git push origin master tag v$v
+-
+-* Announce it on Savannah first, so you can include the savannah.org
+-  announcement link in the email message.
+-
+-  From here:
+-    https://savannah.gnu.org/projects/@PACKAGE@/
+-  click on "submit news", then write something like the following:
+-  (If there is no such button, then enable "News" for the project via
+-   the Main -> "Select Features" menu item, or via this link:
+-   https://savannah.gnu.org/project/admin/editgroupfeatures.php?group=@PACKAGE@)
+-
+-    Subject: @PACKAGE@-X.Y released [stable]
+-    +verbatim+
+-    ...paste the announcement here...
+-    -verbatim-
+-
+-  Then go here to approve it:
+-    https://savannah.gnu.org/news/approve.php?group=@PACKAGE@
+-
+-* Send the announcement email message.
+-
+-* After each non-alpha release, update the on-line manual accessible via
+-
+-    http://www.gnu.org/software/@PACKAGE@/manual/
+-
+-  by running this from top_srcdir:
+-
+-    build-aux/gnu-web-doc-update
++* Run:
+ 
+-  possibly with "-C <BUILDDIR>"
++    make release
