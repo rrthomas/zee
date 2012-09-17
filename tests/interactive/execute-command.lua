@@ -1,2 +1,2 @@
 -- M-x move-next-character RET a file-save file-quit
-call_command ("macro-play", "\\M-xmove-next-character\\ra\\M-s\\C-\\M-q")
+macro_play ("M-x", "m", "o", "v", "e", "-", "n", "e", "x", "t", "-", "c", "h", "a", "r", "a", "c", "t", "e", "r", "RET", "a", "M-s", "C-M-q")

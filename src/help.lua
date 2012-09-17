@@ -48,23 +48,20 @@ Defun ("help-key",
 Display documentation of the command invoked by a key sequence.
 ]],
   function (keystr)
-    local name, binding, keys
+    local key
     if keystr then
-      keys = keystrtovec (keystr)
-      if not keys then
+      key = keycode (keystr)
+      if not key then
         return false
       end
-      name = get_function_by_keys (keys)
-      binding = tostring (keys)
     else
       minibuf_write ("Describe key:")
-      keys = get_key_sequence ()
-      name = get_function_by_keys (keys)
-      binding = tostring (keys)
-
-      if not name then
-        return minibuf_error (binding .. " is undefined")
-      end
+      key = get_key_chord ()
+    end
+    local name = get_function_by_key (key)
+    local binding = tostring (key)
+    if not name then
+      return minibuf_error (binding .. " is undefined")
     end
 
     minibuf_write (string.format ("%s runs the command `%s'", binding, name))

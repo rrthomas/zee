@@ -153,7 +153,7 @@ function minibuf_read_yn (fmt)
       return true
     elseif key == keycode "n" then
       return false
-    elseif key == keycode "\\C-g" then
+    elseif key == keycode "C-g" then
       return -1
     else
       errmsg = "Please answer y or n.  "

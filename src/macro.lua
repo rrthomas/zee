@@ -94,13 +94,6 @@ local function process_keys (keys)
   undo_end_sequence ()
 end
 
-local macro_keys = {}
-
-local function call_macro ()
-  process_keys (macro_keys)
-  return true
-end
-
 Defun ("call-last-kbd-macro",
        {},
 [[
@@ -113,23 +106,19 @@ A prefix argument serves as a repeat count.
       return false
     end
 
-    -- FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec)
-    macro_keys = cur_mp
-    execute_with_uniarg (true, current_prefix_arg, call_macro)
+    -- FIXME: Call macro_play (needs a way to reverse keycode)
+    process_keys (cur_mp)
+    return true
   end
 )
 
-Defun ("macro-play",
-  {"string"},
-[[
-Execute macro as string of editor command characters.
-]],
-  function (keystr)
-    local keys = keystrtovec (keystr)
-    if keys ~= nil then
-      macro_keys = keys
-      execute_with_uniarg (true, current_prefix_arg, call_macro)
-      return true
-    end
+function macro_play (...)
+  local keys = {}
+  for _, keystr in ipairs ({...}) do
+    local key = keycode (keystr)
+    if key == nil then return false end
+    table.insert (keys, key)
   end
-)
+  process_keys (keys)
+  return true
+end

@@ -66,42 +66,41 @@ function term_init ()
 
   -- Starting with specially named keys:
   for code, key in pairs {
-    [0x9]     = "\\TAB",
-    [0xd]     = "\\RET",
-    [0x20]    = "\\SPC",
-    [0x5c]    = "\\\\",
-    [0x7f]    = "\\C-?",
-    ["kbs"]   = "\\BACKSPACE",
-    ["kdch1"] = "\\DELETE",
-    ["kcud1"] = "\\DOWN",
-    ["kend"]  = "\\END",
-    ["kf1"]   = "\\F1",
-    ["kf2"]   = "\\F2",
-    ["kf3"]   = "\\F3",
-    ["kf4"]   = "\\F4",
-    ["kf5"]   = "\\F5",
-    ["kf6"]   = "\\F6",
-    ["kf7"]   = "\\F7",
-    ["kf8"]   = "\\F8",
-    ["kf9"]   = "\\F9",
-    ["kf10"]  = "\\F10",
-    ["kf11"]  = "\\F11",
-    ["kf12"]  = "\\F12",
-    ["khome"] = "\\HOME",
-    ["kich1"] = "\\INSERT",
-    ["kcub1"] = "\\LEFT",
-    ["knp"]   = "\\PAGEDOWN",
-    ["kpp"]   = "\\PAGEUP",
-    ["kcuf1"] = "\\RIGHT",
-    ["kspd"]  = "\\C-z",
-    ["kcuu1"] = "\\UP"
+    [0x9]     = "TAB",
+    [0xd]     = "RET",
+    [0x20]    = "SPC",
+    [0x7f]    = "C-?",
+    ["kbs"]   = "BACKSPACE",
+    ["kdch1"] = "DELETE",
+    ["kcud1"] = "DOWN",
+    ["kend"]  = "END",
+    ["kf1"]   = "F1",
+    ["kf2"]   = "F2",
+    ["kf3"]   = "F3",
+    ["kf4"]   = "F4",
+    ["kf5"]   = "F5",
+    ["kf6"]   = "F6",
+    ["kf7"]   = "F7",
+    ["kf8"]   = "F8",
+    ["kf9"]   = "F9",
+    ["kf10"]  = "F10",
+    ["kf11"]  = "F11",
+    ["kf12"]  = "F12",
+    ["khome"] = "HOME",
+    ["kich1"] = "INSERT",
+    ["kcub1"] = "LEFT",
+    ["knp"]   = "PAGEDOWN",
+    ["kpp"]   = "PAGEUP",
+    ["kcuf1"] = "RIGHT",
+    ["kspd"]  = "C-z",
+    ["kcuu1"] = "UP"
   } do
     local codes = nil
     if type (code) == "string" then
       local s = curses.tigetstr (code)
       if s then
         codes = {}
-        for i=1,#s do
+        for i = 1, #s do
           table.insert (codes, s:byte (i))
         end
       end
@@ -117,23 +116,23 @@ function term_init ()
   end
 
   -- Reverse lookup of a lone ESC.
-  keytocode[keycode "\\e"] = { ESC }
+  keytocode[keycode "ESC"] = { ESC }
 
   -- ...fallback to 0x7f for backspace if terminfo doesn't know better
   if not curses.tigetstr ("kbs") then
-    keytocode[keycode "\\BACKSPACE"] = {0x7f}
+    keytocode[keycode "BACKSPACE"] = {0x7f}
   end
   if not codetokey[{0x7f}] then
-    codetokey[{0x7f}] = keycode "\\BACKSPACE"
+    codetokey[{0x7f}] = keycode "BACKSPACE"
   end
 
   -- ...inject remaining ASCII key codes
-  for code=0,0x7f do
+  for code = 0, 0x7f do
     local key = nil
     if not codetokey[{code}] then
       -- control keys
       if code < 0x20 then
-        key = keycode ("\\C-" .. string.lower (string.char (code + 0x40)))
+        key = keycode ("C-" .. string.lower (string.char (code + 0x40)))
 
       -- printable keys
       elseif code < 0x80 then
@@ -143,7 +142,7 @@ function term_init ()
       else
         local basekey = codetokey[{code - 0x80}]
         if type (basekey) == "table" and basekey.key then
-          key = "\\M-" + basekey
+          key = "M-" + basekey
         end
       end
 
@@ -216,7 +215,7 @@ function term_getkey (delay)
     c = term_getkey_unfiltered (ESCDELAY)
     if c == nil then
       -- ...if nothing follows quickly enough, assume ESC keypress...
-      key = keycode "\\e"
+      key = keycode "ESC"
     else
       -- ...see whether the following chars match an escape sequence...
       codes = { ESC }
@@ -229,7 +228,7 @@ function term_getkey (delay)
         elseif key == nil then
           -- ...no match, rebuffer unmatched chars and return ESC.
           unget_codes (list.tail (codes))
-          key = keycode "\\e"
+          key = keycode "ESC"
           break
         end
         -- ...partial match, fetch another char and try again.
@@ -242,7 +241,7 @@ function term_getkey (delay)
       table.insert (codes, c)
       key = codetokey[codes]
       if key and key.key then
-        -- ..code lookeup matched a key, return it.
+        -- ...code lookup matched a key, return it.
         break
       elseif key == nil then
         -- ...or return nil for an invalid lookup code.
@@ -254,9 +253,9 @@ function term_getkey (delay)
     end
   end
 
-  if key == keycode "\\e" then
+  if key == keycode "ESC" then
     local another = term_getkey (GETKEY_DEFAULT)
-    if another then key = "\\M-" + another end
+    if another then key = "M-" + another end
   end
 
   return key
@@ -267,7 +266,7 @@ end
 -- return nil.
 function term_keytobyte (key)
   local codes = keytocode[key]
-  if codes and  #codes == 1 and 0xff >= codes[1] then
+  if codes and #codes == 1 and 0xff >= codes[1] then
     return codes[1]
   end
   return nil
@@ -276,7 +275,7 @@ end
 
 function term_bytetokey (byte)
   if byte == ESC then
-    return keycode "\\e"
+    return keycode "ESC"
   else
     return codetokey[byte]
   end
@@ -289,7 +288,7 @@ function term_ungetkey (key)
   if key ~= nil then
     if key.META then
       codevec = { ESC }
-      key = key - "\\M-"
+      key = key - "M-"
     end
 
     local code = keytocode[key]

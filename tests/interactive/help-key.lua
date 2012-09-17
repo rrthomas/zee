@@ -1,3 +1,3 @@
--- help-key \C-f
+-- help-key \\C-f
 -- file-save file-quit
-call_command ("macro-play", "\\M-xhelp-key\\r\\C-f\\M-s\\C-\\M-q")
+macro_play ("M-x", "h", "e", "l", "p", "-", "k", "e", "y", "RET", "C-f", "M-s", "C-M-q")

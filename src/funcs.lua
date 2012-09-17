@@ -110,12 +110,12 @@ by 4 each time.
       local key = do_binding_completion (table.concat (keys, " "))
 
       -- Cancelled.
-      if key == keycode "\\C-g" then
+      if key == keycode "C-g" then
         ok = execute_function ("keyboard-quit")
         break
       -- Digit pressed.
-      elseif string.match (string.char (key.key), "%d") then
-        local digit = key.key - string.byte ('0')
+      elseif string.match (key.key, "%d") then
+        local digit = string.byte (key.key) - string.byte ('0')
         thisflag.uniarg_empty = false
 
         if key.META then
@@ -131,14 +131,14 @@ by 4 each time.
         end
 
         i = i + 1
-      elseif key == keycode "\\C-u" then
+      elseif key == keycode "C-u" then
         as = as .. "C-u"
         if i == 0 then
           arg = arg * 4
         else
           break
         end
-      elseif key == keycode "\\M--" and i == 0 then
+      elseif key == keycode "M--" and i == 0 then
         if sgn > 0 then
           sgn = -sgn
           as = as .. "-"

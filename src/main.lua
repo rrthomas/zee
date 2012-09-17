@@ -101,7 +101,7 @@ local line = 1
 function usage ()
   io.write ("Usage: " .. arg[0] .. " [OPTION...] [+LINE] FILE\n" ..
             "\n" ..
-            "Run " .. PACKAGE_NAME .. ", the lightweight Emacs clone.\n" ..
+            "Run " .. PACKAGE_NAME .. ", the editor.\n" ..
             "\n")
 
   for _, v in ipairs (options) do
@@ -121,6 +121,8 @@ function usage ()
   os.exit (0)
 end
 
+-- FIXME: Rewrite using stdlib getopt
+-- FIXME: Remove processed arguments from arg, ignore the rest, allowing processing by load scripts?
 function process_args ()
   -- Leading `-' means process all arguments in order, treating
   -- non-options as arguments to an option with code 1

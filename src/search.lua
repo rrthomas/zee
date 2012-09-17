@@ -156,7 +156,7 @@ local function isearch (forward, regexp)
 
     local c = getkey (GETKEY_DEFAULT)
 
-    if c == keycode "\\C-g" then
+    if c == keycode "C-g" then
       goto_offset (start)
       thisflag.need_resync = true
 
@@ -169,7 +169,7 @@ local function isearch (forward, regexp)
       end
       cur_bp.mark = old_mark
       break
-    elseif c == keycode "\\BACKSPACE" then
+    elseif c == keycode "BACKSPACE" then
       if #pattern > 0 then
         pattern = string.sub (pattern, 1, -2)
         cur = start
@@ -178,14 +178,14 @@ local function isearch (forward, regexp)
       else
         ding ()
       end
-    elseif c == keycode "\\C-q" then
+    elseif c == keycode "C-q" then
       minibuf_write (string.format ("%s^Q-", buf))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
-    elseif c == keycode "\\C-r" or c == keycode "\\C-s" then
+    elseif c == keycode "C-r" or c == keycode "C-s" then
       -- Invert direction.
-      if c == keycode "\\C-r" then
+      if c == keycode "C-r" then
         forward = false
-      elseif c == keycode "\\C-s" then
+      elseif c == keycode "C-s" then
         forward = true
       end
       if #pattern > 0 then
@@ -196,8 +196,8 @@ local function isearch (forward, regexp)
       elseif last_search then
         pattern = last_search
       end
-    elseif c.META or c.CTRL or c == keycode "\\RET" or term_keytobyte (c) == nil then
-      if c == keycode "\\RET" and #pattern == 0 then
+    elseif c.META or c.CTRL or c == keycode "RET" or term_keytobyte (c) == nil then
+      if c == keycode "RET" and #pattern == 0 then
         do_search (forward, regexp)
       else
         if #pattern > 0 then
@@ -212,7 +212,7 @@ local function isearch (forward, regexp)
         else
           minibuf_clear ()
         end
-        if c ~= keycode "\\RET" then
+        if c ~= keycode "RET" then
           ungetkey (c)
         end
       end
@@ -315,7 +315,7 @@ what to do with it.
         while true do
           minibuf_write (string.format ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl))
           c = getkey (GETKEY_DEFAULT)
-          if c == keycode "\\C-g" or c == keycode "\\RET" or c == keycode " " or c == keycode "y" or c == keycode "n"  or c == keycode "q" or c == keycode "." or c == keycode "!" then
+          if c == keycode "C-g" or c == keycode "RET" or c == keycode " " or c == keycode "y" or c == keycode "n"  or c == keycode "q" or c == keycode "." or c == keycode "!" then
             break
           end
           minibuf_error ("Please answer y, n, !, . or q.")
@@ -325,7 +325,7 @@ what to do with it.
 
         if c == keycode "q" then -- Quit immediately.
           break
-        elseif c == keycode "\\C-g" then
+        elseif c == keycode "C-g" then
           ok = execute_function ("keyboard-quit")
           break
         elseif c == keycode "!" then -- Replace all without asking.
@@ -333,7 +333,7 @@ what to do with it.
         end
       end
 
-      if c ~= keycode "n" and c ~= keycode "\\RET" and c ~= keycode "\\DELETE" then -- Do not replace.
+      if c ~= keycode "n" and c ~= keycode "RET" and c ~= keycode "DELETE" then -- Do not replace.
         -- Perform replacement.
         count = count + 1
         local case_repl = repl

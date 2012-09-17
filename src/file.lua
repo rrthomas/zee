@@ -268,7 +268,7 @@ local function save_some_buffers ()
           local c = getkey (GETKEY_DEFAULT)
           minibuf_clear ()
 
-          if c == keycode "\\C-g" then
+          if c == keycode "C-g" then
             execute_function ("keyboard-quit")
             return false
           elseif c == keycode "q" then
@@ -283,7 +283,7 @@ local function save_some_buffers ()
           if c == keycode "!" or c == keycode " " or c == keycode "y" then
             save_buffer (bp)
           end
-          if c == keycode "!" or c == keycode " " or c == keycode "y" or c == keycode "n" or c == keycode "\\RET" or c == keycode "\\DELETE" then
+          if c == keycode "!" or c == keycode " " or c == keycode "y" or c == keycode "n" or c == keycode "RET" or c == keycode "DELETE" then
             break
           else
             minibuf_error ("Please answer y, n, !, . or q.")
