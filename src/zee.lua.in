@@ -20,8 +20,6 @@ A=--[[ exec @LUA@ "$0" "$@"  # -*- mode: lua; -*- ]]A
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-_DEBUG = true
-
 -- Constants set by configure
 PACKAGE = "@PACKAGE@"
 PACKAGE_NAME = "@PACKAGE_NAME@"
@@ -43,6 +41,7 @@ local function err(err)
   term_close ()
   print ("Internal error.  Please report this bug with steps to reproduce the problem")
   print (debug.traceback(err, 2))
+  posix._exit (2)
 end
 
 xpcall (main, err)
