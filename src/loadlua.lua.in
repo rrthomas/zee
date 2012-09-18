@@ -19,7 +19,7 @@ local function require_version (module, min, too_big, pattern)
   end
 end
 
-require_version ("std", "25")
+require_version ("std", "27")
 require "strict" -- optional stdlib module
 require_version ("posix", "5.1.20")
 require "curses" -- part of luaposix
