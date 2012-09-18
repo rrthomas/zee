@@ -107,7 +107,6 @@ end
 
 function main ()
   signal_init ()
-  --process_args ()
   getopt.processArgs ()
 
   local file
