@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+CLOC = cloc --force-lang="C",h --autoconf
+
 TESTS = rblist rbacc
 check_PROGRAMS = rblist rbacc
 
@@ -13,22 +15,22 @@ rbacc_LDADD = zmalloc.o rblist.o
 
 bin_PROGRAMS = zee
 
-LUA_RUNTIME = 					\
+LUA_RUNTIME =					\
 	lib.lua					\
 	tbl_vars.lua				\
 	tbl_keys.h				\
 	bind.lua				\
-	completion.lua 				\
+	completion.lua				\
 	history.lua				\
 	keys.lua				\
 	minibuf.lua				\
 	texinfo.lua
 
-LUA_RUNTIME_EXTRA = 				\
+LUA_RUNTIME_EXTRA =				\
 	std.lua					\
 	tbl_funcs.lua
 
-dist_pkgdata_DATA = 				\
+dist_pkgdata_DATA =				\
 	$(LUA_RUNTIME)				\
 	$(LUA_RUNTIME_EXTRA)			\
 	cua_bindings emacs_bindings
@@ -38,17 +40,17 @@ dist_sysconf_DATA = $(PACKAGE)rc
 info_TEXINFOS = zee.texi
 
 zee_base_SOURCES =				\
-	rblist.c			        \
-	rblist.h			        \
+	rblist.c				\
+	rblist.h				\
 	rbacc.c					\
 	rbacc.h					\
-        rbutil.c				\
-        rbutil.h				\
-	nonstd.h			        \
-	zmalloc.h			        \
-	zmalloc.c			        \
-	term.h				        \
-	extern.h			        \
+	rbutil.c				\
+	rbutil.h				\
+	nonstd.h				\
+	zmalloc.h				\
+	zmalloc.c				\
+	term.h					\
+	extern.h				\
 	main.h					\
 	tbl_opts.h				\
 	copyright.h				\
@@ -113,5 +115,5 @@ copyright.texi: copyright.h mkcopyright.lua
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkcopyright.lua $(srcdir)/copyright.h
 
 loc:
-	cloc --no3 --force_lang=m4,ac --force_lang=Make,am $(zee_base_SOURCES) term_*.c Makefile.am ../Makefile.am ../configure.ac \
+	$(CLOC) $(zee_base_SOURCES) term_*.c Makefile.am ../Makefile.am ../configure.ac \
 		$(LUA_BUILDTIME) $(LUA_RUNTIME)
