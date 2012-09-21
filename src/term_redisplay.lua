@@ -153,7 +153,7 @@ local function draw_window (topline, wp)
   end
 
   -- Draw the window lines.
-  local cur_tab_width = tab_width (cur_bp)
+  local cur_tab_width = tab_width ()
   for i = topline, wp.eheight + topline do
     -- Clear the line.
     term_move (i, 0)
@@ -249,13 +249,13 @@ local function draw_popup ()
       term_addstr (popup_text:sub (o, popup_text:end_of_line (o)))
       o = popup_text:next_line (o)
     end
-    --term_clrtoeol ()
+    --term_clrtoeol () FIXME: Remove EOL from docstrings
   end
 end
 
 function term_redisplay ()
   -- Calculate the start column if the line at point has to be truncated.
-  local lastcol, t = 0, tab_width (cur_bp)
+  local lastcol, t = 0, tab_width ()
   local o = get_buffer_pt (cur_bp)
   local lineo = o - get_buffer_line_o (cur_bp)
 
@@ -284,7 +284,7 @@ function term_redisplay ()
     lastcol = col
   end
 
-  -- Draw the windows.
+  -- Draw the window.
   local topline = 0
   cur_topline = topline
   draw_window (topline, cur_wp)

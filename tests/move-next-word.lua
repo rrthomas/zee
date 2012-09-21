@@ -1,4 +1,7 @@
-call_command ("move-next-word", "4")
+call_command ("move-next-word")
+call_command ("move-next-word")
+call_command ("move-next-word")
+call_command ("move-next-word")
 insert_string ("a")
 call_command ("file-save")
 call_command ("file-quit")

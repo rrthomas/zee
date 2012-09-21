@@ -17,11 +17,12 @@ local function require_version (module, min, too_big, pattern)
   if too_big then
     assert (module_version (m, pattern) < version_to_list (too_big))
   end
+  return m
 end
 
 require_version ("std", "27")
 require "strict" -- optional stdlib module
-require_version ("posix", "5.1.20")
+require_version ("posix", "5.1.23")
 require "curses" -- part of luaposix
-require "bit" -- no particular version needed
-require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)")
+rex_gnu = require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)")
+-- FIXME: Integrate this module into std and put the requires where they are needed

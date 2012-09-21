@@ -23,9 +23,6 @@
 -- User commands
 usercmd = {}
 
--- Initialise prefix arg
-prefix_arg = false -- Not nil, so it is picked up in environment table
-
 function Defun (name, argtypes, doc, func)
   usercmd[name] = {
     doc = texi (doc),
@@ -42,9 +39,6 @@ function Defun (name, argtypes, doc, func)
                end
                table.insert (args, v)
              end
-             setfenv (func, setmetatable ({current_prefix_arg = prefix_arg},
-                                          {__index = _G, __newindex = _G}))
-             prefix_arg = false
              local ret = func (unpack (args))
              if ret == nil then
                ret = true
@@ -82,61 +76,17 @@ function function_exists (f)
   return usercmd[f] ~= nil
 end
 
-function execute_with_uniarg (undo, uniarg, forward, backward)
-  uniarg = uniarg or 1
 
-  if backward and uniarg < 0 then
-    forward = backward
-    uniarg = -uniarg
-  end
-  if undo then
-    undo_start_sequence ()
-  end
-  local ret = true
-  for _ = 1, uniarg do
-    ret = forward ()
-    if not ret then
-      break
-    end
-  end
-  if undo then
-    undo_end_sequence ()
-  end
-
-  return ret
-end
-
-function move_with_uniarg (uniarg, move)
-  local ret = true
-  for uni = 1, math.abs (uniarg) do
-    ret = move (uniarg < 0 and - 1 or 1)
-    if not ret then
-      break
-    end
-  end
-  return ret
-end
-
-
+-- FIXME: Better name for execute-command.
 Defun ("execute-command",
        {"number"},
 [[
-Read function name, then read its arguments and call it.
+Read function name and call it.
 ]],
-  function (n)
-    local msg = ""
-
-    if lastflag.set_uniarg then
-      if lastflag.uniarg_empty then
-        msg = "C-u "
-      else
-        msg = string.format ("%d ", current_prefix_arg)
-      end
-    end
-    msg = msg .. "M-x "
-
+  function ()
+    local msg = "M-x "
     local name = minibuf_read_function_name (msg)
-    return name and execute_function (name, n) or nil
+    return name and execute_function (name) or nil
   end
 )
 

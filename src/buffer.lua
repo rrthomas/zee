@@ -190,9 +190,6 @@ function delete_char ()
 end
 
 
--- The buffer list
-buffers = {}
-
 buffer_name_history = history_new ()
 
 -- Allocate a new buffer, set the default local variable values, and
@@ -205,18 +202,13 @@ function buffer_new ()
   bp.text = AStr ("")
   bp.markers = {}
   bp.dir = posix.getcwd () or ""
-
-  -- Insert into buffer list.
-  table.insert (buffers, bp)
-
   init_buffer (bp)
-
   return bp
 end
 
 -- Initialise a buffer
 function init_buffer (bp)
-  if get_variable_bool ("preferences-toggle-wrap-mode") then
+  if get_variable ("preferences-toggle-wrap-mode") then
     bp.autofill = true
   end
 end
@@ -301,9 +293,9 @@ function deactivate_mark ()
   cur_bp.mark_active = false
 end
 
--- Return a safe tab width for the given buffer.
-function tab_width (bp)
-  return math.max (get_variable_number_bp (bp, "tab-width"), 1)
+-- Return a safe tab width.
+function tab_width ()
+  return math.max (get_variable ("tab-width"), 1)
 end
 
 
@@ -341,7 +333,7 @@ function goto_goalc ()
     if col == cur_bp.goalc then
       break
     elseif get_buffer_char (cur_bp, i) == '\t' then
-      local t = tab_width (cur_bp)
+      local t = tab_width ()
       for w = t - col % t, 1, -1 do
         col = col + 1
         if col == cur_bp.goalc then

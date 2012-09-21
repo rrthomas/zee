@@ -122,11 +122,11 @@ function main ()
   init_default_bindings ()
   create_window ()
 
-  if not getopt.opt["no-init-flag"] then
-    -- local s = os.getenv ("HOME")
-    -- if s then
-    --   lisp_loadfile (s .. "/." .. PACKAGE)
-    -- end
+  if not getopt.opt["no-init-file"] then
+    local s = os.getenv ("HOME")
+    if s then
+      execute_function ("load", s .. "/." .. PACKAGE)
+    end
   end
 
   -- Load file
@@ -136,46 +136,52 @@ function main ()
     lastflag.need_resync = true
   end
 
-  -- Load Lua files and run functions given on the command line.
-  -- FIXME: Just have one option to run Lua expressions.
-  for _, f in ipairs (getopt.opt.funcall or {}) do
-    ok = execute_function (f)
-    if ok == nil then
-      minibuf_error (string.format ("Function `%s' not defined", f))
-    end
-    if thisflag.quit then
-      break
-    end
-  end
-  if not thisflag.quit then
-    for _, f in ipairs (getopt.opt.load or {}) do
-      ok = execute_function ("load", normalize_path (f))
-      if not ok then
-        minibuf_error (string.format ("Cannot open load file: %s\n", f))
+  if ok then
+    -- Load Lua files and run functions given on the command line.
+    -- FIXME: Just have one option to run Lua statements.
+    for _, f in ipairs (getopt.opt.funcall or {}) do
+      ok = execute_function (f)
+      if ok == nil then
+        minibuf_error (string.format ("Function `%s' not defined", f))
       end
       if thisflag.quit then
         break
       end
     end
-  end
-
-  lastflag.need_resync = true
-
-  -- Reinitialise the buffer to catch settings
-  init_buffer (cur_bp)
-
-  -- Refresh minibuffer in case there was an error that couldn't be
-  -- written during startup
-  minibuf_refresh ()
-
-  -- Run the main loop.
-  while not thisflag.quit do
-    if lastflag.need_resync then
-      window_resync (cur_wp)
+    if not thisflag.quit then
+      for _, f in ipairs (getopt.opt.load or {}) do
+        ok = execute_function ("load", normalize_path (f))
+        if not ok then
+          minibuf_error (string.format ("Cannot open load file: %s\n", f))
+        end
+        if thisflag.quit then
+          break
+        end
+      end
     end
-    get_and_run_command ()
+
+    lastflag.need_resync = true
+
+    -- Reinitialise the buffer to catch settings
+    init_buffer (cur_bp)
+
+    -- Refresh minibuffer in case there was an error that couldn't be
+    -- written during startup
+    minibuf_refresh ()
+
+    -- Run the main loop.
+    while not thisflag.quit do
+      if lastflag.need_resync then
+        window_resync (cur_wp)
+      end
+      get_and_run_command ()
+    end
   end
 
   -- Tidy and close the terminal.
   term_finish ()
+
+  if not ok then
+    io.stderr:write (minibuf_contents .. "\n")
+  end
 end

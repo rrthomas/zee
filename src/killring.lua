@@ -58,7 +58,7 @@ local function copy_or_kill_the_region (kill)
   return false
 end
 
-local function kill_text (uniarg, mark_func)
+local function kill_text (mark_func)
   maybe_free_kill_ring ()
 
   if warn_if_readonly_buffer () then
@@ -68,7 +68,7 @@ local function kill_text (uniarg, mark_func)
   push_mark ()
   undo_start_sequence ()
   select_on ()
-  execute_function (mark_func, uniarg)
+  execute_function (mark_func)
   execute_function ("edit-kill-selection")
   undo_end_sequence ()
   pop_mark ()
@@ -82,10 +82,9 @@ Defun ("edit-kill-word",
        {"number"},
 [[
 Kill characters forward until encountering the end of a word.
-With argument @i{arg}, do this that many times.
 ]],
   function (arg)
-    return kill_text (arg, "move-next-word")
+    return kill_text ("move-next-word")
   end
 )
 
@@ -93,10 +92,9 @@ Defun ("edit-kill-word-backward",
        {"number"},
 [[
 Kill characters backward until encountering the end of a word.
-With argument @i{arg}, do this that many times.
 ]],
   function (arg)
-    return kill_text (-(arg or 1), "move-next-word")
+    return kill_text ("move-previous-word")
   end
 )
 

@@ -72,11 +72,11 @@ On reaching end of buffer, stop and signal error.
 -- Get the goal column, expanding tabs.
 function get_goalc_bp (bp, o)
   local col = 0
-  local t = tab_width (bp)
+  local t = tab_width ()
   local start = buffer_start_of_line (bp, o)
   for i = 1, o - start do
     if get_buffer_char (bp, start + i) == '\t' then
-      col = bit.bor (col, t - 1)
+      col = bit32.bor (col, t - 1)
     end
     col = col + 1
   end
@@ -88,6 +88,7 @@ function get_goalc ()
   return get_goalc_bp (cur_bp, get_buffer_pt (cur_bp))
 end
 
+-- FIXME: cope with out-of-range arg
 Defun ("goto-char",
        {"number"},
 [[
@@ -96,7 +97,7 @@ Beginning of buffer is position 1.
 ]],
   function (n)
     if not n then
-      n = minibuf_read_number ("Goto char: ", "")
+      n = minibuf_read_number ("Goto char: ")
     end
 
     return type (n) == "number" and goto_offset (math.max (n, 1))
@@ -109,7 +110,6 @@ Defun ("edit-goto-line",
 Goto @i{line}, counting from line 1 at beginning of buffer.
 ]],
   function (n)
-    n = n or current_prefix_arg
     if not n and _interactive then
       n = minibuf_read_number ("Goto line: ")
     end
@@ -139,8 +139,8 @@ If there is no character in the target line exactly over the current column,
 the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 ]],
-  function (n)
-    return move_line (-(n or current_prefix_arg or 1))
+  function ()
+    return move_line (-1)
   end
 )
 
@@ -153,7 +153,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 ]],
   function (n)
-    return move_line (n or current_prefix_arg or 1)
+    return move_line (1)
   end
 )
 
@@ -177,38 +177,30 @@ Move point to the end of the buffer; leave mark at previous position.
   end
 )
 
-local function scroll_down ()
-  if not window_top_visible (cur_wp) then
-    return move_line (-cur_wp.eheight)
-  end
-
-  return minibuf_error ("Beginning of buffer")
-end
-
-local function scroll_up ()
-  if not window_bottom_visible (cur_wp) then
-    return move_line (cur_wp.eheight)
-  end
-
-  return minibuf_error ("End of buffer")
-end
-
 Defun ("move-previous-page",
-       {"number"},
+       {},
 [[
 Scroll text of current window downward near full screen.
 ]],
-  function (n)
-    return execute_with_uniarg (false, n or 1, scroll_down, scroll_up)
+  function ()
+    if not window_top_visible (cur_wp) then
+      return move_line (-cur_wp.eheight)
+    end
+
+    return minibuf_error ("Beginning of buffer")
   end
 )
 
 Defun ("move-next-page",
-       {"number"},
+       {},
 [[
 Scroll text of current window upward near full screen.
 ]],
-  function (n)
-    return execute_with_uniarg (false, n or 1, scroll_up, scroll_down)
+  function ()
+    if not window_bottom_visible (cur_wp) then
+      return move_line (cur_wp.eheight)
+    end
+
+    return minibuf_error ("End of buffer")
   end
 )

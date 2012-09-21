@@ -19,10 +19,10 @@
 
 -- Return true if there are no upper-case letters in the given string.
 -- If `regex' is true, ignore escaped letters.
-local function no_upper (s, regex)
+local function no_upper (s)
   local quote_flag = false
   for i = 1, #s do
-    if regex and s[i] == '\\' then
+    if s[i] == '\\' then
       quote_flag = not quote_flag
     elseif not quote_flag and s[i] == string.upper (s[i]) then
       return false
@@ -42,20 +42,20 @@ function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase
     s = string.gsub (s, "([$^.*[%]\\+?])", "\\%1")
   end
   if icase then
-    cf = bit.bor (cf, re_flags.ICASE)
+    cf = bit32.bor (cf, re_flags.ICASE)
   end
 
   local ok, r = pcall (rex_gnu.new, s, cf)
   if ok then
     local ef = 0
     if notbol then
-      ef = bit.bor (ef, re_flags.not_bol)
+      ef = bit32.bor (ef, re_flags.not_bol)
     end
     if noteol then
-      ef = bit.bor (ef, re_flags.not_eol)
+      ef = bit32.bor (ef, re_flags.not_eol)
     end
     if not forward then
-      ef = bit.bor (ef, re_flags.backward)
+      ef = bit32.bor (ef, re_flags.backward)
     end
     local match_from, match_to = r:find (string.sub (as .. bs, from, to), nil, ef)
     if match_from then
@@ -72,7 +72,7 @@ function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase
   return ret
 end
 
-local function search (o, s, forward, regexp)
+local function search (o, s, forward)
   if #s < 1 then
     return false
   end
@@ -82,8 +82,8 @@ local function search (o, s, forward, regexp)
   local noteol = not forward and o <= get_buffer_size (cur_bp)
   local from = forward and o or 1
   local to = forward and get_buffer_size (cur_bp) + 1 or o - 1
-  local downcase = get_variable_bool ("case-fold-search") and no_upper (s, regexp)
-  local pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp), s, from, to, forward, notbol, noteol, regexp, downcase)
+  local downcase = get_variable ("case-fold-search") and no_upper (s)
+  local pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp), s, from, to, forward, notbol, noteol, true, downcase)
   if not pos then
     return false
   end
@@ -95,11 +95,11 @@ end
 
 local last_search
 
-function do_search (forward, regexp, pattern)
+function do_search (forward, pattern)
   local ok = false
 
   if not pattern then
-    pattern = minibuf_read (string.format ("%s%s: ", regexp and "RE search" or "Search", forward and "" or " backward"), last_search or "")
+    pattern = minibuf_read (string.format ("Search%s: ", forward and "" or " backward"), last_search or "")
   end
 
   if not pattern then
@@ -108,7 +108,7 @@ function do_search (forward, regexp, pattern)
   if #pattern > 0 then
     last_search = pattern
 
-    if not search (get_buffer_pt (cur_bp), pattern, forward, regexp) then
+    if not search (get_buffer_pt (cur_bp), pattern, forward) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
       ok = true
@@ -120,7 +120,7 @@ end
 
 
 -- Incremental search engine.
-local function isearch (forward, regexp)
+local function isearch (forward)
   local old_mark
   if cur_bp.mark then
     old_mark = copy_marker (cur_bp.mark)
@@ -135,9 +135,7 @@ local function isearch (forward, regexp)
   while true do
     -- Make the minibuf message.
     local buf = string.format ("%sI-search%s: %s",
-                               (last and
-                                (regexp and "Regexp " or "") or
-                                (regexp and "Failing regexp " or "Failing ")),
+                               (last and "" or "Failing "),
                                forward and "" or " backward",
                                pattern)
 
@@ -198,7 +196,7 @@ local function isearch (forward, regexp)
       end
     elseif c.META or c.CTRL or c == keycode "RET" or term_keytobyte (c) == nil then
       if c == keycode "RET" and #pattern == 0 then
-        do_search (forward, regexp)
+        do_search (forward)
       else
         if #pattern > 0 then
           -- Save mark.
@@ -222,7 +220,7 @@ local function isearch (forward, regexp)
     end
 
     if #pattern > 0 then
-      last = search (cur, pattern, forward, regexp)
+      last = search (cur, pattern, forward)
     else
       last = true
     end
@@ -243,14 +241,13 @@ Defun ("edit-find",
        {"string", "boolean"},
 [[
 Do incremental search forward for regular expression.
-With a prefix argument, do a regular string search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
 Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
-  function (s, plain)
-    return (_interactive and isearch or do_search) (true, not (lastflag.set_uniarg or plain), s)
+  function (s)
+    return (_interactive and isearch or do_search) (true, s)
   end
 )
 
@@ -258,14 +255,13 @@ Defun ("edit-find-backward",
        {},
 [[
 Do incremental search backward for regular expression.
-With a prefix argument, do a regular string search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
 Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
-  function (s, plain)
-    return (_interactive and isearch or do_search) (false, not (lastflag.set_uniarg or plain), s)
+  function (s)
+    return (_interactive and isearch or do_search) (false, s)
   end
 )
 
@@ -295,7 +291,7 @@ what to do with it.
     if find == "" then
       return false
     end
-    local find_no_upper = no_upper (find, false)
+    local find_no_upper = no_upper (find)
 
     local repl = minibuf_read (string.format ("Query replace `%s' with: ", find), "")
     if not repl then
@@ -305,7 +301,7 @@ what to do with it.
     local noask = false
     local count = 0
     local ok = true
-    while search (get_buffer_pt (cur_bp), find, true, false) do
+    while search (get_buffer_pt (cur_bp), find, true) do
       local c = string.byte (' ')
 
       if not noask then
@@ -338,7 +334,7 @@ what to do with it.
         count = count + 1
         local case_repl = repl
         local r = region_new (get_buffer_pt (cur_bp) - #find, get_buffer_pt (cur_bp))
-        if find_no_upper and get_variable_bool ("case-replace") then
+        if find_no_upper and get_variable ("case-replace") then
           local case_type = check_case (tostring (get_buffer_region (cur_bp, r)))
           if case_type then
             case_repl = recase (repl, case_type)

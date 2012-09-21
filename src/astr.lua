@@ -19,8 +19,14 @@
 
 require "alien"
 
+alien.default.memchr:types ("pointer", "pointer", "int", "size_t")
+-- FIXME: Add implementation for systems lacking memrchr
+alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")
+
 local allocation_chunk_size = 16
 AStr = Object {
+  -- Primitive methods
+
   _init = function (self, s)
     self.buf = alien.array ("char", #s, alien.buffer (s))
     self.length = #s
@@ -75,13 +81,18 @@ AStr = Object {
     return self
   end,
 
-  find = function (self, s, from)
-    return tostring (self):find (s, from) -- FIXME
+  start_of_line = function (self, o)
+    local prev = alien.default.memrchr (self.buf.buffer:topointer (), string.byte ('\n'), o - 1)
+    return prev and self.buf.buffer:tooffset (prev) + 1 or 1
   end,
 
-  rfind = function (self, s, from)
-    return find_substr (tostring (self), "", s, 1, from - 1, false, true, true, false, false) -- FIXME
+  end_of_line = function (self, o)
+    local next = alien.default.memchr (self.buf.buffer:topointer (o), string.byte ('\n'), self:len () - (o - 1))
+    return next and self.buf.buffer:tooffset (next) or self:len () + 1
   end,
+
+
+  -- Derived methods
 
   cat = function (self, src)
     local oldlen = self:len ()
@@ -99,26 +110,12 @@ AStr = Object {
     return eo <= self:len () and eo + 1 or nil
   end,
 
-  start_of_line = function (self, o)
-    local prev = self:rfind ("\n", o)
-    return prev and prev + 1 or 1
-  end,
-
-  end_of_line = function (self, o)
-    local next = self:find ("\n", o)
-    return next or self:len () + 1
-  end,
-
   lines = function (self)
-    local lines = 0
-    local s = 1
-    local next
+    local lines = -1
+    local next = 1
     repeat
-      next = tostring (self):find ("\n", s)
-      if next then
-        lines = lines + 1
-        s = next + 1
-      end
+      next = self:next_line (next)
+      lines = lines + 1
     until not next
     return lines
   end,

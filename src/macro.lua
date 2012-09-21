@@ -80,7 +80,7 @@ The macro is now available for use via @kbd{C-x e}.
   end
 )
 
-local function process_keys (keys)
+function process_keys (keys)
   local cur = term_buf_len ()
 
   for i = #keys, 1, -1 do
@@ -98,7 +98,6 @@ Defun ("call-last-kbd-macro",
        {},
 [[
 Call the last keyboard macro that you defined with @kbd{C-x (}.
-A prefix argument serves as a repeat count.
 ]],
   function ()
     if cur_mp == nil then

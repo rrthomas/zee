@@ -27,7 +27,7 @@ local function self_insert_command ()
     return false
   end
 
-  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable_number ("fill_column") then
+  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable ("fill-column") then
     fill_break_line ()
   end
 
@@ -42,7 +42,7 @@ Insert the character you type.
 Whichever character you type to run this command is inserted.
 ]],
   function ()
-    return execute_with_uniarg (true, current_prefix_arg, self_insert_command)
+    return self_insert_command ()
   end
 )
 
@@ -83,7 +83,7 @@ function get_and_run_command ()
   minibuf_clear ()
 
   if function_exists (name) then
-    call_command (name, lastflag.set_uniarg and (prefix_arg or 1))
+    call_command (name)
   else
     minibuf_error (tostring (key) .. " is undefined")
   end
@@ -91,21 +91,32 @@ end
 
 root_bindings = {}
 
-function key_bind (keystr, cmd)
+local function key_canon (keystr)
   local key = tostring (keycode (keystr)) -- canonicalize the string
   if not key then
     minibuf_error (string.format ("Key sequence %s is invalid", keystr))
     return
   end
+  return key
+end
 
-  if not function_exists (cmd) then -- Possible if called non-interactively
-    minibuf_error (string.format ("No such function `%s'", cmd))
-    return
+function key_unbind (keystr)
+  local key = key_canon (keystr)
+  if key then
+    root_bindings[key] = nil
   end
+end
 
-  root_bindings[key] = cmd
+function key_bind (keystr, cmd)
+  local key = key_canon (keystr)
+  if key then
+    if not function_exists (cmd) then -- Possible if called non-interactively
+      minibuf_error (string.format ("No such function `%s'", cmd))
+      return
+    end
 
-  return true
+    root_bindings[key] = cmd
+  end
 end
 
 function init_default_bindings ()
@@ -124,8 +135,8 @@ function init_default_bindings ()
 
   key_bind ("C-b", "move-previous-character")
   key_bind ("LEFT", "move-previous-character")
-  key_bind ("BACKSPACE", "backward-edit-delete-next-character")
-  key_bind ("C-?", "backward-edit-delete-next-character")
+  key_bind ("BACKSPACE", "edit-delete-previous-character")
+  key_bind ("C-?", "edit-delete-previous-character")
   key_bind ("M-BACKSPACE", "edit-kill-word-backward")
   key_bind ("C-M-?", "edit-kill-word-backward")
   key_bind ("M-{", "move-previous-paragraph")
@@ -177,44 +188,18 @@ function init_default_bindings ()
   key_bind ("M-i", "edit-insert-tab")
   key_bind ("M-r", "preferences-toggle-read-only")
   key_bind ("C-_", "edit-undo")
-  key_bind ("C-u", "edit-repeat")
   key_bind ("C-y", "edit-paste")
 end
 
 function do_binding_completion (as)
-  local bs = ""
-
-  if lastflag.set_uniarg then
-    local arg = math.abs (prefix_arg or 1)
-    repeat
-      bs = string.char (arg % 10 + string.byte ('0')) .. " " .. bs
-      arg = math.floor (arg / 10)
-    until arg == 0
-  end
-
-  if prefix_arg and prefix_arg < 0 then
-    bs = "- " .. bs
-  end
-
-  minibuf_write (((lastflag.set_uniarg or lastflag.uniarg_empty) and "C-u " or "") ..
-                 bs .. as .. "-")
+  minibuf_write (as .. "-")
   local key = getkey (GETKEY_DEFAULT)
   minibuf_clear ()
 
   return key
 end
 
--- Get a key chord from the keyboard.
-function get_key_chord ()
-  return getkey (GETKEY_DEFAULT) or get_key_chord ()
-end
-
 function get_function_by_key (key)
-  -- Detect Meta-digit
-  if key.META and #key.key == 1 and string.match (key.key, "[%d%-]") then
-    return "edit-repeat"
-  end
-
   return root_bindings[tostring (key)]
 end
 

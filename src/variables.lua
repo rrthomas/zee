@@ -1,4 +1,4 @@
--- Editor variables handling functions
+-- Editor variables
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
@@ -18,32 +18,10 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 function get_variable (var)
-  return get_variable_bp (cur_bp, var)
+  return ((cur_bp and cur_bp.vars and cur_bp.vars[var]) or main_vars[var] or {}).val
 end
 
-function get_variable_bp (bp, var)
-  return ((bp and bp.vars and bp.vars[var]) or main_vars[var] or {}).val
-end
-
-function get_variable_number_bp (bp, var)
-  return tonumber (get_variable_bp (bp, var), 10)
-  -- FIXME: Check result and signal error.
-end
-
-function get_variable_number (var)
-  return get_variable_number_bp (cur_bp, var)
-end
-
-function get_variable_bool (var)
-  local p = get_variable (var)
-  if p then
-    return p ~= "nil"
-  end
-
-  return false
-end
-
-function set_variable (var, val)
+function preferences_set_variable (var, val)
   local vars
   if (main_vars[var] or {}).islocal then
     cur_bp.vars = cur_bp.vars or {}
@@ -52,7 +30,6 @@ function set_variable (var, val)
     vars = main_vars
   end
   vars[var] = vars[var] or {}
-
   vars[var].val = val
 end
 
@@ -74,7 +51,7 @@ Set a variable value to the user-specified value.
     end
 
     if ok then
-      set_variable (var, val)
+      preferences_set_variable (var, val)
     end
 
     return ok

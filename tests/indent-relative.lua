@@ -1,4 +1,5 @@
-call_command ("move-next-line", "2")
+call_command ("move-next-line")
+call_command ("move-next-line")
 call_command ("indent-relative")
 insert_string ("f")
 call_command ("indent-relative")

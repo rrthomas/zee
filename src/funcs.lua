@@ -83,87 +83,6 @@ Put the mark where point is now, and point where the mark is now.
   end
 )
 
-Defun ("edit-repeat",
-       {},
-[[
-Begin a numeric argument for the following command.
-Digits or minus sign following @kbd{C-u} make up the numeric argument.
-@kbd{C-u} following the digits or minus sign ends the argument.
-@kbd{C-u} without digits or minus sign provides 4 as argument.
-Repeating @kbd{C-u} without digits or minus sign multiplies the argument
-by 4 each time.
-]],
-  function ()
-    local ok = true
-
-    -- Need to process key used to invoke universal-argument.
-    pushkey (lastkey ())
-
-    thisflag.uniarg_empty = true
-
-    local i = 0
-    local arg = 1
-    local sgn = 1
-    local keys = {}
-    while true do
-      local as = ""
-      local key = do_binding_completion (table.concat (keys, " "))
-
-      -- Cancelled.
-      if key == keycode "C-g" then
-        ok = execute_function ("keyboard-quit")
-        break
-      -- Digit pressed.
-      elseif string.match (key.key, "%d") then
-        local digit = string.byte (key.key) - string.byte ('0')
-        thisflag.uniarg_empty = false
-
-        if key.META then
-          as = "ESC "
-        end
-
-        as = as .. string.format ("%d", digit)
-
-        if i == 0 then
-          arg = digit
-        else
-          arg = arg * 10 + digit
-        end
-
-        i = i + 1
-      elseif key == keycode "C-u" then
-        as = as .. "C-u"
-        if i == 0 then
-          arg = arg * 4
-        else
-          break
-        end
-      elseif key == keycode "M--" and i == 0 then
-        if sgn > 0 then
-          sgn = -sgn
-          as = as .. "-"
-          -- The default negative arg is -1, not -4.
-          arg = 1
-          thisflag.uniarg_empty = false
-        end
-      else
-        ungetkey (key)
-        break
-      end
-
-      table.insert (keys, as)
-    end
-
-    if ok then
-      prefix_arg = arg * sgn
-      thisflag.set_uniarg = true
-      minibuf_clear ()
-    end
-
-    return ok
-  end
-)
-
 function select_on ()
   set_mark ()
   activate_mark ()
@@ -188,7 +107,7 @@ This is useful for inserting control characters.
 ]],
   function ()
     minibuf_write ("C-q-")
-    insert_char (string.char (bit.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
+    insert_char (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
     minibuf_clear ()
   end
 )
@@ -223,7 +142,7 @@ Fill paragraph at or after point.
     unchain_marker (m_end)
 
     execute_function ("move-end-line")
-    while get_goalc () > get_variable_number ("fill-column") + 1 and fill_break_line () do end
+    while get_goalc () > get_variable ("fill-column") + 1 and fill_break_line () do end
 
     goto_offset (m.o)
     unchain_marker (m)
@@ -383,22 +302,19 @@ end
 Defun ("move-next-word",
        {"number"},
 [[
-Move point forward one word (backward if the argument is negative).
-With argument, do this that many times.
+Move point forward one word.
 ]],
   function (n)
-    return move_with_uniarg (n or 1, move_word)
+    return move_word (1)
   end
 )
 
 Defun ("move-previous-word",
        {"number"},
 [[
-Move backward until encountering the end of a word (forward if the
-argument is negative).
-With argument, do this that many times.
+Move backward until encountering the end of a word.
 ]],
   function (n)
-    return move_with_uniarg (-(n or 1), move_word)
+    return move_word (-1)
   end
 )

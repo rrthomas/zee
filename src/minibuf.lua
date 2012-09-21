@@ -128,21 +128,6 @@ function minibuf_read_filename (fmt, name, file)
   return name
 end
 
-function minibuf_read_yesno (fmt)
-  local errmsg = "Please answer yes or no."
-  local ret = nil
-
-  local cp = completion_new ()
-  cp.completions = {"no", "yes"}
-  local ms = minibuf_vread_completion (fmt, "", cp, nil, errmsg, errmsg)
-
-  if ms then
-    ret = ms == "yes"
-  end
-
-  return ret
-end
-
 function minibuf_read_yn (fmt)
   local errmsg = ""
 

@@ -32,7 +32,7 @@ end
 function fill_break_line ()
   local i, old_col
   local break_col = 0
-  local fillcol = get_variable_number ("fill-column")
+  local fillcol = get_variable ("fill-column")
   local break_made = false
 
   -- Only break if we're beyond fill-column.
@@ -91,7 +91,7 @@ function intercalate_newline ()
 end
 
 local function insert_expanded_tab ()
-  local t = tab_width (cur_bp)
+  local t = tab_width ()
   insert_string (string.rep (' ', t - get_goalc () % t))
 end
 
@@ -100,7 +100,7 @@ local function insert_tab ()
     return false
   end
 
-  if get_variable_bool ("indent-tabs-mode") then
+  if get_variable ("indent-tabs-mode") then
     insert_char ('\t')
   else
     insert_expanded_tab ()
@@ -152,7 +152,7 @@ does nothing.
   function ()
     local target_goalc = 0
     local cur_goalc = get_goalc ()
-    local t = tab_width (cur_bp)
+    local t = tab_width ()
     local ok = false
 
     if warn_if_readonly_buffer () then
@@ -258,22 +258,22 @@ Indentation is done using the `indent-for-tab-command' function.
 
 
 Defun ("edit-delete-next-character",
-       {"number"},
+       {},
 [[
-Delete the following @i{n} characters (previous if @i{n} is negative).
+Delete the following character.
 ]],
-  function (n)
-    return execute_with_uniarg (true, n, delete_char, backward_delete_char)
+  function ()
+    delete_char ()
   end
 )
 
-Defun ("backward-edit-delete-next-character",
-       {"number"},
+Defun ("edit-delete-previous-character",
+       {},
 [[
-Delete the previous @i{n} characters (following if @i{n} is negative).
+Delete the previous character.
 ]],
-  function (n)
-    return execute_with_uniarg (true, n, backward_delete_char, delete_char)
+  function ()
+    backward_delete_char ()
   end
 )
 
@@ -303,25 +303,25 @@ Defun ("edit-insert-tab",
 Insert a tabulation at the current point position into the current
 buffer.
 ]],
-  function (n)
-    return execute_with_uniarg (true, n, insert_tab)
+  function ()
+    return insert_tab ()
   end
 )
 
 local function newline ()
-  if cur_bp.autofill and get_goalc () > get_variable_number ("fill-column") then
+  if cur_bp.autofill and get_goalc () > get_variable ("fill-column") then
     fill_break_line ()
   end
   return insert_newline ()
 end
 
 Defun ("edit-insert-newline",
-       {"number"},
+       {},
 [[
 Insert a newline at the current point position into
 the current buffer.
 ]],
-  function (n)
-    return execute_with_uniarg (true, n, newline)
+  function ()
+    return newline ()
   end
 )

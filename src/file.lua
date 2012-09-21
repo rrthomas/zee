@@ -170,20 +170,9 @@ local function write_file (bp, filename)
   return minibuf_error (string.format ("Error writing `%s'", filename))
 end
 
-local function write_buffer (bp, needname, confirm, name, prompt)
+local function write_buffer (bp, confirm, name, prompt)
   local ans = true
   local ok = true
-
-  if needname then
-    name = minibuf_read_filename (prompt, "")
-    if not name then
-      return execute_function ("keyboard-quit")
-    end
-    if name == "" then
-      return false
-    end
-    confirm = true
-  end
 
   if confirm and exist_file (name) then
     ans = minibuf_read_yn (string.format ("File `%s' exists; overwrite? (y or n) ", name))
@@ -201,9 +190,6 @@ local function write_buffer (bp, needname, confirm, name, prompt)
     if not bp.filename or name ~= bp.filename then
       set_buffer_names (bp, name)
     end
-    bp.needname = false
-    bp.temporary = false
-    bp.nosave = false
     if write_file (bp, name) then
       minibuf_write ("Wrote " .. name)
       bp.modified = false
@@ -218,7 +204,7 @@ end
 
 local function save_buffer (bp)
   if bp.modified then
-    return write_buffer (bp, bp.needname, false, bp.filename, "File to save in: ")
+    return write_buffer (bp, false, bp.filename, "File to save in: ")
   end
 
   minibuf_write ("(No changes need to be saved)")
@@ -228,7 +214,7 @@ end
 Defun ("file-save",
        {},
 [[
-Save current buffer in visited file if modified.
+Save buffer in visited file if modified.
 ]],
   function ()
     return save_buffer (cur_bp)
@@ -238,89 +224,53 @@ Save current buffer in visited file if modified.
 Defun ("write-file",
        {},
 [[
-Write current buffer into file @i{filename}.
+Write buffer into file @i{filename}.
 This makes the buffer visit that file, and marks it as not modified.
 
-Interactively, confirmation is required unless you supply a prefix argument.
+Interactively, confirmation is required.
 ]],
   function ()
-    return write_buffer (cur_bp, true,
-                         _interactive and not lastflag.set_uniarg,
-                         nil, "Write file: ")
+    return write_buffer (cur_bp, true, _interactive, nil, "Write file: ")
   end
 )
-
-local function save_some_buffers ()
-  local none_to_save = true
-  local noask = false
-
-  for _, bp in ripairs (buffers) do
-    if bp.modified and not bp.nosave then
-      local fname = get_buffer_filename_or_name (bp)
-
-      none_to_save = false
-
-      if noask then
-        save_buffer (bp)
-      else
-        while true do
-          minibuf_write (string.format ("Save file %s? (y, n, !, ., q) ", fname))
-          local c = getkey (GETKEY_DEFAULT)
-          minibuf_clear ()
-
-          if c == keycode "C-g" then
-            execute_function ("keyboard-quit")
-            return false
-          elseif c == keycode "q" then
-            bp = nil
-            break
-          elseif c == keycode "." then
-            save_buffer (bp)
-            return true
-          elseif c == keycode "!" then
-            noask = true
-          end
-          if c == keycode "!" or c == keycode " " or c == keycode "y" then
-            save_buffer (bp)
-          end
-          if c == keycode "!" or c == keycode " " or c == keycode "y" or c == keycode "n" or c == keycode "RET" or c == keycode "DELETE" then
-            break
-          else
-            minibuf_error ("Please answer y, n, !, . or q.")
-            waitkey (WAITKEY_DEFAULT)
-          end
-        end
-      end
-    end
-  end
-
-  if none_to_save then
-    minibuf_write ("(No files need saving)")
-  end
-
-  return true
-end
 
 Defun ("file-quit",
        {},
 [[
-Offer to save each buffer, then kill this process.
+Offer to save the file, then kill this process.
 ]],
   function ()
-    if not save_some_buffers () then
-      return false
+    if cur_bp.modified then
+      while true do
+        minibuf_write (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (cur_bp)))
+        local c = getkey (GETKEY_DEFAULT)
+        minibuf_clear ()
+
+        if c == keycode "C-g" then
+          execute_function ("keyboard-quit")
+          return false
+        end
+        if c == keycode "y" then
+          save_buffer (cur_bp)
+        end
+        if c == keycode "y" or c == keycode "n" then
+          break
+        else
+          minibuf_error ("Please answer y or n.")
+          waitkey (WAITKEY_DEFAULT)
+        end
+      end
+    else
+      minibuf_write ("(The file does not need saving)")
     end
 
-    for _, bp in ipairs (buffers) do
-      if bp.modified and not bp.needname then
-        while true do
-          local ans = minibuf_read_yesno ("Modified buffers exist; exit anyway? (yes or no) ")
-          if ans == nil then
-            return execute_function ("keyboard-quit")
-          elseif not ans then
-            return false
-          end
-          break -- We have found a modified buffer, so stop.
+    if cur_bp.modified then
+      while true do
+        local ans = minibuf_read_yn ("The file is modified; exit anyway? (y or n) ")
+        if ans == nil then
+          return execute_function ("keyboard-quit")
+        elseif not ans then
+          return false
         end
       end
     end
@@ -330,43 +280,29 @@ Offer to save each buffer, then kill this process.
 )
 
 function find_file (filename)
-  local bp
-
   if exist_file (filename) and not is_regular_file (filename) then
     return minibuf_error ("File exists but could not be read")
   else
-    bp = buffer_new ()
-    set_buffer_names (bp, filename)
-    bp.dir = posix.dirname (filename)
+    cur_bp = buffer_new ()
+    set_buffer_names (cur_bp, filename)
+    cur_bp.dir = posix.dirname (filename)
 
     local s = io.slurp (filename)
     if s then
-      bp.readonly = not check_writable (filename)
+      cur_bp.readonly = not check_writable (filename)
     else
       s = ""
     end
-    bp.text = AStr (s)
+    cur_bp.text = AStr (s)
 
     -- Reset undo history
-    bp.next_undop = nil
-    bp.last_undop = nil
-    bp.modified = false
-  end
-
-  -- Set current buffer.
-  cur_bp = bp
-
-  -- Move the buffer to head.
-  for i = 1, #buffers do
-    if buffers[i] == bp then
-      table.remove (buffers, i)
-      table.insert (buffers, bp)
-      break
-    end
+    cur_bp.next_undop = nil
+    cur_bp.last_undop = nil
+    cur_bp.modified = false
   end
 
   -- Change to buffer's default directory
-  posix.chdir (bp.dir)
+  posix.chdir (cur_bp.dir)
 
   thisflag.need_resync = true
 
@@ -374,21 +310,16 @@ function find_file (filename)
 end
 
 -- Function called on unexpected error or crash (SIGSEGV).
--- Attempts to save modified buffers.
+-- Attempts to save modified buffer.
 -- If doabort is true, aborts to allow core dump generation;
 -- otherwise, exit.
 function editor_exit (doabort)
-  io.stderr:write ("Trying to save modified buffers (if any)...\r\n")
+  io.stderr:write ("Trying to save buffer (if modified)...\r\n")
 
-  for _, bp in ipairs (buffers) do
-    if bp.modified and not bp.nosave then
-      local buf, as = ""
-      local i
-      local fname = bp.filename or bp.name
-      buf = fname .. string.upper (PACKAGE) .. "SAVE"
-      io.stderr:write (string.format ("Saving %s...\r\n", buf))
-      write_to_disk (bp, buf, "rw-------")
-    end
+  if cur_bp.modified then
+    local buf = (cur_bp.filename or cur_bp.name) .. string.upper (PACKAGE) .. "SAVE"
+    io.stderr:write (string.format ("Saving %s...\r\n", buf))
+    write_to_disk (bp, buf, "rw-------")
   end
 
   if doabort then

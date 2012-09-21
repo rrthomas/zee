@@ -1,5 +1,5 @@
 call_command ("move-end-line")
 call_command ("move-previous-character", "2")
-call_command ("backward-edit-delete-next-character", "1")
+call_command ("edit-delete-previous-character")
 call_command ("file-save")
 call_command ("file-quit")

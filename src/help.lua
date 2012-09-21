@@ -48,15 +48,9 @@ Defun ("help-key",
 Display documentation of the command invoked by a key sequence.
 ]],
   function (keystr)
-    local key
-    if keystr then
-      key = keycode (keystr)
-      if not key then
-        return false
-      end
-    else
-      minibuf_write ("Describe key:")
-      key = get_key_chord ()
+    local key = get_chord (keystr, "Describe key: ")
+    if not key then
+      return false
     end
     local name = get_function_by_key (key)
     local binding = tostring (key)

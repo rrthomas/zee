@@ -94,3 +94,20 @@ function ungetkey (key)
     remove_key_from_cmd ()
   end
 end
+
+-- Get a key chord from the keyboard.
+function get_key_chord ()
+  return getkey (GETKEY_DEFAULT) or get_key_chord ()
+end
+
+-- Get a key chord from a key string or keyboard.
+function get_chord (keystr, prompt)
+  local key
+  if keystr then
+    key = keycode (keystr)
+  else
+    minibuf_write (prompt)
+    key = get_key_chord ()
+  end
+  return key
+end

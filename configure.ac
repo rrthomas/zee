@@ -29,8 +29,8 @@ dnl Set up gnulib
 gl_EARLY
 gl_INIT
 
-dnl Lua 5.1
-AX_PROG_LUA([501])
+dnl Lua 5.2
+AX_PROG_LUA([502])
 
 dnl help2man
 AX_WITH_PROG([HELP2MAN], [help2man], [false])
