@@ -26,10 +26,6 @@
 --   ewidth, eheight: The effective width and height of the window.
 -- }
 
-local function window_new ()
-  return {topdelta = 0, start_column = 0, lastpointn = 0}
-end
-
 function window_top_visible (wp)
   return offset_to_line (cur_bp, get_buffer_pt (cur_bp)) == wp.topdelta
 end
@@ -40,7 +36,7 @@ end
 
 function create_window ()
   local w, h = term_width (), term_height ()
-  cur_wp = window_new ()
+  cur_wp = {topdelta = 0, start_column = 0, lastpointn = 0}
   cur_wp.fwidth = w
   cur_wp.ewidth = w
   -- Save space for minibuffer.

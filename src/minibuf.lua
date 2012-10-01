@@ -54,6 +54,7 @@ function minibuf_error (s)
   return ding ()
 end
 
+-- FIXME: Use a set
 local function minibuf_test_in_completions (ms, cp)
   for _, v in pairs (cp.completions) do
     if v == ms then

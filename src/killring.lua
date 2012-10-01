@@ -25,33 +25,24 @@ local function maybe_free_kill_ring ()
   end
 end
 
-local function kill_ring_push (as)
-  kill_ring_text = (kill_ring_text or AStr ("")):cat (as)
-end
-
-local function copy_or_kill_region (kill, rp)
-  kill_ring_push (get_buffer_region (cur_bp, rp))
-
-  if kill then
-    if cur_bp.readonly then
-      minibuf_error ("Read only text copied to kill ring")
-    else
-      assert (delete_region (rp))
-    end
-  end
-
-  _this_command = "edit-kill-selection"
-  deactivate_mark ()
-
-  return true
-end
-
 local function copy_or_kill_the_region (kill)
   local rp = calculate_the_region ()
 
   if rp then
     maybe_free_kill_ring ()
-    copy_or_kill_region (kill, rp)
+    kill_ring_text = (kill_ring_text or AStr ("")):cat (get_buffer_region (cur_bp, rp))
+
+    if kill then
+      if cur_bp.readonly then
+        minibuf_error ("Read only text copied to kill ring")
+      else
+        assert (delete_region (rp))
+      end
+    end
+
+    _this_command = "edit-kill-selection"
+    deactivate_mark ()
+
     return true
   end
 

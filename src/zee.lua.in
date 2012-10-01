@@ -37,7 +37,7 @@ package.path = PATH_DATA .. "/?.lua;" .. package.path
 require "loadlua"
 
 
-local function err(err)
+local function err (err)
   term_close ()
   print ("Internal error.  Please report this bug with steps to reproduce the problem")
   print (debug.traceback(err, 2))

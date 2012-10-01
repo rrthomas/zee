@@ -19,29 +19,25 @@
 
 -- Key binding.
 
-local function self_insert_command ()
-  local key = term_keytobyte (lastkey ())
-  deactivate_mark ()
-  if not key then
-    ding ()
-    return false
-  end
-
-  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
-    fill_break_line ()
-  end
-
-  insert_char (string.char (key))
-  return true
-end
-
 Defun ("edit-insert-character",
 [[
 Insert the character you type.
 Whichever character you type to run this command is inserted.
 ]],
   function ()
-    return self_insert_command ()
+    local key = term_keytobyte (lastkey ())
+    deactivate_mark ()
+    if not key then
+      ding ()
+      return false
+    end
+
+    if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+      fill_break_line ()
+    end
+
+    insert_char (string.char (key))
+    return true
   end
 )
 

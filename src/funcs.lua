@@ -17,11 +17,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-local function get_region ()
-  activate_mark ()
-  return get_buffer_region (cur_bp, calculate_the_region ())
-end
-
 Defun ("keyboard-quit",
 [[
 Cancel current command.
@@ -206,7 +201,8 @@ Return the exit code of command.
           ok = minibuf_error ("Cannot open temporary file")
         else
           local fd = posix.fileno (h)
-          local s = get_region ()
+          activate_mark ()
+          local s = get_buffer_region (cur_bp, calculate_the_region ())
           local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
           if not written then
             ok = minibuf_error ("Error writing to temporary file: " .. err)

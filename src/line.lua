@@ -68,7 +68,7 @@ function fill_break_line ()
     if break_col >= 1 then -- Break line.
       goto_offset (get_buffer_line_o (cur_bp) + break_col)
       execute_function ("delete-horizontal-space")
-      insert_newline ()
+      insert_string ("\n")
       goto_offset (m.o)
       break_made = true
     else -- Undo fiddling with point.
@@ -79,10 +79,6 @@ function fill_break_line ()
   end
 
   return break_made
-end
-
-function insert_newline ()
-  return insert_string ("\n")
 end
 
 local function insert_expanded_tab ()
@@ -101,18 +97,6 @@ local function insert_tab ()
     insert_expanded_tab ()
   end
 
-  return true
-end
-
-local function backward_delete_char ()
-  deactivate_mark ()
-
-  if not move_char (-1) then
-    minibuf_error ("Beginning of buffer")
-    return false
-  end
-
-  delete_char ()
   return true
 end
 
@@ -225,7 +209,7 @@ Indentation is done using the `indent-for-tab-command' function.
     deactivate_mark ()
 
     undo_start_sequence ()
-    if insert_newline () then
+    if insert_string ("\n") then
       local m = point_marker ()
       local pos
 
@@ -263,7 +247,15 @@ Defun ("edit-delete-previous-character",
 Delete the previous character.
 ]],
   function ()
-    backward_delete_char ()
+    deactivate_mark ()
+
+    if not move_char (-1) then
+      minibuf_error ("Beginning of buffer")
+      return false
+    end
+
+    delete_char ()
+    return true
   end
 )
 
@@ -279,7 +271,7 @@ Delete all spaces and tabs around point.
     end
 
     while not bolp () and preceding_char ():match ("%s") do
-      backward_delete_char ()
+      execute_function ("edit-delete-previous-character")
     end
 
     undo_end_sequence ()
@@ -296,19 +288,15 @@ buffer.
   end
 )
 
-local function newline ()
-  if cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
-    fill_break_line ()
-  end
-  return insert_newline ()
-end
-
 Defun ("edit-insert-newline",
 [[
 Insert a newline at the current point position into
 the current buffer.
 ]],
   function ()
-    return newline ()
+    if cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+      fill_break_line ()
+    end
+    return insert_string ("\n")
   end
 )
