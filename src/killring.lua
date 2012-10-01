@@ -80,7 +80,6 @@ local function kill_text (mark_func)
 end
 
 Defun ("edit-kill-word",
-       {"number"},
 [[
 Kill characters forward until encountering the end of a word.
 ]],
@@ -90,7 +89,6 @@ Kill characters forward until encountering the end of a word.
 )
 
 Defun ("edit-kill-word-backward",
-       {"number"},
 [[
 Kill characters backward until encountering the end of a word.
 ]],
@@ -100,7 +98,6 @@ Kill characters backward until encountering the end of a word.
 )
 
 Defun ("edit-paste",
-       {},
 [[
 Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
@@ -122,7 +119,6 @@ killed @i{or} pasted.  Put point at end, and set mark at beginning.
 )
 
 Defun ("edit-kill-selection",
-       {},
 [[
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
@@ -140,7 +136,6 @@ to make one entry in the kill ring.
 )
 
 Defun ("edit-copy",
-       {},
 [[
 Save the region as if killed, but don't kill it.
 ]],

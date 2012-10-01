@@ -297,7 +297,7 @@ end
 
 -- Return a safe tab width.
 function tab_width ()
-  return math.max (get_variable ("tab-width"), 1)
+  return math.max (tonumber (get_variable ("tab-width")), 1)
 end
 
 

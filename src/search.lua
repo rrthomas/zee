@@ -235,7 +235,6 @@ local function isearch (forward)
 end
 
 Defun ("edit-find",
-       {"string", "boolean"},
 [[
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -249,7 +248,6 @@ Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 )
 
 Defun ("edit-find-backward",
-       {},
 [[
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -274,7 +272,6 @@ local function check_case (s)
 end
 
 Defun ("edit-replace",
-       {},
 [[
 Replace occurrences of a string with other text.
 As each match is found, the user must type a character saying

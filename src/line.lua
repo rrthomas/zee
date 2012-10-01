@@ -32,7 +32,7 @@ end
 function fill_break_line ()
   local i, old_col
   local break_col = 0
-  local fillcol = get_variable ("fill-column")
+  local fillcol = tonumber (get_variable ("fill-column"))
   local break_made = false
 
   -- Only break if we're beyond fill-column.
@@ -137,7 +137,6 @@ local function previous_nonblank_goalc ()
 end
 
 Defun ("indent-relative",
-       {},
 [[
 Space out to under next indent point in previous nonblank line.
 An indent point is a non-whitespace character following whitespace.
@@ -217,7 +216,6 @@ does nothing.
 )
 
 Defun ("edit-insert-newline-and-indent",
-       {},
 [[
 Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
@@ -257,7 +255,6 @@ Indentation is done using the `indent-for-tab-command' function.
 
 
 Defun ("edit-delete-next-character",
-       {},
 [[
 Delete the following character.
 ]],
@@ -267,7 +264,6 @@ Delete the following character.
 )
 
 Defun ("edit-delete-previous-character",
-       {},
 [[
 Delete the previous character.
 ]],
@@ -277,7 +273,6 @@ Delete the previous character.
 )
 
 Defun ("delete-horizontal-space",
-       {},
 [[
 Delete all spaces and tabs around point.
 ]],
@@ -297,7 +292,6 @@ Delete all spaces and tabs around point.
 )
 
 Defun ("edit-insert-tab",
-       {"number"},
 [[
 Insert a tabulation at the current point position into the current
 buffer.
@@ -308,14 +302,13 @@ buffer.
 )
 
 local function newline ()
-  if cur_bp.autofill and get_goalc () > get_variable ("fill-column") then
+  if cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
     fill_break_line ()
   end
   return insert_newline ()
 end
 
 Defun ("edit-insert-newline",
-       {},
 [[
 Insert a newline at the current point position into
 the current buffer.

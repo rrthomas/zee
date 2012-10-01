@@ -94,7 +94,6 @@ function compact_path (path)
 end
 
 Defun ("insert-file",
-       {"string"},
 [[
 Insert contents of file FILENAME into buffer after point.
 Set mark after the inserted text.
@@ -183,7 +182,6 @@ local function save_buffer ()
 end
 
 Defun ("file-save",
-       {},
 [[
 Save buffer in visited file if modified.
 ]],
@@ -193,7 +191,6 @@ Save buffer in visited file if modified.
 )
 
 Defun ("file-quit",
-       {},
 [[
 Offer to save the file, then kill this process.
 ]],

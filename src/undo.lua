@@ -88,7 +88,6 @@ local function revert_action (up)
 end
 
 Defun ("edit-undo",
-       {},
 [[
 Undo some previous changes.
 Repeat this command to undo more changes.

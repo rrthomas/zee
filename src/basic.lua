@@ -18,7 +18,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Defun ("move-start-line",
-       {},
 [[
 Move point to beginning of current line.
 ]],
@@ -29,7 +28,6 @@ Move point to beginning of current line.
 )
 
 Defun ("move-end-line",
-       {},
 [[
 Move point to end of current line.
 ]],
@@ -40,7 +38,6 @@ Move point to end of current line.
 )
 
 Defun ("move-previous-character",
-       {"number"},
 [[
 Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
@@ -55,13 +52,12 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 )
 
 Defun ("move-next-character",
-       {"number"},
 [[
 Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
 ]],
   function (n)
-    local ok = move_char (n or 1)
+    local ok = move_char (tonumber (n) or 1)
     if not ok then
       minibuf_error ("End of buffer")
     end
@@ -87,7 +83,6 @@ end
 
 -- FIXME: cope with out-of-range arg
 Defun ("goto-char",
-       {"number"},
 [[
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
@@ -96,17 +91,18 @@ Beginning of buffer is position 1.
     if not n then
       n = minibuf_read_number ("Goto char: ")
     end
+    n = tonumber (n)
 
     return type (n) == "number" and goto_offset (math.max (n, 1))
   end
 )
 
 Defun ("edit-goto-line",
-       {"number"},
 [[
 Goto @i{line}, counting from line 1 at beginning of buffer.
 ]],
   function (n)
+    n = tonumber (n)
     if not n and _interactive then
       n = minibuf_read_number ("Goto line: ")
     end
@@ -129,7 +125,6 @@ function next_line ()
 end
 
 Defun ("move-previous-line",
-       {"number"},
 [[
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -142,7 +137,6 @@ column, or at the end of the line if it is not long enough.
 )
 
 Defun ("move-next-line",
-       {"number"},
 [[
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -155,7 +149,6 @@ column, or at the end of the line if it is not long enough.
 )
 
 Defun ("move-start-file",
-       {},
 [[
 Move point to the beginning of the buffer; leave mark at previous position.
 ]],
@@ -165,7 +158,6 @@ Move point to the beginning of the buffer; leave mark at previous position.
 )
 
 Defun ("move-end-file",
-       {},
 [[
 Move point to the end of the buffer; leave mark at previous position.
 ]],
@@ -175,7 +167,6 @@ Move point to the end of the buffer; leave mark at previous position.
 )
 
 Defun ("move-previous-page",
-       {},
 [[
 Scroll text of current window downward near full screen.
 ]],
@@ -189,7 +180,6 @@ Scroll text of current window downward near full screen.
 )
 
 Defun ("move-next-page",
-       {},
 [[
 Scroll text of current window upward near full screen.
 ]],

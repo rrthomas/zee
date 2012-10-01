@@ -27,7 +27,7 @@ local function self_insert_command ()
     return false
   end
 
-  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > get_variable ("fill-column") then
+  if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
     fill_break_line ()
   end
 
@@ -36,7 +36,6 @@ local function self_insert_command ()
 end
 
 Defun ("edit-insert-character",
-       {},
 [[
 Insert the character you type.
 Whichever character you type to run this command is inserted.
@@ -204,7 +203,6 @@ function get_function_by_key (key)
 end
 
 Defun ("where-is",
-       {},
 [[
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command name.

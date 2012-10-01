@@ -23,7 +23,6 @@ local function get_region ()
 end
 
 Defun ("keyboard-quit",
-       {},
 [[
 Cancel current command.
 ]],
@@ -34,7 +33,6 @@ Cancel current command.
 )
 
 Defun ("file-suspend",
-       {},
 [[
 Stop editor and return to superior process.
 ]],
@@ -44,7 +42,6 @@ Stop editor and return to superior process.
 )
 
 Defun ("preferences-toggle-read-only",
-       {},
 [[
 Change whether this buffer is visiting its file read-only.
 ]],
@@ -54,7 +51,6 @@ Change whether this buffer is visiting its file read-only.
 )
 
 Defun ("preferences-toggle-wrap-mode",
-       {},
 [[
 Toggle Auto Fill mode.
 In Auto Fill mode, inserting a space at a column beyond `fill-column'
@@ -66,7 +62,6 @@ automatically breaks the line at a previous space.
 )
 
 Defun ("edit-select-other-end",
-       {},
 [[
 Put the mark where point is now, and point where the mark is now.
 ]],
@@ -89,7 +84,6 @@ function select_on ()
 end
 
 Defun ("edit-select-on",
-       {},
 [[
 Set the mark where point is.
 ]],
@@ -100,7 +94,6 @@ Set the mark where point is.
 )
 
 Defun ("edit-insert-quoted",
-       {},
 [[
 Read next input character and insert it.
 This is useful for inserting control characters.
@@ -113,7 +106,6 @@ This is useful for inserting control characters.
 )
 
 Defun ("edit-wrap-paragraph",
-       {},
 [[
 Fill paragraph at or after point.
 ]],
@@ -142,7 +134,7 @@ Fill paragraph at or after point.
     unchain_marker (m_end)
 
     execute_function ("move-end-line")
-    while get_goalc () > get_variable ("fill-column") + 1 and fill_break_line () do end
+    while get_goalc () > tonumber (get_variable ("fill-column")) + 1 and fill_break_line () do end
 
     goto_offset (m.o)
     unchain_marker (m)
@@ -193,7 +185,6 @@ end
 -- The `start' and `end' arguments are fake, hence their string type,
 -- so they can be ignored.
 Defun ("edit-shell-command",
-       {"string", "string", "string"},
 [[
 Execute string command in inferior shell with region as input.
 The output is inserted in the buffer, replacing the region if any.
@@ -259,7 +250,6 @@ local function move_paragraph (uniarg, forward, backward, line_extremum)
 end
 
 Defun ("move-previous-paragraph",
-       {"number"},
 [[
 Move backward to start of paragraph.  With argument N, do it N times.
 ]],
@@ -269,7 +259,6 @@ Move backward to start of paragraph.  With argument N, do it N times.
 )
 
 Defun ("move-next-paragraph",
-       {"number"},
 [[
 Move forward to end of paragraph.  With argument N, do it N times.
 ]],
@@ -300,7 +289,6 @@ local function move_word (dir)
 end
 
 Defun ("move-next-word",
-       {"number"},
 [[
 Move point forward one word.
 ]],
@@ -310,7 +298,6 @@ Move point forward one word.
 )
 
 Defun ("move-previous-word",
-       {"number"},
 [[
 Move backward until encountering the end of a word.
 ]],

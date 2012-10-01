@@ -40,7 +40,6 @@ function cancel_kbd_macro ()
 end
 
 Defun ("macro-record",
-       {},
 [[
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
@@ -64,7 +63,6 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 )
 
 Defun ("macro-stop",
-       {},
 [[
 Finish defining a keyboard macro.
 The definition was started by @kbd{C-x (}.
@@ -95,7 +93,6 @@ local function process_keys (keys)
 end
 
 Defun ("call-last-kbd-macro",
-       {},
 [[
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 ]],

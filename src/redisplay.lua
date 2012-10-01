@@ -18,7 +18,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Defun ("move-redraw",
-       {},
 [[
 Redraw screen.
 ]],

@@ -17,8 +17,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- FIXME: Have type specifiers the same as for Defuns to ensure type is correct when set
-
 X ("tab-width", 8, true, "Distance between tab stops (for display of tab characters), in columns.")
 X ("indent-tabs-mode", true, true, "If non-nil, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
 X ("fill-column", 70, true, "Column beyond which automatic line-wrapping should happen.\nAutomatically becomes buffer-local when set in any fashion.")

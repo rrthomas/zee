@@ -34,7 +34,6 @@ function preferences_set_variable (var, val)
 end
 
 Defun ("preferences-set-variable",
-       {"string", "string"},
 [[
 Set a variable value to the user-specified value.
 ]],

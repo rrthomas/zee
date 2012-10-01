@@ -26,7 +26,6 @@ local function get_variable_doc (name)
 end
 
 Defun ("help-thing",
-       {"string"},
 [[
 Display the documentation of a function or variable.
 ]],
@@ -43,7 +42,6 @@ Display the documentation of a function or variable.
 )
 
 Defun ("help-key",
-       {"string"},
 [[
 Display documentation of the command invoked by a key sequence.
 ]],

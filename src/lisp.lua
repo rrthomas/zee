@@ -23,27 +23,12 @@
 -- User commands
 usercmd = {}
 
-function Defun (name, argtypes, doc, func)
+function Defun (name, doc, func)
   usercmd[name] = {
     doc = texi (doc:chomp ()),
     func = function (...)
-             local args = {}
-             for i, v in ipairs ({...}) do
-               local ty = argtypes[i]
-               if ty == "number" then
-                 v = tonumber (v, 10)
-               elseif ty == "boolean" then
-                 v = v ~= "nil"
-               elseif ty == "string" then
-                 v = tostring (v)
-               end
-               table.insert (args, v)
-             end
-             local ret = func (unpack (args))
-             if ret == nil then
-               ret = true
-             end
-             return ret
+             local ret = func (...)
+             return ret == nil and true or ret
            end
   }
 end
@@ -53,11 +38,10 @@ function get_function_doc (name)
 end
 
 function execute_function (name, ...)
-  return usercmd[name] and usercmd[name].func and usercmd[name].func (...)
+  return usercmd[name] and usercmd[name].func and pcall (usercmd[name].func (...))
 end
 
 Defun ("load",
-       {"string"},
 [[
 Execute a file of Lua code named FILE.
 ]],
@@ -79,7 +63,6 @@ end
 
 -- FIXME: Better name for execute-command.
 Defun ("execute-command",
-       {"number"},
 [[
 Read function name and call it.
 ]],
