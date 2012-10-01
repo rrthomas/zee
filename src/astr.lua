@@ -17,8 +17,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "alien"
-
 alien.default.memchr:types ("pointer", "pointer", "int", "size_t")
 -- FIXME: Add implementation for systems lacking memrchr
 alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")
@@ -27,22 +25,38 @@ local allocation_chunk_size = 16
 AStr = Object {
   -- Primitive methods
 
-  _init = function (self, s)
-    self.buf = alien.array ("char", #s, alien.buffer (s))
-    self.length = #s
+  _init = function (self, init, len)
+    if type (init) == "string" then
+      self.buf = alien.array ("char", #init, alien.buffer (init))
+      self.length = #init
+    elseif type (init) == "number" then
+      self.buf = alien.array ("char", math.max (init, 1))
+      self.length = init
+    elseif type (init) == "userdata" then
+      self.buf = alien.array ("char", len, alien.buffer (init))
+      self.length = len
+    else
+      self.buf = alien.array ("char", init)
+      self.length = #init
+    end
     return self
   end,
 
   __tostring = function (self)
-    return self.buf.buffer:tostring (self:len ())
+    return self.buf.buffer:tostring (#self)
   end,
 
-  len = function (self) -- FIXME: In Lua 5.2 use __len metamethod (doesn't work for tables in 5.1)
+  __index = function (self, n)
+    return self.buf[n]
+  end,
+
+  __len = function (self)
     return self.length
   end,
 
   sub = function (self, from, to)
-    return tostring (self):sub (from, to) -- FIXME
+    to = to or self.length
+    return AStr (self:topointer (from), to - from + 1)
   end,
 
   set_len = function (self, n)
@@ -53,51 +67,59 @@ AStr = Object {
   end,
 
   move = function (self, to, from, n)
-    assert (math.max (from, to) + n <= self:len () + 1)
-    alien.memmove (self.buf.buffer:topointer (to), self.buf.buffer:topointer (from), n)
+    assert (math.max (from, to) + n <= #self + 1)
+    alien.memmove (self:topointer (to), self:topointer (from), n)
   end,
 
   set = function (self, from, c, n)
-    assert (from + n <= self:len () + 1)
-    alien.memset (self.buf.buffer:topointer (from), c:byte (), n)
+    assert (from + n <= #self + 1)
+    alien.memset (self:topointer (from), c:byte (), n)
   end,
 
   remove = function (self, from, n)
-    assert (from + n <= self:len () + 1)
+    assert (from + n <= #self + 1)
     self:move (from + n, from, n)
-    self:set_len (self:len () - n)
+    self:set_len (#self - n)
   end,
 
   insert = function (self, from, n)
-    assert (from <= self:len () + 1)
-    self:set_len (self:len () + n)
-    self:move (from + n, from, self:len () + 1 - (from + n))
+    assert (from <= #self + 1)
+    self:set_len (#self + n)
+    self:move (from + n, from, #self + 1 - (from + n))
     self:set (from, '\0', n)
   end,
 
-  replace = function (self, from, rep)
-    assert (from + #rep <= self:len () + 1)
-    alien.memmove (self.buf.buffer:topointer (from), rep, #rep)
+  replace = function (self, from, rep, len)
+    local len = len or #rep
+    assert (from + len <= #self + 1)
+    if type (rep) ~= "userdata" then
+      rep = rep:topointer ()
+    end
+    alien.memmove (self:topointer (from), rep, len)
     return self
   end,
 
   start_of_line = function (self, o)
-    local prev = alien.default.memrchr (self.buf.buffer:topointer (), string.byte ('\n'), o - 1)
+    local prev = alien.default.memrchr (self:topointer (), string.byte ('\n'), o - 1)
     return prev and self.buf.buffer:tooffset (prev) + 1 or 1
   end,
 
   end_of_line = function (self, o)
-    local next = alien.default.memchr (self.buf.buffer:topointer (o), string.byte ('\n'), self:len () - (o - 1))
-    return next and self.buf.buffer:tooffset (next) or self:len () + 1
+    local next = alien.default.memchr (self:topointer (o), string.byte ('\n'), #self - (o - 1))
+    return next and self.buf.buffer:tooffset (next) or #self + 1
   end,
 
 
   -- Derived methods
 
+  topointer = function (self, offset)
+    return self.buf.buffer:topointer (offset)
+  end,
+
   cat = function (self, src)
-    local oldlen = self:len ()
-    self:insert (oldlen + 1, src:len ())
-    return self:replace (oldlen + 1, tostring (src))
+    local oldlen = #self
+    self:insert (oldlen + 1, #src)
+    return self:replace (oldlen + 1, src:topointer (), #src)
   end,
 
   prev_line = function (self, o)
@@ -107,7 +129,7 @@ AStr = Object {
 
   next_line = function (self, o)
     local eo = self:end_of_line (o)
-    return eo <= self:len () and eo + 1 or nil
+    return eo <= #self and eo + 1 or nil
   end,
 
   lines = function (self)

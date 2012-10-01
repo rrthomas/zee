@@ -37,7 +37,7 @@ end
 
 -- Clear the minibuffer.
 function minibuf_clear ()
-  minibuf_write ("")
+  term_minibuf_write ("")
 end
 
 -- Write the specified string in the minibuffer.

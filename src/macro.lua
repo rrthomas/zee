@@ -80,7 +80,7 @@ The macro is now available for use via @kbd{C-x e}.
   end
 )
 
-function process_keys (keys)
+local function process_keys (keys)
   local cur = term_buf_len ()
 
   for i = #keys, 1, -1 do
@@ -105,9 +105,7 @@ Call the last keyboard macro that you defined with @kbd{C-x (}.
       return false
     end
 
-    -- FIXME: Call macro_play (needs a way to reverse keycode)
     process_keys (cur_mp)
-    return true
   end
 )
 
@@ -119,5 +117,4 @@ function macro_play (...)
     table.insert (keys, key)
   end
   process_keys (keys)
-  return true
 end

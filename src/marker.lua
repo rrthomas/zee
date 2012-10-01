@@ -20,56 +20,22 @@
 
 -- Marker datatype
 
-local function marker_new (bp, o)
-  local marker = {bp = bp, o = o}
-  bp.markers[marker] = true
+local function marker_new (o)
+  local marker = {o = o}
+  cur_bp.markers[marker] = true
   return marker
 end
 
 function copy_marker (m)
-  return marker_new (m.bp, m.o)
+  return marker_new (m.o)
 end
 
 function point_marker ()
-  return marker_new (cur_bp, get_buffer_pt (cur_bp))
+  return marker_new (get_buffer_pt (cur_bp))
 end
 
 function unchain_marker (marker)
-  if marker.bp then
-    marker.bp.markers[marker] = nil
-  end
-end
-
-
--- Mark ring
-
-local mark_ring = {} -- Mark ring.
-
--- Push the current mark to the mark-ring.
-function push_mark ()
-  -- Save the mark.
-  if cur_bp.mark then
-    table.insert (mark_ring, copy_marker (cur_bp.mark))
-  else
-    -- Save an invalid mark.
-    table.insert (mark_ring, marker_new (cur_bp, 0))
-  end
-
-  select_on ()
-end
-
--- Pop a mark from the mark-ring and make it the current mark.
-function pop_mark ()
-  local m = mark_ring[#mark_ring]
-
-  -- Replace the mark.
-  if m.bp.mark then
-    unchain_marker (m.bp.mark)
-  end
-  m.bp.mark = copy_marker (m)
-
-  table.remove (mark_ring, #mark_ring)
-  unchain_marker (m)
+  cur_bp.markers[marker] = nil
 end
 
 -- Set the mark to point.

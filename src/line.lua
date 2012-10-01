@@ -128,8 +128,7 @@ local function previous_nonblank_goalc ()
 
   -- Find previous non-blank line.
   execute_function ("move-start-line")
-  while move_line (-1) and is_blank_line () do
-  end
+  while move_line (-1) and is_blank_line () do end
 
   -- Go to `cur_goalc' in that non-blank line.
   while not eolp () and get_goalc () < cur_goalc do

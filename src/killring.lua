@@ -65,13 +65,14 @@ local function kill_text (mark_func)
     return false
   end
 
-  push_mark ()
+  local m = point_marker ()
   undo_start_sequence ()
   select_on ()
   execute_function (mark_func)
   execute_function ("edit-kill-selection")
   undo_end_sequence ()
-  pop_mark ()
+  set_mark (m)
+  unchain_marker (m)
 
   _this_command = "edit-kill-selection"
   minibuf_write ("") -- Erase "Set mark" message.

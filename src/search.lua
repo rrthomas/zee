@@ -34,18 +34,14 @@ end
 local re_flags = rex_gnu.flags ()
 local re_find_err
 
-function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase)
+local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   local ret
-  local cf = 0
 
   if not regex then
     s = string.gsub (s, "([$^.*[%]\\+?])", "\\%1")
   end
-  if icase then
-    cf = bit32.bor (cf, re_flags.ICASE)
-  end
 
-  local ok, r = pcall (rex_gnu.new, s, cf)
+  local ok, r = pcall (rex_gnu.new, s, icase and re_flags.ICASE or 0)
   if ok then
     local ef = 0
     if notbol then
@@ -57,7 +53,7 @@ function find_substr (as, bs, s, from, to, forward, notbol, noteol, regex, icase
     if not forward then
       ef = bit32.bor (ef, re_flags.backward)
     end
-    local match_from, match_to = r:find (string.sub (as .. bs, from, to), nil, ef)
+    local match_from, match_to = r:find (string.sub (tostring (as), from, to), nil, ef)
     if match_from then
       if forward then
         ret = match_to + from
@@ -83,7 +79,8 @@ local function search (o, s, forward)
   local from = forward and o or 1
   local to = forward and get_buffer_size (cur_bp) + 1 or o - 1
   local downcase = get_variable ("case-fold-search") and no_upper (s)
-  local pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp), s, from, to, forward, notbol, noteol, true, downcase)
+  -- FIXME: The following is horribly inefficient, but re_search_2 also concatenates copies of the strings
+  local pos = find_substr (tostring (get_buffer_pre_point (cur_bp)) .. tostring (get_buffer_post_point (cur_bp)), s, from, to, forward, notbol, noteol, true, downcase)
   if not pos then
     return false
   end
@@ -335,7 +332,7 @@ what to do with it.
         local case_repl = repl
         local r = region_new (get_buffer_pt (cur_bp) - #find, get_buffer_pt (cur_bp))
         if find_no_upper and get_variable ("case-replace") then
-          local case_type = check_case (tostring (get_buffer_region (cur_bp, r)))
+          local case_type = check_case (tostring (get_buffer_region (cur_bp, r))) -- FIXME
           if case_type then
             case_repl = recase (repl, case_type)
           end

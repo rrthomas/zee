@@ -57,8 +57,6 @@ X = nil
 -- Global flags, stored in thisflag and lastflag.
 -- need_resync:    a resync is required.
 -- quit:           the user has asked to quit.
--- set_uniarg:     the last command modified the universal arg variable `uniarg'.
--- uniarg_empty:   current universal arg is just C-u's with no number.
 -- defining_macro: we are defining a macro.
 
 
@@ -78,8 +76,7 @@ lastflag = {}
 
 options = {
   Option {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
-  Option {{"funcall", 'f'}, "call function FUNC with no arguments", "Req", "FUNC"},
-  Option {{"load", 'l'}, "load Lua FILE using the load function", "Req", "FILE"},
+  Option {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
   Option {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
 }
 
@@ -137,26 +134,16 @@ function main ()
   end
 
   if ok then
-    -- Load Lua files and run functions given on the command line.
-    -- FIXME: Just have one option to run Lua statements.
-    for _, f in ipairs (getopt.opt.funcall or {}) do
-      ok = execute_function (f)
-      if ok == nil then
-        minibuf_error (string.format ("Function `%s' not defined", f))
+    -- Evaluate Lua chunks given on the command line.
+    for _, c in ipairs (getopt.opt.eval or {}) do
+      local func, err = load (c)
+      if func == nil then
+        ok = false
+        minibuf_error (string.format ("Error evaluating Lua: %s", err))
       end
+      func ()
       if thisflag.quit then
         break
-      end
-    end
-    if not thisflag.quit then
-      for _, f in ipairs (getopt.opt.load or {}) do
-        ok = execute_function ("load", normalize_path (f))
-        if not ok then
-          minibuf_error (string.format ("Cannot open load file: %s\n", f))
-        end
-        if thisflag.quit then
-          break
-        end
       end
     end
 

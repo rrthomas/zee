@@ -123,7 +123,7 @@ local function draw_status_line (line, wp)
   local n = offset_to_line (cur_bp, get_buffer_pt (cur_bp))
   local as = string.format ("--%2s  %-15s   %s %-9s (",
                             make_modeline_flags (), cur_bp.name, make_screen_pos (wp),
-                            string.format ("(%d,%d)", n + 1, get_goalc_bp (cur_bp, get_buffer_pt (cur_bp))))
+                            string.format ("(%d,%d)", n + 1, get_goalc ()))
 
   if cur_bp.autofill then
     as = as .. " Fill"
@@ -246,10 +246,10 @@ local function draw_popup ()
   end
   for i = 1, h - y + 1 do
     if o then
-      term_addstr (popup_text:sub (o, popup_text:end_of_line (o)))
+      term_addstr (tostring (popup_text:sub (o, popup_text:end_of_line (o))))
       o = popup_text:next_line (o)
     end
-    --term_clrtoeol () FIXME: Remove EOL from docstrings
+    term_clrtoeol ()
   end
 end
 

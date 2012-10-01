@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- FIXME: Warn when file changes on disk
+-- FIXME: Reload when file changes on disk
 
 function exist_file (filename)
   if posix.stat (filename) then
@@ -131,83 +131,54 @@ Set mark after the inserted text.
 )
 
 -- Write buffer to given file name with given mode.
-local function write_to_disk (bp, filename, mode)
-  local ret = true
+
+alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
+
+
+local function write_to_disk (filename, mode)
   local h = posix.creat (filename, mode)
-  if not h then
-    return false
-  end
-
-  local s = get_buffer_pre_point (bp)
-  local written = posix.write (h, s)
-  if written < 0 or written ~= #s then
-    ret = written
-  else
-    s = get_buffer_post_point (bp)
-    written = posix.write (h, s)
-    if written < 0 or written ~= #s then
-      ret = written
+  if h then
+    local s = get_buffer_pre_point (cur_bp)
+    local ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
+    if ret == #s then
+      s = get_buffer_post_point (cur_bp)
+      ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
+      if ret == #s then
+        ret = true
+      end
     end
-  end
 
-  if posix.close (h) ~= 0 then
-    ret = false
-  end
+    local ret2 = posix.close (h)
+    if ret == true and ret2 ~= 0 then -- writing error takes precedence over closing error
+      ret = ret2
+    end
 
-  return ret
+    return ret
+  end
 end
 
 -- Write the buffer contents to a file.
-local function write_file (bp, filename)
-  local ret, err = write_to_disk (bp, filename, "rw-rw-rw-")
-  if ret then
+local function write_file ()
+  local ret = write_to_disk (cur_bp.filename, "rw-rw-rw-")
+  if ret == true then
     return true
   end
 
-  if ret == -1 then
-    return minibuf_error (string.format ("Error writing `%s': %s", filename, err))
-  end
-  return minibuf_error (string.format ("Error writing `%s'", filename))
+  return minibuf_error (string.format ("Error writing `%s'%s", cur_bp.filename,
+                                       ret == -1 and ": " .. posix.errno () or ""))
 end
 
-local function write_buffer (bp, confirm, name, prompt)
-  local ans = true
-  local ok = true
-
-  if confirm and exist_file (name) then
-    ans = minibuf_read_yn (string.format ("File `%s' exists; overwrite? (y or n) ", name))
-    if ans == -1 then
-      execute_function ("keyboard-quit")
-    elseif ans == false then
-      minibuf_error ("Canceled")
+local function save_buffer ()
+  if cur_bp.modified then
+    if not write_file () then
+      return false
     end
-    if ans ~= true then
-      ok = false
-    end
+    minibuf_write ("Wrote " .. cur_bp.filename)
+    cur_bp.modified = false
+    undo_set_unchanged (cur_bp.last_undop)
+  else
+    minibuf_write ("(No changes need to be saved)")
   end
-
-  if ans == true then
-    if not bp.filename or name ~= bp.filename then
-      set_buffer_names (bp, name)
-    end
-    if write_file (bp, name) then
-      minibuf_write ("Wrote " .. name)
-      bp.modified = false
-      undo_set_unchanged (bp.last_undop)
-    else
-      ok = false
-    end
-  end
-
-  return ok
-end
-
-local function save_buffer (bp)
-  if bp.modified then
-    return write_buffer (bp, false, bp.filename, "File to save in: ")
-  end
-
-  minibuf_write ("(No changes need to be saved)")
   return true
 end
 
@@ -217,20 +188,7 @@ Defun ("file-save",
 Save buffer in visited file if modified.
 ]],
   function ()
-    return save_buffer (cur_bp)
-  end
-)
-
-Defun ("write-file",
-       {},
-[[
-Write buffer into file @i{filename}.
-This makes the buffer visit that file, and marks it as not modified.
-
-Interactively, confirmation is required.
-]],
-  function ()
-    return write_buffer (cur_bp, true, _interactive, nil, "Write file: ")
+    return save_buffer ()
   end
 )
 
@@ -251,7 +209,7 @@ Offer to save the file, then kill this process.
           return false
         end
         if c == keycode "y" then
-          save_buffer (cur_bp)
+          save_buffer ()
         end
         if c == keycode "y" or c == keycode "n" then
           break
@@ -316,10 +274,10 @@ end
 function editor_exit (doabort)
   io.stderr:write ("Trying to save buffer (if modified)...\r\n")
 
-  if cur_bp.modified then
+  if cur_bp and cur_bp.modified then
     local buf = (cur_bp.filename or cur_bp.name) .. string.upper (PACKAGE) .. "SAVE"
     io.stderr:write (string.format ("Saving %s...\r\n", buf))
-    write_to_disk (bp, buf, "rw-------")
+    write_to_disk (buf, "rw-------")
   end
 
   if doabort then

@@ -55,7 +55,7 @@ for _, name in ipairs (arg) do
   if io.open (test .. ".output") ~= nil then
     name = test:gsub (io.catfile (srcdir, "tests/"), "")
     local edit_file = test:gsub ("^" .. srcdir_pat, builddir) .. ".input"
-    local args = {"-no-init-file", edit_file, "-load", test:gsub ("^" .. srcdir_pat, abs_srcdir) .. ".lua"}
+    local args = {"-no-init-file", edit_file, "-eval", ("loadfile('%s.lua') ()"):format (test:gsub ("^" .. srcdir_pat, abs_srcdir))}
 
     posix.system ("mkdir", "-p", posix.dirname (edit_file))
 

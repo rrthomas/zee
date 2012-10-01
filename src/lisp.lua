@@ -25,7 +25,7 @@ usercmd = {}
 
 function Defun (name, argtypes, doc, func)
   usercmd[name] = {
-    doc = texi (doc),
+    doc = texi (doc:chomp ()),
     func = function (...)
              local args = {}
              for i, v in ipairs ({...}) do

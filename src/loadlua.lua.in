@@ -24,5 +24,6 @@ require_version ("std", "27")
 require "strict" -- optional stdlib module
 require_version ("posix", "5.1.23")
 require "curses" -- part of luaposix
-rex_gnu = require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)")
+rex_gnu = require_version ("rex_gnu", "2.5.3", nil, "[%S]+%s*([%S]+)") -- FIXME: 2.7
 -- FIXME: Integrate this module into std and put the requires where they are needed
+require_version ("alien", "0.7.0")

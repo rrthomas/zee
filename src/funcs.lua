@@ -208,17 +208,17 @@ Return the exit code of command.
 
     if cmd then
       local rp = calculate_the_region ()
-      local fd
-
-      local tempfile
+      local h, tempfile
       if rp then
         tempfile = os.tmpname ()
 
-        fd = io.open (tempfile, "w")
-        if not fd then
+        h = io.open (tempfile, "w")
+        if not h then
           ok = minibuf_error ("Cannot open temporary file")
         else
-          local written, err = fd:write (tostring (get_region ()))
+          local fd = posix.fileno (h)
+          local s = get_region ()
+          local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
           if not written then
             ok = minibuf_error ("Error writing to temporary file: " .. err)
           end
@@ -228,8 +228,8 @@ Return the exit code of command.
       if ok then
         ok = pipe_command (cmd, tempfile)
       end
-      if fd then
-        fd:close ()
+      if h then
+        h:close ()
       end
       if rp then
         os.remove (tempfile)

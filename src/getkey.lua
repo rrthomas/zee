@@ -81,14 +81,9 @@ function waitkey ()
   ungetkey (getkey (GETKEY_DELAYED))
 end
 
--- Push a key into the input buffer.
-function pushkey (key)
-  term_ungetkey (key)
-end
-
 -- Unget a key as if it had not been fetched.
 function ungetkey (key)
-  pushkey (key)
+  term_ungetkey (key)
 
   if thisflag.defining_macro then
     remove_key_from_cmd ()

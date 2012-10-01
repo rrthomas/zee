@@ -30,8 +30,8 @@
 -- metamethod that works like strict.lua.
 
 -- Make a new completions table
-function completion_new (filename)
-  return {completions = {}, matches = {}, filename = filename}
+function completion_new (filename, completions)
+  return {completions = completions or {}, matches = {}, filename = filename}
 end
 
 -- Write the matches in `l' in a set of columns. The width of the
@@ -184,13 +184,7 @@ end
 
 -- FIXME: Common up minibuf_read*_name
 function minibuf_read_name (fmt)
-  local cp = completion_new ()
-  for v in pairs (main_vars) do
-    table.insert (cp.completions, v)
-  end
-  for name, func in pairs (usercmd) do
-    table.insert (cp.completions, name)
-  end
+  local cp = completion_new (nil, list.concat (table.keys (main_vars), table.keys (usercmd)))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No name given",
@@ -198,10 +192,7 @@ function minibuf_read_name (fmt)
 end
 
 function minibuf_read_variable_name (fmt)
-  local cp = completion_new ()
-  for v in pairs (main_vars) do
-    table.insert (cp.completions, v)
-  end
+  local cp = completion_new (nil, table.keys (main_vars))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No variable name given",

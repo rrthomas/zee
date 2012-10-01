@@ -170,14 +170,6 @@ function term_close ()
   curses.endwin ()
 end
 
-function term_reopen ()
-  curses.flushinp ()
-  -- FIXME: implement def_shell_mode in lcurses
-  --curses.def_shell_mode ()
-  curses.doupdate ()
-  resumed = true
-end
-
 function term_getkey_unfiltered (delay)
   if #key_buf > 0 then
     return table.remove (key_buf)

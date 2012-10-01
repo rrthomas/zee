@@ -57,7 +57,7 @@ local function o_to_realo (bp, o)
 end
 
 function get_buffer_size (bp)
-  return realo_to_o (bp, bp.text:len ())
+  return realo_to_o (bp, #bp.text)
 end
 
 function buffer_line_len (bp, o)
@@ -74,7 +74,7 @@ function replace_astr (del, as)
     return false
   end
 
-  local newlen = as:len ()
+  local newlen = #as
 
   undo_save_block (cur_bp.pt, del, newlen)
 
@@ -84,7 +84,7 @@ function replace_astr (del, as)
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
     added_gap = min_gap
-    cur_bp.text:insert (cur_bp.pt, (as:len () + min_gap) - (cur_bp.gap + del))
+    cur_bp.text:insert (cur_bp.pt, (#as + min_gap) - (cur_bp.gap + del))
     cur_bp.gap = min_gap
   elseif oldgap + del > max_gap + newlen then
     -- If gap would be larger than max_gap, restrict it to max_gap.
@@ -100,7 +100,7 @@ function replace_astr (del, as)
   end
 
   -- Insert `newlen' chars.
-  cur_bp.text:replace (cur_bp.pt, tostring (as))
+  cur_bp.text:replace (cur_bp.pt, as)
   cur_bp.pt = cur_bp.pt + newlen
 
   -- Adjust markers.
@@ -123,7 +123,7 @@ end
 
 function get_buffer_char (bp, o)
   local n = o_to_realo (bp, o)
-  return bp.text:sub (n, n)
+  return string.char (bp.text[n])
 end
 
 function buffer_prev_line (bp, o)
@@ -146,21 +146,23 @@ function get_buffer_line_o (bp)
   return realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, bp.pt)))
 end
 
-
--- Buffer methods that don't know about the gap.
-
 -- Copy a region of text into an AStr.
 function get_buffer_region (bp, r)
-  local s = ""
+  local as = AStr (r.finish - r.start)
   if r.start < get_buffer_pt (bp) then
-    s = s .. get_buffer_pre_point (bp):sub (r.start, math.min (r.finish, get_buffer_pt (bp)))
+    as:replace (1, bp.text:sub (r.start, math.min (r.finish, get_buffer_pt (bp)) - 1))
   end
   if r.finish > get_buffer_pt (bp) then
-    local from = math.max (r.start - get_buffer_pt (bp), 0)
-    s = s .. get_buffer_post_point (bp):sub (from + 1, r.finish - get_buffer_pt (bp))
+    local n = r.start - get_buffer_pt (bp)
+    local done = math.max (-n, 0)
+    local from = math.max (n, 0)
+    as:replace (done + 1, bp.text:sub (get_buffer_pt (bp) + bp.gap + from, bp.gap + r.finish - 1))
   end
-  return AStr (s)
+  return as
 end
+
+
+-- Buffer methods that don't know about the gap.
 
 -- Insert the character `c' at the current point position
 -- into the current buffer.
