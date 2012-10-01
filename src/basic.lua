@@ -39,11 +39,11 @@ Move point to end of current line.
 
 Defun ("move-previous-character",
 [[
-Move point left N characters (right if N is negative).
+Move point left one character.
 On attempt to pass beginning or end of buffer, stop and signal error.
 ]],
-  function (n)
-    local ok = move_char (-(n or 1))
+  function ()
+    local ok = move_char (-1)
     if not ok then
       minibuf_error ("Beginning of buffer")
     end
@@ -53,11 +53,11 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 
 Defun ("move-next-character",
 [[
-Move point right N characters (left if N is negative).
+Move point right one characters.
 On reaching end of buffer, stop and signal error.
 ]],
-  function (n)
-    local ok = move_char (tonumber (n) or 1)
+  function ()
+    local ok = move_char (1)
     if not ok then
       minibuf_error ("End of buffer")
     end
@@ -142,7 +142,7 @@ If there is no character in the target line exactly under the current column,
 the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 ]],
-  function (n)
+  function ()
     return move_line (1)
   end
 )

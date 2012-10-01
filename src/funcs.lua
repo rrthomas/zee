@@ -182,15 +182,13 @@ local function minibuf_read_shell_command ()
   return ms
 end
 
--- The `start' and `end' arguments are fake, hence their string type,
--- so they can be ignored.
 Defun ("edit-shell-command",
 [[
 Execute string command in inferior shell with region as input.
 The output is inserted in the buffer, replacing the region if any.
 Return the exit code of command.
 ]],
-  function (start, finish, cmd)
+  function (cmd)
     local ok = true
 
     if not cmd then
@@ -230,40 +228,32 @@ Return the exit code of command.
   end
 )
 
-local function move_paragraph (uniarg, forward, backward, line_extremum)
-  if uniarg < 0 then
-    uniarg = -uniarg
-    forward = backward
-  end
-
-  for i = uniarg, 1, -1 do
-    repeat until not is_empty_line () or not forward ()
-    repeat until is_empty_line () or not forward ()
-  end
+local function move_paragraph (forward, backward, line_extremum)
+  repeat until not is_empty_line () or not forward ()
+  repeat until is_empty_line () or not forward ()
 
   if is_empty_line () then
     execute_function ("move-start-line")
   else
     execute_function (line_extremum)
   end
-  return true
 end
 
 Defun ("move-previous-paragraph",
 [[
-Move backward to start of paragraph.  With argument N, do it N times.
+Move backward to start of paragraph.
 ]],
-  function (n)
-    return move_paragraph (n or 1, previous_line, next_line, "move-start-line")
+  function ()
+    return move_paragraph (previous_line, next_line, "move-start-line")
   end
 )
 
 Defun ("move-next-paragraph",
 [[
-Move forward to end of paragraph.  With argument N, do it N times.
+Move forward to end of paragraph.
 ]],
-  function (n)
-    return move_paragraph (n or 1, next_line, previous_line, "move-end-line")
+  function ()
+    return move_paragraph (next_line, previous_line, "move-end-line")
   end
 )
 
@@ -292,7 +282,7 @@ Defun ("move-next-word",
 [[
 Move point forward one word.
 ]],
-  function (n)
+  function ()
     return move_word (1)
   end
 )
@@ -301,7 +291,7 @@ Defun ("move-previous-word",
 [[
 Move backward until encountering the end of a word.
 ]],
-  function (n)
+  function ()
     return move_word (-1)
   end
 )

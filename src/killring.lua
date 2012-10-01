@@ -83,7 +83,7 @@ Defun ("edit-kill-word",
 [[
 Kill characters forward until encountering the end of a word.
 ]],
-  function (arg)
+  function ()
     return kill_text ("move-next-word")
   end
 )
@@ -92,7 +92,7 @@ Defun ("edit-kill-word-backward",
 [[
 Kill characters backward until encountering the end of a word.
 ]],
-  function (arg)
+  function ()
     return kill_text ("move-previous-word")
   end
 )
