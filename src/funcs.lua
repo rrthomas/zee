@@ -228,7 +228,7 @@ Return the exit code of command.
   end
 )
 
-local function move_paragraph (forward, backward, line_extremum)
+local function move_paragraph (forward, line_extremum)
   repeat until not is_empty_line () or not forward ()
   repeat until is_empty_line () or not forward ()
 
@@ -244,7 +244,7 @@ Defun ("move-previous-paragraph",
 Move backward to start of paragraph.
 ]],
   function ()
-    return move_paragraph (previous_line, next_line, "move-start-line")
+    return move_paragraph (previous_line, "move-start-line")
   end
 )
 
@@ -253,7 +253,7 @@ Defun ("move-next-paragraph",
 Move forward to end of paragraph.
 ]],
   function ()
-    return move_paragraph (next_line, previous_line, "move-end-line")
+    return move_paragraph (next_line, "move-end-line")
   end
 )
 
