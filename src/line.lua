@@ -85,11 +85,6 @@ function insert_newline ()
   return insert_string ("\n")
 end
 
--- Insert a newline at the current position without moving the cursor.
-function intercalate_newline ()
-  return insert_newline () and move_char (-1)
-end
-
 local function insert_expanded_tab ()
   local t = tab_width ()
   insert_string (string.rep (' ', t - get_goalc () % t))

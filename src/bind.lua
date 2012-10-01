@@ -190,14 +190,6 @@ function init_default_bindings ()
   key_bind ("C-y", "edit-paste")
 end
 
-function do_binding_completion (as)
-  minibuf_write (as .. "-")
-  local key = getkey (GETKEY_DEFAULT)
-  minibuf_clear ()
-
-  return key
-end
-
 function get_function_by_key (key)
   return root_bindings[tostring (key)]
 end

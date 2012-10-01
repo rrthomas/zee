@@ -192,8 +192,6 @@ function delete_char ()
 end
 
 
-buffer_name_history = history_new ()
-
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
 function buffer_new ()

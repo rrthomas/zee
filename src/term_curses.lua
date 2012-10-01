@@ -264,16 +264,6 @@ function term_keytobyte (key)
   return nil
 end
 
-
-function term_bytetokey (byte)
-  if byte == ESC then
-    return keycode "ESC"
-  else
-    return codetokey[byte]
-  end
-end
-
-
 function term_ungetkey (key)
   local codevec = {}
 
