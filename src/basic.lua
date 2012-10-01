@@ -81,7 +81,7 @@ function get_goalc ()
   return col
 end
 
-Defun ("goto-char",
+Defun ("edit-goto-character",
 [[
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
