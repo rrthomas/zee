@@ -81,7 +81,6 @@ function get_goalc ()
   return col
 end
 
--- FIXME: cope with out-of-range arg
 Defun ("goto-char",
 [[
 Set point to @i{position}, a number.

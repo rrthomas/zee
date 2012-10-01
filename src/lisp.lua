@@ -48,10 +48,7 @@ Execute a file of Lua code named FILE.
   function (file)
     if file then
       local f = loadfile (file)
-      if not f then
-        return false
-      end
-      return f ()
+      return not f and false or f ()
     end
   end
 )
@@ -67,8 +64,7 @@ Defun ("execute-command",
 Read function name and call it.
 ]],
   function ()
-    local msg = "M-x "
-    local name = minibuf_read_function_name (msg)
+    local name = minibuf_read_function_name ("M-x ")
     return name and execute_function (name) or nil
   end
 )

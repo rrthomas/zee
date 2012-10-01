@@ -111,7 +111,6 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
         ding ()
       end
     elseif c == keycode "C-k" then
-      -- FIXME: do kill-register save.
       if pos < #as then
         as = string.sub (as, pos + 1)
       else
