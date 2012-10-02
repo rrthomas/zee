@@ -121,7 +121,6 @@ end
 
 function minibuf_read_yn (fmt)
   local errmsg = ""
-
   while true do
     minibuf_write (errmsg .. fmt)
     local key = getkeystroke (GETKEY_DEFAULT)
@@ -131,9 +130,8 @@ function minibuf_read_yn (fmt)
       return false
     elseif key == keycode "C-g" then
       return -1
-    else
-      errmsg = "Please answer y or n.  "
     end
+    errmsg = "Please answer y or n.  "
   end
 end
 
