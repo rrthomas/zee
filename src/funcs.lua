@@ -255,15 +255,11 @@ Move forward to end of paragraph.
 
 
 -- Move through words
-local function iswordchar (c)
-  return c and (c:match ("[%w$]"))
-end
-
 local function move_word (dir)
   local gotword = false
   repeat
     while not (dir > 0 and eolp or bolp) () do
-      if iswordchar (get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0))) then
+      if get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0)):match ("%w") then
         gotword = true
       elseif gotword then
         break
