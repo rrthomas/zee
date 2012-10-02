@@ -196,38 +196,14 @@ Offer to save the file, then kill this process.
 ]],
   function ()
     if cur_bp.modified then
-      while true do
-        minibuf_write (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (cur_bp)))
-        local c = getkey (GETKEY_DEFAULT)
-        minibuf_clear ()
-
-        if c == keycode "C-g" then
-          execute_function ("keyboard-quit")
-          return false
-        end
-        if c == keycode "y" then
-          save_buffer ()
-        end
-        if c == keycode "y" or c == keycode "n" then
-          break
-        else
-          minibuf_error ("Please answer y or n.")
-          waitkey (WAITKEY_DEFAULT)
-        end
+      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (cur_bp)))
+      if ans == nil then
+        return execute_function ("keyboard-quit")
+      elseif ans then
+        save_buffer ()
       end
     else
       minibuf_write ("(The file does not need saving)")
-    end
-
-    if cur_bp.modified then
-      while true do
-        local ans = minibuf_read_yn ("The file is modified; exit anyway? (y or n) ")
-        if ans == nil then
-          return execute_function ("keyboard-quit")
-        elseif not ans then
-          return false
-        end
-      end
     end
 
     thisflag.quit = true
