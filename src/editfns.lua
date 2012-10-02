@@ -37,7 +37,7 @@ end
 
 function is_blank_line ()
   local s = get_buffer_region (cur_bp, region_new (get_buffer_line_o (cur_bp), buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp))))
-  return find_substr (s, "^[ \t]*$", 1, #s, true, false, false, true, false) ~= nil
+  return regex_match (s, "^[ \t]*$")
 end
 
 -- Returns the character following point in the current buffer.

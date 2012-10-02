@@ -34,14 +34,14 @@ end
 local re_flags = rex_gnu.flags ()
 local re_find_err
 
-function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
+local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   local ret
 
   if not regex then
     s = string.gsub (s, "([$^.*[%]\\+?])", "\\%1")
   end
 
-  local ok, r = pcall (rex_gnu.new, s, icase and re_flags.ICASE or 0)
+  local ok, r = pcall (rex_gnu.new, s, bit32.bor (re_flags.SYNTAX_EGREP, icase and re_flags.ICASE or 0))
   if ok then
     local ef = 0
     if notbol then
@@ -66,6 +66,10 @@ function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
   end
 
   return ret
+end
+
+function regex_match (s, pat)
+  return find_substr (s, pat, 1, #s, true, false, false, true, false) ~= nil
 end
 
 local function search (o, s, forward)
@@ -264,9 +268,9 @@ Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 -- Returns "uppercase" if it is all upper case, "capitalized" if just
 -- the first letter is, and nil otherwise.
 local function check_case (s)
-  if s:match ("^%u+$") then
+  if regex_match (s, "^[[:upper:]]+$") then
     return "uppercase"
-  elseif s:match ("^%u%U*") then
+  elseif regex_match (s, "^[[:upper:]][^[:upper:]]*") then
     return "capitalized"
   end
 end
@@ -329,7 +333,7 @@ what to do with it.
         local case_repl = repl
         local r = region_new (get_buffer_pt (cur_bp) - #find, get_buffer_pt (cur_bp))
         if find_no_upper and get_variable ("case-replace") then
-          local case_type = check_case (tostring (get_buffer_region (cur_bp, r))) -- FIXME
+          local case_type = check_case (get_buffer_region (cur_bp, r))
           if case_type then
             case_repl = recase (repl, case_type)
           end
