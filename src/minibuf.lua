@@ -54,16 +54,6 @@ function minibuf_error (s)
   return ding ()
 end
 
--- FIXME: Use a set
-local function minibuf_test_in_completions (ms, cp)
-  for _, v in pairs (cp.completions) do
-    if v == ms then
-      return true
-    end
-  end
-  return false
-end
-
 -- Read a string from the minibuffer using a completion.
 function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
   local ms
@@ -87,7 +77,7 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
         popup_completion (cp)
       end
 
-      if minibuf_test_in_completions (ms, cp) then
+      if set.new (cp.completions):member (ms) then
         if hp then
           add_history_element (hp, ms)
         end
