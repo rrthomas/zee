@@ -57,7 +57,7 @@ local function o_to_realo (bp, o)
 end
 
 function get_buffer_size (bp)
-  return realo_to_o (bp, #bp.text)
+  return realo_to_o (bp, #bp.text + 1) - 1
 end
 
 function buffer_line_len (bp, o)
