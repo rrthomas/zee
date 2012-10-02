@@ -92,7 +92,7 @@ Beginning of buffer is position 1.
     end
     n = tonumber (n)
 
-    return type (n) == "number" and goto_offset (math.max (n, 1))
+    return type (n) == "number" and goto_offset (math.min (get_buffer_size (cur_bp) + 1, math.max (n, 1)))
   end
 )
 
