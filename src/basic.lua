@@ -115,6 +115,24 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
   end
 )
 
+Defun ("edit-goto-column",
+[[
+Goto @i{column}, counting from column 1 at the start of the line.
+]],
+  function (n)
+    n = tonumber (n)
+    if not n and _interactive then
+      n = minibuf_read_number ("Goto column: ")
+    end
+
+    if type (n) == "number" then
+      goto_offset (math.min (math.max (n, 1), buffer_line_len (cur_bp)) - 1 + get_buffer_line_o (cur_bp))
+    else
+      return false
+    end
+  end
+)
+
 function previous_line ()
   return move_line (-1)
 end
