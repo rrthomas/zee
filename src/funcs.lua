@@ -111,13 +111,13 @@ Fill paragraph at or after point.
 
     execute_function ("move-next-paragraph")
     if is_empty_line () then
-      previous_line ()
+      move_line (-1)
     end
     local m_end = point_marker ()
 
     execute_function ("move-previous-paragraph")
     if is_empty_line () then -- Move to next line if between two paragraphs.
-      next_line ()
+      move_line (1)
     end
 
     while buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < m_end.o do
@@ -224,9 +224,9 @@ Return the exit code of command.
   end
 )
 
-local function move_paragraph (forward, line_extremum)
-  repeat until not is_empty_line () or not forward ()
-  repeat until is_empty_line () or not forward ()
+local function move_paragraph (dir, line_extremum)
+  repeat until not is_empty_line () or not move_line (dir)
+  repeat until is_empty_line () or not move_line (dir)
 
   if is_empty_line () then
     execute_function ("move-start-line")
@@ -240,7 +240,7 @@ Defun ("move-previous-paragraph",
 Move backward to start of paragraph.
 ]],
   function ()
-    return move_paragraph (previous_line, "move-start-line")
+    return move_paragraph (-1, "move-start-line")
   end
 )
 
@@ -249,7 +249,7 @@ Defun ("move-next-paragraph",
 Move forward to end of paragraph.
 ]],
   function ()
-    return move_paragraph (next_line, "move-end-line")
+    return move_paragraph (1, "move-end-line")
   end
 )
 

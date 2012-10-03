@@ -133,14 +133,6 @@ Goto @i{column}, counting from column 1 at the start of the line.
   end
 )
 
-function previous_line ()
-  return move_line (-1)
-end
-
-function next_line ()
-  return move_line (1)
-end
-
 Defun ("move-previous-line",
 [[
 Move cursor vertically up one line.
