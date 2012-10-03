@@ -112,3 +112,16 @@ Repeat this command to undo more changes.
     minibuf_write ("Undo!")
   end
 )
+
+Defun ("edit-revert",
+[[
+Undo until buffer is unmodified.
+]],
+  function ()
+    -- FIXME: save pointer to current undo action and abort if we get
+    -- back to it.
+    while cur_bp.modified do
+      execute_function ("edit-undo")
+    end
+  end
+)
