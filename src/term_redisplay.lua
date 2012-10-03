@@ -246,7 +246,7 @@ local function draw_popup ()
   end
   for i = 1, h - y + 1 do
     if o then
-      term_addstr (tostring (popup_text:sub (o, popup_text:end_of_line (o)))) -- FIXME
+      term_addstr (tostring (popup_text:sub (o, popup_text:end_of_line (o))))
       o = popup_text:next_line (o)
     end
     term_clrtoeol ()
