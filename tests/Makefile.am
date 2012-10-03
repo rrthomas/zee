@@ -23,28 +23,21 @@ TERM ?= vt100
 
 LUA_TESTS =						\
 	$(srcdir)/tests/*.lua				\
-	$(srcdir)/tests/interactive/*.lua
+	$(srcdir)/tests/interactive/*.lua		\
+	$(srcdir)/tests/regression/*.lua
 
-LUA_TESTS_ZEE_ONLY =					\
-	$(srcdir)/tests/regression/*.lua		\
-	$(srcdir)/tests/zee-only/*.lua			\
-	$(srcdir)/tests/zee-only/interactive/*.lua
-
-LUA_TESTS_ZEE_ONLY_FIXED_SCREEN =			\
-	$(srcdir)/tests/zee-only/fixed-screen/*.lua
+LUA_TESTS_FIXED_SCREEN =				\
+	$(srcdir)/tests/fixed-screen/*.lua
 
 LUA_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/regression/*.output		\
-	$(srcdir)/tests/zee-only/*.output		\
-	$(srcdir)/tests/zee-only/interactive/*.output	\
-	$(srcdir)/tests/zee-only/fixed-screen/*.output
+	$(srcdir)/tests/fixed-screen/*.output
 
 LUA_ALL_TESTS =						\
 	$(LUA_TESTS)					\
-	$(LUA_TESTS_ZEE_ONLY)				\
-	$(LUA_TESTS_ZEE_ONLY_FIXED_SCREEN)
+	$(LUA_TESTS_FIXED_SCREEN)
 
 LUA_TESTS_ENVIRONMENT =					\
 	abs_srcdir=$(abs_srcdir)			\
@@ -60,6 +53,5 @@ EXTRA_DIST +=						\
 	tests/run-lisp-tests.lua
 
 check-local: $(builddir)/src/zee
+	echo $(LUA_TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
 	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	echo $(LUA_TESTS_ZEE_ONLY_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	echo $(LUA_TESTS_ZEE_ONLY) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
