@@ -34,13 +34,9 @@ end
 local re_flags = rex_gnu.flags ()
 local re_find_err
 
-local function find_substr (as, s, from, to, forward, notbol, noteol, regex, icase)
+local function find_substr (as, s, forward, notbol, noteol, icase)
   local ret
-
-  if not regex then
-    s = string.gsub (s, "([$^.*[%]\\+?])", "\\%1")
-  end
-
+  local from, to = 1, #as
   local ok, r = pcall (rex_gnu.new, s, bit32.bor (re_flags.SYNTAX_EGREP, icase and re_flags.ICASE or 0))
   if ok then
     local ef = 0
@@ -53,7 +49,7 @@ local function find_substr (as, s, from, to, forward, notbol, noteol, regex, ica
     if not forward then
       ef = bit32.bor (ef, re_flags.backward)
     end
-    local match_from, match_to = r:find (as:sub (from, to), nil, ef)
+    local match_from, match_to = r:find (as, nil, ef)
     if match_from then
       if forward then
         ret = match_to + from
@@ -69,27 +65,26 @@ local function find_substr (as, s, from, to, forward, notbol, noteol, regex, ica
 end
 
 function regex_match (s, pat)
-  return find_substr (s, pat, 1, #s, true, false, false, true, false) ~= nil
+  return find_substr (s, pat, true, false, false, false) ~= nil
 end
 
-local function search (o, s, forward)
+local function search (s, forward)
   if #s < 1 then
     return false
   end
 
   -- Attempt match.
+  local o = get_buffer_pt (cur_bp)
   local notbol = forward and o > 1
   local noteol = not forward and o <= get_buffer_size (cur_bp)
-  local from = forward and o or 1
-  local to = forward and get_buffer_size (cur_bp) + 1 or o - 1
   local downcase = get_variable ("case-fold-search") and no_upper (s)
-  -- FIXME: The following is horribly inefficient, but re_search_2 also concatenates copies of the strings
-  local pos = find_substr (tostring (get_buffer_pre_point (cur_bp)) .. tostring (get_buffer_post_point (cur_bp)), s, from, to, forward, notbol, noteol, true, downcase)
+  local as = (forward and get_buffer_post_point or get_buffer_pre_point) (cur_bp)
+  local pos = find_substr (as, s, forward, notbol, noteol, downcase)
   if not pos then
     return false
   end
 
-  goto_offset (pos)
+  goto_offset (pos + (forward and (get_buffer_pt (cur_bp) - 1) or 0))
   thisflag.need_resync = true
   return true
 end
@@ -109,7 +104,7 @@ function do_search (forward, pattern)
   if #pattern > 0 then
     last_search = pattern
 
-    if not search (get_buffer_pt (cur_bp), pattern, forward) then
+    if not search (pattern, forward) then
       minibuf_error (string.format ("Search failed: \"%s\"", pattern))
     else
       ok = true
@@ -221,7 +216,9 @@ local function isearch (forward)
     end
 
     if #pattern > 0 then
-      last = search (cur, pattern, forward)
+      local pt = get_buffer_pt (cur_bp)
+      goto_offset (cur)
+      last = search (pattern, forward)
     else
       last = true
     end
@@ -299,7 +296,7 @@ what to do with it.
     local noask = false
     local count = 0
     local ok = true
-    while search (get_buffer_pt (cur_bp), find, true) do
+    while search (find, true) do
       local c = string.byte (' ')
 
       if not noask then
