@@ -1,4 +1,3 @@
--- undo in Emacs undoes everything from the start of the script (cf. fill-paragraph_2.el)
 call_command ("edit-delete-next-character")
 call_command ("edit-delete-next-character")
 call_command ("edit-delete-next-character")
