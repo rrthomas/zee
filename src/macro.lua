@@ -20,6 +20,9 @@
 cmd_mp = {}
 cur_mp = {}
 
+-- FIXME: macros should be executed immediately and abort on error;
+-- they should be stored as a macro list, not a series of
+-- keystrokes. Macros should return success/failure.
 function add_cmd_to_macro ()
   cur_mp = list.concat (cur_mp, cmd_mp)
   cmd_mp = {}

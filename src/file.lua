@@ -244,6 +244,7 @@ end
 -- Attempts to save modified buffer.
 -- If doabort is true, aborts to allow core dump generation;
 -- otherwise, exit.
+-- FIXME: Reset the terminal?
 function editor_exit (doabort)
   io.stderr:write ("Trying to save buffer (if modified)...\r\n")
 

@@ -116,6 +116,10 @@ end
 
 
 -- Incremental search engine.
+-- FIXME: Once the search is underway, "find next" is hard-wired to C-s.
+-- Having it hard-wired is obviously broken, but something neutral like RET
+-- would be better.
+-- The proposed meaning of ESC obviates the current behaviour of RET.
 local function isearch (forward)
   local old_mark
   if buf.mark then
@@ -272,6 +276,7 @@ local function check_case (s)
   end
 end
 
+-- FIXME: Make edit_replace run on selection.
 Command ("edit-replace",
 [[
 Replace occurrences of a string with other text.
