@@ -37,8 +37,8 @@ Change whether this file can be modified.
 
 Command ("preferences-toggle-wrap-mode",
 [[
-Toggle Wrap mode.
-In Wrap mode, inserting a space or newline at a column beyond
+Toggle wrap mode.
+In wrap mode, inserting a space or newline at a column beyond
 `wrap-column' automatically breaks the line at a previous space.
 Paragraphs can also be wrapped using `edit-wrap-paragraph'.
 ]],

@@ -1,4 +1,4 @@
-call_command ("preferences-set-variable", "case-fold-search", "nil")
+call_command ("preferences-set-variable", "caseless-search", "nil")
 execute_command ("edit-find", "I")
 insert_string ("a")
 call_command ("file-save")

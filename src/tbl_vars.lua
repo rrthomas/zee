@@ -17,9 +17,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-X ("tab-width", 8, true, "Distance between tab stops (for display of tab characters), in columns.")
+X ("tab-width", 8, true, "Number of spaces displayed for a tab character.")
 X ("indent-tabs-mode", true, true, "If non-nil, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
-X ("wrap-column", 70, true, "Column beyond which automatic line-wrapping should happen.\nAutomatically becomes buffer-local when set in any fashion.")
-X ("preferences-toggle-wrap-mode", nil, false, "If non-nil, Auto Fill Mode is automatically enabled.")
-X ("case-fold-search", true, true, "Non-nil means searches ignore case.")
-X ("case-replace", true, false, "Non-nil means `query-replace' should preserve case in replacements.")
+X ("wrap-column", 70, true, "Column beyond which wrapping occurs in wrap mode.")
+X ("wrap-mode", nil, false, "Whether wrap mode is automatically enabled.")
+X ("caseless-search", true, true, "Whether searching ignores case by default.")
+X ("case-replace", true, false, "Whether `query-replace' should preserve case.")

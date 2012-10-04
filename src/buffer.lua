@@ -208,7 +208,7 @@ end
 
 -- Initialise a buffer
 function init_buffer (bp)
-  if get_variable ("preferences-toggle-wrap-mode") then
+  if get_variable ("wrap-mode") then
     bp.wrap = true
   end
 end

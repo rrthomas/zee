@@ -286,7 +286,7 @@ Indent to next multiple of `indent_width'.
 
 Command ("edit-insert-newline",
 [[
-Insert a newline, wrapping if in Wrap mode.
+Insert a newline, wrapping if in wrap mode.
 ]],
   function ()
     if buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then

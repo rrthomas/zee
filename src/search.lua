@@ -77,7 +77,7 @@ local function search (s, forward)
   local o = get_buffer_pt (buf)
   local notbol = forward and o > 1
   local noteol = not forward and o <= get_buffer_size (buf)
-  local downcase = get_variable ("case-fold-search") and no_upper (s)
+  local downcase = get_variable ("caseless-search") and no_upper (s)
   local as = (forward and get_buffer_post_point or get_buffer_pre_point) (buf)
   local pos = find_substr (as, s, forward, notbol, noteol, downcase)
   if not pos then
