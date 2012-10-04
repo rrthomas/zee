@@ -1,4 +1,4 @@
-call_command ("edit-select-on", "point")
+call_command ("edit-select-on")
 call_command ("move-next-line")
 call_command ("move-next-line")
 call_command ("move-next-line")
