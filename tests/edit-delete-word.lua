@@ -1,0 +1,5 @@
+call_command ("edit-delete-word")
+call_command ("edit-delete-word")
+call_command ("edit-delete-word")
+call_command ("file-save")
+call_command ("file-quit")

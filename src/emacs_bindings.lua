@@ -53,8 +53,8 @@ key_bind("Ctrl-Alt-q", "file_quit")
 -- Undo
 key_bind("Ctrl-_", "edit_undo")
 -- Cut selection to clipboard
-key_bind("Ctrl-k", "edit_kill_selection")
-key_bind("Alt-d", "edit_kill_word")
+key_bind("Ctrl-k", "edit_delete_selection")
+key_bind("Alt-d", "edit_delete_word")
 -- Copy selection to clipboard
 key_bind("Alt-w", "edit_copy")
 -- Delete without modifying clipboard

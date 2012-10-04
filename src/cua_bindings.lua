@@ -48,13 +48,13 @@ key_bind("Ctrl-z", "edit_undo")
 -- Cut selection to clipboard
 -- FIXME: Following is approximate! We don't have a proper edit_cut
 -- command yet.
-key_bind("Ctrl-x", "edit_kill_selection")
-key_bind("Alt-DEL", "edit_kill_word")
+key_bind("Ctrl-x", "edit_delete_selection")
+key_bind("Alt-DEL", "edit_delete_word")
 -- Copy selection to clipboard
 key_bind("Ctrl-c", "edit_copy")
 -- Delete without modifying clipboard")
 key_bind("BS", "edit_delete_previous_character")
-key_bind("Alt-BS", "edit_kill_word_backward")
+key_bind("Alt-BS", "edit_delete_word_backward")
 key_bind("DEL", "edit_delete_next_character")
 -- Paste
 key_bind("Ctrl-v", "edit_paste")

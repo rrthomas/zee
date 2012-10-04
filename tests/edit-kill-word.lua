@@ -1,5 +1,0 @@
-call_command ("edit-kill-word")
-call_command ("edit-kill-word")
-call_command ("edit-kill-word")
-call_command ("file-save")
-call_command ("file-quit")

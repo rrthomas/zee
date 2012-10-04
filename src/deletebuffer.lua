@@ -1,4 +1,4 @@
--- Kill ring facility functions
+-- Delete buffer facility functions
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
@@ -17,30 +17,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-local kill_ring_text
+local delete_buffer_text
 
-local function maybe_free_kill_ring ()
-  if _last_command ~= "edit-kill-selection" then
-    kill_ring_text = nil
+local function maybe_free_delete_buffer ()
+  if _last_command ~= "edit-delete-selection" then
+    delete_buffer_text = nil
   end
 end
 
-local function copy_or_kill_the_region (kill)
+local function copy_or_delete_the_region (delete)
   local rp = calculate_the_region ()
 
   if rp then
-    maybe_free_kill_ring ()
-    kill_ring_text = (kill_ring_text or AStr ("")):cat (get_buffer_region (buf, rp))
+    maybe_free_delete_buffer ()
+    delete_buffer_text = (delete_buffer_text or AStr ("")):cat (get_buffer_region (buf, rp))
 
-    if kill then
+    if delete then
       if buf.readonly then
-        minibuf_error ("Read only text copied to kill ring")
+        minibuf_error ("Read only text copied to delete buffer")
       else
         assert (delete_region (rp))
       end
     end
 
-    _this_command = "edit-kill-selection"
+    _this_command = "edit-delete-selection"
     deactivate_mark ()
 
     return true
@@ -49,8 +49,8 @@ local function copy_or_kill_the_region (kill)
   return false
 end
 
-local function kill_text (mark_func)
-  maybe_free_kill_ring ()
+local function delete_text (mark_func)
+  maybe_free_delete_buffer ()
 
   if warn_if_readonly_buffer () then
     return false
@@ -60,42 +60,42 @@ local function kill_text (mark_func)
   undo_start_sequence ()
   select_on ()
   execute_command (mark_func)
-  execute_command ("edit-kill-selection")
+  execute_command ("edit-delete-selection")
   undo_end_sequence ()
   set_mark (m)
   unchain_marker (m)
 
-  _this_command = "edit-kill-selection"
+  _this_command = "edit-delete-selection"
   minibuf_write ("") -- Erase "Set mark" message.
   return true
 end
 
-Command ("edit-kill-word",
+Command ("edit-delete-word",
 [[
 Kill characters forward until encountering the end of a word.
 ]],
   function ()
-    return kill_text ("move-next-word")
+    return delete_text ("move-next-word")
   end
 )
 
-Command ("edit-kill-word-backward",
+Command ("edit-delete-word-backward",
 [[
 Kill characters backward until encountering the end of a word.
 ]],
   function ()
-    return kill_text ("move-previous-word")
+    return delete_text ("move-previous-word")
   end
 )
 
 Command ("edit-paste",
 [[
-Reinsert the stretch of killed text most recently killed.
+Reinsert the stretch of deleted text most recently deleted.
 Set mark at beginning, and put point at end.
 ]],
   function ()
-    if not kill_ring_text then
-      minibuf_error ("Kill ring is empty")
+    if not delete_buffer_text then
+      minibuf_error ("Delete buffer is empty")
       return false
     end
 
@@ -103,30 +103,30 @@ Set mark at beginning, and put point at end.
       return false
     end
 
-    insert_astr (kill_ring_text)
+    insert_astr (delete_buffer_text)
     deactivate_mark ()
   end
 )
 
 -- FIXME: Rename
-Command ("edit-kill-selection",
+Command ("edit-delete-selection",
 [[
 Delete the selection.
 The text is deleted, unless the buffer is read-only, and saved in the
-kill buffer; the `edit_paste' command retrieves it.
-If the previous command was also a kill command,
-the text killed this time appends to the text killed last time.
+delete buffer; the `edit-paste' command retrieves it.
+If the previous command was also a delete command,
+the text deleted this time appends to the text deleted last time.
 ]],
   function ()
-    return copy_or_kill_the_region (true)
+    return copy_or_delete_the_region (true)
   end
 )
 
 Command ("edit-copy",
 [[
-Copy the selection to the kill buffer.
+Copy the selection to the delete buffer.
 ]],
   function ()
-    return copy_or_kill_the_region (false)
+    return copy_or_delete_the_region (false)
   end
 )

@@ -40,7 +40,7 @@ src_@PACKAGE@_LUA =					\
 	src/help.lua					\
 	src/file.lua					\
 	src/keycode.lua					\
-	src/killring.lua				\
+	src/deletebuffer.lua				\
 	src/line.lua					\
 	src/macro.lua					\
 	src/marker.lua					\

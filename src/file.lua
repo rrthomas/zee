@@ -188,7 +188,7 @@ Save buffer in visited file.
 
 Command ("file-quit",
 [[
-Offer to save the file, then kill this process.
+Offer to save the file, then delete this process.
 ]],
   function ()
     if buf.modified then
