@@ -88,6 +88,28 @@ Set the mark where point is.
   end
 )
 
+Defun ("edit-select-off",
+[[
+Stop selecting text.
+]],
+  function ()
+    deactivate_mark ()
+  end
+)
+
+Defun ("edit-select-toggle",
+[[
+Toggle selection mode.
+]],
+  function ()
+    if cur_bp.mark then
+      execute_function ("edit-select-off")
+    else
+      execute_function ("edit-select-on")
+    end
+  end
+)
+
 Defun ("edit-insert-quoted",
 [[
 Read next input character and insert it.
