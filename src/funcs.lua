@@ -275,6 +275,18 @@ Move forward to end of paragraph.
   end
 )
 
+Defun ("move-start-line-text",
+[[
+Move point to the first non-whitespace character on this line.
+]],
+  function ()
+    goto_offset (get_buffer_line_o (cur_bp))
+    while not eolp () and following_char ():match ("%s") do
+      move_char (1)
+    end
+  end
+)
+
 
 -- Move through words
 local function move_word (dir)
