@@ -99,7 +99,7 @@ function do_search (forward, pattern)
   end
 
   if not pattern then
-    return execute_function ("keyboard-quit")
+    return ding ()
   end
   if #pattern > 0 then
     last_search = pattern
@@ -155,7 +155,7 @@ local function isearch (forward)
       thisflag.need_resync = true
 
       -- Quit.
-      execute_function ("keyboard-quit")
+      ding ()
 
       -- Restore old mark position.
       if buf.mark then
@@ -281,7 +281,7 @@ what to do with it.
   function ()
     local find = minibuf_read ("Query replace string: ", "")
     if not find then
-      return execute_function ("keyboard-quit")
+      return ding ()
     end
     if find == "" then
       return false
@@ -290,7 +290,7 @@ what to do with it.
 
     local repl = minibuf_read (string.format ("Query replace `%s' with: ", find), "")
     if not repl then
-      execute_function ("keyboard-quit")
+      ding ()
     end
 
     local noask = false
@@ -317,7 +317,7 @@ what to do with it.
         if c == keycode "q" then -- Quit immediately.
           break
         elseif c == keycode "C-g" then
-          ok = execute_function ("keyboard-quit")
+          ding ()
           break
         elseif c == keycode "!" then -- Replace all without asking.
           noask = true

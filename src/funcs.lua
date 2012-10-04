@@ -17,16 +17,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defun ("keyboard-quit",
-[[
-Cancel current command.
-]],
-  function ()
-    deactivate_mark ()
-    return minibuf_error ("Quit")
-  end
-)
-
 Defun ("file-suspend",
 [[
 Stop editor and return to superior process.
@@ -189,8 +179,7 @@ local function minibuf_read_shell_command ()
   local ms = minibuf_read ("Shell command: ", "")
 
   if not ms then
-    execute_function ("keyboard-quit")
-    return
+    return ding ()
   end
   if ms == "" then
     return

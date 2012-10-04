@@ -62,7 +62,7 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
     ms = term_minibuf_read (fmt, value, -1, cp, hp)
 
     if not ms then -- Cancelled.
-      execute_function ("keyboard-quit")
+      ding ()
       break
     elseif ms == "" then
       minibuf_error (empty_err)
@@ -146,7 +146,7 @@ function minibuf_read_number (fmt)
   repeat
     local ms = minibuf_read (fmt, "")
       if not ms then
-        execute_function ("keyboard-quit")
+        ding ()
         break
       elseif #ms == 0 then
         n = ""

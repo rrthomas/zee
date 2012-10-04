@@ -108,7 +108,7 @@ Set mark after the inserted text.
     if not file then
       file = minibuf_read_filename ("Insert file: ", buf.dir)
       if not file then
-        ok = execute_function ("keyboard-quit")
+        ok = ding ()
       end
     end
 
@@ -198,7 +198,7 @@ Offer to save the file, then kill this process.
     if buf.modified then
       local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (buf)))
       if ans == nil then
-        return execute_function ("keyboard-quit")
+        return ding ()
       elseif ans then
         save_buffer ()
       end

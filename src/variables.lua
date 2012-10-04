@@ -44,15 +44,9 @@ Set a variable value to the user-specified value.
     end
 
     val = val or minibuf_read (string.format ("Set %s to value: ", var), "")
-    local ok = true
     if not val then
-      ok = execute_function ("keyboard-quit")
+      return ding ()
     end
-
-    if ok then
-      preferences_set_variable (var, val)
-    end
-
-    return ok
+    preferences_set_variable (var, val)
   end
 )
