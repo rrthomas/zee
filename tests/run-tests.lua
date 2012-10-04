@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require "posix"
+posix = require "posix"
 require "std"
 
 -- N.B. Tests that use macro-play must note that keyboard input
