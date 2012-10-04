@@ -31,13 +31,13 @@ Redraw screen.
 
 function resize_window ()
   -- Resize window horizontally.
-  cur_wp.fwidth = term_width ()
-  cur_wp.ewidth = cur_wp.fwidth
+  win.fwidth = term_width ()
+  win.ewidth = win.fwidth
 
   -- Resize window vertically.
-  local hdelta = term_height () - 1 - cur_wp.fheight
-  cur_wp.fheight = cur_wp.fheight + hdelta
-  cur_wp.eheight = cur_wp.eheight + hdelta
+  local hdelta = term_height () - 1 - win.fheight
+  win.fheight = win.fheight + hdelta
+  win.eheight = win.eheight + hdelta
 
   execute_function ("move-redraw")
 end

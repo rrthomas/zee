@@ -36,13 +36,13 @@ end
 
 function create_window ()
   local w, h = term_width (), term_height ()
-  cur_wp = {topdelta = 0, start_column = 0, lastpointn = 0}
-  cur_wp.fwidth = w
-  cur_wp.ewidth = w
+  win = {topdelta = 0, start_column = 0, lastpointn = 0}
+  win.fwidth = w
+  win.ewidth = w
   -- Save space for minibuffer.
-  cur_wp.fheight = h - 1
+  win.fheight = h - 1
   -- Save space for status line.
-  cur_wp.eheight = cur_wp.fheight - 1
+  win.eheight = win.fheight - 1
 end
 
 function window_resync (wp)

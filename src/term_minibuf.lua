@@ -77,7 +77,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
     end
 
     if cp then
-      local completion_text = completion_write (cp, cur_wp.ewidth)
+      local completion_text = completion_write (cp, win.ewidth)
       if completion_text ~= old_completion_text then
         popup_set (completion_text)
         old_completion_text = completion_text

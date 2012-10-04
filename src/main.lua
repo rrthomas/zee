@@ -64,7 +64,7 @@ X = nil
 WAITKEY_DEFAULT = 20
 
 -- The current window
-cur_wp = nil
+win = nil
 
 -- The current buffer
 buf = nil
@@ -159,7 +159,7 @@ function main ()
     -- Run the main loop.
     while not thisflag.quit do
       if lastflag.need_resync then
-        window_resync (cur_wp)
+        window_resync (win)
       end
       get_and_run_command ()
     end

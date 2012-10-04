@@ -172,7 +172,7 @@ end
 function popup_completion (cp)
   cp.poppedup = true
   cp.close = true
-  popup_set (completion_write (cp, cur_wp.ewidth))
+  popup_set (completion_write (cp, win.ewidth))
   term_redisplay ()
 end
 

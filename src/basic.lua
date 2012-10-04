@@ -180,8 +180,8 @@ Defun ("move-previous-page",
 Scroll text of current window downward near full screen.
 ]],
   function ()
-    if not window_top_visible (cur_wp) then
-      return move_line (-cur_wp.eheight)
+    if not window_top_visible (win) then
+      return move_line (-win.eheight)
     end
 
     return minibuf_error ("Beginning of buffer")
@@ -193,8 +193,8 @@ Defun ("move-next-page",
 Scroll text of current window upward near full screen.
 ]],
   function ()
-    if not window_bottom_visible (cur_wp) then
-      return move_line (cur_wp.eheight)
+    if not window_bottom_visible (win) then
+      return move_line (win.eheight)
     end
 
     return minibuf_error ("End of buffer")

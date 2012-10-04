@@ -110,7 +110,7 @@ end
 
 local function draw_border ()
   term_attrset (display.reverse)
-  term_addstr (string.rep ('-', cur_wp.ewidth))
+  term_addstr (string.rep ('-', win.ewidth))
   term_attrset (display.normal)
 end
 
@@ -204,7 +204,7 @@ end
 
 -- Scroll the popup text and loop having reached the bottom.
 function popup_scroll_down_and_loop ()
-  popup_line = popup_line + cur_wp.fheight - 3
+  popup_line = popup_line + win.fheight - 3
   if popup_line > popup_text:lines () then
     popup_line = 0
   end
@@ -213,7 +213,7 @@ end
 
 -- Scroll down the popup text.
 function popup_scroll_down ()
-  local h = cur_wp.fheight - 3
+  local h = win.fheight - 3
   popup_line = math.min (popup_line + h, popup_text:lines () + 1 - h)
   term_display ()
 end
@@ -230,7 +230,7 @@ local function draw_popup ()
 
   -- Number of lines of popup_text that will fit on the terminal.
   -- Allow 3 for the border above, and minibuffer and status line below.
-  local h = cur_wp.fheight - 3
+  local h = win.fheight - 3
   -- Number of lines.
   local l = popup_text:lines ()
   -- Position of top of popup == number of lines not to use.
@@ -261,9 +261,9 @@ function term_redisplay ()
 
   col = 0
   o = o - lineo
-  cur_wp.start_column = 0
+  win.start_column = 0
 
-  local ew = cur_wp.ewidth
+  local ew = win.ewidth
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
@@ -276,7 +276,7 @@ function term_redisplay ()
     end
 
     if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then
-      cur_wp.start_column = lp + 1
+      win.start_column = lp + 1
       col = lastcol
       break
     end
@@ -287,8 +287,8 @@ function term_redisplay ()
   -- Draw the window.
   local topline = 0
   cur_topline = topline
-  draw_window (topline, cur_wp)
-  topline = topline + cur_wp.fheight
+  draw_window (topline, win)
+  topline = topline + win.fheight
 
   -- Draw the popup window.
   if popup_text then
@@ -299,5 +299,5 @@ function term_redisplay ()
 end
 
 function term_redraw_cursor ()
-  term_move (cur_topline + cur_wp.topdelta, col)
+  term_move (cur_topline + win.topdelta, col)
 end

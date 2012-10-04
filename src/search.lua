@@ -224,7 +224,7 @@ local function isearch (forward)
     end
 
     if thisflag.need_resync then
-      window_resync (cur_wp)
+      window_resync (win)
       term_redisplay ()
     end
   end
@@ -301,7 +301,7 @@ what to do with it.
 
       if not noask then
         if thisflag.need_resync then
-          window_resync (cur_wp)
+          window_resync (win)
         end
         while true do
           minibuf_write (string.format ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl))
@@ -348,7 +348,7 @@ what to do with it.
     end
 
     if thisflag.need_resync then
-      window_resync (cur_wp)
+      window_resync (win)
     end
 
     if ok then

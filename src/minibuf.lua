@@ -24,7 +24,7 @@ minibuf_contents = nil
 -- Minibuffer wrapper functions.
 
 function minibuf_refresh ()
-  if cur_wp then
+  if win then
     if minibuf_contents then
       term_minibuf_write (minibuf_contents)
     end
