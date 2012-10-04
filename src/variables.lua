@@ -33,7 +33,7 @@ function preferences_set_variable (var, val)
   vars[var].val = val
 end
 
-Defun ("preferences-set-variable",
+Command ("preferences-set-variable",
 [[
 Set a variable value to the user-specified value.
 ]],

@@ -87,7 +87,7 @@ local function revert_action (up)
   return up.next
 end
 
-Defun ("edit-undo",
+Command ("edit-undo",
 [[
 Undo some previous changes.
 Repeat this command to undo more changes.
@@ -113,7 +113,7 @@ Repeat this command to undo more changes.
   end
 )
 
-Defun ("edit-revert",
+Command ("edit-revert",
 [[
 Undo until buffer is unmodified.
 ]],
@@ -121,7 +121,7 @@ Undo until buffer is unmodified.
     -- FIXME: save pointer to current undo action and abort if we get
     -- back to it.
     while buf.modified do
-      execute_function ("edit-undo")
+      execute_command ("edit-undo")
     end
   end
 )

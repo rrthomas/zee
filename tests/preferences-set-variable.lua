@@ -1,5 +1,5 @@
 call_command ("preferences-set-variable", "case-fold-search", "nil")
-execute_function ("edit-find", "I")
+execute_command ("edit-find", "I")
 insert_string ("a")
 call_command ("file-save")
 call_command ("file-quit")

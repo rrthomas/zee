@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defun ("move-start-line",
+Command ("move-start-line",
 [[
 Move point to beginning of current line.
 ]],
@@ -27,7 +27,7 @@ Move point to beginning of current line.
   end
 )
 
-Defun ("move-end-line",
+Command ("move-end-line",
 [[
 Move point to end of current line.
 ]],
@@ -37,7 +37,7 @@ Move point to end of current line.
   end
 )
 
-Defun ("move-previous-character",
+Command ("move-previous-character",
 [[
 Move point left one character.
 On attempt to pass beginning or end of buffer, stop and signal error.
@@ -51,7 +51,7 @@ On attempt to pass beginning or end of buffer, stop and signal error.
   end
 )
 
-Defun ("move-next-character",
+Command ("move-next-character",
 [[
 Move point right one characters.
 On reaching end of buffer, stop and signal error.
@@ -81,7 +81,7 @@ function get_goalc ()
   return col
 end
 
-Defun ("edit-goto-character",
+Command ("edit-goto-character",
 [[
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
@@ -96,7 +96,7 @@ Beginning of buffer is position 1.
   end
 )
 
-Defun ("edit-goto-line",
+Command ("edit-goto-line",
 [[
 Goto @i{line}, counting from line 1 at beginning of buffer.
 ]],
@@ -108,14 +108,14 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
 
     if type (n) == "number" then
       move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
-      execute_function ("move-start-line")
+      execute_command ("move-start-line")
     else
       return false
     end
   end
 )
 
-Defun ("edit-goto-column",
+Command ("edit-goto-column",
 [[
 Goto @i{column}, counting from column 1 at the start of the line.
 ]],
@@ -133,7 +133,7 @@ Goto @i{column}, counting from column 1 at the start of the line.
   end
 )
 
-Defun ("move-previous-line",
+Command ("move-previous-line",
 [[
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -145,7 +145,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Defun ("move-next-line",
+Command ("move-next-line",
 [[
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -157,7 +157,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Defun ("move-start-file",
+Command ("move-start-file",
 [[
 Move point to the beginning of the buffer; leave mark at previous position.
 ]],
@@ -166,7 +166,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
   end
 )
 
-Defun ("move-end-file",
+Command ("move-end-file",
 [[
 Move point to the end of the buffer; leave mark at previous position.
 ]],
@@ -175,7 +175,7 @@ Move point to the end of the buffer; leave mark at previous position.
   end
 )
 
-Defun ("move-previous-page",
+Command ("move-previous-page",
 [[
 Scroll text of current window downward near full screen.
 ]],
@@ -188,7 +188,7 @@ Scroll text of current window downward near full screen.
   end
 )
 
-Defun ("move-next-page",
+Command ("move-next-page",
 [[
 Scroll text of current window upward near full screen.
 ]],

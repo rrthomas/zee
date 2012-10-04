@@ -235,7 +235,7 @@ local function isearch (forward)
   return true
 end
 
-Defun ("edit-find",
+Command ("edit-find",
 [[
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -248,7 +248,7 @@ Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
   end
 )
 
-Defun ("edit-find-backward",
+Command ("edit-find-backward",
 [[
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
@@ -272,7 +272,7 @@ local function check_case (s)
   end
 end
 
-Defun ("edit-replace",
+Command ("edit-replace",
 [[
 Replace occurrences of a string with other text.
 As each match is found, the user must type a character saying

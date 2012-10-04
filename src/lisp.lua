@@ -23,7 +23,7 @@
 -- User commands
 usercmd = {}
 
-function Defun (name, doc, func)
+function Command (name, doc, func)
   usercmd[name] = {
     doc = texi (doc:chomp ()),
     func = function (...)
@@ -33,15 +33,15 @@ function Defun (name, doc, func)
   }
 end
 
-function get_function_doc (name)
+function get_command_doc (name)
   return usercmd[name] and usercmd[name].doc or nil
 end
 
-function execute_function (name, ...)
+function execute_command (name, ...)
   return usercmd[name] and usercmd[name].func and pcall (usercmd[name].func (...))
 end
 
-Defun ("load",
+Command ("load",
 [[
 Execute a file of Lua code named FILE.
 ]],
@@ -53,32 +53,32 @@ Execute a file of Lua code named FILE.
   end
 )
 
-function function_exists (f)
+function command_exists (f)
   return usercmd[f] ~= nil
 end
 
 
 -- FIXME: Better name for execute-command.
-Defun ("execute-command",
+Command ("execute-command",
 [[
 Read function name and call it.
 ]],
   function ()
-    local name = minibuf_read_function_name ("M-x ")
-    return name and execute_function (name) or nil
+    local name = minibuf_read_command_name ("M-x ")
+    return name and execute_command (name) or nil
   end
 )
 
 -- Read a function name from the minibuffer.
-local functions_history = history_new ()
-function minibuf_read_function_name (fmt)
+local commands_history = history_new ()
+function minibuf_read_command_name (fmt)
   local cp = completion_new ()
 
   for name, func in pairs (usercmd) do
     table.insert (cp.completions, name)
   end
 
-  return minibuf_vread_completion (fmt, "", cp, functions_history,
-                                   "No function name given",
-                                   "Undefined function name `%s'")
+  return minibuf_vread_completion (fmt, "", cp, commands_history,
+                                   "No command name given",
+                                   "Undefined command name `%s'")
 end

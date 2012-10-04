@@ -59,8 +59,8 @@ local function kill_text (mark_func)
   local m = point_marker ()
   undo_start_sequence ()
   select_on ()
-  execute_function (mark_func)
-  execute_function ("edit-kill-selection")
+  execute_command (mark_func)
+  execute_command ("edit-kill-selection")
   undo_end_sequence ()
   set_mark (m)
   unchain_marker (m)
@@ -70,7 +70,7 @@ local function kill_text (mark_func)
   return true
 end
 
-Defun ("edit-kill-word",
+Command ("edit-kill-word",
 [[
 Kill characters forward until encountering the end of a word.
 ]],
@@ -79,7 +79,7 @@ Kill characters forward until encountering the end of a word.
   end
 )
 
-Defun ("edit-kill-word-backward",
+Command ("edit-kill-word-backward",
 [[
 Kill characters backward until encountering the end of a word.
 ]],
@@ -88,7 +88,7 @@ Kill characters backward until encountering the end of a word.
   end
 )
 
-Defun ("edit-paste",
+Command ("edit-paste",
 [[
 Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
@@ -109,7 +109,7 @@ killed @i{or} pasted.  Put point at end, and set mark at beginning.
   end
 )
 
-Defun ("edit-kill-selection",
+Command ("edit-kill-selection",
 [[
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
@@ -126,7 +126,7 @@ to make one entry in the kill ring.
   end
 )
 
-Defun ("edit-copy",
+Command ("edit-copy",
 [[
 Save the region as if killed, but don't kill it.
 ]],

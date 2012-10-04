@@ -314,7 +314,7 @@ function move_char (offset)
     elseif not btest () then
       thisflag.need_resync = true
       set_buffer_pt (buf, get_buffer_pt (buf) + dir)
-      execute_function (lmove)
+      execute_command (lmove)
     else
       return false
     end

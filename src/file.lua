@@ -93,7 +93,7 @@ function compact_path (path)
   return (string.gsub (path, "^" .. home, "~"))
 end
 
-Defun ("insert-file",
+Command ("insert-file",
 [[
 Insert contents of file FILENAME into buffer after point.
 Set mark after the inserted text.
@@ -181,7 +181,7 @@ local function save_buffer ()
   return true
 end
 
-Defun ("file-save",
+Command ("file-save",
 [[
 Save buffer in visited file if modified.
 ]],
@@ -190,7 +190,7 @@ Save buffer in visited file if modified.
   end
 )
 
-Defun ("file-quit",
+Command ("file-quit",
 [[
 Offer to save the file, then kill this process.
 ]],

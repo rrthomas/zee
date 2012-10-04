@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defun ("move-redraw",
+Command ("move-redraw",
 [[
 Redraw screen.
 ]],
@@ -39,5 +39,5 @@ function resize_window ()
   win.fheight = win.fheight + hdelta
   win.eheight = win.eheight + hdelta
 
-  execute_function ("move-redraw")
+  execute_command ("move-redraw")
 end

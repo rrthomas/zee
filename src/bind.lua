@@ -19,7 +19,7 @@
 
 -- Key binding.
 
-Defun ("edit-insert-character",
+Command ("edit-insert-character",
 [[
 Insert the character you type.
 Whichever character you type to run this command is inserted.
@@ -51,7 +51,7 @@ function call_command (f, ...)
   -- Execute the command.
   _this_command = f
   _interactive = true
-  local ok = execute_function (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_function
+  local ok = execute_command (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_command
   _interactive = false
   _last_command = _this_command
 
@@ -72,12 +72,12 @@ end
 
 function get_and_run_command ()
   local key = get_key_chord ()
-  local name = get_function_by_key (key)
+  local name = get_command_by_key (key)
 
   popup_clear ()
   minibuf_clear ()
 
-  if function_exists (name) then
+  if command_exists (name) then
     call_command (name)
   else
     minibuf_error (tostring (key) .. " is undefined")
@@ -105,7 +105,7 @@ end
 function key_bind (keystr, cmd)
   local key = key_canon (keystr)
   if key then
-    if not function_exists (cmd) then -- Possible if called non-interactively
+    if not command_exists (cmd) then -- Possible if called non-interactively
       minibuf_error (string.format ("No such function `%s'", cmd))
       return
     end
@@ -186,19 +186,19 @@ function init_default_bindings ()
   key_bind ("C-y", "edit-paste")
 end
 
-function get_function_by_key (key)
+function get_command_by_key (key)
   return root_bindings[tostring (key)]
 end
 
-Defun ("where-is",
+Command ("where-is",
 [[
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command name.
 ]],
   function ()
-    local name = minibuf_read_function_name ("Where is command: ")
+    local name = minibuf_read_command_name ("Where is command: ")
 
-    if name and function_exists (name) then
+    if name and command_exists (name) then
       local keys = {}
       for k, n in pairs (root_bindings) do
         if n == name then

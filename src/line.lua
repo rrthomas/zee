@@ -67,7 +67,7 @@ function fill_break_line ()
 
     if break_col >= 1 then -- Break line.
       goto_offset (get_buffer_line_o (buf) + break_col)
-      execute_function ("delete-horizontal-space")
+      execute_command ("delete-horizontal-space")
       insert_string ("\n")
       goto_offset (m.o)
       break_made = true
@@ -106,7 +106,7 @@ local function previous_nonblank_goalc ()
   local cur_goalc = get_goalc ()
 
   -- Find previous non-blank line.
-  execute_function ("move-start-line")
+  execute_command ("move-start-line")
   while move_line (-1) and is_blank_line () do end
 
   -- Go to `cur_goalc' in that non-blank line.
@@ -115,7 +115,7 @@ local function previous_nonblank_goalc ()
   end
 end
 
-Defun ("indent-relative",
+Command ("indent-relative",
 [[
 Space out to under next indent point in previous nonblank line.
 An indent point is a non-whitespace character following whitespace.
@@ -194,7 +194,7 @@ does nothing.
   end
 )
 
-Defun ("edit-insert-newline-and-indent",
+Command ("edit-insert-newline-and-indent",
 [[
 Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
@@ -222,7 +222,7 @@ Indentation is done using the `indent-for-tab-command' function.
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
       if indent then
-        execute_function ("indent-for-tab-command")
+        execute_command ("indent-for-tab-command")
       end
       ok = true
     end
@@ -233,7 +233,7 @@ Indentation is done using the `indent-for-tab-command' function.
 )
 
 
-Defun ("edit-delete-next-character",
+Command ("edit-delete-next-character",
 [[
 Delete the following character.
 ]],
@@ -242,7 +242,7 @@ Delete the following character.
   end
 )
 
-Defun ("edit-delete-previous-character",
+Command ("edit-delete-previous-character",
 [[
 Delete the previous character.
 ]],
@@ -259,7 +259,7 @@ Delete the previous character.
   end
 )
 
-Defun ("delete-horizontal-space",
+Command ("delete-horizontal-space",
 [[
 Delete all spaces and tabs around point.
 ]],
@@ -271,14 +271,14 @@ Delete all spaces and tabs around point.
     end
 
     while not bolp () and preceding_char ():match ("%s") do
-      execute_function ("edit-delete-previous-character")
+      execute_command ("edit-delete-previous-character")
     end
 
     undo_end_sequence ()
   end
 )
 
-Defun ("edit-insert-tab",
+Command ("edit-insert-tab",
 [[
 Insert a tabulation at the current point position into the current
 buffer.
@@ -288,7 +288,7 @@ buffer.
   end
 )
 
-Defun ("edit-insert-newline",
+Command ("edit-insert-newline",
 [[
 Insert a newline at the current point position into
 the current buffer.

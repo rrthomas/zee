@@ -1,4 +1,4 @@
--- Miscellaneous Emacs functions
+-- Miscellaneous editing commands
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defun ("file-suspend",
+Command ("file-suspend",
 [[
 Stop editor and return to superior process.
 ]],
@@ -26,7 +26,7 @@ Stop editor and return to superior process.
   end
 )
 
-Defun ("preferences-toggle-read-only",
+Command ("preferences-toggle-read-only",
 [[
 Change whether this buffer is visiting its file read-only.
 ]],
@@ -35,7 +35,7 @@ Change whether this buffer is visiting its file read-only.
   end
 )
 
-Defun ("preferences-toggle-wrap-mode",
+Command ("preferences-toggle-wrap-mode",
 [[
 Toggle Auto Fill mode.
 In Auto Fill mode, inserting a space at a column beyond `fill-column'
@@ -46,7 +46,7 @@ automatically breaks the line at a previous space.
   end
 )
 
-Defun ("edit-select-other-end",
+Command ("edit-select-other-end",
 [[
 Put the mark where point is now, and point where the mark is now.
 ]],
@@ -68,7 +68,7 @@ function select_on ()
   activate_mark ()
 end
 
-Defun ("edit-select-on",
+Command ("edit-select-on",
 [[
 Set the mark where point is.
 ]],
@@ -78,7 +78,7 @@ Set the mark where point is.
   end
 )
 
-Defun ("edit-select-off",
+Command ("edit-select-off",
 [[
 Stop selecting text.
 ]],
@@ -87,20 +87,20 @@ Stop selecting text.
   end
 )
 
-Defun ("edit-select-toggle",
+Command ("edit-select-toggle",
 [[
 Toggle selection mode.
 ]],
   function ()
     if buf.mark then
-      execute_function ("edit-select-off")
+      execute_command ("edit-select-off")
     else
-      execute_function ("edit-select-on")
+      execute_command ("edit-select-on")
     end
   end
 )
 
-Defun ("edit-insert-quoted",
+Command ("edit-insert-quoted",
 [[
 Read next input character and insert it.
 This is useful for inserting control characters.
@@ -112,7 +112,7 @@ This is useful for inserting control characters.
   end
 )
 
-Defun ("edit-wrap-paragraph",
+Command ("edit-wrap-paragraph",
 [[
 Fill paragraph at or after point.
 ]],
@@ -121,26 +121,26 @@ Fill paragraph at or after point.
 
     undo_start_sequence ()
 
-    execute_function ("move-next-paragraph")
+    execute_command ("move-next-paragraph")
     if is_empty_line () then
       move_line (-1)
     end
     local m_end = point_marker ()
 
-    execute_function ("move-previous-paragraph")
+    execute_command ("move-previous-paragraph")
     if is_empty_line () then -- Move to next line if between two paragraphs.
       move_line (1)
     end
 
     while buffer_end_of_line (buf, get_buffer_pt (buf)) < m_end.o do
-      execute_function ("move-end-line")
+      execute_command ("move-end-line")
       delete_char ()
-      execute_function ("delete-horizontal-space")
+      execute_command ("delete-horizontal-space")
       insert_char (' ')
     end
     unchain_marker (m_end)
 
-    execute_function ("move-end-line")
+    execute_command ("move-end-line")
     while get_goalc () > tonumber (get_variable ("fill-column")) + 1 and fill_break_line () do end
 
     goto_offset (m.o)
@@ -188,7 +188,7 @@ local function minibuf_read_shell_command ()
   return ms
 end
 
-Defun ("edit-shell-command",
+Command ("edit-shell-command",
 [[
 Execute string command in inferior shell with region as input.
 The output is inserted in the buffer, replacing the region if any.
@@ -240,13 +240,13 @@ local function move_paragraph (dir, line_extremum)
   repeat until is_empty_line () or not move_line (dir)
 
   if is_empty_line () then
-    execute_function ("move-start-line")
+    execute_command ("move-start-line")
   else
-    execute_function (line_extremum)
+    execute_command (line_extremum)
   end
 end
 
-Defun ("move-previous-paragraph",
+Command ("move-previous-paragraph",
 [[
 Move backward to start of paragraph.
 ]],
@@ -255,7 +255,7 @@ Move backward to start of paragraph.
   end
 )
 
-Defun ("move-next-paragraph",
+Command ("move-next-paragraph",
 [[
 Move forward to end of paragraph.
 ]],
@@ -264,7 +264,7 @@ Move forward to end of paragraph.
   end
 )
 
-Defun ("move-start-line-text",
+Command ("move-start-line-text",
 [[
 Move point to the first non-whitespace character on this line.
 ]],
@@ -293,7 +293,7 @@ local function move_word (dir)
   return gotword
 end
 
-Defun ("move-next-word",
+Command ("move-next-word",
 [[
 Move point forward one word.
 ]],
@@ -302,7 +302,7 @@ Move point forward one word.
   end
 )
 
-Defun ("move-previous-word",
+Command ("move-previous-word",
 [[
 Move backward until encountering the end of a word.
 ]],

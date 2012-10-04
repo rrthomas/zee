@@ -122,14 +122,14 @@ function main ()
   if not getopt.opt["no-init-file"] then
     local s = os.getenv ("HOME")
     if s then
-      execute_function ("load", s .. "/." .. PACKAGE)
+      execute_command ("load", s .. "/." .. PACKAGE)
     end
   end
 
   -- Load file
   local ok = find_file (file)
   if ok then
-    execute_function ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
+    execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
     lastflag.need_resync = true
   end
 

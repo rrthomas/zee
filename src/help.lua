@@ -25,23 +25,23 @@ local function get_variable_doc (name)
   end
 end
 
-Defun ("help-thing",
+Command ("help-thing",
 [[
-Display the documentation of a function or variable.
+Display the documentation of a command or variable.
 ]],
   function (name)
-    name = name or minibuf_read_name ("Describe function or variable: ")
+    name = name or minibuf_read_name ("Describe command or variable: ")
     if not name then
       return false
     end
 
-    local doc = get_function_doc (name) or get_variable_doc (name) or "No help available"
+    local doc = get_command_doc (name) or get_variable_doc (name) or "No help available"
     popup_set (string.format ("Help for `%s':\n%s", name, doc))
     return true
   end
 )
 
-Defun ("help-key",
+Command ("help-key",
 [[
 Display documentation of the command invoked by a key sequence.
 ]],
@@ -50,7 +50,7 @@ Display documentation of the command invoked by a key sequence.
     if not key then
       return false
     end
-    local name = get_function_by_key (key)
+    local name = get_command_by_key (key)
     local binding = tostring (key)
     if not name then
       return minibuf_error (binding .. " is undefined")
@@ -58,7 +58,7 @@ Display documentation of the command invoked by a key sequence.
 
     minibuf_write (string.format ("%s runs the command `%s'", binding, name))
 
-    local doc = get_function_doc (name)
+    local doc = get_command_doc (name)
     if not doc then
       return false
     end
