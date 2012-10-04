@@ -143,7 +143,7 @@ is given by the variable `wrap-column'.
     unchain_marker (m_end)
 
     execute_command ("move-end-line")
-    while get_goalc () > tonumber (get_variable ("wrap-column")) + 1 and fill_break_line () do end
+    while get_goalc () > tonumber (get_variable ("wrap-column")) + 1 and wrap_break_line () do end
 
     goto_offset (m.o)
     unchain_marker (m)

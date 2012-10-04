@@ -33,7 +33,7 @@ Whichever character you type to run this command is inserted.
     end
 
     if string.char (key):match ("%s") and buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
-      fill_break_line ()
+      wrap_break_line ()
     end
 
     insert_char (string.char (key))

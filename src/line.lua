@@ -29,20 +29,20 @@ end
 -- line contains no spaces, no break is made.
 --
 -- Return flag indicating whether break was made.
-function fill_break_line ()
+function wrap_break_line ()
   local i, old_col
   local break_col = 0
-  local fillcol = tonumber (get_variable ("wrap-column"))
+  local wrapcol = tonumber (get_variable ("wrap-column"))
   local break_made = false
 
   -- Only break if we're beyond wrap-column.
-  if get_goalc () > fillcol then
+  if get_goalc () > wrapcol then
     -- Save point.
     local m = point_marker ()
 
-    -- Move cursor back to fill column
+    -- Move cursor back to wrap column
     old_col = get_buffer_pt (buf) - get_buffer_line_o (buf)
-    while get_goalc () > fillcol + 1 do
+    while get_goalc () > wrapcol + 1 do
       move_char (-1)
     end
 
@@ -290,7 +290,7 @@ Insert a newline, wrapping if in Wrap mode.
 ]],
   function ()
     if buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
-      fill_break_line ()
+      wrap_break_line ()
     end
     return insert_string ("\n")
   end
