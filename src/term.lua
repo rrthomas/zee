@@ -1,4 +1,4 @@
--- Redisplay engine
+-- Display engine
 --
 -- Copyright (c) 2009-2012 Free Software Foundation, Inc.
 --
@@ -16,6 +16,31 @@
 --
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Command ("move-redraw",
+[[
+Redraw screen.
+]],
+  function ()
+    term_clear ()
+    term_redisplay ()
+    term_refresh ()
+    return true
+  end
+)
+
+function resize_window ()
+  -- Resize window horizontally.
+  win.fwidth = term_width ()
+  win.ewidth = win.fwidth
+
+  -- Resize window vertically.
+  local hdelta = term_height () - 1 - win.fheight
+  win.fheight = win.fheight + hdelta
+  win.eheight = win.eheight + hdelta
+
+  execute_command ("move-redraw")
+end
 
 -- Tidy up the term ready to exit (temporarily or permanently!).
 function term_tidy ()

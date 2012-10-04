@@ -45,14 +45,13 @@ src_@PACKAGE@_LUA =					\
 	src/macro.lua					\
 	src/marker.lua					\
 	src/minibuf.lua					\
-	src/redisplay.lua				\
 	src/search.lua					\
 	src/tbl_vars.lua				\
 	src/undo.lua					\
 	src/window.lua					\
+	src/term.lua					\
 	src/term_curses.lua				\
-	src/term_minibuf.lua				\
-	src/term_redisplay.lua
+	src/term_minibuf.lua
 
 LUA_RUNTIME =						\
 	$(src_$(PACKAGE)_LUA)
