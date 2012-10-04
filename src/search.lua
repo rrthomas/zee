@@ -279,7 +279,7 @@ end
 -- FIXME: Make edit_replace run on selection.
 Command ("edit-replace",
 [[
-Replace occurrences of a string with other text.
+Replace occurrences of a regular expression with other text.
 As each match is found, the user must type a character saying
 what to do with it.
 ]],

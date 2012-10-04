@@ -35,7 +35,7 @@ end
 
 Command ("preferences-set-variable",
 [[
-Set a variable value to the user-specified value.
+Set a variable to the specified value.
 ]],
   function (var, val)
     var = var or minibuf_read_variable_name ("Set variable: ")

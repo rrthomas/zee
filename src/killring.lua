@@ -90,9 +90,8 @@ Kill characters backward until encountering the end of a word.
 
 Command ("edit-paste",
 [[
-Reinsert the last stretch of killed text.
-More precisely, reinsert the stretch of killed text most recently
-killed @i{or} pasted.  Put point at end, and set mark at beginning.
+Reinsert the stretch of killed text most recently killed.
+Set mark at beginning, and put point at end.
 ]],
   function ()
     if not kill_ring_text then
@@ -109,17 +108,14 @@ killed @i{or} pasted.  Put point at end, and set mark at beginning.
   end
 )
 
+-- FIXME: Rename
 Command ("edit-kill-selection",
 [[
-Kill between point and mark.
-The text is deleted but saved in the kill ring.
-The command @kbd{C-y} (edit-paste) can retrieve it from there.
-If the buffer is read-only, beep and refrain from deleting the text,
-but put the text in the kill ring anyway.  This means that you can
-use the killing commands to copy text from a read-only buffer.
+Delete the selection.
+The text is deleted, unless the buffer is read-only, and saved in the
+kill buffer; the `edit_paste' command retrieves it.
 If the previous command was also a kill command,
-the text killed this time appends to the text killed last time
-to make one entry in the kill ring.
+the text killed this time appends to the text killed last time.
 ]],
   function ()
     return copy_or_kill_the_region (true)
@@ -128,7 +124,7 @@ to make one entry in the kill ring.
 
 Command ("edit-copy",
 [[
-Save the region as if killed, but don't kill it.
+Copy the selection to the kill buffer.
 ]],
   function ()
     return copy_or_kill_the_region (false)

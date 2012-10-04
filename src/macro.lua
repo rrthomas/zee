@@ -44,7 +44,7 @@ end
 
 Command ("macro-record",
 [[
-Record subsequent keyboard input, defining a keyboard macro.
+Record subsequent keyboard input, defining a macro.
 The commands are recorded even as they are executed.
 Use @kbd{C-x )} to finish recording and make the macro available.
 ]],
@@ -95,9 +95,9 @@ local function process_keys (keys)
   undo_end_sequence ()
 end
 
-Command ("call-last-kbd-macro",
+Command ("macro-play",
 [[
-Call the last keyboard macro that you defined with @kbd{C-x (}.
+Play back the last macro that you defined.
 ]],
   function ()
     if cur_mp == nil then

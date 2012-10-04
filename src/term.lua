@@ -19,7 +19,7 @@
 
 Command ("move-redraw",
 [[
-Redraw screen.
+Redraw the display.
 ]],
   function ()
     term_clear ()
@@ -150,8 +150,8 @@ local function draw_status_line (line, wp)
                             make_modeline_flags (), buf.name, make_screen_pos (wp),
                             string.format ("(%d,%d)", n + 1, get_goalc ()))
 
-  if buf.autofill then
-    as = as .. " Fill"
+  if buf.wrap then
+    as = as .. " Wrap"
   end
   if thisflag.defining_macro then
     as = as .. " Def"

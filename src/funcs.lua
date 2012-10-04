@@ -28,7 +28,7 @@ Stop editor and return to superior process.
 
 Command ("preferences-toggle-read-only",
 [[
-Change whether this buffer is visiting its file read-only.
+Change whether this file can be modified.
 ]],
   function ()
     buf.readonly = not buf.readonly
@@ -37,18 +37,19 @@ Change whether this buffer is visiting its file read-only.
 
 Command ("preferences-toggle-wrap-mode",
 [[
-Toggle Auto Fill mode.
-In Auto Fill mode, inserting a space at a column beyond `fill-column'
-automatically breaks the line at a previous space.
+Toggle Wrap mode.
+In Wrap mode, inserting a space or newline at a column beyond
+`wrap-column' automatically breaks the line at a previous space.
+Paragraphs can also be wrapped using `edit-wrap-paragraph'.
 ]],
   function ()
-    buf.autofill = not buf.autofill
+    buf.wrap = not buf.wrap
   end
 )
 
 Command ("edit-select-other-end",
 [[
-Put the mark where point is now, and point where the mark is now.
+When selecting text, move the cursor to the other end of the selection.
 ]],
   function ()
     if not buf.mark then
@@ -70,7 +71,7 @@ end
 
 Command ("edit-select-on",
 [[
-Set the mark where point is.
+Start selecting text.
 ]],
   function ()
     select_on ()
@@ -114,7 +115,8 @@ This is useful for inserting control characters.
 
 Command ("edit-wrap-paragraph",
 [[
-Fill paragraph at or after point.
+Wrap the paragraph at or after the cursor. The wrap column
+is given by the variable `wrap-column'.
 ]],
   function ()
     local m = point_marker ()
@@ -141,7 +143,7 @@ Fill paragraph at or after point.
     unchain_marker (m_end)
 
     execute_command ("move-end-line")
-    while get_goalc () > tonumber (get_variable ("fill-column")) + 1 and fill_break_line () do end
+    while get_goalc () > tonumber (get_variable ("wrap-column")) + 1 and fill_break_line () do end
 
     goto_offset (m.o)
     unchain_marker (m)
@@ -190,9 +192,11 @@ end
 
 Command ("edit-shell-command",
 [[
-Execute string command in inferior shell with region as input.
-The output is inserted in the buffer, replacing the region if any.
-Return the exit code of command.
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command; passes the selection as input to the
+shell command.
+If the shell command produces any output, it is inserted into the
+file, replacing the selection if any.
 ]],
   function (cmd)
     local ok = true
@@ -248,7 +252,7 @@ end
 
 Command ("move-previous-paragraph",
 [[
-Move backward to start of paragraph.
+Move the cursor backward to the start of the paragraph.
 ]],
   function ()
     return move_paragraph (-1, "move-start-line")
@@ -257,7 +261,7 @@ Move backward to start of paragraph.
 
 Command ("move-next-paragraph",
 [[
-Move forward to end of paragraph.
+Move the cursor forward to the end of the paragraph.
 ]],
   function ()
     return move_paragraph (1, "move-end-line")
@@ -266,7 +270,7 @@ Move forward to end of paragraph.
 
 Command ("move-start-line-text",
 [[
-Move point to the first non-whitespace character on this line.
+Move the cursor to the first non-whitespace character on this line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf))
@@ -295,7 +299,7 @@ end
 
 Command ("move-next-word",
 [[
-Move point forward one word.
+Move the cursor forward one word.
 ]],
   function ()
     return move_word (1)
@@ -304,7 +308,7 @@ Move point forward one word.
 
 Command ("move-previous-word",
 [[
-Move backward until encountering the end of a word.
+Move the cursor backwards one word.
 ]],
   function ()
     return move_word (-1)

@@ -19,7 +19,7 @@
 
 Command ("move-start-line",
 [[
-Move point to beginning of current line.
+Move the cursor to the beginning of the line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf))
@@ -29,7 +29,7 @@ Move point to beginning of current line.
 
 Command ("move-end-line",
 [[
-Move point to end of current line.
+Move the cursor to the end of the line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf) + buffer_line_len (buf))
@@ -39,29 +39,19 @@ Move point to end of current line.
 
 Command ("move-previous-character",
 [[
-Move point left one character.
-On attempt to pass beginning or end of buffer, stop and signal error.
+Move the cursor left one character.
 ]],
   function ()
-    local ok = move_char (-1)
-    if not ok then
-      minibuf_error ("Beginning of buffer")
-    end
-    return ok
+    return move_char (-1)
   end
 )
 
 Command ("move-next-character",
 [[
-Move point right one characters.
-On reaching end of buffer, stop and signal error.
+Move the cursor right one character.
 ]],
   function ()
-    local ok = move_char (1)
-    if not ok then
-      minibuf_error ("End of buffer")
-    end
-    return ok
+    return move_char (1)
   end
 )
 
@@ -98,7 +88,8 @@ Beginning of buffer is position 1.
 
 Command ("edit-goto-line",
 [[
-Goto @i{line}, counting from line 1 at beginning of buffer.
+Move the cursor to the given line.
+Line 1 is the beginning of the buffer.
 ]],
   function (n)
     n = tonumber (n)
@@ -117,7 +108,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
 
 Command ("edit-goto-column",
 [[
-Goto @i{column}, counting from column 1 at the start of the line.
+Move the cursor to the given column.
 ]],
   function (n)
     n = tonumber (n)
@@ -159,7 +150,7 @@ column, or at the end of the line if it is not long enough.
 
 Command ("move-start-file",
 [[
-Move point to the beginning of the buffer; leave mark at previous position.
+Move the cursor to the beginning of the file.
 ]],
   function ()
     goto_offset (1)
@@ -168,7 +159,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 
 Command ("move-end-file",
 [[
-Move point to the end of the buffer; leave mark at previous position.
+Move the cursor to the end of the file.
 ]],
   function ()
     goto_offset (get_buffer_size (buf) + 1)

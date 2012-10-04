@@ -168,22 +168,18 @@ local function write_file ()
 end
 
 local function save_buffer ()
-  if buf.modified then
-    if not write_file () then
-      return false
-    end
-    minibuf_write ("Wrote " .. buf.filename)
-    buf.modified = false
-    undo_set_unchanged (buf.last_undop)
-  else
-    minibuf_write ("(No changes need to be saved)")
+  if not write_file () then
+    return false
   end
+  minibuf_write ("Wrote " .. buf.filename)
+  buf.modified = false
+  undo_set_unchanged (buf.last_undop)
   return true
 end
 
 Command ("file-save",
 [[
-Save buffer in visited file if modified.
+Save buffer in visited file.
 ]],
   function ()
     return save_buffer ()

@@ -27,7 +27,7 @@ end
 
 Command ("help-thing",
 [[
-Display the documentation of a command or variable.
+Display the help for the given command or variable.
 ]],
   function (name)
     name = name or minibuf_read_name ("Describe command or variable: ")
@@ -43,7 +43,7 @@ Display the documentation of a command or variable.
 
 Command ("help-key",
 [[
-Display documentation of the command invoked by a key sequence.
+Display the command invoked by a key combination.
 ]],
   function (keystr)
     local key = get_chord (keystr, "Describe key: ")

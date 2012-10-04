@@ -23,19 +23,19 @@ function insert_string (s)
   return insert_astr (AStr (s))
 end
 
--- If point is greater than fill-column, then split the line at the
--- right-most space character at or before fill-column, if there is
--- one, or at the left-most at or after fill-column, if not. If the
+-- If point is greater than wrap-column, then split the line at the
+-- right-most space character at or before wrap-column, if there is
+-- one, or at the left-most at or after wrap-column, if not. If the
 -- line contains no spaces, no break is made.
 --
 -- Return flag indicating whether break was made.
 function fill_break_line ()
   local i, old_col
   local break_col = 0
-  local fillcol = tonumber (get_variable ("fill-column"))
+  local fillcol = tonumber (get_variable ("wrap-column"))
   local break_made = false
 
-  -- Only break if we're beyond fill-column.
+  -- Only break if we're beyond wrap-column.
   if get_goalc () > fillcol then
     -- Save point.
     local m = point_marker ()
@@ -46,7 +46,7 @@ function fill_break_line ()
       move_char (-1)
     end
 
-    -- Find break point moving left from fill-column.
+    -- Find break point moving left from wrap-column.
     for i = get_buffer_pt (buf) - get_buffer_line_o (buf), 1, -1 do
       if get_buffer_char (buf, get_buffer_line_o (buf) + i - 1):match ("%s") then
         break_col = i
@@ -54,7 +54,7 @@ function fill_break_line ()
       end
     end
 
-    -- If no break point moving left from fill-column, find first
+    -- If no break point moving left from wrap-column, find first
     -- possible moving right.
     if break_col == 0 then
       for i = get_buffer_pt (buf) + 1, buffer_end_of_line (buf, get_buffer_line_o (buf)) do
@@ -117,14 +117,7 @@ end
 
 Command ("indent-relative",
 [[
-Space out to under next indent point in previous nonblank line.
-An indent point is a non-whitespace character following whitespace.
-The following line shows the indentation points in this line.
-    ^         ^    ^     ^   ^           ^      ^  ^    ^
-If the previous nonblank line has no indent points beyond the
-column point starts at, `edit-insert-tab' is done instead, unless
-this command is invoked with a numeric argument, in which case it
-does nothing.
+Indent line or insert a tab.
 ]],
   function ()
     local target_goalc = 0
@@ -197,7 +190,9 @@ does nothing.
 Command ("edit-insert-newline-and-indent",
 [[
 Insert a newline, then indent.
-Indentation is done using the `indent-for-tab-command' function.
+Indentation is done using the `indent-relative' function, except
+that if there is a character in the first column of the line above,
+no indenting is performed.
 ]],
   function ()
     local ok = false
@@ -222,7 +217,7 @@ Indentation is done using the `indent-for-tab-command' function.
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
       if indent then
-        execute_command ("indent-for-tab-command")
+        execute_command ("indent-relative")
       end
       ok = true
     end
@@ -236,6 +231,7 @@ Indentation is done using the `indent-for-tab-command' function.
 Command ("edit-delete-next-character",
 [[
 Delete the following character.
+Join lines if the character is a newline.
 ]],
   function ()
     delete_char ()
@@ -245,6 +241,7 @@ Delete the following character.
 Command ("edit-delete-previous-character",
 [[
 Delete the previous character.
+Join lines if the character is a newline.
 ]],
   function ()
     deactivate_mark ()
@@ -280,8 +277,7 @@ Delete all spaces and tabs around point.
 
 Command ("edit-insert-tab",
 [[
-Insert a tabulation at the current point position into the current
-buffer.
+Indent to next multiple of `indent_width'.
 ]],
   function ()
     return insert_tab ()
@@ -290,11 +286,10 @@ buffer.
 
 Command ("edit-insert-newline",
 [[
-Insert a newline at the current point position into
-the current buffer.
+Insert a newline, wrapping if in Wrap mode.
 ]],
   function ()
-    if buf.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+    if buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
       fill_break_line ()
     end
     return insert_string ("\n")

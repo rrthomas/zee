@@ -209,7 +209,7 @@ end
 -- Initialise a buffer
 function init_buffer (bp)
   if get_variable ("preferences-toggle-wrap-mode") then
-    bp.autofill = true
+    bp.wrap = true
   end
 end
 
@@ -301,6 +301,7 @@ end
 
 -- Basic movement routines
 
+-- FIXME: Only needs to move ±1
 function move_char (offset)
   local dir, ltest, btest, lmove
   if offset >= 0 then

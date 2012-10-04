@@ -32,7 +32,7 @@ Whichever character you type to run this command is inserted.
       return false
     end
 
-    if string.char (key):match ("%s") and buf.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+    if string.char (key):match ("%s") and buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
       fill_break_line ()
     end
 
@@ -140,7 +140,7 @@ function init_default_bindings ()
   key_bind ("M-<", "move-start-file")
   key_bind ("C-a", "move-start-line")
   key_bind ("HOME", "move-start-line")
-  key_bind ("M-m", "call-last-kbd-macro")
+  key_bind ("M-m", "macro-play")
   key_bind ("M-w", "edit-copy")
   key_bind ("C-d", "edit-delete-next-character")
   key_bind ("DELETE", "edit-delete-next-character")

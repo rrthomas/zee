@@ -61,7 +61,7 @@ end
 -- FIXME: Better name for execute-command.
 Command ("execute-command",
 [[
-Read function name and call it.
+Read command name, then run it.
 ]],
   function ()
     local name = minibuf_read_command_name ("M-x ")
