@@ -47,13 +47,13 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 
   -- Draw body of line.
   local x = 0
-  local line_len = buffer_line_len (cur_bp, o)
+  local line_len = buffer_line_len (buf, o)
   for i = startcol, math.huge do
     term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
     if i >= line_len or x >= wp.ewidth then
       break
     end
-    local c = get_buffer_char (cur_bp, o + i)
+    local c = get_buffer_char (buf, o + i)
     if posix.isprint (c) then
       term_addstr (c)
       x = x + 1
@@ -76,19 +76,19 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 end
 
 local function calculate_highlight_region ()
-  if cur_bp.mark == nil or not cur_bp.mark_active then
+  if buf.mark == nil or not buf.mark_active then
     return false
   end
 
-  return true, region_new (get_buffer_pt (cur_bp), cur_bp.mark.o)
+  return true, region_new (get_buffer_pt (buf), buf.mark.o)
 end
 
 function make_modeline_flags ()
-  if cur_bp.modified and cur_bp.readonly then
+  if buf.modified and buf.readonly then
     return "%*"
-  elseif cur_bp.modified then
+  elseif buf.modified then
     return "**"
-  elseif cur_bp.readonly then
+  elseif buf.readonly then
     return "%%"
   end
   return "--"
@@ -105,7 +105,7 @@ local function make_screen_pos (wp)
   elseif bv then
     return "Bot"
   end
-  return string.format ("%2d%%", (get_buffer_pt (cur_bp) / get_buffer_size (cur_bp)) * 100)
+  return string.format ("%2d%%", (get_buffer_pt (buf) / get_buffer_size (buf)) * 100)
 end
 
 local function draw_border ()
@@ -120,18 +120,18 @@ local function draw_status_line (line, wp)
 
   term_attrset (display.reverse)
   term_move (line, 0)
-  local n = offset_to_line (cur_bp, get_buffer_pt (cur_bp))
+  local n = offset_to_line (buf, get_buffer_pt (buf))
   local as = string.format ("--%2s  %-15s   %s %-9s (",
-                            make_modeline_flags (), cur_bp.name, make_screen_pos (wp),
+                            make_modeline_flags (), buf.name, make_screen_pos (wp),
                             string.format ("(%d,%d)", n + 1, get_goalc ()))
 
-  if cur_bp.autofill then
+  if buf.autofill then
     as = as .. " Fill"
   end
   if thisflag.defining_macro then
     as = as .. " Def"
   end
-  if cur_bp.isearch then
+  if buf.isearch then
     as = as .. " Isearch"
   end
   as = as .. ")"
@@ -144,10 +144,10 @@ local function draw_window (topline, wp)
   local highlight, rp = calculate_highlight_region ()
 
   -- Find the first line to display on the first screen line.
-  local o = buffer_start_of_line (cur_bp, get_buffer_pt (cur_bp))
+  local o = buffer_start_of_line (buf, get_buffer_pt (buf))
   local i = wp.topdelta
   while i > 0 and o > 1 do
-    o = buffer_prev_line (cur_bp, o)
+    o = buffer_prev_line (buf, o)
     assert (o)
     i = i - 1
   end
@@ -168,11 +168,11 @@ local function draw_window (topline, wp)
         term_addstr ('$')
       end
 
-      o = buffer_next_line (cur_bp, o)
+      o = buffer_next_line (buf, o)
     end
   end
 
-  wp.all_displayed = o == nil or o == get_buffer_size (cur_bp)
+  wp.all_displayed = o == nil or o == get_buffer_size (buf)
 
   -- Draw the status line only if there is available space after the
   -- buffer text space.
@@ -256,8 +256,8 @@ end
 function term_redisplay ()
   -- Calculate the start column if the line at point has to be truncated.
   local lastcol, t = 0, tab_width ()
-  local o = get_buffer_pt (cur_bp)
-  local lineo = o - get_buffer_line_o (cur_bp)
+  local o = get_buffer_pt (buf)
+  local lineo = o - get_buffer_line_o (buf)
 
   col = 0
   o = o - lineo
@@ -267,7 +267,7 @@ function term_redisplay ()
   for lp = lineo, 0, -1 do
     col = 0
     for p = lp, lineo - 1 do
-      local c = get_buffer_char (cur_bp, o + p)
+      local c = get_buffer_char (buf, o + p)
       if posix.isprint (c) then
         col = col + 1
       else

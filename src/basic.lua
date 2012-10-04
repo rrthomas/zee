@@ -22,8 +22,8 @@ Defun ("move-start-line",
 Move point to beginning of current line.
 ]],
   function ()
-    goto_offset (get_buffer_line_o (cur_bp))
-    cur_bp.goalc = 0
+    goto_offset (get_buffer_line_o (buf))
+    buf.goalc = 0
   end
 )
 
@@ -32,8 +32,8 @@ Defun ("move-end-line",
 Move point to end of current line.
 ]],
   function ()
-    goto_offset (get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp))
-    cur_bp.goalc = math.huge
+    goto_offset (get_buffer_line_o (buf) + buffer_line_len (buf))
+    buf.goalc = math.huge
   end
 )
 
@@ -67,12 +67,12 @@ On reaching end of buffer, stop and signal error.
 
 -- Get the goal column, expanding tabs.
 function get_goalc ()
-  local o = get_buffer_pt (cur_bp)
+  local o = get_buffer_pt (buf)
   local col = 0
   local t = tab_width ()
-  local start = buffer_start_of_line (cur_bp, o)
+  local start = buffer_start_of_line (buf, o)
   for i = 1, o - start do
-    if get_buffer_char (cur_bp, start + i) == '\t' then
+    if get_buffer_char (buf, start + i) == '\t' then
       col = bit32.bor (col, t - 1)
     end
     col = col + 1
@@ -92,7 +92,7 @@ Beginning of buffer is position 1.
     end
     n = tonumber (n)
 
-    return type (n) == "number" and goto_offset (math.min (get_buffer_size (cur_bp) + 1, math.max (n, 1)))
+    return type (n) == "number" and goto_offset (math.min (get_buffer_size (buf) + 1, math.max (n, 1)))
   end
 )
 
@@ -107,7 +107,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
     end
 
     if type (n) == "number" then
-      move_line ((math.max (n, 1) - 1) - offset_to_line (cur_bp, get_buffer_pt (cur_bp)))
+      move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
       execute_function ("move-start-line")
     else
       return false
@@ -126,7 +126,7 @@ Goto @i{column}, counting from column 1 at the start of the line.
     end
 
     if type (n) == "number" then
-      goto_offset (math.min (math.max (n, 1), buffer_line_len (cur_bp)) - 1 + get_buffer_line_o (cur_bp))
+      goto_offset (math.min (math.max (n, 1), buffer_line_len (buf)) - 1 + get_buffer_line_o (buf))
     else
       return false
     end
@@ -171,7 +171,7 @@ Defun ("move-end-file",
 Move point to the end of the buffer; leave mark at previous position.
 ]],
   function ()
-    goto_offset (get_buffer_size (cur_bp) + 1)
+    goto_offset (get_buffer_size (buf) + 1)
   end
 )
 

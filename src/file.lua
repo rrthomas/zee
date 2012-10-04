@@ -106,7 +106,7 @@ Set mark after the inserted text.
     end
 
     if not file then
-      file = minibuf_read_filename ("Insert file: ", cur_bp.dir)
+      file = minibuf_read_filename ("Insert file: ", buf.dir)
       if not file then
         ok = execute_function ("keyboard-quit")
       end
@@ -137,10 +137,10 @@ alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
 local function write_to_disk (filename, mode)
   local h = posix.creat (filename, mode)
   if h then
-    local s = get_buffer_pre_point (cur_bp)
+    local s = get_buffer_pre_point (buf)
     local ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
     if ret == #s then
-      s = get_buffer_post_point (cur_bp)
+      s = get_buffer_post_point (buf)
       ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
       if ret == #s then
         ret = true
@@ -158,23 +158,23 @@ end
 
 -- Write the buffer contents to a file.
 local function write_file ()
-  local ret = write_to_disk (cur_bp.filename, "rw-rw-rw-")
+  local ret = write_to_disk (buf.filename, "rw-rw-rw-")
   if ret == true then
     return true
   end
 
-  return minibuf_error (string.format ("Error writing `%s'%s", cur_bp.filename,
+  return minibuf_error (string.format ("Error writing `%s'%s", buf.filename,
                                        ret == -1 and ": " .. posix.errno () or ""))
 end
 
 local function save_buffer ()
-  if cur_bp.modified then
+  if buf.modified then
     if not write_file () then
       return false
     end
-    minibuf_write ("Wrote " .. cur_bp.filename)
-    cur_bp.modified = false
-    undo_set_unchanged (cur_bp.last_undop)
+    minibuf_write ("Wrote " .. buf.filename)
+    buf.modified = false
+    undo_set_unchanged (buf.last_undop)
   else
     minibuf_write ("(No changes need to be saved)")
   end
@@ -195,8 +195,8 @@ Defun ("file-quit",
 Offer to save the file, then kill this process.
 ]],
   function ()
-    if cur_bp.modified then
-      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (cur_bp)))
+    if buf.modified then
+      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (buf)))
       if ans == nil then
         return execute_function ("keyboard-quit")
       elseif ans then
@@ -214,26 +214,26 @@ function find_file (filename)
   if exist_file (filename) and not is_regular_file (filename) then
     return minibuf_error ("File exists but could not be read")
   else
-    cur_bp = buffer_new ()
-    set_buffer_names (cur_bp, filename)
-    cur_bp.dir = posix.dirname (filename)
+    buf = buffer_new ()
+    set_buffer_names (buf, filename)
+    buf.dir = posix.dirname (filename)
 
     local s = io.slurp (filename)
     if s then
-      cur_bp.readonly = not check_writable (filename)
+      buf.readonly = not check_writable (filename)
     else
       s = ""
     end
-    cur_bp.text = AStr (s)
+    buf.text = AStr (s)
 
     -- Reset undo history
-    cur_bp.next_undop = nil
-    cur_bp.last_undop = nil
-    cur_bp.modified = false
+    buf.next_undop = nil
+    buf.last_undop = nil
+    buf.modified = false
   end
 
   -- Change to buffer's default directory
-  posix.chdir (cur_bp.dir)
+  posix.chdir (buf.dir)
 
   thisflag.need_resync = true
 
@@ -247,10 +247,10 @@ end
 function editor_exit (doabort)
   io.stderr:write ("Trying to save buffer (if modified)...\r\n")
 
-  if cur_bp and cur_bp.modified then
-    local buf = (cur_bp.filename or cur_bp.name) .. string.upper (PACKAGE) .. "SAVE"
-    io.stderr:write (string.format ("Saving %s...\r\n", buf))
-    write_to_disk (buf, "rw-------")
+  if buf and buf.modified then
+    local file = (buf.filename or buf.name) .. string.upper (PACKAGE) .. "SAVE"
+    io.stderr:write (string.format ("Saving %s...\r\n", file))
+    write_to_disk (file, "rw-------")
   end
 
   if doabort then

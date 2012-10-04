@@ -24,26 +24,26 @@ UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
 
 -- Save a reverse delta for doing undo.
 local function undo_save (ty, o, osize, size)
-  if cur_bp.noundo then
+  if buf.noundo then
     return
   end
 
-  local up = {type = ty, next = cur_bp.last_undop}
+  local up = {type = ty, next = buf.last_undop}
 
   up.o = o
 
   if ty == UNDO_REPLACE_BLOCK then
     up.size = size
-    up.text = get_buffer_region (cur_bp, region_new (o, o + osize))
-    up.unchanged = not cur_bp.modified
+    up.text = get_buffer_region (buf, region_new (o, o + osize))
+    up.unchanged = not buf.modified
   end
 
-  cur_bp.last_undop = up
+  buf.last_undop = up
 end
 
 
 function undo_start_sequence ()
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0)
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (buf), 0, 0)
 end
 
 function undo_end_sequence ()
@@ -81,7 +81,7 @@ local function revert_action (up)
   end
 
   if up.unchanged then
-    cur_bp.modified = false
+    buf.modified = false
   end
 
   return up.next
@@ -93,7 +93,7 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 ]],
   function ()
-    if cur_bp.noundo then
+    if buf.noundo then
       minibuf_error ("Undo disabled in this buffer")
       return false
     end
@@ -102,13 +102,13 @@ Repeat this command to undo more changes.
       return false
     end
 
-    if not cur_bp.next_undop then
+    if not buf.next_undop then
       minibuf_error ("No further undo information")
-      cur_bp.next_undop = cur_bp.last_undop
+      buf.next_undop = buf.last_undop
       return false
     end
 
-    cur_bp.next_undop = revert_action (cur_bp.next_undop)
+    buf.next_undop = revert_action (buf.next_undop)
     minibuf_write ("Undo!")
   end
 )
@@ -120,7 +120,7 @@ Undo until buffer is unmodified.
   function ()
     -- FIXME: save pointer to current undo action and abort if we get
     -- back to it.
-    while cur_bp.modified do
+    while buf.modified do
       execute_function ("edit-undo")
     end
   end

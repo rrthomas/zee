@@ -27,7 +27,7 @@
 -- }
 
 function window_top_visible (wp)
-  return offset_to_line (cur_bp, get_buffer_pt (cur_bp)) == wp.topdelta
+  return offset_to_line (buf, get_buffer_pt (buf)) == wp.topdelta
 end
 
 function window_bottom_visible (wp)
@@ -46,7 +46,7 @@ function create_window ()
 end
 
 function window_resync (wp)
-  local n = offset_to_line (cur_bp, get_buffer_pt (cur_bp))
+  local n = offset_to_line (buf, get_buffer_pt (buf))
   local delta = n - wp.lastpointn
 
   if delta ~= 0 then

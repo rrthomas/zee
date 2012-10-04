@@ -41,7 +41,7 @@ Defun ("preferences-toggle-read-only",
 Change whether this buffer is visiting its file read-only.
 ]],
   function ()
-    cur_bp.readonly = not cur_bp.readonly
+    buf.readonly = not buf.readonly
   end
 )
 
@@ -52,7 +52,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 ]],
   function ()
-    cur_bp.autofill = not cur_bp.autofill
+    buf.autofill = not buf.autofill
   end
 )
 
@@ -61,13 +61,13 @@ Defun ("edit-select-other-end",
 Put the mark where point is now, and point where the mark is now.
 ]],
   function ()
-    if not cur_bp.mark then
+    if not buf.mark then
       return minibuf_error ("No mark set in this buffer")
     end
 
-    local tmp = get_buffer_pt (cur_bp)
-    goto_offset (cur_bp.mark.o)
-    cur_bp.mark.o = tmp
+    local tmp = get_buffer_pt (buf)
+    goto_offset (buf.mark.o)
+    buf.mark.o = tmp
     activate_mark ()
     thisflag.need_resync = true
   end
@@ -102,7 +102,7 @@ Defun ("edit-select-toggle",
 Toggle selection mode.
 ]],
   function ()
-    if cur_bp.mark then
+    if buf.mark then
       execute_function ("edit-select-off")
     else
       execute_function ("edit-select-on")
@@ -142,7 +142,7 @@ Fill paragraph at or after point.
       move_line (1)
     end
 
-    while buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < m_end.o do
+    while buffer_end_of_line (buf, get_buffer_pt (buf)) < m_end.o do
       execute_function ("move-end-line")
       delete_char ()
       execute_function ("delete-horizontal-space")
@@ -174,7 +174,7 @@ local function pipe_command (cmd, tempfile)
     minibuf_write ("(Shell command succeeded with no output)")
   elseif not warn_if_readonly_buffer () then
     local del = 0
-    if cur_bp.mark_active then
+    if buf.mark_active then
       local r = calculate_the_region ()
       goto_offset (r.start)
       del = get_region_size (r)
@@ -224,7 +224,7 @@ Return the exit code of command.
         else
           local fd = posix.fileno (h)
           activate_mark ()
-          local s = get_buffer_region (cur_bp, calculate_the_region ())
+          local s = get_buffer_region (buf, calculate_the_region ())
           local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
           if not written then
             ok = minibuf_error ("Error writing to temporary file: " .. err)
@@ -280,7 +280,7 @@ Defun ("move-start-line-text",
 Move point to the first non-whitespace character on this line.
 ]],
   function ()
-    goto_offset (get_buffer_line_o (cur_bp))
+    goto_offset (get_buffer_line_o (buf))
     while not eolp () and following_char ():match ("%s") do
       move_char (1)
     end
@@ -293,7 +293,7 @@ local function move_word (dir)
   local gotword = false
   repeat
     while not (dir > 0 and eolp or bolp) () do
-      if get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - (dir < 0 and 1 or 0)):match ("%w") then
+      if get_buffer_char (buf, get_buffer_pt (buf) - (dir < 0 and 1 or 0)):match ("%w") then
         gotword = true
       elseif gotword then
         break

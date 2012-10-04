@@ -32,11 +32,11 @@ end
 
 
 function is_empty_line ()
-  return buffer_line_len (cur_bp) == 0
+  return buffer_line_len (buf) == 0
 end
 
 function is_blank_line ()
-  local s = get_buffer_region (cur_bp, region_new (get_buffer_line_o (cur_bp), buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp))))
+  local s = get_buffer_region (buf, region_new (get_buffer_line_o (buf), buffer_end_of_line (buf, get_buffer_pt (buf))))
   return regex_match (s, "^[ \t]*$")
 end
 
@@ -47,7 +47,7 @@ function following_char ()
   elseif eolp () then
     return '\n'
   else
-    return get_buffer_char (cur_bp, get_buffer_pt (cur_bp))
+    return get_buffer_char (buf, get_buffer_pt (buf))
   end
 end
 
@@ -58,26 +58,26 @@ function preceding_char ()
   elseif bolp () then
     return '\n'
   else
-    return get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - 1)
+    return get_buffer_char (buf, get_buffer_pt (buf) - 1)
   end
 end
 
 -- Return true if point is at the beginning of the buffer.
 function bobp ()
-  return get_buffer_pt (cur_bp) == 1
+  return get_buffer_pt (buf) == 1
 end
 
 -- Return true if point is at the end of the buffer.
 function eobp (void)
-  return get_buffer_pt (cur_bp) > get_buffer_size (cur_bp)
+  return get_buffer_pt (buf) > get_buffer_size (buf)
 end
 
 -- Return true if point is at the beginning of a line.
 function bolp ()
-  return get_buffer_pt (cur_bp) == get_buffer_line_o (cur_bp)
+  return get_buffer_pt (buf) == get_buffer_line_o (buf)
 end
 
 -- Return true if point is at the end of a line.
 function eolp ()
-  return get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp) == buffer_line_len (cur_bp)
+  return get_buffer_pt (buf) - get_buffer_line_o (buf) == buffer_line_len (buf)
 end

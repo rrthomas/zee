@@ -32,7 +32,7 @@ Whichever character you type to run this command is inserted.
       return false
     end
 
-    if string.char (key):match ("%s") and cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+    if string.char (key):match ("%s") and buf.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
       fill_break_line ()
     end
 
@@ -61,8 +61,8 @@ function call_command (f, ...)
     add_cmd_to_macro ()
   end
 
-  if cur_bp and _last_command ~= "edit-undo" then
-    cur_bp.next_undop = cur_bp.last_undop
+  if buf and _last_command ~= "edit-undo" then
+    buf.next_undop = buf.last_undop
   end
 
   lastflag = thisflag

@@ -30,10 +30,10 @@ local function copy_or_kill_the_region (kill)
 
   if rp then
     maybe_free_kill_ring ()
-    kill_ring_text = (kill_ring_text or AStr ("")):cat (get_buffer_region (cur_bp, rp))
+    kill_ring_text = (kill_ring_text or AStr ("")):cat (get_buffer_region (buf, rp))
 
     if kill then
-      if cur_bp.readonly then
+      if buf.readonly then
         minibuf_error ("Read only text copied to kill ring")
       else
         assert (delete_region (rp))

@@ -76,41 +76,41 @@ function replace_astr (del, as)
 
   local newlen = #as
 
-  undo_save_block (cur_bp.pt, del, newlen)
+  undo_save_block (buf.pt, del, newlen)
 
   -- Adjust gap.
-  local oldgap = cur_bp.gap
+  local oldgap = buf.gap
   local added_gap = 0
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
     added_gap = min_gap
-    cur_bp.text:insert (cur_bp.pt, (#as + min_gap) - (cur_bp.gap + del))
-    cur_bp.gap = min_gap
+    buf.text:insert (buf.pt, (#as + min_gap) - (buf.gap + del))
+    buf.gap = min_gap
   elseif oldgap + del > max_gap + newlen then
     -- If gap would be larger than max_gap, restrict it to max_gap.
-    cur_bp.text:remove (cur_bp.pt + newlen + max_gap, (oldgap + del) - (max_gap + newlen))
-    cur_bp.gap = max_gap
+    buf.text:remove (buf.pt + newlen + max_gap, (oldgap + del) - (max_gap + newlen))
+    buf.gap = max_gap
   else
-    cur_bp.gap = oldgap + del - newlen
+    buf.gap = oldgap + del - newlen
   end
 
   -- Zero any new bit of gap not produced by insertion.
-  if math.max (oldgap, newlen) + added_gap < cur_bp.gap + newlen then
-    cur_bp.text:set (cur_bp.pt + math.max (oldgap, newlen) + added_gap, '\0', newlen + cur_bp.gap - math.max (oldgap, newlen) - added_gap)
+  if math.max (oldgap, newlen) + added_gap < buf.gap + newlen then
+    buf.text:set (buf.pt + math.max (oldgap, newlen) + added_gap, '\0', newlen + buf.gap - math.max (oldgap, newlen) - added_gap)
   end
 
   -- Insert `newlen' chars.
-  cur_bp.text:replace (cur_bp.pt, as)
-  cur_bp.pt = cur_bp.pt + newlen
+  buf.text:replace (buf.pt, as)
+  buf.pt = buf.pt + newlen
 
   -- Adjust markers.
-  for m in pairs (cur_bp.markers) do
-    if m.o > cur_bp.pt - newlen then
-      m.o = math.max (cur_bp.pt - newlen, m.o + newlen - del)
+  for m in pairs (buf.markers) do
+    if m.o > buf.pt - newlen then
+      m.o = math.max (buf.pt - newlen, m.o + newlen - del)
     end
   end
 
-  cur_bp.modified = true
+  buf.modified = true
   if as:next_line (1) then
     thisflag.need_resync = true
   end
@@ -186,7 +186,7 @@ function delete_char ()
   end
   replace_astr (1, AStr (""))
 
-  cur_bp.modified = true
+  buf.modified = true
 
   return true
 end
@@ -230,8 +230,8 @@ end
 -- Print an error message into the echo area and return true
 -- if the current buffer is readonly; otherwise return false.
 function warn_if_readonly_buffer ()
-  if cur_bp.readonly then
-    minibuf_error (string.format ("Buffer is readonly: %s", cur_bp.name))
+  if buf.readonly then
+    minibuf_error (string.format ("Buffer is readonly: %s", buf.name))
     return true
   end
 
@@ -239,10 +239,10 @@ function warn_if_readonly_buffer ()
 end
 
 function warn_if_no_mark ()
-  if not cur_bp.mark then
+  if not buf.mark then
     minibuf_error ("The mark is not set now")
     return true
-  elseif not cur_bp.mark_active then
+  elseif not buf.mark_active then
     minibuf_error ("The mark is not active now")
     return true
   end
@@ -264,7 +264,7 @@ function calculate_the_region ()
     return nil
   end
 
-  return region_new (cur_bp.pt, cur_bp.mark.o)
+  return region_new (buf.pt, buf.mark.o)
 end
 
 function delete_region (r)
@@ -286,11 +286,11 @@ function in_region (o, x, r)
 end
 
 function activate_mark ()
-  cur_bp.mark_active = true
+  buf.mark_active = true
 end
 
 function deactivate_mark ()
-  cur_bp.mark_active = false
+  buf.mark_active = false
 end
 
 -- Return a safe tab width.
@@ -310,10 +310,10 @@ function move_char (offset)
   end
   for i = 1, math.abs (offset) do
     if not ltest () then
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
+      set_buffer_pt (buf, get_buffer_pt (buf) + dir)
     elseif not btest () then
       thisflag.need_resync = true
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + dir)
+      set_buffer_pt (buf, get_buffer_pt (buf) + dir)
       execute_function (lmove)
     else
       return false
@@ -327,16 +327,16 @@ end
 function goto_goalc ()
   local col = 0
 
-  local i = get_buffer_line_o (cur_bp)
-  local lim = get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp)
+  local i = get_buffer_line_o (buf)
+  local lim = get_buffer_line_o (buf) + buffer_line_len (buf)
   while i < lim do
-    if col == cur_bp.goalc then
+    if col == buf.goalc then
       break
-    elseif get_buffer_char (cur_bp, i) == '\t' then
+    elseif get_buffer_char (buf, i) == '\t' then
       local t = tab_width ()
       for w = t - col % t, 1, -1 do
         col = col + 1
-        if col == cur_bp.goalc then
+        if col == buf.goalc then
           break
         end
       end
@@ -346,7 +346,7 @@ function goto_goalc ()
     i = i + 1
   end
 
-  set_buffer_pt (cur_bp, i)
+  set_buffer_pt (buf, i)
 end
 
 function move_line (n)
@@ -357,15 +357,15 @@ function move_line (n)
   end
 
   if _last_command ~= "move-next-line" and _last_command ~= "move-previous-line" then
-    cur_bp.goalc = get_goalc ()
+    buf.goalc = get_goalc ()
   end
 
   while n > 0 do
-    local o = func (cur_bp, cur_bp.pt)
+    local o = func (buf, buf.pt)
     if o == nil then
       break
     end
-    set_buffer_pt (cur_bp, o)
+    set_buffer_pt (buf, o)
     n = n - 1
   end
 
@@ -387,10 +387,10 @@ function offset_to_line (bp, offset)
 end
 
 function goto_offset (o)
-  local old_lineo = get_buffer_line_o (cur_bp)
-  set_buffer_pt (cur_bp, o)
-  if get_buffer_line_o (cur_bp) ~= old_lineo then
-    cur_bp.goalc = get_goalc ()
+  local old_lineo = get_buffer_line_o (buf)
+  set_buffer_pt (buf, o)
+  if get_buffer_line_o (buf) ~= old_lineo then
+    buf.goalc = get_goalc ()
     thisflag.need_resync = true
   end
 end

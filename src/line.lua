@@ -41,14 +41,14 @@ function fill_break_line ()
     local m = point_marker ()
 
     -- Move cursor back to fill column
-    old_col = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp)
+    old_col = get_buffer_pt (buf) - get_buffer_line_o (buf)
     while get_goalc () > fillcol + 1 do
       move_char (-1)
     end
 
     -- Find break point moving left from fill-column.
-    for i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp), 1, -1 do
-      if get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i - 1):match ("%s") then
+    for i = get_buffer_pt (buf) - get_buffer_line_o (buf), 1, -1 do
+      if get_buffer_char (buf, get_buffer_line_o (buf) + i - 1):match ("%s") then
         break_col = i
         break
       end
@@ -57,22 +57,22 @@ function fill_break_line ()
     -- If no break point moving left from fill-column, find first
     -- possible moving right.
     if break_col == 0 then
-      for i = get_buffer_pt (cur_bp) + 1, buffer_end_of_line (cur_bp, get_buffer_line_o (cur_bp)) do
-        if get_buffer_char (cur_bp, i - 1):match ("%s") then
-          break_col = i - get_buffer_line_o (cur_bp)
+      for i = get_buffer_pt (buf) + 1, buffer_end_of_line (buf, get_buffer_line_o (buf)) do
+        if get_buffer_char (buf, i - 1):match ("%s") then
+          break_col = i - get_buffer_line_o (buf)
           break
         end
       end
     end
 
     if break_col >= 1 then -- Break line.
-      goto_offset (get_buffer_line_o (cur_bp) + break_col)
+      goto_offset (get_buffer_line_o (buf) + break_col)
       execute_function ("delete-horizontal-space")
       insert_string ("\n")
       goto_offset (m.o)
       break_made = true
     else -- Undo fiddling with point.
-      goto_offset (get_buffer_line_o (cur_bp) + old_col)
+      goto_offset (get_buffer_line_o (buf) + old_col)
     end
 
     unchain_marker (m)
@@ -139,7 +139,7 @@ does nothing.
     deactivate_mark ()
 
     -- If we're on the first line, set target to 0.
-    if get_buffer_line_o (cur_bp) == 0 then
+    if get_buffer_line_o (buf) == 0 then
       target_goalc = 0
     else
       -- Find goalc in previous non-blank line.
@@ -294,7 +294,7 @@ Insert a newline at the current point position into
 the current buffer.
 ]],
   function ()
-    if cur_bp.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
+    if buf.autofill and get_goalc () > tonumber (get_variable ("fill-column")) then
       fill_break_line ()
     end
     return insert_string ("\n")

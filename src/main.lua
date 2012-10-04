@@ -67,7 +67,7 @@ WAITKEY_DEFAULT = 20
 cur_wp = nil
 
 -- The current buffer
-cur_bp = nil
+buf = nil
 
 -- The global editor flags.
 thisflag = {}
@@ -150,7 +150,7 @@ function main ()
     lastflag.need_resync = true
 
     -- Reinitialise the buffer to catch settings
-    init_buffer (cur_bp)
+    init_buffer (buf)
 
     -- Refresh minibuffer in case there was an error that couldn't be
     -- written during startup

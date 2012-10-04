@@ -74,17 +74,17 @@ local function search (s, forward)
   end
 
   -- Attempt match.
-  local o = get_buffer_pt (cur_bp)
+  local o = get_buffer_pt (buf)
   local notbol = forward and o > 1
-  local noteol = not forward and o <= get_buffer_size (cur_bp)
+  local noteol = not forward and o <= get_buffer_size (buf)
   local downcase = get_variable ("case-fold-search") and no_upper (s)
-  local as = (forward and get_buffer_post_point or get_buffer_pre_point) (cur_bp)
+  local as = (forward and get_buffer_post_point or get_buffer_pre_point) (buf)
   local pos = find_substr (as, s, forward, notbol, noteol, downcase)
   if not pos then
     return false
   end
 
-  goto_offset (pos + (forward and (get_buffer_pt (cur_bp) - 1) or 0))
+  goto_offset (pos + (forward and (get_buffer_pt (buf) - 1) or 0))
   thisflag.need_resync = true
   return true
 end
@@ -118,22 +118,22 @@ end
 -- Incremental search engine.
 local function isearch (forward)
   local old_mark
-  if cur_bp.mark then
-    old_mark = copy_marker (cur_bp.mark)
+  if buf.mark then
+    old_mark = copy_marker (buf.mark)
   end
 
-  cur_bp.isearch = true
+  buf.isearch = true
 
   local last = true
   local pattern = ""
-  local start = get_buffer_pt (cur_bp)
+  local start = get_buffer_pt (buf)
   local cur = start
   while true do
     -- Make the minibuf message.
-    local buf = string.format ("%sI-search%s: %s",
-                               (last and "" or "Failing "),
-                               forward and "" or " backward",
-                               pattern)
+    local ms = string.format ("%sI-search%s: %s",
+                              (last and "" or "Failing "),
+                              forward and "" or " backward",
+                              pattern)
 
     -- Regex error.
     if re_find_err then
@@ -142,11 +142,11 @@ local function isearch (forward)
         string.sub (re_find_err, 1, 8) == "Invalid " then
         re_find_err = "incomplete input"
       end
-      buf = buf .. string.format (" [%s]", re_find_err)
+      ms = ms .. string.format (" [%s]", re_find_err)
       re_find_err = nil
     end
 
-    minibuf_write (buf)
+    minibuf_write (ms)
 
     local c = getkey (GETKEY_DEFAULT)
 
@@ -158,10 +158,10 @@ local function isearch (forward)
       execute_function ("keyboard-quit")
 
       -- Restore old mark position.
-      if cur_bp.mark then
-        unchain_marker (cur_bp.mark)
+      if buf.mark then
+        unchain_marker (buf.mark)
       end
-      cur_bp.mark = old_mark
+      buf.mark = old_mark
       break
     elseif c == keycode "BACKSPACE" then
       if #pattern > 0 then
@@ -173,7 +173,7 @@ local function isearch (forward)
         ding ()
       end
     elseif c == keycode "C-q" then
-      minibuf_write (string.format ("%s^Q-", buf))
+      minibuf_write (string.format ("%s^Q-", ms))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
     elseif c == keycode "C-r" or c == keycode "C-s" then
       -- Invert direction.
@@ -184,7 +184,7 @@ local function isearch (forward)
       end
       if #pattern > 0 then
         -- Find next match.
-        cur = get_buffer_pt (cur_bp)
+        cur = get_buffer_pt (buf)
         -- Save search string.
         last_search = pattern
       elseif last_search then
@@ -197,7 +197,7 @@ local function isearch (forward)
         if #pattern > 0 then
           -- Save mark.
           set_mark ()
-          cur_bp.mark.o = start
+          buf.mark.o = start
 
           -- Save search string.
           last_search = pattern
@@ -216,7 +216,7 @@ local function isearch (forward)
     end
 
     if #pattern > 0 then
-      local pt = get_buffer_pt (cur_bp)
+      local pt = get_buffer_pt (buf)
       goto_offset (cur)
       last = search (pattern, forward)
     else
@@ -230,7 +230,7 @@ local function isearch (forward)
   end
 
   -- done
-  cur_bp.isearch = false
+  buf.isearch = false
 
   return true
 end
@@ -328,9 +328,9 @@ what to do with it.
         -- Perform replacement.
         count = count + 1
         local case_repl = repl
-        local r = region_new (get_buffer_pt (cur_bp) - #find, get_buffer_pt (cur_bp))
+        local r = region_new (get_buffer_pt (buf) - #find, get_buffer_pt (buf))
         if find_no_upper and get_variable ("case-replace") then
-          local case_type = check_case (get_buffer_region (cur_bp, r))
+          local case_type = check_case (get_buffer_region (buf, r))
           if case_type then
             case_repl = recase (repl, case_type)
           end

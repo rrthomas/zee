@@ -22,7 +22,7 @@
 
 local function marker_new (o)
   local marker = {o = o}
-  cur_bp.markers[marker] = true
+  buf.markers[marker] = true
   return marker
 end
 
@@ -31,17 +31,17 @@ function copy_marker (m)
 end
 
 function point_marker ()
-  return marker_new (get_buffer_pt (cur_bp))
+  return marker_new (get_buffer_pt (buf))
 end
 
 function unchain_marker (marker)
-  cur_bp.markers[marker] = nil
+  buf.markers[marker] = nil
 end
 
 -- Set the mark to point.
 function set_mark ()
-  if cur_bp.mark then
-    unchain_marker (cur_bp.mark)
+  if buf.mark then
+    unchain_marker (buf.mark)
   end
-  cur_bp.mark = point_marker ()
+  buf.mark = point_marker ()
 end

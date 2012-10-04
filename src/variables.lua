@@ -18,14 +18,14 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 function get_variable (var)
-  return ((cur_bp and cur_bp.vars and cur_bp.vars[var]) or main_vars[var] or {}).val
+  return ((buf and buf.vars and buf.vars[var]) or main_vars[var] or {}).val
 end
 
 function preferences_set_variable (var, val)
   local vars
   if (main_vars[var] or {}).islocal then
-    cur_bp.vars = cur_bp.vars or {}
-    vars = cur_bp.vars
+    buf.vars = buf.vars or {}
+    vars = buf.vars
   else
     vars = main_vars
   end
