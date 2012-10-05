@@ -130,7 +130,6 @@ function main ()
   local ok = find_file (file)
   if ok then
     execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
-    lastflag.need_resync = true
   end
 
   if ok then
