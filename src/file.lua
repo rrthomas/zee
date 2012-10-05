@@ -29,10 +29,7 @@ end
 
 local function is_regular_file (filename)
   local st = posix.stat (filename)
-
-  if st and st.type == "regular" then
-    return true
-  end
+  return st and st.type == "regular"
 end
 
 -- Return nonzero if file exists and can be written.
@@ -80,11 +77,8 @@ function normalize_path (path)
 end
 
 -- Write buffer to given file name with given mode.
-
 alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
-
-
-local function write_to_disk (filename, mode)
+local function write_file (filename, mode)
   local h = posix.creat (filename, mode)
   if h then
     local s = get_buffer_pre_point (buf)
@@ -107,20 +101,13 @@ local function write_to_disk (filename, mode)
 end
 
 -- Write the buffer contents to a file.
-local function write_file ()
-  local ret = write_to_disk (buf.filename, "rw-rw-rw-")
-  if ret == true then
-    return true
-  end
-
-  return minibuf_error (string.format ("Error writing `%s'%s", buf.filename,
-                                       ret == -1 and ": " .. posix.errno () or ""))
-end
-
 local function save_buffer ()
-  if not write_file () then
-    return false
+  local ret = write_file (buf.filename, "rw-rw-rw-")
+  if not ret then
+    return minibuf_error (string.format ("Error writing `%s'%s", buf.filename,
+                                         ret == -1 and ": " .. posix.errno () or ""))
   end
+
   minibuf_write ("Wrote " .. buf.filename)
   buf.modified = false
   undo_set_unchanged (buf.last_undop)
@@ -142,7 +129,7 @@ Offer to save the file, then delete this process.
 ]],
   function ()
     if buf.modified then
-      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename_or_name (buf)))
+      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename (buf)))
       if ans == nil then
         return ding ()
       elseif ans then
@@ -158,11 +145,10 @@ Offer to save the file, then delete this process.
 
 function find_file (filename)
   if exist_file (filename) and not is_regular_file (filename) then
-    return minibuf_error ("File exists but could not be read")
+    return minibuf_error (string.format ("File `%s' exists but could not be read", filename))
   else
     buf = buffer_new ()
-    set_buffer_names (buf, filename)
-    buf.dir = posix.dirname (filename)
+    set_buffer_name (buf, filename)
 
     local s = io.slurp (filename)
     if s then
@@ -179,7 +165,7 @@ function find_file (filename)
   end
 
   -- Change to buffer's default directory
-  posix.chdir (buf.dir)
+  posix.chdir (posix.dirname (buf.filename))
 
   thisflag.need_resync = true
 
@@ -195,7 +181,7 @@ function editor_exit (doabort)
   io.stderr:write ("Trying to save buffer (if modified)...\r\n")
 
   if buf and buf.modified then
-    local file = (buf.filename or buf.name) .. string.upper (PACKAGE) .. "SAVE"
+    local file = buf.filename .. string.upper (PACKAGE) .. "SAVE"
     io.stderr:write (string.format ("Saving %s...\r\n", file))
     write_to_disk (file, "rw-------")
   end

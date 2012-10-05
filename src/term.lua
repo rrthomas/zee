@@ -147,7 +147,7 @@ local function draw_status_line (line, wp)
   term_move (line, 0)
   local n = offset_to_line (buf, get_buffer_pt (buf))
   local as = string.format ("--%2s  %-15s   %s %-9s (",
-                            make_modeline_flags (), buf.name, make_screen_pos (wp),
+                            make_modeline_flags (), buf.filename, make_screen_pos (wp),
                             string.format ("(%d,%d)", n + 1, get_goalc ()))
 
   if buf.wrap then

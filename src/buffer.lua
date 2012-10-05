@@ -201,7 +201,6 @@ function buffer_new ()
   bp.gap = 0
   bp.text = AStr ("")
   bp.markers = {}
-  bp.dir = posix.getcwd () or ""
   init_buffer (bp)
   return bp
 end
@@ -213,25 +212,24 @@ function init_buffer (bp)
   end
 end
 
--- Get filename, or buffer name if nil.
-function get_buffer_filename_or_name (bp)
-  return bp.filename or bp.name
+-- Get filename.
+function get_buffer_filename (bp)
+  return bp.filename
 end
 
--- Set a new filename, and from it a name, for the buffer.
-function set_buffer_names (bp, filename)
+-- Set a new filename for the buffer.
+function set_buffer_name (bp, filename)
   if filename[1] ~= '/' then
     filename = string.format ("%s/%s", posix.getcwd(), filename)
   end
   bp.filename = filename
-  bp.name = posix.basename (filename)
 end
 
 -- Print an error message into the echo area and return true
 -- if the current buffer is readonly; otherwise return false.
 function warn_if_readonly_buffer ()
   if buf.readonly then
-    minibuf_error (string.format ("Buffer is readonly: %s", buf.name))
+    minibuf_error ("File is readonly")
     return true
   end
 
