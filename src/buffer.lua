@@ -299,24 +299,22 @@ end
 
 -- Basic movement routines
 
--- FIXME: Only needs to move ±1
-function move_char (offset)
-  local dir, ltest, btest, lmove
-  if offset >= 0 then
-    dir, ltest, btest, lmove = 1, eolp, eobp, "move-start-line"
+function move_char (dir)
+  local ltest, btest, lmove
+  if dir >= 0 then
+    ltest, btest, lmove = eolp, eobp, "move-start-line"
   else
-    dir, ltest, btest, lmove = -1, bolp, bobp, "move-end-line"
+    ltest, btest, lmove = bolp, bobp, "move-end-line"
   end
-  for i = 1, math.abs (offset) do
-    if not ltest () then
-      set_buffer_pt (buf, get_buffer_pt (buf) + dir)
-    elseif not btest () then
-      thisflag.need_resync = true
-      set_buffer_pt (buf, get_buffer_pt (buf) + dir)
-      execute_command (lmove)
-    else
-      return false
-    end
+
+  if not ltest () then
+    set_buffer_pt (buf, get_buffer_pt (buf) + dir)
+  elseif not btest () then
+    thisflag.need_resync = true
+    set_buffer_pt (buf, get_buffer_pt (buf) + dir)
+    execute_command (lmove)
+  else
+    return false
   end
 
   return true
