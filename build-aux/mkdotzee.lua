@@ -21,10 +21,6 @@ require "std"
 require "lib"
 
 -- Load variables
-vars = {}
-function X (name, default_value, docstring)
-  table.insert (vars, {name = name, val = default_value, doc = texi (docstring)})
-end
 require "tbl_vars"
 
 local h = io.open ("src/dot" .. os.getenv ("PACKAGE") .. ".sample", "w")

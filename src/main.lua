@@ -45,14 +45,6 @@ display = {}
 GETKEY_DEFAULT = -1
 GETKEY_DELAYED = 2000
 
--- Global variables
-vars = {}
-function X (name, default_value, docstring)
-  vars[name] = {val = default_value, doc = texi (docstring)}
-end
-require "tbl_vars"
-X = nil
-
 
 -- Global flags, stored in thisflag and lastflag.
 -- need_resync:    a resync is required.
