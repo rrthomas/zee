@@ -17,6 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+-- FIXME: Use a table with default values
 function get_variable (var)
   return (vars[var] or {}).val
 end
@@ -36,8 +37,10 @@ Set a variable to the specified value.
       return false
     end
 
-    val = val or minibuf_read (string.format ("Set %s to value: ", var), "")
-    if not val then
+    if val == nil then
+      val = minibuf_read (string.format ("Set %s to value: ", var), "")
+    end
+    if val == nil then
       return ding ()
     end
     preferences_set_variable (var, val)

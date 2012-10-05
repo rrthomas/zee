@@ -18,8 +18,8 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 X ("tab-width", 8, "Number of spaces displayed for a tab character.")
-X ("indent-tabs-mode", true, "If non-nil, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
+X ("indent-tabs-mode", true, "If true, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
 X ("wrap-column", 70, "Column beyond which wrapping occurs in wrap mode.")
-X ("wrap-mode", nil, "Whether wrap mode is automatically enabled.")
+X ("wrap-mode", false, "Whether wrap mode is automatically enabled.")
 X ("caseless-search", true, "Whether searching ignores case by default.")
 X ("case-replace", false, "Whether `query-replace' should preserve case.")
