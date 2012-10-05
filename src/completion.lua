@@ -22,7 +22,6 @@
 --   completions: list of completion strings
 --   matches: list of matches
 --   match: the current matched string
---   filename: true if the completion is a filename completion
 --   poppedup: true if the completion is currently displayed
 --   close: true if the completion window should be closed
 -- }
@@ -30,8 +29,8 @@
 -- metamethod that works like strict.lua.
 
 -- Make a new completions table
-function completion_new (filename, completions)
-  return {completions = completions or {}, matches = {}, filename = filename}
+function completion_new (completions)
+  return {completions = completions or {}, matches = {}}
 end
 
 -- Write the matches in `l' in a set of columns. The width of the
@@ -69,47 +68,6 @@ local function common_prefix_length (s1, s2)
   return len
 end
 
-
--- Reread directory for completions.
-local function completion_readdir (cp, path)
-  cp.completions = {}
-
-  -- Normalize path, and abort if it fails
-  path = normalize_path (path)
-  if not path then
-    return false
-  end
-
-  -- Split up path with dirname and basename, unless it ends in `/',
-  -- in which case it's considered to be entirely dirname.
-  local pdir
-  if path[-1] ~= "/" then
-    pdir = posix.dirname (path)
-    if pdir ~= "/" then
-      pdir = pdir .. "/"
-    end
-    path = posix.basename (path)
-  else
-    pdir = path
-    path = ""
-  end
-
-  local dir = posix.dir (pdir)
-  if dir then
-    for _, d in ipairs (dir) do
-      local s = posix.stat (pdir .. d)
-      if s and s.type == "directory" then
-        d = d .. "/"
-      end
-      table.insert (cp.completions, d)
-    end
-
-    cp.path = compact_path (pdir)
-  end
-
-  return path
-end
-
 -- Arguments:
 --
 -- cp - the completions
@@ -119,7 +77,7 @@ end
 --
 -- The effect on cp is as follows:
 --
---   completions - reread for filename completion; otherwise unchanged
+--   completions - unchanged
 --   matches - replaced with the list of matching completions, sorted
 --   match - replaced with the longest common prefix of the matches
 --
@@ -127,10 +85,6 @@ end
 -- after this function.
 function completion_try (cp, search)
   cp.matches = {}
-
-  if cp.filename then
-    search = completion_readdir (cp, search)
-  end
 
   local fullmatch = false
   for _, v in ipairs (cp.completions) do
@@ -178,7 +132,7 @@ end
 
 -- FIXME: Common up minibuf_read*_name
 function minibuf_read_name (fmt)
-  local cp = completion_new (nil, list.concat (table.keys (vars), table.keys (usercmd)))
+  local cp = completion_new (list.concat (table.keys (vars), table.keys (usercmd)))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No name given",
@@ -186,7 +140,7 @@ function minibuf_read_name (fmt)
 end
 
 function minibuf_read_variable_name (fmt)
-  local cp = completion_new (nil, table.keys (vars))
+  local cp = completion_new (table.keys (vars))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No variable name given",

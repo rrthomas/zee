@@ -180,8 +180,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
             cp.poppedup = false
           end
           if thistab == "incomplete" or thistab == "matches" or thistab == "match" then
-            local bs = cp.filename and cp.path or ""
-            bs = bs .. cp.match
+            local bs = cp.match
             if string.sub (as, 1, #bs) ~= bs then
               thistab = nil
             end

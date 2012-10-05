@@ -16,8 +16,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-files_history = history_new ()
-
 minibuf_contents = nil
 
 
@@ -91,32 +89,6 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
   end
 
   return ms
-end
-
--- Read a filename from the minibuffer.
-function minibuf_read_filename (fmt, name, file)
-  if not file and #name > 0 and name[-1] ~= '/' then
-    name = name .. '/'
-  end
-  name = normalize_path (name)
-  if name then
-    name = compact_path (name)
-
-    local pos = #name
-    if file then
-      pos  = pos - #file
-    end
-    name = term_minibuf_read (fmt, name, pos, completion_new (true), files_history)
-
-    if name then
-      name = normalize_path (name)
-      if name then
-        add_history_element (files_history, name)
-      end
-    end
-  end
-
-  return name
 end
 
 function minibuf_read_yn (fmt)

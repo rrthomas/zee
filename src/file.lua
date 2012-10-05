@@ -79,56 +79,6 @@ function normalize_path (path)
   return io.catdir (unpack (ncomp))
 end
 
--- Return a `~/foo' like path if the user is under his home directory,
--- else the unmodified path.
--- If the user's home directory cannot be read, nil is returned.
-function compact_path (path)
-  local home = posix.getpasswd (nil, "dir")
-  -- If we cannot get the home directory, return empty string
-  if home == nil then
-    return ""
-  end
-
-  -- Replace `^$HOME' (if found) with `~'.
-  return (string.gsub (path, "^" .. home, "~"))
-end
-
-Command ("insert-file",
-[[
-Insert contents of file FILENAME into buffer after point.
-Set mark after the inserted text.
-]],
-  function (file)
-    local ok = true
-
-    if warn_if_readonly_buffer () then
-      return false
-    end
-
-    if not file then
-      file = minibuf_read_filename ("Insert file: ", buf.dir)
-      if not file then
-        ok = ding ()
-      end
-    end
-
-    if not file or file == "" then
-      ok = false
-    end
-
-    if ok then
-      local s = io.slurp (file)
-      if s then
-        insert_astr (AStr (s))
-      else
-        ok = minibuf_error ("%s: %s", file, posix.errno ())
-      end
-    end
-
-    return ok
-  end
-)
-
 -- Write buffer to given file name with given mode.
 
 alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
