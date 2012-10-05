@@ -18,7 +18,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 local function get_variable_doc (name)
-  local doc = main_vars[name].doc
+  local doc = vars[name].doc
   if doc then
     return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
                            name, get_variable (name), doc))

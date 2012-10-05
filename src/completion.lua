@@ -178,7 +178,7 @@ end
 
 -- FIXME: Common up minibuf_read*_name
 function minibuf_read_name (fmt)
-  local cp = completion_new (nil, list.concat (table.keys (main_vars), table.keys (usercmd)))
+  local cp = completion_new (nil, list.concat (table.keys (vars), table.keys (usercmd)))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No name given",
@@ -186,7 +186,7 @@ function minibuf_read_name (fmt)
 end
 
 function minibuf_read_variable_name (fmt)
-  local cp = completion_new (nil, table.keys (main_vars))
+  local cp = completion_new (nil, table.keys (vars))
 
   return minibuf_vread_completion (fmt, "", cp, nil,
                                    "No variable name given",

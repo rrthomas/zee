@@ -22,8 +22,8 @@ require "lib"
 
 -- Load variables
 vars = {}
-function X (name, default_value, local_when_set, docstring)
-  table.insert (vars, {name = name, val = default_value, islocal = local_when_set, doc = texi (docstring)})
+function X (name, default_value, docstring)
+  table.insert (vars, {name = name, val = default_value, doc = texi (docstring)})
 end
 require "tbl_vars"
 
@@ -34,10 +34,10 @@ end
 
 h:write (
   [[
-;;;; .]] .. os.getenv ("PACKAGE") .. [[ configuration
+---- .]] .. os.getenv ("PACKAGE") .. [[ configuration
 
-;; Rebind keys with:
-;; (global-set-key "key" 'func)
+-- Rebind keys with:
+-- (global-set-key "key" 'func)
 
 ]])
 

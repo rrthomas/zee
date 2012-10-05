@@ -18,17 +18,10 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 function get_variable (var)
-  return ((buf and buf.vars and buf.vars[var]) or main_vars[var] or {}).val
+  return (vars[var] or {}).val
 end
 
 function preferences_set_variable (var, val)
-  local vars
-  if (main_vars[var] or {}).islocal then
-    buf.vars = buf.vars or {}
-    vars = buf.vars
-  else
-    vars = main_vars
-  end
   vars[var] = vars[var] or {}
   vars[var].val = val
 end
