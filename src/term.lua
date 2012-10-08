@@ -266,7 +266,7 @@ local function draw_popup ()
 
   -- Draw popup text, and blank lines to bottom of window.
   local o = 1
-  for l = 0, popup_line do
+  for l = 0, popup_line - 1 do
     o = popup_text:next_line (o)
   end
   for i = 1, h - y + 1 do
