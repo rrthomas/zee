@@ -39,24 +39,18 @@ Display the command invoked by a key combination.
 ]],
   function (keystr)
     local key = get_chord (keystr, "Describe key: ")
-    if not key then
+    if key then
+      local name = get_command_by_key (key)
+      local binding = tostring (key)
+      if not name then
+        return minibuf_error (binding .. " is undefined")
+      end
+      local doc = get_doc (name)
+      if doc then
+        popup_set (string.format ("%s runs the command `%s'.\n%s", binding, name, doc))
+        return true
+      end
       return false
     end
-    local name = get_command_by_key (key)
-    local binding = tostring (key)
-    if not name then
-      return minibuf_error (binding .. " is undefined")
-    end
-
-    minibuf_write (string.format ("%s runs the command `%s'", binding, name))
-
-    local doc = get_doc (name)
-    if not doc then
-      return false
-    end
-
-    popup_set (string.format ("%s runs the command `%s'.\n%s", binding, name, doc))
-
-    return true
   end
 )
