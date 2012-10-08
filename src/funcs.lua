@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Command ("file-suspend",
+Define ("file-suspend",
 [[
 Stop editor and return to superior process.
 ]],
@@ -26,7 +26,7 @@ Stop editor and return to superior process.
   end
 )
 
-Command ("preferences-toggle-read-only",
+Define ("preferences-toggle-read-only",
 [[
 Change whether this file can be modified.
 ]],
@@ -35,7 +35,7 @@ Change whether this file can be modified.
   end
 )
 
-Command ("preferences-toggle-wrap-mode",
+Define ("preferences-toggle-wrap-mode",
 [[
 Toggle wrap mode.
 In wrap mode, inserting a space or newline at a column beyond
@@ -47,7 +47,7 @@ Paragraphs can also be wrapped using `edit-wrap-paragraph'.
   end
 )
 
-Command ("edit-select-other-end",
+Define ("edit-select-other-end",
 [[
 When selecting text, move the cursor to the other end of the selection.
 ]],
@@ -69,7 +69,7 @@ function select_on ()
   activate_mark ()
 end
 
-Command ("edit-select-on",
+Define ("edit-select-on",
 [[
 Start selecting text.
 ]],
@@ -79,7 +79,7 @@ Start selecting text.
   end
 )
 
-Command ("edit-select-off",
+Define ("edit-select-off",
 [[
 Stop selecting text.
 ]],
@@ -88,7 +88,7 @@ Stop selecting text.
   end
 )
 
-Command ("edit-select-toggle",
+Define ("edit-select-toggle",
 [[
 Toggle selection mode.
 ]],
@@ -101,7 +101,7 @@ Toggle selection mode.
   end
 )
 
-Command ("edit-insert-quoted",
+Define ("edit-insert-quoted",
 [[
 Read next input character and insert it.
 This is useful for inserting control characters.
@@ -113,7 +113,7 @@ This is useful for inserting control characters.
   end
 )
 
-Command ("edit-wrap-paragraph",
+Define ("edit-wrap-paragraph",
 [[
 Wrap the paragraph at or after the cursor. The wrap column
 is given by the variable `wrap-column'.
@@ -190,7 +190,7 @@ local function minibuf_read_shell_command ()
   return ms
 end
 
-Command ("edit-shell-command",
+Define ("edit-shell-command",
 [[
 Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command; passes the selection as input to the
@@ -250,7 +250,7 @@ local function move_paragraph (dir, line_extremum)
   end
 end
 
-Command ("move-previous-paragraph",
+Define ("move-previous-paragraph",
 [[
 Move the cursor backward to the start of the paragraph.
 ]],
@@ -259,7 +259,7 @@ Move the cursor backward to the start of the paragraph.
   end
 )
 
-Command ("move-next-paragraph",
+Define ("move-next-paragraph",
 [[
 Move the cursor forward to the end of the paragraph.
 ]],
@@ -268,7 +268,7 @@ Move the cursor forward to the end of the paragraph.
   end
 )
 
-Command ("move-start-line-text",
+Define ("move-start-line-text",
 [[
 Move the cursor to the first non-whitespace character on this line.
 ]],
@@ -297,7 +297,7 @@ local function move_word (dir)
   return gotword
 end
 
-Command ("move-next-word",
+Define ("move-next-word",
 [[
 Move the cursor forward one word.
 ]],
@@ -306,7 +306,7 @@ Move the cursor forward one word.
   end
 )
 
-Command ("move-previous-word",
+Define ("move-previous-word",
 [[
 Move the cursor backwards one word.
 ]],

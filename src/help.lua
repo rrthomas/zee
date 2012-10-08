@@ -17,15 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-local function get_variable_doc (name)
-  local doc = vars[name].doc
-  if doc then
-    return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
-                           name, get_variable (name), doc))
-  end
-end
-
-Command ("help-thing",
+Define ("help-thing",
 [[
 Display the help for the given command or variable.
 ]],
@@ -35,13 +27,13 @@ Display the help for the given command or variable.
       return false
     end
 
-    local doc = get_command_doc (name) or get_variable_doc (name) or "No help available"
+    local doc = get_doc (name) or "No help available"
     popup_set (string.format ("Help for `%s':\n%s", name, doc))
     return true
   end
 )
 
-Command ("help-key",
+Define ("help-key",
 [[
 Display the command invoked by a key combination.
 ]],
@@ -58,7 +50,7 @@ Display the command invoked by a key combination.
 
     minibuf_write (string.format ("%s runs the command `%s'", binding, name))
 
-    local doc = get_command_doc (name)
+    local doc = get_doc (name)
     if not doc then
       return false
     end

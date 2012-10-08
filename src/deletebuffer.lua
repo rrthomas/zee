@@ -70,7 +70,7 @@ local function delete_text (mark_func)
   return true
 end
 
-Command ("edit-delete-word",
+Define ("edit-delete-word",
 [[
 Kill characters forward until encountering the end of a word.
 ]],
@@ -79,7 +79,7 @@ Kill characters forward until encountering the end of a word.
   end
 )
 
-Command ("edit-delete-word-backward",
+Define ("edit-delete-word-backward",
 [[
 Kill characters backward until encountering the end of a word.
 ]],
@@ -88,7 +88,7 @@ Kill characters backward until encountering the end of a word.
   end
 )
 
-Command ("edit-paste",
+Define ("edit-paste",
 [[
 Reinsert the stretch of deleted text most recently deleted.
 Set mark at beginning, and put point at end.
@@ -109,7 +109,7 @@ Set mark at beginning, and put point at end.
 )
 
 -- FIXME: Rename
-Command ("edit-delete-selection",
+Define ("edit-delete-selection",
 [[
 Delete the selection.
 The text is deleted, unless the buffer is read-only, and saved in the
@@ -122,7 +122,7 @@ the text deleted this time appends to the text deleted last time.
   end
 )
 
-Command ("edit-copy",
+Define ("edit-copy",
 [[
 Copy the selection to the delete buffer.
 ]],

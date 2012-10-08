@@ -115,7 +115,7 @@ local function previous_nonblank_goalc ()
   end
 end
 
-Command ("indent-relative",
+Define ("indent-relative",
 [[
 Indent line or insert a tab.
 ]],
@@ -187,7 +187,7 @@ Indent line or insert a tab.
   end
 )
 
-Command ("edit-insert-newline-and-indent",
+Define ("edit-insert-newline-and-indent",
 [[
 Insert a newline, then indent.
 Indentation is done using the `indent-relative' function, except
@@ -228,7 +228,7 @@ no indenting is performed.
 )
 
 
-Command ("edit-delete-next-character",
+Define ("edit-delete-next-character",
 [[
 Delete the following character.
 Join lines if the character is a newline.
@@ -238,7 +238,7 @@ Join lines if the character is a newline.
   end
 )
 
-Command ("edit-delete-previous-character",
+Define ("edit-delete-previous-character",
 [[
 Delete the previous character.
 Join lines if the character is a newline.
@@ -256,7 +256,7 @@ Join lines if the character is a newline.
   end
 )
 
-Command ("delete-horizontal-space",
+Define ("delete-horizontal-space",
 [[
 Delete all spaces and tabs around point.
 ]],
@@ -275,7 +275,7 @@ Delete all spaces and tabs around point.
   end
 )
 
-Command ("edit-insert-tab",
+Define ("edit-insert-tab",
 [[
 Indent to next multiple of `indent_width'.
 ]],
@@ -284,7 +284,7 @@ Indent to next multiple of `indent_width'.
   end
 )
 
-Command ("edit-insert-newline",
+Define ("edit-insert-newline",
 [[
 Insert a newline, wrapping if in wrap mode.
 ]],

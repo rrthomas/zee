@@ -17,18 +17,30 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Define ("tab-width", "Number of spaces displayed for a tab character.",
+        8)
+Define ("indent-tabs-mode", "If true, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.",
+        true)
+Define ("wrap-column", "Column beyond which wrapping occurs in wrap mode.",
+        70)
+Define ("wrap-mode", "Whether wrap mode is automatically enabled.",
+        false)
+Define ("caseless-search", "Whether searching ignores case by default.",
+        true)
+Define ("case-replace", "Whether `query-replace' should preserve case.",
+        false)
 
--- FIXME: Use a table with default values
+
 function get_variable (var)
-  return (vars[var] or {}).val
+  return (env[var] or {}).val
 end
 
 function preferences_set_variable (var, val)
-  vars[var] = vars[var] or {}
-  vars[var].val = val
+  env[var] = env[var] or {}
+  env[var].val = val
 end
 
-Command ("preferences-set-variable",
+Define ("preferences-set-variable",
 [[
 Set a variable to the specified value.
 ]],

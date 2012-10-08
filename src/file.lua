@@ -114,7 +114,7 @@ local function save_buffer ()
   return true
 end
 
-Command ("file-save",
+Define ("file-save",
 [[
 Save buffer in visited file.
 ]],
@@ -123,7 +123,7 @@ Save buffer in visited file.
   end
 )
 
-Command ("file-quit",
+Define ("file-quit",
 [[
 Offer to save the file, then delete this process.
 ]],

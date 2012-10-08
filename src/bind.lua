@@ -19,7 +19,7 @@
 
 -- Key binding.
 
-Command ("edit-insert-character",
+Define ("edit-insert-character",
 [[
 Insert the character you type.
 Whichever character you type to run this command is inserted.
@@ -190,7 +190,7 @@ function get_command_by_key (key)
   return root_bindings[tostring (key)]
 end
 
-Command ("where-is",
+Define ("where-is",
 [[
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command name.

@@ -42,7 +42,7 @@ function cancel_kbd_macro ()
   thisflag.defining_macro = false
 end
 
-Command ("macro-record",
+Define ("macro-record",
 [[
 Record subsequent keyboard input, defining a macro.
 The commands are recorded even as they are executed.
@@ -65,7 +65,7 @@ Use @kbd{C-x )} to finish recording and make the macro available.
   end
 )
 
-Command ("macro-stop",
+Define ("macro-stop",
 [[
 Finish defining a keyboard macro.
 The definition was started by @kbd{C-x (}.
@@ -95,7 +95,7 @@ local function process_keys (keys)
   undo_end_sequence ()
 end
 
-Command ("macro-play",
+Define ("macro-play",
 [[
 Play back the last macro that you defined.
 ]],

@@ -27,7 +27,7 @@ src_@PACKAGE@_LUA =					\
 	src/lib.lua					\
 	src/astr.lua					\
 	src/history.lua					\
-	src/lisp.lua					\
+	src/eval.lua					\
 	src/main.lua					\
 	src/variables.lua				\
 	src/basic.lua					\
@@ -46,7 +46,6 @@ src_@PACKAGE@_LUA =					\
 	src/marker.lua					\
 	src/minibuf.lua					\
 	src/search.lua					\
-	src/tbl_vars.lua				\
 	src/undo.lua					\
 	src/window.lua					\
 	src/term.lua					\
@@ -78,7 +77,7 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
 	chmod +x $@
 	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
 
-src/dot$(PACKAGE).sample: src/tbl_vars.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
+src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
 	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile'"$(srcdir)/build-aux/mkdot$(PACKAGE).lua"' ()"
 
 install-exec-hook:

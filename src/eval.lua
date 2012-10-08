@@ -20,28 +20,39 @@
 -- MA 02111-1301, USA.
 
 
--- User commands
-usercmd = {}
+-- User things
+env = {}
 
-function Command (name, doc, func)
-  usercmd[name] = {
+function Define (name, doc, value)
+  env[name] = {
     doc = texi (doc:chomp ()),
-    func = function (...)
-             local ret = func (...)
-             return ret == nil and true or ret
-           end
   }
+  if type (value) == "function" then
+    env[name].func = function (...)
+      local ret = value (...)
+      return ret == nil and true or ret -- FIXME: avoid needing this wrapper
+    end
+  else
+    env[name].val = value
+  end
 end
 
-function get_command_doc (name)
-  return usercmd[name] and usercmd[name].doc or nil
+function get_doc (name)
+  if env[name] then
+    if env[name].func then
+      return env[name].doc
+    elseif env[name].doc then
+      return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
+                             name, get_variable (name), env[name].doc))
+    end
+  end
 end
 
 function execute_command (name, ...)
-  return usercmd[name] and usercmd[name].func and pcall (usercmd[name].func (...))
+  return env[name] and env[name].func and pcall (env[name].func (...))
 end
 
-Command ("eval",
+Define ("eval",
 [[
 Evaluation a Lua chunk CHUNK.
 ]],
@@ -56,12 +67,12 @@ Evaluation a Lua chunk CHUNK.
 )
 
 function command_exists (f)
-  return usercmd[f] ~= nil
+  return env[f] and env[f].func
 end
 
 
 -- FIXME: Better name for execute-command.
-Command ("execute-command",
+Define ("execute-command",
 [[
 Read command name, then run it.
 ]],
@@ -76,7 +87,7 @@ local commands_history = history_new ()
 function minibuf_read_command_name (fmt)
   local cp = completion_new ()
 
-  for name, func in pairs (usercmd) do
+  for name, func in pairs (env) do
     cp.completions:insert (name)
   end
 

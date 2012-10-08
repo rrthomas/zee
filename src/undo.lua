@@ -87,7 +87,7 @@ local function revert_action (up)
   return up.next
 end
 
-Command ("edit-undo",
+Define ("edit-undo",
 [[
 Undo some previous changes.
 Repeat this command to undo more changes.
@@ -113,7 +113,7 @@ Repeat this command to undo more changes.
   end
 )
 
-Command ("edit-revert",
+Define ("edit-revert",
 [[
 Undo until buffer is unmodified.
 ]],

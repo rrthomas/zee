@@ -17,7 +17,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Command ("move-start-line",
+Define ("move-start-line",
 [[
 Move the cursor to the beginning of the line.
 ]],
@@ -27,7 +27,7 @@ Move the cursor to the beginning of the line.
   end
 )
 
-Command ("move-end-line",
+Define ("move-end-line",
 [[
 Move the cursor to the end of the line.
 ]],
@@ -37,7 +37,7 @@ Move the cursor to the end of the line.
   end
 )
 
-Command ("move-previous-character",
+Define ("move-previous-character",
 [[
 Move the cursor left one character.
 ]],
@@ -46,7 +46,7 @@ Move the cursor left one character.
   end
 )
 
-Command ("move-next-character",
+Define ("move-next-character",
 [[
 Move the cursor right one character.
 ]],
@@ -71,7 +71,7 @@ function get_goalc ()
   return col
 end
 
-Command ("edit-goto-character",
+Define ("edit-goto-character",
 [[
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
@@ -86,7 +86,7 @@ Beginning of buffer is position 1.
   end
 )
 
-Command ("edit-goto-line",
+Define ("edit-goto-line",
 [[
 Move the cursor to the given line.
 Line 1 is the beginning of the buffer.
@@ -106,7 +106,7 @@ Line 1 is the beginning of the buffer.
   end
 )
 
-Command ("edit-goto-column",
+Define ("edit-goto-column",
 [[
 Move the cursor to the given column.
 ]],
@@ -124,7 +124,7 @@ Move the cursor to the given column.
   end
 )
 
-Command ("move-previous-line",
+Define ("move-previous-line",
 [[
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -136,7 +136,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Command ("move-next-line",
+Define ("move-next-line",
 [[
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -148,7 +148,7 @@ column, or at the end of the line if it is not long enough.
   end
 )
 
-Command ("move-start-file",
+Define ("move-start-file",
 [[
 Move the cursor to the beginning of the file.
 ]],
@@ -157,7 +157,7 @@ Move the cursor to the beginning of the file.
   end
 )
 
-Command ("move-end-file",
+Define ("move-end-file",
 [[
 Move the cursor to the end of the file.
 ]],
@@ -166,7 +166,7 @@ Move the cursor to the end of the file.
   end
 )
 
-Command ("move-previous-page",
+Define ("move-previous-page",
 [[
 Scroll text of current window downward near full screen.
 ]],
@@ -179,7 +179,7 @@ Scroll text of current window downward near full screen.
   end
 )
 
-Command ("move-next-page",
+Define ("move-next-page",
 [[
 Scroll text of current window upward near full screen.
 ]],
