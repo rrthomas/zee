@@ -79,7 +79,7 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
 	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
 
 src/dot$(PACKAGE).sample: src/tbl_vars.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
-	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile'"$(srcdir)/build-aux/mkdot$(PACKAGE).lua"' ()" foo
+	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile'"$(srcdir)/build-aux/mkdot$(PACKAGE).lua"' ()"
 
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
