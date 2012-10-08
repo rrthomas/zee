@@ -20,5 +20,4 @@
 EXTRA_DIST +=						\
 	build-aux/extract-trace				\
 	build-aux/options-parser			\
-	build-aux/mkdot$(PACKAGE).lua			\
-	build-aux/$(PACKAGE)-help2man-wrapper
+	build-aux/mkdot$(PACKAGE).lua

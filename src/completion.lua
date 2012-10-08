@@ -30,7 +30,7 @@
 
 -- Make a new completions table
 function completion_new (completions)
-  return {completions = completions or {}, matches = {}}
+  return {completions = set.new (completions or {}), matches = {}}
 end
 
 -- Write the matches in `l' in a set of columns. The width of the
@@ -73,7 +73,8 @@ end
 -- cp - the completions
 -- search - the prefix to search for
 --
--- Returns the search status.
+-- Returns false if `search' is not a prefix of any completion, and true
+-- otherwise.
 --
 -- The effect on cp is as follows:
 --
@@ -83,43 +84,38 @@ end
 --
 -- To format the completions for a popup, call completion_write
 -- after this function.
+-- FIXME: To see the completions in a popup, you should call
+-- completion_popup after this method. You may want to call
+-- completion_remove_suffix and/or completion_remove_prefix in between
+-- to keep the list manageable. (See C Zee's completion.lua.)
 function completion_try (cp, search)
   cp.matches = {}
 
   local fullmatch = false
-  for _, v in ipairs (cp.completions) do
-    if type (v) == "string" then
-      local len = math.min (#v, #search)
-      if string.sub (v, 1, len) == string.sub (search, 1, len) then
-        table.insert (cp.matches, v)
-        if #v == #search then
+  for c in pairs (cp.completions) do
+    if type (c) == "string" then
+      if string.sub (c, 1, #search) == search then
+        table.insert (cp.matches, c)
+        if c == search then
           fullmatch = true
         end
       end
     end
   end
 
-  table.sort (cp.matches)
-  local match = cp.matches[1] or ""
-  local prefix_len = #match
-  for _, v in ipairs (cp.matches) do
-    prefix_len = math.min (prefix_len, common_prefix_length (match, v))
-  end
-  cp.match = string.sub (match, 1, prefix_len)
-
-  local ret = "incomplete"
   if #cp.matches == 0 then
-    ret = "no match"
-  elseif #cp.matches == 1 then
-    ret = "match"
-  elseif fullmatch and #cp.matches > 1 then
-    local len = math.min (#search, #cp.match)
-    if len > 0 and string.sub (cp.match, 1, len) == string.sub (search, 1, len) then
-      ret = "matches"
-    end
+    return false
   end
 
-  return ret
+  table.sort (cp.matches)
+  cp.match = cp.matches[1]
+  local prefix_len = #cp.match
+  for _, v in ipairs (cp.matches) do
+    prefix_len = math.min (prefix_len, common_prefix_length (cp.match, v))
+  end
+  cp.match = cp.match:sub (1, prefix_len)
+
+  return true
 end
 
 -- Popup the completion window.

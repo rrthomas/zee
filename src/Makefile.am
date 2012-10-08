@@ -61,8 +61,8 @@ dist_pkgdata_DATA =					\
 	src/loadlua.lua
 
 PRODUCTIONSOURCES =					\
-	$(src_$(PACKAGE)_LUA)					\
-	$(top_srcdir)/src/$(PACKAGE).lua			\
+	$(src_$(PACKAGE)_LUA)				\
+	$(top_srcdir)/src/$(PACKAGE).lua		\
 	$(top_srcdir)/src/loadlua.lua			\
 	$(top_srcdir)/src/Makefile.am			\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
@@ -78,8 +78,8 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
 	chmod +x $@
 	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
 
-src/dot$(PACKAGE).sample: src/tbl_vars.lua build-aux/mkdot$(PACKAGE).lua
-	PACKAGE="$(PACKAGE)" $(LUA_ENV) $(LUA) $(srcdir)/build-aux/mkdot$(PACKAGE).lua $(srcdir)/src/tbl_vars.lua
+src/dot$(PACKAGE).sample: src/tbl_vars.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
+	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile'"$(srcdir)/build-aux/mkdot$(PACKAGE).lua"' ()" foo
 
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp

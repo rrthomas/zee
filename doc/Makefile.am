@@ -28,9 +28,9 @@ doc/$(PACKAGE).1: $(srcdir)/doc/$(PACKAGE).1.in doc/Makefile.am config.status
 	$(install_edit) '$(srcdir)/$@.in' >$@.tmp
 	mv $@.tmp $@
 
-$(srcdir)/doc/$(PACKAGE).1.in: doc/man-extras build-aux/$(PACKAGE)-help2man-wrapper configure.ac
+$(srcdir)/doc/$(PACKAGE).1.in: doc/man-extras configure.ac
 	@test -d doc || mkdir doc
 ## Exit gracefully if $(PACKAGE).1.in is not writeable, such as during distcheck!
 	$(AM_V_GEN)if ( touch $@.w && rm -f $@.w; ) >/dev/null 2>&1; then \
-	  builddir=$(builddir) $(srcdir)/build-aux/missing --run $(HELP2MAN) --output=$@ --no-info --name="$(PACKAGE_NAME)" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/$(PACKAGE)-help2man-wrapper; \
+	  builddir=$(builddir) $(srcdir)/build-aux/missing --run $(HELP2MAN) --output=$@ --no-info --name="$(PACKAGE_NAME)" --include $(srcdir)/doc/man-extras $(srcdir)/src/zee; \
 	fi

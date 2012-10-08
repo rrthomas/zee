@@ -41,15 +41,17 @@ function execute_command (name, ...)
   return usercmd[name] and usercmd[name].func and pcall (usercmd[name].func (...))
 end
 
-Command ("load",
+Command ("eval",
 [[
-Execute a file of Lua code named FILE.
+Evaluation a Lua chunk CHUNK.
 ]],
   function (file)
-    if file then
-      local f = loadfile (file)
-      return not f and false or f ()
+    local func, err = load (file)
+    if func == nil then
+      minibuf_error (string.format ("Error evaluating Lua: %s", err))
+      return false
     end
+    return func ()
   end
 )
 
@@ -75,7 +77,7 @@ function minibuf_read_command_name (fmt)
   local cp = completion_new ()
 
   for name, func in pairs (usercmd) do
-    table.insert (cp.completions, name)
+    cp.completions:insert (name)
   end
 
   return minibuf_vread_completion (fmt, "", cp, commands_history,

@@ -57,7 +57,7 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
   local ms
 
   while true do
-    ms = term_minibuf_read (fmt, value, -1, cp, hp)
+    ms = term_minibuf_read (fmt, value, nil, cp, hp)
 
     if not ms then -- Cancelled.
       ding ()
@@ -75,7 +75,7 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
         popup_completion (cp)
       end
 
-      if set.new (cp.completions):member (ms) then
+      if cp.completions:member (ms) then
         if hp then
           add_history_element (hp, ms)
         end
@@ -109,7 +109,7 @@ end
 
 -- Read a string from the minibuffer.
 function minibuf_read (fmt, value, cp, hp)
-  return term_minibuf_read (fmt, value, -1, cp, hp)
+  return term_minibuf_read (fmt, value, nil, cp, hp)
 end
 
 -- Read a non-negative number from the minibuffer.

@@ -22,9 +22,15 @@ function Var (name, default_value, docstring)
   vars[name] = {val = default_value, doc = texi (docstring)}
 end
 
-Var ("tab-width", 8, "Number of spaces displayed for a tab character.")
-Var ("indent-tabs-mode", true, "If true, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
-Var ("wrap-column", 70, "Column beyond which wrapping occurs in wrap mode.")
-Var ("wrap-mode", false, "Whether wrap mode is automatically enabled.")
-Var ("caseless-search", true, "Whether searching ignores case by default.")
-Var ("case-replace", false, "Whether `query-replace' should preserve case.")
+Var ("tab-width", 8,
+     "Number of spaces displayed for a tab character.")
+Var ("indent-tabs-mode", true,
+     "If true, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
+Var ("wrap-column", 70,
+     "Column beyond which wrapping occurs in wrap mode.")
+Var ("wrap-mode", false,
+     "Whether wrap mode is automatically enabled.")
+Var ("caseless-search", true,
+     "Whether searching ignores case by default.")
+Var ("case-replace", false,
+     "Whether `query-replace' should preserve case.")

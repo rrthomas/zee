@@ -98,12 +98,9 @@ function main ()
   signal_init ()
   getopt.processArgs ()
 
-  local file
-  if #arg ~= 1 then
+  if #arg ~= 1 and not (#arg == 0 and getopt.opt.eval) then
     getopt.usage ()
     os.exit (1)
-  else
-    file = normalize_path (arg[1])
   end
 
   os.setlocale ("")
@@ -119,46 +116,44 @@ function main ()
   end
 
   -- Load file
-  local ok = find_file (file)
-  if ok then
-    execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
-  end
+  local ok = true
+  if #arg == 1 then
+    ok = find_file (normalize_path (arg[1]))
+    if ok then
+      execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
 
-  if ok then
-    -- Evaluate Lua chunks given on the command line.
-    for _, c in ipairs (getopt.opt.eval or {}) do
-      local func, err = load (c)
-      if func == nil then
-        ok = false
-        minibuf_error (string.format ("Error evaluating Lua: %s", err))
+      -- Evaluate Lua chunks given on the command line.
+      for _, c in ipairs (getopt.opt.eval or {}) do
+        if not execute_command ("eval", c) then
+          break
+        end
+        if thisflag.quit then
+          break
+        end
       end
-      func ()
-      if thisflag.quit then
-        break
+
+      lastflag.need_resync = true
+
+      -- Reinitialise the buffer to catch settings.
+      init_buffer (buf)
+
+      -- Refresh minibuffer in case there's a pending error message.
+      minibuf_refresh ()
+
+      -- Run the main loop.
+      while not thisflag.quit do
+        if lastflag.need_resync then
+          window_resync (win)
+        end
+        get_and_run_command ()
       end
-    end
-
-    lastflag.need_resync = true
-
-    -- Reinitialise the buffer to catch settings
-    init_buffer (buf)
-
-    -- Refresh minibuffer in case there was an error that couldn't be
-    -- written during startup
-    minibuf_refresh ()
-
-    -- Run the main loop.
-    while not thisflag.quit do
-      if lastflag.need_resync then
-        window_resync (win)
-      end
-      get_and_run_command ()
     end
   end
 
   -- Tidy and close the terminal.
   term_finish ()
 
+  -- Print any error message.
   if not ok then
     io.stderr:write (minibuf_contents .. "\n")
   end
