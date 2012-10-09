@@ -38,7 +38,13 @@ Define ("help-key",
 Display the command invoked by a key combination.
 ]],
   function (keystr)
-    local key = get_chord (keystr, "Describe key: ")
+    local key
+    if keystr then
+      key = keycode (keystr)
+    else
+      minibuf_write ("Describe key: ")
+      key = get_key_chord (true)
+    end
     if key then
       local name = get_command_by_key (key)
       local binding = tostring (key)

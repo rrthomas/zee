@@ -49,11 +49,11 @@ local refresh_wait = {
   usec = (MAX_RESYNC_MS % 1000) * 1000,
 }
 
-function getkey (delay)
+function getkey (delay, norefresh)
   local now = posix.gettimeofday ()
   local keycode = getkeystroke (0)
 
-  if not keycode or posix.timercmp (now, next_refresh) >= 0 then
+  if not norefresh and (not keycode or posix.timercmp (now, next_refresh) >= 0) then
     term_redisplay ()
     term_refresh ()
     next_refresh = posix.timeradd (now, refresh_wait)
@@ -91,18 +91,6 @@ function ungetkey (key)
 end
 
 -- Get a key chord from the keyboard.
-function get_key_chord ()
-  return getkey (GETKEY_DEFAULT) or get_key_chord ()
-end
-
--- Get a key chord from a key string or keyboard.
-function get_chord (keystr, prompt)
-  local key
-  if keystr then
-    key = keycode (keystr)
-  else
-    minibuf_write (prompt)
-    key = get_key_chord ()
-  end
-  return key
+function get_key_chord (norefresh)
+  return getkey (GETKEY_DEFAULT, norefresh) or get_key_chord (norefresh)
 end

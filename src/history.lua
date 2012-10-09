@@ -40,7 +40,7 @@ function previous_history_element (hp)
       return hp[hp.sel]
     end
     minibuf_error ("Beginning of history; no preceding item")
-    waitkey (WAITKEY_DEFAULT)
+    waitkey ()
   elseif hp.sel > 1 then
     -- If there is there another element, select it
     hp.sel = hp.sel - 1
@@ -55,6 +55,6 @@ function next_history_element (hp)
     return hp[hp.sel]
   else -- No more elements (back to original status)
     minibuf_error ("End of history; no defaults available")
-    waitkey (WAITKEY_DEFAULT)
+    waitkey ()
   end
 end

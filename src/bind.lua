@@ -85,6 +85,7 @@ function get_and_run_command ()
 end
 
 root_bindings = {}
+bindings = root_bindings
 
 local function key_canon (keystr)
   local key = tostring (keycode (keystr)) -- canonicalize the string
@@ -98,7 +99,7 @@ end
 function key_unbind (keystr)
   local key = key_canon (keystr)
   if key then
-    root_bindings[key] = nil
+    bindings[key] = nil
   end
 end
 
@@ -110,23 +111,26 @@ function key_bind (keystr, cmd)
       return
     end
 
-    root_bindings[key] = cmd
+    bindings[key] = cmd
   end
 end
 
-function init_default_bindings ()
-  -- Bind all printing keys to edit-insert-character
+function bind_printing_chars (cmd)
+  -- Bind all printing keys to given command
   for i = 0, 0xff do
     if posix.isprint (string.char (i)) then
-      root_bindings[string.char (i)] = "edit-insert-character"
+      bindings[string.char (i)] = cmd
     end
   end
-
   -- Bind special key names to edit-insert-character
   list.map (function (e)
-              root_bindings[tostring (keycode (e))] = "edit-insert-character"
+              bindings[tostring (keycode (e))] = cmd
             end,
             {"SPC", "TAB", "RET"})
+end
+
+function init_default_bindings ()
+  bind_printing_chars ("edit-insert-character")
 
   key_bind ("C-b", "move-previous-character")
   key_bind ("LEFT", "move-previous-character")
@@ -187,7 +191,7 @@ function init_default_bindings ()
 end
 
 function get_command_by_key (key)
-  return root_bindings[tostring (key)]
+  return bindings[tostring (key)]
 end
 
 Define ("where-is",
@@ -200,7 +204,7 @@ Argument is a command name.
 
     if name and command_exists (name) then
       local keys = {}
-      for k, n in pairs (root_bindings) do
+      for k, n in pairs (bindings) do
         if n == name then
           table.insert (keys, k)
         end

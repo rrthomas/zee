@@ -52,9 +52,6 @@ GETKEY_DELAYED = 2000
 -- defining_macro: we are defining a macro.
 
 
--- Default waitkey pause in ds
-WAITKEY_DEFAULT = 20
-
 -- The current window
 win = nil
 
