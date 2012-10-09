@@ -323,10 +323,10 @@ end
 -- Get the goal column, expanding tabs.
 function get_goalc ()
   local o = get_buffer_pt (buf)
-  local col = 0
+  local col = 0 -- FIXME: 1?
   local t = tab_width ()
   local start = buffer_start_of_line (buf, o)
-  for i = 1, o - start do
+  for i = 0, o - start - 1 do
     if get_buffer_char (buf, start + i) == '\t' then
       col = bit32.bor (col, t - 1)
     end
