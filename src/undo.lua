@@ -24,13 +24,7 @@ UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
 
 -- Save a reverse delta for doing undo.
 local function undo_save (ty, o, osize, size)
-  if buf.noundo then
-    return
-  end
-
-  local up = {type = ty, next = buf.last_undop}
-
-  up.o = o
+  local up = {type = ty, next = buf.last_undop, o = o}
 
   if ty == UNDO_REPLACE_BLOCK then
     up.size = size
@@ -93,11 +87,6 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 ]],
   function ()
-    if buf.noundo then
-      minibuf_error ("Undo disabled in this buffer")
-      return false
-    end
-
     if warn_if_readonly_buffer () then
       return false
     end
