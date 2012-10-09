@@ -137,6 +137,9 @@ function main ()
       -- Refresh minibuffer in case there's a pending error message.
       minibuf_refresh ()
 
+      -- Leave cursor in correct position.
+      term_redraw_cursor ()
+
       -- Run the main loop.
       while not thisflag.quit do
         if lastflag.need_resync then

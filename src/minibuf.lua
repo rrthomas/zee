@@ -26,9 +26,6 @@ function minibuf_refresh ()
     if minibuf_contents then
       term_minibuf_write (minibuf_contents)
     end
-
-    -- Redisplay (and leave the cursor in the correct position).
-    term_redraw_cursor ()
     term_refresh ()
   end
 end
