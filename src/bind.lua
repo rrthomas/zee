@@ -24,8 +24,8 @@ Define ("edit-insert-character",
 Insert the character you type.
 Whichever character you type to run this command is inserted.
 ]],
-  function ()
-    local key = term_keytobyte (lastkey ())
+  function (key)
+    local key = key and string.byte (key) or term_keytobyte (lastkey ())
     deactivate_mark ()
     if not key then
       ding ()
