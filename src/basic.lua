@@ -55,22 +55,6 @@ Move the cursor right one character.
   end
 )
 
--- Get the goal column, expanding tabs.
-function get_goalc ()
-  local o = get_buffer_pt (buf)
-  local col = 0
-  local t = tab_width ()
-  local start = buffer_start_of_line (buf, o)
-  for i = 1, o - start do
-    if get_buffer_char (buf, start + i) == '\t' then
-      col = bit32.bor (col, t - 1)
-    end
-    col = col + 1
-  end
-
-  return col
-end
-
 Define ("edit-goto-character",
 [[
 Set point to @i{position}, a number.
