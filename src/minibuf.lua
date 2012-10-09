@@ -101,7 +101,7 @@ function minibuf_read_yn (fmt)
     elseif key == keycode "n" then
       return false
     elseif key == keycode "C-g" then
-      return -1
+      return nil
     end
     errmsg = "Please answer y or n.  "
   end
