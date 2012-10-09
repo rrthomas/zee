@@ -17,16 +17,11 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--- Undo delta types.
-UNDO_REPLACE_BLOCK = 0  -- Replace a block of characters.
-UNDO_START_SEQUENCE = 1 -- Start a multi operation sequence.
-UNDO_END_SEQUENCE = 2   -- End a multi operation sequence.
-
 -- Save a reverse delta for doing undo.
 local function undo_save (ty, o, osize, size)
   local up = {type = ty, next = buf.last_undop, o = o}
 
-  if ty == UNDO_REPLACE_BLOCK then
+  if ty == "replace block" then
     up.size = size
     up.text = get_buffer_region (buf, region_new (o, o + osize))
     up.unchanged = not buf.modified
@@ -37,15 +32,15 @@ end
 
 
 function undo_start_sequence ()
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (buf), 0, 0)
+  undo_save ("start sequence", get_buffer_pt (buf))
 end
 
 function undo_end_sequence ()
-  undo_save (UNDO_END_SEQUENCE, 0, 0, 0)
+  undo_save ("end sequence")
 end
 
 function undo_save_block (o, osize, size)
-  undo_save (UNDO_REPLACE_BLOCK, o, osize, size)
+  undo_save ("replace block", o, osize, size)
 end
 
 -- Set unchanged flags to false.
@@ -58,19 +53,19 @@ end
 
 -- Revert an action.  Return the next undo entry.
 local function revert_action (up)
-  if up.type == UNDO_END_SEQUENCE then
+  if up.type == "end sequence" then
     undo_start_sequence ()
     up = up.next
-    while up.type ~= UNDO_START_SEQUENCE do
+    while up.type ~= "start sequence" do
       up = revert_action (up)
     end
     undo_end_sequence ()
   end
 
-  if up.type ~= UNDO_END_SEQUENCE then
+  if up.type ~= "end sequence" then
     goto_offset (up.o)
   end
-  if up.type == UNDO_REPLACE_BLOCK then
+  if up.type == "replace block" then
     replace_astr (up.size, up.text)
   end
 
