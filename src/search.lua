@@ -152,7 +152,7 @@ local function isearch (forward)
 
     minibuf_write (ms)
 
-    local c = getkey (GETKEY_DEFAULT)
+    local c = get_key_chord ()
 
     if c == keycode "C-g" then
       goto_offset (start)
@@ -309,7 +309,7 @@ what to do with it.
           window_resync (win)
         end
         minibuf_write (string.format ("Replace `%s' with `%s' (y, n, !, ., q)? ", find, repl))
-        c = getkey (GETKEY_DEFAULT)
+        c = get_key_chord ()
         minibuf_clear ()
 
         if c == keycode "q" then -- Quit immediately.

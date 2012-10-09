@@ -30,7 +30,7 @@ end
 
 -- Get a keystroke, waiting for up to delay ms, and translate it into a
 -- keycode.
-function getkeystroke (delay)
+local function getkeystroke (delay)
   _last_key = term_getkey (delay)
 
   if _last_key and thisflag.defining_macro then
@@ -49,7 +49,7 @@ local refresh_wait = {
   usec = (MAX_RESYNC_MS % 1000) * 1000,
 }
 
-function getkey (delay, norefresh)
+local function getkey (delay, norefresh)
   local now = posix.gettimeofday ()
   local keycode = getkeystroke (0)
 
