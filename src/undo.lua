@@ -67,6 +67,7 @@ local function revert_action (up)
   end
   if up.type == "replace block" then
     replace_astr (up.size, up.text)
+    goto_offset (up.o)
   end
 
   if up.unchanged then
