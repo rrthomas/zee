@@ -52,6 +52,8 @@ EXTRA_DIST +=						\
 	tests/test.input				\
 	tests/run-lisp-tests.lua
 
+# FIXME: nproc and xargs --max-procs are GNU-specific
 check-local: $(builddir)/src/zee
-	echo $(LUA_TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
-	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS)
+	echo $(LUA_TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS) > /dev/null
+	NPROC=`nproc`; \
+	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs --max-procs=$$NPROC --max-args=$$(( `echo $(LUA_TESTS) | wc -w` / $$NPROC + 1 )) $(RUNLUATESTS) > /dev/null

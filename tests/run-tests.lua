@@ -43,10 +43,10 @@ function run_test (test, name, edit_file, cmd, args)
       posix.system ("rm", "-f", edit_file, edit_file .. "~")
       return true
     else
-      print (name .. " failed to produce correct output")
+      debug (name .. " failed to produce correct output")
     end
   else
-    print (name .. " failed to run with error code " .. tostring (status))
+    debug (name .. " failed to run with error code " .. tostring (status))
   end
 end
 
@@ -67,6 +67,7 @@ for _, name in ipairs (arg) do
   end
 end
 
-print (string.format ("%d pass(es) and %d failure(s)", pass, fail))
+posix.system ("tset")
+debug (string.format ("%d pass(es) and %d failure(s)", pass, fail))
 
 os.exit (fail)
