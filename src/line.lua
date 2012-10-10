@@ -67,7 +67,7 @@ function wrap_break_line ()
 
     if break_col >= 1 then -- Break line.
       goto_offset (get_buffer_line_o (buf) + break_col)
-      execute_command ("delete-horizontal-space")
+      execute_command ("edit-delete-horizontal-space")
       insert_string ("\n")
       goto_offset (m.o)
       break_made = true
@@ -98,7 +98,7 @@ local function previous_nonblank_goalc ()
   end
 end
 
-Define ("indent-relative",
+Define ("edit-indent-relative",
 [[
 Indent line or insert a tab.
 ]],
@@ -155,7 +155,7 @@ Indent line or insert a tab.
 Define ("edit-insert-newline-and-indent",
 [[
 Insert a newline, then indent.
-Indentation is done using the `indent-relative' function, except
+Indentation is done using the `edit-indent-relative' function, except
 that if there is a character in the first column of the line above,
 no indenting is performed.
 ]],
@@ -182,7 +182,7 @@ no indenting is performed.
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
       if indent then
-        execute_command ("indent-relative")
+        execute_command ("edit-indent-relative")
       end
       ok = true
     end
@@ -221,7 +221,7 @@ Join lines if the character is a newline.
   end
 )
 
-Define ("delete-horizontal-space",
+Define ("edit-delete-horizontal-space",
 [[
 Delete all spaces and tabs around point.
 ]],

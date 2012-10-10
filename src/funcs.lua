@@ -137,7 +137,7 @@ is given by the variable `wrap-column'.
     while buffer_end_of_line (buf, get_buffer_pt (buf)) < m_end.o do
       execute_command ("move-end-line")
       delete_char ()
-      execute_command ("delete-horizontal-space")
+      execute_command ("edit-delete-horizontal-space")
       insert_char (' ')
     end
     unchain_marker (m_end)
