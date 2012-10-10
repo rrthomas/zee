@@ -24,9 +24,9 @@ function recase (s, newcase)
   local i, len
 
   if newcase == "capitalized" or newcase == "upper" then
-    bs = bs .. string.upper (s[1])
+    bs = bs .. s[1]:upper ()
   else
-    bs = bs .. string.lower (s[1])
+    bs = bs .. s[1]:lower ()
   end
 
   for i = 2, #s do
@@ -38,7 +38,7 @@ end
 
 -- Turn texinfo markup into plain text
 function texi (s)
-  s = string.gsub (s, "@i{([^}]+)}", function (s) return string.upper (s) end)
-  s = string.gsub (s, "@kbd{([^}]+)}", "%1")
+  s = s:gsub ("@i{([^}]+)}", function (s) return s:upper () end)
+  s = s:gsub ("@kbd{([^}]+)}", "%1")
   return s
 end

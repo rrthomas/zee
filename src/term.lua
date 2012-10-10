@@ -60,10 +60,10 @@ local function make_char_printable (c, x, cur_tab_width)
   assert (c ~= "")
   if c == '\t' then
     return string.rep (" ", cur_tab_width - x % cur_tab_width)
-  elseif string.byte (c) > 0 and string.byte (c) <= 27 then
-    return string.format ("^%c", string.byte ("@") + string.byte (c))
+  elseif c:byte () > 0 and c:byte () <= 27 then
+    return string.format ("^%c", string.byte ("@") + c:byte ())
   else
-    return string.format ("\\%o", string.byte (c))
+    return string.format ("\\%o", c:byte ())
   end
 end
 
@@ -161,7 +161,7 @@ local function draw_status_line (line, wp)
   end
   as = as .. ")"
 
-  term_addstr (string.sub (as, 1, term_width ()))
+  term_addstr (as:sub (1, term_width ()))
   term_attrset (display.normal)
 end
 

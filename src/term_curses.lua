@@ -132,7 +132,7 @@ function term_init ()
     if not codetokey[{code}] then
       -- control keys
       if code < 0x20 then
-        key = keycode ("C-" .. string.lower (string.char (code + 0x40)))
+        key = keycode ("C-" .. string.char (code + 0x40):lower ())
 
       -- printable keys
       elseif code < 0x80 then

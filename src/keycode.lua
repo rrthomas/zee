@@ -74,7 +74,7 @@ local keycode_mt = {
   -- Normalise modifier lookups to uppercase, sans `-' suffix.
   --   hasmodifier = keycode.META or keycode["c"]
   __index = function (self, mod)
-    mod = string.upper (string.sub (mod, 1, 1))
+    mod = mod:sub (1, 1):upper ()
     return rawget (self, mod)
   end,
 
@@ -82,7 +82,7 @@ local keycode_mt = {
   --   ctrlkey = "C-" + key
   __add = function (self, mod)
     if "string" == type (self) then mod, self = self, mod end
-    mod = string.upper (string.sub (mod, 1, 1))
+    mod = mod:sub (1, 1):upper ()
     if self[mod] then return self end
     return keycode (mod .. "-" .. tostring (self))
   end,
@@ -91,8 +91,8 @@ local keycode_mt = {
   --   withoutmeta = key - "M-"
   __sub = function (self, mod)
     if "string" == type (self) then mod, self = self, mod end
-    mod = string.upper (string.sub (mod, 1, 1))
-    local keystr = string.gsub (tostring (self), mod .. "%-", "")
+    mod = mod:sub (1, 1):upper ()
+    local keystr = tostring (self):gsub (mod .. "%-", "")
     return keycode (keystr)
   end,
 }
@@ -124,6 +124,6 @@ keycode = memoize (function (chord)
   if not keyname:member (tail) then return nil end
   key.key = tail
   key.code = keynametocode[tail]
-  
+
   return key
 end)

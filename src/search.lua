@@ -24,7 +24,7 @@ local function no_upper (s)
   for i = 1, #s do
     if s[i] == '\\' then
       quote_flag = not quote_flag
-    elseif not quote_flag and s[i] == string.upper (s[i]) then
+    elseif not quote_flag and s[i] == s[i]:upper () then
       return false
     end
   end
@@ -141,9 +141,9 @@ local function isearch (forward)
 
     -- Regex error.
     if re_find_err then
-      if string.sub (re_find_err, 1, 10) == "Premature " or
-        string.sub (re_find_err, 1, 10) == "Unmatched " or
-        string.sub (re_find_err, 1, 8) == "Invalid " then
+      if re_find_err:sub (1, 10) == "Premature " or
+        re_find_err:sub (1, 10) == "Unmatched " or
+        re_find_err:sub (1, 8) == "Invalid " then
         re_find_err = "incomplete input"
       end
       ms = ms .. string.format (" [%s]", re_find_err)
@@ -169,7 +169,7 @@ local function isearch (forward)
       break
     elseif c == keycode "BACKSPACE" then
       if #pattern > 0 then
-        pattern = string.sub (pattern, 1, -2)
+        pattern = pattern:sub (1, -2)
         cur = start
         goto_offset (start)
         thisflag.need_resync = true

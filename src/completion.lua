@@ -59,7 +59,7 @@ end
 local function common_prefix_length (s1, s2)
   local len = math.min (#s1, #s2)
   for i = 1, len do
-    if string.sub (s1, 1, i) ~= string.sub (s2, 1, i) then
+    if s1:sub (i, i) ~= s2:sub (i, i) then
       return i - 1
     end
   end
