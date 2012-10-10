@@ -81,25 +81,6 @@ function wrap_break_line ()
   return break_made
 end
 
-local function insert_expanded_tab ()
-  local t = tab_width ()
-  insert_string (string.rep (' ', t - get_goalc () % t))
-end
-
-local function insert_tab ()
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
-  if get_variable ("indent-tabs-mode") then
-    insert_char ('\t')
-  else
-    insert_expanded_tab ()
-  end
-
-  return true
-end
-
 -- Indentation command
 -- Go to cur_goalc () in the previous non-blank line.
 local function previous_nonblank_goalc ()
@@ -163,7 +144,7 @@ Indent line or insert a tab.
       end
     else
       -- if already at EOL on target line, insert a tab.
-      ok = insert_tab ()
+      ok = call_command ("insert-tab")
     end
     undo_end_sequence ()
 
@@ -261,10 +242,16 @@ Delete all spaces and tabs around point.
 
 Define ("edit-insert-tab",
 [[
-Indent to next multiple of `indent_width'.
+Indent to next multiple of `indent-width'.
 ]],
   function ()
-    return insert_tab ()
+    if warn_if_readonly_buffer () then
+      return false
+    end
+
+    local t = indent_width ()
+    insert_string (string.rep (' ', t - get_goalc () % t))
+    return true
   end
 )
 

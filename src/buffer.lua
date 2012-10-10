@@ -296,6 +296,11 @@ function tab_width ()
   return math.max (tonumber (get_variable ("tab-width")), 1)
 end
 
+-- Return a safe indent width.
+function indent_width ()
+  return math.max (tonumber (get_variable ("indent-width")), 1)
+end
+
 
 -- Basic movement routines
 

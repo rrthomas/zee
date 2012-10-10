@@ -17,10 +17,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Define ("indent-width", "Number of spaces inserted for an indentation.",
+        2)
 Define ("tab-width", "Number of spaces displayed for a tab character.",
         8)
-Define ("indent-tabs-mode", "If true, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.",
-        true)
 Define ("wrap-column", "Column beyond which wrapping occurs in wrap mode.",
         70)
 Define ("wrap-mode", "Whether wrap mode is automatically enabled.",
