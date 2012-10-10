@@ -22,8 +22,6 @@
 --   completions: list of completion strings
 --   matches: list of matches
 --   match: the current matched string
---   poppedup: true if the completion is currently displayed
---   close: true if the completion window should be closed
 -- }
 -- FIXME: Use Objects here and elsewhere, and add an __index
 -- metamethod that works like strict.lua.
@@ -120,8 +118,6 @@ end
 
 -- Popup the completion window.
 function popup_completion (cp)
-  cp.poppedup = true
-  cp.close = true
   popup_set (completion_write (cp, win.ewidth))
   term_redisplay ()
 end

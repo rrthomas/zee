@@ -124,7 +124,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
           function ()
             if cp == nil then
               ding ()
-            elseif cp.poppedup then
+            else
               popup_scroll_down ()
             end
           end)
@@ -133,7 +133,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
           function ()
             if cp == nil then
               ding ()
-            elseif cp.poppedup then
+            else
               popup_scroll_up ()
             end
           end)
