@@ -132,6 +132,7 @@ end
 function init_default_bindings ()
   bind_printing_chars ("edit-insert-character")
 
+  -- FIXME: Make ESC bindable and use it for cancelling
   key_bind ("C-b", "move-previous-character")
   key_bind ("LEFT", "move-previous-character")
   key_bind ("BACKSPACE", "edit-delete-previous-character")

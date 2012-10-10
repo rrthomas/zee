@@ -42,6 +42,7 @@ local function draw_minibuf_read (prompt, value, pointo)
   term_refresh ()
 end
 
+-- FIXME: Turn term_minibuf_read inside out so it's a minor mode
 function term_minibuf_read (prompt, value, pos, cp, hp)
   local quit = false
 
