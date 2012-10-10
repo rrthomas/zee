@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-RUNLUATESTS = $(LUA) $(srcdir)/tests/run-tests.lua
+RUNLUATESTS = $(LUA) $(srcdir)/build-aux/run-tests.lua
 
 TERM ?= vt100
 
