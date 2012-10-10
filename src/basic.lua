@@ -61,7 +61,7 @@ Set point to @i{position}, a number.
 Beginning of buffer is position 1.
 ]],
   function (n)
-    if not n then
+    if not n and interactive () then
       n = minibuf_read_number ("Goto char: ")
     end
     n = tonumber (n)
@@ -77,7 +77,7 @@ Line 1 is the beginning of the buffer.
 ]],
   function (n)
     n = tonumber (n)
-    if not n and _interactive then
+    if not n and interactive () then
       n = minibuf_read_number ("Goto line: ")
     end
 
@@ -96,7 +96,7 @@ Move the cursor to the given column.
 ]],
   function (n)
     n = tonumber (n)
-    if not n and _interactive then
+    if not n and interactive () then
       n = minibuf_read_number ("Goto column: ")
     end
 

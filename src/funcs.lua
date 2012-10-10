@@ -177,19 +177,6 @@ local function pipe_command (cmd, tempfile)
   return true
 end
 
-local function minibuf_read_shell_command ()
-  local ms = minibuf_read ("Shell command: ", "")
-
-  if not ms then
-    return ding ()
-  end
-  if ms == "" then
-    return
-  end
-
-  return ms
-end
-
 Define ("edit-shell-command",
 [[
 Reads a line of text using the minibuffer and creates an inferior shell
@@ -201,40 +188,45 @@ file, replacing the selection if any.
   function (cmd)
     local ok = true
 
+    if not cmd and interactive () then
+      cmd = minibuf_read ("Shell command: ", "")
+    end
     if not cmd then
-      cmd = minibuf_read_shell_command ()
+      return ding ()
+    end
+    if cmd == "" then
+      return
     end
 
-    if cmd then
-      local rp = calculate_the_region ()
-      local h, tempfile
-      if rp then
-        tempfile = os.tmpname ()
+    local rp = calculate_the_region ()
+    local h, tempfile
+    if rp then
+      tempfile = os.tmpname ()
 
-        h = io.open (tempfile, "w")
-        if not h then
-          ok = minibuf_error ("Cannot open temporary file")
-        else
-          local fd = posix.fileno (h)
-          activate_mark ()
-          local s = get_buffer_region (buf, calculate_the_region ())
-          local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
-          if not written then
-            ok = minibuf_error ("Error writing to temporary file: " .. err)
-          end
+      h = io.open (tempfile, "w")
+      if not h then
+        ok = minibuf_error ("Cannot open temporary file")
+      else
+        local fd = posix.fileno (h)
+        activate_mark ()
+        local s = get_buffer_region (buf, calculate_the_region ())
+        local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
+        if not written then
+          ok = minibuf_error ("Error writing to temporary file: " .. err)
         end
       end
-
-      if ok then
-        ok = pipe_command (cmd, tempfile)
-      end
-      if h then
-        h:close ()
-      end
-      if rp then
-        os.remove (tempfile)
-      end
     end
+
+    if ok then
+      ok = pipe_command (cmd, tempfile)
+    end
+    if h then
+      h:close ()
+    end
+    if rp then
+      os.remove (tempfile)
+    end
+
     return ok
   end
 )

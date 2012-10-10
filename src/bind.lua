@@ -43,16 +43,20 @@ Whichever character you type to run this command is inserted.
 
 _last_command = nil
 _this_command = nil
-_interactive = false
+_interactive = 0
+
+function interactive ()
+  return _interactive > 0
+end
 
 function call_command (f, ...)
   thisflag = {defining_macro = lastflag.defining_macro}
 
   -- Execute the command.
   _this_command = f
-  _interactive = true
+  _interactive = _interactive + 1
   local ok = execute_command (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_command
-  _interactive = false
+  _interactive = math.max (0, _interactive - 1)
   _last_command = _this_command
 
   -- Only add keystrokes if we were already in macro defining mode

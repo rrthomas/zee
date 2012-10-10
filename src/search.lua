@@ -94,7 +94,7 @@ local last_search
 function do_search (forward, pattern)
   local ok = false
 
-  if not pattern then
+  if not pattern and interactive () then
     pattern = minibuf_read (string.format ("Search%s: ", forward and "" or " backward"), last_search or "")
   end
 
@@ -248,7 +248,7 @@ Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   function (s)
-    return (_interactive and isearch or do_search) (true, s)
+    return (interactive () and isearch or do_search) (true, s)
   end
 )
 
@@ -261,7 +261,7 @@ Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   function (s)
-    return (_interactive and isearch or do_search) (false, s)
+    return (interactive () and isearch or do_search) (false, s)
   end
 )
 
@@ -283,8 +283,8 @@ Replace occurrences of a regular expression with other text.
 As each match is found, the user must type a character saying
 what to do with it.
 ]],
-  function ()
-    local find = minibuf_read ("Query replace string: ", "")
+  function (find)
+    local find = find or (interactive () and minibuf_read ("Query replace string: ", ""))
     if not find then
       return ding ()
     end
@@ -293,7 +293,7 @@ what to do with it.
     end
     local find_no_upper = no_upper (find)
 
-    local repl = minibuf_read (string.format ("Query replace `%s' with: ", find), "")
+    local repl = interactive () and minibuf_read (string.format ("Query replace `%s' with: ", find), "")
     if not repl then
       ding ()
     end

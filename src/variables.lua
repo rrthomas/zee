@@ -45,12 +45,12 @@ Define ("preferences-set-variable",
 Set a variable to the specified value.
 ]],
   function (var, val)
-    var = var or minibuf_read_variable_name ("Set variable: ")
+    var = var or (interactive () and minibuf_read_variable_name ("Set variable: "))
     if not var then
       return false
     end
 
-    if val == nil then
+    if val == nil and interactive () then
       val = minibuf_read (string.format ("Set %s to value: ", var), "")
     end
     if val == nil then

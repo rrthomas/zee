@@ -22,7 +22,7 @@ Define ("help-thing",
 Display the help for the given command or variable.
 ]],
   function (name)
-    name = name or minibuf_read_name ("Describe command or variable: ")
+    name = name or (interactive () and minibuf_read_name ("Describe command or variable: "))
     if not name then
       return false
     end
