@@ -89,7 +89,7 @@ end
 function completion_try(cp, search)
   fullmatches = 0
   cp.matches = {}
-  for i, v in pairs(cp.completions) do
+  for i in pairs(cp.completions) do
     if type(i) == "string" then
       if string.sub(i, 1, #search) == search then
         table.insert(cp.matches, i)
