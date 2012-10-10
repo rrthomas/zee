@@ -104,14 +104,16 @@ end
 -- Go to cur_goalc () in the previous non-blank line.
 local function previous_nonblank_goalc ()
   local cur_goalc = get_goalc ()
+  local ok = true
 
-  -- Find previous non-blank line.
-  execute_command ("move-start-line")
-  while move_line (-1) and is_blank_line () do end
+  -- Find previous non-blank line, if any.
+  repeat
+    ok = move_line (-1)
+  until not ok or not is_blank_line ()
 
   -- Go to `cur_goalc' in that non-blank line.
-  while not eolp () and get_goalc () < cur_goalc do
-    move_char (1)
+  while ok and not eolp () and get_goalc () < cur_goalc do
+    ok = move_char (1)
   end
 end
 
@@ -120,65 +122,47 @@ Define ("indent-relative",
 Indent line or insert a tab.
 ]],
   function ()
-    local target_goalc = 0
-    local cur_goalc = get_goalc ()
-    local t = tab_width ()
-    local ok = false
-
     if warn_if_readonly_buffer () then
       return false
     end
 
+    local cur_goalc = get_goalc ()
+    local target_goalc = 0
+    local m = point_marker ()
+    local ok = true
+
     deactivate_mark ()
+    previous_nonblank_goalc ()
 
-    -- If we're on the first line, set target to 0.
-    if get_buffer_line_o (buf) == 0 then
-      target_goalc = 0
-    else
-      -- Find goalc in previous non-blank line.
-      local m = point_marker ()
-
-      previous_nonblank_goalc ()
-
-      -- Now find the next blank char.
-      if preceding_char () ~= '\t' or get_goalc () <= cur_goalc then
-        while not eolp () and not following_char ():match ("%s") do
-          move_char (1)
-        end
-      end
-
-      -- Find next non-blank char.
-      while not eolp () and following_char ():match ("%s") do
+    -- Now find the next blank char.
+    if preceding_char () ~= '\t' or get_goalc () <= cur_goalc then
+      while not eolp () and not following_char ():match ("%s") do
         move_char (1)
       end
-
-      -- Target column.
-      if not eolp () then
-        target_goalc = get_goalc ()
-      end
-      goto_offset (m.o)
-      unchain_marker (m)
     end
 
-    -- Insert indentation.
+    -- Find next non-blank char.
+    while not eolp () and following_char ():match ("%s") do
+      move_char (1)
+    end
+
+    -- Target column.
+    if not eolp () then
+      target_goalc = get_goalc ()
+    end
+    goto_offset (m.o)
+    unchain_marker (m)
+
+    -- Indent.
     undo_start_sequence ()
     if target_goalc > 0 then
       -- If not at EOL on target line, insert spaces & tabs up to
-      -- target_goalc; if already at EOL on target line, insert a tab.
-      cur_goalc = get_goalc ()
-      if cur_goalc < target_goalc then
-        repeat
-          if cur_goalc % t == 0 and cur_goalc + t <= target_goalc then
-            ok = insert_tab ()
-          else
-            ok = insert_char (' ')
-          end
-          cur_goalc = get_goalc ()
-        until not ok or cur_goalc >= target_goalc
-      else
-        ok = insert_tab ()
+      -- target_goalc.
+      while get_goalc () < target_goalc do
+        ok = insert_char (' ')
       end
     else
+      -- if already at EOL on target line, insert a tab.
       ok = insert_tab ()
     end
     undo_end_sequence ()
