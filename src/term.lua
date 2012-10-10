@@ -101,7 +101,7 @@ local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
 end
 
 local function calculate_highlight_region ()
-  if buf.mark == nil or not buf.mark_active then
+  if buf.mark == nil then
     return false
   end
 

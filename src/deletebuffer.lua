@@ -58,11 +58,11 @@ local function delete_text (mark_func)
 
   local m = point_marker ()
   undo_start_sequence ()
-  select_on ()
+  set_mark ()
   execute_command (mark_func)
   execute_command ("edit-delete-selection")
   undo_end_sequence ()
-  set_mark (m)
+  set_mark ()
   unchain_marker (m)
 
   _this_command = "edit-delete-selection"

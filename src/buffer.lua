@@ -225,9 +225,6 @@ function warn_if_no_mark ()
   if not buf.mark then
     minibuf_error ("The mark is not set now")
     return true
-  elseif not buf.mark_active then
-    minibuf_error ("The mark is not active now")
-    return true
   end
   return false
 end
@@ -268,12 +265,8 @@ function in_region (o, x, r)
   return o + x >= r.start and o + x < r.finish
 end
 
-function activate_mark ()
-  buf.mark_active = true
-end
-
 function deactivate_mark ()
-  buf.mark_active = false
+  buf.mark = nil
 end
 
 -- Return a safe tab width.

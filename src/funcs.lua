@@ -59,22 +59,16 @@ When selecting text, move the cursor to the other end of the selection.
     local tmp = get_buffer_pt (buf)
     goto_offset (buf.mark.o)
     buf.mark.o = tmp
-    activate_mark ()
     thisflag.need_resync = true
   end
 )
-
-function select_on ()
-  set_mark ()
-  activate_mark ()
-end
 
 Define ("edit-select-on",
 [[
 Start selecting text.
 ]],
   function ()
-    select_on ()
+    set_mark ()
     minibuf_write ("Mark set")
   end
 )
@@ -166,7 +160,7 @@ local function pipe_command (cmd, tempfile)
     minibuf_write ("(Shell command succeeded with no output)")
   elseif not warn_if_readonly_buffer () then
     local del = 0
-    if buf.mark_active then
+    if buf.mark then
       local r = calculate_the_region ()
       goto_offset (r.start)
       del = get_region_size (r)
@@ -208,7 +202,6 @@ file, replacing the selection if any.
         ok = minibuf_error ("Cannot open temporary file")
       else
         local fd = posix.fileno (h)
-        activate_mark ()
         local s = get_buffer_region (buf, calculate_the_region ())
         local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
         if not written then
