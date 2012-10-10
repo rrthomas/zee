@@ -80,16 +80,16 @@ Line 1 is the beginning of the buffer.
     if not n and interactive () then
       n = minibuf_read_number ("Goto line: ")
     end
-
-    if type (n) == "number" then
-      move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
-      execute_command ("move-start-line")
-    else
+    if type (n) ~= "number" then
       return false
     end
+
+    move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
+    execute_command ("move-start-line")
   end
 )
 
+-- FIXME: Abstract out the interactive input of arguments à la C Zee
 Define ("edit-goto-column",
 [[
 Move the cursor to the given column.
@@ -99,12 +99,11 @@ Move the cursor to the given column.
     if not n and interactive () then
       n = minibuf_read_number ("Goto column: ")
     end
-
-    if type (n) == "number" then
-      goto_offset (math.min (math.max (n, 1), buffer_line_len (buf)) - 1 + get_buffer_line_o (buf))
-    else
+    if type (n) ~= "number" then
       return false
     end
+
+    goto_offset (math.min (math.max (n, 1), buffer_line_len (buf)) - 1 + get_buffer_line_o (buf))
   end
 )
 

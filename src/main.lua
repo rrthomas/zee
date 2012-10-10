@@ -131,9 +131,6 @@ function main ()
 
       lastflag.need_resync = true
 
-      -- Reinitialise the buffer to catch settings.
-      init_buffer (buf)
-
       -- Refresh minibuffer in case there's a pending error message.
       minibuf_refresh ()
 

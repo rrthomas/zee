@@ -195,21 +195,7 @@ end
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
 function buffer_new ()
-  local bp = {}
-
-  bp.pt = 1
-  bp.gap = 0
-  bp.text = AStr ("")
-  bp.markers = {}
-  init_buffer (bp)
-  return bp
-end
-
--- Initialise a buffer
-function init_buffer (bp)
-  if get_variable ("wrap-mode") then
-    bp.wrap = true
-  end
+  return {pt = 1, gap = 0, text = AStr (""), markers = {}, wrap = get_variable ("wrap-mode") == true}
 end
 
 -- Get filename.
@@ -232,7 +218,6 @@ function warn_if_readonly_buffer ()
     minibuf_error ("File is readonly")
     return true
   end
-
   return false
 end
 
