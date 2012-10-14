@@ -35,18 +35,6 @@ Change whether this file can be modified.
   end
 )
 
-Define ("preferences-toggle-wrap-mode",
-[[
-Toggle wrap mode.
-In wrap mode, inserting a space or newline at a column beyond
-`wrap-column' automatically breaks the line at a previous space.
-Paragraphs can also be wrapped using `edit-wrap-paragraph'.
-]],
-  function ()
-    buf.wrap = not buf.wrap
-  end
-)
-
 Define ("edit-select-toggle",
 [[
 Toggle selection mode.
@@ -181,43 +169,6 @@ Move the cursor forward to the end of the paragraph.
 ]],
   function ()
     move_paragraph (1, "move-end-line")
-  end
-)
-
-Define ("edit-wrap-paragraph",
-[[
-Wrap the paragraph at or after the cursor. The wrap column
-is given by the variable `wrap-column'.
-]],
-  function ()
-    local m = point_marker ()
-
-    undo_start_sequence ()
-
-    execute_command ("move-next-paragraph")
-    if is_empty_line () then
-      move_line (-1)
-    end
-    local m_end = point_marker ()
-
-    execute_command ("move-previous-paragraph")
-    if is_empty_line () then -- Move to next line if between two paragraphs.
-      move_line (1)
-    end
-
-    while buffer_end_of_line (buf, get_buffer_pt (buf)) < m_end.o do
-      execute_command ("move-end-line")
-      delete_char ()
-      execute_command ("edit-delete-horizontal-space")
-      insert_char (' ')
-    end
-
-    execute_command ("move-end-line")
-    while get_goalc () > tonumber (get_variable ("wrap-column")) + 1 and wrap_break_line () do end
-
-    goto_offset (m.o)
-
-    undo_end_sequence ()
   end
 )
 

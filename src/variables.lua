@@ -21,10 +21,6 @@ Define ("indent-width", "Number of spaces inserted for an indentation.",
         2)
 Define ("tab-width", "Number of spaces displayed for a tab character.",
         8)
-Define ("wrap-column", "Column beyond which wrapping occurs in wrap mode.",
-        70)
-Define ("wrap-mode", "Whether wrap mode is automatically enabled.",
-        false)
 Define ("caseless-search", "Whether searching ignores case by default.",
         true)
 Define ("case-replace", "Whether `query-replace' should preserve case.",

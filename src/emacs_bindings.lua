@@ -78,6 +78,3 @@ key_bind("Alt-i", "edit_insert_tab")
 key_bind("Alt-(", "macro_record")
 key_bind("Alt-)", "macro_stop")
 key_bind("Alt-e", "macro_play")
-
--- Wrap
-key_bind("Alt-q", "edit_wrap_paragraph")

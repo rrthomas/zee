@@ -30,11 +30,6 @@ Whichever character you type to run this command is inserted.
     if not key then
       return ding ()
     end
-
-    if string.char (key):match ("%s") and buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
-      wrap_break_line ()
-    end
-
     insert_char (string.char (key))
   end
 )
@@ -151,7 +146,6 @@ function init_default_bindings ()
   key_bind ("C-e", "move-end-line")
   key_bind ("END", "move-end-line")
   key_bind ("M-x", "execute-command")
-  key_bind ("M-q", "edit-wrap-paragraph")
   key_bind ("RIGHT", "move-next-character")
   key_bind ("C-f", "move-next-character")
   key_bind ("M-}", "move-next-paragraph")

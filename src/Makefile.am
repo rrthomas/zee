@@ -74,8 +74,8 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
 	chmod +x $@
 	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
 
-src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
-	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile'"$(srcdir)/build-aux/mkdot$(PACKAGE).lua"' ()"
+$(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
+	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
 
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp

@@ -192,9 +192,6 @@ local function draw_status_line (line, wp)
   if thisflag.defining_macro then
     table.insert (flags, "Def")
   end
-  if buf.wrap then
-    table.insert (flags, "Wrap")
-  end
   if buf.search then
     table.insert (flags, "Search")
   end

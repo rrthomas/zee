@@ -23,62 +23,6 @@ function insert_string (s)
   return insert_astr (AStr (s))
 end
 
--- If point is greater than wrap-column, then split the line at the
--- right-most space character at or before wrap-column, if there is
--- one, or at the left-most at or after wrap-column, if not. If the
--- line contains no spaces, no break is made.
---
--- Return flag indicating whether break was made.
-function wrap_break_line ()
-  local i, old_col
-  local break_col = 0
-  local wrapcol = tonumber (get_variable ("wrap-column"))
-  local break_made = false
-
-  -- Only break if we're beyond wrap-column.
-  if get_goalc () > wrapcol then
-    -- Save point.
-    local m = point_marker ()
-
-    -- Move cursor back to wrap column
-    old_col = get_buffer_pt (buf) - get_buffer_line_o (buf)
-    while get_goalc () > wrapcol + 1 do
-      move_char (-1)
-    end
-
-    -- Find break point moving left from wrap-column.
-    for i = get_buffer_pt (buf) - get_buffer_line_o (buf), 1, -1 do
-      if get_buffer_char (buf, get_buffer_line_o (buf) + i - 1):match ("%s") then
-        break_col = i
-        break
-      end
-    end
-
-    -- If no break point moving left from wrap-column, find first
-    -- possible moving right.
-    if break_col == 0 then
-      for i = get_buffer_pt (buf) + 1, buffer_end_of_line (buf, get_buffer_line_o (buf)) do
-        if get_buffer_char (buf, i - 1):match ("%s") then
-          break_col = i - get_buffer_line_o (buf)
-          break
-        end
-      end
-    end
-
-    if break_col >= 1 then -- Break line.
-      goto_offset (get_buffer_line_o (buf) + break_col)
-      execute_command ("edit-delete-horizontal-space")
-      insert_string ("\n")
-      goto_offset (m.o)
-      break_made = true
-    else -- Undo fiddling with point.
-      goto_offset (get_buffer_line_o (buf) + old_col)
-    end
-  end
-
-  return break_made
-end
-
 -- Indentation command
 -- Go to cur_goalc () in the previous non-blank line.
 local function previous_nonblank_goalc ()
@@ -244,12 +188,9 @@ Indent to next multiple of `indent-width'.
 
 Define ("edit-insert-newline",
 [[
-Insert a newline, wrapping if in wrap mode.
+Insert a newline.
 ]],
   function ()
-    if buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
-      wrap_break_line ()
-    end
     return not insert_string ("\n")
   end
 )

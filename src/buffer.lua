@@ -203,7 +203,6 @@ end
 function buffer_new () -- FIXME: Constructor which we can pass other arguments
   return {pt = 1, gap = 0, text = AStr (""),
           markers = setmetatable ({}, {__mode = "k"}),
-          wrap = get_variable ("wrap-mode") == true,
           modified = false}
 end
 

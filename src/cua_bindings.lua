@@ -73,6 +73,3 @@ key_bind("Alt-i", "edit_insert_quoted")
 key_bind("Alt-(", "macro_record")
 key_bind("Alt-)", "macro_stop")
 key_bind("Alt-e", "macro_play")
-
--- Wrap
-key_bind("Ctrl-j", "edit_wrap_paragraph")
