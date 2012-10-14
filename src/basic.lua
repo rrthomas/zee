@@ -73,6 +73,7 @@ Beginning of buffer is position 1.
   end
 )
 
+-- FIXME: Rename move-goto-line
 Define ("edit-goto-line",
 [[
 Move the cursor to the given line.
@@ -87,7 +88,7 @@ Line 1 is the beginning of the buffer.
       return true
     end
 
-    move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
+    move_line ((math.max (n, 1) - 1) - get_buffer_line (buf))
     execute_command ("move-start-line")
   end
 )
@@ -157,11 +158,7 @@ Define ("move-previous-page",
 Scroll text of current window downward near full screen.
 ]],
   function ()
-    if not window_top_visible (win) then
-      return move_line (-win.eheight)
-    end
-
-    return minibuf_error ("Beginning of buffer")
+    return move_line (-win.eheight)
   end
 )
 
@@ -170,10 +167,6 @@ Define ("move-next-page",
 Scroll text of current window upward near full screen.
 ]],
   function ()
-    if not window_bottom_visible (win) then
-      return move_line (win.eheight)
-    end
-
-    return minibuf_error ("End of buffer")
+    return move_line (win.eheight)
   end
 )

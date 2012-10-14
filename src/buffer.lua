@@ -101,7 +101,8 @@ function replace_astr (del, as)
 
   -- Insert `newlen' chars.
   buf.text:replace (buf.pt, as)
-  buf.pt = buf.pt + newlen -- FIXME: remove this!
+  buf.pt = buf.pt + newlen -- FIXME: remove this & the next line!
+  resync_buffer_line (buf)
 
   -- Adjust markers.
   for m in pairs (buf.markers) do
@@ -176,6 +177,27 @@ function insert_char (c)
   -- end
 end
 
+function get_buffer_line (bp)
+  return bp.line
+end
+
+function resync_buffer_line (bp)
+  local n = 0
+  local o = 1
+  while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < get_buffer_pt (bp) do
+    n = n + 1
+    o = buffer_next_line (bp, o)
+    assert (o)
+  end
+  bp.line = n
+end
+
+-- Get filename.
+function get_buffer_filename (bp)
+  return bp.filename
+end
+
+
 function delete_char ()
   execute_command ("edit-select-off")
 
@@ -201,14 +223,9 @@ end
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
 function buffer_new () -- FIXME: Constructor which we can pass other arguments
-  return {pt = 1, gap = 0, text = AStr (""),
+  return {pt = 1, line = 0, gap = 0, text = AStr (""),
           markers = setmetatable ({}, {__mode = "k"}),
           modified = false}
-end
-
--- Get filename.
-function get_buffer_filename (bp)
-  return bp.filename
 end
 
 -- Print an error message into the echo area and return true
@@ -318,6 +335,7 @@ function move_char (dir)
     set_buffer_pt (buf, get_buffer_pt (buf) + dir)
   elseif not btest () then
     thisflag.need_resync = true
+    bp.line = bp.line + dir
     set_buffer_pt (buf, get_buffer_pt (buf) + dir)
     execute_command (lmove)
   else
@@ -331,10 +349,10 @@ function get_goalc ()
 end
 
 function move_line (n)
-  local func = buffer_next_line
+  local dir, func = 1, buffer_next_line
   if n < 0 then
+    dir, func = -1, buffer_prev_line
     n = -n
-    func = buffer_prev_line
   end
 
   if _last_command ~= "move-next-line" and _last_command ~= "move-previous-line" then
@@ -348,24 +366,12 @@ function move_line (n)
     end
     set_buffer_pt (buf, o)
     n = n - 1
+    buf.line = buf.line + dir
   end
 
   set_buffer_pt (buf, get_buffer_line_o (buf) + #make_string_printable (get_line (), buf.goalc))
-
   thisflag.need_resync = true
-
   return n ~= 0
-end
-
-function offset_to_line (bp, offset)
-  local n = 0
-  local o = 1
-  while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < offset do
-    n = n + 1
-    o = buffer_next_line (bp, o)
-    assert (o)
-  end
-  return n
 end
 
 function goto_offset (o)
@@ -374,5 +380,6 @@ function goto_offset (o)
   if get_buffer_line_o (buf) ~= old_lineo then
     buf.goalc = get_goalc ()
     thisflag.need_resync = true
+    resync_buffer_line (buf)
   end
 end

@@ -19,22 +19,14 @@
 
 -- Window table:
 -- {
---   topdelta: The top line delta from point.
---   lastpointn: The last point line number.
---   fwidth, fheight: The formal width and height of the window.
---   ewidth, eheight: The effective width and height of the window.
+--   topdelta: top line delta from point
+--   lastpointn: last point line number
+--   fwidth, fheight: actual width and height of the window
+--   ewidth, eheight: editing width and height of the window
 -- }
 
-function window_top_visible (wp)
-  return offset_to_line (buf, get_buffer_pt (buf)) == wp.topdelta
-end
-
-function window_bottom_visible (wp)
-  return wp.all_displayed
-end
-
 function window_resync (wp)
-  local n = offset_to_line (buf, get_buffer_pt (buf))
+  local n = get_buffer_line (buf)
   local delta = n - wp.lastpointn
 
   if delta ~= 0 then
@@ -162,7 +154,7 @@ local function draw_status_line (line, wp)
 
   term_attrset (display.reverse)
   term_move (line, 0)
-  local n = offset_to_line (buf, get_buffer_pt (buf))
+  local n = get_buffer_line (buf)
 
   local as = "--"
 
@@ -235,8 +227,6 @@ local function draw_window (topline, wp)
       o = buffer_next_line (buf, o)
     end
   end
-
-  wp.all_displayed = o == nil or o == get_buffer_size (buf)
 
   -- Draw the status line only if there is available space after the
   -- buffer text space.
