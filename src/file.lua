@@ -38,44 +38,6 @@ local function check_writable (filename)
   return ok and ok >= 0
 end
 
--- This functions makes the passed path an absolute path:
---
---  * expands `~/' and `~name/' expressions;
---  * replaces `//' with `/' (restarting from the root directory);
---  * removes `..' and `.' entries.
---
--- Returns normalized path, or nil if a password entry could not be
--- read
-function normalize_path (path)
-  local comp = io.splitdir (path)
-  local ncomp = {}
-
-  -- Prepend cwd if path is relative
-  if comp[1] ~= "" then
-    comp = list.concat (io.splitdir (posix.getcwd () or ""), comp)
-  end
-
-  -- Deal with `~[user]', `..', `.', `//'
-  for i, v in ipairs (comp) do
-    if v == "" and i > 1 and i < #comp then -- `//'
-      ncomp = {}
-    elseif v == ".." then -- `..'
-      table.remove (ncomp)
-    elseif v ~= "." then -- not `.'
-      if v[1] == "~" then -- `~[user]'
-        ncomp = {}
-        v = posix.getpasswd (v:match ("^~(.+)$"), "dir")
-        if v == nil then
-          return nil
-        end
-      end
-      table.insert (ncomp, v)
-    end
-  end
-
-  return io.catdir (unpack (ncomp))
-end
-
 -- Write buffer to given file name with given mode.
 alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
 local function write_file (filename, mode)
@@ -100,76 +62,55 @@ local function write_file (filename, mode)
   end
 end
 
--- Write the buffer contents to a file.
-local function save_buffer ()
-  local ret = write_file (buf.filename, "rw-rw-rw-")
-  if not ret then
-    return minibuf_error (string.format ("Error writing `%s'%s", buf.filename,
-                                         ret == -1 and ": " .. posix.errno () or ""))
-  end
-
-  minibuf_write ("Wrote " .. buf.filename)
-  buf.modified = false
-  undo_set_unchanged (buf.last_undop)
-  return true
-end
-
 Define ("file-save",
 [[
 Save buffer in visited file.
 ]],
   function ()
-    return save_buffer ()
+    local ret = write_file (buf.filename, "rw-rw-rw-")
+    if not ret then
+      return minibuf_error (string.format ("Error writing `%s'%s", buf.filename,
+                                           ret == -1 and ": " .. posix.errno () or ""))
+    end
+
+    minibuf_write ("Wrote " .. buf.filename)
+    buf.modified = false
+    undo_set_unchanged (buf.last_undop)
   end
 )
 
 Define ("file-quit",
 [[
-Offer to save the file, then delete this process.
+Quit, unless there are unsaved changes.
 ]],
   function ()
     if buf.modified then
-      local ans = minibuf_read_yn (string.format ("Save file %s? (y, n) ", get_buffer_filename (buf)))
-      if ans == nil then
-        return ding ()
-      elseif ans then
-        save_buffer ()
-      end
-    else
-      minibuf_write ("(The file does not need saving)")
+      return minibuf_error ("Unsaved changes: use `file-save' or `edit-revert'")
     end
 
     thisflag.quit = true
   end
 )
 
-function find_file (filename)
+alien.default.read:types ("ptrdiff_t", "int", "pointer", "size_t")
+function read_file (filename)
   if exist_file (filename) and not is_regular_file (filename) then
     return minibuf_error (string.format ("File `%s' exists but could not be read", filename))
-  else
-    buf = buffer_new ()
-    set_buffer_name (buf, filename)
-
-    local s = io.slurp (filename)
-    if s then
-      buf.readonly = not check_writable (filename)
-    else
-      s = ""
-    end
-    buf.text = AStr (s)
-
-    -- Reset undo history
-    buf.next_undop = nil
-    buf.last_undop = nil
-    buf.modified = false
   end
 
-  -- Change to buffer's default directory
-  posix.chdir (posix.dirname (buf.filename))
-
-  thisflag.need_resync = true
-
-  return true
+  buf = buffer_new ()
+  buf.filename = filename
+  local len = posix.stat (filename, "size")
+  local h = posix.open (filename, posix.O_RDONLY)
+  local s
+  if h and len then
+    s = AStr (len)
+    local ret = alien.default.read (h, s:topointer (), len)
+    if ret == len then
+      buf.readonly = not check_writable (filename)
+    end
+  end
+  buf.text = s or AStr ("") -- FIXME: error if reading fails
 end
 
 -- Function called on unexpected error or crash (SIGSEGV).

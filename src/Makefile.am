@@ -24,7 +24,6 @@ BUILT_SOURCES = src/loadlua.lua
 bin_SCRIPTS = src/$(PACKAGE)
 
 src_@PACKAGE@_LUA =					\
-	src/lib.lua					\
 	src/astr.lua					\
 	src/history.lua					\
 	src/eval.lua					\
@@ -40,14 +39,12 @@ src_@PACKAGE@_LUA =					\
 	src/help.lua					\
 	src/file.lua					\
 	src/keycode.lua					\
-	src/deletebuffer.lua				\
+	src/cut.lua					\
 	src/line.lua					\
 	src/macro.lua					\
-	src/marker.lua					\
 	src/minibuf.lua					\
 	src/search.lua					\
 	src/undo.lua					\
-	src/window.lua					\
 	src/term.lua					\
 	src/term_curses.lua				\
 	src/term_minibuf.lua
@@ -87,7 +84,7 @@ install-exec-hook:
 
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
-	src/$(PACKAGE).lua.in					\
+	src/$(PACKAGE).lua.in				\
 	src/loadlua.lua.in				\
 	src/dot$(PACKAGE).sample
 

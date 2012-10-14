@@ -74,8 +74,6 @@ function wrap_break_line ()
     else -- Undo fiddling with point.
       goto_offset (get_buffer_line_o (buf) + old_col)
     end
-
-    unchain_marker (m)
   end
 
   return break_made
@@ -89,7 +87,7 @@ local function previous_nonblank_goalc ()
 
   -- Find previous non-blank line, if any.
   repeat
-    ok = move_line (-1)
+    ok = not move_line (-1)
   until not ok or not is_blank_line ()
 
   -- Go to `cur_goalc' in that non-blank line.
@@ -104,15 +102,15 @@ Indent line or insert a tab.
 ]],
   function ()
     if warn_if_readonly_buffer () then
-      return false
+      return true
     end
 
     local cur_goalc = get_goalc ()
     local target_goalc = 0
     local m = point_marker ()
-    local ok = true
+    local ok
 
-    deactivate_mark ()
+    execute_command ("edit-select-off")
     previous_nonblank_goalc ()
 
     -- Now find the next blank char.
@@ -132,7 +130,6 @@ Indent line or insert a tab.
       target_goalc = get_goalc ()
     end
     goto_offset (m.o)
-    unchain_marker (m)
 
     -- Indent.
     undo_start_sequence ()
@@ -160,13 +157,11 @@ that if there is a character in the first column of the line above,
 no indenting is performed.
 ]],
   function ()
-    local ok = false
-
     if warn_if_readonly_buffer () then
-      return false
+      return true
     end
 
-    deactivate_mark ()
+    execute_command ("edit-select-off")
 
     undo_start_sequence ()
     if insert_string ("\n") then
@@ -178,17 +173,13 @@ no indenting is performed.
       pos = get_goalc ()
       local indent = pos > 0 or (not eolp () and following_char ():match ("%s"))
       goto_offset (m.o)
-      unchain_marker (m)
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
       if indent then
         execute_command ("edit-indent-relative")
       end
-      ok = true
     end
     undo_end_sequence ()
-
-    return ok
   end
 )
 
@@ -209,15 +200,12 @@ Delete the previous character.
 Join lines if the character is a newline.
 ]],
   function ()
-    deactivate_mark ()
-
-    if not move_char (-1) then
+    if move_char (-1) then
       minibuf_error ("Beginning of buffer")
-      return false
+      return true
     end
 
     delete_char ()
-    return true
   end
 )
 
@@ -246,12 +234,11 @@ Indent to next multiple of `indent-width'.
 ]],
   function ()
     if warn_if_readonly_buffer () then
-      return false
+      return true
     end
 
     local t = indent_width ()
     insert_string (string.rep (' ', t - get_goalc () % t))
-    return true
   end
 )
 
@@ -263,6 +250,6 @@ Insert a newline, wrapping if in wrap mode.
     if buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
       wrap_break_line ()
     end
-    return insert_string ("\n")
+    return not insert_string ("\n")
   end
 )

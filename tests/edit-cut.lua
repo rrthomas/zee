@@ -1,6 +1,6 @@
 call_command ("edit-select-on")
 call_command ("move-next-line")
 call_command ("move-next-line")
-call_command ("edit-delete-selection")
+call_command ("edit-cut")
 call_command ("file-save")
 call_command ("file-quit")

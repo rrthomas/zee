@@ -47,41 +47,6 @@ Paragraphs can also be wrapped using `edit-wrap-paragraph'.
   end
 )
 
-Define ("edit-select-other-end",
-[[
-When selecting text, move the cursor to the other end of the selection.
-]],
-  function ()
-    if not buf.mark then
-      return minibuf_error ("No mark set in this buffer")
-    end
-
-    local tmp = get_buffer_pt (buf)
-    goto_offset (buf.mark.o)
-    buf.mark.o = tmp
-    thisflag.need_resync = true
-  end
-)
-
-Define ("edit-select-on",
-[[
-Start selecting text.
-]],
-  function ()
-    set_mark ()
-    minibuf_write ("Mark set")
-  end
-)
-
-Define ("edit-select-off",
-[[
-Stop selecting text.
-]],
-  function ()
-    deactivate_mark ()
-  end
-)
-
 Define ("edit-select-toggle",
 [[
 Toggle selection mode.
@@ -95,6 +60,22 @@ Toggle selection mode.
   end
 )
 
+Define ("edit-select-other-end",
+[[
+When selecting text, move the cursor to the other end of the selection.
+]],
+  function ()
+    if not buf.mark then
+      return minibuf_error ("No selection")
+    end
+
+    local tmp = get_buffer_pt (buf)
+    goto_offset (buf.mark.o)
+    buf.mark.o = tmp
+    thisflag.need_resync = true
+  end
+)
+
 Define ("edit-insert-quoted",
 [[
 Read next input character and insert it.
@@ -104,6 +85,102 @@ This is useful for inserting control characters.
     minibuf_write ("C-q-")
     insert_char (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
     minibuf_clear ()
+  end
+)
+
+-- Move through words
+local function move_word (dir)
+  local gotword = false
+  repeat
+    while not (dir > 0 and eolp or bolp) () do
+      if get_buffer_char (buf, get_buffer_pt (buf) - (dir < 0 and 1 or 0)):match ("%w") then
+        gotword = true
+      elseif gotword then
+        break
+      end
+      move_char (dir)
+    end
+  until gotword or move_char (dir)
+  return gotword
+end
+
+Define ("move-next-word",
+[[
+Move the cursor forward one word.
+]],
+  function ()
+    return not move_word (1)
+  end
+)
+
+Define ("move-previous-word",
+[[
+Move the cursor backwards one word.
+]],
+  function ()
+    return not move_word (-1)
+  end
+)
+
+local function delete_text (move_func)
+  if warn_if_readonly_buffer () then
+    return true
+  end
+
+  local pt = get_buffer_pt (buf)
+
+  undo_start_sequence ()
+  execute_command (move_func)
+  delete_region (region_new (pt, get_buffer_pt (buf)))
+  undo_end_sequence ()
+
+  goto_offset (pt)
+end
+
+Define ("edit-delete-word",
+[[
+Delete forward up to the end of a word.
+]],
+  function ()
+    return delete_text ("move-next-word")
+  end
+)
+
+Define ("edit-delete-word-backward",
+[[
+Delete backward up to the end of a word.
+]],
+  function ()
+    return delete_text ("move-previous-word")
+  end
+)
+
+local function move_paragraph (dir, line_extremum)
+  repeat until not is_empty_line () or move_line (dir)
+  repeat until is_empty_line () or move_line (dir)
+
+  if is_empty_line () then
+    execute_command ("move-start-line")
+  else
+    execute_command (line_extremum)
+  end
+end
+
+Define ("move-previous-paragraph",
+[[
+Move the cursor backward to the start of the paragraph.
+]],
+  function ()
+    move_paragraph (-1, "move-start-line")
+  end
+)
+
+Define ("move-next-paragraph",
+[[
+Move the cursor forward to the end of the paragraph.
+]],
+  function ()
+    move_paragraph (1, "move-end-line")
   end
 )
 
@@ -134,42 +211,27 @@ is given by the variable `wrap-column'.
       execute_command ("edit-delete-horizontal-space")
       insert_char (' ')
     end
-    unchain_marker (m_end)
 
     execute_command ("move-end-line")
     while get_goalc () > tonumber (get_variable ("wrap-column")) + 1 and wrap_break_line () do end
 
     goto_offset (m.o)
-    unchain_marker (m)
 
     undo_end_sequence ()
   end
 )
 
-local function pipe_command (cmd, tempfile)
-  local cmdline = string.format ("%s 2>&1%s", cmd, tempfile and " <" .. tempfile or "")
-  local pipe = io.popen (cmdline, "r")
-  if not pipe then
-    return minibuf_error ("Cannot open pipe to process")
-  end
-
-  local out = pipe:read ("*a")
-  pipe:close ()
-
-  if #out == 0 then
-    minibuf_write ("(Shell command succeeded with no output)")
-  elseif not warn_if_readonly_buffer () then
-    local del = 0
-    if buf.mark then
-      local r = calculate_the_region ()
-      goto_offset (r.start)
-      del = get_region_size (r)
+Define ("move-start-line-text",
+[[
+Move the cursor to the first non-whitespace character on this line.
+]],
+  function ()
+    goto_offset (get_buffer_line_o (buf))
+    while not eolp () and following_char ():match ("%s") do
+      move_char (1)
     end
-    replace_astr (del, AStr (out))
   end
-
-  return true
-end
+)
 
 Define ("edit-shell-command",
 [[
@@ -211,8 +273,32 @@ file, replacing the selection if any.
     end
 
     if ok then
-      ok = pipe_command (cmd, tempfile)
+      local cmdline = string.format ("%s 2>&1%s", cmd, tempfile and " <" .. tempfile or "")
+      local pipe = io.popen (cmdline, "r")
+      if not pipe then
+        ok = minibuf_error ("Cannot open pipe to process")
+      else
+        local out = pipe:read ("*a") -- FIXME: make efficient
+        pipe:close ()
+
+        if #out == 0 then
+          minibuf_write ("(Shell command succeeded with no output)")
+        elseif not warn_if_readonly_buffer () then
+          local del = 0
+          if buf.mark then
+            local r = calculate_the_region ()
+            goto_offset (r.start)
+            del = get_region_size (r)
+          end
+          replace_astr (del, AStr (out))
+        end
+      end
     end
+
+    -- FIXME: We have no way of knowing whether a sub-process caught a
+    -- SIGWINCH, so raise one. (Add to lposix.c)
+    --posix.raise (posix.SIGWINCH)
+
     if h then
       h:close ()
     end
@@ -220,82 +306,6 @@ file, replacing the selection if any.
       os.remove (tempfile)
     end
 
-    return ok
-  end
-)
-
-local function move_paragraph (dir, line_extremum)
-  repeat until not is_empty_line () or not move_line (dir)
-  repeat until is_empty_line () or not move_line (dir)
-
-  if is_empty_line () then
-    execute_command ("move-start-line")
-  else
-    execute_command (line_extremum)
-  end
-end
-
-Define ("move-previous-paragraph",
-[[
-Move the cursor backward to the start of the paragraph.
-]],
-  function ()
-    return move_paragraph (-1, "move-start-line")
-  end
-)
-
-Define ("move-next-paragraph",
-[[
-Move the cursor forward to the end of the paragraph.
-]],
-  function ()
-    return move_paragraph (1, "move-end-line")
-  end
-)
-
-Define ("move-start-line-text",
-[[
-Move the cursor to the first non-whitespace character on this line.
-]],
-  function ()
-    goto_offset (get_buffer_line_o (buf))
-    while not eolp () and following_char ():match ("%s") do
-      move_char (1)
-    end
-  end
-)
-
-
--- Move through words
-local function move_word (dir)
-  local gotword = false
-  repeat
-    while not (dir > 0 and eolp or bolp) () do
-      if get_buffer_char (buf, get_buffer_pt (buf) - (dir < 0 and 1 or 0)):match ("%w") then
-        gotword = true
-      elseif gotword then
-        break
-      end
-      move_char (dir)
-    end
-  until gotword or not move_char (dir)
-  return gotword
-end
-
-Define ("move-next-word",
-[[
-Move the cursor forward one word.
-]],
-  function ()
-    return move_word (1)
-  end
-)
-
-Define ("move-previous-word",
-[[
-Move the cursor backwards one word.
-]],
-  function ()
-    return move_word (-1)
+    return not ok
   end
 )

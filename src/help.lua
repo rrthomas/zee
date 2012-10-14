@@ -24,12 +24,19 @@ Display the help for the given command or variable.
   function (name)
     name = name or (interactive () and minibuf_read_name ("Describe command or variable: "))
     if not name then
-      return false
+      return true
+    end
+
+    local where = ""
+    if command_exists (name) then
+      local keys = command_to_binding (name)
+      if #keys > 0 then
+        where = string.format ("\n\nBound to: %s", table.concat (keys, ", "))
+      end
     end
 
     local doc = get_doc (name) or "No help available"
-    popup_set (string.format ("Help for `%s':\n%s", name, doc))
-    return true
+    popup_set (string.format ("Help for `%s':\n\n%s%s", name, doc, where))
   end
 )
 
@@ -46,7 +53,7 @@ Display the command invoked by a key combination.
       key = get_key_chord (true)
     end
     if key then
-      local name = get_command_by_key (key)
+      local name = binding_to_command (key)
       local binding = tostring (key)
       if not name then
         return minibuf_error (binding .. " is undefined")
@@ -54,9 +61,7 @@ Display the command invoked by a key combination.
       local doc = get_doc (name)
       if doc then
         popup_set (string.format ("%s runs the command `%s'.\n%s", binding, name, doc))
-        return true
       end
-      return false
     end
   end
 )

@@ -17,15 +17,48 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+-- Window table:
+-- {
+--   topdelta: The top line delta from point.
+--   lastpointn: The last point line number.
+--   start_column: The start column of the window (>0 if scrolled sideways).
+--   fwidth, fheight: The formal width and height of the window.
+--   ewidth, eheight: The effective width and height of the window.
+-- }
+
+function window_top_visible (wp)
+  return offset_to_line (buf, get_buffer_pt (buf)) == wp.topdelta
+end
+
+function window_bottom_visible (wp)
+  return wp.all_displayed
+end
+
+function window_resync (wp)
+  local n = offset_to_line (buf, get_buffer_pt (buf))
+  local delta = n - wp.lastpointn
+
+  if delta ~= 0 then
+    if (delta > 0 and wp.topdelta + delta < wp.eheight) or (delta < 0 and wp.topdelta >= -delta) then
+      wp.topdelta = wp.topdelta + delta
+    elseif n > wp.eheight / 2 then
+      wp.topdelta = math.floor (wp.eheight / 2)
+    else
+      wp.topdelta = n
+    end
+    wp.lastpointn = n
+  end
+end
+
+-- FIXME: rename
 Define ("move-redraw",
 [[
 Redraw the display.
 ]],
   function ()
     term_clear ()
-    term_redisplay ()
+    term_display ()
     term_refresh ()
-    return true
   end
 )
 
@@ -35,11 +68,9 @@ function resize_window ()
   win.ewidth = win.fwidth
 
   -- Resize window vertically.
-  local hdelta = term_height () - 1 - win.fheight
-  win.fheight = win.fheight + hdelta
-  win.eheight = win.eheight + hdelta
-
-  execute_command ("move-redraw")
+  win.fheight = term_height ()
+  win.eheight = win.fheight
+  win.eheight = win.eheight - math.min (win.eheight, 2)
 end
 
 -- Tidy up the term ready to exit (temporarily or permanently!).
@@ -67,70 +98,57 @@ local function make_char_printable (c, x, cur_tab_width)
   end
 end
 
-local function draw_line (line, startcol, wp, o, rp, highlight, cur_tab_width)
+-- Prints a line on the terminal.
+--
+-- line - the line number within the buffer
+-- startcol - the horizontal scroll offset
+-- o - the starting offset of the line
+-- rp - the highlight rectangle, or nil if none
+-- cur_tab_width - the display width of a tab character
+--
+-- If any part of the line is off the left-hand side of the screen,
+-- prints a `$' character in the left-hand column. If any part is off
+-- the right, prints a `$' character in the right-hand column. Any
+-- part that is within the highlight region is highlighted. If the
+-- final position is within the highlight region then the remainder of
+-- the line is also highlighted.
+local function draw_line (line, startcol, o, rp, cur_tab_width)
   term_move (line, 0)
 
   -- Draw body of line.
   local x = 0
   local line_len = buffer_line_len (buf, o)
   for i = startcol, math.huge do
-    term_attrset ((highlight and in_region (o, i, rp)) and display.reverse or display.normal)
-    if i >= line_len or x >= wp.ewidth then
+    if i >= line_len or x >= win.ewidth then
       break
     end
+    term_attrset ((rp and in_region (o, i, rp)) and display.reverse or display.normal)
     local c = get_buffer_char (buf, o + i)
     if posix.isprint (c) then
       term_addstr (c)
       x = x + 1
     else
       local s = make_char_printable (c, x, cur_tab_width)
-      term_addstr (s)
+      term_addstr (s:sub (1, math.min (#s, win.fwidth - x)))
       x = x + #s
     end
   end
 
-  -- Draw end of line.
-  if x >= term_width () then
-    term_move (line, term_width () - 1)
-    term_attrset (display.normal)
-    term_addstr ('$')
-  else
-    term_addstr (string.rep (" ", wp.ewidth - x))
-  end
+  term_addstr (string.rep (" ", win.fwidth - x))
   term_attrset (display.normal)
+
+  -- Draw end of line.
+  if x >= win.fwidth then
+    term_move (line, win.fwidth - 1)
+    term_addstr ('$')
+  end
 end
 
 local function calculate_highlight_region ()
   if buf.mark == nil then
-    return false
+    return nil
   end
-
-  return true, region_new (get_buffer_pt (buf), buf.mark.o)
-end
-
-function make_modeline_flags ()
-  if buf.modified and buf.readonly then
-    return "%*"
-  elseif buf.modified then
-    return "**"
-  elseif buf.readonly then
-    return "%%"
-  end
-  return "--"
-end
-
-local function make_screen_pos (wp)
-  local tv = window_top_visible (wp)
-  local bv = window_bottom_visible (wp)
-
-  if tv and bv then
-    return "All"
-  elseif tv then
-    return "Top"
-  elseif bv then
-    return "Bot"
-  end
-  return string.format ("%2d%%", (get_buffer_pt (buf) / get_buffer_size (buf)) * 100)
+  return region_new (get_buffer_pt (buf), buf.mark.o)
 end
 
 local function draw_border ()
@@ -146,27 +164,49 @@ local function draw_status_line (line, wp)
   term_attrset (display.reverse)
   term_move (line, 0)
   local n = offset_to_line (buf, get_buffer_pt (buf))
-  local as = string.format ("--%2s  %-15s   %s %-9s (",
-                            make_modeline_flags (), buf.filename, make_screen_pos (wp),
-                            string.format ("(%d,%d)", n + 1, get_goalc ()))
 
-  if buf.wrap then
-    as = as .. " Wrap"
+  local as = "--"
+
+  -- Buffer state flags
+  if buf.modified and buf.readonly then
+    as = as .. "%*"
+  elseif buf.modified then
+    as = as .. "**"
+  elseif buf.readonly then
+    as = as .. "%%"
+  else
+    as = as .. "--"
   end
+
+  -- File name
+  as = as .. string.format ("  %-15s   ", buf.filename)
+
+  -- Percentage of the way through the file
+  as = as .. string.format ("%3d%%", (get_buffer_pt (buf) / get_buffer_size (buf)) * 100)
+
+  -- Coordinates
+  as = as .. string.format (" %-9s (", string.format ("(%d,%d)", n + 1, get_goalc ()))
+
+  -- Mode flags
+  local flags = {}
   if thisflag.defining_macro then
-    as = as .. " Def"
+    table.insert (flags, "Def")
   end
-  if buf.isearch then
-    as = as .. " Isearch"
+  if buf.wrap then
+    table.insert (flags, "Wrap")
   end
-  as = as .. ")"
+  if buf.search then
+    table.insert (flags, "Search")
+  end
+  as = as .. table.concat (flags, " ") .. ")"
 
+  -- Display status line
   term_addstr (as:sub (1, term_width ()))
   term_attrset (display.normal)
 end
 
 local function draw_window (topline, wp)
-  local highlight, rp = calculate_highlight_region ()
+  local rp = calculate_highlight_region ()
 
   -- Find the first line to display on the first screen line.
   local o = buffer_start_of_line (buf, get_buffer_pt (buf))
@@ -186,7 +226,7 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      draw_line (i, wp.start_column, wp, o, rp, highlight, cur_tab_width)
+      draw_line (i, wp.start_column, o, rp, cur_tab_width)
 
       if wp.start_column > 0 then
         term_move (i, 0)
@@ -206,7 +246,7 @@ local function draw_window (topline, wp)
   end
 end
 
-local cur_topline, col = 0, 0
+local col = 0
 
 
 
@@ -218,7 +258,7 @@ local popup_line = 0
 
 -- Set the popup string to `s'.
 function popup_set (s)
-  popup_text = s and AStr (s:chomp ())
+  popup_text = s and AStr (s:chomp ()) -- FIXME: stop needing chomp for docstrings
   popup_line = 0
 end
 
@@ -233,7 +273,7 @@ function popup_scroll_down_and_loop ()
   if popup_line > popup_text:lines () then
     popup_line = 0
   end
-  term_redisplay ()
+  term_display ()
 end
 
 -- Scroll down the popup text.
@@ -259,7 +299,7 @@ local function draw_popup ()
   -- Number of lines.
   local l = popup_text:lines ()
   -- Position of top of popup == number of lines not to use.
-  local y = math.max (h - l, 0)
+  local y = math.max (h - l - 1, 0)
 
   term_move (y, 0)
   draw_border ()
@@ -278,8 +318,68 @@ local function draw_popup ()
   end
 end
 
-function term_redisplay ()
+-- Scans `s' and replaces each character with a string of one or
+-- more printable characters. The returned string is suitable for
+-- printing at screen column `col'; the screen column only matters
+-- if `s' contains tab characters.
+--
+-- Scanning stops when the screen column reaches or exceeds `goal',
+-- or when `s' is exhausted. The number of input characters
+-- scanned is returned as a second return value. If you don't
+-- want a `goal', just pass `math.huge'.
+--
+-- Characters that are already printable expand to themselves.
+-- Characters from 0 to 26 are replaced with strings from `^@' to
+-- `^Z'. Tab characters are replaced with enough spaces (but always
+-- at least one) to reach a screen column that is a multiple of `tab'.
+-- Newline characters must not occur in `s'. Other characters are
+-- replaced with a backslash followed by their hex character code.
+function make_string_printable (s, col, tab, goal)
+  local ctrls = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+  local ret, pos = "", 0
+
+  for i = 1, #s do
+    local c = s[i]
+    assert (c ~= '\n')
+
+    local x = col + #ret
+    if x >= goal then
+      break
+    end
+
+    if c == '\t' then
+      ret = ret .. string.rep (' ', tab - (x % tab))
+    elseif c:byte () < #ctrls then
+      ret = ret .. '^' .. ctrls[string.byte[c] + 1]
+    elseif posix.isprint (c) then
+      ret = ret .. c
+      -- FIXME: For double-width characters add a '\0' too so the length of
+      -- 'ret' matches the display width.
+    else
+      ret = ret .. '\\' ..  string.format ("%x", string.byte (c))
+    end
+
+    pos = pos + 1
+  end
+
+  return ret
+end
+
+-- Find the character position in `rbl' corresponding to display
+-- width `goal'.
+local function column_to_character (s, goal)
+  return make_string_printable (s, 0, tab_width (), goal)
+end
+
+-- Calculate the display width of a string in screen columns
+local function string_display_width (s)
+  return #make_string_printable (s, 0, tab_width (), math.huge)
+end
+
+function term_display ()
   -- Calculate the start column if the line at point has to be truncated.
+  -- FIXME: Rewrite with string_display_width.
   local lastcol, t = 0, tab_width ()
   local o = get_buffer_pt (buf)
   local lineo = o - get_buffer_line_o (buf)
@@ -310,10 +410,7 @@ function term_redisplay ()
   end
 
   -- Draw the window.
-  local topline = 0
-  cur_topline = topline
-  draw_window (topline, win)
-  topline = topline + win.fheight
+  draw_window (0, win)
 
   -- Draw the popup window.
   if popup_text then
@@ -324,5 +421,5 @@ function term_redisplay ()
 end
 
 function term_redraw_cursor ()
-  term_move (cur_topline + win.topdelta, col)
+  term_move (win.topdelta, col)
 end

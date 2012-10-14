@@ -224,7 +224,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
 
     draw_minibuf_read (prompt, value, pos)
     local key = get_key_chord (true)
-    local name = get_command_by_key (key)
+    local name = binding_to_command (key)
     if command_exists (name) then
       call_command (name)
     else
@@ -235,7 +235,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
   minibuf_clear ()
   if cp then
     popup_clear ()
-    term_redisplay ()
+    term_display ()
   end
   bindings = root_bindings
   return value

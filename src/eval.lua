@@ -23,15 +23,20 @@
 -- User things
 env = {}
 
+-- Turn texinfo markup into plain text
+local function texi (s)
+  s = s:gsub ("@i{([^}]+)}", function (s) return s:upper () end)
+  s = s:gsub ("@kbd{([^}]+)}", "%1")
+  return s
+end
+
 function Define (name, doc, value)
   env[name] = {
     doc = texi (doc:chomp ()),
   }
+  -- FIXME: Avoid needing different fields
   if type (value) == "function" then
-    env[name].func = function (...)
-      local ret = value (...)
-      return ret == nil and true or ret -- FIXME: avoid needing this wrapper
-    end
+    env[name].func = value
   else
     env[name].val = value
   end
@@ -49,7 +54,7 @@ function get_doc (name)
 end
 
 function execute_command (name, ...)
-  return env[name] and env[name].func and pcall (env[name].func (...))
+  return env[name] and env[name].func and pcall (env[name].func, ...)
 end
 
 Define ("eval",
@@ -78,20 +83,9 @@ Read command name, then run it.
 ]],
   function ()
     local name = minibuf_read_command_name ("M-x ")
-    return name and execute_command (name) or nil
+    if not name then
+      return true
+    end
+    return execute_command (name)
   end
 )
-
--- Read a function name from the minibuffer.
-local commands_history = history_new ()
-function minibuf_read_command_name (fmt)
-  local cp = completion_new ()
-
-  for name, func in pairs (env) do
-    cp.completions:insert (name)
-  end
-
-  return minibuf_vread_completion (fmt, "", cp, commands_history,
-                                   "No command name given",
-                                   "Undefined command name `%s'")
-end

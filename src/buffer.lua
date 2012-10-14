@@ -101,7 +101,7 @@ function replace_astr (del, as)
 
   -- Insert `newlen' chars.
   buf.text:replace (buf.pt, as)
-  buf.pt = buf.pt + newlen
+  buf.pt = buf.pt + newlen -- FIXME: remove this!
 
   -- Adjust markers.
   for m in pairs (buf.markers) do
@@ -118,7 +118,10 @@ function replace_astr (del, as)
 end
 
 function insert_astr (as)
-  return replace_astr (0, as)
+  local ok = replace_astr (0, as)
+  -- if ok then
+  --   goto_offset (buf.pt + #as)
+  -- end
 end
 
 function get_buffer_char (bp, o)
@@ -167,11 +170,14 @@ end
 -- Insert the character `c' at the current point position
 -- into the current buffer.
 function insert_char (c)
-  return replace_astr (0, AStr (c))
+  local ok = replace_astr (0, AStr (c))
+  -- if ok then
+  --   move_char (1)
+  -- end
 end
 
 function delete_char ()
-  deactivate_mark ()
+  execute_command ("edit-select-off")
 
   if eobp () then
     return minibuf_error ("End of buffer")
@@ -194,21 +200,16 @@ end
 
 -- Allocate a new buffer, set the default local variable values, and
 -- insert it into the buffer list.
-function buffer_new ()
-  return {pt = 1, gap = 0, text = AStr (""), markers = {}, wrap = get_variable ("wrap-mode") == true}
+function buffer_new () -- FIXME: Constructor which we can pass other arguments
+  return {pt = 1, gap = 0, text = AStr (""),
+          markers = setmetatable ({}, {__mode = "k"}),
+          wrap = get_variable ("wrap-mode") == true,
+          modified = false}
 end
 
 -- Get filename.
 function get_buffer_filename (bp)
   return bp.filename
-end
-
--- Set a new filename for the buffer.
-function set_buffer_name (bp, filename)
-  if filename[1] ~= '/' then
-    filename = string.format ("%s/%s", posix.getcwd(), filename)
-  end
-  bp.filename = filename
 end
 
 -- Print an error message into the echo area and return true
@@ -248,26 +249,50 @@ function calculate_the_region ()
 end
 
 function delete_region (r)
-  if warn_if_readonly_buffer () then
-    return false
-  end
+  assert (not warn_if_readonly_buffer ())
 
-  local m = point_marker ()
   goto_offset (r.start)
   replace_astr (get_region_size (r), AStr (""))
-  goto_offset (m.o)
-  unchain_marker (m)
-
-  return true
 end
 
 function in_region (o, x, r)
   return o + x >= r.start and o + x < r.finish
 end
 
-function deactivate_mark ()
-  buf.mark = nil
+
+-- Marker datatype
+
+local function marker_new (o)
+  local marker = {o = o}
+  buf.markers[marker] = true
+  return marker
 end
+
+function copy_marker (m)
+  return marker_new (m.o)
+end
+
+function point_marker ()
+  return marker_new (get_buffer_pt (buf))
+end
+
+Define ("edit-select-on",
+[[
+Start selecting text.
+]],
+  function ()
+    buf.mark = point_marker ()
+  end
+)
+
+Define ("edit-select-off",
+[[
+Stop selecting text.
+]],
+  function ()
+    buf.mark = nil
+  end
+)
 
 -- Return a safe tab width.
 function tab_width ()
@@ -297,10 +322,8 @@ function move_char (dir)
     set_buffer_pt (buf, get_buffer_pt (buf) + dir)
     execute_command (lmove)
   else
-    return false
+    return true
   end
-
-  return true
 end
 
 -- Get the goal column, expanding tabs.
@@ -368,7 +391,7 @@ function move_line (n)
   goto_goalc ()
   thisflag.need_resync = true
 
-  return n == 0
+  return n ~= 0
 end
 
 function offset_to_line (bp, offset)

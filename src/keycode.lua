@@ -18,6 +18,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+-- FIXME: Make key names friendlier
 -- Map of key names to code.
 local KBD_NONPRINT = 283
 local keynametocode = {
@@ -27,8 +28,7 @@ local keynametocode = {
 for i in list.elems {
   "BACKSPACE", "DELETE", "DOWN", "END", "F1", "F10", "F11", "F12",
   "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "HOME", "INSERT",
-  "LEFT", "NEXT", "PAGEDOWN", "PAGEUP", "PRIOR", "RET", "RIGHT",
-  "TAB", "UP", "\t" } do
+  "LEFT", "PAGEDOWN", "PAGEUP", "RET", "RIGHT", "TAB", "UP", "\t" } do
   keynametocode[i] = KBD_NONPRINT
 end
 
@@ -42,7 +42,7 @@ end
 local keyname = set.new {
   "BACKSPACE", "C-", "DELETE", "DOWN", "ESC", "END", "F1", "F10",
   "F11", "F12", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9",
-  "HOME", "INSERT", "LEFT", "M-", "NEXT", "PAGEDOWN", "PAGEUP", "RET",
+  "HOME", "INSERT", "LEFT", "M-", "PAGEDOWN", "PAGEUP", "RET",
   "RIGHT", "SPC", "TAB", "UP",
 }
 
@@ -98,6 +98,7 @@ local keycode_mt = {
 }
 
 -- Extract a modifier prefix of a key string.
+-- FIXME: Change to Ctrl- and Alt-
 local modifier_name = set.new {"C-", "M-"}
 local function getmodifier (s)
   for match in modifier_name:elems () do

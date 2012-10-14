@@ -61,12 +61,15 @@ Set point to @i{position}, a number.
 Beginning of buffer is position 1.
 ]],
   function (n)
+    n = tonumber (n)
     if not n and interactive () then
       n = minibuf_read_number ("Goto char: ")
     end
-    n = tonumber (n)
+    if type (n) ~= "number" then
+      return true
+    end
 
-    return type (n) == "number" and goto_offset (math.min (get_buffer_size (buf) + 1, math.max (n, 1)))
+    goto_offset (math.min (get_buffer_size (buf) + 1, math.max (n, 1)))
   end
 )
 
@@ -81,7 +84,7 @@ Line 1 is the beginning of the buffer.
       n = minibuf_read_number ("Goto line: ")
     end
     if type (n) ~= "number" then
-      return false
+      return true
     end
 
     move_line ((math.max (n, 1) - 1) - offset_to_line (buf, get_buffer_pt (buf)))
@@ -100,7 +103,7 @@ Move the cursor to the given column.
       n = minibuf_read_number ("Goto column: ")
     end
     if type (n) ~= "number" then
-      return false
+      return true
     end
 
     goto_offset (math.min (math.max (n, 1), buffer_line_len (buf)) - 1 + get_buffer_line_o (buf))

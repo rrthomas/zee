@@ -188,6 +188,7 @@ function term_getkey_unfiltered (delay)
     c = curses.stdscr ():getch ()
     if curses.KEY_RESIZE == c then
       resize_window ()
+      execute_command ("move-redraw")
     end
   until curses.KEY_RESIZE ~= c
 

@@ -37,24 +37,21 @@ function previous_history_element (hp)
     -- Select last element
     if #hp > 0 then
       hp.sel = #hp
-      return hp[hp.sel]
     end
-    minibuf_error ("Beginning of history; no preceding item")
-    waitkey ()
   elseif hp.sel > 1 then
     -- If there is there another element, select it
     hp.sel = hp.sel - 1
-    return hp[hp.sel]
   end
+  return hp[hp.sel] or ""
 end
 
 function next_history_element (hp)
   -- Next element
   if hp.sel < #hp then
     hp.sel = hp.sel + 1
-    return hp[hp.sel]
   else -- No more elements (back to original status)
-    minibuf_error ("End of history; no defaults available")
-    waitkey ()
+    hp.sel = 1
   end
+
+  return hp[hp.sel] or ""
 end

@@ -20,14 +20,14 @@
 -- Signal an error, and abort any ongoing macro definition.
 function ding ()
   if thisflag.defining_macro then
-    cancel_kbd_macro ()
+    cancel_macro_definition ()
   end
 
   if win then
     term_beep ()
   end
   -- enable call chaining with `return ding ()'
-  return false
+  return true
 end
 
 

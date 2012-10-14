@@ -89,47 +89,22 @@ local function search (s, forward)
   return true
 end
 
-local last_search
-
-function do_search (forward, pattern)
-  local ok = false
-
-  if not pattern and interactive () then
-    pattern = minibuf_read (string.format ("Search%s: ", forward and "" or " backward"), last_search or "")
-  end
-
-  if not pattern then
-    return ding ()
-  end
-  if #pattern > 0 then
-    last_search = pattern
-
-    if not search (pattern, forward) then
-      minibuf_error (string.format ("Search failed: \"%s\"", pattern))
-    else
-      ok = true
-    end
-  end
-
-  return ok
-end
-
 
 -- Incremental search engine.
 -- FIXME: Once the search is underway, "find next" is hard-wired to C-s.
 -- Having it hard-wired is obviously broken, but something neutral like RET
 -- would be better.
 -- The proposed meaning of ESC obviates the current behaviour of RET.
-local function isearch (forward)
+local last_search
+local function isearch (forward, pattern)
   local old_mark
   if buf.mark then
     old_mark = copy_marker (buf.mark)
   end
 
-  buf.isearch = true
+  buf.search = true
 
   local last = true
-  local pattern = ""
   local start = get_buffer_pt (buf)
   local cur = start
   while true do
@@ -141,38 +116,25 @@ local function isearch (forward)
 
     -- Regex error.
     if re_find_err then
-      if re_find_err:sub (1, 10) == "Premature " or
-        re_find_err:sub (1, 10) == "Unmatched " or
-        re_find_err:sub (1, 8) == "Invalid " then
-        re_find_err = "incomplete input"
-      end
       ms = ms .. string.format (" [%s]", re_find_err)
       re_find_err = nil
     end
 
     minibuf_write (ms)
 
-    local c = get_key_chord ()
+    local c = interactive () and get_key_chord ()
 
-    if c == keycode "C-g" then
+    if not c then
+    elseif c == keycode "C-g" then
       goto_offset (start)
-      thisflag.need_resync = true
-
-      -- Quit.
-      ding ()
-
-      -- Restore old mark position.
-      if buf.mark then
-        unchain_marker (buf.mark)
-      end
       buf.mark = old_mark
+      ding ()
       break
     elseif c == keycode "BACKSPACE" then
       if #pattern > 0 then
         pattern = pattern:sub (1, -2)
         cur = start
         goto_offset (start)
-        thisflag.need_resync = true
       else
         ding ()
       end
@@ -181,11 +143,7 @@ local function isearch (forward)
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
     elseif c == keycode "C-r" or c == keycode "C-s" then
       -- Invert direction.
-      if c == keycode "C-r" then
-        forward = false
-      elseif c == keycode "C-s" then
-        forward = true
-      end
+      forward = c == keycode "C-s"
       if #pattern > 0 then
         -- Find next match.
         cur = get_buffer_pt (buf)
@@ -195,24 +153,20 @@ local function isearch (forward)
         pattern = last_search
       end
     elseif c.META or c.CTRL or c == keycode "RET" or term_keytobyte (c) == nil then
-      if c == keycode "RET" and #pattern == 0 then
-        do_search (forward)
+      if #pattern > 0 then
+        -- Save mark.
+        execute_command ("edit-select-on")
+        buf.mark.o = start
+
+        -- Save search string.
+        last_search = pattern
+
+        minibuf_write ("Mark saved when search started")
       else
-        if #pattern > 0 then
-          -- Save mark.
-          set_mark ()
-          buf.mark.o = start
-
-          -- Save search string.
-          last_search = pattern
-
-          minibuf_write ("Mark saved when search started")
-        else
-          minibuf_clear ()
-        end
-        if c ~= keycode "RET" then
-          ungetkey (c)
-        end
+        minibuf_clear ()
+      end
+      if c ~= keycode "RET" then
+        ungetkey (c)
       end
       break
     else
@@ -223,18 +177,19 @@ local function isearch (forward)
       local pt = get_buffer_pt (buf)
       goto_offset (cur)
       last = search (pattern, forward)
+      if not c then
+        break
+      end
     else
       last = true
     end
 
-    if thisflag.need_resync then
-      window_resync (win)
-      term_redisplay ()
-    end
+    window_resync (win)
+    term_display ()
   end
 
   -- done
-  buf.isearch = false
+  buf.search = false
 
   return true
 end
@@ -243,12 +198,12 @@ Define ("edit-find",
 [[
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
+Type RET to exit, leaving point at location found.
 Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   function (s)
-    return (interactive () and isearch or do_search) (true, s)
+    isearch (true, s or "")
   end
 )
 
@@ -256,12 +211,12 @@ Define ("edit-find-backward",
 [[
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
+Type RET to exit, leaving point at location found.
 Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 ]],
   function (s)
-    return (interactive () and isearch or do_search) (false, s)
+    isearch (false, s or "")
   end
 )
 
@@ -274,6 +229,24 @@ local function check_case (s)
   elseif regex_match (s, "^[[:upper:]][^[:upper:]]*") then
     return "capitalized"
   end
+end
+
+-- Recase str according to newcase.
+local function recase (s, newcase)
+  local bs = ""
+  local i, len
+
+  if newcase == "capitalized" or newcase == "upper" then
+    bs = bs .. s[1]:upper ()
+  else
+    bs = bs .. s[1]:lower ()
+  end
+
+  for i = 2, #s do
+    bs = bs .. (newcase == "upper" and string.upper or string.lower) (s[i])
+  end
+
+  return bs
 end
 
 -- FIXME: Make edit_replace run on selection.
@@ -289,7 +262,7 @@ what to do with it.
       return ding ()
     end
     if find == "" then
-      return false
+      return true
     end
     local find_no_upper = no_upper (find)
 
@@ -337,7 +310,6 @@ what to do with it.
         goto_offset (r.start)
         replace_astr (#find, AStr (case_repl))
         goto_offset (m.o)
-        unchain_marker (m)
 
         if c == keycode "." then -- Replace and quit.
           break
@@ -357,6 +329,6 @@ what to do with it.
       minibuf_write (string.format ("Replaced %d occurrence%s", count, count ~= 1 and "s" or ""))
     end
 
-    return ok
+    return not ok
   end
 )

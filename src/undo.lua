@@ -62,16 +62,13 @@ local function revert_action (up)
     undo_end_sequence ()
   end
 
-  if up.type ~= "end sequence" then
-    goto_offset (up.o)
-  end
+  goto_offset (up.o)
   if up.type == "replace block" then
     replace_astr (up.size, up.text)
     goto_offset (up.o)
-  end
-
-  if up.unchanged then
-    buf.modified = false
+    if up.unchanged then
+      buf.modified = false
+    end
   end
 
   return up.next
@@ -84,13 +81,13 @@ Repeat this command to undo more changes.
 ]],
   function ()
     if warn_if_readonly_buffer () then
-      return false
+      return true
     end
 
     if not buf.next_undop then
       minibuf_error ("No further undo information")
       buf.next_undop = buf.last_undop
-      return false
+      return true
     end
 
     buf.next_undop = revert_action (buf.next_undop)

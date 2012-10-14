@@ -17,28 +17,21 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-cmd_mp = {}
-cur_mp = {}
+local macro = {}
 
 -- FIXME: macros should be executed immediately and abort on error;
 -- they should be stored as a macro list, not a series of
 -- keystrokes. Macros should return success/failure.
-function add_cmd_to_macro ()
-  cur_mp = list.concat (cur_mp, cmd_mp)
-  cmd_mp = {}
+function add_key_to_macro (key)
+  table.insert (macro, key)
 end
 
-function add_key_to_cmd (key)
-  table.insert (cmd_mp, key)
+function remove_key_from_macro ()
+  table.remove (macro)
 end
 
-function remove_key_from_cmd ()
-  table.remove (cmd_mp)
-end
-
-function cancel_kbd_macro ()
-  cmd_mp = {}
-  cur_mp = {}
+function cancel_macro_definition ()
+  macro = {}
   thisflag.defining_macro = false
 end
 
@@ -54,14 +47,14 @@ Use @kbd{C-x )} to finish recording and make the macro available.
       return false
     end
 
-    if cur_mp ~= nil then
-      cancel_kbd_macro ()
+    if macro ~= nil then
+      cancel_macro_definition ()
     end
 
     minibuf_write ("Defining keyboard macro...")
 
     thisflag.defining_macro = true
-    cur_mp = {}
+    macro = {}
   end
 )
 
@@ -99,22 +92,18 @@ Define ("macro-play",
 [[
 Play back the last macro that you defined.
 ]],
-  function ()
-    if cur_mp == nil then
-      minibuf_error ("No kbd macro has been defined")
-      return false
+  function (...)
+    local m = {...}
+    if #m > 0 then
+      m = list.map (keycode, m)
+    elseif interactive () then
+      m = macro
+      if m == nil then
+        minibuf_error ("No macro has been defined")
+        return false
+      end
     end
 
-    process_keys (cur_mp)
+    process_keys (m)
   end
 )
-
-function macro_play (...)
-  local keys = {}
-  for _, keystr in ipairs ({...}) do
-    local key = keycode (keystr)
-    if key == nil then return false end
-    table.insert (keys, key)
-  end
-  process_keys (keys)
-end

@@ -101,9 +101,14 @@ function main ()
   end
 
   os.setlocale ("")
+  win = {}
+
+  local w, h = term_width (), term_height ()
+  win = {topdelta = 0, start_column = 0, lastpointn = 0}
+  win.fwidth = 2
   term_init ()
+  resize_window ()
   init_default_bindings ()
-  create_window ()
 
   if not getopt.opt["no-init-file"] then
     local s = os.getenv ("HOME")
@@ -115,13 +120,13 @@ function main ()
   -- Load file
   local ok = true
   if #arg == 1 then
-    ok = find_file (normalize_path (arg[1]))
+    ok = not read_file (arg[1])
     if ok then
       execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
 
       -- Evaluate Lua chunks given on the command line.
       for _, c in ipairs (getopt.opt.eval or {}) do
-        if not execute_command ("eval", c) then
+        if execute_command ("eval", c) then
           break
         end
         if thisflag.quit then

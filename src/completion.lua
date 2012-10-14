@@ -34,7 +34,7 @@ end
 -- Write the matches in `l' in a set of columns. The width of the
 -- columns is chosen to be big enough for the longest string, with a
 -- COLUMN_GAP-character gap between each column.
-local COLUMN_GAP = 5
+local COLUMN_GAP = 3
 function completion_write (cp, width)
   local maxlen = 0
   for i, v in ipairs (cp.matches) do
@@ -119,22 +119,32 @@ end
 -- Popup the completion window.
 function popup_completion (cp)
   popup_set (completion_write (cp, win.ewidth))
-  term_redisplay ()
+  term_display ()
 end
 
 -- FIXME: Common up minibuf_read*_name
 function minibuf_read_name (fmt)
   local cp = completion_new (table.keys (env))
 
-  return minibuf_vread_completion (fmt, "", cp, nil,
-                                   "No name given",
-                                   "No such thing `%s'")
+  return minibuf_read_completion (fmt, "", cp, nil,
+                                  "No name given",
+                                  "No such thing `%s'")
 end
 
 function minibuf_read_variable_name (fmt)
   local cp = completion_new (table.keys (env)) -- FIXME: filter out the commands
 
-  return minibuf_vread_completion (fmt, "", cp, nil,
-                                   "No variable name given",
-                                   "Undefined variable name `%s'")
+  return minibuf_read_completion (fmt, "", cp, nil,
+                                  "No variable name given",
+                                  "Undefined variable name `%s'")
+end
+
+-- Read a function name from the minibuffer.
+local commands_history = history_new ()
+function minibuf_read_command_name (fmt)
+  local cp = completion_new (table.keys (env)) -- FIXME: filter out the variables
+
+  return minibuf_read_completion (fmt, "", cp, commands_history,
+                                  "No command name given",
+                                  "Undefined command name `%s'")
 end

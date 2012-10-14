@@ -34,7 +34,7 @@ local function getkeystroke (delay)
   _last_key = term_getkey (delay)
 
   if _last_key and thisflag.defining_macro then
-    add_key_to_cmd (_last_key)
+    add_key_to_macro (_last_key)
   end
 
   return _last_key
@@ -54,7 +54,7 @@ local function getkey (delay, norefresh)
   local keycode = getkeystroke (0)
 
   if not norefresh and (not keycode or posix.timercmp (now, next_refresh) >= 0) then
-    term_redisplay ()
+    term_display ()
     term_refresh ()
     next_refresh = posix.timeradd (now, refresh_wait)
   end
@@ -70,7 +70,7 @@ function getkey_unfiltered (delay)
   local c = term_getkey_unfiltered (delay)
   _last_key = c
   if thisflag.defining_macro then
-    add_key_to_cmd (c)
+    add_key_to_macro (c)
   end
   return c
 end
@@ -86,7 +86,7 @@ function ungetkey (key)
   term_ungetkey (key)
 
   if thisflag.defining_macro then
-    remove_key_from_cmd ()
+    remove_key_from_macro ()
   end
 end
 

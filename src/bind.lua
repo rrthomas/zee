@@ -26,10 +26,9 @@ Whichever character you type to run this command is inserted.
 ]],
   function (key)
     local key = key and key:byte () or term_keytobyte (lastkey ())
-    deactivate_mark ()
+    execute_command ("edit-select-off")
     if not key then
-      ding ()
-      return false
+      return ding ()
     end
 
     if string.char (key):match ("%s") and buf.wrap and get_goalc () > tonumber (get_variable ("wrap-column")) then
@@ -37,7 +36,6 @@ Whichever character you type to run this command is inserted.
     end
 
     insert_char (string.char (key))
-    return true
   end
 )
 
@@ -55,15 +53,9 @@ function call_command (f, ...)
   -- Execute the command.
   _this_command = f
   _interactive = _interactive + 1
-  local ok = execute_command (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_command
+  local ok = not execute_command (f, ...) -- FIXME: Most of this (except _interactive) should be inside execute_command
   _interactive = math.max (0, _interactive - 1)
   _last_command = _this_command
-
-  -- Only add keystrokes if we were already in macro defining mode
-  -- before the function call, to cope with start-kbd-macro.
-  if lastflag.defining_macro and thisflag.defining_macro then
-    add_cmd_to_macro ()
-  end
 
   if buf and _last_command ~= "edit-undo" then
     buf.next_undop = buf.last_undop
@@ -76,7 +68,7 @@ end
 
 function get_and_run_command ()
   local key = get_key_chord ()
-  local name = get_command_by_key (key)
+  local name = binding_to_command (key)
 
   popup_clear ()
   minibuf_clear ()
@@ -170,7 +162,7 @@ function init_default_bindings ()
   key_bind ("TAB", "edit-indent-relative")
   key_bind ("C-r", "edit-find-backward")
   key_bind ("C-s", "edit-find")
-  key_bind ("C-w", "edit-delete-selection")
+  key_bind ("C-w", "edit-cut")
   key_bind ("M-d", "edit-delete-word")
   key_bind ("RET", "edit-insert-newline")
   key_bind ("C-j", "edit-insert-newline-and-indent")
@@ -196,32 +188,16 @@ function init_default_bindings ()
   key_bind ("C-y", "edit-paste")
 end
 
-function get_command_by_key (key)
+function binding_to_command (key)
   return bindings[tostring (key)]
 end
 
-Define ("where-is",
-[[
-Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command name.
-]],
-  function ()
-    local name = minibuf_read_command_name ("Where is command: ")
-
-    if name and command_exists (name) then
-      local keys = {}
-      for k, n in pairs (bindings) do
-        if n == name then
-          table.insert (keys, k)
-        end
-      end
-
-      if #keys == 0 then
-        minibuf_write (name .. " is not on any key")
-      else
-        minibuf_write ("%s is on %s", name, table.concat (keys, ", "))
-      end
-      return true
+function command_to_binding (cmd)
+  local keys = {}
+  for k, n in pairs (bindings) do
+    if n == cmd then
+      table.insert (keys, k)
     end
   end
-)
+  return keys
+end

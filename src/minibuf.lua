@@ -1,3 +1,4 @@
+-- Minibuffer
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
@@ -50,7 +51,7 @@ function minibuf_error (s)
 end
 
 -- Read a string from the minibuffer using a completion.
-function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
+function minibuf_read_completion (fmt, value, cp, hp, empty_err, invalid_err)
   local ms
 
   while true do
@@ -86,22 +87,6 @@ function minibuf_vread_completion (fmt, value, cp, hp, empty_err, invalid_err)
   end
 
   return ms
-end
-
-function minibuf_read_yn (fmt)
-  local errmsg = ""
-  while true do
-    minibuf_write (errmsg .. fmt)
-    local key = get_key_chord (true)
-    if key == keycode "y" then
-      return true
-    elseif key == keycode "n" then
-      return false
-    elseif key == keycode "C-g" then
-      return nil
-    end
-    errmsg = "Please answer y or n.  "
-  end
 end
 
 -- Read a string from the minibuffer.

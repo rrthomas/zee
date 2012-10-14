@@ -3,4 +3,4 @@
 
 -- edit-insert-quoted F1 RETURN
 -- file-save file-quit
-macro_play ("C-q", "F1", "RET", "M-s", "C-M-q")
+call_command ("macro-play", "C-q", "F1", "RET", "M-s", "C-M-q")
