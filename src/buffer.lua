@@ -327,44 +327,7 @@ end
 
 -- Get the goal column, expanding tabs.
 function get_goalc ()
-  local o = get_buffer_pt (buf)
-  local col = 0 -- FIXME: 1?
-  local t = tab_width ()
-  local start = buffer_start_of_line (buf, o)
-  for i = 0, o - start - 1 do
-    if get_buffer_char (buf, start + i) == '\t' then
-      col = bit32.bor (col, t - 1)
-    end
-    col = col + 1
-  end
-
-  return col
-end
-
--- Go to the column `goalc'.  Take care of expanding tabulations.
-function goto_goalc ()
-  local col = 0
-
-  local i = get_buffer_line_o (buf)
-  local lim = get_buffer_line_o (buf) + buffer_line_len (buf)
-  while i < lim do
-    if col == buf.goalc then
-      break
-    elseif get_buffer_char (buf, i) == '\t' then
-      local t = tab_width ()
-      for w = t - col % t, 1, -1 do
-        col = col + 1
-        if col == buf.goalc then
-          break
-        end
-      end
-    else
-      col = col + 1
-    end
-    i = i + 1
-  end
-
-  set_buffer_pt (buf, i)
+  return #make_string_printable (get_line (), get_buffer_pt (buf) - get_buffer_line_o (buf))
 end
 
 function move_line (n)
@@ -387,7 +350,8 @@ function move_line (n)
     n = n - 1
   end
 
-  goto_goalc ()
+  set_buffer_pt (buf, get_buffer_line_o (buf) + #make_string_printable (get_line (), buf.goalc))
+
   thisflag.need_resync = true
 
   return n ~= 0

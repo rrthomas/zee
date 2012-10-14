@@ -21,7 +21,6 @@
 -- {
 --   topdelta: The top line delta from point.
 --   lastpointn: The last point line number.
---   start_column: The start column of the window (>0 if scrolled sideways).
 --   fwidth, fheight: The formal width and height of the window.
 --   ewidth, eheight: The effective width and height of the window.
 -- }
@@ -202,6 +201,9 @@ local function draw_status_line (line, wp)
   term_attrset (display.normal)
 end
 
+local start_column = 0 -- start column of the window (>0 if scrolled sideways).
+local cursor_screen_column = 0 -- screen column of cursor
+
 local function draw_window (topline, wp)
   local rp = calculate_highlight_region ()
 
@@ -223,9 +225,9 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      draw_line (i, wp.start_column, o, rp, cur_tab_width)
+      draw_line (i, start_column, o, rp, cur_tab_width)
 
-      if wp.start_column > 0 then
+      if start_column > 0 then
         term_move (i, 0)
         term_addstr ('$')
       end
@@ -242,9 +244,6 @@ local function draw_window (topline, wp)
     draw_status_line (topline + wp.eheight, wp)
   end
 end
-
-local col = 0
-
 
 
 -- Popup
@@ -316,9 +315,7 @@ local function draw_popup ()
 end
 
 -- Scans `s' and replaces each character with a string of one or
--- more printable characters. The returned string is suitable for
--- printing at screen column `col'; the screen column only matters
--- if `s' contains tab characters.
+-- more printable characters.
 --
 -- Scanning stops when the screen column reaches or exceeds `goal',
 -- or when `s' is exhausted. The number of input characters
@@ -331,30 +328,31 @@ end
 -- at least one) to reach a screen column that is a multiple of `tab'.
 -- Newline characters must not occur in `s'. Other characters are
 -- replaced with a backslash followed by their hex character code.
-function make_string_printable (s, col, tab, goal)
+function make_string_printable (s, goal)
+  goal = goal or math.huge
+
   local ctrls = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
+  local tab = tab_width ()
   local ret, pos = "", 0
-
   for i = 1, #s do
     local c = s[i]
     assert (c ~= '\n')
 
-    local x = col + #ret
+    local x = #ret
     if x >= goal then
       break
     end
 
     if c == '\t' then
       ret = ret .. string.rep (' ', tab - (x % tab))
-    elseif c:byte () < #ctrls then
-      ret = ret .. '^' .. ctrls[string.byte[c] + 1]
-    elseif posix.isprint (c) then
-      ret = ret .. c
+    elseif c < #ctrls then
+      ret = ret .. '^' .. ctrls[c + 1]
+    elseif posix.isprint (string.char (c)) then
+      ret = ret .. string.char (c)
       -- FIXME: For double-width characters add a '\0' too so the length of
       -- 'ret' matches the display width.
     else
-      ret = ret .. '\\' ..  string.format ("%x", string.byte (c))
+      ret = ret .. '\\' ..  string.format ("%x", c)
     end
 
     pos = pos + 1
@@ -363,53 +361,47 @@ function make_string_printable (s, col, tab, goal)
   return ret
 end
 
--- Find the character position in `rbl' corresponding to display
--- width `goal'.
-local function column_to_character (s, goal)
-  return make_string_printable (s, 0, tab_width (), goal)
-end
+-- Calculate start_column and cursor_screen_column.
+--
+-- `start_column' is always a multiple of a third of a screen width. It is
+-- chosen so as to put the cursor in the middle third, unless the cursor is near
+-- one or other end of the line, in which case it is chosen to show as much of
+-- the line as possible.
+local function calculate_start_column ()
+  local width = win.ewidth
+  local third_width = math.max (1, math.floor (width / 3))
 
--- Calculate the display width of a string in screen columns
-local function string_display_width (s)
-  return #make_string_printable (s, 0, tab_width (), math.huge)
+  -- Calculate absolute columns of cursor and end of line.
+  local x = get_goalc ()
+  local length = #make_string_printable (get_line ())
+
+  -- Choose start_column.
+  if x < third_width or length < width then
+    -- No-brainer cases: show left-hand end of line.
+    start_column = 0
+  else
+    -- Put cursor in the middle third.
+    start_column = x - (x % third_width) - third_width
+    -- But scroll left if the right-hand end of the line stays on the screen.
+    while start_column + width >= length + third_width do
+      start_column = start_column - third_width
+    end
+  end
+
+  -- Consequently, calculate screen-relative column.
+  cursor_screen_column = x - start_column
 end
 
 function term_display ()
   -- Calculate the start column if the line at point has to be truncated.
-  -- FIXME: Rewrite with string_display_width.
   local lastcol, t = 0, tab_width ()
   local o = get_buffer_pt (buf)
   local lineo = o - get_buffer_line_o (buf)
 
-  col = 0
-  o = o - lineo
-  win.start_column = 0
+  calculate_start_column ()
 
-  local ew = win.ewidth
-  for lp = lineo, 0, -1 do
-    col = 0
-    for p = lp, lineo - 1 do
-      local c = get_buffer_char (buf, o + p)
-      if posix.isprint (c) then
-        col = col + 1
-      else
-        col = col + #make_char_printable (c, col, t)
-      end
-    end
-
-    if col >= ew - 1 or (lp / (ew / 3) + 2 < lineo / (ew / 3)) then
-      win.start_column = lp + 1
-      col = lastcol
-      break
-    end
-
-    lastcol = col
-  end
-
-  -- Draw the window.
   draw_window (0, win)
 
-  -- Draw the popup window.
   if popup_text then
     draw_popup ()
   end
@@ -418,5 +410,5 @@ function term_display ()
 end
 
 function term_redraw_cursor ()
-  term_move (win.topdelta, col)
+  term_move (win.topdelta, cursor_screen_column)
 end

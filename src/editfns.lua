@@ -31,13 +31,16 @@ function ding ()
 end
 
 
+function get_line ()
+  return get_buffer_region (buf, region_new (get_buffer_line_o (buf), buffer_end_of_line (buf, get_buffer_pt (buf))))
+end
+
 function is_empty_line ()
   return buffer_line_len (buf) == 0
 end
 
 function is_blank_line ()
-  local s = get_buffer_region (buf, region_new (get_buffer_line_o (buf), buffer_end_of_line (buf, get_buffer_pt (buf))))
-  return regex_match (s, "^[ \t]*$")
+  return regex_match (get_line (), "^[ \t]*$")
 end
 
 -- Returns the character following point in the current buffer.
