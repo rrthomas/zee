@@ -123,32 +123,34 @@ function main ()
     ok = not read_file (arg[1])
     if ok then
       execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
+    end
+  end
 
-      -- Evaluate Lua chunks given on the command line.
-      for _, c in ipairs (getopt.opt.eval or {}) do
-        if execute_command ("eval", c) then
-          break
-        end
-        if thisflag.quit then
-          break
-        end
+  -- Evaluate Lua chunks given on the command line.
+  for _, c in ipairs (getopt.opt.eval or {}) do
+    if execute_command ("eval", c) then
+      break
+    end
+    if thisflag.quit then
+      break
+    end
+  end
+
+  if ok and #arg == 1 then
+    lastflag.need_resync = true
+
+    -- Refresh minibuffer in case there's a pending error message.
+    minibuf_refresh ()
+
+    -- Leave cursor in correct position.
+    term_redraw_cursor ()
+
+    -- Run the main loop.
+    while not thisflag.quit do
+      if lastflag.need_resync then
+        window_resync (win)
       end
-
-      lastflag.need_resync = true
-
-      -- Refresh minibuffer in case there's a pending error message.
-      minibuf_refresh ()
-
-      -- Leave cursor in correct position.
-      term_redraw_cursor ()
-
-      -- Run the main loop.
-      while not thisflag.quit do
-        if lastflag.need_resync then
-          window_resync (win)
-        end
-        get_and_run_command ()
-      end
+      get_and_run_command ()
     end
   end
 
