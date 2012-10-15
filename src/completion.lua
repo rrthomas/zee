@@ -121,30 +121,3 @@ function popup_completion (cp)
   popup_set (completion_write (cp, win.ewidth))
   term_display ()
 end
-
--- FIXME: Common up minibuf_read*_name
-function minibuf_read_name (fmt)
-  local cp = completion_new (table.keys (env))
-
-  return minibuf_read_completion (fmt, "", cp, nil,
-                                  "No name given",
-                                  "No such thing `%s'")
-end
-
-function minibuf_read_variable_name (fmt)
-  local cp = completion_new (table.keys (env)) -- FIXME: filter out the commands
-
-  return minibuf_read_completion (fmt, "", cp, nil,
-                                  "No variable name given",
-                                  "Undefined variable name `%s'")
-end
-
--- Read a function name from the minibuffer.
-local commands_history = history_new ()
-function minibuf_read_command_name (fmt)
-  local cp = completion_new (table.keys (env)) -- FIXME: filter out the variables
-
-  return minibuf_read_completion (fmt, "", cp, commands_history,
-                                  "No command name given",
-                                  "Undefined command name `%s'")
-end

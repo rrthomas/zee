@@ -278,11 +278,13 @@ function minibuf_error (s)
 end
 
 -- Read a string from the minibuffer using a completion.
-function minibuf_read_completion (fmt, value, cp, hp, empty_err, invalid_err)
+function minibuf_read_completion (fmt, cp, class_name)
+  local empty_err = "No " .. class_name .. " given"
+  local invalid_err = "There is no " .. class_name .. " named `%s'"
   local ms
 
   while true do
-    ms = term_minibuf_read (fmt, value, nil, cp, hp)
+    ms = term_minibuf_read (fmt, "", nil, cp)
 
     if not ms then -- Cancelled.
       ding ()
@@ -301,9 +303,6 @@ function minibuf_read_completion (fmt, value, cp, hp, empty_err, invalid_err)
       end
 
       if cp.completions:member (ms) then
-        if hp then
-          add_history_element (hp, ms)
-        end
         minibuf_clear ()
         break
       else

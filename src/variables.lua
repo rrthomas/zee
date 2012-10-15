@@ -41,7 +41,13 @@ Define ("preferences-set-variable",
 Set a variable to the specified value.
 ]],
   function (var, val)
-    var = var or (interactive () and minibuf_read_variable_name ("Set variable: "))
+    var = var or (interactive () and
+                  minibuf_read_completion ("Set variable: ",
+                                           completion_new (filter (function (e)
+                                                                     return not env[e].func
+                                                                   end,
+                                                                   list.elems, table.keys (env))),
+                                           "variable"))
     if not var then
       return false
     end

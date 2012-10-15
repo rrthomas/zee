@@ -82,7 +82,12 @@ Define ("execute-command",
 Read command name, then run it.
 ]],
   function ()
-    local name = minibuf_read_command_name ("M-x ")
+    local name = minibuf_read_completion ("Command: ",
+                                          completion_new (filter (function (e)
+                                                                    return env[e].func
+                                                                  end,
+                                                                  list.elems, table.keys (env))),
+                                          "command")
     if not name then
       return true
     end
