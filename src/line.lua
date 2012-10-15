@@ -19,10 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-function insert_string (s)
-  return insert_astr (AStr (s))
-end
-
 -- Indentation command
 -- Go to cur_goalc () in the previous non-blank line.
 local function previous_nonblank_goalc ()
@@ -164,6 +160,7 @@ Delete all spaces and tabs around point.
   end
 )
 
+-- FIXME: rename
 Define ("edit-insert-tab",
 [[
 Indent to next multiple of `indent-width'.

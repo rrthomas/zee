@@ -127,6 +127,10 @@ function insert_astr (as)
   -- end
 end
 
+function insert_string (s)
+  return insert_astr (AStr (s))
+end
+
 function get_buffer_char (bp, o)
   local n = o_to_realo (bp, o)
   return string.char (bp.text[n])
