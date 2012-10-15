@@ -19,21 +19,6 @@
 
 -- Key binding.
 
-Define ("edit-insert-character",
-[[
-Insert the character you type.
-Whichever character you type to run this command is inserted.
-]],
-  function (key)
-    local key = key and key:byte () or term_keytobyte (lastkey ())
-    execute_command ("edit-select-off")
-    if not key then
-      return ding ()
-    end
-    insert_char (string.char (key))
-  end
-)
-
 _last_command = nil
 _this_command = nil
 _interactive = 0
@@ -177,7 +162,6 @@ function init_default_bindings ()
   key_bind ("M-|", "edit-shell-command")
   key_bind ("C-z", "file-suspend")
   key_bind ("M-i", "edit-insert-tab")
-  key_bind ("M-r", "preferences-toggle-read-only")
   key_bind ("C-_", "edit-undo")
   key_bind ("C-y", "edit-paste")
 end

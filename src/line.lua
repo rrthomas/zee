@@ -19,6 +19,21 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
+Define ("edit-insert-character",
+[[
+Insert the character you type.
+Whichever character you type to run this command is inserted.
+]],
+  function (key)
+    local key = key and key:byte () or term_keytobyte (lastkey ())
+    execute_command ("edit-select-off")
+    if not key then
+      return ding ()
+    end
+    insert_char (string.char (key))
+  end
+)
+
 -- Indentation command
 -- Go to cur_goalc () in the previous non-blank line.
 local function previous_nonblank_goalc ()
@@ -177,5 +192,44 @@ Insert a newline.
 ]],
   function ()
     return not insert_string ("\n")
+  end
+)
+
+Define ("edit-insert-quoted",
+[[
+Read next input character and insert it.
+This is useful for inserting control characters.
+]],
+  function ()
+    minibuf_write ("C-q-")
+    insert_char (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
+    minibuf_clear ()
+  end
+)
+
+local function delete_text (move_func)
+  local pt = get_buffer_pt (buf)
+  undo_start_sequence ()
+  execute_command (move_func)
+  delete_region (region_new (pt, get_buffer_pt (buf)))
+  undo_end_sequence ()
+  goto_offset (pt)
+end
+
+Define ("edit-delete-word",
+[[
+Delete forward up to the end of a word.
+]],
+  function ()
+    return delete_text ("move-next-word")
+  end
+)
+
+Define ("edit-delete-word-backward",
+[[
+Delete backward up to the end of a word.
+]],
+  function ()
+    return delete_text ("move-previous-word")
   end
 )

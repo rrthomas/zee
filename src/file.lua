@@ -133,3 +133,12 @@ function editor_exit (doabort)
     posix._exit (2)
   end
 end
+
+Define ("file-suspend",
+[[
+Stop editor and return to superior process.
+]],
+  function ()
+    posix.raise (posix.SIGTSTP)
+  end
+)

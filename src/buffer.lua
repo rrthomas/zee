@@ -288,6 +288,35 @@ Stop selecting text.
   end
 )
 
+Define ("edit-select-toggle",
+[[
+Toggle selection mode.
+]],
+  function ()
+    if buf.mark then
+      execute_command ("edit-select-off")
+    else
+      execute_command ("edit-select-on")
+    end
+  end
+)
+
+Define ("edit-select-other-end",
+[[
+When selecting text, move the cursor to the other end of the selection.
+]],
+  function ()
+    if not buf.mark then
+      return minibuf_error ("No selection")
+    end
+
+    local tmp = get_buffer_pt (buf)
+    goto_offset (buf.mark.o)
+    buf.mark.o = tmp
+    thisflag.need_resync = true
+  end
+)
+
 -- Return a safe tab width.
 function tab_width ()
   return math.max (tonumber (get_variable ("tab-width")), 1)

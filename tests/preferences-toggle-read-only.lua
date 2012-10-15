@@ -1,6 +1,0 @@
-call_command ("preferences-toggle-read-only")
-insert_string ("aaa")
-call_command ("preferences-toggle-read-only")
-insert_string ("a")
-call_command ("file-save")
-call_command ("file-quit")
