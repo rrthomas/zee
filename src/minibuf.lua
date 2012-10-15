@@ -23,9 +23,10 @@ local function term_minibuf_write (s)
   term_addstr (s:sub (1, math.min (#s, term_width ())))
 end
 
--- FIXME: Turn term_minibuf_read inside out so it's a minor mode
-function term_minibuf_read (prompt, value, pos, cp)
-  local quit = false
+-- FIXME: Turn minibuf_read inside out so it's a minor mode
+-- Read a string from the minibuffer.
+function minibuf_read (prompt, value, cp)
+  local quit, pos = false, #value
 
   Define ("minibuf-insert-character", "",
           function ()
@@ -156,10 +157,7 @@ function term_minibuf_read (prompt, value, pos, cp)
   key_bind ("PAGEDOWN", "minibuf-next-page")
   key_bind ("TAB", "minibuf-complete")
 
-  local saved
-  pos = pos or #value
-
-  local completion_text, old_completion_text
+  local saved, completion_text, old_completion_text
   repeat
     if cp and (not old_completion_text or old_completion_text ~= completion_text) then
       popup_completion (cp)
@@ -250,7 +248,7 @@ function minibuf_read_completion (fmt, cp, class_name)
   local ms
 
   while true do
-    ms = term_minibuf_read (fmt, "", nil, cp)
+    ms = minibuf_read (fmt, "", cp)
 
     if not ms then -- Cancelled.
       ding ()
@@ -279,11 +277,6 @@ function minibuf_read_completion (fmt, cp, class_name)
   end
 
   return ms
-end
-
--- Read a string from the minibuffer.
-function minibuf_read (fmt, value, cp)
-  return term_minibuf_read (fmt, value, nil, cp)
 end
 
 -- Read a non-negative number from the minibuffer.
