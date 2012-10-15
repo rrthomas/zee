@@ -39,7 +39,7 @@ LUA_RUNTIME =						\
 	src/file.lua					\
 	src/keycode.lua					\
 	src/cut.lua					\
-	src/line.lua					\
+	src/edit.lua					\
 	src/macro.lua					\
 	src/minibuf.lua					\
 	src/search.lua					\

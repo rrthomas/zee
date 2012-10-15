@@ -1,4 +1,4 @@
--- Line-oriented editing functions
+-- Basic editing functions
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
