@@ -23,7 +23,7 @@ BUILT_SOURCES = src/loadlua.lua
 
 bin_SCRIPTS = src/$(PACKAGE)
 
-src_@PACKAGE@_LUA =					\
+LUA_RUNTIME =						\
 	src/astr.lua					\
 	src/history.lua					\
 	src/eval.lua					\
@@ -49,15 +49,12 @@ src_@PACKAGE@_LUA =					\
 	src/term_curses.lua				\
 	src/term_minibuf.lua
 
-LUA_RUNTIME =						\
-	$(src_$(PACKAGE)_LUA)
-
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
 	src/loadlua.lua
 
 PRODUCTIONSOURCES =					\
-	$(src_$(PACKAGE)_LUA)				\
+	$(LUA_RUNTIME)					\
 	$(top_srcdir)/src/$(PACKAGE).lua		\
 	$(top_srcdir)/src/loadlua.lua			\
 	$(top_srcdir)/src/Makefile.am			\
