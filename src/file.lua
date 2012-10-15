@@ -142,3 +142,16 @@ Stop editor and return to superior process.
     posix.raise (posix.SIGTSTP)
   end
 )
+
+-- Signal an error, and abort any ongoing macro definition.
+function ding ()
+  if thisflag.defining_macro then
+    cancel_macro_definition ()
+  end
+
+  if win then
+    term_beep ()
+  end
+  -- enable call chaining with `return ding ()'
+  return true
+end

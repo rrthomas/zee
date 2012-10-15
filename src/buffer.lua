@@ -390,3 +390,57 @@ function goto_offset (o)
     resync_buffer_line (buf)
   end
 end
+
+function get_line ()
+  return get_buffer_region (buf, region_new (get_buffer_line_o (buf), buffer_end_of_line (buf, get_buffer_pt (buf))))
+end
+
+function is_empty_line ()
+  return buffer_line_len (buf) == 0
+end
+
+function is_blank_line ()
+  return regex_match (get_line (), "^[ \t]*$")
+end
+
+-- Returns the character following the cursor.
+function following_char ()
+  if end_of_buffer () then
+    return nil
+  elseif end_of_line () then
+    return '\n'
+  else
+    return get_buffer_char (buf, get_buffer_pt (buf))
+  end
+end
+
+-- Return the character preceding the cursor.
+function preceding_char ()
+  if beginning_of_buffer () then
+    return nil
+  elseif beginning_of_line () then
+    return '\n'
+  else
+    return get_buffer_char (buf, get_buffer_pt (buf) - 1)
+  end
+end
+
+-- Return true if cursor is at the beginning of the buffer.
+function beginning_of_buffer ()
+  return get_buffer_pt (buf) == 1
+end
+
+-- Return true if cursor is at the end of the buffer.
+function end_of_buffer (void)
+  return get_buffer_pt (buf) > get_buffer_size (buf)
+end
+
+-- Return true if cursor is at the beginning of a line.
+function beginning_of_line ()
+  return get_buffer_pt (buf) == get_buffer_line_o (buf)
+end
+
+-- Return true if cursor is at the end of a line.
+function end_of_line ()
+  return get_buffer_pt (buf) - get_buffer_line_o (buf) == buffer_line_len (buf)
+end

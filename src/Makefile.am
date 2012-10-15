@@ -33,7 +33,6 @@ LUA_RUNTIME =						\
 	src/bind.lua					\
 	src/buffer.lua					\
 	src/completion.lua				\
-	src/editfns.lua					\
 	src/shell.lua					\
 	src/getkey.lua					\
 	src/help.lua					\
