@@ -46,8 +46,7 @@ LUA_RUNTIME =						\
 	src/search.lua					\
 	src/undo.lua					\
 	src/term.lua					\
-	src/term_curses.lua				\
-	src/term_minibuf.lua
+	src/term_curses.lua
 
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
