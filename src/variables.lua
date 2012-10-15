@@ -48,12 +48,12 @@ Set a variable to the specified value.
                                                                    end,
                                                                    list.elems, table.keys (env))),
                                            "variable"))
-    if not var then
-      return false
+    if var == "" then
+      return true
     end
 
     if val == nil and interactive () then
-      val = minibuf_read (string.format ("Set %s to value: ", var), "")
+      val = minibuf_read (string.format ("Set %s to value: ", var))
     end
     if val == nil then
       return ding ()

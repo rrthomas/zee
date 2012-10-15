@@ -44,7 +44,7 @@ Use @kbd{C-x )} to finish recording and make the macro available.
   function ()
     if thisflag.defining_macro then
       minibuf_error ("Already defining a keyboard macro")
-      return false
+      return true
     end
 
     if macro ~= nil then
@@ -67,7 +67,7 @@ The macro is now available for use via @kbd{C-x e}.
   function ()
     if not thisflag.defining_macro then
       minibuf_error ("Not defining a keyboard macro")
-      return false
+      return true
     end
 
     thisflag.defining_macro = false
@@ -100,7 +100,7 @@ Play back the last macro that you defined.
       m = macro
       if m == nil then
         minibuf_error ("No macro has been defined")
-        return false
+        return true
       end
     end
 

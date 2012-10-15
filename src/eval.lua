@@ -65,7 +65,7 @@ Evaluation a Lua chunk CHUNK.
     local func, err = load (file)
     if func == nil then
       minibuf_error (string.format ("Error evaluating Lua: %s", err))
-      return false
+      return true
     end
     return func ()
   end
@@ -88,7 +88,7 @@ Read command name, then run it.
                                                                   end,
                                                                   list.elems, table.keys (env))),
                                           "command")
-    if not name then
+    if name == "" then
       return true
     end
     return execute_command (name)

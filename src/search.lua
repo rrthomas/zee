@@ -259,17 +259,14 @@ As each match is found, the user must type a character saying
 what to do with it.
 ]],
   function (find)
-    local find = find or (interactive () and minibuf_read ("Query replace string: ", ""))
+    local find = find or (interactive () and minibuf_read ("Query replace string: "))
     if not find then
       return ding ()
     end
-    if find == "" then
-      return true
-    end
     local find_no_upper = no_upper (find)
 
-    local repl = interactive () and minibuf_read (string.format ("Query replace `%s' with: ", find), "")
-    if not repl then
+    local repl = interactive () and minibuf_read (string.format ("Query replace `%s' with: ", find))
+    if repl == "" then
       ding ()
     end
 

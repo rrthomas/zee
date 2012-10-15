@@ -25,7 +25,7 @@ Display the help for the given command or variable.
     name = name or (interactive () and
                     minibuf_read_completion ("Describe command or variable: ",
                                              completion_new (table.keys (env)), "thing"))
-    if not name then
+    if name == "" then
       return true
     end
 

@@ -27,13 +27,10 @@ file, replacing the selection if any.
 ]],
   function (cmd)
     if not cmd and interactive () then
-      cmd = minibuf_read ("Shell command: ", "")
-    end
-    if not cmd then
-      return ding ()
+      cmd = minibuf_read ("Shell command: ")
     end
     if cmd == "" then
-      return
+      return ding ()
     end
 
     local ok = true

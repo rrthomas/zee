@@ -25,15 +25,15 @@ end
 
 -- FIXME: Turn minibuf_read inside out so it's a minor mode
 -- Read a string from the minibuffer.
-function minibuf_read (prompt, value, cp)
-  local quit, pos = false, #value
+function minibuf_read (prompt, cp)
+  local quit, value, pos = false, "", 0
 
   Define ("minibuf-insert-character", "",
           function ()
             local key = term_keytobyte (lastkey ())
             if not key then
               ding ()
-              return false
+              return true
             end
             value = value:sub (1, pos) .. string.char (key) .. value:sub (pos + 1)
             pos = pos + 1
@@ -51,7 +51,7 @@ function minibuf_read (prompt, value, cp)
 
   Define ("minibuf-quit", "",
           function ()
-            value = nil
+            value = ""
             quit = true
           end)
 
@@ -242,20 +242,11 @@ end
 
 -- Read a string from the minibuffer using a completion.
 function minibuf_read_completion (fmt, cp, class_name)
-  local empty_err = "No " .. class_name .. " given"
-  local invalid_err = "There is no " .. class_name .. " named `%s'"
-  local ms
-
   while true do
-    ms = minibuf_read (fmt, "", cp)
-
-    if not ms then -- Cancelled.
+    local ms = minibuf_read (fmt, cp)
+    if ms == "" then -- Cancelled.
       ding ()
-      break
-    elseif ms == "" then
-      minibuf_error (empty_err)
-      ms = nil
-      break
+      return nil
     else
       -- Complete partial words if possible.
       local comp = completion_try (cp, ms)
@@ -267,27 +258,22 @@ function minibuf_read_completion (fmt, cp, class_name)
 
       if cp.completions:member (ms) then
         minibuf_clear ()
-        break
+        return ms
       else
-        minibuf_error (string.format (invalid_err, ms))
+        minibuf_error (string.format ("There is no " .. class_name .. " named `%s'", ms))
         waitkey ()
       end
     end
   end
-
-  return ms
 end
 
 -- Read a non-negative number from the minibuffer.
-function minibuf_read_number (fmt)
+function minibuf_read_number (prompt)
   local n
   repeat
-    local ms = minibuf_read (fmt, "")
+    local ms = minibuf_read (prompt)
       if not ms then
-        ding ()
-        break
-      elseif #ms == 0 then
-        n = ""
+        return ding ()
       else
         n = tonumber (ms, 10)
       end
