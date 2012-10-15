@@ -29,7 +29,7 @@ LUA_RUNTIME =						\
 	src/eval.lua					\
 	src/main.lua					\
 	src/variables.lua				\
-	src/basic.lua					\
+	src/move.lua					\
 	src/bind.lua					\
 	src/buffer.lua					\
 	src/completion.lua				\

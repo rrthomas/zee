@@ -76,40 +76,6 @@ This is useful for inserting control characters.
   end
 )
 
--- Move through words
-local function move_word (dir)
-  local gotword = false
-  repeat
-    while not (dir > 0 and eolp or bolp) () do
-      if get_buffer_char (buf, get_buffer_pt (buf) - (dir < 0 and 1 or 0)):match ("%w") then
-        gotword = true
-      elseif gotword then
-        break
-      end
-      move_char (dir)
-    end
-  until gotword or move_char (dir)
-  return gotword
-end
-
-Define ("move-next-word",
-[[
-Move the cursor forward one word.
-]],
-  function ()
-    return not move_word (1)
-  end
-)
-
-Define ("move-previous-word",
-[[
-Move the cursor backwards one word.
-]],
-  function ()
-    return not move_word (-1)
-  end
-)
-
 local function delete_text (move_func)
   local pt = get_buffer_pt (buf)
   undo_start_sequence ()
@@ -134,47 +100,6 @@ Delete backward up to the end of a word.
 ]],
   function ()
     return delete_text ("move-previous-word")
-  end
-)
-
-local function move_paragraph (dir, line_extremum)
-  repeat until not is_empty_line () or move_line (dir)
-  repeat until is_empty_line () or move_line (dir)
-
-  if is_empty_line () then
-    execute_command ("move-start-line")
-  else
-    execute_command (line_extremum)
-  end
-end
-
-Define ("move-previous-paragraph",
-[[
-Move the cursor backward to the start of the paragraph.
-]],
-  function ()
-    move_paragraph (-1, "move-start-line")
-  end
-)
-
-Define ("move-next-paragraph",
-[[
-Move the cursor forward to the end of the paragraph.
-]],
-  function ()
-    move_paragraph (1, "move-end-line")
-  end
-)
-
-Define ("move-start-line-text",
-[[
-Move the cursor to the first non-whitespace character on this line.
-]],
-  function ()
-    goto_offset (get_buffer_line_o (buf))
-    while not eolp () and following_char ():match ("%s") do
-      move_char (1)
-    end
   end
 )
 

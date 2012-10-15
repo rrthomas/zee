@@ -122,7 +122,7 @@ function main ()
   if #arg == 1 then
     ok = not read_file (arg[1])
     if ok then
-      execute_command ("edit-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
+      execute_command ("move-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
     end
   end
 
