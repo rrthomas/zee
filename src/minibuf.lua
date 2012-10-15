@@ -208,10 +208,9 @@ function minibuf_read (prompt, value, cp)
 end
 
 
-minibuf_contents = nil
-
-
 -- Minibuffer wrapper functions.
+
+minibuf_contents = nil
 
 function minibuf_refresh ()
   if win then
