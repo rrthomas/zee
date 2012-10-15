@@ -58,6 +58,8 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/src/$(PACKAGE).lua		\
 	$(top_srcdir)/src/loadlua.lua			\
 	$(top_srcdir)/src/Makefile.am			\
+	$(top_srcdir)/tests/Makefile.am			\
+	$(top_srcdir)/build-aux/Makefile.am		\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
 src/loadlua.lua: src/Makefile.am src/loadlua.lua.in
