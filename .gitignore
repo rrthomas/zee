@@ -18,6 +18,7 @@
 /gnulib
 /lib
 /maint.mk
+/tight-scope.mk
 /zee*.tar.gz
 /zee*.tar.gz.directive*
 /zee*.tar.gz.sig
