@@ -25,7 +25,6 @@ bin_SCRIPTS = src/$(PACKAGE)
 
 LUA_RUNTIME =						\
 	src/astr.lua					\
-	src/history.lua					\
 	src/eval.lua					\
 	src/main.lua					\
 	src/variables.lua				\

@@ -119,32 +119,6 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
             end
           end)
 
-  Define ("minibuf-history-previous", "",
-          function ()
-            if hp then
-              local elem = previous_history_element (hp)
-              if elem then
-                if not saved then
-                  saved = value
-                end
-                value = elem
-              end
-            end
-          end)
-
-  Define ("minibuf-history-next", "",
-          function ()
-            if hp then
-              local elem = next_history_element (hp)
-              if elem then
-                value = elem
-              elseif saved then
-                value = saved
-                saved = nil
-              end
-            end
-          end)
-
   Define ("minibuf-complete", "",
           function ()
             if not cp or #cp.matches == 0 then
@@ -180,15 +154,7 @@ function term_minibuf_read (prompt, value, pos, cp, hp)
   key_bind ("PAGEUP", "minibuf-previous-page")
   key_bind ("C-v", "minibuf-next-page")
   key_bind ("PAGEDOWN", "minibuf-next-page")
-  key_bind ("M-p", "minibuf-history-previous")
-  key_bind ("UP", "minibuf-history-previous")
-  key_bind ("M-n", "minibuf-history-next")
-  key_bind ("DOWN", "minibuf-history-next")
   key_bind ("TAB", "minibuf-complete")
-
-  if hp then
-    history_prepare (hp)
-  end
 
   local saved
   pos = pos or #value
