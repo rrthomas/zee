@@ -24,7 +24,7 @@ local function term_minibuf_write (s)
 end
 
 -- FIXME: Turn term_minibuf_read inside out so it's a minor mode
-function term_minibuf_read (prompt, value, pos, cp, hp)
+function term_minibuf_read (prompt, value, pos, cp)
   local quit = false
 
   Define ("minibuf-insert-character", "",
@@ -282,8 +282,8 @@ function minibuf_read_completion (fmt, cp, class_name)
 end
 
 -- Read a string from the minibuffer.
-function minibuf_read (fmt, value, cp, hp)
-  return term_minibuf_read (fmt, value, nil, cp, hp)
+function minibuf_read (fmt, value, cp)
+  return term_minibuf_read (fmt, value, nil, cp)
 end
 
 -- Read a non-negative number from the minibuffer.
