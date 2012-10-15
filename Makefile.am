@@ -52,10 +52,10 @@ loc:
 	$(CLOC) $(PRODUCTIONSOURCES)
 
 loc-tests:
-	$(CLOC) $(LISP_ALL_TESTS)
+	$(CLOC) $(LUA_ALL_TESTS)
 
 loc-all:
-	$(CLOC) $(LISP_ALL_TESTS) $(PRODUCTIONSOURCES) $(srcdir)/tests/run-lisp-tests.lua
+	$(CLOC) $(LUA_ALL_TESTS) $(PRODUCTIONSOURCES) $(srcdir)/tests/run-lisp-tests.lua
 
 ## ------------- ##
 ## Distribution. ##
