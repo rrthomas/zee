@@ -20,20 +20,19 @@
 local cut_buffer_text = AStr ("")
 
 local function copy_or_cut_the_region (cut)
-  if warn_if_no_mark () then
+  local r = calculate_the_selection ()
+  if not r then
     return true
   end
 
-  cut_buffer_text = get_buffer_region (buf, calculate_the_region ())
-
+  cut_buffer_text = get_buffer_region (buf, r)
   if cut then
     if buf.readonly then
       minibuf_error ("Read only text copied to cut buffer")
     else
-      delete_region (calculate_the_region ())
+      delete_region (r)
     end
   end
-
   execute_command ("edit-select-off")
 end
 
@@ -62,10 +61,6 @@ Define ("edit-paste",
 Insert the contents of the paste buffer.
 ]],
   function ()
-    if warn_if_readonly_buffer () then
-      return true
-    end
-
-    insert_astr (cut_buffer_text)
+    return not insert_astr (cut_buffer_text)
   end
 )

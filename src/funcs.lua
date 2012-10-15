@@ -111,17 +111,11 @@ Move the cursor backwards one word.
 )
 
 local function delete_text (move_func)
-  if warn_if_readonly_buffer () then
-    return true
-  end
-
   local pt = get_buffer_pt (buf)
-
   undo_start_sequence ()
   execute_command (move_func)
   delete_region (region_new (pt, get_buffer_pt (buf)))
   undo_end_sequence ()
-
   goto_offset (pt)
 end
 
@@ -193,8 +187,6 @@ If the shell command produces any output, it is inserted into the
 file, replacing the selection if any.
 ]],
   function (cmd)
-    local ok = true
-
     if not cmd and interactive () then
       cmd = minibuf_read ("Shell command: ", "")
     end
@@ -205,9 +197,10 @@ file, replacing the selection if any.
       return
     end
 
-    local rp = calculate_the_region ()
+    local ok = true
+
     local h, tempfile
-    if rp then
+    if buf.mark then
       tempfile = os.tmpname ()
 
       h = io.open (tempfile, "w")
@@ -215,7 +208,7 @@ file, replacing the selection if any.
         ok = minibuf_error ("Cannot open temporary file")
       else
         local fd = posix.fileno (h)
-        local s = get_buffer_region (buf, calculate_the_region ())
+        local s = get_buffer_region (buf, calculate_the_selection ())
         local written, err = alien.default.write (fd, s.buf.buffer:topointer (), #s)
         if not written then
           ok = minibuf_error ("Error writing to temporary file: " .. err)
@@ -234,10 +227,10 @@ file, replacing the selection if any.
 
         if #out == 0 then
           minibuf_write ("(Shell command succeeded with no output)")
-        elseif not warn_if_readonly_buffer () then
+        else
           local del = 0
           if buf.mark then
-            local r = calculate_the_region ()
+            local r = calculate_the_selection ()
             goto_offset (r.start)
             del = get_region_size (r)
           end
@@ -253,7 +246,7 @@ file, replacing the selection if any.
     if h then
       h:close ()
     end
-    if rp then
+    if tempfile then
       os.remove (tempfile)
     end
 

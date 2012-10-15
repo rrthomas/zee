@@ -80,10 +80,6 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 ]],
   function ()
-    if warn_if_readonly_buffer () then
-      return true
-    end
-
     if not buf.next_undop then
       minibuf_error ("No further undo information")
       buf.next_undop = buf.last_undop

@@ -45,10 +45,6 @@ Define ("edit-indent-relative",
 Indent line or insert a tab.
 ]],
   function ()
-    if warn_if_readonly_buffer () then
-      return true
-    end
-
     local cur_goalc = get_goalc ()
     local target_goalc = 0
     local m = point_marker ()
@@ -101,10 +97,6 @@ that if there is a character in the first column of the line above,
 no indenting is performed.
 ]],
   function ()
-    if warn_if_readonly_buffer () then
-      return true
-    end
-
     execute_command ("edit-select-off")
 
     undo_start_sequence ()
@@ -177,12 +169,8 @@ Define ("edit-insert-tab",
 Indent to next multiple of `indent-width'.
 ]],
   function ()
-    if warn_if_readonly_buffer () then
-      return true
-    end
-
     local t = indent_width ()
-    insert_string (string.rep (' ', t - get_goalc () % t))
+    return not insert_string (string.rep (' ', t - get_goalc () % t))
   end
 )
 

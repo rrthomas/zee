@@ -70,7 +70,8 @@ end
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
 function replace_astr (del, as)
-  if warn_if_readonly_buffer () then
+  if buf.readonly then
+    minibuf_error ("File is readonly")
     return false
   end
 
@@ -120,6 +121,7 @@ end
 
 function insert_astr (as)
   local ok = replace_astr (0, as)
+  return ok
   -- if ok then
   --   goto_offset (buf.pt + #as)
   -- end
@@ -205,18 +207,11 @@ function delete_char ()
     return minibuf_error ("End of buffer")
   end
 
-  if warn_if_readonly_buffer () then
-    return false
-  end
-
   if eolp () then
     thisflag.need_resync = true
   end
-  replace_astr (1, AStr (""))
-
-  buf.modified = true
-
-  return true
+  buf.modified = replace_astr (1, AStr (""))
+  return buf.modified
 end
 
 
@@ -228,24 +223,6 @@ function buffer_new () -- FIXME: Constructor which we can pass other arguments
           modified = false}
 end
 
--- Print an error message into the echo area and return true
--- if the current buffer is readonly; otherwise return false.
-function warn_if_readonly_buffer ()
-  if buf.readonly then
-    minibuf_error ("File is readonly")
-    return true
-  end
-  return false
-end
-
-function warn_if_no_mark ()
-  if not buf.mark then
-    minibuf_error ("The mark is not set now")
-    return true
-  end
-  return false
-end
-
 -- Make a region from two offsets
 function region_new (o1, o2)
   return {start = math.min (o1, o2), finish = math.max (o1, o2)}
@@ -255,18 +232,16 @@ function get_region_size (rp)
   return rp.finish - rp.start
 end
 
--- Return the region between point and mark.
-function calculate_the_region ()
-  if warn_if_no_mark () then
-    return nil
+-- Return the selection
+function calculate_the_selection ()
+  if not buf.mark then
+    return minibuf_error ("There is no selection")
   end
 
   return region_new (buf.pt, buf.mark.o)
 end
 
 function delete_region (r)
-  assert (not warn_if_readonly_buffer ())
-
   goto_offset (r.start)
   replace_astr (get_region_size (r), AStr (""))
 end
