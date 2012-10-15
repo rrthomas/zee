@@ -1,4 +1,4 @@
--- Buffer-oriented functions
+-- Buffer type, functions and commands
 --
 -- Copyright (c) 2010-2012 Free Software Foundation, Inc.
 --
@@ -407,22 +407,16 @@ end
 function following_char ()
   if end_of_buffer () then
     return nil
-  elseif end_of_line () then
-    return '\n'
-  else
-    return get_buffer_char (buf, get_buffer_pt (buf))
   end
+  return get_buffer_char (buf, get_buffer_pt (buf))
 end
 
 -- Return the character preceding the cursor.
 function preceding_char ()
   if beginning_of_buffer () then
     return nil
-  elseif beginning_of_line () then
-    return '\n'
-  else
-    return get_buffer_char (buf, get_buffer_pt (buf) - 1)
   end
+  return get_buffer_char (buf, get_buffer_pt (buf) - 1)
 end
 
 -- Return true if cursor is at the beginning of the buffer.
