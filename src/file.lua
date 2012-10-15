@@ -124,7 +124,7 @@ function editor_exit (doabort)
   if buf and buf.modified then
     local file = buf.filename .. string.upper (PACKAGE) .. "SAVE"
     io.stderr:write (string.format ("Saving %s...\r\n", file))
-    write_to_disk (file, "rw-------")
+    write_file (file, "rw-------")
   end
 
   if doabort then
