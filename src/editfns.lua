@@ -43,44 +43,44 @@ function is_blank_line ()
   return regex_match (get_line (), "^[ \t]*$")
 end
 
--- Returns the character following point in the current buffer.
+-- Returns the character following the cursor.
 function following_char ()
-  if eobp () then
+  if end_of_buffer () then
     return nil
-  elseif eolp () then
+  elseif end_of_line () then
     return '\n'
   else
     return get_buffer_char (buf, get_buffer_pt (buf))
   end
 end
 
--- Return the character preceding point in the current buffer.
+-- Return the character preceding the cursor.
 function preceding_char ()
-  if bobp () then
+  if beginning_of_buffer () then
     return nil
-  elseif bolp () then
+  elseif beginning_of_line () then
     return '\n'
   else
     return get_buffer_char (buf, get_buffer_pt (buf) - 1)
   end
 end
 
--- Return true if point is at the beginning of the buffer.
-function bobp ()
+-- Return true if cursor is at the beginning of the buffer.
+function beginning_of_buffer ()
   return get_buffer_pt (buf) == 1
 end
 
--- Return true if point is at the end of the buffer.
-function eobp (void)
+-- Return true if cursor is at the end of the buffer.
+function end_of_buffer (void)
   return get_buffer_pt (buf) > get_buffer_size (buf)
 end
 
--- Return true if point is at the beginning of a line.
-function bolp ()
+-- Return true if cursor is at the beginning of a line.
+function beginning_of_line ()
   return get_buffer_pt (buf) == get_buffer_line_o (buf)
 end
 
--- Return true if point is at the end of a line.
-function eolp ()
+-- Return true if cursor is at the end of a line.
+function end_of_line ()
   return get_buffer_pt (buf) - get_buffer_line_o (buf) == buffer_line_len (buf)
 end

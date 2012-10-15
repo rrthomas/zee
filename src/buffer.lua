@@ -20,11 +20,11 @@
 
 -- Buffer methods that know about the gap.
 
-function get_buffer_pre_point (bp)
+function get_buffer_pre_cursor (bp)
   return bp.text:sub (1, get_buffer_pt (bp) - 1)
 end
 
-function get_buffer_post_point (bp)
+function get_buffer_post_cursor (bp)
   return bp.text:sub (get_buffer_pt (bp) + bp.gap)
 end
 
@@ -66,7 +66,7 @@ function buffer_line_len (bp, o)
     realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, o)))
 end
 
--- Replace `del' chars after point with `as'.
+-- Replace `del' chars after cursor with `as'.
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
 function replace_astr (del, as)
@@ -174,8 +174,7 @@ end
 
 -- Buffer methods that don't know about the gap.
 
--- Insert the character `c' at the current point position
--- into the current buffer.
+-- Insert the character `c' at the current cursor position.
 function insert_char (c)
   local ok = replace_astr (0, AStr (c))
   -- if ok then
@@ -207,11 +206,11 @@ end
 function delete_char ()
   execute_command ("edit-select-off")
 
-  if eobp () then
+  if end_of_buffer () then
     return minibuf_error ("End of buffer")
   end
 
-  if eolp () then
+  if end_of_line () then
     thisflag.need_resync = true
   end
   buf.modified = replace_astr (1, AStr (""))
@@ -267,7 +266,7 @@ function copy_marker (m)
   return marker_new (m.o)
 end
 
-function point_marker ()
+function cursor_marker ()
   return marker_new (get_buffer_pt (buf))
 end
 
@@ -276,7 +275,7 @@ Define ("edit-select-on",
 Start selecting text.
 ]],
   function ()
-    buf.mark = point_marker ()
+    buf.mark = cursor_marker ()
   end
 )
 
@@ -305,9 +304,9 @@ end
 function move_char (dir)
   local ltest, btest, lmove
   if dir >= 0 then
-    ltest, btest, lmove = eolp, eobp, "move-start-line"
+    ltest, btest, lmove = end_of_line, end_of_buffer, "move-start-line"
   else
-    ltest, btest, lmove = bolp, bobp, "move-end-line"
+    ltest, btest, lmove = beginning_of_line, beginning_of_buffer, "move-end-line"
   end
 
   if not ltest () then

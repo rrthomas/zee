@@ -33,7 +33,7 @@ Move the cursor to the first non-whitespace character on this line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf))
-    while not eolp () and following_char ():match ("%s") do
+    while not end_of_line () and following_char ():match ("%s") do
       move_char (1)
     end
   end
@@ -131,7 +131,7 @@ Scroll text of current window upward near full screen.
 local function move_word (dir)
   local gotword = false
   repeat
-    while not (dir > 0 and eolp or bolp) () do
+    while not (dir > 0 and end_of_line or beginning_of_line) () do
       if get_buffer_char (buf, get_buffer_pt (buf) - (dir < 0 and 1 or 0)):match ("%w") then
         gotword = true
       elseif gotword then
@@ -192,8 +192,7 @@ Move the cursor forward to the end of the paragraph.
 
 Define ("move-goto-character",
 [[
-Set point to @i{position}, a number.
-Beginning of buffer is position 1.
+Move to character @i{position}. Beginning of buffer is character 1.
 ]],
   function (n)
     n = tonumber (n)

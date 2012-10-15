@@ -19,15 +19,15 @@
 
 -- Window table:
 -- {
---   topdelta: top line delta from point
---   lastpointn: last point line number
+--   topdelta: top line delta from cursor
+--   last_line: last cursor line number
 --   fwidth, fheight: actual width and height of the window
 --   ewidth, eheight: editing width and height of the window
 -- }
 
 function window_resync (wp)
   local n = get_buffer_line (buf)
-  local delta = n - wp.lastpointn
+  local delta = n - wp.last_line
 
   if delta ~= 0 then
     if (delta > 0 and wp.topdelta + delta < wp.eheight) or (delta < 0 and wp.topdelta >= -delta) then
@@ -37,7 +37,7 @@ function window_resync (wp)
     else
       wp.topdelta = n
     end
-    wp.lastpointn = n
+    wp.last_line = n
   end
 end
 
@@ -342,7 +342,7 @@ function make_string_printable (s, goal)
       -- FIXME: For double-width characters add a '\0' too so the length of
       -- 'ret' matches the display width.
     else
-      ret = ret .. '\\' ..  string.format ("%x", c)
+      ret = ret .. '\\' .. string.format ("%x", c)
     end
 
     pos = pos + 1
@@ -383,7 +383,7 @@ local function calculate_start_column ()
 end
 
 function term_display ()
-  -- Calculate the start column if the line at point has to be truncated.
+  -- Calculate the start column if the line at cursor has to be truncated.
   local lastcol, t = 0, tab_width ()
   local o = get_buffer_pt (buf)
   local lineo = o - get_buffer_line_o (buf)

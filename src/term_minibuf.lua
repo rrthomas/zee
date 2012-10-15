@@ -17,17 +17,17 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-local function draw_minibuf_read (prompt, value, pointo)
+local function draw_minibuf_read (prompt, value, pos)
   term_minibuf_write (prompt)
 
   local w, h = term_width (), term_height ()
   local margin = 1
   local n = 0
 
-  if #prompt + pointo + 1 >= w then
+  if #prompt + pos + 1 >= w then
     margin = margin + 1
     term_addstr ('$')
-    n = pointo - pointo % (w - #prompt - 2)
+    n = pos - pos % (w - #prompt - 2)
   end
 
   term_addstr (value:sub (n + 1, math.min (w - #prompt - margin, #value - n)))
@@ -37,7 +37,7 @@ local function draw_minibuf_read (prompt, value, pointo)
     term_addstr ('$')
   end
 
-  term_move (h - 1, #prompt + margin - 1 + pointo % (w - #prompt - margin))
+  term_move (h - 1, #prompt + margin - 1 + pos % (w - #prompt - margin))
 
   term_refresh ()
 end

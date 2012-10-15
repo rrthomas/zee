@@ -43,10 +43,10 @@ alien.default.write:types ("ptrdiff_t", "int", "pointer", "size_t")
 local function write_file (filename, mode)
   local h = posix.creat (filename, mode)
   if h then
-    local s = get_buffer_pre_point (buf)
+    local s = get_buffer_pre_cursor (buf)
     local ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
     if ret == #s then
-      s = get_buffer_post_point (buf)
+      s = get_buffer_post_cursor (buf)
       ret = alien.default.write (h, s.buf.buffer:topointer (), #s)
       if ret == #s then
         ret = true

@@ -31,7 +31,7 @@ local function previous_nonblank_goalc ()
   until not ok or not is_blank_line ()
 
   -- Go to `cur_goalc' in that non-blank line.
-  while ok and not eolp () and get_goalc () < cur_goalc do
+  while ok and not end_of_line () and get_goalc () < cur_goalc do
     ok = move_char (1)
   end
 end
@@ -43,7 +43,7 @@ Indent line or insert a tab.
   function ()
     local cur_goalc = get_goalc ()
     local target_goalc = 0
-    local m = point_marker ()
+    local m = cursor_marker ()
     local ok
 
     execute_command ("edit-select-off")
@@ -51,18 +51,18 @@ Indent line or insert a tab.
 
     -- Now find the next blank char.
     if preceding_char () ~= '\t' or get_goalc () <= cur_goalc then
-      while not eolp () and not following_char ():match ("%s") do
+      while not end_of_line () and not following_char ():match ("%s") do
         move_char (1)
       end
     end
 
     -- Find next non-blank char.
-    while not eolp () and following_char ():match ("%s") do
+    while not end_of_line () and following_char ():match ("%s") do
       move_char (1)
     end
 
     -- Target column.
-    if not eolp () then
+    if not end_of_line () then
       target_goalc = get_goalc ()
     end
     goto_offset (m.o)
@@ -97,13 +97,13 @@ no indenting is performed.
 
     undo_start_sequence ()
     if insert_string ("\n") then
-      local m = point_marker ()
+      local m = cursor_marker ()
       local pos
 
       -- Check where last non-blank goalc is.
       previous_nonblank_goalc ()
       pos = get_goalc ()
-      local indent = pos > 0 or (not eolp () and following_char ():match ("%s"))
+      local indent = pos > 0 or (not end_of_line () and following_char ():match ("%s"))
       goto_offset (m.o)
       -- Only indent if we're in column > 0 or we're in column 0 and
       -- there is a space character there in the last non-blank line.
@@ -143,16 +143,16 @@ Join lines if the character is a newline.
 
 Define ("edit-delete-horizontal-space",
 [[
-Delete all spaces and tabs around point.
+Delete all spaces and tabs around the cursor.
 ]],
   function ()
     undo_start_sequence ()
 
-    while not eolp () and following_char ():match ("%s") do
+    while not end_of_line () and following_char ():match ("%s") do
       delete_char ()
     end
 
-    while not bolp () and preceding_char ():match ("%s") do
+    while not beginning_of_line () and preceding_char ():match ("%s") do
       execute_command ("edit-delete-previous-character")
     end
 

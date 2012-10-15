@@ -78,7 +78,7 @@ local function search (s, forward)
   local notbol = forward and o > 1
   local noteol = not forward and o <= get_buffer_size (buf)
   local downcase = get_variable ("caseless-search") and no_upper (s)
-  local as = (forward and get_buffer_post_point or get_buffer_pre_point) (buf)
+  local as = (forward and get_buffer_post_cursor or get_buffer_pre_cursor) (buf)
   local pos = find_substr (as, s, forward, notbol, noteol, downcase)
   if not pos then
     return false
@@ -198,9 +198,10 @@ Define ("edit-find",
 [[
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
-Type RET to exit, leaving point at location found.
+Type RET to exit, leaving cursor at location found.
 Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
+@kbd{C-g} when search is successful aborts and moves cursor to starting
+point.
 ]],
   function (s)
     isearch (true, s or "")
@@ -211,9 +212,10 @@ Define ("edit-find-backward",
 [[
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
-Type RET to exit, leaving point at location found.
+Type RET to exit, leaving cursor at location found.
 Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
+@kbd{C-g} when search is successful aborts and moves cursor to starting
+point.
 ]],
   function (s)
     isearch (false, s or "")
@@ -306,7 +308,7 @@ what to do with it.
             case_repl = recase (repl, case_type)
           end
         end
-        local m = point_marker ()
+        local m = cursor_marker ()
         goto_offset (r.start)
         replace_astr (#find, AStr (case_repl))
         goto_offset (m.o)

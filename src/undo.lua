@@ -51,7 +51,8 @@ function undo_set_unchanged (up)
   end
 end
 
--- Revert an action.  Return the next undo entry.
+-- Revert an action.
+-- Return the next undo entry.
 local function revert_action (up)
   if up.type == "end sequence" then
     undo_start_sequence ()

@@ -71,7 +71,7 @@ options = {
 
 local function segv_sig_handler (signo)
   io.stderr:write (prog.name .. ": " .. PACKAGE_NAME ..
-                   " crashed.  Please send a bug report to <" ..
+                   " crashed. Please send a bug report to <" ..
                    PACKAGE_BUGREPORT .. ">.\r\n")
   editor_exit (true)
 end
@@ -104,7 +104,7 @@ function main ()
   win = {}
 
   local w, h = term_width (), term_height ()
-  win = {topdelta = 0, start_column = 0, lastpointn = 0}
+  win = {topdelta = 0, start_column = 0, last_line = 0}
   win.fwidth = 2
   term_init ()
   resize_window ()
