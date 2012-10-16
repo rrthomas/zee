@@ -54,7 +54,7 @@ function get_doc (name)
 end
 
 function execute_command (name, ...)
-  return env[name] and env[name].func and pcall (env[name].func, ...)
+  return env[name] and env[name].func and env[name].func (...)
 end
 
 Define ("eval",
@@ -76,7 +76,10 @@ function command_exists (f)
 end
 
 
--- FIXME: Better name for execute-command.
+-- FIXME: Make this non-interactive: need to change Define so it
+-- defines functions in _G, and hence can accept non-interactive
+-- functions (which still need documentation, but should not appear in
+-- menu).
 Define ("execute-command",
 [[
 Read command name, then run it.
