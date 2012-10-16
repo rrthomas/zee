@@ -172,7 +172,7 @@ local function draw_status_line (line, wp)
   as = as .. string.format ("  %-15s   ", buf.filename)
 
   -- Percentage of the way through the file
-  as = as .. string.format ("%3d%%", (get_buffer_pt (buf) / math.max (get_buffer_size (buf), 1)) * 100)
+  as = as .. string.format ("%3d%%", ((get_buffer_pt (buf) - 1) / math.max (get_buffer_size (buf), 1)) * 100)
 
   -- Coordinates
   as = as .. string.format (" %-9s (", string.format ("(%d,%d)", n + 1, get_goalc ()))
