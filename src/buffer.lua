@@ -76,7 +76,6 @@ function replace_astr (del, as)
   end
 
   local newlen = #as
-
   undo_save_block (buf.pt, del, newlen)
 
   -- Adjust gap.
@@ -94,21 +93,19 @@ function replace_astr (del, as)
       buf.gap = oldgap + del - newlen
     end
 
-    -- Zero new bit of gap.
-    if math.max (oldgap, newlen) < buf.gap + newlen then
-      buf.text:set (buf.pt + math.max (oldgap, newlen), '\0', newlen + buf.gap - math.max (oldgap, newlen))
+    -- Zero any new bit of gap.
+    if buf.gap > oldgap then
+      buf.text:set (buf.pt + oldgap, '\0', buf.gap - oldgap)
     end
   end
 
   -- Insert `newlen' chars.
-  buf.text:replace (buf.pt, as)
-  buf.pt = buf.pt + newlen -- FIXME: remove this & the next line!
-  resync_buffer_line (buf)
+  buf.text:replace (buf.pt + buf.gap, as)
 
   -- Adjust markers.
   for m in pairs (buf.markers) do
-    if m.o > buf.pt - newlen then
-      m.o = math.max (buf.pt - newlen, m.o + newlen - del)
+    if m.o > buf.pt then
+      m.o = math.max (buf.pt, m.o + newlen - del)
     end
   end
 
@@ -121,10 +118,10 @@ end
 
 function insert_astr (as)
   local ok = replace_astr (0, as)
+  if ok then
+    goto_offset (buf.pt + #as)
+  end
   return ok
-  -- if ok then
-  --   goto_offset (buf.pt + #as)
-  -- end
 end
 
 function insert_string (s)
