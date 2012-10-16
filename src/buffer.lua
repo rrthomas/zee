@@ -174,14 +174,6 @@ end
 
 -- Buffer methods that don't know about the gap.
 
--- Insert the character `c' at the current cursor position.
-function insert_char (c)
-  local ok = replace_astr (0, AStr (c))
-  -- if ok then
-  --   move_char (1)
-  -- end
-end
-
 function get_buffer_line (bp)
   return bp.line
 end

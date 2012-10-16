@@ -30,7 +30,7 @@ Whichever character you type to run this command is inserted.
     if not key then
       return ding ()
     end
-    insert_char (string.char (key))
+    insert_string (string.char (key))
   end
 )
 
@@ -88,7 +88,7 @@ Indent line or insert a tab.
       -- If not at EOL on target line, insert spaces & tabs up to
       -- target_goalc.
       while get_goalc () < target_goalc do
-        ok = insert_char (' ')
+        ok = insert_string (' ')
       end
     else
       -- if already at EOL on target line, insert a tab.
@@ -202,7 +202,7 @@ This is useful for inserting control characters.
 ]],
   function ()
     minibuf_write ("C-q-")
-    insert_char (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
+    insert_string (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
     minibuf_clear ()
   end
 )
