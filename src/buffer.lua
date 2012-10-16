@@ -83,7 +83,7 @@ function replace_astr (del, as)
   local oldgap = buf.gap
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
-    buf.text:insert (buf.pt, (#as + min_gap) - (buf.gap + del))
+    buf.text:insert (buf.pt, (newlen + min_gap) - (buf.gap + del))
     buf.gap = min_gap
   else
     if oldgap + del > max_gap + newlen then
