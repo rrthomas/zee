@@ -9,34 +9,18 @@ Copyright (c) 1997-2012 Free Software Foundation, Inc.
 are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.**
 
-_This file is marked up in [MultiMarkdown][] syntax_.
-
-  [MultiMarkdown]: http://fletcherpenney.net/multimarkdown
-
-------------------------------------------------------------------------
-
-Contents
-========
-
-1. [INTRODUCTION][]
-   * [Source Layout][]
-   * [Web Pages][]
-   * [Mailing Lists][]
-2. [OBTAINING THE LATEST SOURCES][]
-   * [Official Release][]
-   * [Development Sources][]
-3. [REPORTING BUGS][]
-
-------------------------------------------------------------------------
 
 INTRODUCTION
 ============
 
 Zee is a lightweight editor. Zee is aimed at small footprint systems
 and quick editing sessions (it starts up and shuts down instantly).
+Zee's home page is at:
 
-Zee is written in Lua 5.2 using POSIX APIs, and hence requires a Lua
-5.2 runtime and a few additional Lua modules:
+  > <https://github.com/rrthomas/zee>
+
+Zee is written in Lua 5.2 using POSIX APIs, and requires these
+additional modules:
 
  * Lua stdlib <https://github.com/rrthomas/lua-stdlib>
  * lrexlib <http://rrthomas.github.com/lrexlib/>
@@ -45,142 +29,45 @@ Zee is written in Lua 5.2 using POSIX APIs, and hence requires a Lua
    (the curses module must be built)
  * alien <http://mascarenhas.github.com/alien/>
 
-For exact version dependencies, see `src/loadlibs.lua.in`.
-
-  [gnulib]:  http://www.gnu.org/s/gnulib
+For the exact versions required, see `src/loadlibs.lua.in`.
 
 
-Source Layout
--------------
+INSTALLING
+==========
 
- * See file `AUTHORS` for the names of maintainers past and present.
- * See file `COPYING` for copying conditions.
- * See file `FAQ` for a selection of a Frequently Answered Questions.
- * See file `INSTALL` for generic compilation and installation
-   instructions.
- * See file `NEWS` for a list of major changes in each release.
- * See file `THANKS` for a list of important contributors.
+The simplest way to install the latest release of Zee is to use
+[Luarocks][]
 
-The rest of the files in the top-level directory are part of the
-[Autotools]() build system used to compile and install Zee.
+  [Luarocks]: http://luarocks.org/
 
- * Directory `build-aux` contains helper scripts used to build Zee.
- * Directory `doc` contains files used to create Zee's documentation.
- * Directory `m4` contains a mixture of [gnulib]() supplied and Zee-
-   specific macros for rebuilding the `configure' script.
- * Directory `src` contains the source code used to build Zee.
- * Directory `tests` contains a suite of tests used by `make check` to
-   sanity check a newly built `src/zee` binary.
+Run:
 
-  [Autotools]: http://sourceware.org/autobook/
+    luarocks install zee
 
-
-Web Pages
----------
-
-Zee's home page is at:
-
-  > <http://zee.sourceforge.net/>
-
-
-Mailing Lists
--------------
-
-Questions, comments and requests should be sent to the Zee developers' list
-at <zee-devel@lists.sourceforge.net>.
-
-See [REPORTING BUGS][] for the bug reporting mailing list address.
-
-
-OBTAINING THE LATEST SOURCES
-============================
-
-If you are just building Zee from an [Official Release][], you should
-not normally need to run `./bootstrap`; just go ahead and start with
-`./configure`.
-
-If you are trying to build Zee from the [Development Sources][],
-`./configure` will not work until the `./bootstrap` script has completed
-successfully.
-
-
-Official Release
-----------------
-
-Compressed tarballs of all recent Zee releases are available from:
-
-  > <http://ftpmirror.gnu.org/zile>
-
-Generic instructions for how to build Zee from a release tarball
-are contained in the file `INSTALL`.
-
-If you are missing any of the prerequisite libraries needed to
-successfully build Zee, the `configure` script will abort itself
-and tell you right away.
-
-
-Development Sources
--------------------
-
-Zee development sources are maintained at the GNU Savannah git server:
-
-  > [git://git.sv.gnu.org/zile.git][gitbrowser]
-
-You can fetch a read-only copy with either:
-
-    git clone git://git.sv.gnu.org/zile.git
-
-If you are behind a firewall that blocks the git protocol, you can force
-git to transparently rewrite all savannah references to use http:
-
-    git config --global url.http://git.sv.gnu.org/r/.insteadof \
-        git://git.sv.gnu.org/
-
-When you are building Zee from a git checkout, you first need to run
-the `bootstrap` script to generate various files that are shipped in
+Development sources are available from the web page. When you are
+building Zee from a git checkout, you first need to run the
+`bootstrap` script to generate various files that are shipped in
 release tarballs, but not checked in to git.
-
-Normally, you just need to run `./bootstrap`, and it will either get
-everything ready so that you can then run `./configure` as would for a
-release tarball, or else tell you if your machine is missing some
-packages that it needs in order to do that. One of the first things that
-`bootstrap` will do the first time you run it in a freshly cloned git
-tree is to clone a copy of [gnulib][] as a submodule. If you already
-have an up-to-date [gnulib][] clone on your machine, you can save the
-time and bandwidth of downloading it again by using `--gnulib-srcdir` to
-point at your existing gnulib directory:
-
-    ./bootstrap --gnulib-srcdir=/path/to/existing/gnulib/checkout/
-
-With a copy of gnulib now installed as a submodule, if you wish, you can
-continue to work off-line by passing `--skip-git` to rerun the
-`bootstrap` script, otherwise subsequent `bootstrap` runs will refresh
-the contents of the submodule:
-
-    ./bootstrap --skip-git
-
-  [gitbrowser]: http://git.sv.gnu.org/cgit/zile.git
 
 
 REPORTING BUGS
 ==============
 
-If this distribution doesn't work for you, before you report the
-problem, please try upgrading to the latest released version first, to
-see whether your issue has been fixed already. If you can, please also
-check whether the latest development sources for the next release still
-exhibit the problem (see [OBTAINING THE LATEST SOURCES][] above).
+If Zee doesn't work for you, before you report the problem, please try
+upgrading to the latest released version first, to see whether your
+issue has been fixed already. If you can, please also check whether
+the latest development sources still exhibit the problem.
 
-Please file bug reports in the issue tracker at
-<https://sourceforge.net/p/zee/bugs/>.
+Please file bug reports in the issue tracker at the home page (see
+above).
 
-If you're not an experience bug reporter, please read this before
+If you're not an experienced bug reporter, please read this before
 reporting a bug:
 
   > <http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 
-Zee has a suite of Lua tests in the tests directory of the source
-distribution, which you can run with:
+Zee has a suite of tests in the source distribution, which you can run
+with:
 
     make check
 
