@@ -108,7 +108,7 @@ end
 function init_default_bindings ()
   bind_printing_chars ("edit-insert-character")
 
-  -- FIXME: Make ESC bindable and use it for cancelling
+  -- FIXME: Make ESC bindable and make it possible to escape to top level
   -- FIXME: Put the following into a separate file PKGDATADIR .. "/cua_bindings.lua"
   key_bind ("C-b", "move-previous-character")
   key_bind ("LEFT", "move-previous-character")

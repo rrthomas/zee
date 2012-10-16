@@ -65,6 +65,7 @@ lastflag = {}
 
 options = {
   Option {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
+  -- FIXME: Option {{"batch", 'b'}, "run non-interactively"},
   Option {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
   Option {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
 }
