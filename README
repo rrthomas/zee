@@ -35,19 +35,18 @@ INTRODUCTION
 Zee is a lightweight editor. Zee is aimed at small footprint systems
 and quick editing sessions (it starts up and shuts down instantly).
 
-Zee is written in Lua 5.1 using POSIX APIs, and hence requires only a
-Lua 5.1 runtime and a few additional Lua modules:
+Zee is written in Lua 5.2 using POSIX APIs, and hence requires a Lua
+5.2 runtime and a few additional Lua modules:
 
- * Lua stdlib <http://luaforge.net/projects/stdlib>
- * Lua BitOp <http://bitop.luajit.org/>
- * lrexlib <http://luaforge.net/projects/lrexlib>
+ * Lua stdlib <https://github.com/rrthomas/lua-stdlib>
+ * lrexlib <http://rrthomas.github.com/lrexlib/>
    (the rex_gnu module must be built)
- * luaposix <http://luaforge.net/projects/luaposix>
+ * luaposix <https://github.com/luaposix/luaposix>
    (the curses module must be built)
+ * alien <http://mascarenhas.github.com/alien/>
 
 For exact version dependencies, see `src/loadlibs.lua.in`.
 
-  [Emacs]:   http://www.gnu.org/s/emacs
   [gnulib]:  http://www.gnu.org/s/gnulib
 
 
@@ -70,8 +69,8 @@ The rest of the files in the top-level directory are part of the
  * Directory `m4` contains a mixture of [gnulib]() supplied and Zee-
    specific macros for rebuilding the `configure' script.
  * Directory `src` contains the source code used to build Zee.
- * Directory `tests` contains a small suite of tests used by
-   `make check` to sanity check a newly built `src/zee` binary.
+ * Directory `tests` contains a suite of tests used by `make check` to
+   sanity check a newly built `src/zee` binary.
 
   [Autotools]: http://sourceware.org/autobook/
 
@@ -81,33 +80,14 @@ Web Pages
 
 Zee's home page is at:
 
-  > <http://www.gnu.org/s/zile/>
-
-Zee development is co-ordinated from Zile's project page at GNU
-Savannah:
-
-  > <http://savannah.gnu.org/projects/zile/>
-
-An archive of past releases is also archived at:
-
-  > <http://ftp.gnu.org/gnu/zile/>
-
-But please use a mirror for faster downloads and to reduce stress on the
-main gnu machine. The following link will automatically redirect to a
-nearby mirror:
-
-  > <http://ftpmirror.gnu.org/zile/>
-
-Or you can manually select a mirror from the list at:
-
-  > <http://www.gnu.org/order/ftp.html>
+  > <http://zee.sourceforge.net/>
 
 
 Mailing Lists
 -------------
 
-Questions, comments and requests should be sent to the Zile user's list
-at <help-zile@gnu.org>.
+Questions, comments and requests should be sent to the Zee developers' list
+at <zee-devel@lists.sourceforge.net>.
 
 See [REPORTING BUGS][] for the bug reporting mailing list address.
 
@@ -115,9 +95,9 @@ See [REPORTING BUGS][] for the bug reporting mailing list address.
 OBTAINING THE LATEST SOURCES
 ============================
 
-If you are just building Zee from an [Official Release][], you
-should not normally need to run `./bootstrap` or `autoreconf`; just go
-ahead and start with `./configure`.
+If you are just building Zee from an [Official Release][], you should
+not normally need to run `./bootstrap`; just go ahead and start with
+`./configure`.
 
 If you are trying to build Zee from the [Development Sources][],
 `./configure` will not work until the `./bootstrap` script has completed
@@ -131,44 +111,12 @@ Compressed tarballs of all recent Zee releases are available from:
 
   > <http://ftpmirror.gnu.org/zile>
 
-Compressed tarballs of unstable prereleases are sometimes made available
-from:
-
-  > <ftp://alpha.gnu.org/gnu/zile>
-
-Official tarballs are supplied with a [GnuPG][] detached signature file
-so that you can verify that the corresponding tarball is still the same
-file that was released by the owner of its GPG key ID. First, be sure to
-download both the .sig file and the corresponding release:
-
-    wget http://ftpmirror.gnu.org/zile/zile-2.3.24.tar.gz
-    wget http://ftpmirror.gnu.org/zile/zile-2.3.24.tar.gz.sig
-
-then run a command like this:
-
-    gpg --verify zile-2.3.24.tar.gz.sig
-
-If that command fails because you don't have the required public key,
-then run this command to import it:
-
-    gpg --keyserver keys.gnupg.net --recv-keys 80EE4A00
-
-and then rerun the `gpg --verify' command.
-
-Generic instructions for how to build GNU Zile from a release tarball
-are contained in the file `INSTALL`. Additionally, If you wish to use a
-non-standard curses library name, this can be specified using
-`CURSES_LIB` and `CPPFLAGS`. For example, to use the X version of
-[PDcurses][]:
-
-    CPPFLAGS=/usr/local/include/xcurses CURSES_LIB=-lXCurses ./configure
+Generic instructions for how to build Zee from a release tarball
+are contained in the file `INSTALL`.
 
 If you are missing any of the prerequisite libraries needed to
-successfully build GNU Zile, the `configure` script will abort itself
+successfully build Zee, the `configure` script will abort itself
 and tell you right away.
-
-  [GnuPG]:    http://www.gnupg.org/
-  [PDcurses]: http://pdcurses.sf.ne
 
 
 Development Sources
@@ -181,11 +129,6 @@ Zee development sources are maintained at the GNU Savannah git server:
 You can fetch a read-only copy with either:
 
     git clone git://git.sv.gnu.org/zile.git
-
-or using the CVS pserver protocol:
-
-    cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/zile.git \
-        co -d zile HEAD
 
 If you are behind a firewall that blocks the git protocol, you can force
 git to transparently rewrite all savannah references to use http:
@@ -228,11 +171,11 @@ see whether your issue has been fixed already. If you can, please also
 check whether the latest development sources for the next release still
 exhibit the problem (see [OBTAINING THE LATEST SOURCES][] above).
 
-Please send bug reports, feature requests and patches to
-<bug-zile@gnu.org> or, preferably, file them directly in the relevant
-tracker at <http://savannah.gnu.org/projects/zile/>.
+Please file bug reports in the issue tracker at
+<https://sourceforge.net/p/zee/bugs/>.
 
-When you are ready to submit a report, first, please read this:
+If you're not an experience bug reporter, please read this before
+reporting a bug:
 
   > <http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 

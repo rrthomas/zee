@@ -1,2 +1,10 @@
 The Zee maintainers would like to thank all those who worked on GNU
 Zile, from which Zee is derived.
+
+In particular:
+
+* Gary Vaughan <gary@gnu.org> contributed to the Lua version of Zile,
+  from which Zee was directly adapted.
+
+* Alistair Turnbull <apt1002@mupsych.org> contributed to the C version
+  of C, from which code was directly translated for Lua Zee.
