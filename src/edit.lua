@@ -175,8 +175,7 @@ Delete all spaces and tabs around the cursor.
   end
 )
 
--- FIXME: rename
-Define ("edit-insert-tab",
+Define ("edit-indent",
 [[
 Indent to next multiple of `indent-width'.
 ]],

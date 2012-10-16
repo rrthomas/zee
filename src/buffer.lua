@@ -313,6 +313,8 @@ end
 
 -- Basic movement routines
 
+-- FIXME: can we replace this (at least for most calls) with goto_offset?
+-- or rewrite in terms of it? i.e. goto_offset (); if thisflag.need_resync then execute_command (lmove) else if btest () then return true end
 function move_char (dir)
   local ltest, btest, lmove
   if dir >= 0 then

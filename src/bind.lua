@@ -161,7 +161,7 @@ function init_default_bindings ()
   key_bind ("C-@", "edit-select-toggle")
   key_bind ("M-|", "edit-shell-command")
   key_bind ("C-z", "file-suspend")
-  key_bind ("M-i", "edit-insert-tab")
+  key_bind ("M-i", "edit-indent")
   key_bind ("C-_", "edit-undo")
   key_bind ("C-y", "edit-paste")
 end
