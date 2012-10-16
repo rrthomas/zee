@@ -77,24 +77,12 @@ function term_finish ()
   term_close ()
 end
 
-local function make_char_printable (c, x, cur_tab_width)
-  assert (c ~= "")
-  if c == '\t' then
-    return string.rep (" ", cur_tab_width - x % cur_tab_width)
-  elseif c:byte () > 0 and c:byte () <= 27 then
-    return string.format ("^%c", string.byte ("@") + c:byte ())
-  else
-    return string.format ("\\%o", c:byte ())
-  end
-end
-
 -- Prints a line on the terminal.
 --
 -- line - the line number within the buffer
 -- startcol - the horizontal scroll offset
 -- o - the starting offset of the line
 -- rp - the highlight rectangle, or nil if none
--- cur_tab_width - the display width of a tab character
 --
 -- If any part of the line is off the left-hand side of the screen,
 -- prints a `$' character in the left-hand column. If any part is off
@@ -102,7 +90,7 @@ end
 -- part that is within the highlight region is highlighted. If the
 -- final position is within the highlight region then the remainder of
 -- the line is also highlighted.
-local function draw_line (line, startcol, o, rp, cur_tab_width)
+local function draw_line (line, startcol, o, rp)
   term_move (line, 0)
 
   -- Draw body of line.
@@ -118,7 +106,7 @@ local function draw_line (line, startcol, o, rp, cur_tab_width)
       term_addstr (c)
       x = x + 1
     else
-      local s = make_char_printable (c, x, cur_tab_width)
+      local s = make_string_printable (AStr (c), nil, x) -- FIXME: don't force conversion to AStr
       term_addstr (s:sub (1, math.min (#s, win.fwidth - x)))
       x = x + #s
     end
@@ -207,7 +195,6 @@ local function draw_window (topline, wp)
   end
 
   -- Draw the window lines.
-  local cur_tab_width = tab_width ()
   for i = topline, wp.eheight + topline do
     -- Clear the line.
     term_move (i, 0)
@@ -215,7 +202,7 @@ local function draw_window (topline, wp)
 
     -- If at the end of the buffer, don't write any text.
     if o ~= nil then
-      draw_line (i, start_column, o, rp, cur_tab_width)
+      draw_line (i, start_column, o, rp)
 
       if start_column > 0 then
         term_move (i, 0)
@@ -303,20 +290,26 @@ local function draw_popup ()
 end
 
 -- Scans `s' and replaces each character with a string of one or
--- more printable characters.
+-- more printable characters. The returned string is suitable for
+-- printing at screen column `col' (default 0); the screen column
+-- only matters if `s' contains tab characters.
 --
 -- Scanning stops when the screen column reaches or exceeds `goal',
 -- or when `s' is exhausted. The number of input characters
--- scanned is returned as a second return value. If you don't
--- want a `goal', just pass `math.huge'.
+-- scanned is returned as a second return value. If no `goal' is
+-- passed, `math.huge' is assumed.
 --
 -- Characters that are already printable expand to themselves.
 -- Characters from 0 to 26 are replaced with strings from `^@' to
--- `^Z'. Tab characters are replaced with enough spaces (but always
--- at least one) to reach a screen column that is a multiple of `tab'.
--- Newline characters must not occur in `s'. Other characters are
--- replaced with a backslash followed by their hex character code.
-function make_string_printable (s, goal)
+-- `^Z'.
+-- Tab characters are replaced with enough spaces (but always
+-- at least one) to reach a screen column that is a multiple of
+-- `tab_width ()'.
+-- Newline characters must not occur in `s'.
+-- Other characters are replaced with a backslash followed by
+-- their hex character code.
+function make_string_printable (s, goal, col)
+  col = col or 0
   goal = goal or math.huge
 
   local ctrls = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -326,7 +319,7 @@ function make_string_printable (s, goal)
     local c = s[i]
     assert (c ~= '\n')
 
-    local x = #ret
+    local x = col + #ret
     if x >= goal then
       break
     end
