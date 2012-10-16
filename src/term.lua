@@ -41,10 +41,9 @@ function window_resync (wp)
   end
 end
 
--- FIXME: rename
-Define ("move-redraw",
+Define ("view-refresh",
 [[
-Redraw the display.
+Refresh the display.
 ]],
   function ()
     term_clear ()
@@ -203,8 +202,7 @@ local function draw_window (topline, wp)
   local o = buffer_start_of_line (buf, get_buffer_pt (buf))
   local i = wp.topdelta
   while i > 0 and o > 1 do
-    o = buffer_prev_line (buf, o)
-    assert (o)
+    o = assert (buffer_prev_line (buf, o))
     i = i - 1
   end
 
