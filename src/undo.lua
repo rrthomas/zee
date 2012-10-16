@@ -65,7 +65,7 @@ local function revert_action (up)
 
   goto_offset (up.o)
   if up.type == "replace block" then
-    replace_astr (up.size, up.text)
+    replace_string (up.size, up.text)
     goto_offset (up.o)
     if up.unchanged then
       buf.modified = false

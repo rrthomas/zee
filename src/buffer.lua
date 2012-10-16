@@ -66,16 +66,17 @@ function buffer_line_len (bp, o)
     realo_to_o (bp, bp.text:start_of_line (o_to_realo (bp, o)))
 end
 
--- Replace `del' chars after cursor with `as'.
+-- Replace `del' chars after cursor with `s'.
+-- `s' can be a string or an AStr.
 local min_gap = 1024 -- Minimum gap size after resize
 local max_gap = 4096 -- Maximum permitted gap size
-function replace_astr (del, as)
+function replace_string (del, s)
   if buf.readonly then
     minibuf_error ("File is readonly")
     return false
   end
 
-  local newlen = #as
+  local newlen = #s
   undo_save_block (buf.pt, del, newlen)
 
   -- Adjust gap.
@@ -100,7 +101,7 @@ function replace_astr (del, as)
   end
 
   -- Insert `newlen' chars.
-  buf.text:replace (buf.pt + buf.gap, as)
+  buf.text:replace (buf.pt + buf.gap, s)
 
   -- Adjust markers.
   for m in pairs (buf.markers) do
@@ -113,16 +114,12 @@ function replace_astr (del, as)
   return true
 end
 
-function insert_astr (as)
-  local ok = replace_astr (0, as)
+function insert_string (s)
+  local ok = replace_string (0, s)
   if ok then
-    goto_offset (buf.pt + #as)
+    goto_offset (buf.pt + #s)
   end
   return ok
-end
-
-function insert_string (s)
-  return insert_astr (AStr (s))
 end
 
 function get_buffer_char (bp, o)
@@ -199,7 +196,7 @@ function delete_char ()
   if end_of_line () then
     thisflag.need_resync = true
   end
-  buf.modified = replace_astr (1, AStr (""))
+  buf.modified = replace_string (1, "")
   return buf.modified
 end
 
@@ -232,7 +229,7 @@ end
 
 function delete_region (r)
   goto_offset (r.start)
-  replace_astr (get_region_size (r), AStr (""))
+  replace_string (get_region_size (r), "")
 end
 
 function in_region (o, x, r)

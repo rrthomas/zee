@@ -92,7 +92,7 @@ AStr = Object {
   replace = function (self, from, rep, len)
     local len = len or #rep
     assert (from + len <= #self + 1)
-    if type (rep) ~= "userdata" then
+    if type (rep) ~= "userdata" and type (rep) ~= "string" then
       rep = rep:topointer ()
     end
     alien.memmove (self:topointer (from), rep, len)

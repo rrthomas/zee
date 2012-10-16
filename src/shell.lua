@@ -70,7 +70,7 @@ file, replacing the selection if any.
             goto_offset (r.start)
             del = get_region_size (r)
           end
-          replace_astr (del, AStr (out))
+          replace_string (del, out)
         end
       end
     end

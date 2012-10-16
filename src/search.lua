@@ -295,7 +295,7 @@ what to do with it.
         end
         local m = cursor_marker ()
         goto_offset (r.start)
-        replace_astr (#find, AStr (case_repl))
+        replace_string (#find, case_repl)
         goto_offset (m.o)
 
         if c == keycode "." then -- Replace and quit.

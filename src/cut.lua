@@ -61,6 +61,6 @@ Define ("edit-paste",
 Insert the contents of the paste buffer.
 ]],
   function ()
-    return not insert_astr (cut_buffer_text)
+    return not insert_string (cut_buffer_text)
   end
 )
