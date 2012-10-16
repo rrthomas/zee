@@ -44,7 +44,7 @@ Set a variable to the specified value.
     var = var or (interactive () and
                   minibuf_read_completion ("Set variable: ",
                                            completion_new (filter (function (e)
-                                                                     return not env[e].func
+                                                                     return not command_exists (e)
                                                                    end,
                                                                    list.elems, table.keys (env))),
                                            "variable"))

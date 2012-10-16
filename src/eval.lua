@@ -33,28 +33,21 @@ end
 function Define (name, doc, value)
   env[name] = {
     doc = texi (doc:chomp ()),
+    val = value,
   }
-  -- FIXME: Avoid needing different fields
-  if type (value) == "function" then
-    env[name].func = value
-  else
-    env[name].val = value
-  end
 end
 
 function get_doc (name)
-  if env[name] then
-    if env[name].func then
-      return env[name].doc
-    elseif env[name].doc then
-      return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
-                             name, get_variable (name), env[name].doc))
-    end
+  if command_exists (name) then
+    return env[name].doc
+  elseif env[name] and env[name].doc then
+    return (string.format ("%s is a variable.\n\nIts value is %s\n\n%s",
+                           name, get_variable (name), env[name].doc))
   end
 end
 
 function execute_command (name, ...)
-  return env[name] and env[name].func and env[name].func (...)
+  return command_exists (name) and env[name].val (...)
 end
 
 Define ("eval",
@@ -71,8 +64,8 @@ Evaluation a Lua chunk CHUNK.
   end
 )
 
-function command_exists (f)
-  return env[f] and env[f].func
+function command_exists (c)
+  return env[c] and type (env[c].val) == "function"
 end
 
 
@@ -87,7 +80,7 @@ Read command name, then run it.
   function ()
     local name = minibuf_read_completion ("Command: ",
                                           completion_new (filter (function (e)
-                                                                    return env[e].func
+                                                                    return command_exists (e)
                                                                   end,
                                                                   list.elems, table.keys (env))),
                                           "command")
