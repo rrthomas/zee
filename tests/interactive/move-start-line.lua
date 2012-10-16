@@ -1,3 +1,3 @@
--- edit-goto-line 2 RET move-next-word move-next-word move-next-word move-start-line a
+-- edit-goto-line 2 Return move-next-word move-next-word move-next-word move-start-line a
 -- file-save file-quit
-call_command ("macro-play", "M-g", "2", "RET", "M-f", "M-f", "M-f", "C-a", "a", "M-s", "C-M-q")
+call_command ("macro-play", "Alt-g", "2", "Return", "Alt-f", "Alt-f", "Alt-f", "Ctrl-a", "a", "Alt-s", "Ctrl-Alt-q")

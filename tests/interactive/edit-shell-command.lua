@@ -1,3 +1,3 @@
--- edit-select-on edit-goto-line 5 RET shell-command-on-region "sort" RET
+-- edit-select-on edit-goto-line 5 Return shell-command-on-region "sort" Return
 -- file-save file-quit
-call_command ("macro-play", "C-@", "M-g", "5", "RET", "M-|", "s", "o", "r", "t", "RET", "M-s", "C-M-q")
+call_command ("macro-play", "Ctrl-@", "Alt-g", "5", "Return", "Alt-|", "s", "o", "r", "t", "Return", "Alt-s", "Ctrl-Alt-q")

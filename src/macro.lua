@@ -39,7 +39,7 @@ Define ("macro-record",
 [[
 Record subsequent keyboard input, defining a macro.
 The commands are recorded even as they are executed.
-Use @kbd{C-x )} to finish recording and make the macro available.
+Use `macro-stop' to finish recording and make the macro available.
 ]],
   function ()
     if thisflag.defining_macro then
@@ -61,8 +61,8 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 Define ("macro-stop",
 [[
 Finish defining a keyboard macro.
-The definition was started by @kbd{C-x (}.
-The macro is now available for use via @kbd{C-x e}.
+The definition was started by `macro-record'.
+The macro is now available for use via `macro-play'.
 ]],
   function ()
     if not thisflag.defining_macro then

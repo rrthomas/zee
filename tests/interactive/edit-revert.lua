@@ -1,4 +1,4 @@
 -- edit-delete-next-character edit-delete-next-character edit-delete-next-character edit-delete-next-character
--- M-x edit-revert RET
+-- Alt-x edit-revert Return
 -- file-save file-quit
-call_command ("macro-play", "C-d", "C-d", "C-d", "C-d", "M-x", "e", "d", "i", "t", "-", "r", "e", "v", "e", "r", "t", "RET", "M-s", "C-M-q")
+call_command ("macro-play", "Ctrl-d", "Ctrl-d", "Ctrl-d", "Ctrl-d", "Alt-x", "e", "d", "i", "t", "-", "r", "e", "v", "e", "r", "t", "Return", "Alt-s", "Ctrl-Alt-q")

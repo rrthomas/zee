@@ -1,2 +1,2 @@
--- edit-goto-column 8 RET a file-save file-quit
-call_command ("macro-play", "C-M-g", "8", "RET", "a", "M-s", "C-M-q")
+-- edit-goto-column 8 Return a file-save file-quit
+call_command ("macro-play", "Ctrl-Alt-g", "8", "Return", "a", "Alt-s", "Ctrl-Alt-q")

@@ -22,13 +22,14 @@
 -- Map of key names to code.
 local KBD_NONPRINT = 283
 local keynametocode = {
-  ["SPC"] = string.byte (' '),
+  ["Space"] = string.byte (' '),
 }
 
+-- FIXME: Merge with following set
 for i in list.elems {
-  "BACKSPACE", "DELETE", "DOWN", "END", "F1", "F10", "F11", "F12",
-  "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "HOME", "INSERT",
-  "LEFT", "PAGEDOWN", "PAGEUP", "RET", "RIGHT", "TAB", "UP", "\t" } do
+  "Backspace", "Delete", "Down", "End", "F1", "F10", "F11", "F12",
+  "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "Home", "Insert",
+  "Left", "PageDown", "PageUp", "Return", "Right", "Tab", "Up", "\t" } do
   keynametocode[i] = KBD_NONPRINT
 end
 
@@ -40,10 +41,10 @@ end
 
 -- Array of key names
 local keyname = set.new {
-  "BACKSPACE", "C-", "DELETE", "DOWN", "ESC", "END", "F1", "F10",
+  "Backspace", "Ctrl-", "Delete", "Down", "Escape", "End", "F1", "F10",
   "F11", "F12", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9",
-  "HOME", "INSERT", "LEFT", "M-", "PAGEDOWN", "PAGEUP", "RET",
-  "RIGHT", "SPC", "TAB", "UP",
+  "Home", "Insert", "Left", "Alt-", "PageDown", "PageUp", "Return",
+  "Right", "Space", "Tab", "Up",
 }
 
 -- Insert printable characters in the ASCII range.
@@ -53,16 +54,20 @@ for i = 0, 0x7f do
   end
 end
 
+local function normalize_modifier (mod)
+  return mod:sub (1, 1):upper () .. mod:sub (2, -2):lower ()
+end
+
 -- A key code has one `key' and some optional modifiers.
 -- For comparisons to work, keycodes are immutable atoms.
 local keycode_mt = {
-  -- Output the write syntax for this keycode (e.g. C-M-F1).
+  -- Output the write syntax for this keycode (e.g. Ctrl-Alt-F1).
   __tostring = function (self)
     if not self then
       return "invalid keycode: nil"
     end
 
-    local s = (self.CTRL and "C-" or "") .. (self.META and "M-" or "")
+    local s = (self.CTRL and "Ctrl-" or "") .. (self.ALT and "Alt-" or "")
 
     if not self.key then
       return "invalid keycode: " .. s .. "nil"
@@ -71,35 +76,34 @@ local keycode_mt = {
     return s .. self.key
   end,
 
-  -- Normalise modifier lookups to uppercase, sans `-' suffix.
-  --   hasmodifier = keycode.META or keycode["c"]
+  -- Normalise modifier lookups to capitalized & sans `-' suffix.
+  --   hasmodifier = keycode.ALT or keycode["c"]
   __index = function (self, mod)
-    mod = mod:sub (1, 1):upper ()
+    mod = normalize_modifier (mod)
     return rawget (self, mod)
   end,
 
   -- Return the immutable atom for this keycode with modifier added.
-  --   ctrlkey = "C-" + key
+  --   ctrlkey = "Ctrl-" + key
   __add = function (self, mod)
     if "string" == type (self) then mod, self = self, mod end
-    mod = mod:sub (1, 1):upper ()
+    mod = normalize_modifier (mod)
     if self[mod] then return self end
     return keycode (mod .. "-" .. tostring (self))
   end,
 
   -- Return the immutable atom for this keycode with modifier removed.
-  --   withoutmeta = key - "M-"
+  --   withoutmeta = key - "Alt-"
   __sub = function (self, mod)
     if "string" == type (self) then mod, self = self, mod end
-    mod = mod:sub (1, 1):upper ()
+    mod = normalize_modifier (mod)
     local keystr = tostring (self):gsub (mod .. "%-", "")
     return keycode (keystr)
   end,
 }
 
 -- Extract a modifier prefix of a key string.
--- FIXME: Change to Ctrl- and Alt-
-local modifier_name = set.new {"C-", "M-"}
+local modifier_name = set.new {"Ctrl-", "Alt-"}
 local function getmodifier (s)
   for match in modifier_name:elems () do
     if match == s:sub (1, #match) then
@@ -116,10 +120,10 @@ keycode = memoize (function (chord)
   local mod
   repeat
     mod, tail = getmodifier (tail)
-    if mod == "C-" then
+    if mod == "Ctrl-" then
       key.CTRL = true
-    elseif mod == "M-" then
-      key.META = true
+    elseif mod == "Alt-" then
+      key.ALT = true
     end
   until not mod
   if not keyname:member (tail) then return nil end

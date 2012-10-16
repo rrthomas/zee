@@ -91,10 +91,10 @@ end
 
 
 -- Incremental search engine.
--- FIXME: Once the search is underway, "find next" is hard-wired to C-s.
--- Having it hard-wired is obviously broken, but something neutral like RET
+-- FIXME: Once the search is underway, "find next" is hard-wired to Ctrl-s.
+-- Having it hard-wired is obviously broken, but something neutral like Return
 -- would be better.
--- The proposed meaning of ESC obviates the current behaviour of RET.
+-- The proposed meaning of Escape obviates the current behaviour of Return.
 local last_search
 local function isearch (forward, pattern)
   local old_mark
@@ -125,7 +125,7 @@ local function isearch (forward, pattern)
     local c = interactive () and get_key_chord ()
 
     if not c then
-    elseif c == keycode "C-g" then
+    elseif c == keycode "Ctrl-g" then
       goto_offset (start)
       buf.mark = old_mark
       ding ()
@@ -138,22 +138,22 @@ local function isearch (forward, pattern)
       else
         ding ()
       end
-    elseif c == keycode "C-q" then
+    elseif c == keycode "Ctrl-q" then
       minibuf_write (string.format ("%s^Q-", ms))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
-    elseif c == keycode "C-r" or c == keycode "C-s" then -- Invert direction.
-      forward = c == keycode "C-s"
+    elseif c == keycode "Ctrl-r" or c == keycode "Ctrl-s" then -- Invert direction.
+      forward = c == keycode "Ctrl-s"
       if #pattern > 0 then -- Find next match.
         cur = get_buffer_pt (buf)
         last_search = pattern -- Save search string.
       elseif last_search then
         pattern = last_search
       end
-    elseif c.META or c.CTRL or c == keycode "RET" or term_keytobyte (c) == nil then
+    elseif c.ALT or c.CTRL or c == keycode "Return" or term_keytobyte (c) == nil then
       if #pattern > 0 then 
         last_search = pattern -- Save search string.
       end
-      if c ~= keycode "RET" then
+      if c ~= keycode "Return" then
         ungetkey (c)
       end
       break
@@ -186,9 +186,9 @@ Define ("edit-find",
 [[
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
-Type RET to exit, leaving cursor at location found.
-Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
-@kbd{C-g} when search is successful aborts and moves cursor to starting
+Type @kbd{Return} to exit, leaving cursor at location found.
+Type @kbd{Ctrl-s} to search again forward, @kbd{Ctrl-r} to search again backward.
+@kbd{Ctrl-g} when search is successful aborts and moves cursor to starting
 point.
 ]],
   function (s)
@@ -200,9 +200,9 @@ Define ("edit-find-backward",
 [[
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
-Type RET to exit, leaving cursor at location found.
-Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
-@kbd{C-g} when search is successful aborts and moves cursor to starting
+Type @kbd{Return} to exit, leaving cursor at location found.
+Type @kbd{Ctrl-r} to search again backward, @kbd{Ctrl-s} to search again forward.
+@kbd{Ctrl-g} when search is successful aborts and moves cursor to starting
 point.
 ]],
   function (s)
@@ -274,7 +274,7 @@ what to do with it.
 
         if c == keycode "q" then -- Quit immediately.
           break
-        elseif c == keycode "C-g" then
+        elseif c == keycode "Ctrl-g" then
           ding ()
           break
         elseif c == keycode "!" then -- Replace all without asking.
@@ -301,7 +301,7 @@ what to do with it.
         if c == keycode "." then -- Replace and quit.
           break
         end
-      elseif c ~= keycode "n" and c ~= keycode "RET" and c ~= keycode "DELETE" then
+      elseif c ~= keycode "n" and c ~= keycode "Return" and c ~= keycode "Delete" then
         ungetkey (c)
         ok = false
         break

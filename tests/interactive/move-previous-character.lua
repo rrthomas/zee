@@ -1,3 +1,3 @@
 -- move-end-line move-previous-character move-previous-character edit-delete-previous-character
 -- file-save file-quit
-call_command ("macro-play", "C-e", "C-b", "C-b", "C-?", "M-s", "C-M-q")
+call_command ("macro-play", "Ctrl-e", "Ctrl-b", "Ctrl-b", "Ctrl-?", "Alt-s", "Ctrl-Alt-q")

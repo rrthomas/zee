@@ -200,7 +200,7 @@ Read next input character and insert it.
 This is useful for inserting control characters.
 ]],
   function ()
-    minibuf_write ("C-q-")
+    minibuf_write ("Ctrl-q-")
     insert_string (string.char (bit32.band (getkey_unfiltered (GETKEY_DEFAULT), 0xff)))
     minibuf_clear ()
   end

@@ -1,3 +1,3 @@
--- edit-insert-quoted C-a edit-insert-quoted C-h edit-insert-quoted C-z edit-insert-quoted C-q
--- edit-insert-quoted ESC O P edit-insert-quoted TAB file-save file-quit
-call_command ("macro-play", "C-q", "C-a", "C-q", "C-h", "C-q", "C-z", "C-q", "C-q", "C-q", "ESC", "O", "P", "C-q", "TAB", "M-s", "C-M-q")
+-- edit-insert-quoted Ctrl-a edit-insert-quoted Ctrl-h edit-insert-quoted Ctrl-z edit-insert-quoted Ctrl-q
+-- edit-insert-quoted ESC O P edit-insert-quoted Tab file-save file-quit
+call_command ("macro-play", "Ctrl-q", "Ctrl-a", "Ctrl-q", "Ctrl-h", "Ctrl-q", "Ctrl-z", "Ctrl-q", "Ctrl-q", "Ctrl-q", "Escape", "O", "P", "Ctrl-q", "Tab", "Alt-s", "Ctrl-Alt-q")

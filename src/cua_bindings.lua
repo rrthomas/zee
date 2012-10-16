@@ -1,75 +1,73 @@
 -- CUA key bindings
 
 -- Command execution
-key_bind("Alt-x", "execute_command")
-key_bind("Ctrl-u", "edit_repeat")
-key_bind("Alt-s", "edit_shell_command")
+key_bind("Alt-x", "execute-command")
+key_bind("Ctrl-u", "edit-repeat")
+key_bind("Alt-s", "edit-shell-command")
 
 -- Navigation. Mostly arrows and things.
 
 -- Character/line
-key_bind("LEFT", "move_previous_character")
-key_bind("RIGHT", "move_next_character")
-key_bind("UP", "move_previous_line")
-key_bind("DOWN", "move_next_line")
+key_bind("LEFT", "move-previous-character")
+key_bind("RIGHT", "move-next-character")
+key_bind("UP", "move-previous-line")
+key_bind("DOWN", "move-next-line")
 -- Word/paragraph
-key_bind("Ctrl-LEFT", "move_previous_word")
-key_bind("Ctrl-RIGHT", "move_next_word")
-key_bind("Alt-{", "move_previous_paragraph")
-key_bind("Alt-}", "move_next_paragraph")
+key_bind("Ctrl-LEFT", "move-previous-word")
+key_bind("Ctrl-RIGHT", "move-next-word")
+key_bind("Alt-{", "move-previous-paragraph")
+key_bind("Alt-}", "move-next-paragraph")
 -- Line/page
-key_bind("HOME", "move_start_line")
-key_bind("END", "move_end_line")
-key_bind("PGUP", "move_previous_page")
-key_bind("PGDN", "move_next_page")
+key_bind("HOME", "move-start-line")
+key_bind("END", "move-end-line")
+key_bind("PGUP", "move-previous-page")
+key_bind("PGDN", "move-next-page")
 -- Whole buffer
-key_bind("Ctrl-HOME", "move_start_file")
-key_bind("Ctrl-END", "move_end_file")
+key_bind("Ctrl-HOME", "move-start-file")
+key_bind("Ctrl-END", "move-end-file")
 -- Window
-key_bind("Ctrl-l", "move_redraw")
+key_bind("Ctrl-l", "view-refresh")
 
 -- Selection
--- select_other_end
-key_bind("Ctrl-@", "edit_select_toggle")
+-- select-other-end
+key_bind("Ctrl-@", "edit-select-toggle")
 
 -- Absolute navigation. These are like navigation commands but they
 -- don't become selection commands when combined with SHIFT.
 
-key_bind("Ctrl-Alt-g", "edit_goto_column")
-key_bind("Alt-g", "edit_goto_line")
+key_bind("Ctrl-Alt-g", "edit-goto-column")
+key_bind("Alt-g", "edit-goto-line")
 
 -- Save
-key_bind("Ctrl-s", "file_save")
+key_bind("Ctrl-s", "file-save")
 -- Quit
-key_bind("Ctrl-q", "file_quit")
+key_bind("Ctrl-q", "file-quit")
 
 -- Undo
-key_bind("Ctrl-z", "edit_undo")
+key_bind("Ctrl-z", "edit-undo")
 -- Cut selection to clipboard
--- FIXME: Following is approximate! We don't have a proper edit_cut
--- command yet.
-key_bind("Ctrl-x", "edit_delete_selection")
-key_bind("Alt-DEL", "edit_delete_word")
+key_bind("Ctrl-x", "edit-cut")
+key_bind("Alt-DEL", "edit-delete-word")
 -- Copy selection to clipboard
-key_bind("Ctrl-c", "edit_copy")
+key_bind("Ctrl-c", "edit-copy")
 -- Delete without modifying clipboard")
-key_bind("BS", "edit_delete_previous_character")
-key_bind("Alt-BS", "edit_delete_word_backward")
-key_bind("DEL", "edit_delete_next_character")
+key_bind("BS", "edit-delete-previous-character")
+key_bind("Alt-BS", "edit-delete-word-backward")
+key_bind("DEL", "edit-delete-next-character")
 -- Paste
-key_bind("Ctrl-v", "edit_paste")
+key_bind("Ctrl-v", "edit-paste")
 
 -- Search
-key_bind("Ctrl-f", "edit_find")
-key_bind("Ctrl-Alt-f", "edit_find_backward")
-key_bind("Ctrl-r", "edit_replace")
+key_bind("Ctrl-f", "edit-find")
+key_bind("Ctrl-Alt-f", "edit-find-backward")
+key_bind("Ctrl-r", "edit-replace")
 
 -- Insert special characters
-key_bind("Ctrl-RET", "edit_insert_newline")
-key_bind("RET", "edit_insert_newline_and_indent")
-key_bind("Alt-i", "edit_insert_quoted")
+key_bind("Ctrl-Return", "edit-insert-newline")
+key_bind("Return", "edit-insert-newline-and-indent")
+key_bind("Alt-i", "edit-insert-quoted")
 
 -- Macros
-key_bind("Alt-(", "macro_record")
-key_bind("Alt-)", "macro_stop")
-key_bind("Alt-e", "macro_play")
+key_bind("Alt-(", "macro-record")
+key_bind("Alt-)", "macro-stop")
+key_bind("Alt-e", "macro-play")
