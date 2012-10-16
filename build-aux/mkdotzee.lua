@@ -36,11 +36,13 @@ h:write (
 
 -- Don't note where the contents of this file comes from or that it's
 -- auto-generated, because it's ugly in a user configuration file.
-for name, var in pairs (vars) do
-  h:writelines ("-- " .. var.doc:gsub ("\n", "\n; "),
-                "-- Default value is " .. var.val .. ".",
-                "call_command (\"preferences-set-variable\", \"" .. name .. "\", \"" .. var.val .. "\")",
-                "")
+for name, var in pairs (env) do
+  if var.val then
+    h:writelines ("-- " .. var.doc:gsub ("\n", "\n; "),
+                  "-- Default value is " .. var.val .. ".",
+                  "call_command (\"preferences-set-variable\", \"" .. name .. "\", \"" .. var.val .. "\")",
+                  "")
+  end
 end
 
 os.exit ()
