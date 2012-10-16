@@ -18,7 +18,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
--- FIXME: Make key names friendlier
 -- Map of key names to code.
 local KBD_NONPRINT = 283
 local keynametocode = {
