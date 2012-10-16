@@ -147,7 +147,7 @@ Delete the previous character.
 Join lines if the character is a newline.
 ]],
   function ()
-    if move_char (-1) then
+    if not move_char (-1) then
       minibuf_error ("Beginning of buffer")
       return true
     end

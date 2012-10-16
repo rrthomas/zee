@@ -117,7 +117,7 @@ end
 function insert_string (s)
   local ok = replace_string (0, s)
   if ok then
-    move_char (#s)
+    assert (move_char (#s))
   end
   return ok
 end
@@ -333,7 +333,7 @@ function move_char (n)
     set_goalc (new_goalc)
   end
 
-  return n ~= n2 -- FIXME: invert sense of return value
+  return n == n2
 end
 
 function goto_offset (o)

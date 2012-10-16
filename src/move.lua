@@ -54,7 +54,7 @@ Define ("move-previous-character",
 Move the cursor left one character.
 ]],
   function ()
-    return move_char (-1)
+    return not move_char (-1)
   end
 )
 
@@ -63,7 +63,7 @@ Define ("move-next-character",
 Move the cursor right one character.
 ]],
   function ()
-    return move_char (1)
+    return not move_char (1)
   end
 )
 
@@ -139,7 +139,7 @@ local function move_word (dir)
       end
       move_char (dir)
     end
-  until gotword or move_char (dir)
+  until gotword or not move_char (dir)
   return gotword
 end
 
