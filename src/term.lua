@@ -242,7 +242,7 @@ local popup_line = 0
 
 -- Set the popup string to `s'.
 function popup_set (s)
-  popup_text = s and AStr (s:chomp ()) -- FIXME: stop needing chomp for docstrings
+  popup_text = s and AStr (s)
   popup_line = 0
 end
 
