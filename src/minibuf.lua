@@ -18,9 +18,6 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 local function term_minibuf_write (s)
-  term_move (term_height () - 1, 0)
-  term_clrtoeol ()
-  term_addstr (s:sub (1, math.min (#s, term_width ())))
 end
 
 -- FIXME: Turn minibuf_read inside out so it's a minor mode
@@ -167,7 +164,8 @@ function minibuf_read (prompt, cp)
       old_completion_text = completion_text
     end
 
-    term_minibuf_write (prompt)
+    minibuf_write (prompt)
+    minibuf_refresh ()
 
     local w, h = term_width (), term_height ()
     local margin = 1
@@ -215,7 +213,9 @@ minibuf_contents = nil
 function minibuf_refresh ()
   if win then
     if minibuf_contents then
-      term_minibuf_write (minibuf_contents)
+      term_move (term_height () - 1, 0)
+      term_clrtoeol ()
+      term_addstr (minibuf_contents:sub (1, math.min (#minibuf_contents, term_width ())))
     end
     term_refresh ()
   end
@@ -223,7 +223,7 @@ end
 
 -- Clear the minibuffer.
 function minibuf_clear ()
-  term_minibuf_write ("")
+  minibuf_write ("")
 end
 
 -- Write the specified string in the minibuffer.
