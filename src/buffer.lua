@@ -81,23 +81,23 @@ function replace_astr (del, as)
 
   -- Adjust gap.
   local oldgap = buf.gap
-  local added_gap = 0
   if oldgap + del < newlen then
     -- If gap would vanish, open it to min_gap.
-    added_gap = min_gap
     buf.text:insert (buf.pt, (#as + min_gap) - (buf.gap + del))
     buf.gap = min_gap
-  elseif oldgap + del > max_gap + newlen then
-    -- If gap would be larger than max_gap, restrict it to max_gap.
-    buf.text:remove (buf.pt + newlen + max_gap, (oldgap + del) - (max_gap + newlen))
-    buf.gap = max_gap
   else
-    buf.gap = oldgap + del - newlen
-  end
+    if oldgap + del > max_gap + newlen then
+      -- If gap would be larger than max_gap, restrict it to max_gap.
+      buf.text:remove (buf.pt + newlen + max_gap, (oldgap + del) - (max_gap + newlen))
+      buf.gap = max_gap
+    else
+      buf.gap = oldgap + del - newlen
+    end
 
-  -- Zero any new bit of gap not produced by insertion.
-  if math.max (oldgap, newlen) + added_gap < buf.gap + newlen then
-    buf.text:set (buf.pt + math.max (oldgap, newlen) + added_gap, '\0', newlen + buf.gap - math.max (oldgap, newlen) - added_gap)
+    -- Zero new bit of gap.
+    if math.max (oldgap, newlen) < buf.gap + newlen then
+      buf.text:set (buf.pt + math.max (oldgap, newlen), '\0', newlen + buf.gap - math.max (oldgap, newlen))
+    end
   end
 
   -- Insert `newlen' chars.
