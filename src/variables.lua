@@ -19,8 +19,6 @@
 
 Define ("indent-width", "Number of spaces inserted for an indentation.",
         2)
-Define ("tab-width", "Number of spaces displayed for a tab character.",
-        8)
 Define ("caseless-search", "Whether searching ignores case by default.",
         true)
 Define ("case-replace", "Whether `query-replace' should preserve case.",

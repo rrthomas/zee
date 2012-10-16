@@ -289,10 +289,7 @@ When selecting text, move the cursor to the other end of the selection.
   end
 )
 
--- Return a safe tab width.
-function tab_width ()
-  return math.max (tonumber (get_variable ("tab-width")), 1)
-end
+tab_width = 8
 
 -- Return a safe indent width.
 function indent_width ()

@@ -304,7 +304,7 @@ end
 -- `^Z'.
 -- Tab characters are replaced with enough spaces (but always
 -- at least one) to reach a screen column that is a multiple of
--- `tab_width ()'.
+-- `tab_width'.
 -- Newline characters must not occur in `s'.
 -- Other characters are replaced with a backslash followed by
 -- their hex character code.
@@ -313,7 +313,6 @@ function make_string_printable (s, goal, col)
   goal = goal or math.huge
 
   local ctrls = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  local tab = tab_width ()
   local ret, pos = "", 0
   for i = 1, #s do
     local c = s[i]
@@ -325,7 +324,7 @@ function make_string_printable (s, goal, col)
     end
 
     if c == '\t' then
-      ret = ret .. string.rep (' ', tab - (x % tab))
+      ret = ret .. string.rep (' ', tab_width - (x % tab_width))
     elseif c < #ctrls then
       ret = ret .. '^' .. ctrls[c + 1]
     elseif posix.isprint (string.char (c)) then
@@ -374,19 +373,11 @@ local function calculate_start_column ()
 end
 
 function term_display ()
-  -- Calculate the start column if the line at cursor has to be truncated.
-  local lastcol, t = 0, tab_width ()
-  local o = get_buffer_pt (buf)
-  local lineo = o - get_buffer_line_o (buf)
-
   calculate_start_column ()
-
   draw_window (0, win)
-
   if popup_text then
     draw_popup ()
   end
-
   term_redraw_cursor ()
 end
 
