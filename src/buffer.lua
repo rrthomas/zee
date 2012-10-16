@@ -110,9 +110,6 @@ function replace_astr (del, as)
   end
 
   buf.modified = true
-  if as:next_line (1) then
-    thisflag.need_resync = true
-  end
   return true
 end
 
