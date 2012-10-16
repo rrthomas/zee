@@ -23,7 +23,7 @@ Move the cursor to the beginning of the line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf))
-    buf.goalc = 0
+    set_goalc (0)
   end
 )
 
@@ -45,7 +45,7 @@ Move the cursor to the end of the line.
 ]],
   function ()
     goto_offset (get_buffer_line_o (buf) + buffer_line_len (buf))
-    buf.goalc = math.huge
+    set_goalc (math.huge)
   end
 )
 

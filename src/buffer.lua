@@ -117,7 +117,7 @@ end
 function insert_string (s)
   local ok = replace_string (0, s)
   if ok then
-    goto_offset (buf.pt + #s)
+    move_char (#s)
   end
   return ok
 end
@@ -167,17 +167,6 @@ end
 
 function get_buffer_line (bp)
   return bp.line
-end
-
-function resync_buffer_line (bp)
-  local n = 0
-  local o = 1
-  while buffer_end_of_line (bp, o) and buffer_end_of_line (bp, o) < get_buffer_pt (bp) do
-    n = n + 1
-    o = buffer_next_line (bp, o)
-    assert (o)
-  end
-  bp.line = n
 end
 
 -- Get filename.
@@ -313,31 +302,51 @@ end
 
 -- Basic movement routines
 
--- FIXME: can we replace this (at least for most calls) with goto_offset?
--- or rewrite in terms of it? i.e. goto_offset (); if thisflag.need_resync then execute_command (lmove) else if btest () then return true end
-function move_char (dir)
-  local ltest, btest, lmove
-  if dir >= 0 then
-    ltest, btest, lmove = end_of_line, end_of_buffer, "move-start-line"
+function move_char (n)
+  local ltest, new_goalc, n2
+  if n > 0 then
+    ltest, new_goalc = end_of_line, 0
+    n2 = math.min (n, get_buffer_size (buf) + 1 - get_buffer_pt (buf))
   else
-    ltest, btest, lmove = beginning_of_line, beginning_of_buffer, "move-end-line"
+    ltest, new_goalc = beginning_of_line, math.huge
+    n2 = math.max (n, -get_buffer_pt (buf) + 1)
   end
 
-  if not ltest () then
-    set_buffer_pt (buf, get_buffer_pt (buf) + dir)
-  elseif not btest () then
-    thisflag.need_resync = true
-    bp.line = bp.line + dir
-    set_buffer_pt (buf, get_buffer_pt (buf) + dir)
-    execute_command (lmove)
+  -- Count lines we're about to move over.
+  local r
+  if n2 < 0 then
+    r = buf.text:sub (get_buffer_pt (buf) + n2, get_buffer_pt (buf) - 1)
   else
-    return true
+    r = buf.text:sub (get_buffer_pt (buf) + buf.gap, get_buffer_pt (buf) + buf.gap + n2 - 1)
   end
+  local _, lines = rex_gnu.gsub (r, "\n", function () end) -- FIXME: Allow repl argument to be 'nil' for no replacement
+  if lines > 0 then
+    thisflag.need_resync = true
+    buf.line = buf.line + lines * (n2 > 0 and 1 or -1)
+  end
+
+  -- Move.
+  set_buffer_pt (buf, get_buffer_pt (buf) + n2)
+
+  -- If we ended up at a line end, adjust goalc. FIXME: Really?
+  if ltest () then
+    set_goalc (new_goalc)
+  end
+
+  return n ~= n2 -- FIXME: invert sense of return value
+end
+
+function goto_offset (o)
+  move_char (o - get_buffer_pt (buf))
 end
 
 -- Get the goal column, expanding tabs.
 function get_goalc ()
   return #make_string_printable (get_line (), get_buffer_pt (buf) - get_buffer_line_o (buf))
+end
+
+function set_goalc (c)
+  buf.goalc = c
 end
 
 function move_line (n)
@@ -348,7 +357,7 @@ function move_line (n)
   end
 
   if _last_command ~= "move-next-line" and _last_command ~= "move-previous-line" then
-    buf.goalc = get_goalc ()
+    set_goalc (get_goalc ())
   end
 
   while n > 0 do
@@ -364,16 +373,6 @@ function move_line (n)
   set_buffer_pt (buf, get_buffer_line_o (buf) + #make_string_printable (get_line (), buf.goalc))
   thisflag.need_resync = true
   return n ~= 0
-end
-
-function goto_offset (o)
-  local old_lineo = get_buffer_line_o (buf)
-  set_buffer_pt (buf, o)
-  if get_buffer_line_o (buf) ~= old_lineo then
-    buf.goalc = get_goalc ()
-    thisflag.need_resync = true
-    resync_buffer_line (buf)
-  end
 end
 
 function get_line ()
