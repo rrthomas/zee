@@ -239,7 +239,7 @@ local function recase (s, newcase)
   return bs
 end
 
--- FIXME: Make edit_replace run on selection.
+-- FIXME: Make edit-replace run on selection.
 Define ("edit-replace",
 [[
 Replace occurrences of a regular expression with other text.
