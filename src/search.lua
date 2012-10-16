@@ -141,29 +141,17 @@ local function isearch (forward, pattern)
     elseif c == keycode "C-q" then
       minibuf_write (string.format ("%s^Q-", ms))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
-    elseif c == keycode "C-r" or c == keycode "C-s" then
-      -- Invert direction.
+    elseif c == keycode "C-r" or c == keycode "C-s" then -- Invert direction.
       forward = c == keycode "C-s"
-      if #pattern > 0 then
-        -- Find next match.
+      if #pattern > 0 then -- Find next match.
         cur = get_buffer_pt (buf)
-        -- Save search string.
-        last_search = pattern
+        last_search = pattern -- Save search string.
       elseif last_search then
         pattern = last_search
       end
     elseif c.META or c.CTRL or c == keycode "RET" or term_keytobyte (c) == nil then
-      if #pattern > 0 then
-        -- Save mark.
-        execute_command ("edit-select-on")
-        buf.mark.o = start
-
-        -- Save search string.
-        last_search = pattern
-
-        minibuf_write ("Mark saved when search started")
-      else
-        minibuf_clear ()
+      if #pattern > 0 then 
+        last_search = pattern -- Save search string.
       end
       if c ~= keycode "RET" then
         ungetkey (c)
