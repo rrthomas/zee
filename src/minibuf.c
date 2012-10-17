@@ -331,7 +331,7 @@ static rblist minibuf_read_completion(rblist prompt, rblist value, const char *c
         term_beep();
       else {
         rbl = rblist_concat(rblist_concat(rblist_sub(rbl, 0, i), rblist_from_char(c)),
-                      rblist_sub(rbl, i, rblist_length(rbl)));
+                            rblist_sub(rbl, i, rblist_length(rbl)));
         i++;
       }
     }
