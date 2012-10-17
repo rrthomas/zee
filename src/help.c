@@ -68,9 +68,8 @@ Display the help for the given thing.\
     if (bindings)
       where = rblist_fmt("\n\nBound to: %s", bindings);
     const char *doc = get_docstring(name);
-    if (doc == NULL) {
+    if (doc == NULL)
       doc = "No help available";
-    }
     popup_set(rblist_fmt("Help for `%r':\n\n%s%r", name, doc, where));
     ok = true;
   }
