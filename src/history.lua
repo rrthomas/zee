@@ -24,6 +24,7 @@ end
 
 function history_prepare(self)
   self.sel = 0
+  return self
 end
 
 function add_history_element(self, s)
