@@ -316,7 +316,7 @@ function move_char (n)
   else
     r = buf.text:sub (get_buffer_pt (buf) + buf.gap, get_buffer_pt (buf) + buf.gap + n2 - 1)
   end
-  local _, lines = rex_gnu.gsub (r, "\n", function () end)
+  local _, lines = rex_gnu.gsub (r, "\n", nil)
   if lines > 0 then
     thisflag.need_resync = true
     buf.line = buf.line + lines * (n2 > 0 and 1 or -1)
