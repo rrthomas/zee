@@ -17,29 +17,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-RUNLUATESTS = $(LUA) $(srcdir)/build-aux/run-tests.lua
+RUNTESTS = $(LUA) $(srcdir)/build-aux/run-tests.lua
 
 TERM ?= vt100
 
-LUA_TESTS =						\
+TESTS_NORMAL =						\
 	$(srcdir)/tests/*.lua				\
 	$(srcdir)/tests/interactive/*.lua		\
 	$(srcdir)/tests/regression/*.lua
 
-LUA_TESTS_FIXED_SCREEN =				\
+TESTS_FIXED_SCREEN =					\
 	$(srcdir)/tests/fixed-screen/*.lua
 
-LUA_TESTS_OUTPUTS =					\
+TEST_OUTPUTS =						\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/regression/*.output		\
 	$(srcdir)/tests/fixed-screen/*.output
 
-LUA_ALL_TESTS =						\
-	$(LUA_TESTS)					\
-	$(LUA_TESTS_FIXED_SCREEN)
+ALL_TESTS =						\
+	$(TESTS_NORMAL)					\
+	$(TESTS_FIXED_SCREEN)
 
-LUA_TESTS_ENVIRONMENT =					\
+TESTS_ENVIRONMENT =					\
 	abs_srcdir=$(abs_srcdir)			\
 	srcdir=$(srcdir)				\
 	abs_builddir=$(abs_builddir)			\
@@ -47,13 +47,13 @@ LUA_TESTS_ENVIRONMENT =					\
 	TERM=$(TERM)
 
 EXTRA_DIST +=						\
-	$(LUA_ALL_TESTS)				\
-	$(LUA_TESTS_OUTPUTS)				\
+	$(ALL_TESTS)					\
+	$(TEST_OUTPUTS)					\
 	tests/test.input				\
-	tests/run-lisp-tests.lua
+	tests/run-tests.lua
 
 # FIXME: nproc and xargs --max-procs are GNU-specific
 check-local: $(builddir)/src/zee
-	echo $(LUA_TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LUA_TESTS_ENVIRONMENT) xargs $(RUNLUATESTS) > /dev/null
+	echo $(TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(TESTS_ENVIRONMENT) xargs $(RUNTESTS) > /dev/null
 	NPROC=`nproc`; \
-	echo $(LUA_TESTS) | $(LUA_ENV) $(LUA_TESTS_ENVIRONMENT) xargs --max-procs=$$NPROC --max-args=$$(( `echo $(LUA_TESTS) | wc -w` / $$NPROC + 1 )) $(RUNLUATESTS) > /dev/null
+	echo $(TESTS_NORMAL) | $(LUA_ENV) $(TESTS_ENVIRONMENT) xargs --max-procs=$$NPROC --max-args=$$(( `echo $(TESTS_NORMAL) | wc -w` / $$NPROC + 1 )) $(RUNTESTS) > /dev/null
