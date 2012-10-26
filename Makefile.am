@@ -55,7 +55,7 @@ loc-tests:
 	$(CLOC) $(ALL_TESTS)
 
 loc-all:
-	$(CLOC) $(ALL_TESTS) $(PRODUCTIONSOURCES) $(srcdir)/tests/run-tests.lua
+	$(CLOC) $(ALL_TESTS) $(PRODUCTIONSOURCES) $(srcdir)/build-aux/run-tests.lua $(srcdir)/build-aux/mkdot$(PACKAGE).lua
 
 ## ------------- ##
 ## Distribution. ##
