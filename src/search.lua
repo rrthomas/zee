@@ -150,7 +150,7 @@ local function isearch (forward, pattern)
         pattern = last_search
       end
     elseif c.ALT or c.CTRL or c == keycode "Return" or term_keytobyte (c) == nil then
-      if #pattern > 0 then 
+      if #pattern > 0 then
         last_search = pattern -- Save search string.
       end
       if c ~= keycode "Return" then
