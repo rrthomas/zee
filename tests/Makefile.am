@@ -49,8 +49,7 @@ TESTS_ENVIRONMENT =					\
 EXTRA_DIST +=						\
 	$(ALL_TESTS)					\
 	$(TEST_OUTPUTS)					\
-	tests/test.input				\
-	tests/run-tests.lua
+	tests/test.input
 
 # FIXME: nproc and xargs --max-procs are GNU-specific
 check-local: $(builddir)/src/zee
