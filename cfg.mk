@@ -32,9 +32,7 @@ update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=1
 # We aren't internationalised
 translation_project_ = ""
 
+# Allow errors to start with a capital (they are displayed on a
+# separate line, interactively)
 local-checks-to-skip = \
 	sc_error_message_uppercase
-
-# Rationale:
-#
-# sc_error_message_uppercase: Emacs does these
