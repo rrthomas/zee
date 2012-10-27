@@ -23,30 +23,18 @@ gnulib_dir = $(GNULIB_SRCDIR)
 # Set format of NEWS
 old_NEWS_hash := d41d8cd98f00b204e9800998ecf8427e
 
-# Don't check test outputs
+# Don't check test outputs or diffs
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
 # Use dashes instead of lists when updating copyright headers
 update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=1
 
-# Trailing spaces are required for correct diff syntax
-exclude_file_name_regexp--sc_trailing_blank = \.diff$
-
-# Lua-ish, not GNU-ish, error messages in some internal files
-exclude_file_name_regexp--sc_unmarked_diagnostics = ^src/(std|ldb)\.lua$$
-
 # We aren't internationalised
 translation_project_ = ""
 
-# Pig & Whistle
-exclude_file_name_regexp--sc_prohibit_doubled_word = \.lua$$
-
 local-checks-to-skip = \
-	sc_bindtextdomain \
-	sc_error_message_period \
 	sc_error_message_uppercase
 
 # Rationale:
 #
-# sc_bindtextdomain: Emacs isn't internationalised
-# sc_error_message_{period,uppercase}: Emacs does these
+# sc_error_message_uppercase: Emacs does these
