@@ -19,7 +19,9 @@
 
 doc_DATA += src/dot$(PACKAGE).sample
 
-BUILT_SOURCES = src/loadlua.lua
+BUILT_SOURCES =						\
+	src/loadprog.lua				\
+	src/$(PACKAGE).lua
 
 bin_SCRIPTS = src/$(PACKAGE)
 
@@ -48,19 +50,19 @@ LUA_RUNTIME =						\
 
 dist_pkgdata_DATA =					\
 	$(LUA_RUNTIME)					\
-	src/loadlua.lua
+	src/loadprog.lua
 
 PRODUCTIONSOURCES =					\
 	$(LUA_RUNTIME)					\
 	$(top_srcdir)/src/$(PACKAGE).lua		\
-	$(top_srcdir)/src/loadlua.lua			\
+	$(top_srcdir)/src/loadprog.lua			\
 	$(top_srcdir)/src/Makefile.am			\
 	$(top_srcdir)/tests/Makefile.am			\
 	$(top_srcdir)/build-aux/Makefile.am		\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
-src/loadlua.lua: src/Makefile.am src/loadlua.lua.in
-	cp src/loadlua.lua.in $@
+src/loadprog.lua: src/Makefile.am src/loadprog.lua.in
+	cp src/loadprog.lua.in $@
 	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
 
 $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
@@ -81,12 +83,11 @@ install-exec-hook:
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
 	src/$(PACKAGE).lua.in				\
-	src/loadlua.lua.in				\
+	src/loadprog.lua.in				\
 	src/dot$(PACKAGE).sample
 
 CLEANFILES +=						\
-	src/$(PACKAGE)					\
-	src/$(PACKAGE).lua
+	src/$(PACKAGE)
 
 DISTCLEANFILES +=					\
 	$(BUILT_SOURCES)
