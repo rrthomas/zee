@@ -19,7 +19,6 @@
 
 -- This script should be run as zee -e "loadfile ('script.lua') ()"
 
-debug ("src/dot" .. os.getenv ("PACKAGE") .. ".sample", "w")
 local h = io.open ("src/dot" .. os.getenv ("PACKAGE") .. ".sample", "w")
 if not h then
   error ()
