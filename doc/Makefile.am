@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-MAINTAINERCLEANFILES += $(srcdir)/doc/$(PACKAGE).1.in doc/$(PACKAGE).1
-DISTCLEANFILES += doc/$(PACKAGE).1
+MAINTAINERCLEANFILES += $(srcdir)/doc/$(PACKAGE).1.in
+CLEANFILES += doc/$(PACKAGE).1
 EXTRA_DIST += doc/man-extras doc/$(PACKAGE).1.in
 man_MANS = doc/$(PACKAGE).1
 
