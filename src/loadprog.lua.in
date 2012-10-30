@@ -1,7 +1,3 @@
-require "std" -- load std
-require_version ("std", "27") -- check version of std now we have require_version
-require "strict" -- optional stdlib module
-posix = require_version ("posix", "5.1.23")
+require "std" -- load std to get require_version
 curses = require "curses" -- part of luaposix
-rex_gnu = require_version ("rex_gnu", "2.7.1", nil, "[%S]+%s*([%S]+)")
-require_version ("alien", "0.7.0")
+require "strict" -- optional stdlib module
