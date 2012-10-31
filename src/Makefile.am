@@ -80,6 +80,8 @@ install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/$(PACKAGE)
 	rm -f $@.tmp
+
+install-data-hook:
 	$(install_edit) '$(top_builddir)/src/loadprog.lua' >$@.tmp
 	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(pkgdatadir)/loadprog.lua
 	rm -f $@.tmp
