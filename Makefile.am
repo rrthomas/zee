@@ -78,7 +78,7 @@ dist-hook: $(changelog)
 
 distcheck-hook: syntax-check
 
-WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes-$(VERSION) dist_type="tar.gz"
+WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes dist_type="tar.gz"
 
 # Depend on distcheck so that 'make release' runs distcheck before
 # making the rockspec, so the release archive MD5sum is correct in the
