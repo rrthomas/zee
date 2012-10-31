@@ -21,8 +21,7 @@ doc_DATA += src/dot$(PACKAGE).sample
 
 BUILT_SOURCES =						\
 	src/loadprog.lua				\
-	src/$(PACKAGE).lua				\
-	src/dot$(PACKAGE).sample
+	src/$(PACKAGE).lua
 
 bin_SCRIPTS = src/$(PACKAGE)
 
@@ -49,9 +48,9 @@ LUA_RUNTIME =						\
 	src/term.lua					\
 	src/term_curses.lua
 
-dist_pkgdata_DATA =					\
-	$(LUA_RUNTIME)					\
-	src/loadprog.lua
+dist_pkgdata_DATA = $(LUA_RUNTIME)
+
+pkgdata_DATA = src/loadprog.lua
 
 PRODUCTIONSOURCES =					\
 	$(LUA_RUNTIME)					\
@@ -62,8 +61,8 @@ PRODUCTIONSOURCES =					\
 	$(top_srcdir)/build-aux/Makefile.am		\
 	$(top_srcdir)/Makefile.am $(top_srcdir)/configure.ac
 
-src/loadprog.lua: src/Makefile.am src/loadprog.lua.in
-	cp src/loadprog.lua.in $@
+$(top_builddir)/src/loadprog.lua: src/Makefile.am $(top_srcdir)/src/loadprog.lua.in
+	cat $(top_srcdir)/src/loadprog.lua.in > $@
 	$(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+) >= ([%d%.]+)'); if l then local name = modules[l] or l; print (name .. ' = require_version (\"' .. name .. '\", \"' .. v .. '\")') end end, dependencies)" >> $@
 	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'")' >> $@; done
 
@@ -72,7 +71,7 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || rm $@
+	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
 
 $(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
 	PACKAGE="$(PACKAGE)" $(builddir)/src/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
@@ -94,4 +93,5 @@ CLEANFILES +=						\
 	src/$(PACKAGE)
 
 DISTCLEANFILES +=					\
-	$(BUILT_SOURCES)
+	$(BUILT_SOURCES)				\
+	src/dot$(PACKAGE).sample

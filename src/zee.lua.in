@@ -25,14 +25,14 @@ PACKAGE = "@PACKAGE@"
 PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
-local PKGDATA_PATH = "@pkgdatadir@"
 
 -- Remove current directory from package.path
 package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
 
--- Add program code directory to package.path and load program
-if PKGDATA_PATH:sub (1, 1) == "/" then
-  package.path = PKGDATA_PATH .. "/?.lua;" .. package.path
+-- Fudge package.path when running in-tree
+local IN_TREE_LUA_PATH = "@in_tree_lua_path@"
+if IN_TREE_LUA_PATH ~= "" then
+  package.path = IN_TREE_LUA_PATH .. ";" .. package.path
 end
 require ("loadprog")
 

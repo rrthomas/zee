@@ -28,11 +28,10 @@ CLEANFILES =
 MAINTAINERCLEANFILES =
 
 install_edit = sed \
-	-e 's|@pkgdatadir[@]|$(PKGDATA_PATH)|g'		\
 	-e 's|^require ("|require ("$(PACKAGE)/|g'
 
 inplace_edit = sed \
-	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g'
+	-e 's|@in_tree_lua_path[@]|$(abs_top_srcdir)/src/?.lua;$(abs_top_builddir)/src/?.lua|g'
 
 EXTRA_DIST =						\
 	FAQ						\
