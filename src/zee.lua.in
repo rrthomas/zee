@@ -25,7 +25,7 @@ PACKAGE = "@PACKAGE@"
 PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
-PKGDATA_PATH = "@pkgdatadir@"
+local PKGDATA_PATH = "@pkgdatadir@"
 
 -- Remove current directory from package.path
 package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
@@ -34,7 +34,7 @@ package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
 if PKGDATA_PATH:sub (1, 1) == "/" then
   package.path = PKGDATA_PATH .. "/?.lua;" .. package.path
 end
-require "loadprog"
+require ("loadprog")
 
 
 local function err (err)

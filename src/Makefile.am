@@ -82,7 +82,7 @@ install-exec-hook:
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/$(PACKAGE)
 	rm -f $@.tmp
 	$(install_edit) '$(top_builddir)/src/loadprog.lua' >$@.tmp
-	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(pkgdatadir)/loadprog.lua
+	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(pkgdatadir)/loadprog.lua
 	rm -f $@.tmp
 
 EXTRA_DIST +=						\
