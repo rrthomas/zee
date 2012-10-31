@@ -86,7 +86,7 @@ WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes dist_type
 $(ROCKSPEC): $(PACKAGE).rockspec distcheck
 	sed -e 's/_MD5_/'`$(MD5SUM) $(distdir).tar.gz | cut -d " " -f 1`'/g' < $(PACKAGE).rockspec > $@
 
-release:
+release: $(ROCKSPEC)
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger github $(WOGER_ARGS) && \
 	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks make $(ROCKSPEC) && \
