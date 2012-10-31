@@ -20,9 +20,6 @@
 GNULIB_SRCDIR ?= $(srcdir)/gnulib
 gnulib_dir = $(GNULIB_SRCDIR)
 
-# Set format of NEWS
-old_NEWS_hash := d41d8cd98f00b204e9800998ecf8427e
-
 # Don't check test outputs or diffs
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
@@ -35,4 +32,5 @@ translation_project_ = ""
 # Allow errors to start with a capital (they are displayed on a
 # separate line, interactively)
 local-checks-to-skip = \
-	sc_error_message_uppercase
+	sc_error_message_uppercase	\
+	sc_immutable_NEWS

@@ -1,11 +1,9 @@
-*.patch
 /*.rockspec
 *~
 .sc-start*
 /COPYING
 /ChangeLog
 /GNUmakefile
-/HACKING
 /INSTALL
 /README-release
 /aclocal.m4
@@ -20,9 +18,7 @@
 /lib
 /luarocks-config.lua
 /maint.mk
-/tight-scope.mk
+/release-notes*
 /zee*.tar.gz
-/zee*.tar.gz.directive*
-/zee*.tar.gz.sig
 Makefile
 Makefile.in

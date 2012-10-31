@@ -1,0 +1,46 @@
+                        Zee developers' notes
+                        ---------------------
+
+     Copyright (c) 2011-2012 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without
+     modification, are permitted in any medium without royalty
+     provided the copyright notice and this notice are preserved.
+
+
+Coding style
+------------
+
+Rather than attempt an exhaustive list, the following points address
+just FDQs (Frequently Discussed Questions).
+
+0. Follow the style of existing code. Consistency is more important
+than any particular element of style.
+
+1. Avoid reversed comparisons. Arguably a good idea in C, but in Lua
+"if a = 0 then..." is a syntax error, so there's no need to inflict
+"if 0 == a then..." on those who don't like that style.
+
+2. Put space around operators and variables: "for i = 0, #t", not
+"for i=0,#t". The latter is cramped and harder to read.
+
+3. Use one-line conditionals sparingly. As a rule of thumb, only use
+them when the entire line is shorter than 70 characters. Their use is
+encouraged in code of the form "if CONDITION then return end", and a
+one-line "if...then...else...end" may often be superior to the
+quasi-ternary operator "x and a or b" (where if "a" can be false
+results in "b").
+
+
+Making a release
+----------------
+
+To make a release you need woger, from
+http://rrt.sc3d.org/Software/woger and the dependencies it lists for
+releasing on Github and Freecode.
+
+* Write the release notes in release-notes-$VERSION
+
+* Run:
+
+    make release

@@ -57,28 +57,9 @@ loc:
 loc-tests:
 	$(CLOC) $(ALL_TESTS) $(srcdir)/build-aux/run-tests.lua
 
-## ------------- ##
-## Distribution. ##
-## ------------- ##
-
-gitlog_to_changelog	= $(srcdir)/build-aux/gitlog-to-changelog
-git_log_fix		= $(srcdir)/build-aux/git-log-fix
-changelog		= $(srcdir)/ChangeLog
-
-# Changes before this date are from before Lua was used.
-changelog_start_date = 2009-03-30
-$(changelog):
-	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then \
-	  $(gitlog_to_changelog) --amend=$(git_log_fix) \
-	      --since=$(changelog_start_date) > '$@T'; \
-	  rm -f '$@'; mv '$@T' '$@'; \
-	fi
-
-dist-hook: $(changelog)
-
 distcheck-hook: syntax-check
 
-WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes dist_type="tar.gz"
+WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes-$(VERSION) dist_type="tar.gz"
 
 # Depend on distcheck so that 'make release' runs distcheck before
 # making the rockspec, so the release archive MD5sum is correct in the
@@ -87,8 +68,10 @@ $(ROCKSPEC): $(PACKAGE).rockspec distcheck
 	sed -e 's/_MD5_/'`$(MD5SUM) $(distdir).tar.gz | cut -d " " -f 1`'/g' < $(PACKAGE).rockspec > $@
 
 release: $(ROCKSPEC)
-	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
+	git diff --exit-code && \
+	git push && \
 	woger github $(WOGER_ARGS) && \
 	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks make $(ROCKSPEC) && \
-	woger freecode $(WOGER_ARGS) && \
-	rm -f release-notes
+	woger freecode,lua $(WOGER_ARGS) && \
+	git tag -a -m "Release tag" v$(VERSION) && \
+	git push --tags
