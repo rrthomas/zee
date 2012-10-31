@@ -58,7 +58,7 @@ loc-tests:
 
 distcheck-hook: syntax-check
 
-WOGER_ARGS = package=$(PACKAGE) version=$(VERSION) notes=release-notes-$(VERSION) dist_type="tar.gz"
+WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_INIT= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
 
 # Depend on distcheck so that 'make release' runs distcheck before
 # making the rockspec, so the release archive MD5sum is correct in the
