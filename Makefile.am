@@ -28,7 +28,8 @@ CLEANFILES =
 MAINTAINERCLEANFILES =
 
 install_edit = sed \
-	-e 's|@pkgdatadir[@]|$(PKGDATA_PATH)|g'
+	-e 's|@pkgdatadir[@]|$(PKGDATA_PATH)|g'		\
+	-e 's|^require ("|require ("$(PACKAGE)/|g'
 
 inplace_edit = sed \
 	-e 's|@pkgdatadir[@]|$(abs_top_srcdir)/src|g'

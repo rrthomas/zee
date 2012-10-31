@@ -26,15 +26,14 @@ PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
 PKGDATA_PATH = "@pkgdatadir@"
-if PKGDATA_PATH:sub (1, 1) ~= "/" then
-  PKGDATA_PATH = arg[0]:gsub ("[^/]+$", "") .. PKGDATA_PATH
-end
 
 -- Remove current directory from package.path
 package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
 
 -- Add program code directory to package.path and load program
-package.path = PKGDATA_PATH .. "/?.lua;" .. package.path
+if PKGDATA_PATH:sub (1, 1) == "/" then
+  package.path = PKGDATA_PATH .. "/?.lua;" .. package.path
+end
 require "loadprog"
 
 

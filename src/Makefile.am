@@ -56,7 +56,7 @@ dist_pkgdata_DATA =					\
 PRODUCTIONSOURCES =					\
 	$(LUA_RUNTIME)					\
 	$(top_srcdir)/src/$(PACKAGE).lua		\
-	$(top_srcdir)/src/loadprog.lua			\
+	$(top_srcdir)/src/loadprog.lua.in		\
 	$(top_srcdir)/src/Makefile.am			\
 	$(top_srcdir)/tests/Makefile.am			\
 	$(top_srcdir)/build-aux/Makefile.am		\
@@ -65,9 +65,9 @@ PRODUCTIONSOURCES =					\
 src/loadprog.lua: src/Makefile.am src/loadprog.lua.in
 	cp src/loadprog.lua.in $@
 	$(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+) >= ([%d%.]+)'); if l then local name = modules[l] or l; print (name .. ' = require_version (\"' .. name .. '\", \"' .. v .. '\")') end end, dependencies)" >> $@
-	for i in $(LUA_RUNTIME); do echo 'require "'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'"' >> $@; done
+	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'")' >> $@; done
 
-$(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) Makefile
+$(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
 	rm -f $@ $@.tmp
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
@@ -80,6 +80,9 @@ $(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PAC
 install-exec-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/$(PACKAGE)
+	rm -f $@.tmp
+	$(install_edit) '$(top_builddir)/src/loadprog.lua' >$@.tmp
+	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(pkgdatadir)/loadprog.lua
 	rm -f $@.tmp
 
 EXTRA_DIST +=						\
