@@ -16,6 +16,7 @@
 /configure.lineno
 /gnulib
 /lib
+/luarocks
 /luarocks-config.lua
 /maint.mk
 /release-notes*
