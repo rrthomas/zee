@@ -22,7 +22,7 @@ AC_PREREQ([2.61])
 dnl Initialise autoconf and automake
 AC_INIT([Zee], [0.7], [zee-devel@lists.sourceforge.net])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([-Wall -Werror std-options])
+AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign])
 AM_SILENT_RULES([yes])
 
 dnl Set up gnulib
