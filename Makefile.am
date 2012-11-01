@@ -43,7 +43,7 @@ DISTCLEANFILES = $(PACKAGE).rockspec
 
 ROCKSPEC = $(PACKAGE)-$(VERSION)-1.rockspec
 
-doc_DATA = AUTHORS FAQ NEWS
+doc_DATA = AUTHORS FAQ
 
 include build-aux/Makefile.am
 include src/Makefile.am
