@@ -7,4 +7,4 @@ In particular:
   from which Zee was directly adapted.
 
 * Alistair Turnbull <apt1002@mupsych.org> contributed to the C version
-  of C, from which code was directly translated for Lua Zee.
+  of Zee, from which code was directly translated for Lua Zee.
