@@ -33,9 +33,6 @@ dnl Lua
 AC_SUBST([LUA_VERSION], [5.2])
 AX_PROG_LUA([$LUA_VERSION])
 
-dnl help2man
-AX_WITH_PROG([HELP2MAN], [help2man], [false])
-
 dnl md5sum
 AX_WITH_PROG([MD5SUM], [md5sum], [false])
 
