@@ -24,14 +24,19 @@ local COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
 
 prog = {
   name = posix.basename (arg[0] or PACKAGE),
-  banner = VERSION_STRING .. " by Reuben Thomas <rrt@sc3d.org>",
   purpose = "An editor.",
-  notes = COPYRIGHT_STRING .. "\n" ..
+  banner = VERSION_STRING .. " by Reuben Thomas <rrt@sc3d.org>\n" ..
+    COPYRIGHT_STRING .. "\n" ..
     PACKAGE_NAME .. " comes with ABSOLUTELY NO WARRANTY.\n" ..
     "You may redistribute copies of " .. PACKAGE_NAME .. "\n" ..
     "under the terms of the GNU General Public License.\n" ..
     "For more information about these matters, see the file named COPYING.\n" ..
     "Report bugs to " .. PACKAGE_BUGREPORT .. ".",
+  notes = "Exit status is 0 if OK, 1 if it cannot start up, for example because\n" ..
+    "of an invalid command-line argument, and 2 if it crashes or runs out\n" ..
+    "of memory.\n" ..
+    "\n" ..
+    "~/." .. PACKAGE .. " is the user init file",
 }
 
 

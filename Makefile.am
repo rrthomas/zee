@@ -46,7 +46,6 @@ ROCKSPEC = $(PACKAGE)-$(VERSION)-1.rockspec
 doc_DATA = AUTHORS FAQ NEWS
 
 include build-aux/Makefile.am
-include doc/Makefile.am
 include src/Makefile.am
 include tests/Makefile.am
 
