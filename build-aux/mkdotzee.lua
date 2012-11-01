@@ -26,7 +26,7 @@ end
 
 h:write (
   [[
----- .]] .. os.getenv ("PACKAGE") .. [[ configuration
+-- ]] .. os.getenv ("PACKAGE_NAME") .. [[ configuration
 
 -- Rebind keys with:
 -- bind_key("key", "func")
