@@ -325,7 +325,7 @@ function move_char (n)
   -- Move.
   set_buffer_pt (buf, get_buffer_pt (buf) + n2)
 
-  -- If we ended up at a line end, adjust goalc. FIXME: Really?
+  -- If we moved to a line end from inside the line, set goalc to an extreme value.
   if ltest () then
     set_goalc (new_goalc)
   end
