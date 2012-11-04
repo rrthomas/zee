@@ -24,6 +24,8 @@ if not h then
   error ()
 end
 
+-- Don't note where the contents of this file comes from or that it's
+-- auto-generated, because it's ugly in a user configuration file.
 h:write (
   [[
 -- ]] .. os.getenv ("PACKAGE_NAME") .. [[ configuration
@@ -33,8 +35,6 @@ h:write (
 
 ]])
 
--- Don't note where the contents of this file comes from or that it's
--- auto-generated, because it's ugly in a user configuration file.
 for name, var in pairs (env) do
   if not command_exists (name) then
     h:writelines ("-- " .. var.doc:gsub ("\n", "\n; "),
