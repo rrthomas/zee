@@ -20,17 +20,20 @@
 
 -- Map of key names to code.
 local KBD_NONPRINT = 283
-local keynametocode = {
-  ["Space"] = string.byte (' '),
-}
+local keynametocode = {}
 
--- FIXME: Merge with following set
-for i in list.elems {
+local non_modifier_name = set.new {
   "Backspace", "Delete", "Down", "End", "F1", "F10", "F11", "F12",
   "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "Home", "Insert",
-  "Left", "PageDown", "PageUp", "Return", "Right", "Tab", "Up", "\t" } do
+  "Left", "PageDown", "PageUp", "Return", "Right", "Tab", "Up",
+  "Space", "Escape"
+}
+local modifier_name = set.new {"Ctrl-", "Alt-"}
+
+for i in non_modifier_name:elems () do
   keynametocode[i] = KBD_NONPRINT
 end
+keynametocode["Space"] = string.byte (' ')
 
 for i = 0x0, 0x7f do
   if posix.isprint (string.char (i)) and i ~= string.byte ('\\') then
@@ -39,12 +42,7 @@ for i = 0x0, 0x7f do
 end
 
 -- Array of key names
-local keyname = set.new {
-  "Backspace", "Ctrl-", "Delete", "Down", "Escape", "End", "F1", "F10",
-  "F11", "F12", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9",
-  "Home", "Insert", "Left", "Alt-", "PageDown", "PageUp", "Return",
-  "Right", "Space", "Tab", "Up",
-}
+local keyname = modifier_name:union (non_modifier_name)
 
 -- Insert printable characters in the ASCII range.
 for i = 0, 0x7f do
@@ -102,7 +100,6 @@ local keycode_mt = {
 }
 
 -- Extract a modifier prefix of a key string.
-local modifier_name = set.new {"Ctrl-", "Alt-"}
 local function getmodifier (s)
   for match in modifier_name:elems () do
     if match == s:sub (1, #match) then
