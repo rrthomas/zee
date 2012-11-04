@@ -75,7 +75,7 @@ Save buffer in visited file.
 
     minibuf_write ("Wrote " .. buf.filename)
     buf.modified = false
-    undo_set_unchanged (buf.last_undop)
+    undo_set_unchanged (buf.last_undo)
   end
 )
 

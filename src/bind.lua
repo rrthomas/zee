@@ -38,7 +38,7 @@ function call_command (f, ...)
   _last_command = _this_command
 
   if buf and _last_command ~= "edit-undo" then
-    buf.next_undop = buf.last_undop
+    buf.next_undo = buf.last_undo
   end
 
   lastflag = thisflag

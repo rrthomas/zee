@@ -19,15 +19,15 @@
 
 -- Save a reverse delta for doing undo.
 local function undo_save (ty, o, osize, size)
-  local up = {type = ty, next = buf.last_undop, o = o}
+  local u = {type = ty, next = buf.last_undo, o = o}
 
   if ty == "replace block" then
-    up.size = size
-    up.text = get_buffer_region (buf, region_new (o, o + osize))
-    up.unchanged = not buf.modified
+    u.size = size
+    u.text = get_buffer_region (buf, region_new (o, o + osize))
+    u.unchanged = not buf.modified
   end
 
-  buf.last_undop = up
+  buf.last_undo = u
 end
 
 
@@ -44,10 +44,10 @@ function undo_save_block (o, osize, size)
 end
 
 -- Set unchanged flags to false.
-function undo_set_unchanged (up)
-  while up do
-    up.unchanged = false
-    up = up.next
+function undo_set_unchanged (u)
+  while u do
+    u.unchanged = false
+    u = u.next
   end
 end
 
@@ -81,13 +81,13 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 ]],
   function ()
-    if not buf.next_undop then
+    if not buf.next_undo then
       minibuf_error ("No further undo information")
-      buf.next_undop = buf.last_undop
+      buf.next_undop = buf.last_undo
       return true
     end
 
-    buf.next_undop = revert_action (buf.next_undop)
+    buf.next_undo = revert_action (buf.next_undo)
     minibuf_write ("Undo!")
   end
 )
@@ -97,8 +97,6 @@ Define ("edit-revert",
 Undo until buffer is unmodified.
 ]],
   function ()
-    -- FIXME: save pointer to current undo action and abort if we get
-    -- back to it.
     while buf.modified do
       execute_command ("edit-undo")
     end
