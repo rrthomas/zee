@@ -106,7 +106,7 @@ local function draw_line (line, startcol, o, rp)
       term_addstr (c)
       x = x + 1
     else
-      local s = make_string_printable (AStr (c), nil, x) -- FIXME: don't force conversion to AStr
+      local s = make_string_printable (c, nil, x)
       term_addstr (s:sub (1, math.min (#s, win.fwidth - x)))
       x = x + #s
     end
