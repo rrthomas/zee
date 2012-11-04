@@ -315,7 +315,8 @@ function make_string_printable (s, goal, col)
   local ctrls = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   local ret, pos = "", 0
   for i = 1, #s do
-    local c = s[i]
+    local c = s[i] -- if s is a string c is a string, otherwise a byte
+    if type (c) == "number" then c = string.char (c) end
     assert (c ~= '\n')
 
     local x = col + #ret
@@ -325,14 +326,14 @@ function make_string_printable (s, goal, col)
 
     if c == '\t' then
       ret = ret .. string.rep (' ', tab_width - (x % tab_width))
-    elseif c < #ctrls then
-      ret = ret .. '^' .. ctrls[c + 1]
-    elseif posix.isprint (string.char (c)) then
-      ret = ret .. string.char (c)
+    elseif string.byte (c) < #ctrls then
+      ret = ret .. '^' .. ctrls[string.byte (c + 1)]
+    elseif posix.isprint (c) then
+      ret = ret .. c
       -- FIXME: For double-width characters add a '\0' too so the length of
       -- 'ret' matches the display width.
     else
-      ret = ret .. '\\' .. string.format ("%x", c)
+      ret = ret .. '\\' .. string.format ("%x", string.byte (c))
     end
 
     pos = pos + 1
