@@ -25,6 +25,8 @@ end
 function minibuf_read (prompt, cp)
   local quit, value, pos = false, "", 0
 
+  -- FIXME: Stop these definitions appearing in global environment
+  -- (Have nested environments)
   Define ("minibuf-insert-character", "",
           function ()
             local key = term_keytobyte (lastkey ())
@@ -39,11 +41,6 @@ function minibuf_read (prompt, cp)
   Define ("minibuf-exit", "",
           function ()
             quit = true
-          end)
-
-  Define ("minibuf-suspend", "",
-          function ()
-            execute_command ("file-suspend")
           end)
 
   Define ("minibuf-quit", "",
@@ -135,7 +132,7 @@ function minibuf_read (prompt, cp)
   bindings = minibuf_bindings
   bind_printing_chars ("minibuf-insert-character")
   key_bind ("Return", "minibuf-exit")
-  key_bind ("Ctrl-z", "minibuf-suspend")
+  key_bind ("Ctrl-z", "file-suspend")
   key_bind ("Ctrl-g", "minibuf-quit")
   key_bind ("Ctrl-a", "minibuf-move-start-line")
   key_bind ("Home", "minibuf-move-start-line")
@@ -154,14 +151,11 @@ function minibuf_read (prompt, cp)
   key_bind ("PageDown", "minibuf-next-page")
   key_bind ("Tab", "minibuf-complete")
 
-  local saved, completion_text, old_completion_text
+  local saved
   repeat
-    if cp and (not old_completion_text or old_completion_text ~= completion_text) then
-      popup_completion (cp)
+    if cp then
       completion_try (cp, value)
-      local completion_text = completion_write (cp, win.ewidth)
-      popup_set (completion_text)
-      old_completion_text = completion_text
+      popup_completion (cp)
     end
 
     minibuf_write (prompt)
@@ -249,11 +243,8 @@ function minibuf_read_completion (fmt, cp, class_name)
       return nil
     else
       -- Complete partial words if possible.
-      local comp = completion_try (cp, ms)
-      if comp == "match" then
+      if completion_try (cp, ms) then
         ms = cp.match
-      elseif comp == "incomplete" then
-        popup_completion (cp)
       end
 
       if cp.completions:member (ms) then
