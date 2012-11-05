@@ -21,7 +21,7 @@ local cut_buffer_text = AStr ("")
 
 local function copy_or_cut_the_region (cut)
   local r = calculate_the_selection ()
-  if not r then
+  if r == true then
     return true
   end
 
