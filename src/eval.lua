@@ -26,7 +26,7 @@ env = {}
 -- Turn texinfo markup into plain text
 local function texi (s)
   s = s:gsub ("@i{([^}]+)}", function (s) return s:upper () end)
-  s = s:gsub ("@kbd{([^}]+)}", "%1")
+  s = s:gsub ("@kbd{([^}]+)}", "%1") -- FIXME: look up binding of command
   return s
 end
 

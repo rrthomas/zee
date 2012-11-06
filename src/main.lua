@@ -166,4 +166,5 @@ function main ()
   if not ok then
     io.stderr:write (minibuf_contents .. "\n")
   end
+  -- FIXME: Add startup banner (how to quit and get menu)
 end

@@ -194,6 +194,8 @@ Insert a newline.
   end
 )
 
+-- FIXME: Inserting a tab seems to insert some spaces too, and mess up
+-- the buffer (overwriting characters after the tab?)
 Define ("edit-insert-quoted",
 [[
 Read next input character and insert it.
