@@ -91,9 +91,9 @@ end
 
 
 -- Incremental search engine.
--- FIXME: Once the search is underway, "find next" is hard-wired to Ctrl-s.
+-- FIXME: Once the search is underway, "find next" is hard-wired to Ctrl-f.
 -- Having it hard-wired is obviously broken, but something neutral like Return
--- would be better.
+-- would be better, or look up current binding of relevant command.
 -- The proposed meaning of Escape obviates the current behaviour of Return.
 local last_search
 local function isearch (forward, pattern)
@@ -138,11 +138,11 @@ local function isearch (forward, pattern)
       else
         ding ()
       end
-    elseif c == keycode "Ctrl-q" then
+    elseif c == keycode "Ctrl-Alt-q" then
       minibuf_write (string.format ("%s^Q-", ms))
       pattern = pattern .. string.char (getkey_unfiltered (GETKEY_DEFAULT))
-    elseif c == keycode "Ctrl-r" or c == keycode "Ctrl-s" then -- Invert direction.
-      forward = c == keycode "Ctrl-s"
+    elseif c == keycode "Ctrl-Alt-f" or c == keycode "Ctrl-f" then -- Invert direction.
+      forward = c == keycode "Ctrl-f"
       if #pattern > 0 then -- Find next match.
         cur = get_buffer_pt (buf)
         last_search = pattern -- Save search string.
@@ -187,7 +187,7 @@ Define ("edit-find",
 Do incremental search forward for regular expression.
 As you type characters, they add to the search string and are found.
 Type @kbd{Return} to exit, leaving cursor at location found.
-Type @kbd{Ctrl-s} to search again forward, @kbd{Ctrl-r} to search again backward.
+Type @kbd{Ctrl-f} to search again forward, @kbd{Ctrl-Alt-f} to search again backward.
 @kbd{Ctrl-g} when search is successful aborts and moves cursor to starting
 point.
 ]],
@@ -201,7 +201,7 @@ Define ("edit-find-backward",
 Do incremental search backward for regular expression.
 As you type characters, they add to the search string and are found.
 Type @kbd{Return} to exit, leaving cursor at location found.
-Type @kbd{Ctrl-r} to search again backward, @kbd{Ctrl-s} to search again forward.
+Type @kbd{Ctrl-Alt-f} to search again backward, @kbd{Ctrl-f} to search again forward.
 @kbd{Ctrl-g} when search is successful aborts and moves cursor to starting
 point.
 ]],

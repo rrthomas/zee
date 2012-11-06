@@ -72,8 +72,10 @@ function term_init ()
     [0x7f]    = "Ctrl-?",
     ["kbs"]   = "Backspace",
     ["kdch1"] = "Delete",
+    ["kDC5"]  = "Ctrl-Delete",
     ["kcud1"] = "Down",
     ["kend"]  = "End",
+    ["kEND5"] = "Ctrl-End",
     ["kf1"]   = "F1",
     ["kf2"]   = "F2",
     ["kf3"]   = "F3",
@@ -87,11 +89,14 @@ function term_init ()
     ["kf11"]  = "F11",
     ["kf12"]  = "F12",
     ["khome"] = "Home",
+    ["kHOM5"] = "Ctrl-Home",
     ["kich1"] = "Insert",
     ["kcub1"] = "Left",
+    ["kLFT5"] = "Ctrl-Left",
     ["knp"]   = "PageDown",
     ["kpp"]   = "PageUp",
     ["kcuf1"] = "Right",
+    ["kRIT5"] = "Ctrl-Right",
     ["kspd"]  = "Ctrl-z",
     ["kcuu1"] = "Up"
   } do
@@ -116,7 +121,7 @@ function term_init ()
   end
 
   -- Reverse lookup of a lone ESC.
-  keytocode[keycode "Escape"] = { ESC }
+  keytocode[keycode "Escape"] = {ESC}
 
   -- ...fallback to 0x7f for backspace if terminfo doesn't know better
   if not curses.tigetstr ("kbs") then

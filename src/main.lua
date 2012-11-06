@@ -114,7 +114,6 @@ function main ()
   win.fwidth = 2
   term_init ()
   resize_window ()
-  init_default_bindings ()
 
   if not getopt.opt["no-init-file"] then
     local s = os.getenv ("HOME")

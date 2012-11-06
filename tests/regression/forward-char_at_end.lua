@@ -1,3 +1,3 @@
 -- move-end-file a move-next-character
 -- file-save file-quit
-call_command ("macro-play", "Alt->", "a", "Ctrl-f", "Alt-s", "Ctrl-Alt-q")
+call_command ("macro-play", "Ctrl-End", "a", "Right", "Ctrl-s", "Ctrl-q")

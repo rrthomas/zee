@@ -31,14 +31,12 @@ LUA_RUNTIME =						\
 	src/main.lua					\
 	src/variables.lua				\
 	src/move.lua					\
-	src/bind.lua					\
 	src/buffer.lua					\
 	src/completion.lua				\
 	src/shell.lua					\
 	src/getkey.lua					\
 	src/help.lua					\
 	src/file.lua					\
-	src/keycode.lua					\
 	src/cut.lua					\
 	src/edit.lua					\
 	src/macro.lua					\
@@ -46,6 +44,9 @@ LUA_RUNTIME =						\
 	src/search.lua					\
 	src/undo.lua					\
 	src/term.lua					\
+	src/keycode.lua					\
+	src/bind.lua					\
+	src/cua_bindings.lua				\
 	src/term_curses.lua
 
 dist_pkgdata_DATA = $(LUA_RUNTIME)
