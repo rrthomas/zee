@@ -327,7 +327,7 @@ function make_string_printable (s, goal, col)
     if c == '\t' then
       ret = ret .. string.rep (' ', tab_width - (x % tab_width))
     elseif string.byte (c) < #ctrls then
-      ret = ret .. '^' .. ctrls[string.byte (c + 1)]
+      ret = ret .. '^' .. ctrls[string.byte (c) + 1]
     elseif posix.isprint (c) then
       ret = ret .. c
       -- FIXME: For double-width characters add a '\0' too so the length of
