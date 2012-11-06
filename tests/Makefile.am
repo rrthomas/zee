@@ -21,6 +21,7 @@ RUNTESTS = $(LUA) $(srcdir)/build-aux/run-tests.lua
 
 TERM ?= vt100
 
+# FIXME: Make interactive tests look up keybindings so they are resistant to default bindings changing
 TESTS_NORMAL =						\
 	$(srcdir)/tests/*.lua				\
 	$(srcdir)/tests/interactive/*.lua		\
@@ -51,8 +52,12 @@ EXTRA_DIST +=						\
 	$(TEST_OUTPUTS)					\
 	tests/test.input
 
+# Use to find which test hangs:
+check-debug:
+	$(LUA_ENV) $(TESTS_ENVIRONMENT) $(RUNTESTS) $(TESTS_NORMAL) > /dev/null
+
 # FIXME: nproc and xargs --max-procs are GNU-specific
 check-local: $(builddir)/src/zee
-	echo $(TESTS_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(TESTS_ENVIRONMENT) xargs $(RUNTESTS) > /dev/null
+	COLUMNS=80 LINES=24 $(TESTS_ENVIRONMENT) $(RUNTESTS) $(TESTS_FIXED_SCREEN) > /dev/null
 	NPROC=`nproc`; \
 	echo $(TESTS_NORMAL) | $(LUA_ENV) $(TESTS_ENVIRONMENT) xargs --max-procs=$$NPROC --max-args=$$(( `echo $(TESTS_NORMAL) | wc -w` / $$NPROC + 1 )) $(RUNTESTS) > /dev/null
