@@ -94,23 +94,20 @@ Quit, unless there are unsaved changes.
 
 alien.default.read:types ("ptrdiff_t", "int", "pointer", "size_t")
 function read_file (filename)
-  if exist_file (filename) and not is_regular_file (filename) then
-    return minibuf_error (string.format ("File `%s' exists but could not be read", filename))
-  end
-
   buf = buffer_new ()
-  buf.filename = filename
   local len = posix.stat (filename, "size")
   local h = posix.open (filename, posix.O_RDONLY)
-  local s
   if h and len then
-    s = AStr (len)
-    local ret = alien.default.read (h, s:topointer (), len)
-    if ret == len then
+    buf.text = AStr (len)
+    if alien.default.read (h, buf.text:topointer (), len) == len then
+      buf.filename = filename
       buf.readonly = not check_writable (filename)
     end
+    posix.close (h)
   end
-  buf.text = s or AStr ("") -- FIXME: error if reading fails
+  if not buf.filename then
+    return minibuf_error (string.format ("Error reading file `%s': %s"), filename, posix.errno ())
+  end
 end
 
 -- Function called on unexpected error or crash (SIGSEGV).
