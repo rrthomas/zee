@@ -58,7 +58,7 @@ file, replacing the selection if any.
       if not pipe then
         ok = minibuf_error ("Cannot open pipe to process")
       else
-        local out = pipe:read ("*a") -- FIXME: make efficient
+        local out = pipe:read ("*a")
         pipe:close ()
 
         if #out == 0 then
