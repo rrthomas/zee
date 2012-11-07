@@ -75,9 +75,8 @@ file, replacing the selection if any.
       end
     end
 
-    -- FIXME: We have no way of knowing whether a sub-process caught a
-    -- SIGWINCH, so raise one. (Add to lposix.c)
-    --posix.raise (posix.SIGWINCH)
+    -- A sub-process may have caught a SIGWINCH, so assume one did.
+    curses.ungetch (curses.KEY_RESIZE)
 
     if h then
       h:close ()
