@@ -3,7 +3,6 @@ version="@VERSION@-1"
 source = {
   url = "https://github.com/downloads/rrthomas/@PACKAGE@/@PACKAGE@-@VERSION@.tar.gz",
   md5 = "_MD5_",
-  dir = "@PACKAGE@-@VERSION@"
 }
 description = {
   summary = "Experimental lightweight editor",
