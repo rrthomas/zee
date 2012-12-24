@@ -1,4 +1,5 @@
-/*.rockspec
+/zee-[0-9]*.rockspec
+/zee.rockspec
 *~
 .sc-start*
 /COPYING
