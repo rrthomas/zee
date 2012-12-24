@@ -37,7 +37,8 @@ EXTRA_DIST =						\
 	FAQ						\
 	GNUmakefile					\
 	maint.mk					\
-	$(PACKAGE).rockspec.in
+	$(PACKAGE).rockspec.in				\
+	$(PACKAGE)-git.rockspec.in
 
 DISTCLEANFILES = $(PACKAGE).rockspec
 
