@@ -36,5 +36,5 @@ dnl md5sum
 AX_WITH_PROG([MD5SUM], [md5sum], [false])
 
 dnl Generate output
-AC_CONFIG_FILES(Makefile src/zee.lua m4_defn([AC_PACKAGE_TARNAME])[.rockspec] m4_defn([AC_PACKAGE_TARNAME])[-git-1.rockspec luarocks-config.lua])
+AC_CONFIG_FILES([Makefile src/zee.lua] m4_defn([AC_PACKAGE_TARNAME])[.rockspec] m4_defn([AC_PACKAGE_TARNAME])[-git-1.rockspec luarocks-config.lua])
 AC_OUTPUT
