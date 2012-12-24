@@ -8,6 +8,16 @@
      provided the copyright notice and this notice are preserved.
 
 
+Building
+--------
+
+To build Zee in-place from a git checkout, run:
+
+    ./bootstrap && ./configure && make
+
+See ./bootstrap --help and ./configure --help for more information.
+
+
 Coding style
 ------------
 

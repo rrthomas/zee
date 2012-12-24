@@ -44,10 +44,10 @@ Run:
 
     luarocks install zee
 
-Development sources are available from the web page. When you are
-building Zee from a git checkout, you first need to run the
-`bootstrap` script to generate various files that are shipped in
-release tarballs, but not checked in to git.
+Development sources are available from the web page. You can build the
+latest development sources with:
+
+   luarocks build https://github.com/rrthomas/zee/raw/master/zee-git-1.rockspec
 
 
 REPORTING BUGS
