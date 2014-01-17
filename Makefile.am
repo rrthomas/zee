@@ -70,7 +70,7 @@ PRODUCTIONSOURCES =					\
 
 $(PACKAGE)/init.lua: Makefile.am $(PACKAGE)/init.lua.in
 	cat $(PACKAGE)/init.lua.in > $@
-	for i in $(LUA_RUNTIME); do echo 'require ("$(PACKAGE)/'`echo $$i | sed -e 's|^$(PACKAGE)/||;s|\\.lua$$||'`'")' >> $@; done
+	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|\\.lua$$||'`'")' >> $@; done
 
 install-data-hook:
 	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(LUA_ENV) $(LUA) $(DESTDIR)$(bindir)/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()" > $@.tmp
