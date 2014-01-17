@@ -1,4 +1,4 @@
--- CUA key bindings
+-- Emacs key bindings
 
 -- Command execution
 key_bind ("Alt-x", "execute-command")
@@ -37,7 +37,7 @@ key_bind ("Ctrl-v", "move-next-page")
 key_bind ("Ctrl-Home", "move-start-file")
 key_bind ("Alt-<", "move-start-file")
 key_bind ("Ctrl-End", "move-end-file")
-key_bind ("Alt->," "move-end-file")
+key_bind ("Alt->,", "move-end-file")
 -- Window
 key_bind ("Ctrl-l", "view-refresh")
 
