@@ -22,7 +22,7 @@ CLOC = cloc --autoconf
 ACLOCAL_AMFLAGS = -I m4
 
 LUA_PATH ?= ;
-LUA_ENV = LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
+LUA_ENV = LUA_INIT= LUA_INIT_5_2= LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
 
 CLEANFILES =
 MAINTAINERCLEANFILES =
