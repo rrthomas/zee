@@ -25,12 +25,9 @@ LUA_PATH ?= ;
 LUA_ENV = LUA_INIT= LUA_INIT_5_2= LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
 
 CLEANFILES =
-MAINTAINERCLEANFILES =
 
 install_edit = sed \
 	-e 's|^require ("|require ("$(PACKAGE)/|g'
-
-ROCKSPEC = $(PACKAGE)-$(VERSION)-1.rockspec
 
 doc_DATA = FAQ
 
@@ -45,7 +42,7 @@ loc-tests:
 
 WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_INIT= LUA_INIT_5_2= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
 
-ockspecs:
+rockspecs:
 	rm -f *.rockspec
 	$(LUA) mkrockspecs.lua $(PACKAGE) $(VERSION)
 	$(LUA) mkrockspecs.lua $(PACKAGE) git
