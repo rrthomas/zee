@@ -1,5 +1,6 @@
 /zee-[0-9]*.rockspec
 /zee.rockspec
+/zee-git-1.rockspec
 *~
 .sc-start*
 /COPYING
