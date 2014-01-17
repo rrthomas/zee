@@ -86,7 +86,7 @@ install-exec-hook:
 
 install-data-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
-	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(pkgdatadir)/$(PACKAGE).lua
+	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(datadir)/$(PACKAGE).lua
 	rm -f $@.tmp
 
 EXTRA_DIST +=						\
