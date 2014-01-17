@@ -66,7 +66,7 @@ PRODUCTIONSOURCES =					\
 
 $(top_builddir)/src/loadprog.lua: src/Makefile.am $(top_srcdir)/src/loadprog.lua.in
 	cat $(top_srcdir)/src/loadprog.lua.in > $@
-	$(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+) >= ([%d%.]+)'); if l then local name = modules[l] or l; print (name .. ' = require_version (\"' .. name .. '\", \"' .. v .. '\")') end end, dependencies)" >> $@
+	$(LUA_ENV) $(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+) >= ([%d%.]+)'); if l then local name = modules[l] or l; print (name .. ' = require_version (\"' .. name .. '\", \"' .. v .. '\")') end end, dependencies)" >> $@
 	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'")' >> $@; done
 
 $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
@@ -74,7 +74,7 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
 	$(inplace_edit) '$@.lua' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-	$(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
+	$(LUA_ENV) $(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
 
 $(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
 	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(builddir)/src/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
