@@ -74,7 +74,7 @@ $(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
 	$(inplace_edit) '$@.in' >$@.tmp
 	mv $@.tmp $@
 	chmod +x $@
-#	$(LUA_ENV) $(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
+	$(LUA_ENV) $(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
 
 $(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
 	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(builddir)/src/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
