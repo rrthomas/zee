@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-doc_DATA += src/dot$(PACKAGE).sample
-
 BUILT_SOURCES =						\
 	src/$(PACKAGE).lua				\
 	src/$(PACKAGE).in
@@ -69,34 +67,24 @@ $(top_builddir)/src/$(PACKAGE).lua: src/Makefile.am $(top_srcdir)/src/$(PACKAGE)
 	$(LUA_ENV) $(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+)'); if l and l ~= 'lua' then local name = modules[l] or l; print (name .. ' = require (\"' .. name .. '\")') end end, dependencies)" >> $@
 	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'")' >> $@; done
 
-$(top_builddir)/src/$(PACKAGE): $(PRODUCTIONSOURCES) $(BUILT_SOURCES) Makefile
-	rm -f $@ $@.tmp
-	$(inplace_edit) '$@.in' >$@.tmp
-	mv $@.tmp $@
-	chmod +x $@
-	$(LUA_ENV) $(top_builddir)/src/$(PACKAGE) --version >/dev/null || ( cat $@ && rm $@ )
-
-$(top_builddir)/src/dot$(PACKAGE).sample: src/variables.lua build-aux/mkdot$(PACKAGE).lua $(top_builddir)/src/$(PACKAGE)
-	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(builddir)/src/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
-
 install-exec-hook:
-	$(install_edit) '$(top_builddir)/src/$(PACKAGE).in' >$@.tmp
+	$(install_edit) '$(top_builddir)/src/$(PACKAGE)' >$@.tmp
 	$(INSTALL_SCRIPT) $@.tmp $(DESTDIR)$(bindir)/$(PACKAGE)
 	rm -f $@.tmp
 
 install-data-hook:
 	$(install_edit) '$(top_builddir)/src/$(PACKAGE).lua' >$@.tmp
 	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(datadir)/$(PACKAGE).lua
+	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(LUA_ENV) $(LUA) $(DESTDIR)$(bindir)/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
 	rm -f $@.tmp
 
 EXTRA_DIST +=						\
 	$(LUA_RUNTIME)					\
-	src/$(PACKAGE).in.in				\
+	src/$(PACKAGE).in				\
 	src/$(PACKAGE).lua.in
 
 CLEANFILES +=						\
 	src/$(PACKAGE)
 
 DISTCLEANFILES +=					\
-	$(BUILT_SOURCES)				\
-	src/dot$(PACKAGE).sample
+	$(BUILT_SOURCES)

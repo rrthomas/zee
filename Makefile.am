@@ -30,9 +30,6 @@ MAINTAINERCLEANFILES =
 install_edit = sed \
 	-e 's|^require ("|require ("$(PACKAGE)/|g'
 
-inplace_edit = sed \
-	-e 's|@in_tree_lua_path[@]|$(abs_top_srcdir)/src/?.lua;$(abs_top_builddir)/src/?.lua|g'
-
 EXTRA_DIST =						\
 	FAQ						\
 	GNUmakefile					\
