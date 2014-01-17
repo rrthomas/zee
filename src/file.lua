@@ -106,7 +106,7 @@ function read_file (filename)
     posix.close (h)
   end
   if not buf.filename then
-    return minibuf_error (string.format ("Error reading file `%s': %s"), filename, posix.errno ())
+    return minibuf_error (string.format ("Error reading file `%s': %s", filename, posix.errno ()))
   end
 end
 
