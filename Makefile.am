@@ -28,7 +28,7 @@ CLEANFILES =
 
 doc_DATA = FAQ
 
-# Cannot use $(PACKAGE)
+# Cannot use $(PACKAGE) in the following line
 include zee/Makefile.am
 include tests/Makefile.am
 
