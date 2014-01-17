@@ -1,2 +1,2 @@
 curses = require "curses" -- part of luaposix
-require "std.strict" -- optional stdlib module
+--require "std.strict" -- optional stdlib module: FIXME get this working again
