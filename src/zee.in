@@ -1,0 +1,52 @@
+#!/bin/sh
+A=--[[ exec /home/rrt/local/bin/x86_64-linux-gnu/lua "$0" "$@"  # -*- mode: lua; -*- ]]A
+--
+-- Program initialisation
+--
+-- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+--
+-- This file is part of Zee.
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by
+-- the Free Software Foundation; either version 3, or (at your option)
+-- any later version.
+--
+-- This program is distributed in the hope that it will be useful, but
+-- WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-- General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+-- FIXME: Put program in a single file? (Could use folding to make
+-- it easy to edit/navigate; wrap modules in do...end)
+
+-- Constants set by configure
+PACKAGE = "zee"
+PACKAGE_NAME = "Zee"
+PACKAGE_BUGREPORT = "zee-devel@lists.sourceforge.net"
+VERSION = "0.7"
+
+-- Remove current directory from package.path
+package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
+
+-- Fudge package.path when running in-tree
+local IN_TREE_LUA_PATH = "@in_tree_lua_path@"
+if IN_TREE_LUA_PATH ~= "" then
+  package.path = IN_TREE_LUA_PATH .. ";" .. package.path
+end
+require "luarocks.loader"
+require (PACKAGE)
+
+
+local function err (err)
+  term_close ()
+  print ("Internal error. Please report this bug with steps to reproduce the problem.")
+  print (debug.traceback(err, 2))
+  os.exit (2)
+end
+
+xpcall (main, err)
