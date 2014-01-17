@@ -30,7 +30,7 @@ local default = {
   },
   build = {
     type = "command",
-    build_command = "LUA=$(LUA) CPPFLAGS=-I$(LUA_INCDIR) autoreconf -i && ./configure --prefix=$(PREFIX) --libdir=$(LIBDIR) --datadir=$(LUADIR) && make clean && make",
+    build_command = "LUA=$(LUA) autoreconf -i && ./configure --prefix=$(PREFIX) --libdir=$(LIBDIR) --datadir=$(LUADIR) && make clean && make",
     install_command = "make install",
     copy_directories = {},
   },
