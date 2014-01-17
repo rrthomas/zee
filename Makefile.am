@@ -38,17 +38,19 @@ include src/Makefile.am
 include tests/Makefile.am
 
 loc:
-	$(CLOC) $(PRODUCTIONSOURCES) $(srcdir)/build-aux/mkdot$(PACKAGE).lua
+	$(CLOC) $(PRODUCTIONSOURCES) $(srcdir)/build-aux/mkdot$(PACKAGE).lua $(srcdir)/mkrockspecs.lua $(srcdir)/rockspecs.lua
 
 loc-tests:
 	$(CLOC) $(ALL_TESTS) $(srcdir)/build-aux/run-tests.lua
 
 WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_INIT= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
 
-$(ROCKSPEC): $(PACKAGE).rockspec
-	cp $(PACKAGE).rockspec $@
+ockspecs:
+	rm -f *.rockspec
+	$(LUA) mkrockspecs.lua $(PACKAGE) $(VERSION)
+	$(LUA) mkrockspecs.lua $(PACKAGE) git
 
-release: $(ROCKSPEC)
+release: rockspecs
 	git diff --exit-code && \
 	git push && \
 	woger github $(WOGER_ARGS) && \

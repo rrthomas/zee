@@ -29,5 +29,5 @@ AC_SUBST([LUA_VERSION], [5.2])
 AX_PROG_LUA([$LUA_VERSION])
 
 dnl Generate output
-AC_CONFIG_FILES([Makefile src/zee] m4_defn([AC_PACKAGE_TARNAME])[.rockspec] m4_defn([AC_PACKAGE_TARNAME])[-git-1.rockspec luarocks-config.lua])
+AC_CONFIG_FILES([Makefile src/zee luarocks-config.lua])
 AC_OUTPUT

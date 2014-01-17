@@ -1,11 +1,8 @@
 /zee-[0-9]*.rockspec
-/zee.rockspec
 /zee-git-1.rockspec
 *~
-.sc-start*
 /COPYING
 /ChangeLog
-/GNUmakefile
 /INSTALL
 /README-release
 /aclocal.m4
@@ -16,11 +13,8 @@
 /config.status.lineno
 /configure
 /configure.lineno
-/gnulib
-/lib
 /luarocks
 /luarocks-config.lua
-/maint.mk
 /release-notes*
 /zee*.tar.gz
 Makefile
