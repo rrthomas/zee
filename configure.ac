@@ -20,7 +20,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT([Zee], [0.7], [zee-devel@lists.sourceforge.net])
+AC_INIT([Zee], [0.7.1], [zee-devel@lists.sourceforge.net])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
