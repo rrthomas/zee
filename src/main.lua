@@ -1,6 +1,6 @@
 -- Program invocation, startup and shutdown
 --
--- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2014 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -68,11 +68,11 @@ thisflag = {}
 lastflag = {}
 
 
-options = {
-  Option {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
-  -- FIXME: Option {{"batch", 'b'}, "run non-interactively"},
-  Option {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
-  Option {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
+prog.options = {
+  {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
+  -- FIXME: {{"batch", 'b'}, "run non-interactively"},
+  {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
+  {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
 }
 
 local function segv_sig_handler (signo)
@@ -99,7 +99,7 @@ end
 
 function main ()
   signal_init ()
-  getopt.processArgs ()
+  getopt.processArgs (prog)
 
   if #arg ~= 1 and not (#arg == 0 and getopt.opt.eval) then
     getopt.usage ()

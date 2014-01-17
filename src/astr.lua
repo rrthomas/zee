@@ -1,6 +1,6 @@
 -- Efficient string buffers
 --
--- Copyright (c) 2011-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2011-2014 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -16,6 +16,8 @@
 --
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+local Object = require "std.object"
 
 alien.default.memchr:types ("pointer", "pointer", "int", "size_t")
 -- FIXME: Add implementation for systems lacking memrchr

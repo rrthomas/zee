@@ -16,7 +16,7 @@ description = {
 }
 dependencies = {
   "lua == @LUA_VERSION@",
-  "stdlib == 28",
+  "stdlib >= 34",
   "luaposix >= 5.1.23",
   "lrexlib-gnu >= 2.7.1",
   "alien >= 0.7.0",
