@@ -1,6 +1,6 @@
 # Tests Makefile.am
 #
-# Copyright (c) 1997-2012 Free Software Foundation, Inc.
+# Copyright (c) 1997-2014 Free Software Foundation, Inc.
 #
 # This file is part of Zee.
 #
@@ -46,11 +46,6 @@ TESTS_ENVIRONMENT =					\
 	abs_builddir=$(abs_builddir)			\
 	PACKAGE=$(PACKAGE)				\
 	TERM=$(TERM)
-
-EXTRA_DIST +=						\
-	$(ALL_TESTS)					\
-	$(TEST_OUTPUTS)					\
-	tests/test.input
 
 # Use to find which test hangs:
 check-debug:

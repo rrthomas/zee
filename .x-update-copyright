@@ -1,4 +1,0 @@
-bootstrap
-build-aux/extract-trace
-build-aux/options-parser
-m4/ax_.*\.m4

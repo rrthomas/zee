@@ -30,18 +30,10 @@ MAINTAINERCLEANFILES =
 install_edit = sed \
 	-e 's|^require ("|require ("$(PACKAGE)/|g'
 
-EXTRA_DIST =						\
-	FAQ						\
-	GNUmakefile					\
-	maint.mk					\
-	$(PACKAGE).rockspec.in				\
-	$(PACKAGE)-git.rockspec.in
-
 ROCKSPEC = $(PACKAGE)-$(VERSION)-1.rockspec
 
 doc_DATA = FAQ
 
-include build-aux/Makefile.am
 include src/Makefile.am
 include tests/Makefile.am
 
