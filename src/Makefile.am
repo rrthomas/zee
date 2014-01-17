@@ -62,7 +62,6 @@ PRODUCTIONSOURCES =					\
 
 $(top_builddir)/src/$(PACKAGE).lua: src/Makefile.am $(top_srcdir)/src/$(PACKAGE).lua.in
 	cat $(top_srcdir)/src/$(PACKAGE).lua.in > $@
-	$(LUA_ENV) $(LUA) -e "require 'std'; loadfile ('$(PACKAGE).rockspec') (); local modules = {stdlib = 'std', luaposix = 'posix', ['lrexlib-gnu'] = 'rex_gnu'}; list.map (function (s) local l, v = s:match ('([%w-_]+)'); if l and l ~= 'lua' then local name = modules[l] or l; print (name .. ' = require (\"' .. name .. '\")') end end, dependencies)" >> $@
 	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|^src/||;s|\\.lua$$||'`'")' >> $@; done
 
 install-exec-hook:

@@ -1,2 +1,7 @@
+require "std"
+posix = require "posix"
+rex_gnu = require "rex_gnu"
+alien = require "alien"
+colors = require "ansicolors"
 curses = require "curses" -- part of luaposix
 --require "std.strict" -- optional stdlib module: FIXME get this working again
