@@ -25,8 +25,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
 dnl Lua
-AC_SUBST([LUA_VERSION], [5.2])
-AX_PROG_LUA([$LUA_VERSION])
+AX_PROG_LUA([5.2])
 
 dnl Generate output
 AC_CONFIG_FILES([Makefile src/zee luarocks-config.lua])
