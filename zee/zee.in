@@ -3,7 +3,7 @@ A=--[[ exec @LUA@ "$0" "$@"  # -*- mode: lua; -*- ]]A
 --
 -- Program initialisation
 --
--- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2014 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -26,9 +26,6 @@ PACKAGE = "@PACKAGE@"
 PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_BUGREPORT = "@PACKAGE_BUGREPORT@"
 VERSION = "@VERSION@"
-
--- Remove current directory from package.path
-package.path = package.path:gsub (";%./%?%.lua", ""):gsub ("^%./%?%.lua;", "")
 
 require "luarocks.loader"
 require (PACKAGE)

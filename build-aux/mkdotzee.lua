@@ -1,6 +1,6 @@
 -- Produce dotzee.sample
 --
--- Copyright (c) 2012 Free Software Foundation, Inc.
+-- Copyright (c) 2012-2014 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -19,14 +19,9 @@
 
 -- This script should be run as zee -e "loadfile ('script.lua') ()"
 
-local h = io.open ("src/dot" .. os.getenv ("PACKAGE") .. ".sample", "w")
-if not h then
-  error ()
-end
-
 -- Don't note where the contents of this file comes from or that it's
 -- auto-generated, because it's ugly in a user configuration file.
-h:write (
+io.write (
   [[
 -- ]] .. os.getenv ("PACKAGE_NAME") .. [[ configuration
 
@@ -37,10 +32,10 @@ h:write (
 
 for name, var in pairs (env) do
   if not command_exists (name) then
-    h:writelines ("-- " .. var.doc:gsub ("\n", "\n; "),
-                  "-- Default value is " .. var.val .. ".",
-                  "call_command (\"preferences-set-variable\", \"" .. name .. "\", \"" .. var.val .. "\")",
-                  "")
+    io.writelines ("-- " .. var.doc:gsub ("\n", "\n; "),
+                   "-- Default value is " .. var.val .. ".",
+                   "call_command (\"preferences-set-variable\", \"" .. name .. "\", \"" .. var.val .. "\")",
+                   "")
   end
 end
 

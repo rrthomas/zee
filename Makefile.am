@@ -22,16 +22,14 @@ CLOC = cloc --autoconf
 ACLOCAL_AMFLAGS = -I m4
 
 LUA_PATH ?= ;
-LUA_ENV = LUA_INIT= LUA_INIT_5_2= LUA_PATH="$(abs_srcdir)/src/?.lua;$(LUA_PATH)"
+LUA_ENV = LUA_INIT= LUA_INIT_5_2= LUA_PATH="$(abs_srcdir)/?.lua;$(abs_srcdir)/?/init.lua;$(LUA_PATH)"
 
 CLEANFILES =
 
-install_edit = sed \
-	-e 's|^require ("|require ("$(PACKAGE)/|g'
-
 doc_DATA = FAQ
 
-include src/Makefile.am
+# Cannot use $(PACKAGE)
+include zee/Makefile.am
 include tests/Makefile.am
 
 loc:
