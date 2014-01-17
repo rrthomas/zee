@@ -1,6 +1,6 @@
 # Build-aux Makefile.am
 #
-# Copyright (c) 2012 Free Software Foundation, Inc.
+# Copyright (c) 2012-2014 Free Software Foundation, Inc.
 #
 # This file is part of Zee.
 #
@@ -17,8 +17,3 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-EXTRA_DIST +=						\
-	build-aux/extract-trace				\
-	build-aux/options-parser			\
-	build-aux/run-tests.lua				\
-	build-aux/mkdot$(PACKAGE).lua

@@ -37,8 +37,6 @@ EXTRA_DIST =						\
 	$(PACKAGE).rockspec.in				\
 	$(PACKAGE)-git.rockspec.in
 
-DISTCLEANFILES = $(PACKAGE).rockspec
-
 ROCKSPEC = $(PACKAGE)-$(VERSION)-1.rockspec
 
 doc_DATA = FAQ
@@ -48,20 +46,15 @@ include src/Makefile.am
 include tests/Makefile.am
 
 loc:
-	$(CLOC) $(PRODUCTIONSOURCES) $(srcdir)/build-aux/mkdot$(PACKAGE).lua $(srcdir)/cfg.mk $(srcdir)/bootstrap.conf
+	$(CLOC) $(PRODUCTIONSOURCES) $(srcdir)/build-aux/mkdot$(PACKAGE).lua
 
 loc-tests:
 	$(CLOC) $(ALL_TESTS) $(srcdir)/build-aux/run-tests.lua
 
-distcheck-hook: syntax-check
-
 WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_INIT= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
 
-# Depend on distcheck so that 'make release' runs distcheck before
-# making the rockspec, so the release archive MD5sum is correct in the
-# rockspec
-$(ROCKSPEC): $(PACKAGE).rockspec distcheck
-	sed -e 's/_MD5_/'`$(MD5SUM) $(distdir).tar.gz | cut -d " " -f 1`'/g' < $(PACKAGE).rockspec > $@
+$(ROCKSPEC): $(PACKAGE).rockspec
+	cp $(PACKAGE).rockspec $@
 
 release: $(ROCKSPEC)
 	git diff --exit-code && \

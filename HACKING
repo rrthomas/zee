@@ -1,21 +1,11 @@
                         Zee developers' notes
                         ---------------------
 
-     Copyright (c) 2011-2012 Free Software Foundation, Inc.
+     Copyright (c) 2011-2014 Free Software Foundation, Inc.
 
      Copying and distribution of this file, with or without
      modification, are permitted in any medium without royalty
      provided the copyright notice and this notice are preserved.
-
-
-Building
---------
-
-To build Zee in-place from a git checkout, run:
-
-    ./bootstrap && ./configure && make
-
-See ./bootstrap --help and ./configure --help for more information.
 
 
 Coding style

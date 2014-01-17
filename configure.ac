@@ -24,16 +24,9 @@ AC_INIT([Zee], [0.7], [zee-devel@lists.sourceforge.net])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
-dnl Set up gnulib
-gl_EARLY
-gl_INIT
-
 dnl Lua
 AC_SUBST([LUA_VERSION], [5.2])
 AX_PROG_LUA([$LUA_VERSION])
-
-dnl md5sum
-AX_WITH_PROG([MD5SUM], [md5sum], [false])
 
 dnl Generate output
 AC_CONFIG_FILES([Makefile src/zee] m4_defn([AC_PACKAGE_TARNAME])[.rockspec] m4_defn([AC_PACKAGE_TARNAME])[-git-1.rockspec luarocks-config.lua])

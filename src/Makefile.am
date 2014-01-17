@@ -47,11 +47,9 @@ LUA_RUNTIME =						\
 	src/cua_bindings.lua				\
 	src/term_curses.lua
 
-dist_pkgdata_DATA =					\
+pkgdata_DATA = src/$(PACKAGE).lua			\
 	$(LUA_RUNTIME)					\
 	src/emacs_bindings.lua
-
-pkgdata_DATA = src/$(PACKAGE).lua
 
 PRODUCTIONSOURCES =					\
 	$(LUA_RUNTIME)					\
@@ -78,13 +76,5 @@ install-data-hook:
 	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(LUA_ENV) $(LUA) $(DESTDIR)$(bindir)/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()"
 	rm -f $@.tmp
 
-EXTRA_DIST +=						\
-	$(LUA_RUNTIME)					\
-	src/$(PACKAGE).in				\
-	src/$(PACKAGE).lua.in
-
 CLEANFILES +=						\
 	src/$(PACKAGE)
-
-DISTCLEANFILES +=					\
-	$(BUILT_SOURCES)

@@ -1,8 +1,8 @@
 package="@PACKAGE@"
 version="@VERSION@-1"
 source = {
-  url = "https://github.com/downloads/rrthomas/@PACKAGE@/@PACKAGE@-@VERSION@.tar.gz",
-  md5 = "_MD5_",
+  url = "git://github.com/rrthomas/@PACKAGE@.git",
+  tag = "v@VERSION@"
 }
 description = {
   summary = "Experimental lightweight editor",
@@ -23,7 +23,7 @@ dependencies = {
 }
 build = {
   type = "command",
-  build_command = "LUA=$(LUA) CPPFLAGS=-I$(LUA_INCDIR) ./configure --prefix=$(PREFIX) --libdir=$(LIBDIR) --datadir=$(LUADIR) && make clean && make",
+  build_command = "LUA=$(LUA) CPPFLAGS=-I$(LUA_INCDIR) autoreconf -i && ./configure --prefix=$(PREFIX) --libdir=$(LIBDIR) --datadir=$(LUADIR) && make clean && make",
   install_command = "make install",
   copy_directories = {}
 }
