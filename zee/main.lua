@@ -102,7 +102,7 @@ function main ()
   getopt.processArgs (prog)
 
   if #arg ~= 1 and not (#arg == 0 and getopt.opt.eval) then
-    getopt.usage ()
+    getopt.usage (prog)
     os.exit (1)
   end
 
