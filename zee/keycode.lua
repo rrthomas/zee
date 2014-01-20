@@ -1,6 +1,6 @@
 -- Key encoding and decoding functions
 --
--- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2014 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -30,7 +30,7 @@ local non_modifier_name = set.new {
 }
 local modifier_name = set.new {"Ctrl-", "Alt-"}
 
-for i in non_modifier_name:elems () do
+for i in set.elems (non_modifier_name) do
   keynametocode[i] = KBD_NONPRINT
 end
 keynametocode["Space"] = string.byte (' ')
@@ -42,12 +42,12 @@ for i = 0x0, 0x7f do
 end
 
 -- Array of key names
-local keyname = modifier_name:union (non_modifier_name)
+local keyname = set.union (modifier_name, non_modifier_name)
 
 -- Insert printable characters in the ASCII range.
 for i = 0, 0x7f do
   if posix.isprint (string.char (i)) then
-    keyname:insert (string.char (i))
+    set.insert (keyname, string.char (i))
   end
 end
 
@@ -101,7 +101,7 @@ local keycode_mt = {
 
 -- Extract a modifier prefix of a key string.
 local function getmodifier (s)
-  for match in modifier_name:elems () do
+  for match in set.elems (modifier_name) do
     if match == s:sub (1, #match) then
       return match, s:sub (#match + 1)
     end
@@ -122,7 +122,7 @@ keycode = memoize (function (chord)
       key.ALT = true
     end
   until not mod
-  if not keyname:member (tail) then return nil end
+  if not set.member (keyname, tail) then return nil end
   key.key = tail
   key.code = keynametocode[tail]
 

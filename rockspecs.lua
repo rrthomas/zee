@@ -23,7 +23,7 @@ local default = {
   },
   dependencies = {
     "lua == 5.2",
-    "stdlib >= 34",
+    "stdlib >= 37",
     "luaposix >= 5.1.23",
     "lrexlib-gnu >= 2.7.1",
     "alien >= 0.7.0",

@@ -20,24 +20,37 @@
 -- Derived constants
 VERSION_STRING = PACKAGE_NAME .. " " .. VERSION
 
-local COPYRIGHT_STRING = "Copyright (C) 2012 Free Software Foundation, Inc."
+local COPYRIGHT_STRING = ""
 
-prog = {
-  name = posix.basename (arg[0] or PACKAGE),
-  purpose = "An editor.",
-  banner = VERSION_STRING .. " by Reuben Thomas <rrt@sc3d.org>\n" ..
-    COPYRIGHT_STRING .. "\n" ..
-    PACKAGE_NAME .. " comes with ABSOLUTELY NO WARRANTY.\n" ..
-    "You may redistribute copies of " .. PACKAGE_NAME .. "\n" ..
-    "under the terms of the GNU General Public License.\n" ..
-    "For more information about these matters, see the file named COPYING.\n" ..
-    "Report bugs to " .. PACKAGE_BUGREPORT .. ".",
-  notes = "Exit status is 0 if OK, 1 if it cannot start up, for example because\n" ..
-    "of an invalid command-line argument, and 2 if it crashes or runs out\n" ..
-    "of memory.\n" ..
-    "\n" ..
-    "~/." .. PACKAGE .. " is the user init file",
-}
+local program_name = posix.basename (arg[0] or PACKAGE)
+spec = program_name .. " " .. VERSION .. [[
+
+Copyright (C) 2014 Free Software Foundation, Inc.
+]] .. PACKAGE_NAME .. " comes with ABSOLUTELY NO WARRANTY." .. [[
+You may redistribute copies of ]] .. PACKAGE_NAME .. [[
+
+under the terms of the GNU General Public License.
+For more information about these matters, see the file named COPYING.
+
+Usage: ]] .. program_name .. [[
+
+An editor.
+
+Exit status is 0 if OK, 1 if it cannot start up, for example because
+of an invalid command-line argument, and 2 if it crashes or runs out
+of memory.
+
+    ~/.]] .. PACKAGE .. [[ is the user init file
+
+  {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
+  {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
+  {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
+      --help               display this help, then exit
+      --version            display version information, then exit
+
+Report bugs to ]] .. PACKAGE_BUGREPORT .. [[.
+]]
+--    -b, --batch          run non-interactively
 
 
 -- Runtime constants
@@ -68,13 +81,6 @@ thisflag = {}
 lastflag = {}
 
 
-prog.options = {
-  {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
-  -- FIXME: {{"batch", 'b'}, "run non-interactively"},
-  {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
-  {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
-}
-
 local function segv_sig_handler (signo)
   io.stderr:write (prog.name .. ": " .. PACKAGE_NAME ..
                    " crashed. Please send a bug report to <" ..
@@ -83,7 +89,7 @@ local function segv_sig_handler (signo)
 end
 
 local function other_sig_handler (signo)
-  local msg = prog.name .. ": terminated with signal " .. signo .. ".\n" .. debug.traceback ()
+  local msg = progran_name .. ": terminated with signal " .. signo .. ".\n" .. debug.traceback ()
   io.stderr:write (msg:gsub ("\n", "\r\n"))
   editor_exit (false)
 end
@@ -99,11 +105,12 @@ end
 
 function main ()
   signal_init ()
-  getopt.processArgs (prog)
+  local OptionParser = require "std.optparse"
+  local parser = OptionParser (spec)
+  _G.arg, opts = parser:parse (_G.arg)
 
-  if #arg ~= 1 and not (#arg == 0 and getopt.opt.eval) then
-    getopt.usage (prog)
-    os.exit (1)
+  if #arg ~= 1 and not (#arg == 0 and opts.eval) then
+    parser:opterr ("Need a file or expression")
   end
 
   os.setlocale ("")
@@ -115,7 +122,7 @@ function main ()
   term_init ()
   resize_window ()
 
-  if not getopt.opt["no-init-file"] then
+  if not opts.no_init_file then
     local s = os.getenv ("HOME")
     if s then
       execute_command ("load", s .. "/." .. PACKAGE)
@@ -127,12 +134,12 @@ function main ()
   if #arg == 1 then
     ok = not read_file (arg[1])
     if ok then
-      execute_command ("move-goto-line", getopt.opt.line and getopt.opt.line[#getopt.opt.line] or 1)
+      execute_command ("move-goto-line", opts.line or 1)
     end
   end
 
   -- Evaluate Lua chunks given on the command line.
-  for _, c in ipairs (getopt.opt.eval or {}) do
+  for _, c in ipairs ({opts.eval}) do -- FIXME: Support multiple arguments again
     if execute_command ("eval", c) then
       break
     end
