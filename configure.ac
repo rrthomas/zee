@@ -24,6 +24,9 @@ AC_INIT([Zee], [0.7.1], [zee-devel@lists.sourceforge.net])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
+dnl Lua
+AX_PROG_LUA([5.2])
+
 dnl Generate output
 AC_CONFIG_FILES([Makefile zee/zee luarocks-config.lua])
 AC_OUTPUT
