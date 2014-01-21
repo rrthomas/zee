@@ -20,8 +20,6 @@
 local Object = require "std.object"
 
 alien.default.memchr:types ("pointer", "pointer", "int", "size_t")
--- FIXME: Add implementation for systems lacking memrchr
-alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")
 
 local allocation_chunk_size = 16
 AStr = Object {
@@ -101,9 +99,16 @@ AStr = Object {
     return self
   end,
 
+  rchr = function (self, c, from)
+    local b = self.buf
+    for i = from - 1, 1, -1 do
+      if b[i] == c then return i end
+    end
+  end,
+
   start_of_line = function (self, o)
-    local prev = alien.default.memrchr (self:topointer (), string.byte ('\n'), o - 1)
-    return prev and self.buf.buffer:tooffset (prev) + 1 or 1
+    local prev = self:rchr (string.byte ('\n'), o)
+    return prev and prev + 1 or 1
   end,
 
   end_of_line = function (self, o)
@@ -144,3 +149,11 @@ AStr = Object {
     return lines
   end,
 }
+
+local have_memrchr = pcall (loadstring 'alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")')
+if have_memrchr then
+  AStr.rchr = function (self, c, from)
+    local p = alien.default.memrchr(self:topointer (), c, from - 1)
+    return p and self.buf.buffer:tooffset (p)
+  end
+end
