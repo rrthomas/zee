@@ -150,10 +150,15 @@ AStr = Object {
   end,
 }
 
-local have_memrchr = pcall (loadstring 'alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")')
-if have_memrchr then
-  AStr.rchr = function (self, c, from)
+local have_memrchr, rchr = pcall (loadstring [[
+  alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")')
+  
+  return function (self, c, from)
     local p = alien.default.memrchr(self:topointer (), c, from - 1)
     return p and self.buf.buffer:tooffset (p)
   end
+]])
+
+if have_memrchr then
+  AStr.rchr = rchr
 end
