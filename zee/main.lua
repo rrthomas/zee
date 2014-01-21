@@ -139,7 +139,10 @@ function main ()
   end
 
   -- Evaluate Lua chunks given on the command line.
-  for _, c in ipairs ({opts.eval}) do -- FIXME: Support multiple arguments again
+  if type (opts.eval) == "string" then -- If only one argument, put it in a table
+    opts.eval = {opts.eval}
+  end
+  for _, c in ipairs (opts.eval) do
     if execute_command ("eval", c) then
       break
     end
