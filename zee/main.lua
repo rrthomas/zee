@@ -142,7 +142,7 @@ function main ()
   if type (opts.eval) == "string" then -- If only one argument, put it in a table
     opts.eval = {opts.eval}
   end
-  for _, c in ipairs (opts.eval) do
+  for _, c in ipairs (opts.eval or {}) do
     if execute_command ("eval", c) then
       break
     end
