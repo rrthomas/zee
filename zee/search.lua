@@ -36,7 +36,6 @@ local re_find_err
 
 local function find_substr (as, s, forward, notbol, noteol, icase)
   local ret
-  local from, to = 1, #as
   local ok, r = pcall (rex_gnu.new, s, bit32.bor (re_flags.SYNTAX_EGREP, icase and re_flags.ICASE or 0))
   if ok then
     local ef = 0
@@ -52,9 +51,9 @@ local function find_substr (as, s, forward, notbol, noteol, icase)
     local match_from, match_to = r:find (as, nil, ef)
     if match_from then
       if forward then
-        ret = match_to + from
+        ret = match_to + 1
       else
-        ret = match_from + from - 1
+        ret = match_from
       end
     end
   else
@@ -162,7 +161,6 @@ local function isearch (forward, pattern)
     end
 
     if #pattern > 0 then
-      local pt = get_buffer_pt (buf)
       goto_offset (cur)
       last = search (pattern, forward)
       if not c then
