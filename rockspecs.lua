@@ -14,10 +14,9 @@ local default = {
   description = {
     summary = "Experimental lightweight editor",
     detailed = [[
-      Zee is a lightweight editor. Zee is aimed at small footprint
-      systems and quick editing sessions (it starts up and shuts down
-      instantly).
-   ]],
+Zee is a lightweight editor. Zee is aimed at small footprint
+systems and quick editing sessions (it starts up and shuts down
+instantly).]],
     homepage = "http://github.com/rrthomas/"..package_name.."/",
     license = "GPLv3+",
   },
