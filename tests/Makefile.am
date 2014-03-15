@@ -52,7 +52,7 @@ check-debug:
 	$(LUA_ENV) $(TESTS_ENVIRONMENT) $(RUNTESTS) $(TESTS_NORMAL) > /dev/null
 
 # FIXME: nproc and xargs --max-procs are GNU-specific
-check-local: $(builddir)/src/zee
+check-local: $(builddir)/zee/zee
 	COLUMNS=80 LINES=24 $(TESTS_ENVIRONMENT) $(RUNTESTS) $(TESTS_FIXED_SCREEN) > /dev/null
 	NPROC=`nproc`; \
 	echo $(TESTS_NORMAL) | $(LUA_ENV) $(TESTS_ENVIRONMENT) xargs --max-procs=$$NPROC --max-args=$$(( `echo $(TESTS_NORMAL) | wc -w` / $$NPROC + 1 )) $(RUNTESTS) > /dev/null
