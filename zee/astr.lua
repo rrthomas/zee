@@ -77,8 +77,9 @@ AStr = Object {
   end,
 
   remove = function (self, from, n)
-    assert (from + n <= #self + 1)
-    self:move (from + n, from, n)
+    local b, e, eob = from, from + n, #self + 1
+    assert (e <= eob)
+    self:move (e, b, eob - e)
     self:set_len (#self - n)
   end,
 
