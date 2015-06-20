@@ -1,6 +1,6 @@
 -- Key encoding and decoding functions
 --
--- Copyright (c) 2010-2014 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2015 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -22,13 +22,13 @@
 local KBD_NONPRINT = 283
 local keynametocode = {}
 
-local non_modifier_name = set.new {
+local non_modifier_name = set {
   "Backspace", "Delete", "Down", "End", "F1", "F10", "F11", "F12",
   "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "Home", "Insert",
   "Left", "PageDown", "PageUp", "Return", "Right", "Tab", "Up",
   "Space", "Escape"
 }
-local modifier_name = set.new {"Ctrl-", "Alt-"}
+local modifier_name = set {"Ctrl-", "Alt-"}
 
 for i in set.elems (non_modifier_name) do
   keynametocode[i] = KBD_NONPRINT
@@ -110,7 +110,7 @@ local function getmodifier (s)
 end
 
 -- Convert a single keychord string to its key code.
-keycode = memoize (function (chord)
+keycode = functional.memoize (function (chord)
   local key, tail = setmetatable ({}, keycode_mt), chord
 
   local mod

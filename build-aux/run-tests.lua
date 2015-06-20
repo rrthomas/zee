@@ -1,6 +1,6 @@
 -- run-tests
 --
--- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2015 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -18,7 +18,7 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 posix = require "posix"
-require "std"
+std = require "std".barrel ()
 
 -- N.B. Tests that use macro-play must note that keyboard input
 -- is only evaluated once the script has finished running.
@@ -31,22 +31,22 @@ local builddir = os.getenv ("builddir") or "."
 local pass = 0
 local fail = 0
 
-local editor_cmd = io.catfile (builddir, "src", os.getenv ("PACKAGE"))
-local srcdir_pat = string.escapePattern (srcdir)
+local editor_cmd = std.io.catfile (builddir, "zee", os.getenv ("PACKAGE"))
+local srcdir_pat = string.escape_pattern (srcdir)
 
 function run_test (test, name, edit_file, cmd, args)
-  posix.system ("cp", io.catfile (srcdir, "tests", "test.input"), edit_file)
-  posix.system ("chmod", "+w", edit_file)
-  local status = posix.system (cmd, unpack (args))
+  posix.spawn {"cp", io.catfile (srcdir, "tests", "test.input"), edit_file}
+  posix.spawn {"chmod", "+w", edit_file}
+  local status = posix.spawn {cmd, table.unpack (args)}
   if status == 0 then
-    if posix.system ("diff", test .. ".output", edit_file) == 0 then
-      posix.system ("rm", "-f", edit_file, edit_file .. "~")
+    if posix.spawn {"diff", test .. ".output", edit_file} == 0 then
+      posix.spawn {"rm", "-f", edit_file, edit_file .. "~"}
       return true
     else
-      debug (name .. " failed to produce correct output")
+      std.debug (name .. " failed to produce correct output")
     end
   else
-    debug (name .. " failed to run with error code " .. tostring (status))
+    std.debug (name .. " failed to run with error code " .. tostring (status))
   end
 end
 
@@ -55,9 +55,9 @@ for _, name in ipairs (arg) do
   if io.open (test .. ".output") ~= nil then
     name = test:gsub (io.catfile (srcdir, "tests/"), "")
     local edit_file = test:gsub ("^" .. srcdir_pat, builddir) .. ".input"
-    local args = {"-no-init-file", edit_file, "-eval", ("loadfile('%s.lua') ()"):format (test:gsub ("^" .. srcdir_pat, abs_srcdir))}
+    local args = {"--no-init-file", edit_file, "--eval", ("loadfile('%s.lua') ()"):format (test:gsub ("^" .. srcdir_pat, abs_srcdir))}
 
-    posix.system ("mkdir", "-p", posix.dirname (edit_file))
+    posix.spawn {"mkdir", "-p", posix.dirname (edit_file)}
 
     if run_test (test, name, edit_file, editor_cmd, args) then
       pass = pass + 1
@@ -67,7 +67,7 @@ for _, name in ipairs (arg) do
   end
 end
 
-posix.system ("tset")
-debug (string.format ("%d pass(es) and %d failure(s)", pass, fail))
+posix.spawn {"tset"}
+std.debug (string.format ("%d pass(es) and %d failure(s)", pass, fail))
 
 os.exit (fail)

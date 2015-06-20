@@ -56,10 +56,10 @@ function term_init ()
     white   = curses.COLOR_WHITE,
   }
 
-  key_buf = {}
+  key_buf = list {}
 
   -- from curses key presses to editor keycodes
-  codetokey = tree.new ()
+  codetokey = tree {}
 
   -- from editor keycodes back to curses key presses
   keytocode = {}
@@ -201,7 +201,7 @@ function term_getkey_unfiltered (delay)
 end
 
 local function unget_codes (codes)
-  key_buf = list.concat (key_buf, list.reverse (codes))
+  key_buf = list.concat (key_buf, std.ireverse (codes))
 end
 
 function term_getkey (delay)
@@ -225,7 +225,7 @@ function term_getkey (delay)
           break
         elseif key == nil then
           -- ...no match, rebuffer unmatched chars and return Escape.
-          unget_codes (list.tail (codes))
+          unget_codes (list.tail (list (codes)))
           key = keycode "Escape"
           break
         end
@@ -236,9 +236,11 @@ function term_getkey (delay)
   else
     -- Detecting non-Escape involves fetching chars and matching...
     while true do
-      table.insert (codes, c)
+      if c ~= nil then
+        table.insert (codes, c)
+      end
       key = codetokey[codes]
-      if key and key.key then
+      if c == nil or (key and key.key) then
         -- ...code lookup matched a key, return it.
         break
       elseif key == nil then
@@ -256,6 +258,9 @@ function term_getkey (delay)
     if another then key = "Alt-" + another end
   end
 
+  if c == nil then
+    return nil
+  end
   return key
 end
 
@@ -271,11 +276,11 @@ function term_keytobyte (key)
 end
 
 function term_ungetkey (key)
-  local codevec = {}
+  local codevec = list {}
 
   if key ~= nil then
     if key.ALT then
-      codevec = { ESC }
+      codevec = list { ESC }
       key = key - "Alt-"
     end
 

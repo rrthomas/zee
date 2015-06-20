@@ -44,7 +44,7 @@ Set a variable to the specified value.
                                            completion_new (filter (function (e)
                                                                      return not command_exists (e)
                                                                    end,
-                                                                   list.elems, table.keys (env))),
+                                                                   std.ielems, table.keys (env))),
                                            "variable"))
     if var == "" then
       return true

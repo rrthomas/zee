@@ -1,6 +1,6 @@
 -- Generate rockspecs from a prototype with variants
 
-require "std"
+local tree = require "std.tree"
 
 if select ("#", ...) < 2 then
   io.stderr:write "Usage: mkrockspecs PACKAGE VERSION\n"
@@ -30,14 +30,15 @@ function format (x, indent)
   end
 end
 
+flavour = "" -- a global, visible in loadfile
 for f, spec in pairs (loadfile ("rockspecs.lua") ()) do
   if f ~= "default" then
     local specfile = package_name.."-"..(f ~= "" and f:lower ().."-" or "")..version.."-1.rockspec"
     h = io.open (specfile, "w")
     assert (h)
-    flavour = f -- a global, visible in loadfile
+    flavour = f
     local specs = loadfile ("rockspecs.lua") () -- reload to get current flavour interpolated
-    local spec = tree.merge (tree.new (specs.default), tree.new (specs[f]))
+    local spec = tree.merge (tree (specs.default), tree (specs[f]))
     local s = ""
     for i, v in pairs (spec) do
       s = s..i.." = "..format (v, "  ").."\n"

@@ -241,7 +241,7 @@ function minibuf_read_completion (fmt, cp, class_name)
         ms = cp.match
       end
 
-      if cp.completions:member (ms) then
+      if set.member (cp.completions, ms) then
         minibuf_clear ()
         return ms
       else

@@ -73,7 +73,7 @@ $(PACKAGE)/init.lua: Makefile.am $(PACKAGE)/init.lua.in
 	for i in $(LUA_RUNTIME); do echo 'require ("'`echo $$i | sed -e 's|\\.lua$$||'`'")' >> $@; done
 
 install-data-hook:
-	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(LUA_ENV) $(LUA) $(DESTDIR)$(bindir)/$(PACKAGE) -eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()" > $@.tmp
+	PACKAGE="$(PACKAGE)" PACKAGE_NAME="$(PACKAGE_NAME)" $(LUA_ENV) $(LUA) $(DESTDIR)$(bindir)/$(PACKAGE) --eval "loadfile ('$(srcdir)/build-aux/mkdot$(PACKAGE).lua') ()" > $@.tmp
 	$(INSTALL_DATA) $@.tmp $(DESTDIR)$(pkgdatadir)/dot$(PACKAGE).sample
 	rm -f $@.tmp
 

@@ -82,7 +82,7 @@ Read command name, then run it.
                                           completion_new (filter (function (e)
                                                                     return command_exists (e)
                                                                   end,
-                                                                  list.elems, table.keys (env))),
+                                                                  std.ielems, table.keys (env))),
                                           "command")
     if name == "" then
       return true

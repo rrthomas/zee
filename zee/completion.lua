@@ -28,7 +28,7 @@
 
 -- Make a new completions table
 function completion_new (completions)
-  return {completions = set.new (completions or {}), matches = {}}
+  return {completions = set (completions or {}), matches = {}}
 end
 
 -- Write the matches in `l' in a set of columns. The width of the

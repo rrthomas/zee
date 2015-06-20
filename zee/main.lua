@@ -1,6 +1,6 @@
 -- Program invocation, startup and shutdown
 --
--- Copyright (c) 2010-2014 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2015 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -25,14 +25,17 @@ local COPYRIGHT_STRING = ""
 local program_name = posix.basename (arg[0] or PACKAGE)
 spec = program_name .. " " .. VERSION .. [[
 
-Copyright (C) 2014 Free Software Foundation, Inc.
+Copyright (C) 2015 Free Software Foundation, Inc.
 ]] .. PACKAGE_NAME .. " comes with ABSOLUTELY NO WARRANTY." .. [[
+
 You may redistribute copies of ]] .. PACKAGE_NAME .. [[
+
 
 under the terms of the GNU General Public License.
 For more information about these matters, see the file named COPYING.
 
 Usage: ]] .. program_name .. [[
+
 
 An editor.
 
@@ -42,11 +45,12 @@ of memory.
 
     ~/.]] .. PACKAGE .. [[ is the user init file
 
-  {{"no-init-file", 'q'}, "do not load ~/." .. PACKAGE},
-  {{"eval", 'e'}, "evaluate Lua chunk CHUNK", "Req", "CHUNK"},
-  {{"line", 'n'}, "start editing at line LINE", "Req", "LINE"},
-      --help               display this help, then exit
-      --version            display version information, then exit
+  -q, --no-init-file  do not load ~/.]] .. PACKAGE .. [[
+
+  -e, --eval=CHUNK    evaluate Lua chunk CHUNK
+  -n, --line=LINE     start editing at line LINE
+      --version       display version information, then exit
+      --help          display this help, then exit
 
 Report bugs to ]] .. PACKAGE_BUGREPORT .. [[.
 ]]
@@ -107,7 +111,7 @@ function main ()
   signal_init ()
   local OptionParser = require "std.optparse"
   local parser = OptionParser (spec)
-  _G.arg, opts = parser:parse (_G.arg)
+  _G.arg, _G.opts = parser:parse (_G.arg)
 
   if #arg ~= 1 and not (#arg == 0 and opts.eval) then
     parser:opterr ("Need a file or expression")

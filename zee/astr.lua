@@ -1,6 +1,6 @@
 -- Efficient string buffers
 --
--- Copyright (c) 2011-2014 Free Software Foundation, Inc.
+-- Copyright (c) 2011-2015 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -151,7 +151,7 @@ AStr = Object {
   end,
 }
 
-local have_memrchr = pcall (loadstring 'alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")')
+local have_memrchr = pcall (load 'alien.default.memrchr:types ("pointer", "pointer", "int", "size_t")')
 if have_memrchr then
   AStr.rchr = function (self, c, from)
     local p = alien.default.memrchr(self:topointer (), c, from - 1)

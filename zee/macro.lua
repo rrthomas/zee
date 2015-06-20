@@ -95,7 +95,7 @@ Play back the last macro that you defined.
   function (...)
     local m = {...}
     if #m > 0 then
-      m = list.map (keycode, m)
+      m = functional.map (keycode, std.ielems, m)
     elseif interactive () then
       m = macro
       if m == nil then

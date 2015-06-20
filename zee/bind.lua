@@ -1,6 +1,6 @@
 -- Key bindings
 --
--- Copyright (c) 2010-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2010-2015 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -99,10 +99,11 @@ function bind_printing_chars (cmd)
     end
   end
   -- Bind special key names to edit-insert-character
-  list.map (function (e)
-              bindings[tostring (keycode (e))] = cmd
-            end,
-            {"Space", "Tab", "Return"})
+  functional.map (function (e)
+                    bindings[tostring (keycode (e))] = cmd
+                  end,
+                  std.ielems,
+                  {"Space", "Tab", "Return"})
 end
 
 bind_printing_chars ("edit-insert-character")

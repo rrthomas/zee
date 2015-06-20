@@ -1,4 +1,8 @@
-require "std"
+std = require "std".barrel ()
+set = require "std.set"
+functional = require "std.functional"
+list = require "std.list"
+tree = require "std.tree"
 posix = require "posix"
 rex_gnu = require "rex_gnu"
 alien = require "alien"
