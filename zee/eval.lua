@@ -52,10 +52,10 @@ end
 
 Define ("eval",
 [[
-Evaluation a Lua chunk CHUNK.
+Evaluate a Lua chunk CHUNK.
 ]],
-  function (file)
-    local func, err = load (file)
+  function (chunk)
+    local func, err = load (chunk)
     if func == nil then
       minibuf_error (string.format ("Error evaluating Lua: %s", err))
       return true
