@@ -28,5 +28,5 @@ dnl Lua
 AX_PROG_LUA
 
 dnl Generate output
-AC_CONFIG_FILES([Makefile zee/zee luarocks-config.lua])
+AC_CONFIG_FILES([Makefile zee/zee luarocks-config.lua], [chmod +x zee/zee])
 AC_OUTPUT
