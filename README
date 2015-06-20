@@ -3,7 +3,7 @@ Zee
 
 Zee is free software, licensed under the GNU GPL.
 
-Copyright (c) 1997-2012 Free Software Foundation, Inc.
+Copyright (c) 1997-2015 Free Software Foundation, Inc.
 
 **Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
@@ -19,7 +19,7 @@ Zee's home page is at:
 
   > <https://github.com/rrthomas/zee>
 
-Zee is written in Lua 5.2 using POSIX APIs, and requires these
+Zee is written in Lua 5.3 using POSIX APIs, and requires these
 additional modules:
 
  * Lua stdlib <https://github.com/rrthomas/lua-stdlib>

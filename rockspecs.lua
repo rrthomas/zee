@@ -21,7 +21,7 @@ instantly).]],
     license = "GPLv3+",
   },
   dependencies = {
-    "lua == 5.2",
+    "lua == 5.3",
     "stdlib >= 37",
     "luaposix >= 5.1.23",
     "lrexlib-gnu >= 2.7.1",

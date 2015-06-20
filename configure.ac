@@ -1,6 +1,6 @@
 dnl configure.ac
 dnl
-dnl Copyright (c) 1997-2014 Free Software Foundation, Inc.
+dnl Copyright (c) 1997-2015 Free Software Foundation, Inc.
 dnl
 dnl This file is part of Zee.
 dnl
@@ -25,7 +25,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
 dnl Lua
-AX_PROG_LUA([5.2])
+AX_PROG_LUA
 
 dnl Generate output
 AC_CONFIG_FILES([Makefile zee/zee luarocks-config.lua])
