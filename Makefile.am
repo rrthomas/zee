@@ -97,6 +97,6 @@ release: rockspecs
 	git push && \
 	woger github $(WOGER_ARGS) && \
 	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks build $(PACKAGE)-$(VERSION)-1.rockspec && \
-	woger freecode,luarocks $(WOGER_ARGS) && \
+	woger luarocks $(WOGER_ARGS) && \
 	git tag -a -m "Release tag" v$(VERSION) && \
 	git push --tags
