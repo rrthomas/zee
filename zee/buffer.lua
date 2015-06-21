@@ -46,10 +46,12 @@ end
 local function realo_to_o (bp, o)
   if o == nil then
     return o
-  elseif o < bp.pt + bp.gap then
-    return math.min (o, bp.pt)
+  elseif o <= bp.pt then
+    return o
+  elseif o >= bp.pt + bp.gap then
+    return o - bp.gap
   end
-  return o - bp.gap
+  assert (false) -- FIXME: crash with an error
 end
 
 local function o_to_realo (bp, o)
