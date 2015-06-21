@@ -341,9 +341,7 @@ end
 
 -- Get the goal column, expanding tabs.
 function get_goalc ()
-  local s = make_string_printable (get_line ():sub (1, get_buffer_pt (buf) - get_buffer_line_o (buf)))
-  local goalc = #s
-  return goalc
+  return #make_string_printable (get_line ():sub (1, get_buffer_pt (buf) - get_buffer_line_o (buf)))
 end
 
 function set_goalc (c)
