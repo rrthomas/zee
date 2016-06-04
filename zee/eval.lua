@@ -1,6 +1,6 @@
 -- User commands
 --
--- Copyright (c) 2009-2012 Free Software Foundation, Inc.
+-- Copyright (c) 2009-2016 Free Software Foundation, Inc.
 --
 -- This file is part of Zee.
 --
@@ -50,17 +50,29 @@ function execute_command (name, ...)
   return command_exists (name) and env[name].val (...)
 end
 
+local function loadchunk (func, err)
+  if func == nil then
+    minibuf_error (string.format ("Error evaluating Lua: %s", err))
+    return true
+  end
+  return func ()
+end
+
 Define ("eval",
 [[
 Evaluate a Lua chunk CHUNK.
 ]],
   function (chunk)
-    local func, err = load (chunk)
-    if func == nil then
-      minibuf_error (string.format ("Error evaluating Lua: %s", err))
-      return true
-    end
-    return func ()
+    return loadchunk (load (chunk))
+  end
+)
+
+Define ("load",
+[[
+Load and evaluate a Lua chunk from FILE.
+]],
+  function (file)
+    return loadchunk (loadfile (file))
   end
 )
 
