@@ -85,8 +85,6 @@ loc:
 loc-tests:
 	$(CLOC) $(ALL_TESTS) $(srcdir)/build-aux/run-tests.lua
 
-WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_PATH_5_3= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
-
 rockspecs:
 	rm -f *.rockspec
 	$(LUA) mkrockspecs.lua $(PACKAGE) $(VERSION)
@@ -95,8 +93,7 @@ rockspecs:
 release: rockspecs
 	git diff --exit-code && \
 	git push && \
-	woger github $(WOGER_ARGS) && \
 	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks build $(PACKAGE)-$(VERSION)-1.rockspec && \
-	woger luarocks $(WOGER_ARGS) && \
+	woger luarocks package=$(PACKAGE) version=$(VERSION) && \
 	git tag -a -m "Release tag" v$(VERSION) && \
 	git push --tags
