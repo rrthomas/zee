@@ -1,6 +1,6 @@
 dnl configure.ac
 dnl
-dnl Copyright (c) 1997-2015 Free Software Foundation, Inc.
+dnl Copyright (c) 1997-2016 Free Software Foundation, Inc.
 dnl
 dnl This file is part of Zee.
 dnl
@@ -20,7 +20,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT([Zee], [0.7.1], [https://github.com/rrthomas/zee])
+AC_INIT([Zee], [0.7.2], [https://github.com/rrthomas/zee])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options foreign silent-rules])
 
