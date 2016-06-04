@@ -52,7 +52,7 @@ of memory.
       --version       display version information, then exit
       --help          display this help, then exit
 
-Report bugs to ]] .. PACKAGE_BUGREPORT .. [[.
+Please report bugs at ]] .. PACKAGE_BUGREPORT .. [[
 ]]
 --    -b, --batch          run non-interactively
 
