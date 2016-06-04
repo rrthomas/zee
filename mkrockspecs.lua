@@ -1,5 +1,6 @@
 -- Generate rockspecs from a prototype with variants
 
+local table = require "std.table"
 local tree = require "std.tree"
 
 if select ("#", ...) < 2 then
@@ -14,9 +15,9 @@ function format (x, indent)
   indent = indent or ""
   if type (x) == "table" then
     local s = "{\n"
-    for i, v in pairs (x) do
-      if type (i) ~= "number" then
-        s = s..indent..i.." = "..format (v, indent.."  ")..",\n"
+    for i, v in ipairs (table.sort (table.keys (x))) do
+      if type (v) ~= "number" then
+        s = s..indent..v.." = "..format (x[v], indent.."  ")..",\n"
       end
     end
     for i, v in ipairs (x) do
@@ -40,8 +41,8 @@ for f, spec in pairs (loadfile ("rockspecs.lua") ()) do
     local specs = loadfile ("rockspecs.lua") () -- reload to get current flavour interpolated
     local spec = tree.merge (tree (specs.default), tree (specs[f]))
     local s = ""
-    for i, v in pairs (spec) do
-      s = s..i.." = "..format (v, "  ").."\n"
+    for i, v in ipairs (table.sort (table.keys (spec))) do
+      s = s..v.." = "..format (spec[v], "  ").."\n"
     end
     h:write (s)
     h:close ()
