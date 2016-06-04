@@ -29,7 +29,7 @@ additional modules:
    (the curses module must be built)
  * alien <http://mascarenhas.github.com/alien/>
 
-For the exact versions required, see `src/loadlibs.lua.in`.
+For the exact versions required, see `rockspecs.lua`.
 
 
 INSTALLING
