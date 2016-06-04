@@ -25,7 +25,7 @@ instantly).]],
     "stdlib >= 37",
     "luaposix >= 5.1.23",
     "lrexlib-gnu >= 2.7.1",
-    "alien >= 0.7.0",
+    "alien >= 0.7.1",
   },
   build = {
     type = "command",
