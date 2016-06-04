@@ -22,7 +22,7 @@ CLOC = cloc --force-lang=lua,in
 ACLOCAL_AMFLAGS = -I m4
 
 LUA_PATH ?= ;
-LUA_ENV = LUA_INIT= LUA_PATH= LUA_INIT_5_3= LUA_PATH_5_3="$(abs_srcdir)/?.lua;$(abs_srcdir)/?/init.lua;$(LUA_PATH_5_3)"
+LUA_ENV = LUA_PATH_5_3="$(abs_srcdir)/?.lua;$(abs_srcdir)/?/init.lua;$(LUA_PATH_5_3)"
 
 doc_DATA = FAQ
 
@@ -85,7 +85,7 @@ loc:
 loc-tests:
 	$(CLOC) $(ALL_TESTS) $(srcdir)/build-aux/run-tests.lua
 
-WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_INIT= LUA_INIT_5_3= LUA_PATH_5_3= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
+WOGER_ARGS = package=$(PACKAGE) package_name=$(PACKAGE_NAME) version=$(VERSION) notes=release-notes-$(VERSION) description="`LUA_PATH_5_3= LUA_PATH='$(abs_srcdir)/?.rockspec.in' $(LUA) -l$(PACKAGE) -e 'print (description.summary)'`" dist_type="tar.gz" github_user=rrthomas
 
 rockspecs:
 	rm -f *.rockspec
