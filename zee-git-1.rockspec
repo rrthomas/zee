@@ -7,10 +7,10 @@ build = {
 }
 dependencies = {
   "lua == 5.3",
-  "stdlib >= 37",
-  "luaposix >= 5.1.23",
-  "lrexlib-gnu >= 2.7.1",
-  "alien >= 0.7.0",
+  "stdlib >= 41.2.0",
+  "luaposix == 33.3.1",
+  "lrexlib-gnu >= 2.8.0",
+  "alien >= 0.7.1",
 }
 description = {
   detailed = "Zee is a lightweight editor. Zee is aimed at small footprint\
