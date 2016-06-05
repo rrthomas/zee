@@ -93,7 +93,7 @@ rockspecs:
 release: rockspecs
 	git diff --exit-code && \
 	git push && \
-	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks build $(PACKAGE)-$(VERSION)-1.rockspec && \
-	woger luarocks package=$(PACKAGE) version=$(VERSION) && \
 	git tag -a -m "Release tag" v$(VERSION) && \
-	git push --tags
+	git push --tags && \
+	LUAROCKS_CONFIG=$(abs_srcdir)/luarocks-config.lua luarocks --tree=$(abs_srcdir)/luarocks build $(PACKAGE)-$(VERSION)-1.rockspec && \
+	woger luarocks package=$(PACKAGE) version=$(VERSION)
